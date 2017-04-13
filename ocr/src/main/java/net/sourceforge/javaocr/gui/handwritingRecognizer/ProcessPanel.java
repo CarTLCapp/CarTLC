@@ -107,6 +107,7 @@ public class ProcessPanel extends JPanel
             public void actionPerformed(ActionEvent e)
             {
                 JFileChooser chooser = new JFileChooser();
+                chooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
                 int returnVal = chooser.showOpenDialog(null);
