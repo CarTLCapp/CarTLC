@@ -11,7 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.app.TBApplication;
-import timber.log.Timber;
+import com.cartlc.trackbattery.ocr.OCRHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mApp = (TBApplication) getApplicationContext();
-
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -37,23 +36,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_test_image) {
-            mApp.displayImageActivity("images/training/digits.jpg", "images/samples/shuffledDigits.jpg");
+        if (id == R.id.action_show_test_images) {
+            mApp.displayImageActivity(OCRHelper.TRAINING_DIGITS, OCRHelper.SAMPLE_DIGITS);
             return true;
+        }
+        if (id == R.id.action_test_ocr) {
+            OCRHelper.doOCRTest(this);
         }
         return super.onOptionsItemSelected(item);
     }
-
 }
