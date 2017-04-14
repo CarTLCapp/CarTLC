@@ -6,16 +6,12 @@
 // Please see the accompanying LICENSE.txt for details.
 package net.sourceforge.javaocr.ocrPlugins.mseOCR;
 
-import java.awt.Component;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Toolkit;
-import java.awt.image.ImageProducer;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
+
+import android.graphics.Bitmap;
 import net.sourceforge.javaocr.scanner.DocumentScanner;
 import net.sourceforge.javaocr.scanner.DocumentScannerListenerAdaptor;
 import net.sourceforge.javaocr.scanner.PixelImage;
@@ -63,18 +59,17 @@ public class TrainingImageLoader extends DocumentScannerListenerAdaptor
      * images.
      * @throws IOException
      */
-    public void load(Component component, String imageFilename, CharacterRange charRange, HashMap<Character, ArrayList<TrainingImage>> dest)
-            throws IOException
-    {
-
-        ImageProducer imageProducer = (ImageProducer) (new File(imageFilename).toURL().getContent());
-        Image image = Toolkit.getDefaultToolkit().createImage(imageProducer);
-        if (image == null)
-        {
-            throw new IOException("Cannot find training image file: " + imageFilename);
-        }
-        load(component, image, charRange, dest, imageFilename);
-    }
+//    public void load(String imageFilename, CharacterRange charRange, HashMap<Character, ArrayList<TrainingImage>> dest)
+//            throws IOException
+//    {
+//        ImageProducer imageProducer = (ImageProducer) (new File(imageFilename).toURL().getContent());
+//        Image image = Toolkit.getDefaultToolkit().createImage(imageProducer);
+//        if (image == null)
+//        {
+//            throw new IOException("Cannot find training image file: " + imageFilename);
+//        }
+//        load(component, image, charRange, dest, imageFilename);
+//    }
 
     public void setDebug(boolean debug)
     {
@@ -82,23 +77,12 @@ public class TrainingImageLoader extends DocumentScannerListenerAdaptor
     }
 
     public void load(
-            Component component,
-            Image image,
+            Bitmap image,
             CharacterRange charRange,
             HashMap<Character, ArrayList<TrainingImage>> dest,
             String imageFilename)
             throws IOException
     {
-
-        MediaTracker mt = new MediaTracker(component);
-        mt.addImage(image, 0);
-        try
-        {
-            mt.waitForAll();
-        }
-        catch (InterruptedException ex)
-        {
-        }
         PixelImage pixelImage = new PixelImage(image);
         pixelImage.toGrayScale(true);
         pixelImage.filter();
@@ -147,7 +131,7 @@ public class TrainingImageLoader extends DocumentScannerListenerAdaptor
         ArrayList<TrainingImage> al = dest.get(chr);
         if (al == null)
         {
-            al = new ArrayList<TrainingImage>();
+            al = new ArrayList<>();
             dest.put(chr, al);
         }
         al.add(new TrainingImage(pixels, w, h, y1 - rowY1, rowY2 - y2));

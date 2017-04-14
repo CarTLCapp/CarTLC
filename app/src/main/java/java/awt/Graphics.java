@@ -297,9 +297,9 @@ public abstract class Graphics {
      * 
      * @return the font metrics of current font.
      */
-    public FontMetrics getFontMetrics() {
-        return getFontMetrics(getFont());
-    }
+//    public FontMetrics getFontMetrics() {
+//        return getFontMetrics(getFont());
+//    }
 
     /**
      * Determines whether or not the specified rectangle intersects the current
@@ -892,7 +892,7 @@ public abstract class Graphics {
      * @param font
      *            the new font.
      */
-    public abstract void setFont(Font font);
+//    public abstract void setFont(Font font);
 
     /**
      * Sets the paint mode for the Graphics which overwrites all rendering

@@ -17,6 +17,8 @@ import net.sourceforge.javaocr.scanner.DocumentScannerListenerAdaptor;
 import net.sourceforge.javaocr.scanner.PixelImage;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
+import java.io.FileOutputStream;
+
 import timber.log.Timber;
 
 /**
@@ -90,7 +92,7 @@ public class CharacterExtractor extends DocumentScannerListenerAdaptor
             //Paint the scaled image on a white background
             Bitmap normalizedImage = Bitmap.createBitmap(std_width, std_height, Bitmap.Config.ARGB_8888);
             Graphics2D g = normalizedImage.createGraphics();
-            g.setColor(Color.WHITE);
+            g.setColor(java.awt.Color.WHITE);
             g.fillRect(0, 0, std_width, std_height);
 
             //Center scaled image on new canvas
@@ -102,7 +104,8 @@ public class CharacterExtractor extends DocumentScannerListenerAdaptor
 
             //Save new image to file
             File outputfile = new File(outputDir + File.separator + "char_" + num + ".png");
-            ImageIO.write(normalizedImage, "png", outputfile);
+            FileOutputStream output = new FileOutputStream(outputfile);
+            normalizedImage.compress(Bitmap.CompressFormat.PNG, 100, output);
             num++;
         }
         catch (Exception ex)

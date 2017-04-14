@@ -6,11 +6,12 @@
 // Please see the accompanying LICENSE.txt for details.
 package net.sourceforge.javaocr.ocrPlugins.mseOCR;
 
-import java.awt.Image;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
+
+import android.graphics.Bitmap;
 import net.sourceforge.javaocr.scanner.DocumentScanner;
 import net.sourceforge.javaocr.scanner.DocumentScannerListenerAdaptor;
 import net.sourceforge.javaocr.scanner.PixelImage;
@@ -47,10 +48,10 @@ public class OCRScanner extends DocumentScannerListenerAdaptor implements Accura
      * @return The <code>DocumentScanner</code> instance that is used to scan the document(s).
      * This is useful if the caller wants to adjust some of the scanner's parameters.
      */
-    public DocumentScanner getDocumentScanner()
-    {
-        return documentScanner;
-    }
+//    public DocumentScanner getDocumentScanner()
+//    {
+//        return documentScanner;
+//    }
 
     /**
      * Remove all training images from the training set.
@@ -103,7 +104,7 @@ public class OCRScanner extends DocumentScannerListenerAdaptor implements Accura
      * @return The decoded text.
      */
     public String scan(
-            Image image,
+            Bitmap image,
             int x1,
             int y1,
             int x2,

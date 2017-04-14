@@ -1,5 +1,7 @@
 package com.cartlc.trackbattery;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,7 +11,14 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import net.sourceforge.javaocr.ocrPlugins.mseOCR.OCRScanner;
+import net.sourceforge.javaocr.ocrPlugins.mseOCR.TrainingImage;
+import net.sourceforge.javaocr.ocrPlugins.mseOCR.TrainingImageLoader;
 import timber.log.Timber;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -48,5 +57,36 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public String performMSEOCR(ArrayList<TrainingImageSpec> imgs, String targImageLoc) throws Exception {
+        try {
+            OCRScanner ocrScanner = new OCRScanner();
+            HashMap<Character, ArrayList<TrainingImage>> trainingImages = getTrainingImageHashMap(imgs);
+            ocrScanner.addTrainingImages(trainingImages);
+            Bitmap targetImage = BitmapFactory.decodeFile(targImageLoc);
+            return ocrScanner.scan(targetImage, 0, 0, 0, 0, null);
+        } catch (Exception ex) {
+            Timber.e(ex);
+            return null;
+        }
+    }
+
+    private HashMap<Character, ArrayList<TrainingImage>> getTrainingImageHashMap(ArrayList<TrainingImageSpec> imgs) throws Exception
+    {
+        TrainingImageLoader loader = new TrainingImageLoader();
+        HashMap<Character, ArrayList<TrainingImage>> trainingImages = new HashMap<Character, ArrayList<TrainingImage>>();
+        Frame frame = new Frame();
+
+        for (int i = 0; i < imgs.size(); i++)
+        {
+            loader.load(
+                    frame,
+                    imgs.get(i).getFileLocation(),
+                    imgs.get(i).getCharRange(),
+                    trainingImages);
+        }
+
+        return trainingImages;
     }
 }

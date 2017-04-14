@@ -90,7 +90,6 @@ public class TrainingImageLoader extends DocumentScannerListenerAdaptor
             String imageFilename)
             throws IOException
     {
-
         MediaTracker mt = new MediaTracker(component);
         mt.addImage(image, 0);
         try
