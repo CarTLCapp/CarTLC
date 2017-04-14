@@ -6,6 +6,7 @@
 package net.sourceforge.javaocr.ocrPlugins;
 
 
+import java.awt.*;
 import java.io.File;
 
 import android.graphics.Bitmap;
@@ -14,6 +15,8 @@ import android.graphics.Color;
 import net.sourceforge.javaocr.scanner.DocumentScanner;
 import net.sourceforge.javaocr.scanner.DocumentScannerListenerAdaptor;
 import net.sourceforge.javaocr.scanner.PixelImage;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import timber.log.Timber;
 
 /**
