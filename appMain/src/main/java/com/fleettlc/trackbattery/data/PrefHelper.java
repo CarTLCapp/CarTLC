@@ -8,9 +8,9 @@ import android.content.Context;
 
 public class PrefHelper extends PrefHelperBase {
 
-    static PrefHelperBase sInstance;
+    static PrefHelper sInstance;
 
-    public static PrefHelperBase getInstance() {
+    public static PrefHelper getInstance() {
         return sInstance;
     }
 
@@ -18,10 +18,10 @@ public class PrefHelper extends PrefHelperBase {
         new PrefHelper(ctx);
     }
 
-    static final String KEY_COUNTRY = "country";
-    static final String KEY_STATE = "state";
-    static final String KEY_CITY = "city";
-    static final String KEY_PROJECT = "project";
+    static public final String KEY_COUNTRY = "country";
+    static public final String KEY_STATE = "state";
+    static public final String KEY_CITY = "city";
+    static public final String KEY_PROJECT = "project";
 
     static final String KEY_LAST_TECH_ID = "last_tech_id";
 

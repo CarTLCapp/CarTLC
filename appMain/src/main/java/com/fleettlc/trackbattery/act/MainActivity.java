@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,10 +14,15 @@ import android.widget.TextView;
 
 import com.fleettlc.trackbattery.R;
 import com.fleettlc.trackbattery.app.TBApplication;
+import com.fleettlc.trackbattery.data.PrefHelper;
+import com.fleettlc.trackbattery.data.TableCity;
 import com.fleettlc.trackbattery.data.TableProjects;
+import com.fleettlc.trackbattery.data.TableState;
 import com.fleettlc.trackbattery.view.NothingSelectedSpinnerAdapter;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.setup_title) TextView mTitle;
 
     ArrayAdapter<String> mSpinnerAdapter;
-
+    NothingSelectedSpinnerAdapter mNothingSelectedAdapter;
     Stage mCurStage = Stage.LOGIN;
 
     @Override
@@ -75,8 +81,13 @@ public class MainActivity extends AppCompatActivity {
         });
         mSpinnerAdapter = new ArrayAdapter(this, R.layout.spinner_item, new ArrayList());
         mSpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        NothingSelectedSpinnerAdapter nothingSelected = new NothingSelectedSpinnerAdapter(this, mSpinnerAdapter);
-        mSpinner.setAdapter(nothingSelected);
+        mNothingSelectedAdapter = new NothingSelectedSpinnerAdapter(this, mSpinnerAdapter);
+        mSpinner.setAdapter(mNothingSelectedAdapter);
+        mSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectedItem(position);
+            }
+        });
     }
 
     void doNext() {
@@ -94,12 +105,38 @@ public class MainActivity extends AppCompatActivity {
             case PROJECT:
                 mFrameLogin.setVisibility(View.INVISIBLE);
                 mFrameSpinner.setVisibility(View.VISIBLE);
-                mTitle.setText(R.string.title_project);
-                mSpinner.setPrompt(getString(R.string.title_project));
-                mSpinnerAdapter.clear();
-                mSpinnerAdapter.addAll(TableProjects.getInstance().query());
-                mSpinner.performClick();
+                setSpinner(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
+                break;
+            case STATE:
+                setSpinner(R.string.title_state, PrefHelper.KEY_STATE, TableState.getInstance().query(PrefHelper.getInstance().getState()));
+                break;
+            case CITY:
+                setSpinner(R.string.title_city, PrefHelper.KEY_CITY, TableCity.getInstance().query());
                 break;
         }
+    }
+
+    void setSpinner(int textId, String key, List<String> list) {
+        String text = getString(textId);
+        mTitle.setText(text);
+        mSpinner.setPrompt(text);
+        mNothingSelectedAdapter.setNothingSelectedText(text);
+        mSpinnerAdapter.clear();
+        mSpinnerAdapter.addAll(list);
+        mSpinner.performClick();
+
+        String curValue = PrefHelper.getInstance().getString(key, null);
+        if (curValue == null)
+        {
+            mSpinner.setSelection(0);
+        } else {
+            int position = mSpinnerAdapter.getPosition(curValue);
+            mSpinner.setSelection(position);
+        }
+    }
+
+    void selectedItem(int position)
+    {
+        mSpinnerAdapter.getItem(position);
     }
 }

@@ -27,11 +27,11 @@ public class PrefHelperBase {
         return mCtx.getPackageName() + "_preferences";
     }
 
-    protected String getString(String key, String defaultValue) {
+    public String getString(String key, String defaultValue) {
         return getPrefs().getString(key, defaultValue);
     }
 
-    protected void setString(String key, String value) {
+    public void setString(String key, String value) {
         SharedPreferences.Editor editor = getPrefs().edit();
         editor.putString(key, value);
         editor.commit();

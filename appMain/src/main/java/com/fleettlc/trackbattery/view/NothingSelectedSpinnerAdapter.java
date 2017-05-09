@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.SpinnerAdapter;
+import android.widget.TextView;
 
 import com.fleettlc.trackbattery.R;
 
@@ -21,10 +22,12 @@ import com.fleettlc.trackbattery.R;
 public class NothingSelectedSpinnerAdapter implements SpinnerAdapter, ListAdapter {
 
     protected static final int EXTRA = 1;
-    protected SpinnerAdapter adapter;
-    protected Context context;
+    protected final SpinnerAdapter adapter;
+    protected final Context context;
     protected int nothingSelectedLayout = R.layout.spinner_nothing_selected;
     protected LayoutInflater layoutInflater;
+    protected TextView mNothingSelectedView;
+    protected String mNothingSelectedText = "Select";
 
     /**
      * Use this constructor to Define your 'Select One...' layout as the first
@@ -32,8 +35,8 @@ public class NothingSelectedSpinnerAdapter implements SpinnerAdapter, ListAdapte
      * If you do this, you probably don't want a prompt on your spinner or it'll
      * have two 'Select' rows.
      *
-     * @param spinnerAdapter                wrapped Adapter. Should probably return false for isEnabled(0)
-     *                                      the dropdown.
+     * @param spinnerAdapter wrapped Adapter. Should probably return false for isEnabled(0)
+     *                       the dropdown.
      * @param context
      */
     public NothingSelectedSpinnerAdapter(Context context, SpinnerAdapter spinnerAdapter) {
@@ -60,7 +63,11 @@ public class NothingSelectedSpinnerAdapter implements SpinnerAdapter, ListAdapte
      * @return
      */
     protected View getNothingSelectedView(ViewGroup parent) {
-        return layoutInflater.inflate(nothingSelectedLayout, parent, false);
+        if (mNothingSelectedView == null) {
+            mNothingSelectedView = (TextView) layoutInflater.inflate(nothingSelectedLayout, parent, false);
+        }
+        mNothingSelectedView.setText(mNothingSelectedText);
+        return mNothingSelectedView;
     }
 
     @Override
@@ -126,6 +133,13 @@ public class NothingSelectedSpinnerAdapter implements SpinnerAdapter, ListAdapte
     @Override
     public boolean isEnabled(int position) {
         return position != 0; // Don't allow the 'nothing selected' item to be picked.
+    }
+
+    public void setNothingSelectedText(String text) {
+        mNothingSelectedText = text;
+        if (mNothingSelectedView != null) {
+            mNothingSelectedView.setText(text);
+        }
     }
 
 }

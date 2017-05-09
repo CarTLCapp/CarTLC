@@ -3,7 +3,6 @@ package com.fleettlc.trackbattery.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import timber.log.Timber;
 
@@ -17,6 +16,7 @@ import java.util.List;
 public class TableString {
     static final String KEY_ROWID = "_id";
     static final String KEY_VALUE = "value";
+    static final String KEY_FATHER = "father";
 
     protected final SQLiteDatabase db;
     protected final String tableName;
@@ -34,7 +34,9 @@ public class TableString {
         sbuf.append(KEY_ROWID);
         sbuf.append(" integer primary key autoincrement, ");
         sbuf.append(KEY_VALUE);
-        sbuf.append(" text not null)");
+        sbuf.append(" text not null, ");
+        sbuf.append(KEY_FATHER);
+        sbuf.append(" integer)");
         db.execSQL(sbuf.toString());
     }
 
@@ -42,13 +44,14 @@ public class TableString {
         db.delete(tableName, null, null);
     }
 
-    public void add(List<String> list) {
+    public void add(List<Entry> list) {
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            for (String value : list) {
+            for (Entry entry : list) {
                 values.clear();
-                values.put(KEY_VALUE, value);
+                values.put(KEY_VALUE, entry.value);
+                values.put(KEY_FATHER, entry.father);
                 db.insert(tableName, null, values);
             }
             db.setTransactionSuccessful();
@@ -59,14 +62,36 @@ public class TableString {
         }
     }
 
-    public ArrayList<String> query() {
+    public void addStrings(List<String> list) {
+        ArrayList<Entry> entries = new ArrayList();
+        for (String value : list) {
+            entries.add(new Entry(value));
+        }
+        add(entries);
+    }
+
+    public List<String> query() {
+        return query(null);
+    }
+
+    public List<String> query(Integer father) {
         ArrayList<String> list = new ArrayList();
         try {
             final String[] columns = {KEY_VALUE};
             final String orderBy = KEY_VALUE + " ASC";
-            Cursor cursor = db.query(tableName, columns, null, null, null, null, orderBy);
+            String where;
+            String[] whereArgs;
+            if (father == null) {
+                where = null;
+                whereArgs = null;
+            } else {
+                where = KEY_FATHER + "=?";
+                whereArgs = new String[]{String.valueOf(father)};
+            }
+            Cursor cursor = db.query(tableName, columns, where, whereArgs, null, null, orderBy);
+            int idxValue = cursor.getColumnIndex(KEY_VALUE);
             while (cursor.moveToNext()) {
-                list.add(cursor.getString(0));
+                list.add(cursor.getString(idxValue));
             }
             cursor.close();
         } catch (Exception ex) {

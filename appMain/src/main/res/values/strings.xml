@@ -7,5 +7,13 @@
     <string name="entry_hint_first_name">First Name</string>
     <string name="title_login">Login</string>
     <string name="title_project">Project</string>
+    <string name="title_state">State</string>
+    <string name="title_city">City</string>
+    <string name="title_company">Company</string>
+    <string name="title_location">Location</string>
+    <string name="title_current_project">Current Project</string>
+    <string name="title_truck_number">Truck Number</string>
+    <string name="title_equipment_installed">Equipment Installed</string>
+    <string name="title_notes">Notes</string>
 
 </resources>
