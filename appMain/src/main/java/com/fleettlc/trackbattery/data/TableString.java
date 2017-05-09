@@ -3,9 +3,12 @@ package com.fleettlc.trackbattery.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
 import timber.log.Timber;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by dug on 4/14/17.
@@ -21,6 +24,9 @@ public class TableString {
     protected TableString(SQLiteDatabase db, String tableName) {
         this.tableName = tableName;
         this.db = db;
+    }
+
+    public void create() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("create table ");
         sbuf.append(tableName);
@@ -36,7 +42,7 @@ public class TableString {
         db.delete(tableName, null, null);
     }
 
-    public void add(ArrayList<String> list) {
+    public void add(List<String> list) {
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();

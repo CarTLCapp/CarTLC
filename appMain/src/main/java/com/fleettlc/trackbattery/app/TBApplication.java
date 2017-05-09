@@ -1,10 +1,13 @@
 package com.fleettlc.trackbattery.app;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.fleettlc.trackbattery.BuildConfig;
 import com.fleettlc.trackbattery.data.DatabaseManager;
 import com.fleettlc.trackbattery.data.PrefHelper;
+import com.fleettlc.trackbattery.data.TableProjects;
+import com.fleettlc.trackbattery.data.TestData;
 
 import timber.log.Timber;
 
@@ -27,5 +30,6 @@ public class TBApplication extends Application {
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }
+        TestData.Init();
     }
 }

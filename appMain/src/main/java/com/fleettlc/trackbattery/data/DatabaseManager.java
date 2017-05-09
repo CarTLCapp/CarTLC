@@ -3,6 +3,8 @@ package com.fleettlc.trackbattery.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
 import timber.log.Timber;
 
 /**
@@ -25,18 +27,31 @@ public class DatabaseManager {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
+            init(db);
             try {
-                TableCountry.Init(db);
-                TableState.Init(db);
-                TableCity.Init(db);
-                TableProjects.Init(db);
+                TableCountry.getInstance().create();
+                TableState.getInstance().create();
+                TableCity.getInstance().create();
+                TableProjects.getInstance().create();
             } catch (Exception ex) {
                 Timber.e(ex);
             }
         }
 
+        void init(SQLiteDatabase db) {
+            TableCountry.Init(db);
+            TableState.Init(db);
+            TableCity.Init(db);
+            TableProjects.Init(db);
+        }
+
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        }
+
+        @Override
+        public void onOpen(SQLiteDatabase db) {
+            init(db);
         }
     }
 
@@ -49,11 +64,7 @@ public class DatabaseManager {
     DatabaseManager(Context ctx) {
         mCtx = ctx;
         mDbHelper = new DatabaseHelper(ctx);
-        try {
-            mDb = mDbHelper.getWritableDatabase();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
+        mDb = mDbHelper.getWritableDatabase();
         sInstance = this;
     }
 }
