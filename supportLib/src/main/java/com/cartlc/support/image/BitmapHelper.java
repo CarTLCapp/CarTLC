@@ -1,4 +1,4 @@
-package com.cartlc.trackbattery.image;
+package com.cartlc.support.image;
 
 import android.content.Context;
 import android.graphics.Bitmap;

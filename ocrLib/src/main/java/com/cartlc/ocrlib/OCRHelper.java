@@ -1,8 +1,8 @@
-package com.cartlc.trackbattery.ocr;
+package com.cartlc.ocrlib;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import com.cartlc.trackbattery.image.BitmapHelper;
+import com.cartlc.support.image.BitmapHelper;
 import timber.log.Timber;
 
 import java.util.ArrayList;

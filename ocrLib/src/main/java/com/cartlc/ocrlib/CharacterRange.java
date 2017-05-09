@@ -3,7 +3,7 @@
 // All rights reserved.
 // This software is released under the BSD license.
 // Please see the accompanying LICENSE.txt for details.
-package com.cartlc.trackbattery.ocr;
+package com.cartlc.ocrlib;
 
 /**
  * Class to represent a range of character codes.

@@ -3,11 +3,11 @@
 // All rights reserved.
 // This software is released under the BSD license.
 // Please see the accompanying LICENSE.txt for details.
-package com.cartlc.trackbattery.ocr;
+package com.cartlc.ocrlib;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import com.cartlc.trackbattery.image.BitmapHelper;
+import com.cartlc.support.image.BitmapHelper;
 import timber.log.Timber;
 
 /**

@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 
 public class PrefHelperBase {
 
-
     protected SharedPreferences mPrefs;
     final protected Context mCtx;
 

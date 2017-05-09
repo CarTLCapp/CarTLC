@@ -9,7 +9,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.cartlc.trackbattery.R;
-import com.cartlc.trackbattery.image.BitmapHelper;
+import com.cartlc.support.image.BitmapHelper;
 import timber.log.Timber;
 
 public class DisplayImageActivity extends AppCompatActivity {

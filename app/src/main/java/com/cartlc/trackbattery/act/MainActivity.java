@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import com.cartlc.trackbattery.BuildConfig;
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.app.TBApplication;
-import com.cartlc.trackbattery.ocr.OCRHelper;
+import com.cartlc.ocrlib.OCRHelper;
 
 public class MainActivity extends AppCompatActivity {
 

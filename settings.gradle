@@ -1,1 +1,4 @@
-include ':app', ':ocr'
+include ':ocrTest'
+include ':supportLib'
+include ':ocrLib'
+include ':app'
