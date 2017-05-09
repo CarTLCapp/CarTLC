@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">Fleet TLC</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="action_show_test_image">Show Test Images</string>
+    <string name="action_test_ocr">Test OCR</string>
+
+</resources>

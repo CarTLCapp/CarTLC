@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">Fleet TLC</string>
+
+    <string name="btn_next">Next</string>
+    <string name="entry_hint_last_name">Last Name</string>
+    <string name="entry_hint_first_name">First Name</string>
+    <string name="title_login">Login</string>
+</resources>
