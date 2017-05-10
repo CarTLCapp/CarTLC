@@ -38,29 +38,14 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/logo" />
 
-        <LinearLayout
-            android:id="@+id/project_frame"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/project_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/setup_top_margin"
-            android:orientation="horizontal"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/setup_title">
-
-            <TextView
-                android:id="@+id/cur_project"
-                style="@style/CurProjectText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/notes"
-                style="@style/CurProjectNote"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp" />
-        </LinearLayout>
+            app:layout_constraintTop_toBottomOf="@id/setup_title"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -69,7 +54,7 @@
             android:orientation="horizontal"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/project_frame">
+            app:layout_constraintTop_toBottomOf="@id/project_list">
 
             <Button
                 android:id="@+id/new_project"
@@ -86,7 +71,7 @@
 
     <TextView
         android:id="@+id/message_line"
-        style="@style/CurProjectNote"
+        style="@style/MessageLine"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"

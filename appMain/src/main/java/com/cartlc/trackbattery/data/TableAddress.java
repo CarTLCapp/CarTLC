@@ -30,7 +30,7 @@ public class TableAddress {
 
     static final String KEY_ROWID = "_id";
     static final String KEY_COMPANY = "company";
-    static final String KEY_LOCATION = "location";
+    static final String KEY_STREET = "street";
     static final String KEY_CITY = "city";
     static final String KEY_STATE = "state";
 
@@ -54,7 +54,7 @@ public class TableAddress {
         sbuf.append(" integer primary key autoincrement, ");
         sbuf.append(KEY_COMPANY);
         sbuf.append(" text, ");
-        sbuf.append(KEY_LOCATION);
+        sbuf.append(KEY_STREET);
         sbuf.append(" text, ");
         sbuf.append(KEY_CITY);
         sbuf.append(" text, ");
@@ -70,7 +70,7 @@ public class TableAddress {
             for (Address address : list) {
                 values.clear();
                 values.put(KEY_COMPANY, address.company);
-                values.put(KEY_LOCATION, address.location);
+                values.put(KEY_STREET, address.street);
                 values.put(KEY_CITY, address.city);
                 values.put(KEY_STATE, address.state);
                 mDb.insert(TABLE_NAME, null, values);
@@ -145,11 +145,11 @@ public class TableAddress {
         return list;
     }
 
-    public List<String> queryLocations(String state, String city, String company) {
+    public List<String> queryStreets(String state, String city, String company) {
         ArrayList<String> list = new ArrayList();
         try {
-            final String[] columns = {KEY_LOCATION};
-            final String orderBy = KEY_LOCATION + " ASC";
+            final String[] columns = {KEY_STREET};
+            final String orderBy = KEY_STREET + " ASC";
             StringBuilder sbuf = new StringBuilder();
             sbuf.append(KEY_STATE);
             sbuf.append(" =? AND ");
@@ -160,7 +160,7 @@ public class TableAddress {
             final String selection = sbuf.toString();
             final String[] selectionArgs = {state, city, company};
             Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
-            int idxValue = cursor.getColumnIndex(KEY_LOCATION);
+            int idxValue = cursor.getColumnIndex(KEY_STREET);
             while (cursor.moveToNext()) {
                 list.add(cursor.getString(idxValue));
             }

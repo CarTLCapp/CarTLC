@@ -18,13 +18,13 @@ public class TableString {
     static final String KEY_ROWID = "_id";
     static final String KEY_VALUE = "value";
 
-    protected final SQLiteDatabase db;
+    protected final SQLiteDatabase mDb;
     protected final String tableName;
     protected List<String> mEntries;
 
     protected TableString(SQLiteDatabase db, String tableName) {
         this.tableName = tableName;
-        this.db = db;
+        this.mDb = db;
     }
 
     public void create() {
@@ -36,27 +36,27 @@ public class TableString {
         sbuf.append(" integer primary key autoincrement, ");
         sbuf.append(KEY_VALUE);
         sbuf.append(" text not null)");
-        db.execSQL(sbuf.toString());
+        mDb.execSQL(sbuf.toString());
     }
 
     public void clear() {
-        db.delete(tableName, null, null);
+        mDb.delete(tableName, null, null);
     }
 
     public void add(List<String> list) {
-        db.beginTransaction();
+        mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             for (String value : list) {
                 values.clear();
                 values.put(KEY_VALUE, value);
-                db.insert(tableName, null, values);
+                mDb.insert(tableName, null, values);
             }
-            db.setTransactionSuccessful();
+            mDb.setTransactionSuccessful();
         } catch (Exception ex) {
             Timber.e(ex);
         } finally {
-            db.endTransaction();
+            mDb.endTransaction();
         }
     }
 
@@ -66,7 +66,7 @@ public class TableString {
             final String[] columns = {KEY_VALUE};
             final String orderBy = KEY_VALUE + " ASC";
 
-            Cursor cursor = db.query(tableName, columns, null, null, null, null, orderBy);
+            Cursor cursor = mDb.query(tableName, columns, null, null, null, null, orderBy);
             int idxValue = cursor.getColumnIndex(KEY_VALUE);
             while (cursor.moveToNext()) {
                 list.add(cursor.getString(idxValue));
@@ -78,6 +78,43 @@ public class TableString {
         return list;
     }
 
+    public String query(long id) {
+        String projectName = null;
+        try {
+            final String[] columns = {KEY_VALUE};
+            final String selection = KEY_ROWID + " =?";
+            final String[] selectionArgs = {Long.toString(id)};
+
+            Cursor cursor = mDb.query(tableName, columns, selection, selectionArgs, null, null, null);
+            int idxValue = cursor.getColumnIndex(KEY_VALUE);
+            if (cursor.moveToFirst()) {
+                projectName = cursor.getString(idxValue);
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return projectName;
+    }
+
+    public Long query(String name) {
+        Long rowId = null;
+        try {
+            final String[] columns = {KEY_ROWID};
+            final String selection = KEY_VALUE + " =?";
+            final String[] selectionArgs = {name};
+
+            Cursor cursor = mDb.query(tableName, columns, selection, selectionArgs, null, null, null);
+            int idxValue = cursor.getColumnIndex(KEY_ROWID);
+            if (cursor.moveToFirst()) {
+                rowId = cursor.getLong(idxValue);
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return rowId;
+    }
 
     public List<String> getEntries() {
         if (mEntries == null) {

@@ -167,10 +167,10 @@ public class SetupActivity extends AppCompatActivity {
                 setSpinner(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
                 break;
             case LOCATION:
-                List<String> locations = TableAddress.getInstance().queryLocations(PrefHelper.getInstance().getState(),
+                List<String> locations = TableAddress.getInstance().queryStreets(PrefHelper.getInstance().getState(),
                         PrefHelper.getInstance().getCity(),
                         PrefHelper.getInstance().getCompany());
-                setSpinner(R.string.title_location, PrefHelper.KEY_LOCATION, locations);
+                setSpinner(R.string.title_location, PrefHelper.KEY_STREET, locations);
                 break;
             case DONE:
                 startEntryActivity();

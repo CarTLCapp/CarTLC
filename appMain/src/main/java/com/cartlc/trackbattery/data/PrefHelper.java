@@ -20,21 +20,24 @@ public class PrefHelper extends PrefHelperBase {
 
     static public final String KEY_PROJECT = "project";
     static public final String KEY_COMPANY = "company";
-    static public final String KEY_LOCATION = "location";
+    static public final String KEY_STREET = "street";
     static public final String KEY_STATE = "state";
     static public final String KEY_CITY = "city";
     static final String KEY_FIRST_NAME = "first_name";
     static final String KEY_LAST_NAME = "last_name";
-
-    static final String KEY_LAST_TECH_ID = "last_tech_id";
+    static final String KEY_LAST_TRUCK_ID = "last_truck_id";
+    static final String KEY_LAST_EQUIPMENT_COLLECTION_ID = "last_equipment_collection_id";
+    static final String KEY_LAST_NOTES_ID = "last_notes_id";
+    static final String KEY_LAST_PICTURE_COLLECTION_ID = "last_picture_collection_id";
+    static final String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
 
     PrefHelper(Context ctx) {
         super(ctx);
         sInstance = this;
     }
 
-    public String getLocation() {
-        return getString(KEY_LOCATION, null);
+    public String getStreet() {
+        return getString(KEY_STREET, null);
     }
 
     public String getState() {
@@ -49,17 +52,7 @@ public class PrefHelper extends PrefHelperBase {
         return getString(KEY_CITY, null);
     }
 
-    public String getProject() {
-        return getString(KEY_PROJECT, null);
-    }
-
-    public void setTechID(String id) {
-        setString(KEY_LAST_TECH_ID, id);
-    }
-
-    public String getTechID() {
-        return getString(KEY_LAST_TECH_ID, null);
-    }
+    public String getProject() { return getString(KEY_PROJECT, null); }
 
     public void setFirstName(String name) {
         setString(KEY_FIRST_NAME, name);
@@ -75,5 +68,11 @@ public class PrefHelper extends PrefHelperBase {
 
     public String getLastName() {
         return getString(KEY_LAST_NAME, null);
+    }
+
+    public long genNextEquipmentCollectionId() {
+        long nextId = getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L);
+        setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, nextId + 1);
+        return nextId;
     }
 }

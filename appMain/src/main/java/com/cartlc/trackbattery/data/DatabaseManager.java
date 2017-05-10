@@ -14,7 +14,7 @@ import timber.log.Timber;
 
 public class DatabaseManager {
 
-    static final String DATABASE_NAME = "cartcl.mDb";
+    static final String DATABASE_NAME = "cartcl.db";
     static final int DATABASE_VERSION = 1;
 
     public static void Init(Context ctx) {
@@ -31,7 +31,11 @@ public class DatabaseManager {
             init(db);
             try {
                 TableAddress.getInstance().create();
+                TableEntries.getInstance().create();
+                TableEquipment.getInstance().create();
+                TableNotes.getInstance().create();
                 TableProjects.getInstance().create();
+                TableTrucks.getInstance().create();
             } catch (Exception ex) {
                 Timber.e(ex);
             }
@@ -39,7 +43,11 @@ public class DatabaseManager {
 
         void init(SQLiteDatabase db) {
             TableAddress.Init(db);
+            TableEntries.Init(db);
+            TableEquipment.Init(db);
+            TableNotes.Init(db);
             TableProjects.Init(db);
+            TableTrucks.Init(db);
         }
 
         @Override
