@@ -1,4 +1,4 @@
-package com.fleettlc.trackbattery.view;
+package com.cartlc.trackbattery.view;
 
 /**
  * Created by dug on 5/9/17.
@@ -13,7 +13,7 @@ import android.widget.ListAdapter;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
-import com.fleettlc.trackbattery.R;
+import com.cartlc.trackbattery.R;
 
 /**
  * Decorator Adapter to allow a Spinner to show a 'Nothing Selected...' initially

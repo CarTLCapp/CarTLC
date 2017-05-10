@@ -1,9 +1,8 @@
-package com.fleettlc.trackbattery.data;
+package com.cartlc.trackbattery.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import timber.log.Timber;
 
@@ -29,7 +28,7 @@ public class DatabaseManager {
         public void onCreate(SQLiteDatabase db) {
             init(db);
             try {
-                TableCountry.getInstance().create();
+                TableLocation.getInstance().create();
                 TableState.getInstance().create();
                 TableCity.getInstance().create();
                 TableProjects.getInstance().create();
@@ -39,7 +38,7 @@ public class DatabaseManager {
         }
 
         void init(SQLiteDatabase db) {
-            TableCountry.Init(db);
+            TableLocation.Init(db);
             TableState.Init(db);
             TableCity.Init(db);
             TableProjects.Init(db);

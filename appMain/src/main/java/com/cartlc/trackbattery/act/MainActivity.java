@@ -1,4 +1,4 @@
-package com.fleettlc.trackbattery.act;
+package com.cartlc.trackbattery.act;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,16 +12,15 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.fleettlc.trackbattery.R;
-import com.fleettlc.trackbattery.app.TBApplication;
-import com.fleettlc.trackbattery.data.PrefHelper;
-import com.fleettlc.trackbattery.data.TableCity;
-import com.fleettlc.trackbattery.data.TableProjects;
-import com.fleettlc.trackbattery.data.TableState;
-import com.fleettlc.trackbattery.view.NothingSelectedSpinnerAdapter;
+import com.cartlc.trackbattery.R;
+import com.cartlc.trackbattery.app.TBApplication;
+import com.cartlc.trackbattery.data.PrefHelper;
+import com.cartlc.trackbattery.data.TableCity;
+import com.cartlc.trackbattery.data.TableProjects;
+import com.cartlc.trackbattery.data.TableState;
+import com.cartlc.trackbattery.view.NothingSelectedSpinnerAdapter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import butterknife.BindView;
@@ -108,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 setSpinner(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 break;
             case STATE:
-                setSpinner(R.string.title_state, PrefHelper.KEY_STATE, TableState.getInstance().query(PrefHelper.getInstance().getState()));
+//                setSpinner(R.string.title_state, PrefHelper.KEY_STATE, TableState.getInstance().query(PrefHelper.getInstance().getState()));
                 break;
             case CITY:
                 setSpinner(R.string.title_city, PrefHelper.KEY_CITY, TableCity.getInstance().query());

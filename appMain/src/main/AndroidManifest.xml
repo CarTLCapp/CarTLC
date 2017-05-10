@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.fleettlc.trackbattery">
+          package="com.cartlc.trackbattery">
 
     <!-- To access Google+ APIs: -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-            android:name="com.fleettlc.trackbattery.app.TBApplication"
+            android:name="com.cartlc.trackbattery.app.TBApplication"
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
@@ -14,7 +14,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity
-                android:name="com.fleettlc.trackbattery.act.MainActivity"
+                android:name="com.cartlc.trackbattery.act.MainActivity"
                 android:label="@string/app_name"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
