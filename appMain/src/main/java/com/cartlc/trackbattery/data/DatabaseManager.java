@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.List;
+
 import timber.log.Timber;
 
 /**
@@ -12,7 +14,7 @@ import timber.log.Timber;
 
 public class DatabaseManager {
 
-    static final String DATABASE_NAME = "cartcl.db";
+    static final String DATABASE_NAME = "cartcl.mDb";
     static final int DATABASE_VERSION = 1;
 
     public static void Init(Context ctx) {
@@ -28,9 +30,7 @@ public class DatabaseManager {
         public void onCreate(SQLiteDatabase db) {
             init(db);
             try {
-                TableLocation.getInstance().create();
-                TableState.getInstance().create();
-                TableCity.getInstance().create();
+                TableAddress.getInstance().create();
                 TableProjects.getInstance().create();
             } catch (Exception ex) {
                 Timber.e(ex);
@@ -38,9 +38,7 @@ public class DatabaseManager {
         }
 
         void init(SQLiteDatabase db) {
-            TableLocation.Init(db);
-            TableState.Init(db);
-            TableCity.Init(db);
+            TableAddress.Init(db);
             TableProjects.Init(db);
         }
 

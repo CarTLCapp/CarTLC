@@ -12,9 +12,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.7">
 
         <ImageView
@@ -22,9 +22,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/logo"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/setup_title"
@@ -33,27 +33,27 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:text="@string/title_login"
-            app:layout_constraintTop_toBottomOf="@id/logo"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/logo" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/frame_login"
             android:layout_width="@dimen/setup_frame_width"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/setup_top_margin"
-            app:layout_constraintTop_toBottomOf="@id/setup_title"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/setup_title">
 
             <EditText
                 android:id="@+id/first_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/entry_hint_first_name"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
                 android:id="@+id/last_name"
@@ -61,15 +61,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:hint="@string/entry_hint_last_name"
-                app:layout_constraintTop_toBottomOf="@id/first_name"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/first_name" />
 
         </android.support.constraint.ConstraintLayout>
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/frame_spinner"
-            android:layout_width="@dimen/setup_frame_width"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/setup_top_margin"
             android:visibility="gone"
@@ -82,23 +82,41 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:prompt="@string/title_project"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
 
-        <Button
-            android:id="@+id/next"
-            style="@style/SetupNextButton"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
-            android:text="@string/btn_next"
-            android:textAllCaps="false"
-            app:layout_constraintTop_toBottomOf="@id/frame_login"
+            android:orientation="horizontal"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frame_login">
+
+            <Button
+                android:id="@+id/prev"
+                style="@style/SetupNextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="@string/btn_prev"
+                android:textAllCaps="false"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/next"
+                style="@style/SetupNextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="@string/btn_next"
+                android:textAllCaps="false" />
+        </LinearLayout>
+
 
     </android.support.constraint.ConstraintLayout>
 

@@ -15,9 +15,8 @@ import android.widget.TextView;
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.app.TBApplication;
 import com.cartlc.trackbattery.data.PrefHelper;
-import com.cartlc.trackbattery.data.TableCity;
+import com.cartlc.trackbattery.data.TableAddress;
 import com.cartlc.trackbattery.data.TableProjects;
-import com.cartlc.trackbattery.data.TableState;
 import com.cartlc.trackbattery.view.NothingSelectedSpinnerAdapter;
 
 import java.util.ArrayList;
@@ -59,11 +58,13 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.frame_spinner) ViewGroup mFrameSpinner;
     @BindView(R.id.entry_spinner) Spinner mSpinner;
     @BindView(R.id.next) Button mNext;
+    @BindView(R.id.prev) Button mPrev;
     @BindView(R.id.setup_title) TextView mTitle;
 
     ArrayAdapter<String> mSpinnerAdapter;
     NothingSelectedSpinnerAdapter mNothingSelectedAdapter;
     Stage mCurStage = Stage.LOGIN;
+    String mCurKey = PrefHelper.KEY_STATE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,23 +75,46 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mNext.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
                 doNext();
+            }
+        });
+        mPrev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doPrev();
             }
         });
         mSpinnerAdapter = new ArrayAdapter(this, R.layout.spinner_item, new ArrayList());
         mSpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mNothingSelectedAdapter = new NothingSelectedSpinnerAdapter(this, mSpinnerAdapter);
         mSpinner.setAdapter(mNothingSelectedAdapter);
-        mSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectedItem(position);
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                spinnerSelectItem(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+        mCurStage = Stage.LOGIN;
+        setStage();
     }
 
     void doNext() {
+        if (mCurStage == Stage.LOGIN) {
+            PrefHelper.getInstance().setFirstName(mFirstName.getText().toString());
+            PrefHelper.getInstance().setLastName(mLastName.getText().toString());
+        }
         mCurStage = Stage.from(mCurStage.ordinal() + 1);
+        setStage();
+    }
+
+    void doPrev() {
+        mCurStage = Stage.from(mCurStage.ordinal() - 1);
         setStage();
     }
 
@@ -99,23 +123,40 @@ public class MainActivity extends AppCompatActivity {
             case LOGIN:
                 mFrameLogin.setVisibility(View.VISIBLE);
                 mFrameSpinner.setVisibility(View.GONE);
+                mPrev.setVisibility(View.GONE);
                 mTitle.setText(R.string.title_login);
+                mFirstName.setText(PrefHelper.getInstance().getFirstName());
+                mLastName.setText(PrefHelper.getInstance().getLastName());
                 break;
             case PROJECT:
                 mFrameLogin.setVisibility(View.INVISIBLE);
                 mFrameSpinner.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
                 setSpinner(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 break;
             case STATE:
-//                setSpinner(R.string.title_state, PrefHelper.KEY_STATE, TableState.getInstance().query(PrefHelper.getInstance().getState()));
+                List<String> states = TableAddress.getInstance().queryStates();
+                setSpinner(R.string.title_state, PrefHelper.KEY_STATE, states);
                 break;
             case CITY:
-                setSpinner(R.string.title_city, PrefHelper.KEY_CITY, TableCity.getInstance().query());
+                List<String> cities = TableAddress.getInstance().queryCities(PrefHelper.getInstance().getState());
+                setSpinner(R.string.title_city, PrefHelper.KEY_CITY, cities);
+                break;
+            case COMPANY:
+                List<String> companies = TableAddress.getInstance().queryCompanies(PrefHelper.getInstance().getState(), PrefHelper.getInstance().getCity());
+                setSpinner(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
+                break;
+            case LOCATION:
+                List<String> locations = TableAddress.getInstance().queryLocations(PrefHelper.getInstance().getState(),
+                        PrefHelper.getInstance().getCity(),
+                        PrefHelper.getInstance().getCompany());
+                setSpinner(R.string.title_location, PrefHelper.KEY_LOCATION, locations);
                 break;
         }
     }
 
     void setSpinner(int textId, String key, List<String> list) {
+        mCurKey = key;
         String text = getString(textId);
         mTitle.setText(text);
         mSpinner.setPrompt(text);
@@ -125,8 +166,7 @@ public class MainActivity extends AppCompatActivity {
         mSpinner.performClick();
 
         String curValue = PrefHelper.getInstance().getString(key, null);
-        if (curValue == null)
-        {
+        if (curValue == null) {
             mSpinner.setSelection(0);
         } else {
             int position = mSpinnerAdapter.getPosition(curValue);
@@ -134,8 +174,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void selectedItem(int position)
-    {
-        mSpinnerAdapter.getItem(position);
+    void spinnerSelectItem(int position) {
+        if (position > 0) {
+            String selection = mSpinnerAdapter.getItem(position - 1);
+            PrefHelper.getInstance().setString(mCurKey, selection);
+        }
     }
 }

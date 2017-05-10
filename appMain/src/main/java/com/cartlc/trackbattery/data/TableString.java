@@ -14,6 +14,7 @@ import java.util.List;
  */
 
 public class TableString {
+
     static final String KEY_ROWID = "_id";
     static final String KEY_VALUE = "value";
 

@@ -18,10 +18,13 @@ public class PrefHelper extends PrefHelperBase {
         new PrefHelper(ctx);
     }
 
-    static public final String KEY_COUNTRY = "country";
+    static public final String KEY_PROJECT = "project";
+    static public final String KEY_COMPANY = "company";
+    static public final String KEY_LOCATION = "location";
     static public final String KEY_STATE = "state";
     static public final String KEY_CITY = "city";
-    static public final String KEY_PROJECT = "project";
+    static final String KEY_FIRST_NAME = "first_name";
+    static final String KEY_LAST_NAME = "last_name";
 
     static final String KEY_LAST_TECH_ID = "last_tech_id";
 
@@ -30,32 +33,20 @@ public class PrefHelper extends PrefHelperBase {
         sInstance = this;
     }
 
-    public void setCountry(String country) {
-        setString(KEY_COUNTRY, country);
-    }
-
-    public String getCountry() {
-        return getString(KEY_COUNTRY, null);
-    }
-
-    public void setState(String state) {
-        setString(KEY_STATE, state);
+    public String getLocation() {
+        return getString(KEY_LOCATION, null);
     }
 
     public String getState() {
         return getString(KEY_STATE, null);
     }
 
-    public void setCity(String city) {
-        setString(KEY_CITY, city);
+    public String getCompany() {
+        return getString(KEY_COMPANY, null);
     }
 
     public String getCity() {
         return getString(KEY_CITY, null);
-    }
-
-    public void setProject(String project) {
-        setString(KEY_PROJECT, project);
     }
 
     public String getProject() {
@@ -68,5 +59,21 @@ public class PrefHelper extends PrefHelperBase {
 
     public String getTechID() {
         return getString(KEY_LAST_TECH_ID, null);
+    }
+
+    public void setFirstName(String name) {
+        setString(KEY_FIRST_NAME, name);
+    }
+
+    public String getFirstName() {
+        return getString(KEY_FIRST_NAME, null);
+    }
+
+    public void setLastName(String name) {
+        setString(KEY_LAST_NAME, name);
+    }
+
+    public String getLastName() {
+        return getString(KEY_LAST_NAME, null);
     }
 }

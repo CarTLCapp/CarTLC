@@ -13,10 +13,8 @@ public class TestData {
     public static void Init() {
         TableProjects.getInstance().clear();
         TableProjects.getInstance().add(Arrays.asList(PROJECTS));
-        TableState.getInstance().clear();
-        TableState.getInstance().add(Arrays.asList(STATES));
-        TableCity.getInstance().clear();
-        TableCity.getInstance().add(Arrays.asList(CITIES));
+        TableAddress.getInstance().clear();
+        TableAddress.getInstance().add(Arrays.asList(ADDRESSES));
     }
 
     static final String[] PROJECTS = {
@@ -27,68 +25,26 @@ public class TestData {
             "Other"
     };
 
-    static final Integer POS(String value, String[] values) {
-        for (int i = 0; i < values.length; i++) {
-            if (values[i].equals(value)) {
-                return i;
-            }
-        }
-        Timber.e("Could not find: " + value);
-        return null;
-    }
-
-    static final Integer Project(String value) {
-        return POS(value, PROJECTS);
-    }
-
-    static final String[] STATES = {
-            "California",
-            "Illinois",
-            "Wisconsin",
-            "Michigan",
-            "Washington DC",
-            "New York",
-            "Florida",
-            "Ohio",
-            "Texas",
-            "Utah",
-            "Rhode Island",
-            "Arkansas",
-            "Nevada",
-            "Oregon",
-            "Arizona",
-            "Washington",
-            "North Dakota",
-            "Tennesee",
-            "Georgia"
-    };
-
-    static final Integer State(String value) {
-        return POS(value, STATES);
-    }
-
-    static final String[] CITIES = {
-            "San Francisco",
-            "Los Angeles",
-            "Sacramento",
-            "San Jose",
-            "Chicago",
-            "Normal",
-            "Springfield",
-            "Aurora",
-            "Milwaukee",
-            "Racine",
-            "Kenosha",
-            "Madison",
-            "New York",
-            "Dallas",
-            "Houston",
-            "Orlando",
-            "Detroit",
-            "Grand Rapids",
-            "San Salvador",
-            "Antiqua",
-
+    static final Address[] ADDRESSES = {
+            new Address("Cable Car Museum", "1201 Mason St", "San Francisco", "California"),
+            new Address("Levi's Plaza", "1155 Battery St", "San Francisco", "California"),
+            new Address("Nordstrum", "865 Market St", "San Francisco", "California"),
+            new Address("Starbucks", "120 4th St", "San Francisco", "California"),
+            new Address("Starbucks", "2222 Fillmore St", "San Francisco", "California"),
+            new Address("Starbucks", "499 Bay St", "San Francisco", "California"),
+            new Address("STAPLES Center", "1111 S Figueroa St", "Los Angeles", "California"),
+            new Address("Walt Disney Concert Hal", "111 S Grand Ave", "Los Angeles", "California"),
+            new Address("Target", "1 S State St", "Chicago", "Illinois"),
+            new Address("Macy's", "111 N State St", "Chicago", "Illinois"),
+            new Address("Dunkin Donuts", "200 E Ohio St #1", "Chicago", "Illinois"),
+            new Address("Dunkin Donuts", "521 N State St", "Chicago", "Illinois"),
+            new Address("Kohl Center", "601 W Dayton St", "Madison", "Wisconsin"),
+            new Address("Best Western Plus Inntowner", "2424 University Ave", "Madison", "Wisconsin"),
+            new Address("Majestic Theatre", "2115 King St", "Madison", "Wisconsin"),
+            new Address("Greyhound", "1001 Howard St", "Detroit", "Michigan"),
+            new Address("Burger King", "1425 W Lafayette Blvd", "Detroit", "Michigan"),
+            new Address("Burger King", "100 Renaissance Center", "Detroit", "Michigan"),
+            new Address("Burger King", "2155 Gratiot Ave", "Detroit", "Michigan"),
     };
 
 }

@@ -6,28 +6,29 @@ import android.database.sqlite.SQLiteDatabase;
  * Created by dug on 4/17/17.
  */
 
-public class TruckBatteryEntries {
+public class TableEntries {
 
-    static final String TABLE_NAME = "truck_battery_entries";
+    static final String TABLE_NAME = "table_entries";
+
     static final String KEY_ROWID = "_id";
     static final String KEY_DATE = "date";
     static final String KEY_TRUCK_ID = "truck";
     static final String KEY_BATTERY_ID = "battery";
     static final String KEY_TECH_ID = "tech_id";
 
-    static TableState sInstance;
+    static TableEntries sInstance;
 
     static void Init(SQLiteDatabase db) {
-        new TruckBatteryEntries(db);
+        new TableEntries(db);
     }
 
-    public static TableState getInstance() {
+    public static TableEntries getInstance() {
         return sInstance;
     }
 
     final SQLiteDatabase db;
 
-    TruckBatteryEntries(SQLiteDatabase db) {
+    TableEntries(SQLiteDatabase db) {
         this.db = db;
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("create table ");
