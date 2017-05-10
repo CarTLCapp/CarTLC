@@ -4,8 +4,11 @@
 
     <string name="btn_prev">Prev</string>
     <string name="btn_next">Next</string>
+    <string name="btn_new_project">New Project</string>
+
     <string name="entry_hint_last_name">Last Name</string>
     <string name="entry_hint_first_name">First Name</string>
+
     <string name="title_login">Login</string>
     <string name="title_project">Project</string>
     <string name="title_state">State</string>

@@ -1,6 +1,9 @@
 package com.cartlc.trackbattery.act;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -25,7 +28,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class SetupActivity extends AppCompatActivity {
+
+    static final String ACTION_PROJECT = "project";
 
     TBApplication mApp;
 
@@ -36,11 +41,7 @@ public class MainActivity extends AppCompatActivity {
         CITY,
         COMPANY,
         LOCATION,
-        CURRENT_PROJECT,
-        TRUCK_NUMBER,
-        EQUIPMENT_INSTALLED,
-        NOTES,
-        END;
+        DONE;
 
         public static Stage from(int ord) {
             for (Stage s : values()) {
@@ -100,7 +101,26 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-        mCurStage = Stage.LOGIN;
+        processIntent(getIntent());
+    }
+
+    void processIntent(Intent intent) {
+        if (ACTION_PROJECT.equals(intent.getAction())) {
+            mCurStage = Stage.PROJECT;
+        } else {
+            mCurStage = Stage.LOGIN;
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        processIntent(intent);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         setStage();
     }
 
@@ -152,6 +172,9 @@ public class MainActivity extends AppCompatActivity {
                         PrefHelper.getInstance().getCompany());
                 setSpinner(R.string.title_location, PrefHelper.KEY_LOCATION, locations);
                 break;
+            case DONE:
+                startEntryActivity();
+                break;
         }
     }
 
@@ -163,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         mNothingSelectedAdapter.setNothingSelectedText(text);
         mSpinnerAdapter.clear();
         mSpinnerAdapter.addAll(list);
-        mSpinner.performClick();
+//        mSpinner.performClick();
 
         String curValue = PrefHelper.getInstance().getString(key, null);
         if (curValue == null) {
@@ -179,5 +202,10 @@ public class MainActivity extends AppCompatActivity {
             String selection = mSpinnerAdapter.getItem(position - 1);
             PrefHelper.getInstance().setString(mCurKey, selection);
         }
+    }
+
+    void startEntryActivity() {
+        Intent intent = new Intent(this, EntryActivity.class);
+        startActivity(intent);
     }
 }

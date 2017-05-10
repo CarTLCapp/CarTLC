@@ -3,5 +3,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="setup_next_color">#92cbc5</color>
+    <color name="button_blue">#92cbc5</color>
+    <color name="highlight_project">#d0fcf1</color>
+    <color name="highlight_red">#FF4081</color>
 </resources>
