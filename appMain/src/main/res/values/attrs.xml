@@ -1,20 +1,18 @@
 <resources>
 
-    <style name="CommonText">
-    </style>
     <style name="SetupNextButton">
         <item name="android:textSize">18sp</item>
         <item name="android:background">@color/common_blue</item>
         <item name="android:textAllCaps">false</item>
     </style>
-    <style name="SetupTitle" parent="CommonText">
+    <style name="SetupTitle">
         <item name="android:textSize">29sp</item>
         <item name="android:textAllCaps">false</item>
     </style>
-    <style name="SpinnerText">
+    <style name="SimpleItem">
         <item name="android:textSize">22sp</item>
     </style>
-    <style name="ProjectNameText" parent="CommonText">
+    <style name="ProjectNameText">
         <item name="android:textSize">22sp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:background">@color/highlight_project</item>
@@ -23,11 +21,11 @@
         <item name="android:paddingTop">10dp</item>
         <item name="android:paddingBottom">10dp</item>
     </style>
-    <style name="ProjectNotesText" parent="CommonText">
+    <style name="ProjectNotesText">
         <item name="android:textSize">20sp</item>
         <item name="android:textAllCaps">false</item>
     </style>
-    <style name="ProjectAddressText" parent="CommonText">
+    <style name="ProjectAddressText">
         <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">false</item>
     </style>
@@ -36,7 +34,7 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/highlight_red</item>
     </style>
-    <style name="EntryText" parent="CommonText">
+    <style name="EntryText">
         <item name="android:backgroundTint">@color/common_blue</item>
     </style>
 </resources>

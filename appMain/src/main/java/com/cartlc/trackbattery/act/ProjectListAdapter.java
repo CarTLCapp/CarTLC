@@ -13,7 +13,6 @@ import com.cartlc.trackbattery.data.DataProjectGroup;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableEntries;
 import com.cartlc.trackbattery.data.TableProjectGroups;
-import com.cartlc.trackbattery.data.TableProjects;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ import java.util.List;
  * Created by dug on 5/10/17.
  */
 
-public class ProjectListViewAdapter extends RecyclerView.Adapter<ProjectListViewAdapter.CustomViewHolder> {
+public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.CustomViewHolder> {
 
     class CustomViewHolder extends RecyclerView.ViewHolder {
 
@@ -41,14 +40,14 @@ public class ProjectListViewAdapter extends RecyclerView.Adapter<ProjectListView
     List<DataProjectGroup> mProjectGroups;
     Long mCurProjectGroupId;
 
-    public ProjectListViewAdapter(Context context) {
+    public ProjectListAdapter(Context context) {
         mContext = context;
         onDataChanged();
     }
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item, null);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_project, null);
         return new CustomViewHolder(view);
     }
 

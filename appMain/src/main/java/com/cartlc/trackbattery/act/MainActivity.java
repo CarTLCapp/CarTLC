@@ -1,19 +1,22 @@
 package com.cartlc.trackbattery.act;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.cartlc.trackbattery.R;
@@ -21,15 +24,49 @@ import com.cartlc.trackbattery.app.TBApplication;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableAddress;
 import com.cartlc.trackbattery.data.TableProjects;
-import com.cartlc.trackbattery.view.NothingSelectedSpinnerAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SetupActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SimpleListAdapter.OnSelectedItemListener {
+
+    class DetectReturn implements TextWatcher {
+
+        EditText host;
+        boolean changing;
+
+        DetectReturn(EditText host) {
+            this.host = host;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (!changing) {
+                changing = true;
+                String text = s.toString();
+                if (text.contains("\n")) {
+                    s.replace(0, s.length(), text.replaceAll("\\n", ""));
+                    if (host == mFirstName) {
+                        mLastName.requestFocus();
+                    } else if (host == mLastName) {
+                        mInputMM.hideSoftInputFromWindow(mLastName.getWindowToken(), 0);
+                        doNext();
+                    }
+                }
+                changing = false;
+            }
+        }
+    }
 
     static final String ACTION_PROJECT = "project";
 
@@ -38,9 +75,9 @@ public class SetupActivity extends AppCompatActivity {
     enum Stage {
         LOGIN,
         PROJECT,
+        COMPANY,
         STATE,
         CITY,
-        COMPANY,
         LOCATION,
         DONE;
 
@@ -57,16 +94,16 @@ public class SetupActivity extends AppCompatActivity {
     @BindView(R.id.first_name) EditText mFirstName;
     @BindView(R.id.last_name) EditText mLastName;
     @BindView(R.id.frame_login) ViewGroup mFrameLogin;
-    @BindView(R.id.frame_spinner) ViewGroup mFrameSpinner;
-    @BindView(R.id.entry_spinner) Spinner mSpinner;
+    @BindView(R.id.list) RecyclerView mRecyclerView;
     @BindView(R.id.next) Button mNext;
     @BindView(R.id.prev) Button mPrev;
     @BindView(R.id.setup_title) TextView mTitle;
 
-    ArrayAdapter<String> mSpinnerAdapter;
-    NothingSelectedSpinnerAdapter mNothingSelectedAdapter;
     Stage mCurStage = Stage.LOGIN;
     String mCurKey = PrefHelper.KEY_STATE;
+    SimpleListAdapter mSimpleAdapter;
+    LinearLayoutManager mLayoutManager;
+    InputMethodManager mInputMM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +113,7 @@ public class SetupActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mInputMM = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         mNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,35 +126,15 @@ public class SetupActivity extends AppCompatActivity {
                 doPrev();
             }
         });
-        mSpinnerAdapter = new ArrayAdapter(this, R.layout.spinner_item, new ArrayList());
-        mSpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        mNothingSelectedAdapter = new NothingSelectedSpinnerAdapter(this, mSpinnerAdapter);
-        mSpinner.setAdapter(mNothingSelectedAdapter);
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                spinnerSelectItem(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-        processIntent(getIntent());
-    }
-
-    void processIntent(Intent intent) {
-        if (ACTION_PROJECT.equals(intent.getAction())) {
-            mCurStage = Stage.PROJECT;
-        } else {
+        mRecyclerView.setLayoutManager(mLayoutManager = new LinearLayoutManager(this));
+        mSimpleAdapter = new SimpleListAdapter(this, this);
+        mFirstName.addTextChangedListener(new DetectReturn(mFirstName));
+        mLastName.addTextChangedListener(new DetectReturn(mLastName));
+        if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
             mCurStage = Stage.LOGIN;
+        } else /*if (TextUtils.isEmpty(PrefHelper.getInstance().getProject())) */ {
+            mCurStage = Stage.PROJECT;
         }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        processIntent(intent);
     }
 
     @Override
@@ -144,35 +162,35 @@ public class SetupActivity extends AppCompatActivity {
         switch (mCurStage) {
             case LOGIN:
                 mFrameLogin.setVisibility(View.VISIBLE);
-                mFrameSpinner.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.GONE);
                 mPrev.setVisibility(View.GONE);
                 mTitle.setText(R.string.title_login);
                 mFirstName.setText(PrefHelper.getInstance().getFirstName());
                 mLastName.setText(PrefHelper.getInstance().getLastName());
                 break;
             case PROJECT:
-                mFrameLogin.setVisibility(View.INVISIBLE);
-                mFrameSpinner.setVisibility(View.VISIBLE);
+                mFrameLogin.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
-                setSpinner(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
+                setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
+                break;
+            case COMPANY:
+                List<String> companies = TableAddress.getInstance().queryCompanies();
+                setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
                 break;
             case STATE:
                 List<String> states = TableAddress.getInstance().queryStates();
-                setSpinner(R.string.title_state, PrefHelper.KEY_STATE, states);
+                setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 break;
             case CITY:
                 List<String> cities = TableAddress.getInstance().queryCities(PrefHelper.getInstance().getState());
-                setSpinner(R.string.title_city, PrefHelper.KEY_CITY, cities);
-                break;
-            case COMPANY:
-                List<String> companies = TableAddress.getInstance().queryCompanies(PrefHelper.getInstance().getState(), PrefHelper.getInstance().getCity());
-                setSpinner(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
+                setList(R.string.title_city, PrefHelper.KEY_CITY, cities);
                 break;
             case LOCATION:
                 List<String> locations = TableAddress.getInstance().queryStreets(PrefHelper.getInstance().getState(),
                         PrefHelper.getInstance().getCity(),
                         PrefHelper.getInstance().getCompany());
-                setSpinner(R.string.title_location, PrefHelper.KEY_STREET, locations);
+                setList(R.string.title_location, PrefHelper.KEY_STREET, locations);
                 break;
             case DONE:
                 PrefHelper.getInstance().setupSaveNew();
@@ -181,29 +199,27 @@ public class SetupActivity extends AppCompatActivity {
         }
     }
 
-    void setSpinner(int textId, String key, List<String> list) {
+    void setList(int textId, String key, List<String> list) {
         mCurKey = key;
         String text = getString(textId);
         mTitle.setText(text);
-        mSpinner.setPrompt(text);
-        mNothingSelectedAdapter.setNothingSelectedText(text);
-        mSpinnerAdapter.clear();
-        mSpinnerAdapter.addAll(list);
+        mSimpleAdapter.setList(list);
+        mRecyclerView.setAdapter(mSimpleAdapter);
 
         String curValue = PrefHelper.getInstance().getString(key, null);
         if (curValue == null) {
-            mSpinner.setSelection(0);
+            mSimpleAdapter.setNoneSelected();
         } else {
-            int position = mSpinnerAdapter.getPosition(curValue);
-            mSpinner.setSelection(position + 1);
+            int position = mSimpleAdapter.setSelected(curValue);
+            if (position >= 0) {
+                mRecyclerView.scrollToPosition(position);
+            }
         }
     }
 
-    void spinnerSelectItem(int position) {
-        if (position > 0) {
-            String selection = mSpinnerAdapter.getItem(position - 1);
-            PrefHelper.getInstance().setString(mCurKey, selection);
-        }
+    @Override
+    public void onSelectedItem(int position, String text) {
+        PrefHelper.getInstance().setString(mCurKey, text);
     }
 
     void startEntryActivity() {
@@ -211,4 +227,5 @@ public class SetupActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
+
 }

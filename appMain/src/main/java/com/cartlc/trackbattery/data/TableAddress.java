@@ -149,19 +149,12 @@ public class TableAddress {
         return list;
     }
 
-    public List<String> queryCompanies(String state, String city) {
+    public List<String> queryCompanies() {
         ArrayList<String> list = new ArrayList();
         try {
             final String[] columns = {KEY_COMPANY};
             final String orderBy = KEY_COMPANY + " ASC";
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append(KEY_STATE);
-            sbuf.append(" =? AND ");
-            sbuf.append(KEY_CITY);
-            sbuf.append(" =?");
-            final String selection = sbuf.toString();
-            final String[] selectionArgs = {state, city};
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_COMPANY);
             while (cursor.moveToNext()) {
                 list.add(cursor.getString(idxValue));

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+          android:id="@+id/simple_text"
+          style="@style/SimpleItem"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ellipsize="marquee"
+          android:maxLines="1"
+          android:text="Hello World"
+          android:paddingLeft="20dp"
+          android:paddingRight="20dp"
+          android:paddingTop="10dp"
+          android:paddingBottom="10dp"
+          android:textAlignment="inherit"/>

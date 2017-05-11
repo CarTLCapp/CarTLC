@@ -9,7 +9,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -27,7 +26,8 @@ public class EntryActivity extends AppCompatActivity {
     @BindView(R.id.message_line) TextView mMessageLine;
     @BindView(R.id.new_project) Button mNewProject;
 
-    ProjectListViewAdapter mProjectAdapter;
+    ProjectListAdapter mProjectAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,13 +53,8 @@ public class EntryActivity extends AppCompatActivity {
             }
         });
         mProjectList.setLayoutManager(new LinearLayoutManager(this));
-        mProjectAdapter = new ProjectListViewAdapter(this);
+        mProjectAdapter = new ProjectListAdapter(this);
 
-        if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
-            setupName();
-        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getProject())) {
-            setupNewProject();
-        }
     }
 
     @Override
@@ -73,14 +68,14 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     void setupNewProject() {
-        Intent intent = new Intent(this, SetupActivity.class);
-        intent.setAction(SetupActivity.ACTION_PROJECT);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction(MainActivity.ACTION_PROJECT);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
 
     void setupName() {
-        Intent intent = new Intent(this, SetupActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
