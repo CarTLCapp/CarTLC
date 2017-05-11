@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.app.TBApplication;
+import com.cartlc.trackbattery.data.DataStates;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableAddress;
 import com.cartlc.trackbattery.data.TableProjects;
@@ -97,10 +98,12 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
     @BindView(R.id.list) RecyclerView mRecyclerView;
     @BindView(R.id.next) Button mNext;
     @BindView(R.id.prev) Button mPrev;
+    @BindView(R.id.new_entry) Button mNew;
     @BindView(R.id.setup_title) TextView mTitle;
 
     Stage mCurStage = Stage.LOGIN;
     String mCurKey = PrefHelper.KEY_STATE;
+    boolean mCurStageEditing = false;
     SimpleListAdapter mSimpleAdapter;
     LinearLayoutManager mLayoutManager;
     InputMethodManager mInputMM;
@@ -113,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mInputMM = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        mInputMM = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,6 +127,12 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
             @Override
             public void onClick(View v) {
                 doPrev();
+            }
+        });
+        mNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doNewEntry();
             }
         });
         mRecyclerView.setLayoutManager(mLayoutManager = new LinearLayoutManager(this));
@@ -149,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
             PrefHelper.getInstance().setFirstName(mFirstName.getText().toString());
             PrefHelper.getInstance().setLastName(mLastName.getText().toString());
         }
+        mCurStageEditing = false;
         mCurStage = Stage.from(mCurStage.ordinal() + 1);
         setStage();
     }
@@ -158,12 +168,18 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
         setStage();
     }
 
+    void doNewEntry() {
+        mCurStageEditing = true;
+        setStage();
+    }
+
     void setStage() {
         switch (mCurStage) {
             case LOGIN:
                 mFrameLogin.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
                 mPrev.setVisibility(View.GONE);
+                mNew.setVisibility(View.INVISIBLE);
                 mTitle.setText(R.string.title_login);
                 mFirstName.setText(PrefHelper.getInstance().getFirstName());
                 mLastName.setText(PrefHelper.getInstance().getLastName());
@@ -172,29 +188,43 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
                 mFrameLogin.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
+                mNew.setVisibility(View.INVISIBLE);
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 break;
             case COMPANY:
                 List<String> companies = TableAddress.getInstance().queryCompanies();
                 setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
+                mNew.setVisibility(View.INVISIBLE);
                 break;
             case STATE:
-                List<String> states = TableAddress.getInstance().queryStates();
-                setList(R.string.title_state, PrefHelper.KEY_STATE, states);
+                if (mCurStageEditing) {
+                    mNew.setVisibility(View.INVISIBLE);
+                    List<String> states = DataStates.getUnusedStates();
+                    PrefHelper.getInstance().setState(null);
+                    setList(R.string.title_state, PrefHelper.KEY_STATE, states);
+                } else {
+                    String company = PrefHelper.getInstance().getCompany();
+                    List<String> states = TableAddress.getInstance().queryStates(company);
+                    setList(R.string.title_state, PrefHelper.KEY_STATE, states);
+                    mNew.setVisibility(View.VISIBLE);
+                }
                 break;
             case CITY:
-                List<String> cities = TableAddress.getInstance().queryCities(PrefHelper.getInstance().getState());
+                String state = PrefHelper.getInstance().getState();
+                List<String> cities = TableAddress.getInstance().queryCities(state);
                 setList(R.string.title_city, PrefHelper.KEY_CITY, cities);
+                mNew.setVisibility(View.VISIBLE);
                 break;
             case LOCATION:
-                List<String> locations = TableAddress.getInstance().queryStreets(PrefHelper.getInstance().getState(),
+                List<String> locations = TableAddress.getInstance().queryStreets(
+                        PrefHelper.getInstance().getCompany(),
                         PrefHelper.getInstance().getCity(),
-                        PrefHelper.getInstance().getCompany());
+                        PrefHelper.getInstance().getState());
                 setList(R.string.title_location, PrefHelper.KEY_STREET, locations);
+                mNew.setVisibility(View.VISIBLE);
                 break;
             case DONE:
                 PrefHelper.getInstance().setupSaveNew();
-                startEntryActivity();
                 break;
         }
     }
@@ -219,13 +249,10 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
 
     @Override
     public void onSelectedItem(int position, String text) {
-        PrefHelper.getInstance().setString(mCurKey, text);
+        if (mCurKey != null) {
+            PrefHelper.getInstance().setString(mCurKey, text);
+        }
     }
 
-    void startEntryActivity() {
-        Intent intent = new Intent(this, EntryActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
 
 }

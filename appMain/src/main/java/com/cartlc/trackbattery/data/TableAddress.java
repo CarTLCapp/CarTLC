@@ -85,7 +85,6 @@ public class TableAddress {
         }
     }
 
-
     public DataAddress query(long addressId) {
         DataAddress address = null;
         try {
@@ -111,12 +110,21 @@ public class TableAddress {
         return address;
     }
 
-    public List<String> queryStates() {
+    public List<String> queryStates(String company) {
         ArrayList<String> list = new ArrayList();
         try {
             final String[] columns = {KEY_STATE};
             final String orderBy = KEY_STATE + " ASC";
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, orderBy, null);
+            String selection;
+            String[] selectionArgs;
+            if (company == null) {
+                selection = null;
+                selectionArgs = null;
+            } else {
+                selection = KEY_COMPANY + " =?";
+                selectionArgs = new String [] {company};
+            }
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_STATE);
             String state;
             while (cursor.moveToNext()) {
@@ -166,7 +174,7 @@ public class TableAddress {
         return list;
     }
 
-    public List<String> queryStreets(String state, String city, String company) {
+    public List<String> queryStreets(String company, String city, String state) {
         ArrayList<String> list = new ArrayList();
         try {
             final String[] columns = {KEY_STREET};
@@ -192,8 +200,7 @@ public class TableAddress {
         return list;
     }
 
-    public long queryAddressId(String company, String street, String city, String state)
-    {
+    public long queryAddressId(String company, String street, String city, String state) {
         long id = -1L;
         try {
             final String[] columns = {KEY_ROWID};
