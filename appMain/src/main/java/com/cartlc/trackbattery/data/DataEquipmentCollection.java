@@ -7,16 +7,16 @@ import java.util.List;
  * Created by dug on 5/10/17.
  */
 
-public class EquipmentCollection {
+public class DataEquipmentCollection {
     public final long id;
     public List<Long> equipmentList = new ArrayList();
 
-    public EquipmentCollection() {
+    public DataEquipmentCollection() {
         id = PrefHelper.getInstance().genNextEquipmentCollectionId();
         equipmentList = new ArrayList();
     }
 
-    public EquipmentCollection(long collectionId) {
+    public DataEquipmentCollection(long collectionId) {
         this.id = collectionId;
     }
 

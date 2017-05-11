@@ -3,6 +3,7 @@ package com.cartlc.trackbattery.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.List;
 
@@ -33,8 +34,10 @@ public class DatabaseManager {
                 TableAddress.getInstance().create();
                 TableEntries.getInstance().create();
                 TableEquipment.getInstance().create();
+                TableEquipmentCollection.getInstance().create();
                 TableNotes.getInstance().create();
                 TableProjects.getInstance().create();
+                TableProjectGroups.getInstance().create();
                 TableTrucks.getInstance().create();
             } catch (Exception ex) {
                 Timber.e(ex);
@@ -45,8 +48,10 @@ public class DatabaseManager {
             TableAddress.Init(db);
             TableEntries.Init(db);
             TableEquipment.Init(db);
+            TableEquipmentCollection.getInstance().Init(db);
             TableNotes.Init(db);
             TableProjects.Init(db);
+            TableProjectGroups.Init(db);
             TableTrucks.Init(db);
         }
 

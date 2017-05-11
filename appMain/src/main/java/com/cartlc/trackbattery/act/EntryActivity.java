@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -49,9 +51,9 @@ public class EntryActivity extends AppCompatActivity {
         mProjectList.setLayoutManager(new LinearLayoutManager(this));
         mProjectAdapter = new ProjectListViewAdapter(this);
 
-        if (PrefHelper.getInstance().getLastName() == null) {
+        if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
             setupName();
-        } else if (PrefHelper.getInstance().getProject() == null) {
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getProject())) {
             setupNewProject();
         }
     }

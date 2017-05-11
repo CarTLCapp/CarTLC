@@ -38,9 +38,16 @@ public class TableEntries {
     final SQLiteDatabase mDb;
 
     TableEntries(SQLiteDatabase db) {
+        sInstance = this;
         this.mDb = db;
     }
 
+    public void clear() {
+        try {
+            mDb.delete(TABLE_NAME, null, null);
+        } catch (Exception ex) {
+        }
+    }
     public void create() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("create table ");
@@ -78,6 +85,7 @@ public class TableEntries {
         } catch (Exception ex) {
             Timber.e(ex);
         }
+
         return list;
     }
 

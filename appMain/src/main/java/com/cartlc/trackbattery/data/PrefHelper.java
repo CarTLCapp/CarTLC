@@ -23,6 +23,8 @@ public class PrefHelper extends PrefHelperBase {
     static public final String KEY_STREET = "street";
     static public final String KEY_STATE = "state";
     static public final String KEY_CITY = "city";
+    static final String KEY_CURRENT_ADDRESS_ID = "current_address_id";
+    static final String KEY_CURRENT_PROJECT_GROUP_ID = "current_project_group_id";
     static final String KEY_FIRST_NAME = "first_name";
     static final String KEY_LAST_NAME = "last_name";
     static final String KEY_LAST_TRUCK_ID = "last_truck_id";
@@ -40,19 +42,49 @@ public class PrefHelper extends PrefHelperBase {
         return getString(KEY_STREET, null);
     }
 
+    public void setStreet(String value) {
+        setString(KEY_STREET, value);
+    }
+
     public String getState() {
         return getString(KEY_STATE, null);
+    }
+
+    public void setState(String value) {
+        setString(KEY_STATE, value);
     }
 
     public String getCompany() {
         return getString(KEY_COMPANY, null);
     }
 
+    public void setCompany(String value) {
+        setString(KEY_COMPANY, value);
+    }
+
     public String getCity() {
         return getString(KEY_CITY, null);
     }
 
-    public String getProject() { return getString(KEY_PROJECT, null); }
+    public void setCity(String value) {
+        setString(KEY_CITY, value);
+    }
+
+    public String getProject() {
+        return getString(KEY_PROJECT, null);
+    }
+
+    public void setProject(String value) {
+        getString(KEY_PROJECT, value);
+    }
+
+    public long getCurrentProjectGroupId() {
+        return getLong(KEY_CURRENT_PROJECT_GROUP_ID, -1L);
+    }
+
+    public void setCurrentProjectGroupId(long id) {
+        setLong(KEY_CURRENT_PROJECT_GROUP_ID, id);
+    }
 
     public void setFirstName(String name) {
         setString(KEY_FIRST_NAME, name);
@@ -74,5 +106,40 @@ public class PrefHelper extends PrefHelperBase {
         long nextId = getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L);
         setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, nextId + 1);
         return nextId;
+    }
+
+    public void setupInit() {
+        long projectGroupId = getCurrentProjectGroupId();
+        DataProjectGroup projectGroup = TableProjectGroups.getInstance().query(projectGroupId);
+        if (projectGroup == null) {
+            setState(null);
+            setCity(null);
+            setCompany(null);
+            setStreet(null);
+            setProject(null);
+        } else {
+            setProject(projectGroup.getProjectName());
+            DataAddress address = projectGroup.getAddress();
+            if (address == null) {
+                setState(null);
+                setCity(null);
+                setCompany(null);
+                setStreet(null);
+            } else {
+                setState(address.state);
+                setCity(address.city);
+                setCompany(address.company);
+                setStreet(address.street);
+            }
+        }
+    }
+
+    public void setupSaveNew() {
+        long addressId = TableAddress.getInstance().queryAddressId(getCompany(), getStreet(), getCity(), getState());
+        long projectId = TableProjects.getInstance().query(getProject());
+        if (addressId >= 0 && projectId >= 0) {
+            long projectGroupId = TableProjectGroups.getInstance().add(new DataProjectGroup(projectId, addressId));
+            setCurrentProjectGroupId(projectGroupId);
+        }
     }
 }

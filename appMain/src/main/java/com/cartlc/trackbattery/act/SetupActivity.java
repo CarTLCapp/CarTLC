@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -121,6 +122,7 @@ public class SetupActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        PrefHelper.getInstance().setupInit();
         setStage();
     }
 
@@ -173,6 +175,7 @@ public class SetupActivity extends AppCompatActivity {
                 setSpinner(R.string.title_location, PrefHelper.KEY_STREET, locations);
                 break;
             case DONE:
+                PrefHelper.getInstance().setupSaveNew();
                 startEntryActivity();
                 break;
         }
@@ -186,14 +189,13 @@ public class SetupActivity extends AppCompatActivity {
         mNothingSelectedAdapter.setNothingSelectedText(text);
         mSpinnerAdapter.clear();
         mSpinnerAdapter.addAll(list);
-//        mSpinner.performClick();
 
         String curValue = PrefHelper.getInstance().getString(key, null);
         if (curValue == null) {
             mSpinner.setSelection(0);
         } else {
             int position = mSpinnerAdapter.getPosition(curValue);
-            mSpinner.setSelection(position);
+            mSpinner.setSelection(position + 1);
         }
     }
 
@@ -206,6 +208,7 @@ public class SetupActivity extends AppCompatActivity {
 
     void startEntryActivity() {
         Intent intent = new Intent(this, EntryActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
 }

@@ -4,9 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import timber.log.Timber;
 
 /**
@@ -39,7 +36,10 @@ public class TableEquipmentCollection {
     }
 
     public void clear() {
-        mDb.delete(TABLE_NAME, null, null);
+        try {
+            mDb.delete(TABLE_NAME, null, null);
+        } catch (Exception ex) {
+        }
     }
 
     public void create() {
@@ -56,7 +56,7 @@ public class TableEquipmentCollection {
         mDb.execSQL(sbuf.toString());
     }
 
-    public void add(EquipmentCollection collection) {
+    public void add(DataEquipmentCollection collection) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
@@ -74,15 +74,15 @@ public class TableEquipmentCollection {
         }
     }
 
-    public EquipmentCollection query(long id) {
-        EquipmentCollection collection = null;
+    public DataEquipmentCollection query(long id) {
+        DataEquipmentCollection collection = null;
         try {
             final String[] columns = {KEY_EQUIPMENT_ID};
             final String selection = KEY_COLLECTION_ID + " =?";
-            final String [] selectionArgs = { Long.toString(id) };
+            final String[] selectionArgs = {Long.toString(id)};
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_EQUIPMENT_ID);
-            collection = new EquipmentCollection(id);
+            collection = new DataEquipmentCollection(id);
             while (cursor.moveToNext()) {
                 collection.add(cursor.getLong(idxValue));
             }

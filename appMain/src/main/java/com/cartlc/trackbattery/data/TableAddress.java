@@ -3,7 +3,6 @@ package com.cartlc.trackbattery.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteQueryBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +41,10 @@ public class TableAddress {
     }
 
     public void clear() {
-        mDb.delete(TABLE_NAME, null, null);
+        try {
+            mDb.delete(TABLE_NAME, null, null);
+        } catch (Exception ex) {
+        }
     }
 
     public void create() {
@@ -63,11 +65,11 @@ public class TableAddress {
         mDb.execSQL(sbuf.toString());
     }
 
-    public void add(List<Address> list) {
+    public void add(List<DataAddress> list) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            for (Address address : list) {
+            for (DataAddress address : list) {
                 values.clear();
                 values.put(KEY_COMPANY, address.company);
                 values.put(KEY_STREET, address.street);
@@ -81,6 +83,32 @@ public class TableAddress {
         } finally {
             mDb.endTransaction();
         }
+    }
+
+
+    public DataAddress query(long addressId) {
+        DataAddress address = null;
+        try {
+            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET};
+            final String orderBy = KEY_COMPANY + " ASC";
+            final String selection = KEY_ROWID + " =?";
+            final String[] selectionArgs = {Long.toString(addressId)};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            int idxState = cursor.getColumnIndex(KEY_STATE);
+            int idxCity = cursor.getColumnIndex(KEY_CITY);
+            int idxStreet = cursor.getColumnIndex(KEY_STREET);
+            int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
+            if (cursor.moveToFirst()) {
+                address = new DataAddress(cursor.getString(idxCompany),
+                        cursor.getString(idxStreet),
+                        cursor.getString(idxCity),
+                        cursor.getString(idxState));
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return address;
     }
 
     public List<String> queryStates() {
@@ -169,5 +197,33 @@ public class TableAddress {
             Timber.e(ex);
         }
         return list;
+    }
+
+    public long queryAddressId(String company, String street, String city, String state)
+    {
+        long id = -1L;
+        try {
+            final String[] columns = {KEY_ROWID};
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(KEY_COMPANY);
+            sbuf.append(" =? AND ");
+            sbuf.append(KEY_STATE);
+            sbuf.append(" =? AND ");
+            sbuf.append(KEY_CITY);
+            sbuf.append(" =? AND ");
+            sbuf.append(KEY_STREET);
+            sbuf.append(" =?");
+            final String selection = sbuf.toString();
+            final String[] selectionArgs = {company, state, city, street};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+            if (cursor.moveToFirst()) {
+                id = cursor.getLong(idxRowId);
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return id;
     }
 }

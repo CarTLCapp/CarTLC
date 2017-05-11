@@ -40,7 +40,11 @@ public class TableString {
     }
 
     public void clear() {
-        mDb.delete(tableName, null, null);
+        try {
+            mDb.delete(tableName, null, null);
+        } catch (Exception ex) {
+
+        }
     }
 
     public void add(List<String> list) {
@@ -97,8 +101,8 @@ public class TableString {
         return projectName;
     }
 
-    public Long query(String name) {
-        Long rowId = null;
+    public long query(String name) {
+        long rowId = -1L;
         try {
             final String[] columns = {KEY_ROWID};
             final String selection = KEY_VALUE + " =?";

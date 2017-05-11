@@ -37,11 +37,11 @@ public class PrefHelperBase {
         editor.commit();
     }
 
-    public Long getLong(String key, Long defaultValue) {
+    public long getLong(String key, long defaultValue) {
         return getPrefs().getLong(key, defaultValue);
     }
 
-    public void setLong(String key, Long value) {
+    public void setLong(String key, long value) {
         SharedPreferences.Editor editor = getPrefs().edit();
         editor.putLong(key, value);
         editor.commit();

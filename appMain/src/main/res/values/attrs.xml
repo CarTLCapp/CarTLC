@@ -1,18 +1,20 @@
 <resources>
 
+    <style name="CommonText">
+    </style>
     <style name="SetupNextButton">
         <item name="android:textSize">18sp</item>
         <item name="android:background">@color/common_blue</item>
         <item name="android:textAllCaps">false</item>
     </style>
-    <style name="SetupTitle">
+    <style name="SetupTitle" parent="CommonText">
         <item name="android:textSize">29sp</item>
         <item name="android:textAllCaps">false</item>
     </style>
     <style name="SpinnerText">
         <item name="android:textSize">22sp</item>
     </style>
-    <style name="ProjectNameText">
+    <style name="ProjectNameText" parent="CommonText">
         <item name="android:textSize">22sp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:background">@color/highlight_project</item>
@@ -21,8 +23,12 @@
         <item name="android:paddingTop">10dp</item>
         <item name="android:paddingBottom">10dp</item>
     </style>
-    <style name="ProjectNotesText">
+    <style name="ProjectNotesText" parent="CommonText">
         <item name="android:textSize">20sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    <style name="ProjectAddressText" parent="CommonText">
+        <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">false</item>
     </style>
     <style name="MessageLine">
@@ -30,7 +36,7 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/highlight_red</item>
     </style>
-    <style name="FAB">
-        <item name="android:background">@color/common_blue</item>
+    <style name="EntryText" parent="CommonText">
+        <item name="android:backgroundTint">@color/common_blue</item>
     </style>
 </resources>

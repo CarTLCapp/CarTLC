@@ -1,6 +1,7 @@
 package com.cartlc.trackbattery.app;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.cartlc.trackbattery.BuildConfig;
 import com.cartlc.trackbattery.data.DatabaseManager;
