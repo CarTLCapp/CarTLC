@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.cartlc.trackbattery.R;
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
     @BindView(R.id.last_name) EditText mLastName;
     @BindView(R.id.frame_login) ViewGroup mFrameLogin;
     @BindView(R.id.list) RecyclerView mRecyclerView;
+    @BindView(R.id.list_container) FrameLayout mListContainer;
     @BindView(R.id.next) Button mNext;
     @BindView(R.id.prev) Button mPrev;
     @BindView(R.id.new_entry) Button mNew;
@@ -135,21 +137,24 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
                 doNewEntry();
             }
         });
-        mRecyclerView.setLayoutManager(mLayoutManager = new LinearLayoutManager(this));
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mSimpleAdapter = new SimpleListAdapter(this, this);
         mFirstName.addTextChangedListener(new DetectReturn(mFirstName));
         mLastName.addTextChangedListener(new DetectReturn(mLastName));
         if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
             mCurStage = Stage.LOGIN;
-        } else /*if (TextUtils.isEmpty(PrefHelper.getInstance().getProject())) */ {
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getProject())) {
             mCurStage = Stage.PROJECT;
+        } else {
+            mCurStage = Stage.COMPANY;
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        PrefHelper.getInstance().setupInit();
+//        PrefHelper.getInstance().setupInit();
         setStage();
     }
 
@@ -177,8 +182,8 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
         switch (mCurStage) {
             case LOGIN:
                 mFrameLogin.setVisibility(View.VISIBLE);
-                mRecyclerView.setVisibility(View.GONE);
-                mPrev.setVisibility(View.GONE);
+                mListContainer.setVisibility(View.GONE);
+                mPrev.setVisibility(View.INVISIBLE);
                 mNew.setVisibility(View.INVISIBLE);
                 mTitle.setText(R.string.title_login);
                 mFirstName.setText(PrefHelper.getInstance().getFirstName());
@@ -186,15 +191,19 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
                 break;
             case PROJECT:
                 mFrameLogin.setVisibility(View.GONE);
-                mRecyclerView.setVisibility(View.VISIBLE);
+                mListContainer.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 mNew.setVisibility(View.INVISIBLE);
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 break;
             case COMPANY:
-                List<String> companies = TableAddress.getInstance().queryCompanies();
-                setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
+                mFrameLogin.setVisibility(View.GONE);
+                mListContainer.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
                 mNew.setVisibility(View.INVISIBLE);
+                List<String> companies = TableAddress.getInstance().queryCompanies();
+                PrefHelper.getInstance().addCompany(companies);
+                setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
                 break;
             case STATE:
                 if (mCurStageEditing) {
@@ -205,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
                 } else {
                     String company = PrefHelper.getInstance().getCompany();
                     List<String> states = TableAddress.getInstance().queryStates(company);
+                    PrefHelper.getInstance().addState(states);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                     mNew.setVisibility(View.VISIBLE);
                 }
@@ -253,6 +263,4 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
             PrefHelper.getInstance().setString(mCurKey, text);
         }
     }
-
-
 }

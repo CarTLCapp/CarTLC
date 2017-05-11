@@ -7,5 +7,6 @@
     <color name="highlight_project">#d0fcf1</color>
     <color name="highlight_red">#FF4081</color>
     <color name="colorSelected">#fa6397</color>
+    <color name="list_background">#5b3737</color>
 
 </resources>

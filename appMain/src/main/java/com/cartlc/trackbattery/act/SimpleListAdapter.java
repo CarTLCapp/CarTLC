@@ -22,7 +22,6 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
     }
 
     class CustomViewHolder extends RecyclerView.ViewHolder {
-
         TextView simpleText;
 
         public CustomViewHolder(View view) {
@@ -43,7 +42,7 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_simple, null);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_simple, parent, false);
         return new CustomViewHolder(view);
     }
 
@@ -53,9 +52,9 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
         holder.simpleText.setText(text);
 
         if (position == mSelectedPos) {
-            holder.simpleText.setBackgroundResource(R.color.colorSelected);
+            holder.itemView.setBackgroundResource(R.color.colorSelected);
         } else {
-            holder.simpleText.setBackgroundResource(android.R.color.transparent);
+            holder.itemView.setBackgroundResource(android.R.color.transparent);
         }
         holder.simpleText.setOnClickListener(new View.OnClickListener() {
             @Override

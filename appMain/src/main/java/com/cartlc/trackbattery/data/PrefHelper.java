@@ -2,6 +2,9 @@ package com.cartlc.trackbattery.data;
 
 import android.content.Context;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by dug on 4/17/17.
  */
@@ -132,6 +135,22 @@ public class PrefHelper extends PrefHelperBase {
                 setStreet(address.street);
             }
         }
+    }
+
+    public List<String> addState(List<String> list) {
+        return addIfNotFound(list, getState());
+    }
+
+    public List<String> addCompany(List<String> list) {
+        return addIfNotFound(list, getCompany());
+    }
+
+    public List<String> addIfNotFound(List<String> list, String element) {
+        if (element != null && !list.contains(element)) {
+            list.add(element);
+            Collections.sort(list);
+        }
+        return list;
     }
 
     public void setupSaveNew() {
