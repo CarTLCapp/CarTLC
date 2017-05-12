@@ -194,4 +194,17 @@ public class PrefHelper extends PrefHelperBase {
         }
         return false;
     }
+
+    public void setCurrentProjectGroup(DataProjectGroup group) {
+        setCurrentProjectGroupId(group.id);
+        setProject(group.getProjectName());
+        setAddress(group.getAddress());
+    }
+
+    void setAddress(DataAddress address) {
+        setCompany(address.company);
+        setStreet(address.street);
+        setCity(address.city);
+        setState(address.state);
+    }
 }

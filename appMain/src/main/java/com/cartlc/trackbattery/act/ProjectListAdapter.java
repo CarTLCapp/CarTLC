@@ -2,7 +2,6 @@ package com.cartlc.trackbattery.act;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,8 +52,8 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     }
 
     @Override
-    public void onBindViewHolder(CustomViewHolder holder, int position) {
-        DataProjectGroup projectGroup = mProjectGroups.get(position);
+    public void onBindViewHolder(CustomViewHolder holder, final int position) {
+        final DataProjectGroup projectGroup = mProjectGroups.get(position);
         holder.mProjectName.setText(projectGroup.getProjectName());
         int count = TableEntries.getInstance().count(projectGroup.projectNameId);
         if (count > 0) {
@@ -77,7 +76,21 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
             holder.mProjectName.setBackgroundResource(R.color.project_normal);
             holder.mProjectAddress.setBackgroundResource(R.color.address_normal);
         }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setSelected(projectGroup);
+            }
+        });
     }
+
+
+    public void setSelected(DataProjectGroup group) {
+        mCurProjectGroupId = group.id;
+        PrefHelper.getInstance().setCurrentProjectGroup(group);
+        notifyDataSetChanged();
+    }
+
 
     @Override
     public int getItemCount() {

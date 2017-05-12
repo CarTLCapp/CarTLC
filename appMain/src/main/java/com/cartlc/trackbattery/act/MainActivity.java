@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.app.TBApplication;
+import com.cartlc.trackbattery.data.DataProjectGroup;
 import com.cartlc.trackbattery.data.DataStates;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableAddress;
@@ -33,7 +34,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements SimpleListAdapter.OnSelectedItemListener {
+public class MainActivity extends AppCompatActivity {
 
     class DetectReturn implements TextWatcher {
 
@@ -152,7 +153,14 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation()));
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mSimpleAdapter = new SimpleListAdapter(this, this);
+        mSimpleAdapter = new SimpleListAdapter(this, new SimpleListAdapter.OnItemSelectedListener() {
+            @Override
+            public void onSelectedItem(int position, String text) {
+                if (mCurKey != null) {
+                    PrefHelper.getInstance().setString(mCurKey, text);
+                }
+            }
+        });
         mProjectAdapter = new ProjectListAdapter(this);
         mFirstName.addTextChangedListener(new DetectReturn(mFirstName));
         mLastName.addTextChangedListener(new DetectReturn(mLastName));
@@ -338,13 +346,6 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
                     mRecyclerView.scrollToPosition(position);
                 }
             }
-        }
-    }
-
-    @Override
-    public void onSelectedItem(int position, String text) {
-        if (mCurKey != null) {
-            PrefHelper.getInstance().setString(mCurKey, text);
         }
     }
 }

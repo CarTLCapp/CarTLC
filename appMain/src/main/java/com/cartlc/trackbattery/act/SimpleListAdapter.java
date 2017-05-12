@@ -17,7 +17,7 @@ import java.util.List;
 
 public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.CustomViewHolder> {
 
-    public interface OnSelectedItemListener {
+    public interface OnItemSelectedListener {
         void onSelectedItem(int position, String text);
     }
 
@@ -31,11 +31,11 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
     }
 
     final Context mContext;
-    OnSelectedItemListener mListener;
+    OnItemSelectedListener mListener;
     List<String> mItems;
     int mSelectedPos;
 
-    public SimpleListAdapter(Context context, OnSelectedItemListener listener) {
+    public SimpleListAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;
         mListener = listener;
     }
@@ -59,8 +59,8 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
         holder.simpleText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                setSelected(position);
                 if (mListener != null) {
-                    setSelected(position);
                     mListener.onSelectedItem(position, text);
                 }
             }
