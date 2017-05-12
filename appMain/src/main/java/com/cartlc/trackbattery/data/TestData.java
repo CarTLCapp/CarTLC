@@ -15,6 +15,9 @@ public class TestData {
         if (TableAddress.getInstance().count() == 0) {
             TableAddress.getInstance().add(Arrays.asList(ADDRESSES));
         }
+        if (TableEquipment.getInstance().count() == 0) {
+            TableEquipment.getInstance().add(Arrays.asList(EQUIPMENT));
+        }
     }
 
     static final String[] PROJECTS = {
@@ -46,6 +49,56 @@ public class TestData {
             new DataAddress("Alamo RM", "1425 W Lafayette Blvd", "Detroit", "Michigan"),
             new DataAddress("Alamo RM", "100 Renaissance Center", "Detroit", "Michigan"),
             new DataAddress("Alamo RM", "2155 Gratiot Ave", "Detroit", "Michigan"),
+    };
+
+    static final DataEquipment[] EQUIPMENT = {
+            new DataEquipment("Five Cubits", "OBC"),
+            new DataEquipment("Five Cubits", "RDT"),
+            new DataEquipment("Five Cubits", "VMX"),
+            new DataEquipment("Five Cubits", "6 pin Canbus"),
+            new DataEquipment("Five Cubits", "9 pin Canbus"),
+            new DataEquipment("Five Cubits", "Green Canbus"),
+            new DataEquipment("Five Cubits", "External Antenna"),
+            new DataEquipment("Five Cubits", "Internal Antenna"),
+            new DataEquipment("Five Cubits", "Other"),
+            new DataEquipment("Five Cubits", "Uninstall"),
+            new DataEquipment("Five Cubits", "Repair Work"),
+            new DataEquipment("Digital Fleet", "Tablet"),
+            new DataEquipment("Digital Fleet", "Canbus"),
+            new DataEquipment("Digital Fleet", "Other"),
+            new DataEquipment("Digital Fleet", "Uninstall"),
+            new DataEquipment("Digital Fleet", "Repair Work"),
+            new DataEquipment("Smart Witness", "KP1S"),
+            new DataEquipment("Smart Witness", "CPI"),
+            new DataEquipment("Smart Witness", "SVC 1080"),
+            new DataEquipment("Smart Witness", "Modem"),
+            new DataEquipment("Smart Witness", "Driver Facing Camera"),
+            new DataEquipment("Smart Witness", "Back Up Camera"),
+            new DataEquipment("Smart Witness", "Side Camera 1"),
+            new DataEquipment("Smart Witness", "Side Camera 2"),
+            new DataEquipment("Smart Witness", "DVR"),
+            new DataEquipment("Smart Witness", "Uninstall"),
+            new DataEquipment("Smart Witness", "Other"),
+            new DataEquipment("Smart Witness", "Repair Work"),
+            new DataEquipment("Fed Ex", "KP1S"),
+            new DataEquipment("Fed Ex", "Driver Facing Camera"),
+            new DataEquipment("Fed Ex", "Modem"),
+            new DataEquipment("Fed Ex", "Mobileye"),
+            new DataEquipment("Fed Ex", "Backup Sensors"),
+            new DataEquipment("Fed Ex", "Re-Calibrate"),
+            new DataEquipment("Fed Ex", "Other"),
+            new DataEquipment("Fed Ex", "Uninstall"),
+            new DataEquipment("Fed Ex", "Repair Work"),
+            new DataEquipment("Verifi", "V3 Full Install"),
+            new DataEquipment("Verifi", "V4 Full Install"),
+            new DataEquipment("Verifi", "Admix Tank"),
+            new DataEquipment("Verifi", "Nozzle"),
+            new DataEquipment("Verifi", "FDM Upgrade"),
+            new DataEquipment("Verifi", "Crossover Upgrade"),
+            new DataEquipment("Verifi", "WTAA Install"),
+            new DataEquipment("Verifi", "Commissioning"),
+            new DataEquipment("Verifi", "Uninstall"),
+            new DataEquipment("Verifi", "Repair Work"),
     };
 
 }

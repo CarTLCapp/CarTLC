@@ -48,6 +48,7 @@ public class TableEntries {
         } catch (Exception ex) {
         }
     }
+
     public void create() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("create table ");
