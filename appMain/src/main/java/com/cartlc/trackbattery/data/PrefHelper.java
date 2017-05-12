@@ -1,6 +1,8 @@
 package com.cartlc.trackbattery.data;
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.Collections;
 import java.util.List;
@@ -111,21 +113,6 @@ public class PrefHelper extends PrefHelperBase {
         return nextId;
     }
 
-    public void setupInit() {
-        long projectGroupId = getCurrentProjectGroupId();
-        DataProjectGroup projectGroup = TableProjectGroups.getInstance().query(projectGroupId);
-        if (projectGroup != null) {
-            setProject(projectGroup.getProjectName());
-            DataAddress address = projectGroup.getAddress();
-            if (address != null) {
-                setState(address.state);
-                setCity(address.city);
-                setCompany(address.company);
-                setStreet(address.street);
-            }
-        }
-    }
-
     public List<String> addState(List<String> list) {
         return addIfNotFound(list, getState());
     }
@@ -146,16 +133,65 @@ public class PrefHelper extends PrefHelperBase {
         return list;
     }
 
-    public void setupSaveNew() {
-        long addressId = TableAddress.getInstance().queryAddressId(getCompany(), getStreet(), getCity(), getState());
+    public void setupInit() {
+        long projectGroupId = getCurrentProjectGroupId();
+        DataProjectGroup projectGroup = TableProjectGroups.getInstance().query(projectGroupId);
+        if (projectGroup != null) {
+            setProject(projectGroup.getProjectName());
+            DataAddress address = projectGroup.getAddress();
+            if (address != null) {
+                setState(address.state);
+                setCity(address.city);
+                setCompany(address.company);
+                setStreet(address.street);
+            }
+        }
+    }
+
+    public void clearCurProject() {
+        setState(null);
+        setCity(null);
+        setCompany(null);
+        setStreet(null);
+        setProject(null);
+        setCurrentProjectGroupId(-1L);
+    }
+
+    public boolean hasCurProject() {
+        long projectGroupId = getCurrentProjectGroupId();
+        if (projectGroupId < 0) {
+            return false;
+        }
+        DataProjectGroup projectGroup = TableProjectGroups.getInstance().query(projectGroupId);
+        if (projectGroup == null) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean saveNewProjectIfNeeded() {
+        String state = getState();
+        String street = getStreet();
+        String city = getCity();
+        String company = getCompany();
+        String project = getProject();
+        if (TextUtils.isEmpty(project) || TextUtils.isEmpty(state) || TextUtils.isDigitsOnly(street) || TextUtils.isEmpty(city) || TextUtils.isEmpty(company)) {
+            return false;
+        }
+        long addressId = TableAddress.getInstance().queryAddressId(company, street, city, state);
         if (addressId < 0) {
-            DataAddress address = new DataAddress(getCompany(), getStreet(), getCity(), getState());
+            DataAddress address = new DataAddress(company, street, city, state);
             addressId = TableAddress.getInstance().add(address);
         }
-        long projectId = TableProjects.getInstance().query(getProject());
+        long projectId = TableProjects.getInstance().query(project);
         if (addressId >= 0 && projectId >= 0) {
-            long projectGroupId = TableProjectGroups.getInstance().add(new DataProjectGroup(projectId, addressId));
+            long projectGroupId = TableProjectGroups.getInstance().queryProjectGroupId(projectId, addressId);
+            if (projectGroupId < 0) {
+                projectGroupId = TableProjectGroups.getInstance().add(new DataProjectGroup(projectId, addressId));
+            }
             setCurrentProjectGroupId(projectGroupId);
+            return true;
         }
+        return false;
     }
 }

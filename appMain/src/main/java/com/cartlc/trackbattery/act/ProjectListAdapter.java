@@ -2,6 +2,7 @@ package com.cartlc.trackbattery.act;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +67,11 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
             holder.mProjectAddress.setText(null);
         } else {
             holder.mProjectAddress.setText(address.getLine());
+        }
+        if (projectGroup.projectId == mCurProjectGroupId) {
+            holder.mProjectName.setBackgroundResource(R.color.highlight_project);
+        } else {
+            holder.mProjectName.setBackgroundResource(android.R.color.transparent);
         }
     }
 

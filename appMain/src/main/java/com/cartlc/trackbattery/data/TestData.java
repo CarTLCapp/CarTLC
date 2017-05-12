@@ -9,10 +9,12 @@ import java.util.Arrays;
 public class TestData {
 
     public static void Init() {
-        TableProjects.getInstance().clear();
-        TableProjects.getInstance().add(Arrays.asList(PROJECTS));
-        TableAddress.getInstance().clear();
-        TableAddress.getInstance().add(Arrays.asList(ADDRESSES));
+        if (TableProjectGroups.getInstance().count() == 0) {
+            TableProjects.getInstance().add(Arrays.asList(PROJECTS));
+        }
+        if (TableAddress.getInstance().count() == 0) {
+            TableAddress.getInstance().add(Arrays.asList(ADDRESSES));
+        }
     }
 
     static final String[] PROJECTS = {

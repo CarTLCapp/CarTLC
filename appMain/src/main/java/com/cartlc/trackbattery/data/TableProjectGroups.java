@@ -3,6 +3,7 @@ package com.cartlc.trackbattery.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,10 +78,22 @@ public class TableProjectGroups {
         return id;
     }
 
+    public int count() {
+        int count = 0;
+        try {
+            Cursor cursor = mDb.query(true, TABLE_NAME, null, null, null, null, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
     public List<DataProjectGroup> query() {
         ArrayList<DataProjectGroup> list = new ArrayList();
         try {
-            final String[] columns = {KEY_PROJECT_ID, KEY_ADDRESS_ID};
+            final String[] columns = {KEY_ROWID, KEY_PROJECT_ID, KEY_ADDRESS_ID};
             Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, null, null);
             int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
             int idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
@@ -114,6 +127,29 @@ public class TableProjectGroups {
             Timber.e(ex);
         }
         return item;
+    }
+
+    public long queryProjectGroupId(long projectId, long addressId) {
+        long id = -1L;
+        try {
+            final String[] columns = {KEY_ROWID};
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(KEY_PROJECT_ID);
+            sbuf.append(" =? AND ");
+            sbuf.append(KEY_ADDRESS_ID);
+            sbuf.append(" =?");
+            final String selection = sbuf.toString();
+            final String[] selectionArgs = {Long.toString(projectId), Long.toString(addressId)};
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+            if (cursor.moveToFirst()) {
+                id = cursor.getLong(idxRowId);
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return id;
     }
 
 }

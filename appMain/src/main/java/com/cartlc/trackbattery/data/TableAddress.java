@@ -3,6 +3,7 @@ package com.cartlc.trackbattery.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,6 +106,18 @@ public class TableAddress {
         return id;
     }
 
+    public int count() {
+        int count = 0;
+        try {
+            Cursor cursor = mDb.query(true, TABLE_NAME, null, null, null, null, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
     public DataAddress query(long addressId) {
         DataAddress address = null;
         try {
@@ -128,6 +141,29 @@ public class TableAddress {
             Timber.e(ex);
         }
         return address;
+    }
+
+    public List<DataAddress> query() {
+        ArrayList<DataAddress> list = new ArrayList();
+        try {
+            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET};
+            final String orderBy = KEY_COMPANY + " ASC";
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, orderBy, null);
+            int idxState = cursor.getColumnIndex(KEY_STATE);
+            int idxCity = cursor.getColumnIndex(KEY_CITY);
+            int idxStreet = cursor.getColumnIndex(KEY_STREET);
+            int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
+            while (cursor.moveToNext()) {
+                list.add(new DataAddress(cursor.getString(idxCompany),
+                        cursor.getString(idxStreet),
+                        cursor.getString(idxCity),
+                        cursor.getString(idxState)));
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return list;
     }
 
     public List<String> queryStates(String company) {

@@ -1,6 +1,9 @@
 package com.cartlc.trackbattery.data;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
+
+import timber.log.Timber;
 
 /**
  * Created by dug on 5/10/17.
@@ -20,6 +23,9 @@ public class DataProjectGroup implements Comparable<DataProjectGroup> {
     public String getProjectName() {
         if (mProjectName == null) {
             mProjectName = TableProjects.getInstance().query(projectId);
+            if (mProjectName == null) {
+                Timber.e("Could not find project ID=" + projectId);
+            }
         }
         return mProjectName;
     }
@@ -27,6 +33,9 @@ public class DataProjectGroup implements Comparable<DataProjectGroup> {
     public DataAddress getAddress() {
         if (mAddress == null) {
             mAddress = TableAddress.getInstance().query(addressId);
+            if (mAddress == null) {
+                Timber.e("Could not find address ID=" + addressId);
+            }
         }
         return mAddress;
     }
@@ -42,5 +51,22 @@ public class DataProjectGroup implements Comparable<DataProjectGroup> {
             return 0;
         }
         return 1;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("ID=");
+        sbuf.append(projectId);
+        sbuf.append(" [" );
+        sbuf.append(getProjectName());
+        sbuf.append("] ADDRESS=");
+        sbuf.append(addressId);
+        if (getAddress() != null) {
+            sbuf.append(" [");
+            sbuf.append(getAddress().getLine());
+            sbuf.append("]");
+        }
+        return sbuf.toString();
     }
 }

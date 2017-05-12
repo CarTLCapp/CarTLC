@@ -3,6 +3,7 @@ package com.cartlc.trackbattery.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import timber.log.Timber;
 
@@ -64,6 +65,18 @@ public class TableString {
         }
     }
 
+    public int count() {
+        int count = 0;
+        try {
+            Cursor cursor = mDb.query(tableName, null, null, null, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
     public List<String> query() {
         ArrayList<String> list = new ArrayList();
         try {
@@ -86,9 +99,8 @@ public class TableString {
         String projectName = null;
         try {
             final String[] columns = {KEY_VALUE};
-            final String selection = KEY_ROWID + " =?";
+            final String selection = KEY_ROWID + "=?";
             final String[] selectionArgs = {Long.toString(id)};
-
             Cursor cursor = mDb.query(tableName, columns, selection, selectionArgs, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_VALUE);
             if (cursor.moveToFirst()) {
@@ -105,9 +117,8 @@ public class TableString {
         long rowId = -1L;
         try {
             final String[] columns = {KEY_ROWID};
-            final String selection = KEY_VALUE + " =?";
+            final String selection = KEY_VALUE + "=?";
             final String[] selectionArgs = {name};
-
             Cursor cursor = mDb.query(tableName, columns, selection, selectionArgs, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_ROWID);
             if (cursor.moveToFirst()) {

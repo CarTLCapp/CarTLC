@@ -24,6 +24,7 @@ import com.cartlc.trackbattery.app.TBApplication;
 import com.cartlc.trackbattery.data.DataStates;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableAddress;
+import com.cartlc.trackbattery.data.TableProjectGroups;
 import com.cartlc.trackbattery.data.TableProjects;
 
 import java.util.List;
@@ -108,7 +109,6 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
     Stage mCurStage = Stage.LOGIN;
     String mCurKey = PrefHelper.KEY_STATE;
     boolean mCurStageEditing = false;
-    boolean mSetupChanged = false;
     SimpleListAdapter mSimpleAdapter;
     ProjectListAdapter mProjectAdapter;
     LinearLayoutManager mLayoutManager;
@@ -190,10 +190,8 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
         } else if (mCurStageEditing) {
             if (mCurStage == Stage.CITY) {
                 PrefHelper.getInstance().setCity(mEntry.getText().toString());
-                mSetupChanged = true;
             } else if (mCurStage == Stage.STREET) {
                 PrefHelper.getInstance().setStreet(mEntry.getText().toString());
-                mSetupChanged = true;
             }
         }
         mCurStageEditing = false;
@@ -297,13 +295,13 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
                 }
                 break;
             case CURRENT_PROJECT:
-                if (mSetupChanged) {
-                    PrefHelper.getInstance().setupSaveNew();
-                    mSetupChanged = false;
-                }
+                PrefHelper.getInstance().saveNewProjectIfNeeded();
                 if (mCurStageEditing) {
-                    mCurStage = Stage.PROJECT;
+                    PrefHelper.getInstance().clearCurProject();
                     mCurStageEditing = false;
+                }
+                if (!PrefHelper.getInstance().hasCurProject() || TableProjectGroups.getInstance().count() == 0) {
+                    computeCurStage();
                     setStage();
                 } else {
                     mListContainer.setVisibility(View.VISIBLE);
@@ -345,7 +343,6 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
     public void onSelectedItem(int position, String text) {
         if (mCurKey != null) {
             PrefHelper.getInstance().setString(mCurKey, text);
-            mSetupChanged = true;
         }
     }
 }
