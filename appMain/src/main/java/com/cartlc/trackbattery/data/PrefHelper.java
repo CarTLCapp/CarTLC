@@ -80,7 +80,7 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public void setProject(String value) {
-        getString(KEY_PROJECT, value);
+        setString(KEY_PROJECT, value);
     }
 
     public long getCurrentProjectGroupId() {

@@ -6,8 +6,8 @@
     <color name="common_blue">#92cbc5</color>
     <color name="project_highlight">#455ad2</color>
     <color name="address_highlight">#6376ea</color>
-    <color name="project_normal">#3c4369</color>
-    <color name="address_normal">#22284d</color>
+    <color name="project_normal">#272a38</color>
+    <color name="address_normal">#1d2031</color>
     <color name="highlight_red">#FF4081</color>
     <color name="colorSelected">#fa6397</color>
     <color name="list_background">#5b3737</color>

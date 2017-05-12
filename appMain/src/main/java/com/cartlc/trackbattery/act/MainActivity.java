@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -149,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
             }
         });
         mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation()));
         mRecyclerView.setLayoutManager(mLayoutManager);
         mSimpleAdapter = new SimpleListAdapter(this, this);
         mProjectAdapter = new ProjectListAdapter(this);

@@ -1,6 +1,7 @@
 package com.cartlc.trackbattery.data;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import timber.log.Timber;
 
@@ -9,21 +10,28 @@ import timber.log.Timber;
  */
 
 public class DataProjectGroup implements Comparable<DataProjectGroup> {
-    public final long projectId;
+    public long id;
+    public final long projectNameId;
     public final long addressId;
     String mProjectName;
     DataAddress mAddress;
 
     public DataProjectGroup(long projectId, long addressId) {
-        this.projectId = projectId;
+        this.projectNameId = projectId;
+        this.addressId = addressId;
+    }
+
+    public DataProjectGroup(long rowId, long projectId, long addressId) {
+        this.id = rowId;
+        this.projectNameId = projectId;
         this.addressId = addressId;
     }
 
     public String getProjectName() {
         if (mProjectName == null) {
-            mProjectName = TableProjects.getInstance().query(projectId);
+            mProjectName = TableProjects.getInstance().query(projectNameId);
             if (mProjectName == null) {
-                Timber.e("Could not find project ID=" + projectId);
+                Timber.e("Could not find project ID=" + projectNameId);
             }
         }
         return mProjectName;
@@ -56,7 +64,7 @@ public class DataProjectGroup implements Comparable<DataProjectGroup> {
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("ID=");
-        sbuf.append(projectId);
+        sbuf.append(projectNameId);
         sbuf.append(" [" );
         sbuf.append(getProjectName());
         sbuf.append("] ADDRESS=");

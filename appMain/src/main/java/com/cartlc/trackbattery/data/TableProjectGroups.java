@@ -62,20 +62,19 @@ public class TableProjectGroups {
     }
 
     public long add(DataProjectGroup projectGroup) {
-        long id = -1L;
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(KEY_PROJECT_ID, projectGroup.projectId);
+            values.put(KEY_PROJECT_ID, projectGroup.projectNameId);
             values.put(KEY_ADDRESS_ID, projectGroup.addressId);
-            id = mDb.insert(TABLE_NAME, null, values);
+            projectGroup.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
             Timber.e(ex);
         } finally {
             mDb.endTransaction();
         }
-        return id;
+        return projectGroup.id;
     }
 
     public int count() {
@@ -95,11 +94,12 @@ public class TableProjectGroups {
         try {
             final String[] columns = {KEY_ROWID, KEY_PROJECT_ID, KEY_ADDRESS_ID};
             Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, null, null);
+            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
             int idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
             DataProjectGroup item;
             while (cursor.moveToNext()) {
-                item = new DataProjectGroup(cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
+                item = new DataProjectGroup(cursor.getLong(idxRowId), cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
                 list.add(item);
             }
             cursor.close();
