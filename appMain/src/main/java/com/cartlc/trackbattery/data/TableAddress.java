@@ -85,6 +85,26 @@ public class TableAddress {
         }
     }
 
+    public long add(DataAddress address) {
+        long id = -1L;
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.clear();
+            values.put(KEY_COMPANY, address.company);
+            values.put(KEY_STREET, address.street);
+            values.put(KEY_CITY, address.city);
+            values.put(KEY_STATE, address.state);
+            id = mDb.insert(TABLE_NAME, null, values);
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
+        return id;
+    }
+
     public DataAddress query(long addressId) {
         DataAddress address = null;
         try {
@@ -122,7 +142,7 @@ public class TableAddress {
                 selectionArgs = null;
             } else {
                 selection = KEY_COMPANY + " =?";
-                selectionArgs = new String [] {company};
+                selectionArgs = new String[]{company};
             }
             Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_STATE);

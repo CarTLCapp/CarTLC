@@ -15,7 +15,7 @@
     <string name="title_state">State</string>
     <string name="title_city">City</string>
     <string name="title_company">Company</string>
-    <string name="title_location">Location</string>
+    <string name="title_location">Street</string>
     <string name="title_current_project">Current Project</string>
     <string name="title_truck_number">Truck Number</string>
     <string name="title_equipment_installed">Equipment Installed</string>

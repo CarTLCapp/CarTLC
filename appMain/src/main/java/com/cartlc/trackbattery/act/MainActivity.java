@@ -1,8 +1,9 @@
 package com.cartlc.trackbattery.act;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,8 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -60,8 +59,8 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
                     s.replace(0, s.length(), text.replaceAll("\\n", ""));
                     if (host == mFirstName) {
                         mLastName.requestFocus();
-                    } else if (host == mLastName) {
-                        mInputMM.hideSoftInputFromWindow(mLastName.getWindowToken(), 0);
+                    } else {
+                        mInputMM.hideSoftInputFromWindow(host.getWindowToken(), 0);
                         doNext();
                     }
                 }
@@ -80,8 +79,8 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
         COMPANY,
         STATE,
         CITY,
-        LOCATION,
-        DONE;
+        STREET,
+        CURRENT_PROJECT;
 
         public static Stage from(int ord) {
             for (Stage s : values()) {
@@ -95,18 +94,23 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
 
     @BindView(R.id.first_name) EditText mFirstName;
     @BindView(R.id.last_name) EditText mLastName;
+    @BindView(R.id.entry) EditText mEntry;
     @BindView(R.id.frame_login) ViewGroup mFrameLogin;
+    @BindView(R.id.frame_new_entry) ViewGroup mFrameNewEntry;
     @BindView(R.id.list) RecyclerView mRecyclerView;
     @BindView(R.id.list_container) FrameLayout mListContainer;
     @BindView(R.id.next) Button mNext;
     @BindView(R.id.prev) Button mPrev;
     @BindView(R.id.new_entry) Button mNew;
     @BindView(R.id.setup_title) TextView mTitle;
+    @BindView(R.id.fab_add) FloatingActionButton mAdd;
 
     Stage mCurStage = Stage.LOGIN;
     String mCurKey = PrefHelper.KEY_STATE;
     boolean mCurStageEditing = false;
+    boolean mSetupChanged = false;
     SimpleListAdapter mSimpleAdapter;
+    ProjectListAdapter mProjectAdapter;
     LinearLayoutManager mLayoutManager;
     InputMethodManager mInputMM;
 
@@ -137,38 +141,72 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
                 doNewEntry();
             }
         });
+        mAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mSimpleAdapter = new SimpleListAdapter(this, this);
+        mProjectAdapter = new ProjectListAdapter(this);
         mFirstName.addTextChangedListener(new DetectReturn(mFirstName));
         mLastName.addTextChangedListener(new DetectReturn(mLastName));
-        if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
-            mCurStage = Stage.LOGIN;
-        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getProject())) {
-            mCurStage = Stage.PROJECT;
-        } else {
-            mCurStage = Stage.COMPANY;
-        }
+        mEntry.addTextChangedListener(new DetectReturn(mEntry));
     }
 
     @Override
     public void onResume() {
         super.onResume();
-//        PrefHelper.getInstance().setupInit();
+        PrefHelper.getInstance().setupInit();
+        computeCurStage();
         setStage();
     }
 
-    void doNext() {
+    void computeCurStage() {
+        if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
+            mCurStage = Stage.LOGIN;
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getProject())) {
+            mCurStage = Stage.PROJECT;
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCompany())) {
+            mCurStage = Stage.COMPANY;
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getState())) {
+            mCurStage = Stage.STATE;
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCity())) {
+            mCurStage = Stage.CITY;
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
+            mCurStage = Stage.STREET;
+        } else {
+            mCurStage = Stage.CURRENT_PROJECT;
+        }
+    }
+
+    void save() {
         if (mCurStage == Stage.LOGIN) {
             PrefHelper.getInstance().setFirstName(mFirstName.getText().toString());
             PrefHelper.getInstance().setLastName(mLastName.getText().toString());
+        } else if (mCurStageEditing) {
+            if (mCurStage == Stage.CITY) {
+                PrefHelper.getInstance().setCity(mEntry.getText().toString());
+                mSetupChanged = true;
+            } else if (mCurStage == Stage.STREET) {
+                PrefHelper.getInstance().setStreet(mEntry.getText().toString());
+                mSetupChanged = true;
+            }
         }
         mCurStageEditing = false;
+    }
+
+    void doNext() {
+        save();
         mCurStage = Stage.from(mCurStage.ordinal() + 1);
         setStage();
     }
 
     void doPrev() {
+        save();
         mCurStage = Stage.from(mCurStage.ordinal() - 1);
         setStage();
     }
@@ -179,35 +217,41 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
     }
 
     void setStage() {
+        mFrameLogin.setVisibility(View.GONE);
+        mFrameNewEntry.setVisibility(View.GONE);
+        mListContainer.setVisibility(View.GONE);
+        mAdd.setVisibility(View.GONE);
+        mNext.setVisibility(View.INVISIBLE);
+        mPrev.setVisibility(View.INVISIBLE);
+        mNew.setVisibility(View.INVISIBLE);
+
         switch (mCurStage) {
             case LOGIN:
                 mFrameLogin.setVisibility(View.VISIBLE);
-                mListContainer.setVisibility(View.GONE);
-                mPrev.setVisibility(View.INVISIBLE);
-                mNew.setVisibility(View.INVISIBLE);
+                mNext.setVisibility(View.VISIBLE);
                 mTitle.setText(R.string.title_login);
                 mFirstName.setText(PrefHelper.getInstance().getFirstName());
                 mLastName.setText(PrefHelper.getInstance().getLastName());
                 break;
             case PROJECT:
-                mFrameLogin.setVisibility(View.GONE);
                 mListContainer.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
-                mNew.setVisibility(View.INVISIBLE);
+                mNext.setVisibility(View.VISIBLE);
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 break;
             case COMPANY:
-                mFrameLogin.setVisibility(View.GONE);
                 mListContainer.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
-                mNew.setVisibility(View.INVISIBLE);
+                mNext.setVisibility(View.VISIBLE);
                 List<String> companies = TableAddress.getInstance().queryCompanies();
                 PrefHelper.getInstance().addCompany(companies);
                 setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
                 break;
             case STATE:
+                mListContainer.setVisibility(View.VISIBLE);
+                mNext.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
-                    mNew.setVisibility(View.INVISIBLE);
                     List<String> states = DataStates.getUnusedStates();
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
@@ -220,21 +264,56 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
                 }
                 break;
             case CITY:
-                String state = PrefHelper.getInstance().getState();
-                List<String> cities = TableAddress.getInstance().queryCities(state);
-                setList(R.string.title_city, PrefHelper.KEY_CITY, cities);
-                mNew.setVisibility(View.VISIBLE);
+                mNext.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
+                if (mCurStageEditing) {
+                    mFrameNewEntry.setVisibility(View.VISIBLE);
+                    mEntry.setHint(R.string.title_city);
+                    mEntry.setText("");
+                } else {
+                    mListContainer.setVisibility(View.VISIBLE);
+                    mNew.setVisibility(View.VISIBLE);
+                    String state = PrefHelper.getInstance().getState();
+                    List<String> cities = TableAddress.getInstance().queryCities(state);
+                    PrefHelper.getInstance().addCity(cities);
+                    setList(R.string.title_city, PrefHelper.KEY_CITY, cities);
+                }
                 break;
-            case LOCATION:
-                List<String> locations = TableAddress.getInstance().queryStreets(
-                        PrefHelper.getInstance().getCompany(),
-                        PrefHelper.getInstance().getCity(),
-                        PrefHelper.getInstance().getState());
-                setList(R.string.title_location, PrefHelper.KEY_STREET, locations);
-                mNew.setVisibility(View.VISIBLE);
+            case STREET:
+                mNext.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
+                if (mCurStageEditing) {
+                    mFrameNewEntry.setVisibility(View.VISIBLE);
+                    mEntry.setHint(R.string.title_location);
+                    mEntry.setText("");
+                } else {
+                    mNew.setVisibility(View.VISIBLE);
+                    mListContainer.setVisibility(View.VISIBLE);
+                    List<String> locations = TableAddress.getInstance().queryStreets(
+                            PrefHelper.getInstance().getCompany(),
+                            PrefHelper.getInstance().getCity(),
+                            PrefHelper.getInstance().getState());
+                    setList(R.string.title_location, PrefHelper.KEY_STREET, locations);
+                }
                 break;
-            case DONE:
-                PrefHelper.getInstance().setupSaveNew();
+            case CURRENT_PROJECT:
+                if (mSetupChanged) {
+                    PrefHelper.getInstance().setupSaveNew();
+                    mSetupChanged = false;
+                }
+                if (mCurStageEditing) {
+                    mCurStage = Stage.PROJECT;
+                    mCurStageEditing = false;
+                    setStage();
+                } else {
+                    mListContainer.setVisibility(View.VISIBLE);
+                    mNew.setVisibility(View.VISIBLE);
+                    mAdd.setVisibility(View.VISIBLE);
+                    mCurKey = null;
+                    mTitle.setText(R.string.title_current_project);
+                    mRecyclerView.setAdapter(mProjectAdapter);
+                    mProjectAdapter.onDataChanged();
+                }
                 break;
         }
     }
@@ -243,16 +322,21 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
         mCurKey = key;
         String text = getString(textId);
         mTitle.setText(text);
-        mSimpleAdapter.setList(list);
-        mRecyclerView.setAdapter(mSimpleAdapter);
 
-        String curValue = PrefHelper.getInstance().getString(key, null);
-        if (curValue == null) {
-            mSimpleAdapter.setNoneSelected();
+        if (list.size() == 0) {
+            doNewEntry();
         } else {
-            int position = mSimpleAdapter.setSelected(curValue);
-            if (position >= 0) {
-                mRecyclerView.scrollToPosition(position);
+            mSimpleAdapter.setList(list);
+            mRecyclerView.setAdapter(mSimpleAdapter);
+
+            String curValue = PrefHelper.getInstance().getString(key, null);
+            if (curValue == null) {
+                mSimpleAdapter.setNoneSelected();
+            } else {
+                int position = mSimpleAdapter.setSelected(curValue);
+                if (position >= 0) {
+                    mRecyclerView.scrollToPosition(position);
+                }
             }
         }
     }
@@ -261,6 +345,7 @@ public class MainActivity extends AppCompatActivity implements SimpleListAdapter
     public void onSelectedItem(int position, String text) {
         if (mCurKey != null) {
             PrefHelper.getInstance().setString(mCurKey, text);
+            mSetupChanged = true;
         }
     }
 }

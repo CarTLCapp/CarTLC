@@ -114,21 +114,10 @@ public class PrefHelper extends PrefHelperBase {
     public void setupInit() {
         long projectGroupId = getCurrentProjectGroupId();
         DataProjectGroup projectGroup = TableProjectGroups.getInstance().query(projectGroupId);
-        if (projectGroup == null) {
-            setState(null);
-            setCity(null);
-            setCompany(null);
-            setStreet(null);
-            setProject(null);
-        } else {
+        if (projectGroup != null) {
             setProject(projectGroup.getProjectName());
             DataAddress address = projectGroup.getAddress();
-            if (address == null) {
-                setState(null);
-                setCity(null);
-                setCompany(null);
-                setStreet(null);
-            } else {
+            if (address != null) {
                 setState(address.state);
                 setCity(address.city);
                 setCompany(address.company);
@@ -139,6 +128,10 @@ public class PrefHelper extends PrefHelperBase {
 
     public List<String> addState(List<String> list) {
         return addIfNotFound(list, getState());
+    }
+
+    public List<String> addCity(List<String> list) {
+        return addIfNotFound(list, getCity());
     }
 
     public List<String> addCompany(List<String> list) {
@@ -155,6 +148,10 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setupSaveNew() {
         long addressId = TableAddress.getInstance().queryAddressId(getCompany(), getStreet(), getCity(), getState());
+        if (addressId < 0) {
+            DataAddress address = new DataAddress(getCompany(), getStreet(), getCity(), getState());
+            addressId = TableAddress.getInstance().add(address);
+        }
         long projectId = TableProjects.getInstance().query(getProject());
         if (addressId >= 0 && projectId >= 0) {
             long projectGroupId = TableProjectGroups.getInstance().add(new DataProjectGroup(projectId, addressId));
