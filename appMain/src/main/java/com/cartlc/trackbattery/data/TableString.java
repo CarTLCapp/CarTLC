@@ -49,6 +49,7 @@ public class TableString {
     }
 
     public void add(List<String> list) {
+        Log.d("MYDEBUG", "Adding String table " + tableName + "=" + list.size());
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();

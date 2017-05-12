@@ -3,6 +3,7 @@ package com.cartlc.trackbattery.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ public class TableEquipment {
     static final String KEY_ROWID = "_id";
     static final String KEY_NAME = "name";
     static final String KEY_PROJECT_ID = "project_id";
+    static final String KEY_CHECKED = "checked";
 
     static TableEquipment sInstance;
 
@@ -55,7 +57,9 @@ public class TableEquipment {
         sbuf.append(KEY_NAME);
         sbuf.append(" text, ");
         sbuf.append(KEY_PROJECT_ID);
-        sbuf.append(" long)");
+        sbuf.append(" long, ");
+        sbuf.append(KEY_CHECKED);
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -89,6 +93,7 @@ public class TableEquipment {
     }
 
     public void add(List<DataEquipment> list) {
+        Log.d("MYDEBUG", "ADDING " + list.size());
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
@@ -96,7 +101,8 @@ public class TableEquipment {
                 values.clear();
                 values.put(KEY_NAME, value.name);
                 values.put(KEY_PROJECT_ID, value.projectId);
-                mDb.insert(TABLE_NAME, null, values);
+                values.put(KEY_CHECKED, value.isChecked ? 1 : 0);
+                value.id = mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -106,22 +112,67 @@ public class TableEquipment {
         }
     }
 
-    public List<String> query(long projectId) {
-        ArrayList<String> list = new ArrayList();
+    public List<DataEquipment> query(long projectNameId) {
+        ArrayList<DataEquipment> list = new ArrayList();
         try {
-            final String[] columns = {KEY_NAME};
-            final String selection = KEY_PROJECT_ID + "=?";
+            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_CHECKED};
             final String orderBy = KEY_NAME + " ASC";
-            final String[] selectionArgs = {Long.toString(projectId)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, orderBy);
-            int idxValue = cursor.getColumnIndex(KEY_NAME);
+            final String selection = KEY_PROJECT_ID + "=?";
+            final String[] selectionArgs = {Long.toString(projectNameId)};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+            final int idxName = cursor.getColumnIndex(KEY_NAME);
+            final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
             while (cursor.moveToNext()) {
-                list.add(cursor.getString(idxValue));
+                long id = cursor.getLong(idxRowId);
+                String name = cursor.getString(idxName);
+                boolean checked = cursor.getInt(idxChecked) != 0 ? true : false;
+                list.add(new DataEquipment(id, name, projectNameId, checked));
             }
             cursor.close();
         } catch (Exception ex) {
             Timber.e(ex);
         }
         return list;
+    }
+
+    public List<DataEquipment> query() {
+        ArrayList<DataEquipment> list = new ArrayList();
+        try {
+            final String[] columns = {KEY_ROWID, KEY_PROJECT_ID, KEY_NAME, KEY_CHECKED};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
+            final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+            final int idxName = cursor.getColumnIndex(KEY_NAME);
+            final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
+            final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+            while (cursor.moveToNext()) {
+                long id = cursor.getLong(idxRowId);
+                String name = cursor.getString(idxName);
+                boolean checked = cursor.getInt(idxChecked) != 0 ? true : false;
+                long projectId = cursor.getLong(idxProjectId);
+                list.add(new DataEquipment(id, name, projectId, checked));
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return list;
+    }
+
+    public void setChecked(DataEquipment item, boolean flag) {
+        item.isChecked = flag;
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            String where = KEY_ROWID + "=?";
+            String[] whereArgs = {Long.toString(item.id)};
+            values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
+            mDb.update(TABLE_NAME, values, where, whereArgs);
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
     }
 }

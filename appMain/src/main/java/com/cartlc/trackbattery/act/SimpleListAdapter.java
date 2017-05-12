@@ -21,19 +21,19 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
         void onSelectedItem(int position, String text);
     }
 
-    class CustomViewHolder extends RecyclerView.ViewHolder {
+    protected class CustomViewHolder extends RecyclerView.ViewHolder {
         TextView simpleText;
 
         public CustomViewHolder(View view) {
             super(view);
-            simpleText = (TextView) view.findViewById(R.id.simple_text);
+            simpleText = (TextView) view.findViewById(R.id.item);
         }
     }
 
-    final Context mContext;
-    OnItemSelectedListener mListener;
-    List<String> mItems;
-    int mSelectedPos;
+    final protected Context mContext;
+    protected OnItemSelectedListener mListener;
+    protected List<String> mItems;
+    protected int mSelectedPos;
 
     public SimpleListAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;

@@ -21,4 +21,7 @@
     <string name="title_equipment_installed">Equipment Installed</string>
     <string name="title_notes">Notes</string>
 
+    <string name="title_error">Error</string>
+    <string name="not_a_number">Not a number: %s</string>
+
 </resources>

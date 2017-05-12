@@ -1,15 +1,18 @@
 package com.cartlc.trackbattery.act;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
@@ -22,7 +25,6 @@ import android.widget.TextView;
 
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.app.TBApplication;
-import com.cartlc.trackbattery.data.DataProjectGroup;
 import com.cartlc.trackbattery.data.DataStates;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableAddress;
@@ -83,7 +85,9 @@ public class MainActivity extends AppCompatActivity {
         STATE,
         CITY,
         STREET,
-        CURRENT_PROJECT;
+        CURRENT_PROJECT,
+        TRUCK_NUMBER,
+        EQUIPMENT;
 
         public static Stage from(int ord) {
             for (Stage s : values()) {
@@ -113,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
     boolean mCurStageEditing = false;
     SimpleListAdapter mSimpleAdapter;
     ProjectListAdapter mProjectAdapter;
+    EquipmentListAdapter mEquipmentAdapter;
     LinearLayoutManager mLayoutManager;
     InputMethodManager mInputMM;
 
@@ -146,8 +151,7 @@ public class MainActivity extends AppCompatActivity {
         mAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                doNext();
             }
         });
         mLayoutManager = new LinearLayoutManager(this);
@@ -162,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mProjectAdapter = new ProjectListAdapter(this);
+        mEquipmentAdapter = new EquipmentListAdapter(this);
         mFirstName.addTextChangedListener(new DetectReturn(mFirstName));
         mLastName.addTextChangedListener(new DetectReturn(mLastName));
         mEntry.addTextChangedListener(new DetectReturn(mEntry));
@@ -193,10 +198,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void save() {
+    boolean save(boolean errOk) {
         if (mCurStage == Stage.LOGIN) {
             PrefHelper.getInstance().setFirstName(mFirstName.getText().toString());
             PrefHelper.getInstance().setLastName(mLastName.getText().toString());
+        } else if (mCurStage == Stage.TRUCK_NUMBER) {
+            String value = mEntry.getText().toString();
+            if (TextUtils.isDigitsOnly(value)) {
+                PrefHelper.getInstance().setTruckNumber(Long.parseLong(value));
+            } else {
+                if (errOk) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle(R.string.title_error);
+                    builder.setMessage(getString(R.string.not_a_number, value));
+                    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.create().show();
+                }
+                return false;
+            }
         } else if (mCurStageEditing) {
             if (mCurStage == Stage.CITY) {
                 PrefHelper.getInstance().setCity(mEntry.getText().toString());
@@ -205,16 +229,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         mCurStageEditing = false;
+        return true;
     }
 
     void doNext() {
-        save();
-        mCurStage = Stage.from(mCurStage.ordinal() + 1);
-        setStage();
+        if (save(true)) {
+            mCurStage = Stage.from(mCurStage.ordinal() + 1);
+            setStage();
+        }
     }
 
     void doPrev() {
-        save();
+        save(false);
         mCurStage = Stage.from(mCurStage.ordinal() - 1);
         setStage();
     }
@@ -232,6 +258,7 @@ public class MainActivity extends AppCompatActivity {
         mNext.setVisibility(View.INVISIBLE);
         mPrev.setVisibility(View.INVISIBLE);
         mNew.setVisibility(View.INVISIBLE);
+        mEntry.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 
         switch (mCurStage) {
             case LOGIN:
@@ -323,7 +350,36 @@ public class MainActivity extends AppCompatActivity {
                     mProjectAdapter.onDataChanged();
                 }
                 break;
+            case TRUCK_NUMBER:
+                mNext.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
+                mFrameNewEntry.setVisibility(View.VISIBLE);
+                mTitle.setText(R.string.title_truck_number);
+                mEntry.setHint(R.string.title_truck_number);
+                mEntry.setText(getTruckNumber());
+                mEntry.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                break;
+            case EQUIPMENT:
+                if (mCurStageEditing) {
+
+                } else {
+                    mNext.setVisibility(View.VISIBLE);
+                    mPrev.setVisibility(View.VISIBLE);
+                    mNew.setVisibility(View.VISIBLE);
+                    mTitle.setText(R.string.title_equipment_installed);
+                    mRecyclerView.setAdapter(mEquipmentAdapter);
+                    mEquipmentAdapter.onDataChanged();
+                }
+                break;
         }
+    }
+
+    String getTruckNumber() {
+        long id = PrefHelper.getInstance().getTruckNumber();
+        if (id == 0) {
+            return "";
+        }
+        return Long.toString(id);
     }
 
     void setList(int textId, String key, List<String> list) {

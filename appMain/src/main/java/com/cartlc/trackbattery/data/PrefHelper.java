@@ -32,7 +32,7 @@ public class PrefHelper extends PrefHelperBase {
     static final String KEY_CURRENT_PROJECT_GROUP_ID = "current_project_group_id";
     static final String KEY_FIRST_NAME = "first_name";
     static final String KEY_LAST_NAME = "last_name";
-    static final String KEY_LAST_TRUCK_ID = "last_truck_id";
+    static final String KEY_TRUCK_NUMBER = "truck_number";
     static final String KEY_LAST_EQUIPMENT_COLLECTION_ID = "last_equipment_collection_id";
     static final String KEY_LAST_NOTES_ID = "last_notes_id";
     static final String KEY_LAST_PICTURE_COLLECTION_ID = "last_picture_collection_id";
@@ -107,6 +107,14 @@ public class PrefHelper extends PrefHelperBase {
         return getString(KEY_LAST_NAME, null);
     }
 
+    public long getTruckNumber() {
+        return getLong(KEY_TRUCK_NUMBER, 0);
+    }
+
+    public void setTruckNumber(long id) {
+        setLong(KEY_TRUCK_NUMBER, id);
+    }
+
     public long genNextEquipmentCollectionId() {
         long nextId = getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L);
         setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, nextId + 1);
@@ -133,9 +141,13 @@ public class PrefHelper extends PrefHelperBase {
         return list;
     }
 
-    public void setupInit() {
+    public DataProjectGroup getCurrentProjectGroup() {
         long projectGroupId = getCurrentProjectGroupId();
-        DataProjectGroup projectGroup = TableProjectGroups.getInstance().query(projectGroupId);
+        return TableProjectGroups.getInstance().query(projectGroupId);
+    }
+
+    public void setupInit() {
+        DataProjectGroup projectGroup = getCurrentProjectGroup();
         if (projectGroup != null) {
             setProject(projectGroup.getProjectName());
             DataAddress address = projectGroup.getAddress();
