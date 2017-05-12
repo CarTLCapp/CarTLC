@@ -43,7 +43,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_simple, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_equipment, parent, false);
         return new CustomViewHolder(view);
     }
 
@@ -68,17 +68,6 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
     public void onDataChanged() {
         DataProjectGroup curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
         mItems = TableEquipment.getInstance().query(curGroup.projectNameId);
-        Log.d("MYDEBUG", "GOT " + mItems.size() + ", COUNT=" + TableEquipment.getInstance().count());
-
-        if (mItems.size() == 0) {
-            List<DataEquipment> all = TableEquipment.getInstance().query();
-            if (all.size() == 0) {
-                Log.d("MYDEBUG", "ALL WAS ZERO");
-            }
-            for (DataEquipment item : all) {
-                Log.d("MYDEBUG", item.toString());
-            }
-        }
         notifyDataSetChanged();
     }
 

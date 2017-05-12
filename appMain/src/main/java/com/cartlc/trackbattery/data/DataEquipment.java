@@ -22,12 +22,6 @@ public class DataEquipment {
     public DataEquipment(String projectName, String name) {
         this.name = name;
         this.projectId = TableProjects.getInstance().query(projectName);
-        if (projectId < 0) {
-            Log.d("MYDEBUG", "ProjectId=" + projectId + " from " + projectName);
-            for (String n : TableProjects.getInstance().query()) {
-                Log.d("MYDEBUG", "NAME=" + n);
-            }
-        }
     }
 
     public String toString()

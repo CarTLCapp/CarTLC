@@ -369,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
                     mTitle.setText(R.string.title_equipment_installed);
                     mRecyclerView.setAdapter(mEquipmentAdapter);
                     mEquipmentAdapter.onDataChanged();
+                    mListContainer.setVisibility(View.VISIBLE);
                 }
                 break;
         }

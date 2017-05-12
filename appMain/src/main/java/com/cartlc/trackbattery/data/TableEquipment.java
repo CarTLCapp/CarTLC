@@ -93,7 +93,6 @@ public class TableEquipment {
     }
 
     public void add(List<DataEquipment> list) {
-        Log.d("MYDEBUG", "ADDING " + list.size());
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
