@@ -10,24 +10,29 @@
         style="@style/ProjectNameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@color/project_normal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/project_address"
+        style="@style/ProjectAddressText"
+        android:gravity="left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:background="@color/address_normal"
+        app:layout_constraintLeft_toRightOf="@id/project_name"
+        app:layout_constraintTop_toTopOf="@id/project_name"
+        app:layout_constraintBottom_toBottomOf="@id/project_name"/>
 
     <TextView
         android:id="@+id/project_notes"
         style="@style/ProjectNotesText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="20dp"
-        app:layout_constraintLeft_toRightOf="@id/project_name"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/project_address"
-        style="@style/ProjectAddressText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         app:layout_constraintLeft_toLeftOf="parent"

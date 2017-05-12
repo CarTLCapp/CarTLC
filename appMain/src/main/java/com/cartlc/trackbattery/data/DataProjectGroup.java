@@ -1,7 +1,6 @@
 package com.cartlc.trackbattery.data;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import timber.log.Timber;
 
@@ -64,7 +63,7 @@ public class DataProjectGroup implements Comparable<DataProjectGroup> {
         sbuf.append(addressId);
         if (getAddress() != null) {
             sbuf.append(" [");
-            sbuf.append(getAddress().getLine());
+            sbuf.append(getAddress().getBlock());
             sbuf.append("]");
         }
         return sbuf.toString();

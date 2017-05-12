@@ -17,12 +17,12 @@ public class DataAddress {
         this.state = state;
     }
 
-    public String getLine() {
+    public String getBlock() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(company);
-        sbuf.append(", ");
+        sbuf.append("\n");
         sbuf.append(street);
-        sbuf.append(", ");
+        sbuf.append(",\n");
         sbuf.append(city);
         sbuf.append(", ");
         sbuf.append(state);

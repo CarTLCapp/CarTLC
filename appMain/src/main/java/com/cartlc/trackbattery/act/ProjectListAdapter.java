@@ -2,7 +2,6 @@ package com.cartlc.trackbattery.act;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,19 +58,23 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         int count = TableEntries.getInstance().count(projectGroup.projectId);
         if (count > 0) {
             holder.mProjectNotes.setText(Integer.toString(count));
+            holder.mProjectNotes.setVisibility(View.VISIBLE);
         } else {
             holder.mProjectNotes.setText("");
+            holder.mProjectNotes.setVisibility(View.GONE);
         }
         DataAddress address = projectGroup.getAddress();
         if (address == null) {
             holder.mProjectAddress.setText(null);
         } else {
-            holder.mProjectAddress.setText(address.getLine());
+            holder.mProjectAddress.setText(address.getBlock());
         }
         if (projectGroup.projectId == mCurProjectGroupId) {
-            holder.mProjectName.setBackgroundResource(R.color.highlight_project);
+            holder.mProjectName.setBackgroundResource(R.color.project_highlight);
+            holder.mProjectAddress.setBackgroundResource(R.color.address_highlight);
         } else {
-            holder.mProjectName.setBackgroundResource(android.R.color.transparent);
+            holder.mProjectName.setBackgroundResource(R.color.project_normal);
+            holder.mProjectAddress.setBackgroundResource(R.color.address_normal);
         }
     }
 
