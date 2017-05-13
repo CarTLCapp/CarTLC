@@ -78,7 +78,8 @@ public class MainActivity extends AppCompatActivity {
         CURRENT_PROJECT,
         TRUCK_NUMBER,
         EQUIPMENT,
-        NOTES;
+        NOTES,
+        CONFIRM;
 
         public static Stage from(int ord) {
             for (Stage s : values()) {
@@ -229,8 +230,10 @@ public class MainActivity extends AppCompatActivity {
                 PrefHelper.getInstance().setStreet(mEntrySimple.getText().toString());
             } else if (mCurStage == Stage.EQUIPMENT) {
                 String name = mEntrySimple.getText().toString();
-                DataProjectGroup group = PrefHelper.getInstance().getCurrentProjectGroup();
-                TableEquipment.getInstance().addLocal(name, group.projectNameId);
+                if (!TextUtils.isEmpty(name)) {
+                    DataProjectGroup group = PrefHelper.getInstance().getCurrentProjectGroup();
+                    TableEquipment.getInstance().addLocal(name, group.projectNameId);
+                }
             }
         } else if (mCurStage == Stage.NOTES) {
             String value = mEntryNotes.getText().toString();
@@ -265,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
         mListContainer.setVisibility(View.GONE);
         mAdd.setVisibility(View.GONE);
         mNext.setVisibility(View.INVISIBLE);
+        mNext.setText(R.string.btn_next);
         mPrev.setVisibility(View.INVISIBLE);
         mNew.setVisibility(View.INVISIBLE);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
@@ -374,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
+                    mEntryFrame.setVisibility(View.VISIBLE);
                     mTitle.setText(R.string.title_equipment);
                     mEntrySimple.setHint(R.string.title_equipment);
                     mEntrySimple.setText("");
@@ -391,6 +396,11 @@ public class MainActivity extends AppCompatActivity {
                 mNotesFrame.setVisibility(View.VISIBLE);
                 mTitle.setText(R.string.title_notes);
                 mEntryNotes.setText(PrefHelper.getInstance().getNotes());
+                break;
+            case CONFIRM:
+                mNext.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
+                mNext.setText(R.string.btn_confirm);
                 break;
         }
     }

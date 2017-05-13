@@ -6,6 +6,7 @@
     <string name="btn_next">Next</string>
     <string name="btn_new">New</string>
     <string name="btn_new_project">New Project</string>
+    <string name="btn_confirm">Confirm</string>
 
     <string name="entry_hint_last_name">Last Name</string>
     <string name="entry_hint_first_name">First Name</string>
