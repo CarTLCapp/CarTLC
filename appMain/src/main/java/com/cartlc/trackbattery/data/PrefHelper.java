@@ -2,7 +2,6 @@ package com.cartlc.trackbattery.data;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,15 +27,11 @@ public class PrefHelper extends PrefHelperBase {
     static public final String KEY_STREET = "street";
     static public final String KEY_STATE = "state";
     static public final String KEY_CITY = "city";
-    static final String KEY_CURRENT_ADDRESS_ID = "current_address_id";
     static final String KEY_CURRENT_PROJECT_GROUP_ID = "current_project_group_id";
     static final String KEY_FIRST_NAME = "first_name";
     static final String KEY_LAST_NAME = "last_name";
     static final String KEY_TRUCK_NUMBER = "truck_number";
-    static final String KEY_LAST_EQUIPMENT_COLLECTION_ID = "last_equipment_collection_id";
-    static final String KEY_LAST_NOTES_ID = "last_notes_id";
-    static final String KEY_LAST_PICTURE_COLLECTION_ID = "last_picture_collection_id";
-    static final String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
+    static final String KEY_NOTES = "notes";
 
     PrefHelper(Context ctx) {
         super(ctx);
@@ -115,10 +110,12 @@ public class PrefHelper extends PrefHelperBase {
         setLong(KEY_TRUCK_NUMBER, id);
     }
 
-    public long genNextEquipmentCollectionId() {
-        long nextId = getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L);
-        setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, nextId + 1);
-        return nextId;
+    public String getNotes() {
+        return getString(KEY_NOTES, "");
+    }
+
+    public void setNotes(String notes) {
+        setString(KEY_NOTES, notes);
     }
 
     public List<String> addState(List<String> list) {
@@ -167,6 +164,8 @@ public class PrefHelper extends PrefHelperBase {
         setStreet(null);
         setProject(null);
         setCurrentProjectGroupId(-1L);
+        setNotes(null);
+        setTruckNumber(0);
     }
 
     public boolean hasCurProject() {

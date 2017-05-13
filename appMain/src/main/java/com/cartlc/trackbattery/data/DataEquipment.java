@@ -11,12 +11,14 @@ public class DataEquipment {
     public final String name;
     public final long projectId;
     public boolean isChecked;
+    public boolean isLocal;
 
-    public DataEquipment(long id, String name, long projectId, boolean isChecked) {
+    public DataEquipment(long id, String name, long projectId, boolean isChecked, boolean isLocal) {
         this.id = id;
         this.name = name;
         this.projectId = projectId;
         this.isChecked = isChecked;
+        this.isLocal = isLocal;
     }
 
     public DataEquipment(String projectName, String name) {
@@ -33,6 +35,8 @@ public class DataEquipment {
         sbuf.append(TableProjects.getInstance().query(projectId));
         sbuf.append(", checked=");
         sbuf.append(isChecked);
+        sbuf.append(", local=");
+        sbuf.append(isLocal);
         return sbuf.toString();
     }
 }

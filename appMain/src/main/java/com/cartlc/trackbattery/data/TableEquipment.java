@@ -21,7 +21,8 @@ public class TableEquipment {
     static final String KEY_ROWID = "_id";
     static final String KEY_NAME = "name";
     static final String KEY_PROJECT_ID = "project_id";
-    static final String KEY_CHECKED = "checked";
+    static final String KEY_CHECKED = "is_checked";
+    static final String KEY_LOCAL = "is_local";
 
     static TableEquipment sInstance;
 
@@ -59,7 +60,9 @@ public class TableEquipment {
         sbuf.append(KEY_PROJECT_ID);
         sbuf.append(" long, ");
         sbuf.append(KEY_CHECKED);
-        sbuf.append(" bit default 0)");
+        sbuf.append(" bit, ");
+        sbuf.append(KEY_LOCAL);
+        sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -92,6 +95,24 @@ public class TableEquipment {
         return id;
     }
 
+    public long addLocal(String name, long projectId) {
+        long id = -1L;
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_NAME, name);
+            values.put(KEY_PROJECT_ID, projectId);
+            values.put(KEY_LOCAL, 1);
+            id = mDb.insert(TABLE_NAME, null, values);
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
+        return id;
+    }
+
     public void add(List<DataEquipment> list) {
         mDb.beginTransaction();
         try {
@@ -101,6 +122,7 @@ public class TableEquipment {
                 values.put(KEY_NAME, value.name);
                 values.put(KEY_PROJECT_ID, value.projectId);
                 values.put(KEY_CHECKED, value.isChecked ? 1 : 0);
+                values.put(KEY_LOCAL, value.isLocal ? 1 : 0);
                 value.id = mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -114,7 +136,7 @@ public class TableEquipment {
     public List<DataEquipment> query(long projectNameId) {
         ArrayList<DataEquipment> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_CHECKED};
+            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_CHECKED, KEY_LOCAL};
             final String orderBy = KEY_NAME + " ASC";
             final String selection = KEY_PROJECT_ID + "=?";
             final String[] selectionArgs = {Long.toString(projectNameId)};
@@ -122,11 +144,14 @@ public class TableEquipment {
             final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             final int idxName = cursor.getColumnIndex(KEY_NAME);
             final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
+            final int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
+
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(idxRowId);
                 String name = cursor.getString(idxName);
-                boolean checked = cursor.getInt(idxChecked) != 0 ? true : false;
-                list.add(new DataEquipment(id, name, projectNameId, checked));
+                boolean checked = cursor.getShort(idxChecked) != 0 ? true : false;
+                boolean local = cursor.getShort(idxLocal) != 0 ? true : false;
+                list.add(new DataEquipment(id, name, projectNameId, checked, local));
             }
             cursor.close();
         } catch (Exception ex) {
@@ -138,18 +163,21 @@ public class TableEquipment {
     public List<DataEquipment> query() {
         ArrayList<DataEquipment> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_PROJECT_ID, KEY_NAME, KEY_CHECKED};
+            final String[] columns = {KEY_ROWID, KEY_PROJECT_ID, KEY_NAME, KEY_CHECKED, KEY_LOCAL};
             Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
             final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             final int idxName = cursor.getColumnIndex(KEY_NAME);
             final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
             final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+            final int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
+
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(idxRowId);
                 String name = cursor.getString(idxName);
-                boolean checked = cursor.getInt(idxChecked) != 0 ? true : false;
+                boolean checked = cursor.getShort(idxChecked) != 0 ? true : false;
+                boolean local = cursor.getShort(idxLocal) != 0 ? true : false;
                 long projectId = cursor.getLong(idxProjectId);
-                list.add(new DataEquipment(id, name, projectId, checked));
+                list.add(new DataEquipment(id, name, projectId, checked, local));
             }
             cursor.close();
         } catch (Exception ex) {

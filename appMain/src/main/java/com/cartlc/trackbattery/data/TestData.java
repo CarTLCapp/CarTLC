@@ -1,5 +1,7 @@
 package com.cartlc.trackbattery.data;
 
+import android.util.Log;
+
 import java.util.Arrays;
 
 /**

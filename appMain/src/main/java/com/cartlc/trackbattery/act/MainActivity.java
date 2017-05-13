@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -25,9 +24,11 @@ import android.widget.TextView;
 
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.app.TBApplication;
+import com.cartlc.trackbattery.data.DataProjectGroup;
 import com.cartlc.trackbattery.data.DataStates;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableAddress;
+import com.cartlc.trackbattery.data.TableEquipment;
 import com.cartlc.trackbattery.data.TableProjectGroups;
 import com.cartlc.trackbattery.data.TableProjects;
 
@@ -35,16 +36,13 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
-    class DetectReturn implements TextWatcher {
+    class CountChars implements TextWatcher {
 
-        EditText host;
-        boolean changing;
-
-        DetectReturn(EditText host) {
-            this.host = host;
+        public CountChars() {
         }
 
         @Override
@@ -57,20 +55,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (!changing) {
-                changing = true;
-                String text = s.toString();
-                if (text.contains("\n")) {
-                    s.replace(0, s.length(), text.replaceAll("\\n", ""));
-                    if (host == mFirstName) {
-                        mLastName.requestFocus();
-                    } else {
-                        mInputMM.hideSoftInputFromWindow(host.getWindowToken(), 0);
-                        doNext();
-                    }
-                }
-                changing = false;
-            }
+            int numChars = s.toString().length();
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(numChars);
+            sbuf.append("/");
+            sbuf.append(mEntryMaxLength);
+            mNumChars.setText(sbuf.toString());
         }
     }
 
@@ -87,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
         STREET,
         CURRENT_PROJECT,
         TRUCK_NUMBER,
-        EQUIPMENT;
+        EQUIPMENT,
+        NOTES;
 
         public static Stage from(int ord) {
             for (Stage s : values()) {
@@ -101,9 +92,11 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.first_name) EditText mFirstName;
     @BindView(R.id.last_name) EditText mLastName;
-    @BindView(R.id.entry) EditText mEntry;
-    @BindView(R.id.frame_login) ViewGroup mFrameLogin;
-    @BindView(R.id.frame_new_entry) ViewGroup mFrameNewEntry;
+    @BindView(R.id.entry_simple) EditText mEntrySimple;
+    @BindView(R.id.entry_notes) EditText mEntryNotes;
+    @BindView(R.id.frame_login) ViewGroup mLoginFrame;
+    @BindView(R.id.frame_new_entry) ViewGroup mEntryFrame;
+    @BindView(R.id.frame_new_notes) ViewGroup mNotesFrame;
     @BindView(R.id.list) RecyclerView mRecyclerView;
     @BindView(R.id.list_container) FrameLayout mListContainer;
     @BindView(R.id.next) Button mNext;
@@ -111,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.new_entry) Button mNew;
     @BindView(R.id.setup_title) TextView mTitle;
     @BindView(R.id.fab_add) FloatingActionButton mAdd;
+    @BindView(R.id.number_characters) TextView mNumChars;
 
     Stage mCurStage = Stage.LOGIN;
     String mCurKey = PrefHelper.KEY_STATE;
@@ -120,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
     EquipmentListAdapter mEquipmentAdapter;
     LinearLayoutManager mLayoutManager;
     InputMethodManager mInputMM;
+    CountChars mEntryCountChars;
+    int mEntryMaxLength;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,9 +163,14 @@ public class MainActivity extends AppCompatActivity {
         });
         mProjectAdapter = new ProjectListAdapter(this);
         mEquipmentAdapter = new EquipmentListAdapter(this);
-        mFirstName.addTextChangedListener(new DetectReturn(mFirstName));
-        mLastName.addTextChangedListener(new DetectReturn(mLastName));
-        mEntry.addTextChangedListener(new DetectReturn(mEntry));
+        mEntryCountChars = new CountChars();
+        mEntryNotes.addTextChangedListener(mEntryCountChars);
+
+        try {
+            mEntryMaxLength = getResources().getInteger(R.integer.entry_max_length);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
     }
 
     @Override
@@ -203,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
             PrefHelper.getInstance().setFirstName(mFirstName.getText().toString());
             PrefHelper.getInstance().setLastName(mLastName.getText().toString());
         } else if (mCurStage == Stage.TRUCK_NUMBER) {
-            String value = mEntry.getText().toString();
+            String value = mEntrySimple.getText().toString();
             if (TextUtils.isDigitsOnly(value)) {
                 PrefHelper.getInstance().setTruckNumber(Long.parseLong(value));
             } else {
@@ -223,10 +224,17 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (mCurStageEditing) {
             if (mCurStage == Stage.CITY) {
-                PrefHelper.getInstance().setCity(mEntry.getText().toString());
+                PrefHelper.getInstance().setCity(mEntrySimple.getText().toString());
             } else if (mCurStage == Stage.STREET) {
-                PrefHelper.getInstance().setStreet(mEntry.getText().toString());
+                PrefHelper.getInstance().setStreet(mEntrySimple.getText().toString());
+            } else if (mCurStage == Stage.EQUIPMENT) {
+                String name = mEntrySimple.getText().toString();
+                DataProjectGroup group = PrefHelper.getInstance().getCurrentProjectGroup();
+                TableEquipment.getInstance().addLocal(name, group.projectNameId);
             }
+        } else if (mCurStage == Stage.NOTES) {
+            String value = mEntryNotes.getText().toString();
+            PrefHelper.getInstance().setNotes(value);
         }
         mCurStageEditing = false;
         return true;
@@ -251,18 +259,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void setStage() {
-        mFrameLogin.setVisibility(View.GONE);
-        mFrameNewEntry.setVisibility(View.GONE);
+        mLoginFrame.setVisibility(View.GONE);
+        mEntryFrame.setVisibility(View.GONE);
+        mNotesFrame.setVisibility(View.GONE);
         mListContainer.setVisibility(View.GONE);
         mAdd.setVisibility(View.GONE);
         mNext.setVisibility(View.INVISIBLE);
         mPrev.setVisibility(View.INVISIBLE);
         mNew.setVisibility(View.INVISIBLE);
-        mEntry.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 
         switch (mCurStage) {
             case LOGIN:
-                mFrameLogin.setVisibility(View.VISIBLE);
+                mLoginFrame.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
                 mTitle.setText(R.string.title_login);
                 mFirstName.setText(PrefHelper.getInstance().getFirstName());
@@ -302,9 +311,9 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
-                    mFrameNewEntry.setVisibility(View.VISIBLE);
-                    mEntry.setHint(R.string.title_city);
-                    mEntry.setText("");
+                    mEntryFrame.setVisibility(View.VISIBLE);
+                    mEntrySimple.setHint(R.string.title_city);
+                    mEntrySimple.setText("");
                 } else {
                     mListContainer.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
@@ -318,11 +327,13 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
-                    mFrameNewEntry.setVisibility(View.VISIBLE);
-                    mEntry.setHint(R.string.title_location);
-                    mEntry.setText("");
+                    mEntryFrame.setVisibility(View.VISIBLE);
+                    mEntrySimple.setHint(R.string.title_location);
+                    mEntrySimple.setText("");
                 } else {
-                    mNew.setVisibility(View.VISIBLE);
+                    if (isNewEquipmentOkay()) {
+                        mNew.setVisibility(View.VISIBLE);
+                    }
                     mListContainer.setVisibility(View.VISIBLE);
                     List<String> locations = TableAddress.getInstance().queryStreets(
                             PrefHelper.getInstance().getCompany(),
@@ -353,18 +364,20 @@ public class MainActivity extends AppCompatActivity {
             case TRUCK_NUMBER:
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
-                mFrameNewEntry.setVisibility(View.VISIBLE);
+                mEntryFrame.setVisibility(View.VISIBLE);
                 mTitle.setText(R.string.title_truck_number);
-                mEntry.setHint(R.string.title_truck_number);
-                mEntry.setText(getTruckNumber());
-                mEntry.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                mEntrySimple.setHint(R.string.title_truck_number);
+                mEntrySimple.setText(getTruckNumber());
+                mEntrySimple.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 break;
             case EQUIPMENT:
+                mNext.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
-
+                    mTitle.setText(R.string.title_equipment);
+                    mEntrySimple.setHint(R.string.title_equipment);
+                    mEntrySimple.setText("");
                 } else {
-                    mNext.setVisibility(View.VISIBLE);
-                    mPrev.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
                     mTitle.setText(R.string.title_equipment_installed);
                     mRecyclerView.setAdapter(mEquipmentAdapter);
@@ -372,7 +385,22 @@ public class MainActivity extends AppCompatActivity {
                     mListContainer.setVisibility(View.VISIBLE);
                 }
                 break;
+            case NOTES:
+                mNext.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
+                mNotesFrame.setVisibility(View.VISIBLE);
+                mTitle.setText(R.string.title_notes);
+                mEntryNotes.setText(PrefHelper.getInstance().getNotes());
+                break;
         }
+    }
+
+    boolean isNewEquipmentOkay() {
+        String name = PrefHelper.getInstance().getProject();
+        if (name.equals("Other")) {
+            return true;
+        }
+        return false;
     }
 
     String getTruckNumber() {

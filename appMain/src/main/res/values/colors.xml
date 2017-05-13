@@ -11,5 +11,6 @@
     <color name="highlight_red">#FF4081</color>
     <color name="colorSelected">#fa6397</color>
     <color name="list_background">#5b3737</color>
+    <color name="entry_hint_color">#b1b1b1</color>
 
 </resources>

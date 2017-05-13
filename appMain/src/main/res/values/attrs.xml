@@ -40,4 +40,7 @@
     <style name="EntryText">
         <item name="android:backgroundTint">@color/common_blue</item>
     </style>
+    <style name="EntryNumChars">
+        <item name="android:textColor">@color/entry_hint_color</item>
+    </style>
 </resources>

@@ -9,6 +9,7 @@
 
     <string name="entry_hint_last_name">Last Name</string>
     <string name="entry_hint_first_name">First Name</string>
+    <string name="entry_hint_notes">Add any notes here</string>
 
     <string name="title_login">Login</string>
     <string name="title_project">Project</string>
@@ -19,9 +20,10 @@
     <string name="title_current_project">Current Project</string>
     <string name="title_truck_number">Truck Number</string>
     <string name="title_equipment_installed">Equipment Installed</string>
+    <string name="title_equipment">Equipment</string>
     <string name="title_notes">Notes</string>
-
     <string name="title_error">Error</string>
+
     <string name="not_a_number">Not a number: %s</string>
 
 </resources>
