@@ -24,11 +24,16 @@ import android.widget.TextView;
 
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.app.TBApplication;
+import com.cartlc.trackbattery.data.DataEntry;
+import com.cartlc.trackbattery.data.DataEquipmentCollection;
 import com.cartlc.trackbattery.data.DataProjectGroup;
 import com.cartlc.trackbattery.data.DataStates;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableAddress;
+import com.cartlc.trackbattery.data.TableEntries;
 import com.cartlc.trackbattery.data.TableEquipment;
+import com.cartlc.trackbattery.data.TableEquipmentCollection;
+import com.cartlc.trackbattery.data.TableNotes;
 import com.cartlc.trackbattery.data.TableProjectGroups;
 import com.cartlc.trackbattery.data.TableProjects;
 
@@ -79,7 +84,8 @@ public class MainActivity extends AppCompatActivity {
         TRUCK_NUMBER,
         EQUIPMENT,
         NOTES,
-        CONFIRM;
+        CONFIRM,
+        ADD_ELEMENT;
 
         public static Stage from(int ord) {
             for (Stage s : values()) {
@@ -200,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    boolean save(boolean errOk) {
+    boolean save(boolean isNext) {
         if (mCurStage == Stage.LOGIN) {
             PrefHelper.getInstance().setFirstName(mFirstName.getText().toString());
             PrefHelper.getInstance().setLastName(mLastName.getText().toString());
@@ -209,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
             if (TextUtils.isDigitsOnly(value)) {
                 PrefHelper.getInstance().setTruckNumber(Long.parseLong(value));
             } else {
-                if (errOk) {
+                if (isNext) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle(R.string.title_error);
                     builder.setMessage(getString(R.string.not_a_number, value));
@@ -238,6 +244,11 @@ public class MainActivity extends AppCompatActivity {
         } else if (mCurStage == Stage.NOTES) {
             String value = mEntryNotes.getText().toString();
             PrefHelper.getInstance().setNotes(value);
+
+            if (isNext) {
+                long id = TableNotes.getInstance().add(value);
+                PrefHelper.getInstance().setLastNotesId(id);
+            }
         }
         mCurStageEditing = false;
         return true;
@@ -401,6 +412,12 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setText(R.string.btn_confirm);
+                break;
+            case ADD_ELEMENT:
+                DataEntry entry = PrefHelper.getInstance().createEntry();
+                TableEntries.getInstance().add(entry);
+                mCurStage = Stage.CURRENT_PROJECT;
+                setStage();
                 break;
         }
     }

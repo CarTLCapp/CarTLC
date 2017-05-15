@@ -140,6 +140,7 @@ public class TableEquipment {
             final String orderBy = KEY_NAME + " ASC";
             final String selection = KEY_PROJECT_ID + "=?";
             final String[] selectionArgs = {Long.toString(projectNameId)};
+
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
             final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             final int idxName = cursor.getColumnIndex(KEY_NAME);
@@ -152,6 +153,32 @@ public class TableEquipment {
                 boolean checked = cursor.getShort(idxChecked) != 0 ? true : false;
                 boolean local = cursor.getShort(idxLocal) != 0 ? true : false;
                 list.add(new DataEquipment(id, name, projectNameId, checked, local));
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return list;
+    }
+
+    public List<Long> queryChecked(long projectNameId) {
+        ArrayList<Long> list = new ArrayList();
+        try {
+            final String[] columns = {KEY_ROWID};
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(KEY_PROJECT_ID);
+            sbuf.append("=?");
+            sbuf.append(" AND ");
+            sbuf.append(KEY_CHECKED);
+            sbuf.append("=1");
+            final String selection = sbuf.toString();
+            final String[] selectionArgs = {Long.toString(projectNameId)};
+
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+
+            while (cursor.moveToNext()) {
+                list.add(cursor.getLong(idxRowId));
             }
             cursor.close();
         } catch (Exception ex) {

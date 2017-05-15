@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.List;
+
 import timber.log.Timber;
 
 /**
@@ -56,7 +58,8 @@ public class TableEquipmentCollection {
         mDb.execSQL(sbuf.toString());
     }
 
-    public void add(DataEquipmentCollection collection) {
+    public long add(DataEquipmentCollection collection) {
+        long id = -1L;
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
@@ -64,7 +67,7 @@ public class TableEquipmentCollection {
                 values.clear();
                 values.put(KEY_COLLECTION_ID, collection.id);
                 values.put(KEY_EQUIPMENT_ID, equipmentId);
-                mDb.insert(TABLE_NAME, null, values);
+                id = mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -72,6 +75,7 @@ public class TableEquipmentCollection {
         } finally {
             mDb.endTransaction();
         }
+        return id;
     }
 
     public DataEquipmentCollection query(long id) {

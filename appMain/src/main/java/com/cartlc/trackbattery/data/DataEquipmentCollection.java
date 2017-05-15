@@ -11,13 +11,9 @@ public class DataEquipmentCollection {
     public final long id;
     public List<Long> equipmentList = new ArrayList();
 
-    public DataEquipmentCollection() {
+    public DataEquipmentCollection(long projectId) {
         id = PrefHelper.getInstance().genNextEquipmentCollectionId();
-        equipmentList = new ArrayList();
-    }
-
-    public DataEquipmentCollection(long collectionId) {
-        this.id = collectionId;
+        equipmentList = TableEquipment.getInstance().queryChecked(projectId);
     }
 
     public void add(long equipmentId) {

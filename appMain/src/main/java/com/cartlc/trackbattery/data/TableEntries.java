@@ -103,4 +103,9 @@ public class TableEntries {
         }
         return count;
     }
+
+    public void add(DataEntry entry)
+    {
+
+    }
 }

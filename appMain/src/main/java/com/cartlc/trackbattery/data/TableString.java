@@ -65,6 +65,22 @@ public class TableString {
         }
     }
 
+    public long add(String item) {
+        long id = -1L;
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_VALUE, item);
+            id = mDb.insert(tableName, null, values);
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
+        return id;
+    }
+
     public int count() {
         int count = 0;
         try {

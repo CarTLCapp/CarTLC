@@ -32,6 +32,9 @@ public class PrefHelper extends PrefHelperBase {
     static final String KEY_LAST_NAME = "last_name";
     static final String KEY_TRUCK_NUMBER = "truck_number";
     static final String KEY_NOTES = "notes";
+    static final String KEY_LAST_NOTES_ID = "notes_id";
+    static final String KEY_EQUIPMENT_COLLECTION_ID = "equipment_collection_id";
+    static final String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
 
     PrefHelper(Context ctx) {
         super(ctx);
@@ -72,6 +75,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public String getProject() {
         return getString(KEY_PROJECT, null);
+    }
+
+    public Long getProjectId() {
+        long projectId = TableProjects.getInstance().query(getProject());
+        if (projectId >= 0) {
+            return projectId;
+        }
+        return null;
     }
 
     public void setProject(String value) {
@@ -116,6 +127,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setNotes(String notes) {
         setString(KEY_NOTES, notes);
+    }
+
+    public long getLastNotesId() {
+        return getLong(KEY_LAST_NOTES_ID, -1L);
+    }
+
+    public void setLastNotesId(long id) {
+        setLong(KEY_LAST_NOTES_ID, id);
     }
 
     public List<String> addState(List<String> list) {
@@ -164,6 +183,7 @@ public class PrefHelper extends PrefHelperBase {
         setStreet(null);
         setProject(null);
         setCurrentProjectGroupId(-1L);
+        setLastNotesId(-1L);
         setNotes(null);
         setTruckNumber(0);
     }
@@ -218,4 +238,31 @@ public class PrefHelper extends PrefHelperBase {
         setCity(address.city);
         setState(address.state);
     }
+
+    public long genNextEquipmentCollectionId() {
+        long nextId = getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L);
+        setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, nextId + 1);
+        return nextId;
+    }
+
+    public DataEntry createEntry() {
+        long projectGroupId = getCurrentProjectGroupId();
+        if (projectGroupId < 0) {
+            return null;
+        }
+        DataProjectGroup projectGroup = TableProjectGroups.getInstance().query(projectGroupId);
+        if (projectGroup == null) {
+            return null;
+        }
+        DataEntry entry = new DataEntry();
+        entry.projectNameId = projectGroup.projectNameId;
+        DataEquipmentCollection collection = new DataEquipmentCollection(entry.projectNameId);
+        entry.equipmentCollectionId = TableEquipmentCollection.getInstance().add(collection);
+        entry.addressId = projectGroup.addressId;
+        entry.truckNumber = getTruckNumber();
+        entry.notesId = getLastNotesId();
+        entry.date = System.currentTimeMillis();
+        return entry;
+    }
+
 }
