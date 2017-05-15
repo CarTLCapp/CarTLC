@@ -227,10 +227,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    String getEditText(EditText text) {
+        return text.getText().toString().trim();
+    }
+
     boolean save(boolean isNext) {
         if (mCurStage == Stage.LOGIN) {
-            PrefHelper.getInstance().setFirstName(mFirstName.getText().toString());
-            PrefHelper.getInstance().setLastName(mLastName.getText().toString());
+            PrefHelper.getInstance().setFirstName(getEditText(mFirstName));
+            PrefHelper.getInstance().setLastName(getEditText(mLastName));
         } else if (mCurStage == Stage.TRUCK_NUMBER) {
             String value = mEntrySimple.getText().toString();
             if (TextUtils.isDigitsOnly(value)) {
@@ -252,18 +256,18 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (mCurStageEditing) {
             if (mCurStage == Stage.CITY) {
-                PrefHelper.getInstance().setCity(mEntrySimple.getText().toString());
+                PrefHelper.getInstance().setCity(getEditText(mEntrySimple));
             } else if (mCurStage == Stage.STREET) {
-                PrefHelper.getInstance().setStreet(mEntrySimple.getText().toString());
+                PrefHelper.getInstance().setStreet(getEditText(mEntrySimple));
             } else if (mCurStage == Stage.EQUIPMENT) {
-                String name = mEntrySimple.getText().toString();
+                String name = getEditText(mEntrySimple);
                 if (!TextUtils.isEmpty(name)) {
                     DataProjectGroup group = PrefHelper.getInstance().getCurrentProjectGroup();
                     TableEquipment.getInstance().addLocal(name, group.projectNameId);
                 }
             }
         } else if (mCurStage == Stage.NOTES) {
-            String value = mEntryNotes.getText().toString();
+            String value = getEditText(mEntryNotes);
             PrefHelper.getInstance().setNotes(value);
 
             if (isNext) {
@@ -309,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
         mNext.setText(R.string.btn_next);
         mPrev.setVisibility(View.INVISIBLE);
         mNew.setVisibility(View.INVISIBLE);
+        mNew.setText(R.string.btn_add);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         mConfirmationFrame.setVisibility(View.GONE);
 
@@ -398,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
                     mNew.setVisibility(View.VISIBLE);
                     mAdd.setVisibility(View.VISIBLE);
                     mCurKey = null;
+                    mNew.setText(R.string.btn_new);
                     mTitle.setText(R.string.title_current_project);
                     mRecyclerView.setAdapter(mProjectAdapter);
                     mProjectAdapter.onDataChanged();
@@ -446,6 +452,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case ADD_ELEMENT:
                 TableEntries.getInstance().add(mCurEntry);
+                PrefHelper.getInstance().clearLastEntry();
                 mCurStage = Stage.CURRENT_PROJECT;
                 setStage();
                 break;

@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:text="@string/btn_new"
+            android:text="@string/btn_add"
             android:textAllCaps="false"/>
 
         <Button
@@ -229,7 +229,7 @@
                     style="@style/ConfirmTitleText"/>
 
                 <TextView
-                    android:id="@+id/project_name"
+                    android:id="@+id/project_name_value"
                     style="@style/ConfirmText"
                     android:paddingLeft="@dimen/confirm_gap_left"
                     android:layout_gravity="fill"
@@ -244,7 +244,7 @@
                     style="@style/ConfirmTitleText"/>
 
                 <TextView
-                    android:id="@+id/truck_number"
+                    android:id="@+id/truck_number_value"
                     style="@style/ConfirmText"
                     android:paddingLeft="@dimen/confirm_gap_left"
                     android:layout_marginTop="@dimen/confirm_gap_height"
@@ -260,7 +260,7 @@
                     style="@style/ConfirmTitleText"/>
 
                 <TextView
-                    android:id="@+id/project_address"
+                    android:id="@+id/project_address_value"
                     style="@style/ConfirmAddressText"
                     android:paddingLeft="@dimen/confirm_gap_left"
                     android:layout_marginTop="@dimen/confirm_gap_height"
@@ -269,6 +269,7 @@
                     android:layout_height="wrap_content"/>
 
                 <TextView
+                    android:id="@+id/project_notes_label"
                     android:layout_marginTop="@dimen/confirm_gap_height"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -276,7 +277,7 @@
                     style="@style/ConfirmTitleText"/>
 
                 <TextView
-                    android:id="@+id/project_notes"
+                    android:id="@+id/project_notes_value"
                     style="@style/ConfirmText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -298,7 +299,9 @@
                 android:id="@+id/equipment_grid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="2dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
                 android:background="@drawable/background_shadow"
                 android:elevation="3dp"
                 app:layout_constraintTop_toBottomOf="@id/grid_confirmation"

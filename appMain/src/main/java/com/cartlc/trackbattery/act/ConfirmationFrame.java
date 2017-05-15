@@ -10,6 +10,9 @@ import android.widget.TextView;
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.data.DataEntry;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by dug on 5/15/17.
  */
@@ -17,21 +20,22 @@ import com.cartlc.trackbattery.data.DataEntry;
 public class ConfirmationFrame {
 
     final FrameLayout mTop;
-    final TextView mProjectName;
-    final TextView mTruckNumber;
-    final TextView mAddress;
-    final TextView mNotes;
-    final RecyclerView mEquipmentGrid;
     final SimpleListAdapter mSimpleAdapter;
     final GridLayoutManager mGridLayout;
 
+    @BindView(R.id.project_name_value) TextView mProjectNameValue;
+    @BindView(R.id.truck_number_value) TextView mTruckNumberValue;
+    @BindView(R.id.project_address_value) TextView mAddressValue;
+    @BindView(R.id.project_notes_value) TextView mNotesValue;
+    @BindView(R.id.equipment_grid) RecyclerView mEquipmentGrid;
+    @BindView(R.id.project_notes_label) TextView mNotesLabel;
+
+
     public ConfirmationFrame(FrameLayout top) {
         mTop = top;
-        mProjectName = (TextView) top.findViewById(R.id.project_name);
-        mTruckNumber = (TextView) top.findViewById(R.id.truck_number);
-        mAddress = (TextView) top.findViewById(R.id.project_address);
-        mNotes = (TextView) top.findViewById(R.id.project_notes);
-        mEquipmentGrid = (RecyclerView) top.findViewById(R.id.equipment_grid);
+
+        ButterKnife.bind(this, top);
+
         mSimpleAdapter = new SimpleListAdapter(mTop.getContext(), R.layout.entry_item_confirm);
         mEquipmentGrid.setAdapter(mSimpleAdapter);
         mGridLayout = new GridLayoutManager(mTop.getContext(), 2);
@@ -43,26 +47,28 @@ public class ConfirmationFrame {
     }
 
     public void fill(DataEntry entry) {
-        mProjectName.setText(entry.getProjectName());
+        mProjectNameValue.setText(entry.getProjectName());
         String address = entry.getAddressText();
         if (TextUtils.isEmpty(address)) {
-            mAddress.setVisibility(View.GONE);
+            mAddressValue.setVisibility(View.GONE);
         } else {
-            mAddress.setVisibility(View.VISIBLE);
-            mAddress.setText(address);
+            mAddressValue.setVisibility(View.VISIBLE);
+            mAddressValue.setText(address);
         }
         String notes = entry.getNotes();
         if (TextUtils.isEmpty(notes)) {
-            mNotes.setVisibility(View.GONE);
+            mNotesValue.setVisibility(View.GONE);
+            mNotesLabel.setVisibility(View.GONE);
         } else {
-            mNotes.setVisibility(View.VISIBLE);
-            mNotes.setText(notes);
+            mNotesValue.setVisibility(View.VISIBLE);
+            mNotesLabel.setVisibility(View.VISIBLE);
+            mNotesValue.setText(notes);
         }
         if (entry.truckNumber == 0) {
-            mTruckNumber.setVisibility(View.GONE);
+            mTruckNumberValue.setVisibility(View.GONE);
         } else {
-            mTruckNumber.setVisibility(View.VISIBLE);
-            mTruckNumber.setText(Long.toString(entry.truckNumber));
+            mTruckNumberValue.setVisibility(View.VISIBLE);
+            mTruckNumberValue.setText(Long.toString(entry.truckNumber));
         }
         mSimpleAdapter.setList(entry.getEquipmentNames());
     }

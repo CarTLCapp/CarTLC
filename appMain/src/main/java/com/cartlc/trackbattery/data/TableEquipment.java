@@ -256,4 +256,18 @@ public class TableEquipment {
             mDb.endTransaction();
         }
     }
+
+    public void clearChecked() {
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_CHECKED, 0);
+            mDb.update(TABLE_NAME, values, null, null);
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
+    }
 }

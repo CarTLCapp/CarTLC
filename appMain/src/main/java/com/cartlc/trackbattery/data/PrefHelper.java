@@ -189,6 +189,13 @@ public class PrefHelper extends PrefHelperBase {
         setTruckNumber(0);
     }
 
+    public void clearLastEntry() {
+        setTruckNumber(0);
+        setNotes(null);
+        setLastNotesId(-1L);
+        TableEquipment.getInstance().clearChecked();
+    }
+
     public boolean hasCurProject() {
         long projectGroupId = getCurrentProjectGroupId();
         if (projectGroupId < 0) {
