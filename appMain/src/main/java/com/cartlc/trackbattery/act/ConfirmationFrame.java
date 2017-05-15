@@ -33,7 +33,7 @@ public class ConfirmationFrame {
         mAddress = (TextView) top.findViewById(R.id.project_address);
         mNotes = (TextView) top.findViewById(R.id.project_notes);
         mEquipmentGrid = (RecyclerView) top.findViewById(R.id.equipment_grid);
-        mSimpleAdapter = new SimpleListAdapter(mTop.getContext());
+        mSimpleAdapter = new SimpleListAdapter(mTop.getContext(), R.layout.entry_item_confirm);
         mEquipmentGrid.setAdapter(mSimpleAdapter);
         mGridLayout = new GridLayoutManager(mTop.getContext(), 2);
         mEquipmentGrid.setLayoutManager(mGridLayout);
