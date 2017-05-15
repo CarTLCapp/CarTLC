@@ -1,4 +1,4 @@
-package com.cartlc.trackbattery.act;
+package com.cartlc.tracker.act;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cartlc.trackbattery.R;
+import com.cartlc.tracker.R;
 
 import java.util.List;
 

@@ -1,6 +1,4 @@
-package com.cartlc.trackbattery.data;
-
-import android.util.Log;
+package com.cartlc.tracker.data;
 
 /**
  * Created by dug on 5/12/17.

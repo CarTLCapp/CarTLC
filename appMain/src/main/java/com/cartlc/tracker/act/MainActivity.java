@@ -1,12 +1,9 @@
-package com.cartlc.trackbattery.act;
+package com.cartlc.tracker.act;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -27,18 +24,18 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.cartlc.trackbattery.R;
-import com.cartlc.trackbattery.app.TBApplication;
-import com.cartlc.trackbattery.data.DataEntry;
-import com.cartlc.trackbattery.data.DataProjectGroup;
-import com.cartlc.trackbattery.data.DataStates;
-import com.cartlc.trackbattery.data.PrefHelper;
-import com.cartlc.trackbattery.data.TableAddress;
-import com.cartlc.trackbattery.data.TableEntries;
-import com.cartlc.trackbattery.data.TableEquipment;
-import com.cartlc.trackbattery.data.TableNotes;
-import com.cartlc.trackbattery.data.TableProjectGroups;
-import com.cartlc.trackbattery.data.TableProjects;
+import com.cartlc.tracker.R;
+import com.cartlc.tracker.app.TBApplication;
+import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataProjectGroup;
+import com.cartlc.tracker.data.DataStates;
+import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.data.TableAddress;
+import com.cartlc.tracker.data.TableEntries;
+import com.cartlc.tracker.data.TableEquipment;
+import com.cartlc.tracker.data.TableNotes;
+import com.cartlc.tracker.data.TableProjectGroups;
+import com.cartlc.tracker.data.TableProjects;
 
 import java.util.List;
 
@@ -47,6 +44,23 @@ import butterknife.ButterKnife;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
+
+    class DetectReturn implements TextWatcher {
+        public DetectReturn() {
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
+    }
 
     class CountChars implements TextWatcher {
 
@@ -190,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         PrefHelper.getInstance().setupInit();
         computeCurStage();
-        setStage();
+        fillStage();
     }
 
     @Override
@@ -282,28 +296,28 @@ public class MainActivity extends AppCompatActivity {
     void doNext() {
         if (save(true)) {
             mCurStage = Stage.from(mCurStage.ordinal() + 1);
-            setStage();
+            fillStage();
         }
     }
 
     void doPrev() {
         save(false);
         mCurStage = Stage.from(mCurStage.ordinal() - 1);
-        setStage();
+        fillStage();
     }
 
     void doNewEntry() {
         mCurStageEditing = true;
-        setStage();
+        fillStage();
     }
 
     void setStage(Stage stage) {
         save(false);
         mCurStage = stage;
-        setStage();
+        fillStage();
     }
 
-    void setStage() {
+    void fillStage() {
         mLoginFrame.setVisibility(View.GONE);
         mEntryFrame.setVisibility(View.GONE);
         mNotesFrame.setVisibility(View.GONE);
@@ -349,9 +363,14 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     String company = PrefHelper.getInstance().getCompany();
                     List<String> states = TableAddress.getInstance().queryStates(company);
-                    PrefHelper.getInstance().addState(states);
-                    setList(R.string.title_state, PrefHelper.KEY_STATE, states);
-                    mNew.setVisibility(View.VISIBLE);
+                    if (states.size() > 0) {
+                        PrefHelper.getInstance().addState(states);
+                        setList(R.string.title_state, PrefHelper.KEY_STATE, states);
+                        mNew.setVisibility(View.VISIBLE);
+                    } else {
+                        mCurStageEditing = true;
+                        fillStage();
+                    }
                 }
                 break;
             case CITY:
@@ -359,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
                     mEntryFrame.setVisibility(View.VISIBLE);
+                    mTitle.setText(R.string.title_city);
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
@@ -366,27 +386,36 @@ public class MainActivity extends AppCompatActivity {
                     mNew.setVisibility(View.VISIBLE);
                     String state = PrefHelper.getInstance().getState();
                     List<String> cities = TableAddress.getInstance().queryCities(state);
-                    PrefHelper.getInstance().addCity(cities);
-                    setList(R.string.title_city, PrefHelper.KEY_CITY, cities);
+                    if (cities.size() > 0) {
+                        PrefHelper.getInstance().addCity(cities);
+                        setList(R.string.title_city, PrefHelper.KEY_CITY, cities);
+                    } else {
+                        mCurStageEditing = true;
+                        fillStage();
+                    }
                 }
                 break;
             case STREET:
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
+                    mTitle.setText(R.string.title_street);
                     mEntryFrame.setVisibility(View.VISIBLE);
                     mEntrySimple.setHint(R.string.title_street);
                     mEntrySimple.setText("");
                 } else {
-                    if (isNewEquipmentOkay()) {
-                        mNew.setVisibility(View.VISIBLE);
-                    }
+                    mNew.setVisibility(View.VISIBLE);
                     mListContainer.setVisibility(View.VISIBLE);
                     List<String> locations = TableAddress.getInstance().queryStreets(
                             PrefHelper.getInstance().getCompany(),
                             PrefHelper.getInstance().getCity(),
                             PrefHelper.getInstance().getState());
-                    setList(R.string.title_street, PrefHelper.KEY_STREET, locations);
+                    if (locations.size() > 0) {
+                        setList(R.string.title_street, PrefHelper.KEY_STREET, locations);
+                    } else {
+                        mCurStageEditing = true;
+                        fillStage();
+                    }
                 }
                 break;
             case CURRENT_PROJECT:
@@ -397,7 +426,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (!PrefHelper.getInstance().hasCurProject() || TableProjectGroups.getInstance().count() == 0) {
                     computeCurStage();
-                    setStage();
+                    fillStage();
                 } else {
                     mListContainer.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
@@ -418,6 +447,13 @@ public class MainActivity extends AppCompatActivity {
                 mEntrySimple.setText(getTruckNumber());
                 mEntrySimple.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 break;
+            case NOTES:
+                mNext.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
+                mNotesFrame.setVisibility(View.VISIBLE);
+                mTitle.setText(R.string.title_notes);
+                mEntryNotes.setText(PrefHelper.getInstance().getNotes());
+                break;
             case EQUIPMENT:
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
@@ -434,13 +470,6 @@ public class MainActivity extends AppCompatActivity {
                     mListContainer.setVisibility(View.VISIBLE);
                 }
                 break;
-            case NOTES:
-                mNext.setVisibility(View.VISIBLE);
-                mPrev.setVisibility(View.VISIBLE);
-                mNotesFrame.setVisibility(View.VISIBLE);
-                mTitle.setText(R.string.title_notes);
-                mEntryNotes.setText(PrefHelper.getInstance().getNotes());
-                break;
             case CONFIRM:
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
@@ -454,7 +483,7 @@ public class MainActivity extends AppCompatActivity {
                 TableEntries.getInstance().add(mCurEntry);
                 PrefHelper.getInstance().clearLastEntry();
                 mCurStage = Stage.CURRENT_PROJECT;
-                setStage();
+                fillStage();
                 break;
         }
     }

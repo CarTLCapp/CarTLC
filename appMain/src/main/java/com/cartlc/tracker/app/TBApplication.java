@@ -1,12 +1,11 @@
-package com.cartlc.trackbattery.app;
+package com.cartlc.tracker.app;
 
 import android.app.Application;
-import android.util.Log;
 
-import com.cartlc.trackbattery.BuildConfig;
-import com.cartlc.trackbattery.data.DatabaseManager;
-import com.cartlc.trackbattery.data.PrefHelper;
-import com.cartlc.trackbattery.data.TestData;
+import com.cartlc.tracker.BuildConfig;
+import com.cartlc.tracker.data.DatabaseManager;
+import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.data.TestData;
 
 import timber.log.Timber;
 

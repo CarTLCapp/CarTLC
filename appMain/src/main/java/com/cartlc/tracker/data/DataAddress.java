@@ -1,4 +1,4 @@
-package com.cartlc.trackbattery.data;
+package com.cartlc.tracker.data;
 
 /**
  * Created by dug on 5/10/17.

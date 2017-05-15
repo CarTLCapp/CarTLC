@@ -1,4 +1,4 @@
-package com.cartlc.trackbattery.act;
+package com.cartlc.tracker.act;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -8,11 +8,11 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
-import com.cartlc.trackbattery.R;
-import com.cartlc.trackbattery.data.DataEquipment;
-import com.cartlc.trackbattery.data.DataProjectGroup;
-import com.cartlc.trackbattery.data.PrefHelper;
-import com.cartlc.trackbattery.data.TableEquipment;
+import com.cartlc.tracker.R;
+import com.cartlc.tracker.data.DataEquipment;
+import com.cartlc.tracker.data.DataProjectGroup;
+import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.data.TableEquipment;
 
 import java.util.List;
 

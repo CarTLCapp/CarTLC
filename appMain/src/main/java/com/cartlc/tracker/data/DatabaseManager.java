@@ -1,11 +1,8 @@
-package com.cartlc.trackbattery.data;
+package com.cartlc.tracker.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-
-import java.util.List;
 
 import timber.log.Timber;
 

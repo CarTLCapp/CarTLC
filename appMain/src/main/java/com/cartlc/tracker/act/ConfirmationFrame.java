@@ -1,4 +1,4 @@
-package com.cartlc.trackbattery.act;
+package com.cartlc.tracker.act;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.cartlc.trackbattery.R;
-import com.cartlc.trackbattery.data.DataEntry;
+import com.cartlc.tracker.R;
+import com.cartlc.tracker.data.DataEntry;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

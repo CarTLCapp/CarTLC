@@ -1,7 +1,4 @@
-package com.cartlc.trackbattery.data;
-
-import android.provider.ContactsContract;
-import android.util.Log;
+package com.cartlc.tracker.data;
 
 import java.util.ArrayList;
 import java.util.List;

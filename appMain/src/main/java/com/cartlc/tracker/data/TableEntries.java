@@ -1,4 +1,4 @@
-package com.cartlc.trackbattery.data;
+package com.cartlc.tracker.data;
 
 import android.content.ContentValues;
 import android.database.Cursor;

@@ -1,7 +1,6 @@
-package com.cartlc.trackbattery.data;
+package com.cartlc.tracker.data;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import timber.log.Timber;
 

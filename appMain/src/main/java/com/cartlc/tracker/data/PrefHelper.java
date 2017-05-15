@@ -1,8 +1,7 @@
-package com.cartlc.trackbattery.data;
+package com.cartlc.tracker.data;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.Collections;
 import java.util.List;
