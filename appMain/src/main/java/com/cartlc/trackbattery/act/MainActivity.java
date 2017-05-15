@@ -2,8 +2,11 @@ package com.cartlc.trackbattery.act;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -14,6 +17,8 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -188,6 +193,22 @@ public class MainActivity extends AppCompatActivity {
         setStage();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.profile:
+                setStage(Stage.LOGIN);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     void computeCurStage() {
         if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
             mCurStage = Stage.LOGIN;
@@ -272,6 +293,12 @@ public class MainActivity extends AppCompatActivity {
         setStage();
     }
 
+    void setStage(Stage stage) {
+        save(false);
+        mCurStage = stage;
+        setStage();
+    }
+
     void setStage() {
         mLoginFrame.setVisibility(View.GONE);
         mEntryFrame.setVisibility(View.GONE);
@@ -295,7 +322,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case PROJECT:
                 mListContainer.setVisibility(View.VISIBLE);
-                mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 break;

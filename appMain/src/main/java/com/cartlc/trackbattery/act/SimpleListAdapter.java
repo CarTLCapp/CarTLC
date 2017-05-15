@@ -61,7 +61,7 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
 
         if (mSelectedOkay) {
             if (position == mSelectedPos) {
-                holder.itemView.setBackgroundResource(R.color.colorSelected);
+                holder.itemView.setBackgroundResource(R.color.list_item_selected);
             } else {
                 holder.itemView.setBackgroundResource(android.R.color.transparent);
             }
