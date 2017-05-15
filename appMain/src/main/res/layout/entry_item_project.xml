@@ -7,7 +7,7 @@
     <TextView
         android:id="@+id/project_name"
         style="@style/ProjectNameText"
-        android:layout_width="190dp"
+        android:layout_width="@dimen/project_list_width"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
@@ -20,7 +20,7 @@
         android:layout_toRightOf="@id/project_name"
         android:layout_alignTop="@id/project_name"
         android:layout_alignBottom="@id/project_name"
-        android:layout_width="190dp"
+        android:layout_width="@dimen/project_list_width"
         android:layout_height="wrap_content"
         android:layout_marginLeft="2dp"
         android:background="@color/address_normal"

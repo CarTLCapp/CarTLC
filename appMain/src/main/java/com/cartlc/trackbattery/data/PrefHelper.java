@@ -2,6 +2,7 @@ package com.cartlc.trackbattery.data;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.Collections;
 import java.util.List;
@@ -239,10 +240,13 @@ public class PrefHelper extends PrefHelperBase {
         setState(address.state);
     }
 
-    public long genNextEquipmentCollectionId() {
-        long nextId = getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L);
-        setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, nextId + 1);
-        return nextId;
+    public long getNextEquipmentCollectionID() {
+        return getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L);
+    }
+
+    public void incNextEquipmentCollectionID() {
+        setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, getNextEquipmentCollectionID() + 1);
+
     }
 
     public DataEntry createEntry() {
@@ -256,8 +260,8 @@ public class PrefHelper extends PrefHelperBase {
         }
         DataEntry entry = new DataEntry();
         entry.projectNameId = projectGroup.projectNameId;
-        DataEquipmentCollection collection = new DataEquipmentCollection(entry.projectNameId);
-        entry.equipmentCollectionId = TableEquipmentCollection.getInstance().add(collection);
+        entry.equipmentCollection = new DataEquipmentCollection(getNextEquipmentCollectionID(), entry.projectNameId);
+        entry.equipmentCollection.addChecked();
         entry.addressId = projectGroup.addressId;
         entry.truckNumber = getTruckNumber();
         entry.notesId = getLastNotesId();

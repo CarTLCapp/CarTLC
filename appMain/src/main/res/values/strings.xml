@@ -24,6 +24,7 @@
     <string name="title_equipment">Equipment</string>
     <string name="title_notes">Notes</string>
     <string name="title_error">Error</string>
+    <string name="title_confirmation">Confirmation</string>
 
     <string name="not_a_number">Not a number: %s</string>
 

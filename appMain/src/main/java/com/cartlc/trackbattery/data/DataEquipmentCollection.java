@@ -1,5 +1,8 @@
 package com.cartlc.trackbattery.data;
 
+import android.provider.ContactsContract;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,14 +12,54 @@ import java.util.List;
 
 public class DataEquipmentCollection {
     public final long id;
-    public List<Long> equipmentList = new ArrayList();
+    public long projectNameId;
+    public List<Long> equipmentListIds = new ArrayList();
 
-    public DataEquipmentCollection(long projectId) {
-        id = PrefHelper.getInstance().genNextEquipmentCollectionId();
-        equipmentList = TableEquipment.getInstance().queryChecked(projectId);
+    public DataEquipmentCollection(long id, long projectId) {
+        this.id = id;
+        this.projectNameId = projectId;
+    }
+
+    public DataEquipmentCollection(long id) {
+        this.id = id;
+        this.projectNameId = -1L;
     }
 
     public void add(long equipmentId) {
-        equipmentList.add(equipmentId);
+        equipmentListIds.add(equipmentId);
+    }
+
+    public void addChecked() {
+        equipmentListIds = TableEquipment.getInstance().queryChecked(projectNameId);
+    }
+
+    public List<DataEquipment> getEquipment() {
+        ArrayList<DataEquipment> list = new ArrayList();
+        for (long e : equipmentListIds) {
+            list.add(TableEquipment.getInstance().query(e));
+        }
+        return list;
+    }
+
+    public List<String> getEquipmentNames() {
+        List<DataEquipment> equipments = getEquipment();
+        if (equipments != null) {
+            ArrayList<String> list = new ArrayList();
+            for (DataEquipment e : equipments) {
+                list.add(e.name);
+            }
+            return list;
+        }
+        return null;
+    }
+
+    public long getProjectID() {
+        if (projectNameId >= 0) {
+            if (equipmentListIds.size() > 0) {
+                DataEquipment eq = TableEquipment.getInstance().query(equipmentListIds.get(0));
+                projectNameId =  eq.projectId;
+            }
+        }
+        return projectNameId;
     }
 }

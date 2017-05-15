@@ -28,4 +28,16 @@ public class DataAddress {
         sbuf.append(state);
         return sbuf.toString();
     }
+
+    public String getLine() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(company);
+        sbuf.append(", ");
+        sbuf.append(street);
+        sbuf.append(", ");
+        sbuf.append(city);
+        sbuf.append(", ");
+        sbuf.append(state);
+        return sbuf.toString();
+    }
 }

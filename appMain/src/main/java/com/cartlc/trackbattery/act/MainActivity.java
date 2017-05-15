@@ -25,14 +25,12 @@ import android.widget.TextView;
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.app.TBApplication;
 import com.cartlc.trackbattery.data.DataEntry;
-import com.cartlc.trackbattery.data.DataEquipmentCollection;
 import com.cartlc.trackbattery.data.DataProjectGroup;
 import com.cartlc.trackbattery.data.DataStates;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableAddress;
 import com.cartlc.trackbattery.data.TableEntries;
 import com.cartlc.trackbattery.data.TableEquipment;
-import com.cartlc.trackbattery.data.TableEquipmentCollection;
 import com.cartlc.trackbattery.data.TableNotes;
 import com.cartlc.trackbattery.data.TableProjectGroups;
 import com.cartlc.trackbattery.data.TableProjects;
@@ -68,8 +66,6 @@ public class MainActivity extends AppCompatActivity {
             mNumChars.setText(sbuf.toString());
         }
     }
-
-    static final String ACTION_PROJECT = "project";
 
     TBApplication mApp;
 
@@ -112,17 +108,20 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.setup_title) TextView mTitle;
     @BindView(R.id.fab_add) FloatingActionButton mAdd;
     @BindView(R.id.number_characters) TextView mNumChars;
+    @BindView(R.id.frame_confirmation) FrameLayout mConfirmationFrameView;
 
     Stage mCurStage = Stage.LOGIN;
     String mCurKey = PrefHelper.KEY_STATE;
     boolean mCurStageEditing = false;
     SimpleListAdapter mSimpleAdapter;
     ProjectListAdapter mProjectAdapter;
-    EquipmentListAdapter mEquipmentAdapter;
+    EquipmentSelectListAdapter mEquipmentAdapter;
     LinearLayoutManager mLayoutManager;
     InputMethodManager mInputMM;
     CountChars mEntryCountChars;
     int mEntryMaxLength;
+    ConfirmationFrame mConfirmationFrame;
+    DataEntry mCurEntry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mProjectAdapter = new ProjectListAdapter(this);
-        mEquipmentAdapter = new EquipmentListAdapter(this);
+        mEquipmentAdapter = new EquipmentSelectListAdapter(this);
         mEntryCountChars = new CountChars();
         mEntryNotes.addTextChangedListener(mEntryCountChars);
 
@@ -178,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception ex) {
             Timber.e(ex);
         }
+        mConfirmationFrame = new ConfirmationFrame(mConfirmationFrameView);
     }
 
     @Override
@@ -283,6 +283,7 @@ public class MainActivity extends AppCompatActivity {
         mPrev.setVisibility(View.INVISIBLE);
         mNew.setVisibility(View.INVISIBLE);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        mConfirmationFrame.setVisibility(View.GONE);
 
         switch (mCurStage) {
             case LOGIN:
@@ -409,13 +410,16 @@ public class MainActivity extends AppCompatActivity {
                 mEntryNotes.setText(PrefHelper.getInstance().getNotes());
                 break;
             case CONFIRM:
-                mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
+                mNext.setVisibility(View.VISIBLE);
                 mNext.setText(R.string.btn_confirm);
+                mConfirmationFrame.setVisibility(View.VISIBLE);
+                mCurEntry = PrefHelper.getInstance().createEntry();
+                mConfirmationFrame.fill(mCurEntry);
+                mTitle.setText(R.string.title_confirmation);
                 break;
             case ADD_ELEMENT:
-                DataEntry entry = PrefHelper.getInstance().createEntry();
-                TableEntries.getInstance().add(entry);
+                TableEntries.getInstance().add(mCurEntry);
                 mCurStage = Stage.CURRENT_PROJECT;
                 setStage();
                 break;

@@ -133,7 +133,34 @@ public class TableEquipment {
         }
     }
 
-    public List<DataEquipment> query(long projectNameId) {
+    public DataEquipment query(long id) {
+        DataEquipment item = null;
+        try {
+            final String[] columns = {KEY_PROJECT_ID, KEY_NAME, KEY_CHECKED, KEY_LOCAL};
+            final String selection = KEY_ROWID + "=?";
+            final String[] selectionArgs = {Long.toString(id)};
+
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+            final int idxName = cursor.getColumnIndex(KEY_NAME);
+            final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
+            final int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
+
+            if (cursor.moveToFirst()) {
+                long projectId = cursor.getLong(idxProjectId);
+                String name = cursor.getString(idxName);
+                boolean checked = cursor.getShort(idxChecked) != 0 ? true : false;
+                boolean local = cursor.getShort(idxLocal) != 0 ? true : false;
+                item = new DataEquipment(id, name, projectId, checked, local);
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return item;
+    }
+
+    public List<DataEquipment> queryForProject(long projectNameId) {
         ArrayList<DataEquipment> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID, KEY_NAME, KEY_CHECKED, KEY_LOCAL};
@@ -187,7 +214,7 @@ public class TableEquipment {
         return list;
     }
 
-    public List<DataEquipment> query() {
+    public List<DataEquipment> queryForProject() {
         ArrayList<DataEquipment> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID, KEY_PROJECT_ID, KEY_NAME, KEY_CHECKED, KEY_LOCAL};

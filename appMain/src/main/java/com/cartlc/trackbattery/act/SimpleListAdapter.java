@@ -40,6 +40,10 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
         mListener = listener;
     }
 
+    public SimpleListAdapter(Context context) {
+        mContext = context;
+    }
+
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_simple, parent, false);

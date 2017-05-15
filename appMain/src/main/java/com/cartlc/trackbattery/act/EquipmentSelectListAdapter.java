@@ -2,20 +2,17 @@ package com.cartlc.trackbattery.act;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.TextView;
 
 import com.cartlc.trackbattery.R;
 import com.cartlc.trackbattery.data.DataEquipment;
 import com.cartlc.trackbattery.data.DataProjectGroup;
 import com.cartlc.trackbattery.data.PrefHelper;
 import com.cartlc.trackbattery.data.TableEquipment;
-import com.cartlc.trackbattery.data.TableProjects;
 
 import java.util.List;
 
@@ -23,7 +20,7 @@ import java.util.List;
  * Created by dug on 5/12/17.
  */
 
-public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdapter.CustomViewHolder> {
+public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSelectListAdapter.CustomViewHolder> {
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
         CheckBox checkBox;
@@ -37,7 +34,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
     final protected Context mContext;
     protected List<DataEquipment> mItems;
 
-    public EquipmentListAdapter(Context context) {
+    public EquipmentSelectListAdapter(Context context) {
         mContext = context;
     }
 
@@ -67,7 +64,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
 
     public void onDataChanged() {
         DataProjectGroup curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        mItems = TableEquipment.getInstance().query(curGroup.projectNameId);
+        mItems = TableEquipment.getInstance().queryForProject(curGroup.projectNameId);
         notifyDataSetChanged();
     }
 

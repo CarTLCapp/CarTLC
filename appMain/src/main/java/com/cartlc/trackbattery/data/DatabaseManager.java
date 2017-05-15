@@ -34,6 +34,7 @@ public class DatabaseManager {
                 TableAddress.getInstance().create();
                 TableEntries.getInstance().create();
                 TableEquipment.getInstance().create();
+                TableEquipmentCollection.getInstance().create();
                 TableNotes.getInstance().create();
                 TableProjects.getInstance().create();
                 TableProjectGroups.getInstance().create();
@@ -47,6 +48,7 @@ public class DatabaseManager {
             TableAddress.Init(db);
             TableEntries.Init(db);
             TableEquipment.Init(db);
+            TableEquipmentCollection.Init(db);
             TableNotes.Init(db);
             TableProjects.Init(db);
             TableProjectGroups.Init(db);

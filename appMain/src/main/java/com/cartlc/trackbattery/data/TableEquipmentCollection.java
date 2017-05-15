@@ -3,6 +3,7 @@ package com.cartlc.trackbattery.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.List;
 
@@ -58,35 +59,25 @@ public class TableEquipmentCollection {
         mDb.execSQL(sbuf.toString());
     }
 
-    public long add(DataEquipmentCollection collection) {
-        long id = -1L;
-        mDb.beginTransaction();
-        try {
-            ContentValues values = new ContentValues();
-            for (Long equipmentId : collection.equipmentList) {
-                values.clear();
-                values.put(KEY_COLLECTION_ID, collection.id);
-                values.put(KEY_EQUIPMENT_ID, equipmentId);
-                id = mDb.insert(TABLE_NAME, null, values);
-            }
-            mDb.setTransactionSuccessful();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        } finally {
-            mDb.endTransaction();
+    public void add(DataEquipmentCollection collection) {
+        ContentValues values = new ContentValues();
+        for (Long equipmentId : collection.equipmentListIds) {
+            values.clear();
+            values.put(KEY_COLLECTION_ID, collection.id);
+            values.put(KEY_EQUIPMENT_ID, equipmentId);
+            mDb.insert(TABLE_NAME, null, values);
         }
-        return id;
     }
 
-    public DataEquipmentCollection query(long id) {
+    public DataEquipmentCollection query(long collection_id) {
         DataEquipmentCollection collection = null;
         try {
             final String[] columns = {KEY_EQUIPMENT_ID};
             final String selection = KEY_COLLECTION_ID + " =?";
-            final String[] selectionArgs = {Long.toString(id)};
+            final String[] selectionArgs = {Long.toString(collection_id)};
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_EQUIPMENT_ID);
-            collection = new DataEquipmentCollection(id);
+            collection = new DataEquipmentCollection(collection_id);
             while (cursor.moveToNext()) {
                 collection.add(cursor.getLong(idxValue));
             }
