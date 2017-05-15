@@ -30,6 +30,8 @@
     <string name="title_notes_">Notes:</string>
     <string name="title_error">Error</string>
     <string name="title_confirmation">Confirmation</string>
+    <string name="title_entries_">Entries:</string>
+    <string name="title_uploaded_">Uploaded:</string>
 
     <string name="not_a_number">Not a number: %s</string>
 

@@ -149,6 +149,25 @@ public class TableEntries {
         return count;
     }
 
+    public int countUploaded(long projectId) {
+        int count = 0;
+        try {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(KEY_PROJECT_ID);
+            sbuf.append("=? AND ");
+            sbuf.append(KEY_UPLOADED);
+            sbuf.append("=1");
+            final String selection = sbuf.toString();
+            final String[] selectionArgs = {Long.toString(projectId)};
+            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
     public void add(DataEntry entry) {
         mDb.beginTransaction();
         try {

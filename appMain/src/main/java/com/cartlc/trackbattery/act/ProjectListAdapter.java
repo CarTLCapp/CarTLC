@@ -55,9 +55,17 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     public void onBindViewHolder(CustomViewHolder holder, final int position) {
         final DataProjectGroup projectGroup = mProjectGroups.get(position);
         holder.mProjectName.setText(projectGroup.getProjectName());
-        int count = TableEntries.getInstance().count(projectGroup.projectNameId);
-        if (count > 0) {
-            holder.mProjectNotes.setText(Integer.toString(count));
+        int countTotal = TableEntries.getInstance().count(projectGroup.projectNameId);
+
+        if (countTotal > 0) {
+            int countUploaded = TableEntries.getInstance().countUploaded(projectGroup.projectNameId);
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(mContext.getString(R.string.title_entries_));
+            sbuf.append(Integer.toString(countTotal));
+            sbuf.append("   ");
+            sbuf.append(mContext.getString(R.string.title_uploaded_));
+            sbuf.append(Integer.toString(countUploaded));
+            holder.mProjectNotes.setText(sbuf.toString());
             holder.mProjectNotes.setVisibility(View.VISIBLE);
         } else {
             holder.mProjectNotes.setText("");
