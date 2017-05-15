@@ -43,16 +43,23 @@
     <style name="EntryNumChars">
         <item name="android:textColor">@color/entry_hint_color</item>
     </style>
+    <style name="ConfirmTitleText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
     <style name="ConfirmText">
         <item name="android:textSize">20sp</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:background">@color/confirm_color</item>
     </style>
     <style name="ConfirmAddressText">
         <item name="android:textSize">15sp</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:background">@color/confirm_color</item>
     </style>
     <style name="ConfirmEquipmentItemText">
         <item name="android:textSize">18sp</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:background">@color/confirm_color</item>
     </style>
 </resources>

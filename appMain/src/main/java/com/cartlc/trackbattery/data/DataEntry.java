@@ -24,10 +24,10 @@ public class DataEntry {
         return TableProjects.getInstance().query(projectNameId);
     }
 
-    public String getAddressLine() {
+    public String getAddressText() {
         DataAddress address = TableAddress.getInstance().query(addressId);
         if (address != null) {
-            return address.getLine();
+            return address.getBlock();
         }
         return null;
     }

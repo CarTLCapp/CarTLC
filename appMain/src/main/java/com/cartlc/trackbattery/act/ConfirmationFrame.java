@@ -4,7 +4,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -45,7 +44,7 @@ public class ConfirmationFrame {
 
     public void fill(DataEntry entry) {
         mProjectName.setText(entry.getProjectName());
-        String address = entry.getAddressLine();
+        String address = entry.getAddressText();
         if (TextUtils.isEmpty(address)) {
             mAddress.setVisibility(View.GONE);
         } else {

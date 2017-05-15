@@ -3,4 +3,6 @@
     <dimen name="setup_frame_width">200dp</dimen>
     <integer name="entry_max_length">128</integer>
     <dimen name="project_list_width">190dp</dimen>
+    <dimen name="confirm_gap_height">10dp</dimen>
+    <dimen name="confirm_gap_left">10dp</dimen>
 </resources>

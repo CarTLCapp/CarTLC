@@ -35,6 +35,7 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
     OnItemSelectedListener mListener;
     List<String> mItems;
     int mSelectedPos = -1;
+    boolean mSelectedOkay = false;
 
     public SimpleListAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;
@@ -58,10 +59,12 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
         final String text = mItems.get(position);
         holder.simpleText.setText(text);
 
-        if (position == mSelectedPos) {
-            holder.itemView.setBackgroundResource(R.color.colorSelected);
-        } else {
-            holder.itemView.setBackgroundResource(android.R.color.transparent);
+        if (mSelectedOkay) {
+            if (position == mSelectedPos) {
+                holder.itemView.setBackgroundResource(R.color.colorSelected);
+            } else {
+                holder.itemView.setBackgroundResource(android.R.color.transparent);
+            }
         }
         holder.simpleText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,6 +89,7 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
 
     public void setSelected(int position) {
         mSelectedPos = position;
+        mSelectedOkay = true;
         notifyDataSetChanged();
     }
 

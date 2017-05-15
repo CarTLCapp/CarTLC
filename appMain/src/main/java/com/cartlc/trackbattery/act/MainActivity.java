@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
                     mEntryFrame.setVisibility(View.VISIBLE);
-                    mEntrySimple.setHint(R.string.title_location);
+                    mEntrySimple.setHint(R.string.title_street);
                     mEntrySimple.setText("");
                 } else {
                     if (isNewEquipmentOkay()) {
@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
                             PrefHelper.getInstance().getCompany(),
                             PrefHelper.getInstance().getCity(),
                             PrefHelper.getInstance().getState());
-                    setList(R.string.title_location, PrefHelper.KEY_STREET, locations);
+                    setList(R.string.title_street, PrefHelper.KEY_STREET, locations);
                 }
                 break;
             case CURRENT_PROJECT:

@@ -9,8 +9,9 @@
     <color name="project_normal">#272a38</color>
     <color name="address_normal">#1d2031</color>
     <color name="highlight_red">#FF4081</color>
-    <color name="colorSelected">#fa6397</color>
+    <color name="colorSelected">#92cbc5</color>
     <color name="list_background">#5b3737</color>
     <color name="entry_hint_color">#b1b1b1</color>
+    <color name="confirm_color">#667307</color>
 
 </resources>

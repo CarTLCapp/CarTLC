@@ -213,48 +213,86 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true">
 
-            <TextView
-                android:id="@+id/project_name"
-                style="@style/ConfirmText"
+            <GridLayout
+                android:id="@+id/grid_confirmation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
+                android:columnCount="2"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"/>
-
-            <TextView
-                android:id="@+id/truck_number"
-                style="@style/ConfirmText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintRight_toRightOf="parent"/>
-
-            <TextView
-                android:id="@+id/project_address"
-                style="@style/ConfirmAddressText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left|center_vertical"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                app:layout_constraintTop_toBottomOf="@id/project_name"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"/>
+                app:layout_constraintRight_toRightOf="parent">
 
-            <TextView
-                android:id="@+id/project_notes"
-                style="@style/ConfirmText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
-                android:gravity="center"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                app:layout_constraintTop_toBottomOf="@id/project_address"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_project_"
+                    style="@style/ConfirmTitleText"/>
+
+                <TextView
+                    android:id="@+id/project_name"
+                    style="@style/ConfirmText"
+                    android:paddingLeft="@dimen/confirm_gap_left"
+                    android:layout_gravity="fill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:layout_marginTop="@dimen/confirm_gap_height"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_truck_number_"
+                    style="@style/ConfirmTitleText"/>
+
+                <TextView
+                    android:id="@+id/truck_number"
+                    style="@style/ConfirmText"
+                    android:paddingLeft="@dimen/confirm_gap_left"
+                    android:layout_marginTop="@dimen/confirm_gap_height"
+                    android:layout_gravity="fill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:layout_marginTop="@dimen/confirm_gap_height"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_address_"
+                    style="@style/ConfirmTitleText"/>
+
+                <TextView
+                    android:id="@+id/project_address"
+                    style="@style/ConfirmAddressText"
+                    android:paddingLeft="@dimen/confirm_gap_left"
+                    android:layout_marginTop="@dimen/confirm_gap_height"
+                    android:layout_gravity="fill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:layout_marginTop="@dimen/confirm_gap_height"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_notes_"
+                    style="@style/ConfirmTitleText"/>
+
+                <TextView
+                    android:id="@+id/project_notes"
+                    style="@style/ConfirmText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/confirm_gap_height"
+                    android:layout_gravity="fill"
+                    android:paddingLeft="@dimen/confirm_gap_left"
+                    android:gravity="left|center_vertical"/>
+
+                <TextView
+                    android:layout_marginTop="@dimen/confirm_gap_height"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_equipment_installed_"
+                    style="@style/ConfirmTitleText"/>
+
+            </GridLayout>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/equipment_grid"
@@ -263,7 +301,7 @@
                 android:layout_margin="2dp"
                 android:background="@drawable/background_shadow"
                 android:elevation="3dp"
-                app:layout_constraintTop_toBottomOf="@id/project_notes"
+                app:layout_constraintTop_toBottomOf="@id/grid_confirmation"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"/>
 

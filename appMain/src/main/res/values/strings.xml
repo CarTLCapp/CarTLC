@@ -14,15 +14,20 @@
 
     <string name="title_login">Login</string>
     <string name="title_project">Project</string>
+    <string name="title_project_">Project:</string>
     <string name="title_state">State</string>
     <string name="title_city">City</string>
     <string name="title_company">Company</string>
-    <string name="title_location">Street</string>
+    <string name="title_street">Street</string>
+    <string name="title_address_">Address:</string>
     <string name="title_current_project">Current Project</string>
     <string name="title_truck_number">Truck Number</string>
+    <string name="title_truck_number_">Truck Number:</string>
     <string name="title_equipment_installed">Equipment Installed</string>
+    <string name="title_equipment_installed_">Equipment Installed:</string>
     <string name="title_equipment">Equipment</string>
     <string name="title_notes">Notes</string>
+    <string name="title_notes_">Notes:</string>
     <string name="title_error">Error</string>
     <string name="title_confirmation">Confirmation</string>
 
