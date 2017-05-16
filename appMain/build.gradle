@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    mavenCentral()
+}
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
@@ -33,5 +39,7 @@ dependencies {
     compile 'com.jakewharton.timber:timber:4.5.0'
     compile 'com.jakewharton:butterknife:8.5.1'
     compile 'com.android.support:support-v4:25.3.0'
+    compile 'com.squareup.picasso:picasso:2.6.0-SNAPSHOT'
+
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 }

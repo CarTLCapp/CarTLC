@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="trackbattery.dugsolutions.com.trackbattery.MainActivity">
+      tools:context="com.cartcl.tracker.MainActivity">
     <item android:id="@+id/action_show_test_images"
           android:title="@string/action_show_test_image"
           android:orderInCategory="90"

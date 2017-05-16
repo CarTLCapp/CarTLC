@@ -38,6 +38,7 @@
     <string name="title_uploaded_">Uploaded:</string>
     <string name="title_picture">Taking Picture</string>
 
-    <string name="not_a_number">Not a number: %s</string>
+    <string name="error_not_a_number">Not a number: %s</string>
+    <string name="error_cannot_take_picture">Cannot take picture</string>
 
 </resources>

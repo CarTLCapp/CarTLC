@@ -3,6 +3,7 @@ package com.cartlc.tracker.data;
 import android.content.Context;
 import android.text.TextUtils;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -42,6 +43,7 @@ public class PrefHelper extends PrefHelperBase {
     static final String KEY_TECH_ID = "tech_id";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd,HH:mm:ss";
+    static final String FILE_SUBDIR_IMAGES = "images";
 
     PrefHelper(Context ctx) {
         super(ctx);
@@ -299,6 +301,9 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public String getPictureFilename() {
+
+        StringBuffer msgFilebuf = new StringBuffer();
+
         long tech_id = getTechID();
         long project_id = getProjectId();
         StringBuilder sbuf = new StringBuilder();
@@ -311,5 +316,14 @@ public class PrefHelper extends PrefHelperBase {
         SimpleDateFormat fmt = new SimpleDateFormat(PICTURE_DATE_FORMAT);
         sbuf.append(fmt.format(new Date(System.currentTimeMillis())));
         return sbuf.toString();
+    }
+
+    public File getFullPictureFile() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(mCtx.getFilesDir());
+        sbuf.append(File.separator);
+        sbuf.append(FILE_SUBDIR_IMAGES);
+        sbuf.append(getPictureFilename());
+        return new File(sbuf.toString());
     }
 }

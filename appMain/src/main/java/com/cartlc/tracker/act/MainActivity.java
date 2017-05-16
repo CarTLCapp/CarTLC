@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -43,7 +45,9 @@ import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNotes;
 import com.cartlc.tracker.data.TableProjectGroups;
 import com.cartlc.tracker.data.TableProjects;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.List;
 
 import butterknife.BindView;
@@ -155,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
     DataEntry mCurEntry;
     Bitmap mPictureBitmap;
     DataPictureCollection mPictureCollection;
+    File mCurPictureFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -250,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
             mCurStage = Stage.CITY;
         } else if (TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
             mCurStage = Stage.STREET;
-        } else {
+        } else if (mCurStage.ordinal() <= Stage.CURRENT_PROJECT.ordinal()) {
             mCurStage = Stage.CURRENT_PROJECT;
         }
     }
@@ -269,16 +274,7 @@ public class MainActivity extends AppCompatActivity {
                 PrefHelper.getInstance().setTruckNumber(Long.parseLong(value));
             } else {
                 if (isNext) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle(R.string.title_error);
-                    builder.setMessage(getString(R.string.not_a_number, value));
-                    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.create().show();
+                    showError(getString(R.string.error_not_a_number, value));
                 }
                 return false;
             }
@@ -494,9 +490,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case TAKE_PICTURE:
-                dispatchPictureRequest();
                 mTitle.setText(R.string.title_picture);
                 mPrev.setVisibility(View.VISIBLE);
+                if (!dispatchPictureRequest()) {
+                    showError(getString(R.string.error_cannot_take_picture));
+                }
                 break;
             case DISPLAY_PICTURE:
                 if (mCurStageEditing) {
@@ -569,11 +567,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void dispatchPictureRequest() {
-        Log.d("MYDEBUG", "displayPictureRequest()-> START");
-
+    boolean dispatchPictureRequest() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            mCurPictureFile = PrefHelper.getInstance().getFullPictureFile();
+            Uri pictureUri = FileProvider.getUriForFile(this, "com.cartcl.tracker.fileprovider", mCurPictureFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -581,7 +584,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             mPictureBitmap = (Bitmap) extras.get("data");
-            mPicture.setImageBitmap(mPictureBitmap);
+            Picasso.with(this).load(mCurPictureFile).into(mPicture);
+            mCurStage = Stage.DISPLAY_PICTURE;
         }
     }
 
@@ -601,5 +605,21 @@ public class MainActivity extends AppCompatActivity {
             mPictureBitmap.recycle();
             mPictureBitmap = null;
         }
+    }
+
+    void showError(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.title_error);
+        builder.setMessage(message);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                if (mCurStage == Stage.TAKE_PICTURE) {
+                    setStage(Stage.CONFIRM);
+                }
+            }
+        });
+        builder.create().show();
     }
 }

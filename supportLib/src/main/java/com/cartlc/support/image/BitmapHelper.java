@@ -34,6 +34,24 @@ public class BitmapHelper {
     }
 
     /**
+     * Load the bitmap from the assets directory.
+     *
+     * @param filename : asset files
+     */
+    public static Bitmap loadBitmapFromExternal(Context context, final String filename) {
+        Bitmap result = null;
+        try {
+            InputStream is = context.getAssets().open(filename);
+            BitmapFactory.Options opt = new BitmapFactory.Options();
+            result = BitmapFactory.decodeStream(is, null, opt);
+            is.close();
+        } catch (Exception ex) {
+            Timber.e(ex.getMessage());
+        }
+        return result;
+    }
+
+    /**
      * Save bitmap to internal storage.
      *
      * @param ctx
