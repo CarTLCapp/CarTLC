@@ -498,12 +498,14 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case DISPLAY_PICTURE:
                 if (mCurStageEditing) {
+                    mCurStageEditing = false;
                     mCurStage = Stage.TAKE_PICTURE;
                     fillStage();
                 } else {
                     mPicture.setVisibility(View.VISIBLE);
                     mNext.setVisibility(View.VISIBLE);
                     mPrev.setVisibility(View.VISIBLE);
+                    mNew.setVisibility(View.VISIBLE);
                     mPrev.setText(R.string.btn_reject);
                     mNext.setText(R.string.btn_confirm);
                     mNew.setText(R.string.btn_another);
