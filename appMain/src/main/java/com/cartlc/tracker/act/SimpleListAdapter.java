@@ -30,12 +30,12 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
         }
     }
 
-    final Context mContext;
-    final int mEntryItemLayoutId;
-    OnItemSelectedListener mListener;
-    List<String> mItems;
-    int mSelectedPos = -1;
-    boolean mSelectedOkay = false;
+	final Context			mContext;
+	final int				mEntryItemLayoutId;
+	OnItemSelectedListener	mListener;
+	List<String>			mItems;
+	int						mSelectedPos	= -1;
+	boolean					mSelectedOkay	= false;
 
     public SimpleListAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;

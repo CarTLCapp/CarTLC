@@ -3,7 +3,6 @@ package com.cartlc.tracker.act;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,7 +18,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +29,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.cartlc.support.image.BitmapHelper;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
@@ -48,6 +45,7 @@ import com.cartlc.tracker.data.TableProjects;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -134,8 +132,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.frame_login) ViewGroup mLoginFrame;
     @BindView(R.id.frame_new_entry) ViewGroup mEntryFrame;
     @BindView(R.id.frame_new_notes) ViewGroup mNotesFrame;
-    @BindView(R.id.list) RecyclerView mRecyclerView;
-    @BindView(R.id.list_container) FrameLayout mListContainer;
+    @BindView(R.id.list) RecyclerView mMainList;
+    @BindView(R.id.list_container) FrameLayout mMainListFrame;
     @BindView(R.id.next) Button mNext;
     @BindView(R.id.prev) Button mPrev;
     @BindView(R.id.new_entry) Button mNew;
@@ -143,24 +141,25 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.fab_add) FloatingActionButton mAdd;
     @BindView(R.id.number_characters) TextView mNumChars;
     @BindView(R.id.frame_confirmation) FrameLayout mConfirmationFrameView;
-    @BindView(R.id.picture) ImageView mPicture;
     @BindView(R.id.frame_pictures) ViewGroup mPictureFrame;
+    @BindView(R.id.list_pictures) RecyclerView mPictureList;
 
-    Stage mCurStage = Stage.LOGIN;
-    String mCurKey = PrefHelper.KEY_STATE;
-    boolean mCurStageEditing = false;
-    SimpleListAdapter mSimpleAdapter;
-    ProjectListAdapter mProjectAdapter;
-    EquipmentSelectListAdapter mEquipmentAdapter;
-    LinearLayoutManager mLayoutManager;
-    InputMethodManager mInputMM;
-    CountChars mEntryCountChars;
-    int mEntryMaxLength;
-    ConfirmationFrame mConfirmationFrame;
-    DataEntry mCurEntry;
-    DataPictureCollection mPictureCollection;
-    File mCurPictureFile;
-    Uri mCurPictureURI;
+	Stage						mCurStage			= Stage.LOGIN;
+	String						mCurKey				= PrefHelper.KEY_STATE;
+	boolean						mCurStageEditing;
+	SimpleListAdapter			mSimpleAdapter;
+	ProjectListAdapter			mProjectAdapter;
+	EquipmentSelectListAdapter	mEquipmentAdapter;
+	PictureListAdapter			mPictureAdapter;
+	LinearLayoutManager			mLayoutManager;
+	InputMethodManager			mInputMM;
+	CountChars					mEntryCountChars;
+	int							mEntryMaxLength;
+	ConfirmationFrame			mConfirmationFrame;
+	DataEntry					mCurEntry;
+	DataPictureCollection		mPictureCollection;
+	File						mCurPictureFile;
+	Uri							mCurPictureURI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,8 +195,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), mLayoutManager.getOrientation()));
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        mMainList.addItemDecoration(new DividerItemDecoration(mMainList.getContext(), mLayoutManager.getOrientation()));
+        mMainList.setLayoutManager(mLayoutManager);
         mSimpleAdapter = new SimpleListAdapter(this, new SimpleListAdapter.OnItemSelectedListener() {
             @Override
             public void onSelectedItem(int position, String text) {
@@ -208,6 +207,12 @@ public class MainActivity extends AppCompatActivity {
         });
         mProjectAdapter = new ProjectListAdapter(this);
         mEquipmentAdapter = new EquipmentSelectListAdapter(this);
+        mPictureAdapter = new PictureListAdapter(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        layoutManager.setAutoMeasureEnabled(true);
+        mPictureList.setLayoutManager(layoutManager);
+        mPictureList.setAdapter(mPictureAdapter);
+
         mEntryCountChars = new CountChars();
         mEntryNotes.addTextChangedListener(mEntryCountChars);
 
@@ -339,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
         mLoginFrame.setVisibility(View.GONE);
         mEntryFrame.setVisibility(View.GONE);
         mNotesFrame.setVisibility(View.GONE);
-        mListContainer.setVisibility(View.GONE);
+        mMainListFrame.setVisibility(View.GONE);
         mAdd.setVisibility(View.GONE);
         mNext.setVisibility(View.INVISIBLE);
         mNext.setText(R.string.btn_next);
@@ -350,6 +355,7 @@ public class MainActivity extends AppCompatActivity {
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         mConfirmationFrame.setVisibility(View.GONE);
         mPictureFrame.setVisibility(View.GONE);
+        mPictureList.setVisibility(View.GONE);
 
         switch (mCurStage) {
             case LOGIN:
@@ -360,12 +366,12 @@ public class MainActivity extends AppCompatActivity {
                 mLastName.setText(PrefHelper.getInstance().getLastName());
                 break;
             case PROJECT:
-                mListContainer.setVisibility(View.VISIBLE);
+                mMainListFrame.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 break;
             case COMPANY:
-                mListContainer.setVisibility(View.VISIBLE);
+                mMainListFrame.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
                 List<String> companies = TableAddress.getInstance().queryCompanies();
@@ -373,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
                 setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
                 break;
             case STATE:
-                mListContainer.setVisibility(View.VISIBLE);
+                mMainListFrame.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
@@ -402,7 +408,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
-                    mListContainer.setVisibility(View.VISIBLE);
+                    mMainListFrame.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
                     String state = PrefHelper.getInstance().getState();
                     List<String> cities = TableAddress.getInstance().queryCities(state);
@@ -425,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setText("");
                 } else {
                     mNew.setVisibility(View.VISIBLE);
-                    mListContainer.setVisibility(View.VISIBLE);
+                    mMainListFrame.setVisibility(View.VISIBLE);
                     List<String> locations = TableAddress.getInstance().queryStreets(
                             PrefHelper.getInstance().getCompany(),
                             PrefHelper.getInstance().getCity(),
@@ -448,13 +454,13 @@ public class MainActivity extends AppCompatActivity {
                     computeCurStage();
                     fillStage();
                 } else {
-                    mListContainer.setVisibility(View.VISIBLE);
+                    mMainListFrame.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
                     mAdd.setVisibility(View.VISIBLE);
                     mCurKey = null;
                     mNew.setText(R.string.btn_new);
                     mTitle.setText(R.string.title_current_project);
-                    mRecyclerView.setAdapter(mProjectAdapter);
+                    mMainList.setAdapter(mProjectAdapter);
                     mProjectAdapter.onDataChanged();
                 }
                 break;
@@ -485,9 +491,9 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mNew.setVisibility(View.VISIBLE);
                     mTitle.setText(R.string.title_equipment_installed);
-                    mRecyclerView.setAdapter(mEquipmentAdapter);
+                    mMainList.setAdapter(mEquipmentAdapter);
                     mEquipmentAdapter.onDataChanged();
-                    mListContainer.setVisibility(View.VISIBLE);
+                    mMainListFrame.setVisibility(View.VISIBLE);
                 }
                 break;
             case TAKE_PICTURE:
@@ -504,6 +510,7 @@ public class MainActivity extends AppCompatActivity {
                     fillStage();
                 } else {
                     mPictureFrame.setVisibility(View.VISIBLE);
+                    mPictureList.setVisibility(View.VISIBLE);
                     mNext.setVisibility(View.VISIBLE);
                     mPrev.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
@@ -554,7 +561,7 @@ public class MainActivity extends AppCompatActivity {
             doNewEntry();
         } else {
             mSimpleAdapter.setList(list);
-            mRecyclerView.setAdapter(mSimpleAdapter);
+            mMainList.setAdapter(mSimpleAdapter);
 
             String curValue = PrefHelper.getInstance().getString(key, null);
             if (curValue == null) {
@@ -562,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 int position = mSimpleAdapter.setSelected(curValue);
                 if (position >= 0) {
-                    mRecyclerView.scrollToPosition(position);
+                    mMainList.scrollToPosition(position);
                 }
             }
         }
@@ -584,8 +591,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             mCurStage = Stage.DISPLAY_PICTURE;
-            Picasso.with(this).setLoggingEnabled(true);
-            Picasso.with(this).load(mCurPictureURI).into(mPicture);
+            List<Uri> list = new ArrayList();
+            list.add(mCurPictureURI);
+            mPictureAdapter.setList(list);
         }
     }
 

@@ -36,9 +36,9 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         }
     }
 
-    final Context mContext;
-    List<DataProjectGroup> mProjectGroups;
-    Long mCurProjectGroupId;
+	final Context			mContext;
+	List<DataProjectGroup>	mProjectGroups;
+	Long					mCurProjectGroupId;
 
     public ProjectListAdapter(Context context) {
         mContext = context;
