@@ -77,6 +77,27 @@ public class TableEquipment {
         return count;
     }
 
+    public int countChecked(long projectNameId) {
+        int count = 0;
+        try {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(KEY_PROJECT_ID);
+            sbuf.append("=?");
+            sbuf.append(" AND ");
+            sbuf.append(KEY_CHECKED);
+            sbuf.append("=1");
+            final String selection = sbuf.toString();
+            final String[] selectionArgs = {Long.toString(projectNameId)};
+
+            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
     public long add(String name, long projectId) {
         long id = -1L;
         mDb.beginTransaction();

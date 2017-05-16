@@ -5,9 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -18,6 +19,8 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,14 +29,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
-import com.cartlc.tracker.data.DataPicture;
-import com.cartlc.tracker.data.DataPictureCollection;
 import com.cartlc.tracker.data.DataProjectGroup;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.PrefHelper;
@@ -44,10 +44,7 @@ import com.cartlc.tracker.data.TableNotes;
 import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectGroups;
 import com.cartlc.tracker.data.TableProjects;
-import com.squareup.picasso.Picasso;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -58,20 +55,17 @@ public class MainActivity extends AppCompatActivity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
-    class DetectReturn implements TextWatcher {
-        public DetectReturn() {
-        }
+    static final int AUTO_RETURN_DELAY_MS = 500;
+    static final int MSG_AUTO_RETURN      = 0;
 
+    class MyHandler extends Handler {
         @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_AUTO_RETURN:
+                    doNext();
+                    break;
+            }
         }
     }
 
@@ -145,8 +139,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.frame_pictures)     ViewGroup            mPictureFrame;
     @BindView(R.id.list_pictures)      RecyclerView         mPictureList;
 
-    Stage  mCurStage = Stage.LOGIN;
-    String mCurKey   = PrefHelper.KEY_STATE;
+    Stage     mCurStage = Stage.LOGIN;
+    String    mCurKey   = PrefHelper.KEY_STATE;
+    MyHandler mHandler  = new MyHandler();
     boolean                    mCurStageEditing;
     SimpleListAdapter          mSimpleAdapter;
     ProjectListAdapter         mProjectAdapter;
@@ -220,12 +215,14 @@ public class MainActivity extends AppCompatActivity {
             Timber.e(ex);
         }
         mConfirmationFrame = new ConfirmationFrame(mConfirmationFrameView);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        PrefHelper.getInstance().setupInit();
+        mLastName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                mHandler.sendEmptyMessageDelayed(MSG_AUTO_RETURN, AUTO_RETURN_DELAY_MS);
+                return false;
+            }
+        });
+        PrefHelper.getInstance().setupFromCurrentProjectId();
         computeCurStage();
         fillStage();
     }
@@ -278,8 +275,31 @@ public class MainActivity extends AppCompatActivity {
                 PrefHelper.getInstance().setTruckNumber(Long.parseLong(value));
             } else {
                 if (isNext) {
-                    showError(getString(R.string.error_not_a_number, value));
+                    if (TextUtils.isEmpty(value)) {
+                        showError(getString(R.string.error_need_a_number));
+                    } else {
+                        showError(getString(R.string.error_not_a_number, value));
+                    }
                 }
+                return false;
+            }
+        } else if (mCurStage == Stage.NOTES) {
+            String value = getEditText(mEntryNotes);
+            PrefHelper.getInstance().setNotes(value);
+            if (isNext) {
+                long id = TableNotes.getInstance().add(value);
+                PrefHelper.getInstance().setLastNotesId(id);
+            }
+        } else if (mCurStage == Stage.PICTURE) {
+            int numberTaken   = TablePendingPictures.getInstance().count();
+            int requiredCount = PrefHelper.getInstance().getRequiredNumberPictures();
+            if (numberTaken < requiredCount) {
+                showError(getString(R.string.error_need_more_pictures, requiredCount - numberTaken));
+                return false;
+            }
+        } else if (mCurStage == Stage.EQUIPMENT) {
+            if (TableEquipment.getInstance().countChecked(PrefHelper.getInstance().getProjectId()) == 0) {
+                showError(getString(R.string.error_need_equipment));
                 return false;
             }
         } else if (mCurStageEditing) {
@@ -293,14 +313,6 @@ public class MainActivity extends AppCompatActivity {
                     DataProjectGroup group = PrefHelper.getInstance().getCurrentProjectGroup();
                     TableEquipment.getInstance().addLocal(name, group.projectNameId);
                 }
-            }
-        } else if (mCurStage == Stage.NOTES) {
-            String value = getEditText(mEntryNotes);
-            PrefHelper.getInstance().setNotes(value);
-
-            if (isNext) {
-                long id = TableNotes.getInstance().add(value);
-                PrefHelper.getInstance().setLastNotesId(id);
             }
         }
         mCurStageEditing = false;
@@ -316,7 +328,12 @@ public class MainActivity extends AppCompatActivity {
 
     void doPrev() {
         save(false);
-        mCurStage = Stage.from(mCurStage.ordinal() - 1);
+        if (mCurStage == Stage.PROJECT) {
+            PrefHelper.getInstance().recoverProject();
+            mCurStage = Stage.CURRENT_PROJECT;
+        } else {
+            mCurStage = Stage.from(mCurStage.ordinal() - 1);
+        }
         fillStage();
     }
 
@@ -357,6 +374,9 @@ public class MainActivity extends AppCompatActivity {
                 mLastName.setText(PrefHelper.getInstance().getLastName());
                 break;
             case PROJECT:
+                if (TableProjectGroups.getInstance().count() > 0) {
+                    mPrev.setVisibility(View.VISIBLE);
+                }
                 mMainListFrame.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
@@ -488,15 +508,25 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case PICTURE:
-                mTitle.setText(R.string.title_picture);
+                int numberTaken = TablePendingPictures.getInstance().count();
+                int requiredCount = PrefHelper.getInstance().getRequiredNumberPictures();
+                StringBuilder sbuf = new StringBuilder();
+                sbuf.append(getString(R.string.title_picture));
+                sbuf.append(" ");
+                sbuf.append(numberTaken);
+                sbuf.append("/");
+                sbuf.append(requiredCount);
+                mTitle.setText(sbuf.toString());
                 mPrev.setVisibility(View.VISIBLE);
-                if (mCurStageEditing || TablePendingPictures.getInstance().count() == 0) {
+                if (mCurStageEditing || numberTaken == 0) {
                     mCurStageEditing = false;
                     if (!dispatchPictureRequest()) {
                         showError(getString(R.string.error_cannot_take_picture));
                     }
                 } else {
-                    mNext.setVisibility(View.VISIBLE);
+                    if (numberTaken >= requiredCount) {
+                        mNext.setVisibility(View.VISIBLE);
+                    }
                     mNew.setVisibility(View.VISIBLE);
                     mNew.setText(R.string.btn_another);
                     mPictureFrame.setVisibility(View.VISIBLE);
@@ -576,7 +606,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            // Everything needed will happen automatically in fillStage();
+            fillStage();
         }
     }
 

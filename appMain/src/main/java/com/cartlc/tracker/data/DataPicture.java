@@ -18,6 +18,7 @@ public class DataPicture {
 
     public long id;
     public String pictureFilename;
+    File pictureFile;
 
     public DataPicture(long id, String filename) {
         this.id = id;
@@ -29,12 +30,26 @@ public class DataPicture {
         pictureFilename = filename;
     }
 
+    File getPictureFile() {
+        if (pictureFile == null) {
+            pictureFile = new File(pictureFilename);
+        }
+        return pictureFile;
+    }
+
+    public boolean exists() {
+        return getPictureFile().exists();
+    }
+
     public Uri getUri(Context ctx) {
-        return getUri(ctx, new File(pictureFilename));
+        if (!exists()) {
+            return null;
+        }
+        return getUri(ctx, pictureFile);
     }
 
     public void remove() {
-        new File(pictureFilename).delete();
+        getPictureFile().delete();
         if (id >= 0) {
             TablePendingPictures.getInstance().remove(id);
         }

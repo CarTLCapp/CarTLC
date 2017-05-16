@@ -27,21 +27,24 @@ public class PrefHelper extends PrefHelperBase {
         new PrefHelper(ctx);
     }
 
+    static final int REQUIRED_NUMBER_PICTURES_DEFAULT = 5;
+
     static public final String KEY_PROJECT                      = "project";
     static public final String KEY_COMPANY                      = "company";
     static public final String KEY_STREET                       = "street";
     static public final String KEY_STATE                        = "state";
     static public final String KEY_CITY                         = "city";
     static final        String KEY_CURRENT_PROJECT_GROUP_ID     = "current_project_group_id";
+    static final        String KEY_SAVED_PROJECT_GROUP_ID       = "saved_project_group_id";
     static final        String KEY_FIRST_NAME                   = "first_name";
     static final        String KEY_LAST_NAME                    = "last_name";
     static final        String KEY_TRUCK_NUMBER                 = "truck_number";
     static final        String KEY_NOTES                        = "notes";
     static final        String KEY_LAST_NOTES_ID                = "notes_id";
-    static final        String KEY_EQUIPMENT_COLLECTION_ID      = "equipment_collection_id";
     static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
     static final        String KEY_TECH_ID                      = "tech_id";
+    static final        String KEY_REQUIRED_NUMBER_PICTURES     = "required_number_pictures";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss";
 
@@ -114,6 +117,14 @@ public class PrefHelper extends PrefHelperBase {
         setLong(KEY_CURRENT_PROJECT_GROUP_ID, id);
     }
 
+    public long getSavedProjectGroupId() {
+        return getLong(KEY_SAVED_PROJECT_GROUP_ID, -1L);
+    }
+
+    public void setSavedProjectGroupId(long id) {
+        setLong(KEY_SAVED_PROJECT_GROUP_ID, id);
+    }
+
     public void setFirstName(String name) {
         setString(KEY_FIRST_NAME, name);
     }
@@ -128,6 +139,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public String getLastName() {
         return getString(KEY_LAST_NAME, null);
+    }
+
+    public int getRequiredNumberPictures() {
+        return getInt(KEY_REQUIRED_NUMBER_PICTURES, REQUIRED_NUMBER_PICTURES_DEFAULT);
+    }
+
+    public void setRequiredNumberPictures(int count) {
+        setInt(KEY_TRUCK_NUMBER, count);
     }
 
     public long getTruckNumber() {
@@ -179,7 +198,7 @@ public class PrefHelper extends PrefHelperBase {
         return TableProjectGroups.getInstance().query(projectGroupId);
     }
 
-    public void setupInit() {
+    public void setupFromCurrentProjectId() {
         DataProjectGroup projectGroup = getCurrentProjectGroup();
         if (projectGroup != null) {
             setProject(projectGroup.getProjectName());
@@ -193,6 +212,11 @@ public class PrefHelper extends PrefHelperBase {
         }
     }
 
+    public void recoverProject() {
+        setCurrentProjectGroupId(getSavedProjectGroupId());
+        setupFromCurrentProjectId();
+    }
+
     public void clearCurProject() {
         clearLastEntry();
         setState(null);
@@ -200,6 +224,7 @@ public class PrefHelper extends PrefHelperBase {
         setCompany(null);
         setStreet(null);
         setProject(null);
+        setSavedProjectGroupId(getCurrentProjectGroupId());
         setCurrentProjectGroupId(-1L);
     }
 

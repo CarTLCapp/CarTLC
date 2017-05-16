@@ -112,29 +112,32 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
                 mHandler.sendEmptyMessageDelayed(0, 100);
             }
         });
-//            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.imageView.getLayoutParams();
-//            params.height = mFixedHeight;
-
-        builder.build()
-                .load(item.getUri(mContext))
-                .memoryPolicy(MemoryPolicy.NO_CACHE)
-                .resize(getMaxHeight(), getMaxHeight())
-                .centerInside()
-                .into(holder.imageView);
-
-        if (holder.removeView != null) {
-            holder.removeView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    item.remove();
-                    mItems.remove(item);
-                    notifyDataSetChanged();
-                }
-            });
-            holder.loading.setVisibility(View.VISIBLE);
-            holder.loading.setText(R.string.loading);
+        if (!item.exists()) {
+            item.remove();
+            mItems.remove(item);
+            notifyDataSetChanged();
         } else {
-            holder.loading.setVisibility(View.GONE);
+            builder.build()
+                    .load(item.getUri(mContext))
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .resize(getMaxHeight(), getMaxHeight())
+                    .centerInside()
+                    .into(holder.imageView);
+
+            if (holder.removeView != null) {
+                holder.removeView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        item.remove();
+                        mItems.remove(item);
+                        notifyDataSetChanged();
+                    }
+                });
+                holder.loading.setVisibility(View.VISIBLE);
+                holder.loading.setText(R.string.loading);
+            } else {
+                holder.loading.setVisibility(View.GONE);
+            }
         }
     }
 

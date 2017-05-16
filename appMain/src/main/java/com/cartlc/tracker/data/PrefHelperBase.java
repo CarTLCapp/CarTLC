@@ -46,4 +46,15 @@ public class PrefHelperBase {
         editor.putLong(key, value);
         editor.commit();
     }
+
+
+    public int getInt(String key, int defaultValue) {
+        return getPrefs().getInt(key, defaultValue);
+    }
+
+    public void setInt(String key, int value) {
+        SharedPreferences.Editor editor = getPrefs().edit();
+        editor.putInt(key, value);
+        editor.commit();
+    }
 }
