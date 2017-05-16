@@ -33,7 +33,7 @@ public class DataEntry {
     }
 
     public String getNotes() {
-        return TableNotes.getInstance().query(notesId);
+        return TableNote.getInstance().query(notesId);
     }
 
     public List<String> getEquipmentNames() {

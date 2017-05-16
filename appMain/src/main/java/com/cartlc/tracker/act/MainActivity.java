@@ -19,7 +19,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,7 +39,7 @@ import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntries;
 import com.cartlc.tracker.data.TableEquipment;
-import com.cartlc.tracker.data.TableNotes;
+import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectGroups;
 import com.cartlc.tracker.data.TableProjects;
@@ -287,20 +286,24 @@ public class MainActivity extends AppCompatActivity {
             String value = getEditText(mEntryNotes);
             PrefHelper.getInstance().setNotes(value);
             if (isNext) {
-                long id = TableNotes.getInstance().add(value);
+                long id = TableNote.getInstance().add(value);
                 PrefHelper.getInstance().setLastNotesId(id);
             }
         } else if (mCurStage == Stage.PICTURE) {
-            int numberTaken   = TablePendingPictures.getInstance().count();
-            int requiredCount = PrefHelper.getInstance().getRequiredNumberPictures();
-            if (numberTaken < requiredCount) {
-                showError(getString(R.string.error_need_more_pictures, requiredCount - numberTaken));
-                return false;
+            if (isNext) {
+                int numberTaken   = TablePendingPictures.getInstance().count();
+                int requiredCount = PrefHelper.getInstance().getRequiredNumberPictures();
+                if (numberTaken < requiredCount) {
+                    showError(getString(R.string.error_need_more_pictures, requiredCount - numberTaken));
+                    return false;
+                }
             }
         } else if (mCurStage == Stage.EQUIPMENT) {
-            if (TableEquipment.getInstance().countChecked() == 0) {
-                showError(getString(R.string.error_need_equipment));
-                return false;
+            if (isNext) {
+                if (TableEquipment.getInstance().countChecked() == 0) {
+                    showError(getString(R.string.error_need_equipment));
+                    return false;
+                }
             }
         } else if (mCurStageEditing) {
             if (mCurStage == Stage.CITY) {

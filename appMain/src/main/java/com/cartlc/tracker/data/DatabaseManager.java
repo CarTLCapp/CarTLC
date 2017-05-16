@@ -34,7 +34,9 @@ public class DatabaseManager {
                 TableEquipmentEntryCollection.getInstance().create();
                 TableEquipmentProjectCollection.getInstance().create();
                 TablePictureCollection.getInstance().create();
-                TableNotes.getInstance().create();
+                TableNote.getInstance().create();
+                TableNoteProjectCollection.getInstance().create();
+                TablePendingNotes.getInstance().create();
                 TablePendingPictures.getInstance().create();
                 TableProjects.getInstance().create();
                 TableProjectGroups.getInstance().create();
@@ -51,7 +53,9 @@ public class DatabaseManager {
             TableEquipmentProjectCollection.Init(db);
             TableEquipmentEntryCollection.Init(db);
             TablePictureCollection.Init(db);
-            TableNotes.Init(db);
+            TableNote.Init(db);
+            TableNoteProjectCollection.Init(db);
+            TablePendingNotes.getInstance().Init(db);
             TablePendingPictures.getInstance().Init(db);
             TableProjects.Init(db);
             TableProjectGroups.Init(db);

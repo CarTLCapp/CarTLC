@@ -13,16 +13,16 @@ import timber.log.Timber;
  * Created by dug on 5/10/17.
  */
 
-public abstract class TableEquipmentCollection {
+public abstract class TableCollection {
 
-    static final String KEY_ROWID        = "_id";
-    static final String KEY_OTHER_ID     = "other_id";
-    static final String KEY_EQUIPMENT_ID = "equipment_id";
+    static final String KEY_ROWID       = "_id";
+    static final String KEY_GROUPING_ID = "grouping_id";
+    static final String KEY_VALUE_ID    = "value_id";
 
     final SQLiteDatabase mDb;
     final String         mTableName;
 
-    public TableEquipmentCollection(SQLiteDatabase db, String tableName) {
+    public TableCollection(SQLiteDatabase db, String tableName) {
         this.mTableName = tableName;
         this.mDb = db;
     }
@@ -41,9 +41,9 @@ public abstract class TableEquipmentCollection {
         sbuf.append(" (");
         sbuf.append(KEY_ROWID);
         sbuf.append(" integer primary key autoincrement, ");
-        sbuf.append(KEY_OTHER_ID);
+        sbuf.append(KEY_GROUPING_ID);
         sbuf.append(" long, ");
-        sbuf.append(KEY_EQUIPMENT_ID);
+        sbuf.append(KEY_VALUE_ID);
         sbuf.append(" long)");
         mDb.execSQL(sbuf.toString());
     }
@@ -65,14 +65,14 @@ public abstract class TableEquipmentCollection {
         add(collection.id, collection.equipmentListIds);
     }
 
-    public void add(long collectionId, List<Long> equipmentIds) {
+    public void add(long collectionId, List<Long> ids) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            for (Long equipmentId : equipmentIds) {
+            for (Long id : ids) {
                 values.clear();
-                values.put(KEY_OTHER_ID, collectionId);
-                values.put(KEY_EQUIPMENT_ID, equipmentId);
+                values.put(KEY_GROUPING_ID, collectionId);
+                values.put(KEY_VALUE_ID, id);
                 mDb.insert(mTableName, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -83,26 +83,16 @@ public abstract class TableEquipmentCollection {
         }
     }
 
-    public void addByName(long collectionId, List<String> equipments) {
-        List<Long> list = new ArrayList();
-        for (String equipname : equipments) {
-            long id = TableEquipment.getInstance().query(equipname);
-            if (id < 0) {
-                id = TableEquipment.getInstance().add(equipname);
-            }
-            list.add(id);
-        }
-        add(collectionId, list);
-    }
+
 
     public List<Long> query(long other_id) {
         List<Long> collection = new ArrayList();
         try {
-            final String[] columns       = {KEY_EQUIPMENT_ID};
-            final String   selection     = KEY_OTHER_ID + " =?";
+            final String[] columns       = {KEY_VALUE_ID};
+            final String   selection     = KEY_GROUPING_ID + " =?";
             final String[] selectionArgs = {Long.toString(other_id)};
             Cursor         cursor        = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null, null);
-            int            idxValue      = cursor.getColumnIndex(KEY_EQUIPMENT_ID);
+            int            idxValue      = cursor.getColumnIndex(KEY_VALUE_ID);
             while (cursor.moveToNext()) {
                 collection.add(cursor.getLong(idxValue));
             }

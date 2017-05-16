@@ -13,7 +13,8 @@ public class TestData {
             TableAddress.getInstance().add(Arrays.asList(ADDRESSES));
         }
         if (TableProjects.getInstance().count() == 0) {
-            AddEquipmentCollection();
+            AddCollections();
+            AddNotes();
         }
     }
 
@@ -39,7 +40,12 @@ public class TestData {
             new DataAddress("Alamo RM", "2155 Gratiot Ave", "Detroit", "Michigan")
     };
 
-    static void AddEquipmentCollection() {
+
+    static final String[] NOTES = {
+
+    };
+
+    static void AddCollections() {
         TableEquipmentProjectCollection.getInstance().addByName("Five Cubits", Arrays.asList(new String[]{
                 "OBC",
                 "RDT",
@@ -98,7 +104,39 @@ public class TestData {
                 "Repair Work",
         }));
         TableProjects.getInstance().add("Other");
+    }
 
+    static void AddNotes() {
+        TableNoteProjectCollection.getInstance().addByName("Five Cubits", Arrays.asList(new String[]{
+                "Serial #",
+                "IMEI #",
+                "Other"
+        }));
+        TableNoteProjectCollection.getInstance().addByName("Digital Fleet", Arrays.asList(new String[]{
+                "Serial #",
+                "IMEI #",
+                "Other"
+        }));
+        TableNoteProjectCollection.getInstance().addByName("Smart Witness", Arrays.asList(new String[]{
+                "Serial #",
+                "IMEI #",
+                "Sim #",
+                "DRID #",
+                "Other"
+        }));
+        TableNoteProjectCollection.getInstance().addByName("Fed Ex", Arrays.asList(new String[]{
+                "Serial #",
+                "IMEI #",
+                "Sim #",
+                "DRID #",
+                "Mobileye",
+                "Other"
+        }));
+        TableNoteProjectCollection.getInstance().addByName("Other", Arrays.asList(new String[]{
+                "Serial #",
+                "IMEI #",
+                "Other"
+        }));
     }
 
 }

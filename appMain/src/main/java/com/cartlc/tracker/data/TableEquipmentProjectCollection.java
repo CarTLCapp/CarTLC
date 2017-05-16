@@ -2,12 +2,13 @@ package com.cartlc.tracker.data;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by dug on 5/16/17.
  */
-public class TableEquipmentProjectCollection extends TableEquipmentCollection {
+public class TableEquipmentProjectCollection extends TableCollection {
     static final String TABLE_NAME = "project_equipment_collection";
 
     static TableEquipmentProjectCollection sInstance;
@@ -36,7 +37,19 @@ public class TableEquipmentProjectCollection extends TableEquipmentCollection {
         if (projectId < 0) {
             projectId = TableProjects.getInstance().add(projectName);
         }
-        super.addByName(projectId, equipments);
+        addByName(projectId, equipments);
+    }
+
+    public void addByName(long collectionId, List<String> names) {
+        List<Long> list = new ArrayList();
+        for (String name : names) {
+            long id = TableEquipment.getInstance().query(name);
+            if (id < 0) {
+                id = TableEquipment.getInstance().add(name);
+            }
+            list.add(id);
+        }
+        add(collectionId, list);
     }
 
 }
