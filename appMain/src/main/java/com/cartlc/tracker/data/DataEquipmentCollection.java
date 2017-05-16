@@ -7,27 +7,16 @@ import java.util.List;
  * Created by dug on 5/10/17.
  */
 
-public class DataEquipmentCollection {
-    public final long id;
-    public long projectNameId;
+public abstract class DataEquipmentCollection {
+    public long id;
     public List<Long> equipmentListIds = new ArrayList();
-
-    public DataEquipmentCollection(long id, long projectId) {
-        this.id = id;
-        this.projectNameId = projectId;
-    }
 
     public DataEquipmentCollection(long id) {
         this.id = id;
-        this.projectNameId = -1L;
     }
 
     public void add(long equipmentId) {
         equipmentListIds.add(equipmentId);
-    }
-
-    public void addChecked() {
-        equipmentListIds = TableEquipment.getInstance().queryChecked(projectNameId);
     }
 
     public List<DataEquipment> getEquipment() {
@@ -50,13 +39,4 @@ public class DataEquipmentCollection {
         return null;
     }
 
-    public long getProjectID() {
-        if (projectNameId >= 0) {
-            if (equipmentListIds.size() > 0) {
-                DataEquipment eq = TableEquipment.getInstance().query(equipmentListIds.get(0));
-                projectNameId =  eq.projectId;
-            }
-        }
-        return projectNameId;
-    }
 }

@@ -9,26 +9,13 @@ import java.util.Arrays;
 public class TestData {
 
     public static void Init() {
-        if (TableProjects.getInstance().count() == 0) {
-            TableProjects.getInstance().add(Arrays.asList(PROJECTS));
-        }
         if (TableAddress.getInstance().count() == 0) {
             TableAddress.getInstance().add(Arrays.asList(ADDRESSES));
         }
-        SetEquipment();
-        if (TableEquipment.getInstance().count() == 0) {
-            TableEquipment.getInstance().add(Arrays.asList(EQUIPMENT));
+        if (TableProjects.getInstance().count() == 0) {
+            AddEquipmentCollection();
         }
     }
-
-    static final String[] PROJECTS = {
-            "Five Cubits",
-            "Digital Fleet",
-            "Smart Witness",
-            "Fed Ex",
-            "Other",
-            "Verifi"
-    };
 
     static final DataAddress[] ADDRESSES = {
             new DataAddress("IMI", "1201 Mason St", "San Francisco", "California"),
@@ -52,58 +39,66 @@ public class TestData {
             new DataAddress("Alamo RM", "2155 Gratiot Ave", "Detroit", "Michigan")
     };
 
-    static DataEquipment[] EQUIPMENT;
+    static void AddEquipmentCollection() {
+        TableEquipmentProjectCollection.getInstance().addByName("Five Cubits", Arrays.asList(new String[]{
+                "OBC",
+                "RDT",
+                "VMX",
+                "6 pin Canbus",
+                "9 pin Canbus",
+                "Green Canbus",
+                "External Antenna",
+                "Internal Antenna",
+                "Other",
+                "Uninstall",
+                "Repair Work"
+        }));
+        TableEquipmentProjectCollection.getInstance().addByName("Digital Fleet", Arrays.asList(new String[]{
+                "Tablet",
+                "Canbus",
+                "Other",
+                "Uninstall",
+                "Repair Work",
+        }));
+        TableEquipmentProjectCollection.getInstance().addByName("Smart Witness", Arrays.asList(new String[]{
+                "KP1S",
+                "CPI",
+                "SVC 1080",
+                "Modem",
+                "Driver Facing Camera",
+                "Back Up Camera",
+                "Side Camera 1",
+                "Side Camera 2",
+                "DVR",
+                "Uninstall",
+                "Other",
+                "Repair Work",
+        }));
+        TableEquipmentProjectCollection.getInstance().addByName("Fed Ex", Arrays.asList(new String[]{
+                "KP1S",
+                "Driver Facing Camera",
+                "Modem",
+                "Mobileye",
+                "Backup Sensors",
+                "Re-Calibrate",
+                "Other",
+                "Uninstall",
+                "Repair Work",
+        }));
+        TableEquipmentProjectCollection.getInstance().addByName("Verifi", Arrays.asList(new String[]{
+                "V3 Full Install",
+                "V4 Full Install",
+                "Admix Tank",
+                "Nozzle",
+                "FDM Upgrade",
+                "Crossover Upgrade",
+                "WTAA Install",
+                "Commissioning",
+                "Uninstall",
+                "Repair Work",
+        }));
+        TableProjects.getInstance().add("Other");
 
-    static void SetEquipment() {
-        EQUIPMENT = new DataEquipment[]{
-                new DataEquipment("Five Cubits", "OBC"),
-                new DataEquipment("Five Cubits", "RDT"),
-                new DataEquipment("Five Cubits", "VMX"),
-                new DataEquipment("Five Cubits", "6 pin Canbus"),
-                new DataEquipment("Five Cubits", "9 pin Canbus"),
-                new DataEquipment("Five Cubits", "Green Canbus"),
-                new DataEquipment("Five Cubits", "External Antenna"),
-                new DataEquipment("Five Cubits", "Internal Antenna"),
-                new DataEquipment("Five Cubits", "Other"),
-                new DataEquipment("Five Cubits", "Uninstall"),
-                new DataEquipment("Five Cubits", "Repair Work"),
-                new DataEquipment("Digital Fleet", "Tablet"),
-                new DataEquipment("Digital Fleet", "Canbus"),
-                new DataEquipment("Digital Fleet", "Other"),
-                new DataEquipment("Digital Fleet", "Uninstall"),
-                new DataEquipment("Digital Fleet", "Repair Work"),
-                new DataEquipment("Smart Witness", "KP1S"),
-                new DataEquipment("Smart Witness", "CPI"),
-                new DataEquipment("Smart Witness", "SVC 1080"),
-                new DataEquipment("Smart Witness", "Modem"),
-                new DataEquipment("Smart Witness", "Driver Facing Camera"),
-                new DataEquipment("Smart Witness", "Back Up Camera"),
-                new DataEquipment("Smart Witness", "Side Camera 1"),
-                new DataEquipment("Smart Witness", "Side Camera 2"),
-                new DataEquipment("Smart Witness", "DVR"),
-                new DataEquipment("Smart Witness", "Uninstall"),
-                new DataEquipment("Smart Witness", "Other"),
-                new DataEquipment("Smart Witness", "Repair Work"),
-                new DataEquipment("Fed Ex", "KP1S"),
-                new DataEquipment("Fed Ex", "Driver Facing Camera"),
-                new DataEquipment("Fed Ex", "Modem"),
-                new DataEquipment("Fed Ex", "Mobileye"),
-                new DataEquipment("Fed Ex", "Backup Sensors"),
-                new DataEquipment("Fed Ex", "Re-Calibrate"),
-                new DataEquipment("Fed Ex", "Other"),
-                new DataEquipment("Fed Ex", "Uninstall"),
-                new DataEquipment("Fed Ex", "Repair Work"),
-                new DataEquipment("Verifi", "V3 Full Install"),
-                new DataEquipment("Verifi", "V4 Full Install"),
-                new DataEquipment("Verifi", "Admix Tank"),
-                new DataEquipment("Verifi", "Nozzle"),
-                new DataEquipment("Verifi", "FDM Upgrade"),
-                new DataEquipment("Verifi", "Crossover Upgrade"),
-                new DataEquipment("Verifi", "WTAA Install"),
-                new DataEquipment("Verifi", "Commissioning"),
-                new DataEquipment("Verifi", "Uninstall"),
-                new DataEquipment("Verifi", "Repair Work"),
-        };
     }
 
 }

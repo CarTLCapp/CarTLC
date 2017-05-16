@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         } else if (mCurStage == Stage.EQUIPMENT) {
-            if (TableEquipment.getInstance().countChecked(PrefHelper.getInstance().getProjectId()) == 0) {
+            if (TableEquipment.getInstance().countChecked() == 0) {
                 showError(getString(R.string.error_need_equipment));
                 return false;
             }
@@ -374,12 +374,16 @@ public class MainActivity extends AppCompatActivity {
                 mLastName.setText(PrefHelper.getInstance().getLastName());
                 break;
             case PROJECT:
-                if (TableProjectGroups.getInstance().count() > 0) {
-                    mPrev.setVisibility(View.VISIBLE);
+                if (mCurStageEditing) {
+                    showError("No projects!");
+                } else {
+                    if (TableProjectGroups.getInstance().count() > 0) {
+                        mPrev.setVisibility(View.VISIBLE);
+                    }
+                    mMainListFrame.setVisibility(View.VISIBLE);
+                    mNext.setVisibility(View.VISIBLE);
+                    setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 }
-                mMainListFrame.setVisibility(View.VISIBLE);
-                mNext.setVisibility(View.VISIBLE);
-                setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 break;
             case COMPANY:
                 mMainListFrame.setVisibility(View.VISIBLE);

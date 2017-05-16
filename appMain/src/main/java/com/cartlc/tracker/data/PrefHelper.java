@@ -3,7 +3,6 @@ package com.cartlc.tracker.data;
 import android.content.Context;
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -315,7 +314,7 @@ public class PrefHelper extends PrefHelperBase {
         }
         DataEntry entry = new DataEntry();
         entry.projectNameId = projectGroup.projectNameId;
-        entry.equipmentCollection = new DataEquipmentCollection(getNextEquipmentCollectionID(), entry.projectNameId);
+        entry.equipmentCollection = new DataEquipmentEntryCollection(getNextEquipmentCollectionID());
         entry.equipmentCollection.addChecked();
         entry.pictureCollection = TablePendingPictures.getInstance().createCollection();
         entry.addressId = projectGroup.addressId;

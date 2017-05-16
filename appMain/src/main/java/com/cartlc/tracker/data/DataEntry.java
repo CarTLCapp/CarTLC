@@ -7,15 +7,15 @@ import java.util.List;
  */
 
 public class DataEntry {
-    public long                    id;
-    public long                    date;
-    public long                    projectNameId;
-    public long                    addressId;
-    public DataEquipmentCollection equipmentCollection;
-    public DataPictureCollection   pictureCollection;
-    public long                    truckNumber;
-    public long                    notesId;
-    public boolean                 uploaded;
+    public long                         id;
+    public long                         date;
+    public long                         projectNameId;
+    public long                         addressId;
+    public DataEquipmentEntryCollection equipmentCollection;
+    public DataPictureCollection        pictureCollection;
+    public long                         truckNumber;
+    public long                         notesId;
+    public boolean                      uploaded;
 
     public DataEntry() {
     }
