@@ -1,6 +1,8 @@
 package com.cartlc.tracker.act;
 
+import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
@@ -9,6 +11,9 @@ import android.widget.TextView;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataPicture;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -19,26 +24,31 @@ import butterknife.ButterKnife;
 
 public class ConfirmationFrame {
 
-    @BindView(R.id.project_name_value)    TextView     mProjectNameValue;
-    @BindView(R.id.truck_number_value)    TextView     mTruckNumberValue;
-    @BindView(R.id.project_address_value) TextView     mAddressValue;
-    @BindView(R.id.project_notes_value)   TextView     mNotesValue;
-    @BindView(R.id.equipment_grid)        RecyclerView mEquipmentGrid;
-    @BindView(R.id.project_notes_label)   TextView     mNotesLabel;
-
-    final FrameLayout       mTop;
-    final SimpleListAdapter mSimpleAdapter;
-    final GridLayoutManager mGridLayout;
+    @BindView(R.id.project_name_value)    TextView           mProjectNameValue;
+    @BindView(R.id.truck_number_value)    TextView           mTruckNumberValue;
+    @BindView(R.id.project_address_value) TextView           mAddressValue;
+    @BindView(R.id.project_notes_value)   TextView           mNotesValue;
+    @BindView(R.id.equipment_grid)        RecyclerView       mEquipmentGrid;
+    @BindView(R.id.project_notes_label)   TextView           mNotesLabel;
+    @BindView(R.id.confirm_pictures_list) RecyclerView       mPictureList;
+    final                                 FrameLayout        mTop;
+    final                                 SimpleListAdapter  mSimpleAdapter;
+    final                                 GridLayoutManager  mGridLayout;
+    final                                 PictureListAdapter mPictureAdapter;
 
     public ConfirmationFrame(FrameLayout top) {
+        final Context ctx = top.getContext();
         mTop = top;
-
         ButterKnife.bind(this, top);
-
-        mSimpleAdapter = new SimpleListAdapter(mTop.getContext(), R.layout.entry_item_confirm);
+        mSimpleAdapter = new SimpleListAdapter(ctx, R.layout.entry_item_confirm);
         mEquipmentGrid.setAdapter(mSimpleAdapter);
-        mGridLayout = new GridLayoutManager(mTop.getContext(), 2);
+        mGridLayout = new GridLayoutManager(ctx, 2);
         mEquipmentGrid.setLayoutManager(mGridLayout);
+        mPictureAdapter = new PictureListAdapter(ctx);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false);
+        layoutManager.setAutoMeasureEnabled(true);
+        mPictureList.setLayoutManager(layoutManager);
+        mPictureList.setAdapter(mPictureAdapter);
     }
 
     public void setVisibility(int code) {
@@ -70,5 +80,6 @@ public class ConfirmationFrame {
             mTruckNumberValue.setText(Long.toString(entry.truckNumber));
         }
         mSimpleAdapter.setList(entry.getEquipmentNames());
+        mPictureAdapter.setList(entry.getPictures());
     }
 }

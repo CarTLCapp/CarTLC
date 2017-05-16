@@ -60,10 +60,10 @@ public class TablePictureCollection {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            for (String filename : collection.pictures) {
+            for (DataPicture ele : collection.pictures) {
                 values.clear();
                 values.put(KEY_COLLECTION_ID, collection.id);
-                values.put(KEY_PICTURE_FILENAME, filename);
+                values.put(KEY_PICTURE_FILENAME, ele.pictureFilename);
                 mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();

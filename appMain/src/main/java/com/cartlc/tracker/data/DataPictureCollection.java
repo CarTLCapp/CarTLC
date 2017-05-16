@@ -9,17 +9,17 @@ import java.util.List;
 
 public class DataPictureCollection {
     public long id;
-    public List<String> pictures = new ArrayList();
+    public List<DataPicture> pictures = new ArrayList();
 
     public DataPictureCollection(long id) {
         this.id = id;
     }
 
-    public void add(String pictureFilename) {
-        pictures.add(pictureFilename);
+    public void add(DataPicture picture) {
+        pictures.add(picture);
     }
 
-    public void add(List<String> pictures) {
-        pictures.addAll(pictures);
+    public void add(String filename) {
+        pictures.add(new DataPicture(filename));
     }
 }

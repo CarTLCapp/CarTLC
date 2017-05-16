@@ -29,6 +29,7 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.picture) ImageView imageView;
         @BindView(R.id.remove)  ImageView removeView;
+        @BindView(R.id.loading) TextView  loading;
 
         public CustomViewHolder(View view) {
             super(view);
@@ -54,13 +55,21 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
     public void onBindViewHolder(CustomViewHolder holder, final int position) {
         final DataPicture item = mItems.get(position);
         Picasso.with(mContext).load(item.getUri(mContext)).into(holder.imageView);
-        holder.removeView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                item.remove();
-                onDataChanged();
-            }
-        });
+        if (item.isRemoveOk()) {
+            holder.removeView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    item.remove();
+                    mItems.remove(item);
+                    notifyDataSetChanged();
+                }
+            });
+            holder.removeView.setVisibility(View.VISIBLE);
+            holder.loading.setVisibility(View.VISIBLE);
+        } else {
+            holder.removeView.setVisibility(View.GONE);
+            holder.loading.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -68,8 +77,8 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
         return mItems.size();
     }
 
-    public void onDataChanged() {
-        mItems = TablePendingPictures.getInstance().queryPictures();
+    public void setList(List<DataPicture> list) {
+        mItems = list;
         notifyDataSetChanged();
     }
 }

@@ -45,7 +45,7 @@ public class TablePendingPictures extends TableString {
         return DataPicture.getUri(ctx, genNewPictureFile());
     }
 
-    public List<DataPicture> queryPictures() {
+    public List<DataPicture> queryPictures(boolean withId) {
         ArrayList<DataPicture> list = new ArrayList();
         try {
             final String[] columns  = {KEY_ROWID, KEY_VALUE};
@@ -54,7 +54,11 @@ public class TablePendingPictures extends TableString {
             int            idxRow   = cursor.getColumnIndex(KEY_ROWID);
             int            idxValue = cursor.getColumnIndex(KEY_VALUE);
             while (cursor.moveToNext()) {
-                list.add(new DataPicture(cursor.getLong(idxRow), cursor.getString(idxValue)));
+                if (withId) {
+                    list.add(new DataPicture(cursor.getLong(idxRow), cursor.getString(idxValue)));
+                } else {
+                    list.add(new DataPicture(cursor.getString(idxValue)));
+                }
             }
             cursor.close();
         } catch (Exception ex) {
@@ -66,7 +70,7 @@ public class TablePendingPictures extends TableString {
     public DataPictureCollection createCollection() {
         DataPictureCollection collection = new DataPictureCollection(
                 PrefHelper.getInstance().getNextPictureCollectionID());
-        collection.add(query());
+        collection.pictures = queryPictures(false);
         return collection;
     }
 

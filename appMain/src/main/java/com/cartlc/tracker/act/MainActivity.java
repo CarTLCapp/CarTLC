@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.DataPictureCollection;
 import com.cartlc.tracker.data.DataProjectGroup;
 import com.cartlc.tracker.data.DataStates;
@@ -157,7 +158,6 @@ public class MainActivity extends AppCompatActivity {
     int                        mEntryMaxLength;
     ConfirmationFrame          mConfirmationFrame;
     DataEntry                  mCurEntry;
-    DataPictureCollection      mPictureCollection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -301,10 +301,6 @@ public class MainActivity extends AppCompatActivity {
             if (isNext) {
                 long id = TableNotes.getInstance().add(value);
                 PrefHelper.getInstance().setLastNotesId(id);
-            }
-        } else if (mCurStage == Stage.PICTURE) {
-            if (isNext) {
-                savePicture();
             }
         }
         mCurStageEditing = false;
@@ -505,7 +501,7 @@ public class MainActivity extends AppCompatActivity {
                     mNew.setText(R.string.btn_another);
                     mPictureFrame.setVisibility(View.VISIBLE);
                     mPictureList.setVisibility(View.VISIBLE);
-                    mPictureAdapter.onDataChanged();
+                    mPictureAdapter.setList(TablePendingPictures.getInstance().queryPictures(true));
                 }
                 break;
             case CONFIRM:
@@ -513,15 +509,15 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 mNext.setText(R.string.btn_confirm);
                 mConfirmationFrame.setVisibility(View.VISIBLE);
-                mCurEntry = PrefHelper.getInstance().createEntry(mPictureCollection);
+                mCurEntry = PrefHelper.getInstance().createEntry();
                 mConfirmationFrame.fill(mCurEntry);
                 mTitle.setText(R.string.title_confirmation);
                 break;
             case ADD_ELEMENT:
                 TableEntries.getInstance().add(mCurEntry);
                 PrefHelper.getInstance().clearLastEntry();
-                mPictureCollection = null;
                 mCurStage = Stage.CURRENT_PROJECT;
+                mCurEntry = null;
                 fillStage();
                 break;
         }
@@ -582,10 +578,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             // Everything needed will happen automatically in fillStage();
         }
-    }
-
-    void savePicture() {
-        mPictureCollection = TablePendingPictures.getInstance().createCollection();
     }
 
     void showError(String message) {

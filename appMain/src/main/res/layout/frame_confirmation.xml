@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/frame_confirmation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/buttons"
+            android:layout_below="@id/setup_title"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:visibility="gone">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true">
+
+        <GridLayout
+            android:id="@+id/grid_confirmation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                style="@style/ConfirmTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_project_"/>
+
+            <TextView
+                android:id="@+id/project_name_value"
+                style="@style/ConfirmText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:paddingLeft="@dimen/confirm_gap_left"/>
+
+            <TextView
+                style="@style/ConfirmTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/confirm_gap_height"
+                android:text="@string/title_truck_number_"/>
+
+            <TextView
+                android:id="@+id/truck_number_value"
+                style="@style/ConfirmText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_marginTop="@dimen/confirm_gap_height"
+                android:paddingLeft="@dimen/confirm_gap_left"/>
+
+            <TextView
+                style="@style/ConfirmTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/confirm_gap_height"
+                android:text="@string/title_address_"/>
+
+            <TextView
+                android:id="@+id/project_address_value"
+                style="@style/ConfirmAddressText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_marginTop="@dimen/confirm_gap_height"
+                android:paddingLeft="@dimen/confirm_gap_left"/>
+
+            <TextView
+                android:id="@+id/project_notes_label"
+                style="@style/ConfirmTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/confirm_gap_height"
+                android:text="@string/title_notes_"/>
+
+            <TextView
+                android:id="@+id/project_notes_value"
+                style="@style/ConfirmText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_marginTop="@dimen/confirm_gap_height"
+                android:gravity="left|center_vertical"
+                android:paddingLeft="@dimen/confirm_gap_left"/>
+
+            <TextView
+                style="@style/ConfirmTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/confirm_gap_height"
+                android:text="@string/title_equipment_installed_"/>
+
+        </GridLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/equipment_grid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/background_shadow"
+            android:elevation="3dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/grid_confirmation"/>
+
+        <TextView
+            android:id="@+id/confirm_pictures_label"
+            style="@style/ConfirmTitleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="@dimen/confirm_gap_height"
+            android:text="@string/title_pictures_"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/equipment_grid"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/confirm_pictures_list"
+            android:layout_width="wrap_content"
+            android:layout_height="200dp"
+            android:layout_centerInParent="true"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/confirm_pictures_label"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+</ScrollView>

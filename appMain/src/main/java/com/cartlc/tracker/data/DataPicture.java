@@ -16,7 +16,7 @@ public class DataPicture {
         return FileProvider.getUriForFile(ctx, "com.cartcl.tracker.fileprovider", file);
     }
 
-    public long id = -1L;
+    public long id;
     public String pictureFilename;
 
     public DataPicture(long id, String filename) {
@@ -25,6 +25,7 @@ public class DataPicture {
     }
 
     public DataPicture(String filename) {
+        id = -1L;
         pictureFilename = filename;
     }
 
@@ -37,5 +38,9 @@ public class DataPicture {
         if (id >= 0) {
             TablePendingPictures.getInstance().remove(id);
         }
+    }
+
+    public boolean isRemoveOk() {
+        return id >= 0;
     }
 }
