@@ -12,7 +12,7 @@ public class DataEntry {
     public long projectNameId;
     public long addressId;
     public DataEquipmentCollection equipmentCollection;
-    public long pictureCollectionId;
+    public DataPictureCollection pictureCollection;
     public long truckNumber;
     public long notesId;
     public boolean uploaded;

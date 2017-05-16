@@ -3,7 +3,9 @@ package com.cartlc.tracker.data;
 import android.content.Context;
 import android.text.TextUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,10 +37,23 @@ public class PrefHelper extends PrefHelperBase {
     static final String KEY_LAST_NOTES_ID = "notes_id";
     static final String KEY_EQUIPMENT_COLLECTION_ID = "equipment_collection_id";
     static final String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
+    static final String KEY_NEXT_PICTURE_COLLECTION_ID = "next_picture_collection_id";
+
+    static final String KEY_TECH_ID = "tech_id";
+
+    static final String PICTURE_DATE_FORMAT = "yy-MM-dd,HH:mm:ss";
 
     PrefHelper(Context ctx) {
         super(ctx);
         sInstance = this;
+    }
+
+    public long getTechID() {
+        return getLong(KEY_TECH_ID, 0);
+    }
+
+    public void setTechID(long id) {
+        setLong(KEY_TECH_ID, id);
     }
 
     public String getStreet() {
@@ -73,12 +88,12 @@ public class PrefHelper extends PrefHelperBase {
         setString(KEY_CITY, value);
     }
 
-    public String getProject() {
+    public String getProjectName() {
         return getString(KEY_PROJECT, null);
     }
 
     public Long getProjectId() {
-        long projectId = TableProjects.getInstance().query(getProject());
+        long projectId = TableProjects.getInstance().query(getProjectName());
         if (projectId >= 0) {
             return projectId;
         }
@@ -212,7 +227,7 @@ public class PrefHelper extends PrefHelperBase {
         String street = getStreet();
         String city = getCity();
         String company = getCompany();
-        String project = getProject();
+        String project = getProjectName();
         if (TextUtils.isEmpty(project) || TextUtils.isEmpty(state) || TextUtils.isDigitsOnly(street) || TextUtils.isEmpty(city) || TextUtils.isEmpty(company)) {
             return false;
         }
@@ -252,10 +267,17 @@ public class PrefHelper extends PrefHelperBase {
 
     public void incNextEquipmentCollectionID() {
         setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, getNextEquipmentCollectionID() + 1);
-
     }
 
-    public DataEntry createEntry() {
+    public long getNextPictureCollectionID() {
+        return getLong(KEY_NEXT_PICTURE_COLLECTION_ID, 0L);
+    }
+
+    public void incNextPictureCollectionID() {
+        setLong(KEY_NEXT_PICTURE_COLLECTION_ID, getNextPictureCollectionID() + 1);
+    }
+
+    public DataEntry createEntry(DataPictureCollection pictureCollection) {
         long projectGroupId = getCurrentProjectGroupId();
         if (projectGroupId < 0) {
             return null;
@@ -268,6 +290,7 @@ public class PrefHelper extends PrefHelperBase {
         entry.projectNameId = projectGroup.projectNameId;
         entry.equipmentCollection = new DataEquipmentCollection(getNextEquipmentCollectionID(), entry.projectNameId);
         entry.equipmentCollection.addChecked();
+        entry.pictureCollection = pictureCollection;
         entry.addressId = projectGroup.addressId;
         entry.truckNumber = getTruckNumber();
         entry.notesId = getLastNotesId();
@@ -275,4 +298,18 @@ public class PrefHelper extends PrefHelperBase {
         return entry;
     }
 
+    public String getPictureFilename() {
+        long tech_id = getTechID();
+        long project_id = getProjectId();
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("picture_");
+        sbuf.append(tech_id);
+        sbuf.append("_");
+        sbuf.append(project_id);
+        sbuf.append("_");
+
+        SimpleDateFormat fmt = new SimpleDateFormat(PICTURE_DATE_FORMAT);
+        sbuf.append(fmt.format(new Date(System.currentTimeMillis())));
+        return sbuf.toString();
+    }
 }

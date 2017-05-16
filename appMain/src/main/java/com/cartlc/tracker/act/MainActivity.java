@@ -2,7 +2,10 @@ package com.cartlc.tracker.act;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +17,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,11 +26,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.cartlc.support.image.BitmapHelper;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataPictureCollection;
 import com.cartlc.tracker.data.DataProjectGroup;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.PrefHelper;
@@ -44,6 +51,8 @@ import butterknife.ButterKnife;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
+
+    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     class DetectReturn implements TextWatcher {
         public DetectReturn() {
@@ -99,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
         TRUCK_NUMBER,
         EQUIPMENT,
         NOTES,
+        TAKE_PICTURE,
+        DISPLAY_PICTURE,
         CONFIRM,
         ADD_ELEMENT;
 
@@ -128,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.fab_add) FloatingActionButton mAdd;
     @BindView(R.id.number_characters) TextView mNumChars;
     @BindView(R.id.frame_confirmation) FrameLayout mConfirmationFrameView;
+    @BindView(R.id.picture) ImageView mPicture;
 
     Stage mCurStage = Stage.LOGIN;
     String mCurKey = PrefHelper.KEY_STATE;
@@ -141,6 +153,8 @@ public class MainActivity extends AppCompatActivity {
     int mEntryMaxLength;
     ConfirmationFrame mConfirmationFrame;
     DataEntry mCurEntry;
+    Bitmap mPictureBitmap;
+    DataPictureCollection mPictureCollection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -226,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
     void computeCurStage() {
         if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
             mCurStage = Stage.LOGIN;
-        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getProject())) {
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getProjectName())) {
             mCurStage = Stage.PROJECT;
         } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCompany())) {
             mCurStage = Stage.COMPANY;
@@ -288,6 +302,12 @@ public class MainActivity extends AppCompatActivity {
                 long id = TableNotes.getInstance().add(value);
                 PrefHelper.getInstance().setLastNotesId(id);
             }
+        } else if (mCurStage == Stage.DISPLAY_PICTURE) {
+            if (isNext) {
+                savePicture();
+            } else {
+                recyclePicture();
+            }
         }
         mCurStageEditing = false;
         return true;
@@ -307,6 +327,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void doNewEntry() {
+        savePicture();
         mCurStageEditing = true;
         fillStage();
     }
@@ -328,8 +349,10 @@ public class MainActivity extends AppCompatActivity {
         mPrev.setVisibility(View.INVISIBLE);
         mNew.setVisibility(View.INVISIBLE);
         mNew.setText(R.string.btn_add);
+        mPrev.setText(R.string.btn_prev);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         mConfirmationFrame.setVisibility(View.GONE);
+        mPicture.setVisibility(View.GONE);
 
         switch (mCurStage) {
             case LOGIN:
@@ -470,18 +493,37 @@ public class MainActivity extends AppCompatActivity {
                     mListContainer.setVisibility(View.VISIBLE);
                 }
                 break;
+            case TAKE_PICTURE:
+                dispatchPictureRequest();
+                mTitle.setText(R.string.title_picture);
+                mPrev.setVisibility(View.VISIBLE);
+                break;
+            case DISPLAY_PICTURE:
+                if (mCurStageEditing) {
+                    mCurStage = Stage.TAKE_PICTURE;
+                    fillStage();
+                } else {
+                    mPicture.setVisibility(View.VISIBLE);
+                    mNext.setVisibility(View.VISIBLE);
+                    mPrev.setVisibility(View.VISIBLE);
+                    mPrev.setText(R.string.btn_reject);
+                    mNext.setText(R.string.btn_confirm);
+                    mNew.setText(R.string.btn_another);
+                }
+                break;
             case CONFIRM:
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
                 mNext.setText(R.string.btn_confirm);
                 mConfirmationFrame.setVisibility(View.VISIBLE);
-                mCurEntry = PrefHelper.getInstance().createEntry();
+                mCurEntry = PrefHelper.getInstance().createEntry(mPictureCollection);
                 mConfirmationFrame.fill(mCurEntry);
                 mTitle.setText(R.string.title_confirmation);
                 break;
             case ADD_ELEMENT:
                 TableEntries.getInstance().add(mCurEntry);
                 PrefHelper.getInstance().clearLastEntry();
+                mPictureCollection = null;
                 mCurStage = Stage.CURRENT_PROJECT;
                 fillStage();
                 break;
@@ -489,7 +531,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     boolean isNewEquipmentOkay() {
-        String name = PrefHelper.getInstance().getProject();
+        String name = PrefHelper.getInstance().getProjectName();
         if (name.equals("Other")) {
             return true;
         }
@@ -524,6 +566,40 @@ public class MainActivity extends AppCompatActivity {
                     mRecyclerView.scrollToPosition(position);
                 }
             }
+        }
+    }
+
+    void dispatchPictureRequest() {
+        Log.d("MYDEBUG", "displayPictureRequest()-> START");
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            mPictureBitmap = (Bitmap) extras.get("data");
+            mPicture.setImageBitmap(mPictureBitmap);
+        }
+    }
+
+    void savePicture() {
+        String pictureName = PrefHelper.getInstance().getPictureFilename();
+        BitmapHelper.saveBitmapToInternal(this, mPictureBitmap, pictureName);
+        if (mPictureCollection == null) {
+            mPictureCollection = new DataPictureCollection(PrefHelper.getInstance().getNextPictureCollectionID());
+        }
+        mPictureCollection.add(pictureName);
+        recyclePicture();
+    }
+
+    void recyclePicture() {
+        if (mPictureBitmap != null) {
+            mPicture.setImageBitmap(null);
+            mPictureBitmap.recycle();
+            mPictureBitmap = null;
         }
     }
 }

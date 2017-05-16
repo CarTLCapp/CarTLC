@@ -122,7 +122,7 @@ public class TableEntries {
                 entry.addressId = cursor.getLong(idxAddress);
                 long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
                 entry.equipmentCollection = new DataEquipmentCollection(equipmentCollectionId, entry.projectNameId);
-                entry.pictureCollectionId = cursor.getLong(idxPictureCollectionId);
+                entry.pictureCollection = new DataPictureCollection(cursor.getLong(idxPictureCollectionId));
                 entry.truckNumber = cursor.getInt(idxTruckNumber);
                 entry.notesId = cursor.getLong(idxNotesId);
                 entry.uploaded = cursor.getShort(idxUploaded) != 0;
@@ -172,7 +172,10 @@ public class TableEntries {
         mDb.beginTransaction();
         try {
             TableEquipmentCollection.getInstance().add(entry.equipmentCollection);
+            TablePictureCollection.getInstance().add(entry.pictureCollection);
+
             PrefHelper.getInstance().incNextEquipmentCollectionID();
+            PrefHelper.getInstance().incNextPictureCollectionID();
 
             ContentValues values = new ContentValues();
             values.clear();

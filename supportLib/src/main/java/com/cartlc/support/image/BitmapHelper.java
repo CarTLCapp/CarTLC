@@ -4,8 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+
 import timber.log.Timber;
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
 
 /**
@@ -13,7 +15,7 @@ import java.io.InputStream;
  */
 public class BitmapHelper {
 
-   /**
+    /**
      * Load the bitmap from the assets directory.
      *
      * @param filename : asset files
@@ -29,5 +31,25 @@ public class BitmapHelper {
             Timber.e(ex.getMessage());
         }
         return result;
+    }
+
+    /**
+     * Save bitmap to internal storage.
+     *
+     * @param ctx
+     * @param bitmap
+     * @param filename
+     * @return
+     */
+    public static boolean saveBitmapToInternal(Context ctx, Bitmap bitmap, String filename) {
+        try {
+            FileOutputStream fos2 = ctx.openFileOutput(filename, 0);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos2);
+            fos2.close();
+            return true;
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return false;
     }
 }
