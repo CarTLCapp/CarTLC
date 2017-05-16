@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.number_characters) TextView mNumChars;
     @BindView(R.id.frame_confirmation) FrameLayout mConfirmationFrameView;
     @BindView(R.id.picture) ImageView mPicture;
+    @BindView(R.id.frame_pictures) ViewGroup mPictureFrame;
 
     Stage mCurStage = Stage.LOGIN;
     String mCurKey = PrefHelper.KEY_STATE;
@@ -348,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
         mPrev.setText(R.string.btn_prev);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         mConfirmationFrame.setVisibility(View.GONE);
-        mPicture.setVisibility(View.GONE);
+        mPictureFrame.setVisibility(View.GONE);
 
         switch (mCurStage) {
             case LOGIN:
@@ -502,12 +503,10 @@ public class MainActivity extends AppCompatActivity {
                     mCurStage = Stage.TAKE_PICTURE;
                     fillStage();
                 } else {
-                    mPicture.setVisibility(View.VISIBLE);
+                    mPictureFrame.setVisibility(View.VISIBLE);
                     mNext.setVisibility(View.VISIBLE);
                     mPrev.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
-                    mPrev.setText(R.string.btn_reject);
-                    mNext.setText(R.string.btn_confirm);
                     mNew.setText(R.string.btn_another);
                 }
                 break;
