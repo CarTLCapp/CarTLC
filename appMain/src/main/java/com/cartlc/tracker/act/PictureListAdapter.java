@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cartlc.tracker.R;
+import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.TablePendingPictures;
 import com.squareup.picasso.Picasso;
 
@@ -16,6 +17,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by dug on 5/10/17.
  */
@@ -23,17 +27,18 @@ import android.widget.TextView;
 public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.CustomViewHolder> {
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageView;
+        @BindView(R.id.picture) ImageView imageView;
+        @BindView(R.id.remove)  ImageView removeView;
 
         public CustomViewHolder(View view) {
             super(view);
-            imageView = (ImageView) view.findViewById(R.id.picture);
+            ButterKnife.bind(this, view);
             imageView.setAdjustViewBounds(true);
         }
     }
 
     final Context mContext;
-    List<Uri> mItems = new ArrayList();
+    List<DataPicture> mItems = new ArrayList();
 
     public PictureListAdapter(Context context) {
         mContext = context;
@@ -47,8 +52,15 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
 
     @Override
     public void onBindViewHolder(CustomViewHolder holder, final int position) {
-        final Uri uri = mItems.get(position);
-        Picasso.with(mContext).load(uri).into(holder.imageView);
+        final DataPicture item = mItems.get(position);
+        Picasso.with(mContext).load(item.getUri(mContext)).into(holder.imageView);
+        holder.removeView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                item.remove();
+                onDataChanged();
+            }
+        });
     }
 
     @Override
@@ -57,7 +69,7 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
     }
 
     public void onDataChanged() {
-        mItems = TablePendingPictures.getInstance().queryPictures(mContext);
+        mItems = TablePendingPictures.getInstance().queryPictures();
         notifyDataSetChanged();
     }
 }

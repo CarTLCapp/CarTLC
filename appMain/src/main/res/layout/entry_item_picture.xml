@@ -3,6 +3,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent">
 
+
+    <TextView
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:textAllCaps="true"
+        style="@style/LoadingText"
+        android:text="@string/loading"/>
+
     <ImageView
         android:id="@+id/picture"
         android:layout_width="wrap_content"

@@ -1,6 +1,7 @@
 package com.cartlc.tracker.data;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
@@ -8,6 +9,8 @@ import android.support.v4.content.FileProvider;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * Created by dug on 4/17/17.
@@ -29,7 +32,6 @@ public class TablePendingPictures extends TableString {
 
     TablePendingPictures(SQLiteDatabase db) {
         super(db, TABLE_NAME);
-        mOrdering = " DESC";
         sInstance = this;
     }
 
@@ -40,18 +42,23 @@ public class TablePendingPictures extends TableString {
     }
 
     public Uri genNewPictureUri(Context ctx) {
-        return genNewPictureUri(ctx, genNewPictureFile());
+        return DataPicture.getUri(ctx, genNewPictureFile());
     }
 
-    public Uri genNewPictureUri(Context ctx, File file) {
-        return FileProvider.getUriForFile(ctx, "com.cartcl.tracker.fileprovider", file);
-    }
-
-    public List<Uri> queryPictures(Context ctx) {
-        ArrayList<Uri> list = new ArrayList();
-        for (String filePath : query()) {
-            File filePicture = new File(filePath);
-            list.add(genNewPictureUri(ctx, filePicture));
+    public List<DataPicture> queryPictures() {
+        ArrayList<DataPicture> list = new ArrayList();
+        try {
+            final String[] columns  = {KEY_ROWID, KEY_VALUE};
+            final String   orderBy  = KEY_VALUE + " DESC";
+            Cursor         cursor   = mDb.query(mTableName, columns, null, null, null, null, orderBy);
+            int            idxRow   = cursor.getColumnIndex(KEY_ROWID);
+            int            idxValue = cursor.getColumnIndex(KEY_VALUE);
+            while (cursor.moveToNext()) {
+                list.add(new DataPicture(cursor.getLong(idxRow), cursor.getString(idxValue)));
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
         }
         return list;
     }

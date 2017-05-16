@@ -16,6 +16,9 @@ import com.cartlc.tracker.data.TableProjectGroups;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by dug on 5/10/17.
  */
@@ -23,15 +26,14 @@ import java.util.List;
 public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.CustomViewHolder> {
 
     class CustomViewHolder extends RecyclerView.ViewHolder {
-        TextView mProjectName;
-        TextView mProjectNotes;
-        TextView mProjectAddress;
+
+        @BindView(R.id.project_name)    TextView mProjectName;
+        @BindView(R.id.project_notes)   TextView mProjectNotes;
+        @BindView(R.id.project_address) TextView mProjectAddress;
 
         public CustomViewHolder(View view) {
             super(view);
-            mProjectName = (TextView) view.findViewById(R.id.project_name);
-            mProjectNotes = (TextView) view.findViewById(R.id.project_notes);
-            mProjectAddress = (TextView) view.findViewById(R.id.project_address);
+            ButterKnife.bind(this, view);
         }
     }
 

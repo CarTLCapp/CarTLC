@@ -20,8 +20,7 @@ public class TableString {
 
     protected final SQLiteDatabase mDb;
     protected final String         mTableName;
-    protected List<String>         mEntries;
-    protected String               mOrdering = " ASC";
+    protected       List<String>   mEntries;
 
     protected TableString(SQLiteDatabase db, String tableName) {
         this.mTableName = tableName;
@@ -44,7 +43,27 @@ public class TableString {
         try {
             mDb.delete(mTableName, null, null);
         } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
 
+    public void remove(String value) {
+        try {
+            String   where     = KEY_VALUE + "=?";
+            String[] whereArgs = {value};
+            mDb.delete(mTableName, where, whereArgs);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
+    public void remove(long id) {
+        try {
+            String   where     = KEY_ROWID + "=?";
+            String[] whereArgs = {Long.toString(id)};
+            mDb.delete(mTableName, where, whereArgs);
+        } catch (Exception ex) {
+            Timber.e(ex);
         }
     }
 
@@ -97,10 +116,10 @@ public class TableString {
         ArrayList<String> list = new ArrayList();
         try {
             final String[] columns = {KEY_VALUE};
-            final String orderBy = KEY_VALUE + mOrdering;
+            final String   orderBy = KEY_VALUE + " ASC";
 
-            Cursor cursor = mDb.query(mTableName, columns, null, null, null, null, orderBy);
-            int idxValue = cursor.getColumnIndex(KEY_VALUE);
+            Cursor cursor   = mDb.query(mTableName, columns, null, null, null, null, orderBy);
+            int    idxValue = cursor.getColumnIndex(KEY_VALUE);
             while (cursor.moveToNext()) {
                 list.add(cursor.getString(idxValue));
             }
@@ -114,11 +133,11 @@ public class TableString {
     public String query(long id) {
         String projectName = null;
         try {
-            final String[] columns = {KEY_VALUE};
-            final String selection = KEY_ROWID + "=?";
+            final String[] columns       = {KEY_VALUE};
+            final String   selection     = KEY_ROWID + "=?";
             final String[] selectionArgs = {Long.toString(id)};
-            Cursor cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null);
-            int idxValue = cursor.getColumnIndex(KEY_VALUE);
+            Cursor         cursor        = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null);
+            int            idxValue      = cursor.getColumnIndex(KEY_VALUE);
             if (cursor.moveToFirst()) {
                 projectName = cursor.getString(idxValue);
             }
@@ -132,11 +151,11 @@ public class TableString {
     public long query(String name) {
         long rowId = -1L;
         try {
-            final String[] columns = {KEY_ROWID};
-            final String selection = KEY_VALUE + "=?";
+            final String[] columns       = {KEY_ROWID};
+            final String   selection     = KEY_VALUE + "=?";
             final String[] selectionArgs = {name};
-            Cursor cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null);
-            int idxValue = cursor.getColumnIndex(KEY_ROWID);
+            Cursor         cursor        = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null);
+            int            idxValue      = cursor.getColumnIndex(KEY_ROWID);
             if (cursor.moveToFirst()) {
                 rowId = cursor.getLong(idxValue);
             }

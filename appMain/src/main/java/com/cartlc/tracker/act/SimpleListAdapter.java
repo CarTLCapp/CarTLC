@@ -11,6 +11,9 @@ import com.cartlc.tracker.R;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by dug on 5/10/17.
  */
@@ -22,20 +25,20 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
     }
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
-        TextView simpleText;
+        @BindView(R.id.item) TextView simpleText;
 
         public CustomViewHolder(View view) {
             super(view);
-            simpleText = (TextView) view.findViewById(R.id.item);
+            ButterKnife.bind(this, view);
         }
     }
 
-	final Context			mContext;
-	final int				mEntryItemLayoutId;
-	OnItemSelectedListener	mListener;
-	List<String>			mItems;
-	int						mSelectedPos	= -1;
-	boolean					mSelectedOkay	= false;
+    final Context mContext;
+    final int     mEntryItemLayoutId;
+    OnItemSelectedListener mListener;
+    List<String>           mItems;
+    int     mSelectedPos  = -1;
+    boolean mSelectedOkay = false;
 
     public SimpleListAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;

@@ -16,6 +16,9 @@ import com.cartlc.tracker.data.TableEquipment;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by dug on 5/12/17.
  */
@@ -23,11 +26,11 @@ import java.util.List;
 public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSelectListAdapter.CustomViewHolder> {
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
-        CheckBox checkBox;
+        @BindView(R.id.item) CheckBox checkBox;
 
         public CustomViewHolder(View view) {
             super(view);
-            checkBox = (CheckBox) view.findViewById(R.id.item);
+            ButterKnife.bind(this, view);
         }
     }
 
