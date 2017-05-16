@@ -501,7 +501,7 @@ public class MainActivity extends AppCompatActivity {
                     mNew.setText(R.string.btn_another);
                     mPictureFrame.setVisibility(View.VISIBLE);
                     mPictureList.setVisibility(View.VISIBLE);
-                    mPictureAdapter.setList(TablePendingPictures.getInstance().queryPictures(true));
+                    mPictureAdapter.setList(TablePendingPictures.getInstance().queryPictures());
                 }
                 break;
             case CONFIRM:

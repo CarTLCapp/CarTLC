@@ -3,15 +3,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent">
 
-
     <TextView
         android:id="@+id/loading"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/image_thumbnail_max_height"
         android:layout_centerInParent="true"
         android:gravity="center"
         android:textAllCaps="true"
-        android:textSize="25sp"
+        style="@style/LoadingText"
+        android:adjustViewBounds="true"
+        android:textSize="16sp"
         android:text="@string/loading"/>
 
     <ImageView
@@ -24,15 +25,6 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:paddingTop="10dp"
-        android:adjustViewBounds="true"
         android:scaleType="fitCenter"/>
-
-    <ImageView
-        android:id="@+id/remove"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/red_x"/>
 
 </RelativeLayout>

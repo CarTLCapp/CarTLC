@@ -39,8 +39,4 @@ public class DataPicture {
             TablePendingPictures.getInstance().remove(id);
         }
     }
-
-    public boolean isRemoveOk() {
-        return id >= 0;
-    }
 }

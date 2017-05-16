@@ -24,17 +24,17 @@ import butterknife.ButterKnife;
 
 public class ConfirmationFrame {
 
-    @BindView(R.id.project_name_value)    TextView           mProjectNameValue;
-    @BindView(R.id.truck_number_value)    TextView           mTruckNumberValue;
-    @BindView(R.id.project_address_value) TextView           mAddressValue;
-    @BindView(R.id.project_notes_value)   TextView           mNotesValue;
-    @BindView(R.id.equipment_grid)        RecyclerView       mEquipmentGrid;
-    @BindView(R.id.project_notes_label)   TextView           mNotesLabel;
-    @BindView(R.id.confirm_pictures_list) RecyclerView       mPictureList;
-    final                                 FrameLayout        mTop;
-    final                                 SimpleListAdapter  mSimpleAdapter;
-    final                                 GridLayoutManager  mGridLayout;
-    final                                 PictureListAdapter mPictureAdapter;
+    @BindView(R.id.project_name_value)    TextView                    mProjectNameValue;
+    @BindView(R.id.truck_number_value)    TextView                    mTruckNumberValue;
+    @BindView(R.id.project_address_value) TextView                    mAddressValue;
+    @BindView(R.id.project_notes_value)   TextView                    mNotesValue;
+    @BindView(R.id.equipment_grid)        RecyclerView                mEquipmentGrid;
+    @BindView(R.id.project_notes_label)   TextView                    mNotesLabel;
+    @BindView(R.id.confirm_pictures_list) RecyclerView                mPictureList;
+    final                                 FrameLayout                 mTop;
+    final                                 SimpleListAdapter           mSimpleAdapter;
+    final                                 GridLayoutManager           mGridLayout;
+    final                                 PictureThumbnailListAdapter mPictureAdapter;
 
     public ConfirmationFrame(FrameLayout top) {
         final Context ctx = top.getContext();
@@ -44,7 +44,7 @@ public class ConfirmationFrame {
         mEquipmentGrid.setAdapter(mSimpleAdapter);
         mGridLayout = new GridLayoutManager(ctx, 2);
         mEquipmentGrid.setLayoutManager(mGridLayout);
-        mPictureAdapter = new PictureListAdapter(ctx);
+        mPictureAdapter = new PictureThumbnailListAdapter(ctx);
         LinearLayoutManager layoutManager = new LinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false);
         layoutManager.setAutoMeasureEnabled(true);
         mPictureList.setLayoutManager(layoutManager);
