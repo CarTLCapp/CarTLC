@@ -157,9 +157,9 @@ public class MainActivity extends AppCompatActivity {
     int mEntryMaxLength;
     ConfirmationFrame mConfirmationFrame;
     DataEntry mCurEntry;
-    Bitmap mPictureBitmap;
     DataPictureCollection mPictureCollection;
     File mCurPictureFile;
+    Uri mCurPictureURI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -302,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
             if (isNext) {
                 savePicture();
             } else {
-                recyclePicture();
+                removePicture();
             }
         }
         mCurStageEditing = false;
@@ -571,8 +571,8 @@ public class MainActivity extends AppCompatActivity {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             mCurPictureFile = PrefHelper.getInstance().getFullPictureFile();
-            Uri pictureUri = FileProvider.getUriForFile(this, "com.cartcl.tracker.fileprovider", mCurPictureFile);
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
+            mCurPictureURI = FileProvider.getUriForFile(this, "com.cartcl.tracker.fileprovider", mCurPictureFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurPictureURI);
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             return true;
         }
@@ -582,28 +582,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            mPictureBitmap = (Bitmap) extras.get("data");
-            Picasso.with(this).load(mCurPictureFile).into(mPicture);
             mCurStage = Stage.DISPLAY_PICTURE;
+            Picasso.with(this).setLoggingEnabled(true);
+            Picasso.with(this).load(mCurPictureURI).into(mPicture);
         }
     }
 
     void savePicture() {
         String pictureName = PrefHelper.getInstance().getPictureFilename();
-        BitmapHelper.saveBitmapToInternal(this, mPictureBitmap, pictureName);
         if (mPictureCollection == null) {
             mPictureCollection = new DataPictureCollection(PrefHelper.getInstance().getNextPictureCollectionID());
         }
         mPictureCollection.add(pictureName);
-        recyclePicture();
     }
 
-    void recyclePicture() {
-        if (mPictureBitmap != null) {
-            mPicture.setImageBitmap(null);
-            mPictureBitmap.recycle();
-            mPictureBitmap = null;
+    void removePicture() {
+        if (mCurPictureFile != null) {
+            mCurPictureFile.delete();
+            mCurPictureFile = null;
         }
     }
 

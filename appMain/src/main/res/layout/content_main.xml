@@ -308,20 +308,20 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"/>
 
-            <ImageView android:id="@+id/picture"
-                       android:visibility="gone"
-                       android:layout_width="match_parent"
-                       android:layout_height="wrap_content"
-                       android:layout_marginTop="10dp"
-                       android:layout_marginLeft="10dp"
-                       android:layout_marginRight="10dp"
-                       android:scaleType="fitCenter"
-                       app:layout_constraintTop_toBottomOf="@id/grid_confirmation"
-                       app:layout_constraintLeft_toLeftOf="parent"
-                       app:layout_constraintRight_toRightOf="parent"/>
-
         </android.support.constraint.ConstraintLayout>
 
     </FrameLayout>
+
+    <ImageView android:id="@+id/picture"
+               android:visibility="gone"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:layout_marginLeft="10dp"
+               android:layout_marginRight="10dp"
+               android:scaleType="fitCenter"
+               android:layout_below="@id/setup_title"
+               android:layout_centerHorizontal="true"
+               android:layout_marginBottom="20dp"
+               android:layout_marginTop="20dp"/>
 
 </RelativeLayout>
