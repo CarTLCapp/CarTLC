@@ -31,8 +31,8 @@ public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSe
         }
     }
 
-    final protected Context mContext;
-    protected List<DataEquipment> mItems;
+    final protected Context             mContext;
+    protected       List<DataEquipment> mItems;
 
     public EquipmentSelectListAdapter(Context context) {
         mContext = context;

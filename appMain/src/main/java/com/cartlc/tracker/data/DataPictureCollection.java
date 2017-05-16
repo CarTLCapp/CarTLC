@@ -18,4 +18,8 @@ public class DataPictureCollection {
     public void add(String pictureFilename) {
         pictures.add(pictureFilename);
     }
+
+    public void add(List<String> pictures) {
+        pictures.addAll(pictures);
+    }
 }

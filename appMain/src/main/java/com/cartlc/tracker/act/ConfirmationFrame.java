@@ -19,17 +19,17 @@ import butterknife.ButterKnife;
 
 public class ConfirmationFrame {
 
-	final FrameLayout		mTop;
-	final SimpleListAdapter	mSimpleAdapter;
-	final GridLayoutManager	mGridLayout;
+    @BindView(R.id.project_name_value)    TextView     mProjectNameValue;
+    @BindView(R.id.truck_number_value)    TextView     mTruckNumberValue;
+    @BindView(R.id.project_address_value) TextView     mAddressValue;
+    @BindView(R.id.project_notes_value)   TextView     mNotesValue;
+    @BindView(R.id.equipment_grid)        RecyclerView mEquipmentGrid;
+    @BindView(R.id.project_notes_label)   TextView     mNotesLabel;
 
-    @BindView(R.id.project_name_value) TextView mProjectNameValue;
-    @BindView(R.id.truck_number_value) TextView mTruckNumberValue;
-    @BindView(R.id.project_address_value) TextView mAddressValue;
-    @BindView(R.id.project_notes_value) TextView mNotesValue;
-    @BindView(R.id.equipment_grid) RecyclerView mEquipmentGrid;
-    @BindView(R.id.project_notes_label) TextView mNotesLabel;
-    
+    final FrameLayout       mTop;
+    final SimpleListAdapter mSimpleAdapter;
+    final GridLayoutManager mGridLayout;
+
     public ConfirmationFrame(FrameLayout top) {
         mTop = top;
 

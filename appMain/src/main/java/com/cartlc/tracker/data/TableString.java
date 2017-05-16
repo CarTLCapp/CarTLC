@@ -19,18 +19,19 @@ public class TableString {
     static final String KEY_VALUE = "value";
 
     protected final SQLiteDatabase mDb;
-    protected final String tableName;
-    protected List<String> mEntries;
+    protected final String         mTableName;
+    protected List<String>         mEntries;
+    protected String               mOrdering = " ASC";
 
     protected TableString(SQLiteDatabase db, String tableName) {
-        this.tableName = tableName;
+        this.mTableName = tableName;
         this.mDb = db;
     }
 
     public void create() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("create table ");
-        sbuf.append(tableName);
+        sbuf.append(mTableName);
         sbuf.append(" (");
         sbuf.append(KEY_ROWID);
         sbuf.append(" integer primary key autoincrement, ");
@@ -41,7 +42,7 @@ public class TableString {
 
     public void clear() {
         try {
-            mDb.delete(tableName, null, null);
+            mDb.delete(mTableName, null, null);
         } catch (Exception ex) {
 
         }
@@ -54,7 +55,7 @@ public class TableString {
             for (String value : list) {
                 values.clear();
                 values.put(KEY_VALUE, value);
-                mDb.insert(tableName, null, values);
+                mDb.insert(mTableName, null, values);
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -70,7 +71,7 @@ public class TableString {
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_VALUE, item);
-            id = mDb.insert(tableName, null, values);
+            id = mDb.insert(mTableName, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
             Timber.e(ex);
@@ -83,7 +84,7 @@ public class TableString {
     public int count() {
         int count = 0;
         try {
-            Cursor cursor = mDb.query(tableName, null, null, null, null, null, null);
+            Cursor cursor = mDb.query(mTableName, null, null, null, null, null, null);
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
@@ -96,9 +97,9 @@ public class TableString {
         ArrayList<String> list = new ArrayList();
         try {
             final String[] columns = {KEY_VALUE};
-            final String orderBy = KEY_VALUE + " ASC";
+            final String orderBy = KEY_VALUE + mOrdering;
 
-            Cursor cursor = mDb.query(tableName, columns, null, null, null, null, orderBy);
+            Cursor cursor = mDb.query(mTableName, columns, null, null, null, null, orderBy);
             int idxValue = cursor.getColumnIndex(KEY_VALUE);
             while (cursor.moveToNext()) {
                 list.add(cursor.getString(idxValue));
@@ -116,7 +117,7 @@ public class TableString {
             final String[] columns = {KEY_VALUE};
             final String selection = KEY_ROWID + "=?";
             final String[] selectionArgs = {Long.toString(id)};
-            Cursor cursor = mDb.query(tableName, columns, selection, selectionArgs, null, null, null);
+            Cursor cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_VALUE);
             if (cursor.moveToFirst()) {
                 projectName = cursor.getString(idxValue);
@@ -134,7 +135,7 @@ public class TableString {
             final String[] columns = {KEY_ROWID};
             final String selection = KEY_VALUE + "=?";
             final String[] selectionArgs = {name};
-            Cursor cursor = mDb.query(tableName, columns, selection, selectionArgs, null, null, null);
+            Cursor cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_ROWID);
             if (cursor.moveToFirst()) {
                 rowId = cursor.getLong(idxValue);

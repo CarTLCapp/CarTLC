@@ -43,7 +43,6 @@ public class PrefHelper extends PrefHelperBase
 	static final String			KEY_EQUIPMENT_COLLECTION_ID			= "equipment_collection_id";
 	static final String			KEY_NEXT_EQUIPMENT_COLLECTION_ID	= "next_equipment_collection_id";
 	static final String			KEY_NEXT_PICTURE_COLLECTION_ID		= "next_picture_collection_id";
-
 	static final String			KEY_TECH_ID							= "tech_id";
 
 	static final String			PICTURE_DATE_FORMAT					= "yy-MM-dd_HH:mm:ss";
@@ -234,15 +233,13 @@ public class PrefHelper extends PrefHelperBase
 
 	public void clearCurProject()
 	{
+        clearLastEntry();
 		setState(null);
 		setCity(null);
 		setCompany(null);
 		setStreet(null);
 		setProject(null);
 		setCurrentProjectGroupId(-1L);
-		setLastNotesId(-1L);
-		setNotes(null);
-		setTruckNumber(0);
 	}
 
 	public void clearLastEntry()
@@ -251,6 +248,7 @@ public class PrefHelper extends PrefHelperBase
 		setNotes(null);
 		setLastNotesId(-1L);
 		TableEquipment.getInstance().clearChecked();
+        TablePendingPictures.getInstance().clear();
 	}
 
 	public boolean hasCurProject()
@@ -359,7 +357,7 @@ public class PrefHelper extends PrefHelperBase
 		return entry;
 	}
 
-	public String getPictureFilename()
+	public String genPictureFilename()
 	{
 		long tech_id = getTechID();
 		long project_id = getProjectId();
@@ -375,8 +373,8 @@ public class PrefHelper extends PrefHelperBase
 		return sbuf.toString();
 	}
 
-	public File getFullPictureFile()
+	public File genFullPictureFile()
 	{
-		return new File(mCtx.getExternalFilesDir(Environment.DIRECTORY_PICTURES), getPictureFilename());
+		return new File(mCtx.getExternalFilesDir(Environment.DIRECTORY_PICTURES), genPictureFilename());
 	}
 }

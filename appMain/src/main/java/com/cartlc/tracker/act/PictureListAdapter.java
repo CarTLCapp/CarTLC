@@ -1,8 +1,10 @@
 package com.cartlc.tracker.act;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.cartlc.tracker.R;
+import com.cartlc.tracker.data.TablePendingPictures;
 import com.squareup.picasso.Picasso;
 
 import android.content.Context;
@@ -26,11 +28,12 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
         public CustomViewHolder(View view) {
             super(view);
             imageView = (ImageView) view.findViewById(R.id.picture);
+            imageView.setAdjustViewBounds(true);
         }
     }
 
     final Context mContext;
-    List<Uri> mItems;
+    List<Uri> mItems = new ArrayList();
 
     public PictureListAdapter(Context context) {
         mContext = context;
@@ -53,8 +56,8 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
         return mItems.size();
     }
 
-    public void setList(List<Uri> list) {
-        mItems = list;
+    public void onDataChanged() {
+        mItems = TablePendingPictures.getInstance().queryPictures(mContext);
         notifyDataSetChanged();
     }
 }

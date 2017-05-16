@@ -40,6 +40,7 @@ import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntries;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNotes;
+import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectGroups;
 import com.cartlc.tracker.data.TableProjects;
 import com.squareup.picasso.Picasso;
@@ -88,8 +89,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void afterTextChanged(Editable s) {
-            int numChars = s.toString().length();
-            StringBuilder sbuf = new StringBuilder();
+            int           numChars = s.toString().length();
+            StringBuilder sbuf     = new StringBuilder();
             sbuf.append(numChars);
             sbuf.append("/");
             sbuf.append(mEntryMaxLength);
@@ -110,8 +111,7 @@ public class MainActivity extends AppCompatActivity {
         TRUCK_NUMBER,
         EQUIPMENT,
         NOTES,
-        TAKE_PICTURE,
-        DISPLAY_PICTURE,
+        PICTURE,
         CONFIRM,
         ADD_ELEMENT;
 
@@ -125,41 +125,39 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @BindView(R.id.first_name) EditText mFirstName;
-    @BindView(R.id.last_name) EditText mLastName;
-    @BindView(R.id.entry_simple) EditText mEntrySimple;
-    @BindView(R.id.entry_notes) EditText mEntryNotes;
-    @BindView(R.id.frame_login) ViewGroup mLoginFrame;
-    @BindView(R.id.frame_new_entry) ViewGroup mEntryFrame;
-    @BindView(R.id.frame_new_notes) ViewGroup mNotesFrame;
-    @BindView(R.id.list) RecyclerView mMainList;
-    @BindView(R.id.list_container) FrameLayout mMainListFrame;
-    @BindView(R.id.next) Button mNext;
-    @BindView(R.id.prev) Button mPrev;
-    @BindView(R.id.new_entry) Button mNew;
-    @BindView(R.id.setup_title) TextView mTitle;
-    @BindView(R.id.fab_add) FloatingActionButton mAdd;
-    @BindView(R.id.number_characters) TextView mNumChars;
-    @BindView(R.id.frame_confirmation) FrameLayout mConfirmationFrameView;
-    @BindView(R.id.frame_pictures) ViewGroup mPictureFrame;
-    @BindView(R.id.list_pictures) RecyclerView mPictureList;
+    @BindView(R.id.first_name)         EditText             mFirstName;
+    @BindView(R.id.last_name)          EditText             mLastName;
+    @BindView(R.id.entry_simple)       EditText             mEntrySimple;
+    @BindView(R.id.entry_notes)        EditText             mEntryNotes;
+    @BindView(R.id.frame_login)        ViewGroup            mLoginFrame;
+    @BindView(R.id.frame_new_entry)    ViewGroup            mEntryFrame;
+    @BindView(R.id.frame_new_notes)    ViewGroup            mNotesFrame;
+    @BindView(R.id.list)               RecyclerView         mMainList;
+    @BindView(R.id.list_container)     FrameLayout          mMainListFrame;
+    @BindView(R.id.next)               Button               mNext;
+    @BindView(R.id.prev)               Button               mPrev;
+    @BindView(R.id.new_entry)          Button               mNew;
+    @BindView(R.id.setup_title)        TextView             mTitle;
+    @BindView(R.id.fab_add)            FloatingActionButton mAdd;
+    @BindView(R.id.number_characters)  TextView             mNumChars;
+    @BindView(R.id.frame_confirmation) FrameLayout          mConfirmationFrameView;
+    @BindView(R.id.frame_pictures)     ViewGroup            mPictureFrame;
+    @BindView(R.id.list_pictures)      RecyclerView         mPictureList;
 
-	Stage						mCurStage			= Stage.LOGIN;
-	String						mCurKey				= PrefHelper.KEY_STATE;
-	boolean						mCurStageEditing;
-	SimpleListAdapter			mSimpleAdapter;
-	ProjectListAdapter			mProjectAdapter;
-	EquipmentSelectListAdapter	mEquipmentAdapter;
-	PictureListAdapter			mPictureAdapter;
-	LinearLayoutManager			mLayoutManager;
-	InputMethodManager			mInputMM;
-	CountChars					mEntryCountChars;
-	int							mEntryMaxLength;
-	ConfirmationFrame			mConfirmationFrame;
-	DataEntry					mCurEntry;
-	DataPictureCollection		mPictureCollection;
-	File						mCurPictureFile;
-	Uri							mCurPictureURI;
+    Stage  mCurStage = Stage.LOGIN;
+    String mCurKey   = PrefHelper.KEY_STATE;
+    boolean                    mCurStageEditing;
+    SimpleListAdapter          mSimpleAdapter;
+    ProjectListAdapter         mProjectAdapter;
+    EquipmentSelectListAdapter mEquipmentAdapter;
+    PictureListAdapter         mPictureAdapter;
+    LinearLayoutManager        mLayoutManager;
+    InputMethodManager         mInputMM;
+    CountChars                 mEntryCountChars;
+    int                        mEntryMaxLength;
+    ConfirmationFrame          mConfirmationFrame;
+    DataEntry                  mCurEntry;
+    DataPictureCollection      mPictureCollection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -304,11 +302,9 @@ public class MainActivity extends AppCompatActivity {
                 long id = TableNotes.getInstance().add(value);
                 PrefHelper.getInstance().setLastNotesId(id);
             }
-        } else if (mCurStage == Stage.DISPLAY_PICTURE) {
+        } else if (mCurStage == Stage.PICTURE) {
             if (isNext) {
                 savePicture();
-            } else {
-                removePicture();
             }
         }
         mCurStageEditing = false;
@@ -329,7 +325,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void doNewEntry() {
-        savePicture();
         mCurStageEditing = true;
         fillStage();
     }
@@ -387,8 +382,8 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
-                    String company = PrefHelper.getInstance().getCompany();
-                    List<String> states = TableAddress.getInstance().queryStates(company);
+                    String       company = PrefHelper.getInstance().getCompany();
+                    List<String> states  = TableAddress.getInstance().queryStates(company);
                     if (states.size() > 0) {
                         PrefHelper.getInstance().addState(states);
                         setList(R.string.title_state, PrefHelper.KEY_STATE, states);
@@ -410,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mMainListFrame.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
-                    String state = PrefHelper.getInstance().getState();
+                    String       state  = PrefHelper.getInstance().getState();
                     List<String> cities = TableAddress.getInstance().queryCities(state);
                     if (cities.size() > 0) {
                         PrefHelper.getInstance().addCity(cities);
@@ -496,25 +491,21 @@ public class MainActivity extends AppCompatActivity {
                     mMainListFrame.setVisibility(View.VISIBLE);
                 }
                 break;
-            case TAKE_PICTURE:
+            case PICTURE:
                 mTitle.setText(R.string.title_picture);
                 mPrev.setVisibility(View.VISIBLE);
-                if (!dispatchPictureRequest()) {
-                    showError(getString(R.string.error_cannot_take_picture));
-                }
-                break;
-            case DISPLAY_PICTURE:
-                if (mCurStageEditing) {
+                if (mCurStageEditing || TablePendingPictures.getInstance().count() == 0) {
                     mCurStageEditing = false;
-                    mCurStage = Stage.TAKE_PICTURE;
-                    fillStage();
+                    if (!dispatchPictureRequest()) {
+                        showError(getString(R.string.error_cannot_take_picture));
+                    }
                 } else {
-                    mPictureFrame.setVisibility(View.VISIBLE);
-                    mPictureList.setVisibility(View.VISIBLE);
                     mNext.setVisibility(View.VISIBLE);
-                    mPrev.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
                     mNew.setText(R.string.btn_another);
+                    mPictureFrame.setVisibility(View.VISIBLE);
+                    mPictureList.setVisibility(View.VISIBLE);
+                    mPictureAdapter.onDataChanged();
                 }
                 break;
             case CONFIRM:
@@ -578,9 +569,8 @@ public class MainActivity extends AppCompatActivity {
     boolean dispatchPictureRequest() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            mCurPictureFile = PrefHelper.getInstance().getFullPictureFile();
-            mCurPictureURI = FileProvider.getUriForFile(this, "com.cartcl.tracker.fileprovider", mCurPictureFile);
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurPictureURI);
+            Uri pictureUri = TablePendingPictures.getInstance().genNewPictureUri(this);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             return true;
         }
@@ -590,26 +580,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            mCurStage = Stage.DISPLAY_PICTURE;
-            List<Uri> list = new ArrayList();
-            list.add(mCurPictureURI);
-            mPictureAdapter.setList(list);
+            // Everything needed will happen automatically in fillStage();
         }
     }
 
     void savePicture() {
-        String pictureName = PrefHelper.getInstance().getPictureFilename();
-        if (mPictureCollection == null) {
-            mPictureCollection = new DataPictureCollection(PrefHelper.getInstance().getNextPictureCollectionID());
-        }
-        mPictureCollection.add(pictureName);
-    }
-
-    void removePicture() {
-        if (mCurPictureFile != null) {
-            mCurPictureFile.delete();
-            mCurPictureFile = null;
-        }
+        mPictureCollection = TablePendingPictures.getInstance().createCollection();
     }
 
     void showError(String message) {
@@ -620,7 +596,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                if (mCurStage == Stage.TAKE_PICTURE) {
+                if (mCurStage == Stage.PICTURE) {
                     setStage(Stage.CONFIRM);
                 }
             }

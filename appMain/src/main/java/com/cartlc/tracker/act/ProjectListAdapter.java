@@ -23,7 +23,6 @@ import java.util.List;
 public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.CustomViewHolder> {
 
     class CustomViewHolder extends RecyclerView.ViewHolder {
-
         TextView mProjectName;
         TextView mProjectNotes;
         TextView mProjectAddress;
@@ -36,9 +35,9 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         }
     }
 
-	final Context			mContext;
-	List<DataProjectGroup>	mProjectGroups;
-	Long					mCurProjectGroupId;
+    final Context mContext;
+    List<DataProjectGroup> mProjectGroups;
+    Long                   mCurProjectGroupId;
 
     public ProjectListAdapter(Context context) {
         mContext = context;
@@ -58,8 +57,8 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         int countTotal = TableEntries.getInstance().count(projectGroup.projectNameId);
 
         if (countTotal > 0) {
-            int countUploaded = TableEntries.getInstance().countUploaded(projectGroup.projectNameId);
-            StringBuilder sbuf = new StringBuilder();
+            int           countUploaded = TableEntries.getInstance().countUploaded(projectGroup.projectNameId);
+            StringBuilder sbuf          = new StringBuilder();
             sbuf.append(mContext.getString(R.string.title_entries_));
             sbuf.append(Integer.toString(countTotal));
             sbuf.append("   ");
