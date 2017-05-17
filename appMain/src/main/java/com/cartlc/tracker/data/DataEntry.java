@@ -32,7 +32,7 @@ public class DataEntry {
     }
 
     public List<DataNote> getNotes() {
-        return TableNoteProjectCollection.getInstance().getNotes(projectNameId);
+        return TableNoteEntryCollection.getInstance().query(id);
     }
 
     public List<String> getEquipmentNames() {

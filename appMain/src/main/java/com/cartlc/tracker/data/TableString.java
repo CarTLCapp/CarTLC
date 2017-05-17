@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import timber.log.Timber;
 
 import java.util.ArrayList;
@@ -128,10 +130,9 @@ public abstract class TableString {
             Timber.e(ex);
         }
         // Move other to bottom of the list.
-        final String OTHER = "Other";
-        if (list.contains(OTHER)) {
-            list.remove(OTHER);
-            list.add(OTHER);
+        if (list.contains(TBApplication.OTHER)) {
+            list.remove(TBApplication.OTHER);
+            list.add(TBApplication.OTHER);
         }
         return list;
     }

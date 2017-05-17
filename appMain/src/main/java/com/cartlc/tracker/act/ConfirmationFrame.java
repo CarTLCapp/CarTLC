@@ -42,6 +42,7 @@ public class ConfirmationFrame {
         mEquipmentGrid.setLayoutManager(gridLayout);
         mNoteAdapter = new NoteListAdapter(ctx);
         mNoteList.setAdapter(mNoteAdapter);
+        mNoteList.setLayoutManager(new LinearLayoutManager(ctx));
         mPictureAdapter = new PictureThumbnailListAdapter(ctx);
         LinearLayoutManager layoutManager = new LinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false);
         layoutManager.setAutoMeasureEnabled(true);

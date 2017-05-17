@@ -172,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
         mPictureList.setLayoutManager(linearLayoutManager);
         mPictureList.setAdapter(mPictureAdapter);
         mNoteAdapter = new NoteListEntryAdapter(this);
-
         mConfirmationFrame = new ConfirmationFrame(mConfirmationFrameView);
         mLastName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -230,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
             String lastName = getEditText(mLastName);
             PrefHelper.getInstance().setFirstName(firstName);
             PrefHelper.getInstance().setLastName(lastName);
-            if (TextUtils.isEmpty(firstName) || TextUtils.isEmpty(lastName))  {
+            if (TextUtils.isEmpty(firstName) || TextUtils.isEmpty(lastName)) {
                 showError(getString(R.string.error_enter_your_name));
                 return false;
             }
@@ -261,6 +260,17 @@ public class MainActivity extends AppCompatActivity {
             if (isNext) {
                 if (TableEquipment.getInstance().countChecked() == 0) {
                     showError(getString(R.string.error_need_equipment));
+                    return false;
+                }
+            }
+        } else if (mCurStage == Stage.NOTES) {
+            if (isNext) {
+                if (!mNoteAdapter.hasEnoughValues()) {
+                    StringBuilder sbuf = new StringBuilder();
+                    sbuf.append(getString(R.string.error_need_note_fields));
+                    sbuf.append("\n");
+                    sbuf.append(mNoteAdapter.getEmptyFields());
+                    showError(sbuf.toString());
                     return false;
                 }
             }
@@ -479,7 +489,9 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setHint(R.string.title_equipment);
                     mEntrySimple.setText("");
                 } else {
-                    mNew.setVisibility(View.VISIBLE);
+                    if (isNewEquipmentOkay()) {
+                        mNew.setVisibility(View.VISIBLE);
+                    }
                     mTitle.setText(R.string.title_equipment_installed);
                     mMainList.setAdapter(mEquipmentAdapter);
                     mEquipmentAdapter.onDataChanged();
@@ -533,10 +545,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // TODO:
     boolean isNewEquipmentOkay() {
         String name = PrefHelper.getInstance().getProjectName();
-        if (name.equals("Other")) {
+        if (name.equals(TBApplication.OTHER)) {
             return true;
         }
         return false;

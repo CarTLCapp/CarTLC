@@ -1,5 +1,7 @@
 package com.cartlc.tracker.data;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.util.Arrays;
 
 /**
@@ -99,7 +101,7 @@ public class TestData {
                 "Uninstall",
                 "Other",
         }));
-        TableProjects.getInstance().add("Other");
+        TableProjects.getInstance().add(TBApplication.OTHER);
     }
 
     static void AddNotes() {

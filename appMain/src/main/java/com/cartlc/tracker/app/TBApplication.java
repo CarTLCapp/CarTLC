@@ -15,6 +15,8 @@ import timber.log.Timber;
 
 public class TBApplication extends Application {
 
+    public static final String OTHER = "Other";
+
     public TBApplication() {
         super();
     }
