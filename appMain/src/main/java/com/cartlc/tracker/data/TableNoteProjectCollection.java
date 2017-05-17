@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Created by dug on 5/16/17.
  */
@@ -41,7 +43,7 @@ public class TableNoteProjectCollection extends TableCollection {
         for (DataNote note : notes) {
             long id = TableNote.getInstance().query(note.name);
             if (id < 0) {
-                TableNote.getInstance().add(note);
+                id = TableNote.getInstance().add(note);
             }
             list.add(id);
         }
@@ -49,10 +51,15 @@ public class TableNoteProjectCollection extends TableCollection {
     }
 
     public List<DataNote> getNotes(long projectNameId) {
-        List<Long>     noteIds = query(projectNameId);
-        List<DataNote> list    = new ArrayList();
+        List<Long> noteIds = query(projectNameId);
+        List<DataNote> list = new ArrayList();
         for (Long noteId : noteIds) {
-            list.add(TableNote.getInstance().query(noteId));
+            DataNote note = TableNote.getInstance().query(noteId);
+            if (note == null) {
+                Timber.e("Could not find note with ID " + noteId);
+            } else {
+                list.add(note);
+            }
         }
         return list;
     }

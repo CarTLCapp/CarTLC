@@ -7,17 +7,19 @@
 
     <TextView
         android:id="@+id/label"
-        style="@style/NoteEntryText"
-        android:layout_width="@dimen/note_label_width"
+        style="@style/NoteText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ems="@integer/note_label_width"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="5dp"/>
 
     <TextView
         android:id="@+id/value"
-        style="@style/NoteEntryText"
-        android:layout_width="@dimen/note_entry_width"
+        style="@style/NoteText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ems="@integer/note_value_width"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="10dp"/>
 

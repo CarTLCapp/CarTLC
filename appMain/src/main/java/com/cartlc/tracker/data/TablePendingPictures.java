@@ -55,7 +55,6 @@ public class TablePendingPictures extends TableString {
             int            idxValue = cursor.getColumnIndex(KEY_VALUE);
             while (cursor.moveToNext()) {
                 list.add(new DataPicture(cursor.getLong(idxRow), cursor.getString(idxValue)));
-
             }
             cursor.close();
         } catch (Exception ex) {

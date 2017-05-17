@@ -3,6 +3,7 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.app.NotificationCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,7 @@ public class TableNote {
         }
     }
 
-    public void add(DataNote item) {
+    public long add(DataNote item) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
@@ -108,6 +109,7 @@ public class TableNote {
         } finally {
             mDb.endTransaction();
         }
+        return item.id;
     }
 
     public void clearValues() {

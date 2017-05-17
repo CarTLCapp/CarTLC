@@ -13,7 +13,7 @@ import java.util.List;
  * Created by dug on 4/14/17.
  */
 
-public class TableString {
+public abstract class TableString {
 
     static final String KEY_ROWID = "_id";
     static final String KEY_VALUE = "value";
@@ -126,6 +126,12 @@ public class TableString {
             cursor.close();
         } catch (Exception ex) {
             Timber.e(ex);
+        }
+        // Move other to bottom of the list.
+        final String OTHER = "Other";
+        if (list.contains(OTHER)) {
+            list.remove(OTHER);
+            list.add(OTHER);
         }
         return list;
     }

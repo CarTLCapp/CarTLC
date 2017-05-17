@@ -40,11 +40,6 @@ public class TestData {
             new DataAddress("Alamo RM", "2155 Gratiot Ave", "Detroit", "Michigan")
     };
 
-
-    static final String[] NOTES = {
-
-    };
-
     static void AddCollections() {
         TableEquipmentProjectCollection.getInstance().addByName("Five Cubits", Arrays.asList(new String[]{
                 "OBC",
@@ -55,16 +50,16 @@ public class TestData {
                 "Green Canbus",
                 "External Antenna",
                 "Internal Antenna",
-                "Other",
+                "Repair Work",
                 "Uninstall",
-                "Repair Work"
+                "Other",
         }));
         TableEquipmentProjectCollection.getInstance().addByName("Digital Fleet", Arrays.asList(new String[]{
                 "Tablet",
                 "Canbus",
-                "Other",
-                "Uninstall",
                 "Repair Work",
+                "Uninstall",
+                "Other",
         }));
         TableEquipmentProjectCollection.getInstance().addByName("Smart Witness", Arrays.asList(new String[]{
                 "KP1S",
@@ -76,9 +71,9 @@ public class TestData {
                 "Side Camera 1",
                 "Side Camera 2",
                 "DVR",
+                "Repair Work",
                 "Uninstall",
                 "Other",
-                "Repair Work",
         }));
         TableEquipmentProjectCollection.getInstance().addByName("Fed Ex", Arrays.asList(new String[]{
                 "KP1S",
@@ -87,9 +82,9 @@ public class TestData {
                 "Mobileye",
                 "Backup Sensors",
                 "Re-Calibrate",
-                "Other",
-                "Uninstall",
                 "Repair Work",
+                "Uninstall",
+                "Other",
         }));
         TableEquipmentProjectCollection.getInstance().addByName("Verifi", Arrays.asList(new String[]{
                 "V3 Full Install",
@@ -100,8 +95,9 @@ public class TestData {
                 "Crossover Upgrade",
                 "WTAA Install",
                 "Commissioning",
-                "Uninstall",
                 "Repair Work",
+                "Uninstall",
+                "Other",
         }));
         TableProjects.getInstance().add("Other");
     }

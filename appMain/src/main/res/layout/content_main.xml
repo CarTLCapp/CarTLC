@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_centerHorizontal="true"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.cartlc.tracker.act.MainActivity"
-    tools:showIn="@layout/activity_main">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                tools:context="com.cartlc.tracker.act.MainActivity"
+                tools:showIn="@layout/activity_main">
 
     <ImageView
         android:id="@+id/logo"
@@ -16,7 +16,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
-        android:src="@drawable/logo" />
+        android:src="@drawable/logo"/>
 
     <TextView
         android:id="@+id/setup_title"
@@ -26,7 +26,7 @@
         android:layout_below="@id/logo"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
-        android:text="@string/title_login" />
+        android:text="@string/title_login"/>
 
     <TextView
         android:id="@+id/message_line"
@@ -34,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="20dp"/>
 
     <LinearLayout
         android:id="@+id/buttons"
@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
             android:text="@string/btn_prev"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"/>
 
         <Button
             android:id="@+id/new_entry"
@@ -62,7 +62,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:text="@string/btn_add"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"/>
 
         <Button
             android:id="@+id/next"
@@ -71,10 +71,11 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:text="@string/btn_next"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"/>
     </LinearLayout>
 
     <include layout="@layout/frame_entry"/>
+
     <include layout="@layout/frame_confirmation"/>
 
     <FrameLayout
@@ -94,7 +95,15 @@
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:background="@drawable/background_shadow"
-            android:elevation="3dp" />
+            android:elevation="3dp"/>
+
+        <TextView
+            android:id="@+id/empty"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/error_empty"
+            android:textSize="25sp"/>
 
     </FrameLayout>
 

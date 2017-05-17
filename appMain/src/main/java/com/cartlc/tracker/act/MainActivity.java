@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
-    static final int AUTO_RETURN_DELAY_MS = 500;
+    static final int AUTO_RETURN_DELAY_MS = 100;
     static final int MSG_AUTO_RETURN      = 0;
 
     class MyHandler extends Handler {
@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.frame_confirmation) FrameLayout          mConfirmationFrameView;
     @BindView(R.id.frame_pictures)     ViewGroup            mPictureFrame;
     @BindView(R.id.list_pictures)      RecyclerView         mPictureList;
+    @BindView(R.id.empty)              TextView             mEmptyView;
 
     Stage     mCurStage = Stage.LOGIN;
     String    mCurKey   = PrefHelper.KEY_STATE;
@@ -160,9 +161,7 @@ public class MainActivity extends AppCompatActivity {
         mSimpleAdapter = new SimpleListAdapter(this, new SimpleListAdapter.OnItemSelectedListener() {
             @Override
             public void onSelectedItem(int position, String text) {
-                if (mCurKey != null) {
-                    PrefHelper.getInstance().setString(mCurKey, text);
-                }
+                onSelected(text);
             }
         });
         mProjectAdapter = new ProjectListAdapter(this);
@@ -227,8 +226,14 @@ public class MainActivity extends AppCompatActivity {
 
     boolean save(boolean isNext) {
         if (mCurStage == Stage.LOGIN) {
-            PrefHelper.getInstance().setFirstName(getEditText(mFirstName));
-            PrefHelper.getInstance().setLastName(getEditText(mLastName));
+            String firstName = getEditText(mFirstName);
+            String lastName = getEditText(mLastName);
+            PrefHelper.getInstance().setFirstName(firstName);
+            PrefHelper.getInstance().setLastName(lastName);
+            if (TextUtils.isEmpty(firstName) || TextUtils.isEmpty(lastName))  {
+                showError(getString(R.string.error_enter_your_name));
+                return false;
+            }
         } else if (mCurStage == Stage.TRUCK_NUMBER) {
             String value = mEntrySimple.getText().toString();
             if (TextUtils.isDigitsOnly(value)) {
@@ -245,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (mCurStage == Stage.PICTURE) {
             if (isNext) {
-                int numberTaken   = TablePendingPictures.getInstance().count();
+                int numberTaken = TablePendingPictures.getInstance().count();
                 int requiredCount = PrefHelper.getInstance().getRequiredNumberPictures();
                 if (numberTaken < requiredCount) {
                     showError(getString(R.string.error_need_more_pictures, requiredCount - numberTaken));
@@ -320,6 +325,8 @@ public class MainActivity extends AppCompatActivity {
         mConfirmationFrame.setVisibility(View.GONE);
         mPictureFrame.setVisibility(View.GONE);
         mPictureList.setVisibility(View.GONE);
+        mEmptyView.setVisibility(View.GONE);
+        mMainList.setVisibility(View.VISIBLE);
 
         switch (mCurStage) {
             case LOGIN:
@@ -337,7 +344,10 @@ public class MainActivity extends AppCompatActivity {
                         mPrev.setVisibility(View.VISIBLE);
                     }
                     mMainListFrame.setVisibility(View.VISIBLE);
-                    mNext.setVisibility(View.VISIBLE);
+
+                    if (PrefHelper.getInstance().getProjectName() != null) {
+                        mNext.setVisibility(View.VISIBLE);
+                    }
                     setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 }
                 break;
@@ -358,8 +368,8 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
-                    String       company = PrefHelper.getInstance().getCompany();
-                    List<String> states  = TableAddress.getInstance().queryStates(company);
+                    String company = PrefHelper.getInstance().getCompany();
+                    List<String> states = TableAddress.getInstance().queryStates(company);
                     if (states.size() > 0) {
                         PrefHelper.getInstance().addState(states);
                         setList(R.string.title_state, PrefHelper.KEY_STATE, states);
@@ -381,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mMainListFrame.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
-                    String       state  = PrefHelper.getInstance().getState();
+                    String state = PrefHelper.getInstance().getState();
                     List<String> cities = TableAddress.getInstance().queryCities(state);
                     if (cities.size() > 0) {
                         PrefHelper.getInstance().addCity(cities);
@@ -400,6 +410,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntryFrame.setVisibility(View.VISIBLE);
                     mEntrySimple.setHint(R.string.title_street);
                     mEntrySimple.setText("");
+                    mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS);
                 } else {
                     mNew.setVisibility(View.VISIBLE);
                     mMainListFrame.setVisibility(View.VISIBLE);
@@ -447,10 +458,17 @@ public class MainActivity extends AppCompatActivity {
             case NOTES:
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
-                mMainListFrame.setVisibility(View.VISIBLE);
-                mMainList.setAdapter(mNoteAdapter);
                 mNoteAdapter.onDataChanged();
                 mTitle.setText(R.string.title_notes);
+                mMainListFrame.setVisibility(View.VISIBLE);
+                if (mNoteAdapter.getItemCount() == 0) {
+                    mMainList.setVisibility(View.GONE);
+                    mEmptyView.setVisibility(View.VISIBLE);
+                } else {
+                    mMainList.setAdapter(mNoteAdapter);
+                    mMainList.setVisibility(View.VISIBLE);
+                    mEmptyView.setVisibility(View.GONE);
+                }
                 break;
             case EQUIPMENT:
                 mNext.setVisibility(View.VISIBLE);
@@ -487,6 +505,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     if (numberTaken >= requiredCount) {
                         mNext.setVisibility(View.VISIBLE);
+                        mNext.setText(R.string.btn_done);
                     }
                     mNew.setVisibility(View.VISIBLE);
                     mNew.setText(R.string.btn_another);
@@ -514,6 +533,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // TODO:
     boolean isNewEquipmentOkay() {
         String name = PrefHelper.getInstance().getProjectName();
         if (name.equals("Other")) {
@@ -552,6 +572,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    void onSelected(String text) {
+        if (mCurKey != null) {
+            PrefHelper.getInstance().setString(mCurKey, text);
+            if (mCurStage == Stage.PROJECT) {
+                mNext.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
 
     boolean dispatchPictureRequest() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);

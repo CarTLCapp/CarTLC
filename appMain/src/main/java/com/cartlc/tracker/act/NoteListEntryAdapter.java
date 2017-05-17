@@ -76,6 +76,7 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         } else if (item.type == DataNote.Type.MULTILINE) {
             holder.entry.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
             holder.entry.setMaxLines(3);
+            holder.entry.setLines(3);
         } else {
             holder.entry.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
             holder.entry.setMaxLines(1);
