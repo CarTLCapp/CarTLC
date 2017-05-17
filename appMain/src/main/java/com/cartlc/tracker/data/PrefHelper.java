@@ -174,13 +174,13 @@ public class PrefHelper extends PrefHelperBase {
         return list;
     }
 
-    public DataProjectGroup getCurrentProjectGroup() {
+    public DataProjectAddressCombo getCurrentProjectGroup() {
         long projectGroupId = getCurrentProjectGroupId();
-        return TableProjectGroups.getInstance().query(projectGroupId);
+        return TableProjectAddressCombo.getInstance().query(projectGroupId);
     }
 
     public void setupFromCurrentProjectId() {
-        DataProjectGroup projectGroup = getCurrentProjectGroup();
+        DataProjectAddressCombo projectGroup = getCurrentProjectGroup();
         if (projectGroup != null) {
             setProject(projectGroup.getProjectName());
             DataAddress address = projectGroup.getAddress();
@@ -221,7 +221,7 @@ public class PrefHelper extends PrefHelperBase {
         if (projectGroupId < 0) {
             return false;
         }
-        DataProjectGroup projectGroup = TableProjectGroups.getInstance().query(projectGroupId);
+        DataProjectAddressCombo projectGroup = TableProjectAddressCombo.getInstance().query(projectGroupId);
         if (projectGroup == null) {
             return false;
         }
@@ -245,9 +245,9 @@ public class PrefHelper extends PrefHelperBase {
         }
         long projectNameId = TableProjects.getInstance().query(project);
         if (addressId >= 0 && projectNameId >= 0) {
-            long projectGroupId = TableProjectGroups.getInstance().queryProjectGroupId(projectNameId, addressId);
+            long projectGroupId = TableProjectAddressCombo.getInstance().queryProjectGroupId(projectNameId, addressId);
             if (projectGroupId < 0) {
-                projectGroupId = TableProjectGroups.getInstance().add(new DataProjectGroup(projectNameId, addressId));
+                projectGroupId = TableProjectAddressCombo.getInstance().add(new DataProjectAddressCombo(projectNameId, addressId));
             }
             setCurrentProjectGroupId(projectGroupId);
             return true;
@@ -255,7 +255,7 @@ public class PrefHelper extends PrefHelperBase {
         return false;
     }
 
-    public void setCurrentProjectGroup(DataProjectGroup group) {
+    public void setCurrentProjectGroup(DataProjectAddressCombo group) {
         setCurrentProjectGroupId(group.id);
         setProject(group.getProjectName());
         setAddress(group.getAddress());
@@ -289,7 +289,7 @@ public class PrefHelper extends PrefHelperBase {
         if (projectGroupId < 0) {
             return null;
         }
-        DataProjectGroup projectGroup = TableProjectGroups.getInstance().query(projectGroupId);
+        DataProjectAddressCombo projectGroup = TableProjectAddressCombo.getInstance().query(projectGroupId);
         if (projectGroup == null) {
             return null;
         }

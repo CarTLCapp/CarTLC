@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataNote;
-import com.cartlc.tracker.data.DataProjectGroup;
+import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TableNoteProjectCollection;
@@ -88,7 +88,7 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
     }
 
     public void onDataChanged() {
-        DataProjectGroup curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
+        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
         mItems = TableNoteProjectCollection.getInstance().getNotes(curGroup.projectNameId);
         notifyDataSetChanged();
     }

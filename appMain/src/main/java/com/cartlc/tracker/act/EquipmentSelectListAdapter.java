@@ -11,7 +11,7 @@ import android.widget.CompoundButton;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEquipment;
 import com.cartlc.tracker.data.DataEquipmentProjectCollection;
-import com.cartlc.tracker.data.DataProjectGroup;
+import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableEquipmentProjectCollection;
@@ -68,7 +68,7 @@ public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSe
     }
 
     public void onDataChanged() {
-        DataProjectGroup curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
+        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
         DataEquipmentProjectCollection collection = TableEquipmentProjectCollection.getInstance().queryForProject(curGroup.projectNameId);
         mItems = collection.getEquipment();
         notifyDataSetChanged();

@@ -14,19 +14,19 @@ import timber.log.Timber;
  * Created by dug on 5/10/17.
  */
 
-public class TableProjectGroups {
+public class TableProjectAddressCombo {
 
-    static TableProjectGroups sInstance;
+    static TableProjectAddressCombo sInstance;
 
     static void Init(SQLiteDatabase db) {
-        new TableProjectGroups(db);
+        new TableProjectAddressCombo(db);
     }
 
-    public static TableProjectGroups getInstance() {
+    public static TableProjectAddressCombo getInstance() {
         return sInstance;
     }
 
-    static final String TABLE_NAME = "list_project_groups";
+    static final String TABLE_NAME = "list_project_address_combo";
 
     static final String KEY_ROWID      = "_id";
     static final String KEY_PROJECT_ID = "project_id";
@@ -34,7 +34,7 @@ public class TableProjectGroups {
 
     final SQLiteDatabase mDb;
 
-    public TableProjectGroups(SQLiteDatabase db) {
+    public TableProjectAddressCombo(SQLiteDatabase db) {
         sInstance = this;
         this.mDb = db;
     }
@@ -60,7 +60,7 @@ public class TableProjectGroups {
         mDb.execSQL(sbuf.toString());
     }
 
-    public long add(DataProjectGroup projectGroup) {
+    public long add(DataProjectAddressCombo projectGroup) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
@@ -88,17 +88,17 @@ public class TableProjectGroups {
         return count;
     }
 
-    public List<DataProjectGroup> query() {
-        ArrayList<DataProjectGroup> list = new ArrayList();
+    public List<DataProjectAddressCombo> query() {
+        ArrayList<DataProjectAddressCombo> list = new ArrayList();
         try {
             final String[]   columns      = {KEY_ROWID, KEY_PROJECT_ID, KEY_ADDRESS_ID};
             Cursor           cursor       = mDb.query(true, TABLE_NAME, columns, null, null, null, null, null, null);
             int              idxRowId     = cursor.getColumnIndex(KEY_ROWID);
             int              idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
             int              idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
-            DataProjectGroup item;
+            DataProjectAddressCombo item;
             while (cursor.moveToNext()) {
-                item = new DataProjectGroup(cursor.getLong(idxRowId), cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
+                item = new DataProjectAddressCombo(cursor.getLong(idxRowId), cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
                 list.add(item);
             }
             cursor.close();
@@ -109,8 +109,8 @@ public class TableProjectGroups {
         return list;
     }
 
-    public DataProjectGroup query(long id) {
-        DataProjectGroup item = null;
+    public DataProjectAddressCombo query(long id) {
+        DataProjectAddressCombo item = null;
         try {
             final String[] columns       = {KEY_PROJECT_ID, KEY_ADDRESS_ID};
             final String   selection     = KEY_ROWID + " =?";
@@ -119,7 +119,7 @@ public class TableProjectGroups {
             int            idxProjectId  = cursor.getColumnIndex(KEY_PROJECT_ID);
             int            idxAddressId  = cursor.getColumnIndex(KEY_ADDRESS_ID);
             if (cursor.moveToFirst()) {
-                item = new DataProjectGroup(cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
+                item = new DataProjectAddressCombo(cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
             }
             cursor.close();
         } catch (Exception ex) {

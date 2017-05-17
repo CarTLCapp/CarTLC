@@ -8,19 +8,19 @@ import timber.log.Timber;
  * Created by dug on 5/10/17.
  */
 
-public class DataProjectGroup implements Comparable<DataProjectGroup> {
+public class DataProjectAddressCombo implements Comparable<DataProjectAddressCombo> {
     public long id;
     public final long projectNameId;
     public final long addressId;
     String mProjectName;
     DataAddress mAddress;
 
-    public DataProjectGroup(long projectNameId, long addressId) {
+    public DataProjectAddressCombo(long projectNameId, long addressId) {
         this.projectNameId = projectNameId;
         this.addressId = addressId;
     }
 
-    public DataProjectGroup(long rowId, long projectNameId, long addressId) {
+    public DataProjectAddressCombo(long rowId, long projectNameId, long addressId) {
         this.id = rowId;
         this.projectNameId = projectNameId;
         this.addressId = addressId;
@@ -47,7 +47,7 @@ public class DataProjectGroup implements Comparable<DataProjectGroup> {
     }
 
     @Override
-    public int compareTo(@NonNull DataProjectGroup o) {
+    public int compareTo(@NonNull DataProjectAddressCombo o) {
         String name = getProjectName();
         String otherName = o.getProjectName();
         if (name != null && otherName != null) {

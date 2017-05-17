@@ -2,20 +2,13 @@ package com.cartlc.tracker.act;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cartlc.tracker.R;
-import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataNote;
-import com.cartlc.tracker.data.DataProjectGroup;
-import com.cartlc.tracker.data.PrefHelper;
-import com.cartlc.tracker.data.TableNote;
-import com.cartlc.tracker.data.TableNoteProjectCollection;
 
 import java.util.List;
 

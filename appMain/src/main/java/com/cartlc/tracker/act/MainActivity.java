@@ -31,7 +31,7 @@ import android.widget.TextView;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
-import com.cartlc.tracker.data.DataProjectGroup;
+import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
@@ -39,7 +39,7 @@ import com.cartlc.tracker.data.TableEntries;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableEquipmentProjectCollection;
 import com.cartlc.tracker.data.TablePendingPictures;
-import com.cartlc.tracker.data.TableProjectGroups;
+import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
 
 import java.util.List;
@@ -267,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (mCurStage == Stage.EQUIPMENT) {
                 String name = getEditText(mEntrySimple);
                 if (!TextUtils.isEmpty(name)) {
-                    DataProjectGroup group = PrefHelper.getInstance().getCurrentProjectGroup();
+                    DataProjectAddressCombo group = PrefHelper.getInstance().getCurrentProjectGroup();
                     TableEquipmentProjectCollection.getInstance().addLocal(name, group.projectNameId);
                 }
             }
@@ -333,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mCurStageEditing) {
                     showError("No projects!");
                 } else {
-                    if (TableProjectGroups.getInstance().count() > 0) {
+                    if (TableProjectAddressCombo.getInstance().count() > 0) {
                         mPrev.setVisibility(View.VISIBLE);
                     }
                     mMainListFrame.setVisibility(View.VISIBLE);
@@ -421,7 +421,7 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().clearCurProject();
                     mCurStageEditing = false;
                 }
-                if (!PrefHelper.getInstance().hasCurProject() || TableProjectGroups.getInstance().count() == 0) {
+                if (!PrefHelper.getInstance().hasCurProject() || TableProjectAddressCombo.getInstance().count() == 0) {
                     computeCurStage();
                     fillStage();
                 } else {

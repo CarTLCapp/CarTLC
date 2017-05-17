@@ -31,7 +31,7 @@ public class TableNote {
         return sInstance;
     }
 
-    protected final SQLiteDatabase mDb;
+    final SQLiteDatabase mDb;
 
     TableNote(SQLiteDatabase db) {
         mDb = db;

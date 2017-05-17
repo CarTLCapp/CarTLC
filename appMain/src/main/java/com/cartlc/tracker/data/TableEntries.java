@@ -24,7 +24,6 @@ public class TableEntries {
     static final String KEY_EQUIPMENT_COLLECTION_ID = "requipment_collection_id";
     static final String KEY_PICTURE_COLLECTION_ID = "picture_collection_id";
     static final String KEY_TRUCK_NUMBER = "truck_number";
-    static final String KEY_NOTES_ID = "notes_id";
     static final String KEY_UPLOADED = "uploaded";
 
     static TableEntries sInstance;
@@ -70,8 +69,6 @@ public class TableEntries {
         sbuf.append(" long, ");
         sbuf.append(KEY_TRUCK_NUMBER);
         sbuf.append(" int, ");
-        sbuf.append(KEY_NOTES_ID);
-        sbuf.append(" long, ");
         sbuf.append(KEY_UPLOADED);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
@@ -103,7 +100,7 @@ public class TableEntries {
         try {
             final String[] columns = {KEY_ROWID,
                     KEY_DATE, KEY_PROJECT_ID, KEY_ADDRESS_ID, KEY_EQUIPMENT_COLLECTION_ID,
-                    KEY_PICTURE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_NOTES_ID, KEY_UPLOADED};
+                    KEY_PICTURE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_UPLOADED};
             final String orderBy = KEY_DATE + " DESC";
             Cursor cursor = mDb.query(TABLE_NAME, columns, where, whereArgs, null, null, orderBy, null);
             int idxRow = cursor.getColumnIndex(KEY_ROWID);
@@ -112,7 +109,6 @@ public class TableEntries {
             int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
             int idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID);
             int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
-            int idxNotesId = cursor.getColumnIndex(KEY_NOTES_ID);
             int idxUploaded = cursor.getColumnIndex(KEY_UPLOADED);
             DataEntry entry;
             while (cursor.moveToNext()) {
@@ -124,7 +120,6 @@ public class TableEntries {
                 entry.equipmentCollection = new DataEquipmentEntryCollection(equipmentCollectionId);
                 entry.pictureCollection = new DataPictureCollection(cursor.getLong(idxPictureCollectionId));
                 entry.truckNumber = cursor.getInt(idxTruckNumber);
-                entry.notesId = cursor.getLong(idxNotesId);
                 entry.uploaded = cursor.getShort(idxUploaded) != 0;
                 list.add(entry);
             }
@@ -184,7 +179,6 @@ public class TableEntries {
             values.put(KEY_ADDRESS_ID, entry.addressId);
             values.put(KEY_EQUIPMENT_COLLECTION_ID, entry.equipmentCollection.id);
             values.put(KEY_TRUCK_NUMBER, entry.truckNumber);
-            values.put(KEY_NOTES_ID, entry.notesId);
             mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {

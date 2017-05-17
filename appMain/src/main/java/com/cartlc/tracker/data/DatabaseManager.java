@@ -33,14 +33,14 @@ public class DatabaseManager {
                 TableEquipment.getInstance().create();
                 TableEquipmentEntryCollection.getInstance().create();
                 TableEquipmentProjectCollection.getInstance().create();
-                TablePictureCollection.getInstance().create();
                 TableNote.getInstance().create();
                 TableNoteEntryCollection.getInstance().create();
                 TableNoteProjectCollection.getInstance().create();
                 TablePendingNotes.getInstance().create();
                 TablePendingPictures.getInstance().create();
+                TablePictureCollection.getInstance().create();
+                TableProjectAddressCombo.getInstance().create();
                 TableProjects.getInstance().create();
-                TableProjectGroups.getInstance().create();
             } catch (Exception ex) {
                 Timber.e(ex);
             }
@@ -50,16 +50,16 @@ public class DatabaseManager {
             TableAddress.Init(db);
             TableEntries.Init(db);
             TableEquipment.Init(db);
-            TableEquipmentProjectCollection.Init(db);
             TableEquipmentEntryCollection.Init(db);
-            TablePictureCollection.Init(db);
+            TableEquipmentProjectCollection.Init(db);
             TableNote.Init(db);
             TableNoteEntryCollection.Init(db);
             TableNoteProjectCollection.Init(db);
             TablePendingNotes.getInstance().Init(db);
             TablePendingPictures.getInstance().Init(db);
+            TablePictureCollection.Init(db);
+            TableProjectAddressCombo.Init(db);
             TableProjects.Init(db);
-            TableProjectGroups.Init(db);
         }
 
         @Override

@@ -9,10 +9,10 @@ import android.widget.TextView;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataAddress;
-import com.cartlc.tracker.data.DataProjectGroup;
+import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableEntries;
-import com.cartlc.tracker.data.TableProjectGroups;
+import com.cartlc.tracker.data.TableProjectAddressCombo;
 
 import java.util.List;
 
@@ -38,8 +38,8 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     }
 
     final Context mContext;
-    List<DataProjectGroup> mProjectGroups;
-    Long                   mCurProjectGroupId;
+    List<DataProjectAddressCombo> mProjectGroups;
+    Long                          mCurProjectGroupId;
 
     public ProjectListAdapter(Context context) {
         mContext = context;
@@ -54,7 +54,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
 
     @Override
     public void onBindViewHolder(CustomViewHolder holder, final int position) {
-        final DataProjectGroup projectGroup = mProjectGroups.get(position);
+        final DataProjectAddressCombo projectGroup = mProjectGroups.get(position);
         holder.mProjectName.setText(projectGroup.getProjectName());
         int countTotal = TableEntries.getInstance().count(projectGroup.projectNameId);
 
@@ -94,7 +94,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     }
 
 
-    public void setSelected(DataProjectGroup group) {
+    public void setSelected(DataProjectAddressCombo group) {
         mCurProjectGroupId = group.id;
         PrefHelper.getInstance().setCurrentProjectGroup(group);
         notifyDataSetChanged();
@@ -107,7 +107,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     }
 
     void onDataChanged() {
-        mProjectGroups = TableProjectGroups.getInstance().query();
+        mProjectGroups = TableProjectAddressCombo.getInstance().query();
         mCurProjectGroupId = PrefHelper.getInstance().getCurrentProjectGroupId();
         notifyDataSetChanged();
     }

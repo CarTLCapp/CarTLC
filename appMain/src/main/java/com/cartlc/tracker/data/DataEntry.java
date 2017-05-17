@@ -13,7 +13,6 @@ public class DataEntry {
     public long                         addressId;
     public DataEquipmentEntryCollection equipmentCollection;
     public DataPictureCollection        pictureCollection;
-    public DataNoteEntryCollection      noteCollection;
     public long                         truckNumber;
     public boolean                      uploaded;
 
@@ -48,9 +47,6 @@ public class DataEntry {
     }
 
     public void saveNotes() {
-        noteCollection.entries.clear();
-        for (DataNote note : getNotes()) {
-            noteCollection.entries.put(note.name, note.value);
-        }
+        TableNoteEntryCollection.getInstance().store(projectNameId, id);
     }
 }
