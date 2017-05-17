@@ -15,14 +15,14 @@ public class DataProjectGroup implements Comparable<DataProjectGroup> {
     String mProjectName;
     DataAddress mAddress;
 
-    public DataProjectGroup(long projectId, long addressId) {
-        this.projectNameId = projectId;
+    public DataProjectGroup(long projectNameId, long addressId) {
+        this.projectNameId = projectNameId;
         this.addressId = addressId;
     }
 
-    public DataProjectGroup(long rowId, long projectId, long addressId) {
+    public DataProjectGroup(long rowId, long projectNameId, long addressId) {
         this.id = rowId;
-        this.projectNameId = projectId;
+        this.projectNameId = projectNameId;
         this.addressId = addressId;
     }
 

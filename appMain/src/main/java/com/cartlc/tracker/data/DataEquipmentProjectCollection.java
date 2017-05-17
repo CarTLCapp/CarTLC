@@ -8,7 +8,7 @@ import java.util.List;
  */
 
 public class DataEquipmentProjectCollection extends DataEquipmentCollection {
-    public DataEquipmentProjectCollection(long projectId) {
-        super(projectId);
+    public DataEquipmentProjectCollection(long projectNameId) {
+        super(projectNameId);
     }
 }

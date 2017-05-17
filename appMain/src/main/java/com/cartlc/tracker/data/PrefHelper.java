@@ -97,9 +97,9 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public Long getProjectId() {
-        long projectId = TableProjects.getInstance().query(getProjectName());
-        if (projectId >= 0) {
-            return projectId;
+        long projectNameId = TableProjects.getInstance().query(getProjectName());
+        if (projectNameId >= 0) {
+            return projectNameId;
         }
         return null;
     }
@@ -262,11 +262,11 @@ public class PrefHelper extends PrefHelperBase {
             DataAddress address = new DataAddress(company, street, city, state);
             addressId = TableAddress.getInstance().add(address);
         }
-        long projectId = TableProjects.getInstance().query(project);
-        if (addressId >= 0 && projectId >= 0) {
-            long projectGroupId = TableProjectGroups.getInstance().queryProjectGroupId(projectId, addressId);
+        long projectNameId = TableProjects.getInstance().query(project);
+        if (addressId >= 0 && projectNameId >= 0) {
+            long projectGroupId = TableProjectGroups.getInstance().queryProjectGroupId(projectNameId, addressId);
             if (projectGroupId < 0) {
-                projectGroupId = TableProjectGroups.getInstance().add(new DataProjectGroup(projectId, addressId));
+                projectGroupId = TableProjectGroups.getInstance().add(new DataProjectGroup(projectNameId, addressId));
             }
             setCurrentProjectGroupId(projectGroupId);
             return true;

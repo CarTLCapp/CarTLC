@@ -40,7 +40,6 @@ public class DatabaseManager {
                 TablePendingPictures.getInstance().create();
                 TableProjects.getInstance().create();
                 TableProjectGroups.getInstance().create();
-                TableTrucks.getInstance().create();
             } catch (Exception ex) {
                 Timber.e(ex);
             }
@@ -59,7 +58,6 @@ public class DatabaseManager {
             TablePendingPictures.getInstance().Init(db);
             TableProjects.Init(db);
             TableProjectGroups.Init(db);
-            TableTrucks.Init(db);
         }
 
         @Override

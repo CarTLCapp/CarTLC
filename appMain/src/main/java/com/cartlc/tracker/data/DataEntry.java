@@ -14,7 +14,7 @@ public class DataEntry {
     public DataEquipmentEntryCollection equipmentCollection;
     public DataPictureCollection        pictureCollection;
     public long                         truckNumber;
-    public long                         notesId;
+    public long                         notesCollectionId;
     public boolean                      uploaded;
 
     public DataEntry() {
@@ -32,8 +32,8 @@ public class DataEntry {
         return null;
     }
 
-    public String getNotes() {
-        return TableNote.getInstance().query(notesId);
+    public List<DataNote> getNotes() {
+        return TableNoteProjectCollection.getInstance().getNotes(notesCollectionId);
     }
 
     public List<String> getEquipmentNames() {

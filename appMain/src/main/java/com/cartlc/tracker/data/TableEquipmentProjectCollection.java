@@ -26,18 +26,18 @@ public class TableEquipmentProjectCollection extends TableCollection {
         sInstance = this;
     }
 
-    public DataEquipmentProjectCollection queryForProject(long projectId) {
-        DataEquipmentProjectCollection collection = new DataEquipmentProjectCollection(projectId);
-        collection.equipmentListIds = query(projectId);
+    public DataEquipmentProjectCollection queryForProject(long projectNameId) {
+        DataEquipmentProjectCollection collection = new DataEquipmentProjectCollection(projectNameId);
+        collection.equipmentListIds = query(projectNameId);
         return collection;
     }
 
     public void addByName(String projectName, List<String> equipments) {
-        long projectId = TableProjects.getInstance().query(projectName);
-        if (projectId < 0) {
-            projectId = TableProjects.getInstance().add(projectName);
+        long projectNameId = TableProjects.getInstance().query(projectName);
+        if (projectNameId < 0) {
+            projectNameId = TableProjects.getInstance().add(projectName);
         }
-        addByName(projectId, equipments);
+        addByName(projectNameId, equipments);
     }
 
     public void addByName(long collectionId, List<String> names) {
@@ -50,6 +50,11 @@ public class TableEquipmentProjectCollection extends TableCollection {
             list.add(id);
         }
         add(collectionId, list);
+    }
+
+    public void addLocal(String name, long projectNameId) {
+        long equipId = TableEquipment.getInstance().addLocal(name);
+        add(projectNameId, equipId);
     }
 
 }

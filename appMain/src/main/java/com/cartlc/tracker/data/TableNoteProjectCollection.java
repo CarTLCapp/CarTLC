@@ -10,7 +10,9 @@ import java.util.List;
  */
 
 public class TableNoteProjectCollection extends TableCollection {
+
     static final String TABLE_NAME = "note_project_collection";
+
     static TableNoteProjectCollection sInstance;
 
     static void Init(SQLiteDatabase db) {
@@ -26,23 +28,32 @@ public class TableNoteProjectCollection extends TableCollection {
         sInstance = this;
     }
 
-    public void addByName(String projectName, List<String> notes) {
-        long projectId = TableProjects.getInstance().query(projectName);
-        if (projectId < 0) {
-            projectId = TableProjects.getInstance().add(projectName);
+    public void addByName(String projectName, List<DataNote> notes) {
+        long projectNameId = TableProjects.getInstance().query(projectName);
+        if (projectNameId < 0) {
+            projectNameId = TableProjects.getInstance().add(projectName);
         }
-        addByName(projectId, notes);
+        addByName(projectNameId, notes);
     }
 
-    public void addByName(long collectionId, List<String> names) {
+    void addByName(long projectNameId, List<DataNote> notes) {
         List<Long> list = new ArrayList();
-        for (String name : names) {
-            long id = TableNote.getInstance().query(name);
+        for (DataNote note : notes) {
+            long id = TableNote.getInstance().query(note.name);
             if (id < 0) {
-                id = TableNote.getInstance().add(name);
+                TableNote.getInstance().add(note);
             }
             list.add(id);
         }
-        add(collectionId, list);
+        add(projectNameId, list);
+    }
+
+    public List<DataNote> getNotes(long projectNameId) {
+        List<Long>     noteIds = query(projectNameId);
+        List<DataNote> list    = new ArrayList();
+        for (Long noteId : noteIds) {
+            list.add(TableNote.getInstance().query(noteId));
+        }
+        return list;
     }
 }

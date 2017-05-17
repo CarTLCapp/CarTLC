@@ -103,7 +103,7 @@ public class TableEquipment {
         return id;
     }
 
-    public long addLocal(String name, long projectId) {
+    public long addLocal(String name) {
         long id = -1L;
         mDb.beginTransaction();
         try {

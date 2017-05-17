@@ -107,35 +107,35 @@ public class TestData {
     }
 
     static void AddNotes() {
-        TableNoteProjectCollection.getInstance().addByName("Five Cubits", Arrays.asList(new String[]{
-                "Serial #",
-                "IMEI #",
-                "Other"
+        TableNoteProjectCollection.getInstance().addByName("Five Cubits", Arrays.asList(new DataNote[]{
+                new DataNote("Serial #", DataNote.Type.ALPHANUMERIC),
+                new DataNote("IMEI #", DataNote.Type.NUMERIC),
+                new DataNote("Other", DataNote.Type.MULTILINE),
         }));
-        TableNoteProjectCollection.getInstance().addByName("Digital Fleet", Arrays.asList(new String[]{
-                "Serial #",
-                "IMEI #",
-                "Other"
+        TableNoteProjectCollection.getInstance().addByName("Digital Fleet", Arrays.asList(new DataNote[]{
+                new DataNote("Serial #"),
+                new DataNote("IMEI #"),
+                new DataNote("Other"),
         }));
-        TableNoteProjectCollection.getInstance().addByName("Smart Witness", Arrays.asList(new String[]{
-                "Serial #",
-                "IMEI #",
-                "Sim #",
-                "DRID #",
-                "Other"
+        TableNoteProjectCollection.getInstance().addByName("Smart Witness", Arrays.asList(new DataNote[]{
+                new DataNote("Serial #"),
+                new DataNote("IMEI #"),
+                new DataNote("Sim #", DataNote.Type.NUMERIC_WITH_SPACES),
+                new DataNote("DRID #", DataNote.Type.TEXT),
+                new DataNote("Other"),
         }));
-        TableNoteProjectCollection.getInstance().addByName("Fed Ex", Arrays.asList(new String[]{
-                "Serial #",
-                "IMEI #",
-                "Sim #",
-                "DRID #",
-                "Mobileye",
-                "Other"
+        TableNoteProjectCollection.getInstance().addByName("Fed Ex", Arrays.asList(new DataNote[]{
+                new DataNote("Serial #"),
+                new DataNote("IMEI #"),
+                new DataNote("Sim #"),
+                new DataNote("DRID #"),
+                new DataNote("Mobileye", DataNote.Type.TEXT),
+                new DataNote("Other"),
         }));
-        TableNoteProjectCollection.getInstance().addByName("Other", Arrays.asList(new String[]{
-                "Serial #",
-                "IMEI #",
-                "Other"
+        TableNoteProjectCollection.getInstance().addByName("Other", Arrays.asList(new DataNote[]{
+                new DataNote("Serial #"),
+                new DataNote("IMEI #"),
+                new DataNote("Other")
         }));
     }
 

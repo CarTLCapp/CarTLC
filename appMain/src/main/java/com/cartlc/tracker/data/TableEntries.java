@@ -135,11 +135,11 @@ public class TableEntries {
         return list;
     }
 
-    public int count(long projectId) {
+    public int count(long projectNameId) {
         int count = 0;
         try {
             final String selection = KEY_PROJECT_ID + " =?";
-            final String[] selectionArgs = {Long.toString(projectId)};
+            final String[] selectionArgs = {Long.toString(projectNameId)};
             Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
             count = cursor.getCount();
             cursor.close();
@@ -149,7 +149,7 @@ public class TableEntries {
         return count;
     }
 
-    public int countUploaded(long projectId) {
+    public int countUploaded(long projectNameId) {
         int count = 0;
         try {
             StringBuilder sbuf = new StringBuilder();
@@ -158,7 +158,7 @@ public class TableEntries {
             sbuf.append(KEY_UPLOADED);
             sbuf.append("=1");
             final String selection = sbuf.toString();
-            final String[] selectionArgs = {Long.toString(projectId)};
+            final String[] selectionArgs = {Long.toString(projectNameId)};
             Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
             count = cursor.getCount();
             cursor.close();

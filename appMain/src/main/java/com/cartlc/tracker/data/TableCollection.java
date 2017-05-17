@@ -15,9 +15,9 @@ import timber.log.Timber;
 
 public abstract class TableCollection {
 
-    static final String KEY_ROWID       = "_id";
-    static final String KEY_GROUPING_ID = "grouping_id";
-    static final String KEY_VALUE_ID    = "value_id";
+    static final String KEY_ROWID         = "_id";
+    static final String KEY_COLLECTION_ID = "collection_id";
+    static final String KEY_VALUE_ID      = "value_id";
 
     final SQLiteDatabase mDb;
     final String         mTableName;
@@ -41,7 +41,7 @@ public abstract class TableCollection {
         sbuf.append(" (");
         sbuf.append(KEY_ROWID);
         sbuf.append(" integer primary key autoincrement, ");
-        sbuf.append(KEY_GROUPING_ID);
+        sbuf.append(KEY_COLLECTION_ID);
         sbuf.append(" long, ");
         sbuf.append(KEY_VALUE_ID);
         sbuf.append(" long)");
@@ -71,7 +71,7 @@ public abstract class TableCollection {
             ContentValues values = new ContentValues();
             for (Long id : ids) {
                 values.clear();
-                values.put(KEY_GROUPING_ID, collectionId);
+                values.put(KEY_COLLECTION_ID, collectionId);
                 values.put(KEY_VALUE_ID, id);
                 mDb.insert(mTableName, null, values);
             }
@@ -83,14 +83,28 @@ public abstract class TableCollection {
         }
     }
 
+    public void add(long collectionId, long valueId) {
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.clear();
+            values.put(KEY_COLLECTION_ID, collectionId);
+            values.put(KEY_VALUE_ID, valueId);
+            mDb.insert(mTableName, null, values);
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
+    }
 
-
-    public List<Long> query(long other_id) {
+    public List<Long> query(long collection_id) {
         List<Long> collection = new ArrayList();
         try {
             final String[] columns       = {KEY_VALUE_ID};
-            final String   selection     = KEY_GROUPING_ID + " =?";
-            final String[] selectionArgs = {Long.toString(other_id)};
+            final String   selection     = KEY_COLLECTION_ID + " =?";
+            final String[] selectionArgs = {Long.toString(collection_id)};
             Cursor         cursor        = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null, null);
             int            idxValue      = cursor.getColumnIndex(KEY_VALUE_ID);
             while (cursor.moveToNext()) {

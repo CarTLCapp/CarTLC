@@ -28,7 +28,7 @@ public class TableProjectGroups {
 
     static final String TABLE_NAME = "list_project_groups";
 
-    static final String KEY_ROWID = "_id";
+    static final String KEY_ROWID      = "_id";
     static final String KEY_PROJECT_ID = "project_id";
     static final String KEY_ADDRESS_ID = "address_id";
 
@@ -91,11 +91,11 @@ public class TableProjectGroups {
     public List<DataProjectGroup> query() {
         ArrayList<DataProjectGroup> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_PROJECT_ID, KEY_ADDRESS_ID};
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, null, null);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
-            int idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
+            final String[]   columns      = {KEY_ROWID, KEY_PROJECT_ID, KEY_ADDRESS_ID};
+            Cursor           cursor       = mDb.query(true, TABLE_NAME, columns, null, null, null, null, null, null);
+            int              idxRowId     = cursor.getColumnIndex(KEY_ROWID);
+            int              idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+            int              idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
             DataProjectGroup item;
             while (cursor.moveToNext()) {
                 item = new DataProjectGroup(cursor.getLong(idxRowId), cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
@@ -112,12 +112,12 @@ public class TableProjectGroups {
     public DataProjectGroup query(long id) {
         DataProjectGroup item = null;
         try {
-            final String[] columns = {KEY_PROJECT_ID, KEY_ADDRESS_ID};
-            final String selection = KEY_ROWID + " =?";
+            final String[] columns       = {KEY_PROJECT_ID, KEY_ADDRESS_ID};
+            final String   selection     = KEY_ROWID + " =?";
             final String[] selectionArgs = {Long.toString(id)};
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
-            int idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
+            Cursor         cursor        = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            int            idxProjectId  = cursor.getColumnIndex(KEY_PROJECT_ID);
+            int            idxAddressId  = cursor.getColumnIndex(KEY_ADDRESS_ID);
             if (cursor.moveToFirst()) {
                 item = new DataProjectGroup(cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
             }
@@ -128,19 +128,19 @@ public class TableProjectGroups {
         return item;
     }
 
-    public long queryProjectGroupId(long projectId, long addressId) {
+    public long queryProjectGroupId(long projectNameId, long addressId) {
         long id = -1L;
         try {
             final String[] columns = {KEY_ROWID};
-            StringBuilder sbuf = new StringBuilder();
+            StringBuilder  sbuf    = new StringBuilder();
             sbuf.append(KEY_PROJECT_ID);
             sbuf.append(" =? AND ");
             sbuf.append(KEY_ADDRESS_ID);
             sbuf.append(" =?");
-            final String selection = sbuf.toString();
-            final String[] selectionArgs = {Long.toString(projectId), Long.toString(addressId)};
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+            final String   selection     = sbuf.toString();
+            final String[] selectionArgs = {Long.toString(projectNameId), Long.toString(addressId)};
+            Cursor         cursor        = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            int            idxRowId      = cursor.getColumnIndex(KEY_ROWID);
             if (cursor.moveToFirst()) {
                 id = cursor.getLong(idxRowId);
             }
