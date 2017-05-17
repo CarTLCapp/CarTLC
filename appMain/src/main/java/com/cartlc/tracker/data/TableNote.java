@@ -16,11 +16,10 @@ import timber.log.Timber;
 public class TableNote {
     static final String TABLE_NAME = "list_notes";
 
-    static final String KEY_ROWID  = "_id";
-    static final String KEY_NAME   = "name";
-    static final String KEY_VALUE  = "value";
-    static final String KEY_TYPE   = "type";
-    static final String KEY_ACTIVE = "active";
+    static final String KEY_ROWID = "_id";
+    static final String KEY_NAME  = "name";
+    static final String KEY_VALUE = "value";
+    static final String KEY_TYPE  = "type";
 
     static TableNote sInstance;
 
@@ -51,9 +50,7 @@ public class TableNote {
         sbuf.append(KEY_VALUE);
         sbuf.append(" text, ");
         sbuf.append(KEY_TYPE);
-        sbuf.append(" int, ");
-        sbuf.append(KEY_ACTIVE);
-        sbuf.append(" bit)");
+        sbuf.append(" int)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -113,19 +110,12 @@ public class TableNote {
         }
     }
 
-    public void setActive(List<DataNote> list, boolean flag) {
+    public void clearValues() {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            String where;
-            String [] whereArgs;
-            for (DataNote value : list) {
-                values.clear();
-                where = KEY_ROWID + "=?";
-                whereArgs = new String [] { Long.toString(value.id) };
-                values.put(KEY_ACTIVE, flag ? 1 : 0);
-                mDb.update(TABLE_NAME, values, where, whereArgs);
-            }
+            values.put(KEY_VALUE, (String) null);
+            mDb.update(TABLE_NAME, values, null, null);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
             Timber.e(ex);
@@ -201,4 +191,19 @@ public class TableNote {
         return list;
     }
 
+    public void updateValue(DataNote item) {
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_VALUE, item.value);
+            String   where     = KEY_ROWID + "=?";
+            String[] whereArgs = {Long.toString(item.id)};
+            mDb.update(TABLE_NAME, values, where, whereArgs);
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
+    }
 }

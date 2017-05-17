@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
  * Created by dug on 5/16/17.
  */
 
-public class TableEquipmentEntryCollection extends TableCollection {
+public class TableEquipmentEntryCollection {
     static final String TABLE_NAME = "entry_equipment_collection";
 
     static TableEquipmentEntryCollection sInstance;

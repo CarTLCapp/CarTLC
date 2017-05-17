@@ -13,8 +13,8 @@ public class DataEntry {
     public long                         addressId;
     public DataEquipmentEntryCollection equipmentCollection;
     public DataPictureCollection        pictureCollection;
+    public DataNoteEntryCollection      noteCollection;
     public long                         truckNumber;
-    public long                         notesCollectionId;
     public boolean                      uploaded;
 
     public DataEntry() {
@@ -33,7 +33,7 @@ public class DataEntry {
     }
 
     public List<DataNote> getNotes() {
-        return TableNoteProjectCollection.getInstance().getNotes(notesCollectionId);
+        return TableNoteProjectCollection.getInstance().getNotes(projectNameId);
     }
 
     public List<String> getEquipmentNames() {
@@ -45,5 +45,12 @@ public class DataEntry {
 
     public List<DataPicture> getPictures() {
         return pictureCollection.pictures;
+    }
+
+    public void saveNotes() {
+        noteCollection.entries.clear();
+        for (DataNote note : getNotes()) {
+            noteCollection.entries.put(note.name, note.value);
+        }
     }
 }

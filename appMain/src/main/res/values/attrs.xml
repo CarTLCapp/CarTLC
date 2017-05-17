@@ -65,4 +65,10 @@
     <style name="LoadingText">
         <item name="android:textSize">25sp</item>
     </style>
+    <style name="NoteEntryText">
+        <item name="android:textSize">20sp</item>
+    </style>
+    <style name="NoteText">
+        <item name="android:textSize">18sp</item>
+    </style>
 </resources>

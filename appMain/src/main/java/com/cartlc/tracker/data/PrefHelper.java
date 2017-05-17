@@ -38,8 +38,6 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_FIRST_NAME                   = "first_name";
     static final        String KEY_LAST_NAME                    = "last_name";
     static final        String KEY_TRUCK_NUMBER                 = "truck_number";
-    static final        String KEY_NOTES                        = "notes";
-    static final        String KEY_LAST_NOTES_ID                = "notes_id";
     static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
     static final        String KEY_TECH_ID                      = "tech_id";
@@ -156,22 +154,6 @@ public class PrefHelper extends PrefHelperBase {
         setLong(KEY_TRUCK_NUMBER, id);
     }
 
-    public String getNotes() {
-        return getString(KEY_NOTES, "");
-    }
-
-    public void setNotes(String notes) {
-        setString(KEY_NOTES, notes);
-    }
-
-    public long getLastNotesId() {
-        return getLong(KEY_LAST_NOTES_ID, -1L);
-    }
-
-    public void setLastNotesId(long id) {
-        setLong(KEY_LAST_NOTES_ID, id);
-    }
-
     public List<String> addState(List<String> list) {
         return addIfNotFound(list, getState());
     }
@@ -229,10 +211,9 @@ public class PrefHelper extends PrefHelperBase {
 
     public void clearLastEntry() {
         setTruckNumber(0);
-        setNotes(null);
-        setLastNotesId(-1L);
         TableEquipment.getInstance().clearChecked();
         TablePendingPictures.getInstance().clear();
+        TableNote.getInstance().clearValues();
     }
 
     public boolean hasCurProject() {
@@ -319,7 +300,7 @@ public class PrefHelper extends PrefHelperBase {
         entry.pictureCollection = TablePendingPictures.getInstance().createCollection();
         entry.addressId = projectGroup.addressId;
         entry.truckNumber = getTruckNumber();
-        entry.notesId = getLastNotesId();
+        entry.saveNotes();
         entry.date = System.currentTimeMillis();
         return entry;
     }

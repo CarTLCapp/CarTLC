@@ -15,10 +15,8 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,7 +38,6 @@ import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntries;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableEquipmentProjectCollection;
-import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectGroups;
 import com.cartlc.tracker.data.TableProjects;
@@ -49,7 +46,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,30 +62,6 @@ public class MainActivity extends AppCompatActivity {
                     doNext();
                     break;
             }
-        }
-    }
-
-    class CountChars implements TextWatcher {
-
-        public CountChars() {
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            int           numChars = s.toString().length();
-            StringBuilder sbuf     = new StringBuilder();
-            sbuf.append(numChars);
-            sbuf.append("/");
-            sbuf.append(mEntryMaxLength);
-            mNumChars.setText(sbuf.toString());
         }
     }
 
@@ -123,10 +95,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.first_name)         EditText             mFirstName;
     @BindView(R.id.last_name)          EditText             mLastName;
     @BindView(R.id.entry_simple)       EditText             mEntrySimple;
-    @BindView(R.id.entry_notes)        EditText             mEntryNotes;
     @BindView(R.id.frame_login)        ViewGroup            mLoginFrame;
     @BindView(R.id.frame_new_entry)    ViewGroup            mEntryFrame;
-    @BindView(R.id.frame_new_notes)    ViewGroup            mNotesFrame;
     @BindView(R.id.list)               RecyclerView         mMainList;
     @BindView(R.id.list_container)     FrameLayout          mMainListFrame;
     @BindView(R.id.next)               Button               mNext;
@@ -134,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.new_entry)          Button               mNew;
     @BindView(R.id.setup_title)        TextView             mTitle;
     @BindView(R.id.fab_add)            FloatingActionButton mAdd;
-    @BindView(R.id.number_characters)  TextView             mNumChars;
     @BindView(R.id.frame_confirmation) FrameLayout          mConfirmationFrameView;
     @BindView(R.id.frame_pictures)     ViewGroup            mPictureFrame;
     @BindView(R.id.list_pictures)      RecyclerView         mPictureList;
@@ -147,10 +116,8 @@ public class MainActivity extends AppCompatActivity {
     ProjectListAdapter         mProjectAdapter;
     EquipmentSelectListAdapter mEquipmentAdapter;
     PictureListAdapter         mPictureAdapter;
-    LinearLayoutManager        mLayoutManager;
+    NoteListEntryAdapter       mNoteAdapter;
     InputMethodManager         mInputMM;
-    CountChars                 mEntryCountChars;
-    int                        mEntryMaxLength;
     ConfirmationFrame          mConfirmationFrame;
     DataEntry                  mCurEntry;
 
@@ -187,9 +154,9 @@ public class MainActivity extends AppCompatActivity {
                 doNext();
             }
         });
-        mLayoutManager = new LinearLayoutManager(this);
-        mMainList.addItemDecoration(new DividerItemDecoration(mMainList.getContext(), mLayoutManager.getOrientation()));
-        mMainList.setLayoutManager(mLayoutManager);
+        LinearLayoutManager linearLayoutManager;
+        mMainList.setLayoutManager(linearLayoutManager = new LinearLayoutManager(this));
+        mMainList.addItemDecoration(new DividerItemDecoration(mMainList.getContext(), linearLayoutManager.getOrientation()));
         mSimpleAdapter = new SimpleListAdapter(this, new SimpleListAdapter.OnItemSelectedListener() {
             @Override
             public void onSelectedItem(int position, String text) {
@@ -201,19 +168,12 @@ public class MainActivity extends AppCompatActivity {
         mProjectAdapter = new ProjectListAdapter(this);
         mEquipmentAdapter = new EquipmentSelectListAdapter(this);
         mPictureAdapter = new PictureListAdapter(this);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        layoutManager.setAutoMeasureEnabled(true);
-        mPictureList.setLayoutManager(layoutManager);
+        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        linearLayoutManager.setAutoMeasureEnabled(true);
+        mPictureList.setLayoutManager(linearLayoutManager);
         mPictureList.setAdapter(mPictureAdapter);
+        mNoteAdapter = new NoteListEntryAdapter(this);
 
-        mEntryCountChars = new CountChars();
-        mEntryNotes.addTextChangedListener(mEntryCountChars);
-
-        try {
-            mEntryMaxLength = getResources().getInteger(R.integer.entry_max_length);
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
         mConfirmationFrame = new ConfirmationFrame(mConfirmationFrameView);
         mLastName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -283,13 +243,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return false;
             }
-        } else if (mCurStage == Stage.NOTES) {
-            String value = getEditText(mEntryNotes);
-            PrefHelper.getInstance().setNotes(value);
-            if (isNext) {
-                long id = TableNote.getInstance().add(value);
-                PrefHelper.getInstance().setLastNotesId(id);
-            }
         } else if (mCurStage == Stage.PICTURE) {
             if (isNext) {
                 int numberTaken   = TablePendingPictures.getInstance().count();
@@ -355,7 +308,6 @@ public class MainActivity extends AppCompatActivity {
     void fillStage() {
         mLoginFrame.setVisibility(View.GONE);
         mEntryFrame.setVisibility(View.GONE);
-        mNotesFrame.setVisibility(View.GONE);
         mMainListFrame.setVisibility(View.GONE);
         mAdd.setVisibility(View.GONE);
         mNext.setVisibility(View.INVISIBLE);
@@ -495,9 +447,10 @@ public class MainActivity extends AppCompatActivity {
             case NOTES:
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
-                mNotesFrame.setVisibility(View.VISIBLE);
+                mMainListFrame.setVisibility(View.VISIBLE);
+                mMainList.setAdapter(mNoteAdapter);
+                mNoteAdapter.onDataChanged();
                 mTitle.setText(R.string.title_notes);
-                mEntryNotes.setText(PrefHelper.getInstance().getNotes());
                 break;
             case EQUIPMENT:
                 mNext.setVisibility(View.VISIBLE);
