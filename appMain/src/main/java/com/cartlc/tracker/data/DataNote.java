@@ -29,9 +29,7 @@ public class DataNote {
     public Type   type;
 
     public DataNote() {
-
     }
-
 
     public DataNote(String name) {
         this.name = name;
@@ -40,6 +38,19 @@ public class DataNote {
     public DataNote(String name, Type type) {
         this.name = name;
         this.type = type;
+    }
+
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("ID=");
+        sbuf.append(id);
+        sbuf.append(", NAME=");
+        sbuf.append(name);
+        sbuf.append(", VALUE=");
+        sbuf.append(value);
+        sbuf.append(", TYPE=");
+        sbuf.append(type.toString());
+        return sbuf.toString();
     }
 
 }

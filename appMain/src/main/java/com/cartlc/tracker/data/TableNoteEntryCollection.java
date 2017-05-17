@@ -105,7 +105,6 @@ public class TableNoteEntryCollection {
         } catch (Exception ex) {
             Timber.e(ex);
         }
-        Log.d("MYDEBUG", "QUERIED " + list.size());
         return list;
     }
 

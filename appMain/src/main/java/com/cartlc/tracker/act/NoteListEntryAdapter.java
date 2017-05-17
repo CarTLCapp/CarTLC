@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +58,7 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         final DataNote item = mItems.get(position);
         holder.label.setText(item.name);
         holder.entry.setText(item.value);
+        // TODO: REPLACE THIS WITH A TEXT WATCHER
         holder.entry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {

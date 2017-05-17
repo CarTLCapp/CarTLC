@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -212,6 +214,8 @@ public class TableNote {
     }
 
     public void updateValue(DataNote item) {
+        Log.d("MYDEBUG", "updateValue(): " + item.name + "=" + item.value);
+
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();

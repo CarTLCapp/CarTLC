@@ -39,9 +39,7 @@
     </style>
     <style name="EntryText">
         <item name="android:backgroundTint">@color/common_blue</item>
-    </style>
-    <style name="EntryNumChars">
-        <item name="android:textColor">@color/entry_hint_color</item>
+        <!--<item name="android:textCursorDrawable">@null</item>-->
     </style>
     <style name="ConfirmTitleText">
         <item name="android:textSize">20sp</item>
@@ -67,6 +65,7 @@
     </style>
     <style name="NoteEntryText">
         <item name="android:textSize">20sp</item>
+        <!--<item name="android:textCursorDrawable">@null</item>-->
     </style>
     <style name="NoteText">
         <item name="android:textSize">18sp</item>
