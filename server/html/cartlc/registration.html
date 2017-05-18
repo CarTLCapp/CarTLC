@@ -1,0 +1,42 @@
+<html>
+<head>
+<title>Car-TLC Web Registration</title>
+<link href="style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div id="main">
+<h1>Car-TLC Web Registration</h1>
+<div id="login">
+<form action="registration.php" method="POST">
+<h2>Enter The Following to Create a Web Login</h2>
+<label></label>
+<input id="name" name="clientcode" maxlength="7" placeholder="Car-TLC client code" type="text">
+<label></label>
+<input id="name" name="email" maxlength="120" placeholder="email" type="text">
+<label></label>
+<input id="password" name="password" maxlength="80" placeholder="login password" type="password">
+<input name="submit" type="submit" value=" Create Login ">
+<span><?php echo $error; ?></span>
+
+
+<!-- <table style="float:left" "font-family:arial;" border="0" bgcolor="#E0FFFF">
+	<tr>
+        <th align="left">Car-TLC Client Code</th>
+	<td><input type=text name="clientcode" maxlength="12" value="" class="required text"></br></td>
+        </tr><tr>
+        <th align="left">Email</th>
+        <td><input type=text name="email" maxlength="120" value="" class="required text"></br></td>
+	</tr><tr>
+        <th align="left">Password</th>
+        <td><input type=password name="password" maxlength="84" value="" class="required text"></br></td>
+	</tr><tr>
+        <td><input type=submit name="Submit" value="Submit"></td><td><input type="reset" name="Clear" value="Clear"></td><td><input type=submit name="Reset" value="Reset"></td>
+        </tr></table>
+--!>
+
+
+</form>
+</div>
+</div>
+</body>
+</html>
