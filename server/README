@@ -16,29 +16,51 @@ MySQL host:  52.14.73.217
 MySQL database: cartlc
 MySQL port: 3306
 
-Client Unix Setup: 
------------------
-apt-get install mysql-client
-
-Server Login:
-------------
-ssh -i cartlc.pem ubuntu@cartlc.arqnetworks.com
-
-Client Login:
-------------
-mysql -u cartlc -p
-p/w: cartcl#@!
-
-Client Help:
------------
-http://www.dummies.com/programming/databases/how-to-use-the-mysql-client/
-
 From Browser:
 -------------
 http://cartlc.arqnetworks.com/cartlc/profile.php
 User: test@cartlc.com
 p/w: test
 
-
 http://cartlc.arqnetworks.com/cartlc/registration.html
 Create web login
+
+Server Login from Client
+------------------------
+Might need this setup on client first: ssh-keygen -t rsa
+
+ssh -i cartlc.pem ubuntu@cartlc.arqnetworks.com
+
+Terminal MySQL Client:
+----------------------
+Help: http://www.dummies.com/programming/databases/how-to-use-the-mysql-client/
+Setup: apt-get install mysql-client
+Entry:
+mysql -u cartlc -p
+p/w: cartcl#@!
+mysql> use cartlc
+
+GUI Access using phpMyAdmin:
+----------------------------
+Access: http://52.14.73.217/phpmyadmin
+   User: root p/w: cartlc
+
+Additional Login for added security: 
+  User: cartlc p/w: cartcl#@!
+
+Notes:
+	After boot setup?:
+	sudo phpenmod mcrypt
+	sudo phpenmod mbstrinog
+	sudo systemctl restart apache2
+
+	Security setup for phpmyadmin (what I did):
+	   1. vi /etc/apache2/conf-available/phpmyadmin.conf
+	   2. Added 'AllowOveride All' line beneath 'DirectoryIndex' index.php line
+	   3. sudo systemctl restart apache2
+	   4. Created /usr/share/phpmyadmin/.htaccess
+	   5. sudo apt-get install apache2-utils
+	   6. sudo htpasswd -c /etc/phpmyadmin/.htpasswd cartlc
+	   7. p/w: cartcl#@!
+
+Source: https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-16-04#step-one-—-install-phpmyadmin
