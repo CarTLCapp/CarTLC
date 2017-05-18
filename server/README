@@ -64,3 +64,11 @@ Notes:
 	   7. p/w: cartcl#@!
 
 Source: https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-16-04#step-one-—-install-phpmyadmin
+
+WYSIWYG HTML Editor:
+-------------------
+Add PageEdit as extension in Chrome
+
+Setup LAMP stack:
+----------------
+https://www.digitalocean.com/community/tutorials/how-to-set-up-an-apache-mysql-and-python-lamp-server-without-frameworks-on-ubuntu-14-04
