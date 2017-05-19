@@ -382,7 +382,9 @@ public class MainActivity extends AppCompatActivity {
                     List<String> states = TableAddress.getInstance().queryStates(company);
                     if (states.size() > 0) {
                         PrefHelper.getInstance().addState(states);
-                        setList(R.string.title_state, PrefHelper.KEY_STATE, states);
+                        if (!setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
+                            mNext.setVisibility(View.INVISIBLE);
+                        }
                         mNew.setVisibility(View.VISIBLE);
                     } else {
                         mCurStageEditing = true;
@@ -405,7 +407,9 @@ public class MainActivity extends AppCompatActivity {
                     List<String> cities = TableAddress.getInstance().queryCities(state);
                     if (cities.size() > 0) {
                         PrefHelper.getInstance().addCity(cities);
-                        setList(R.string.title_city, PrefHelper.KEY_CITY, cities);
+                        if (!setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
+                            mNext.setVisibility(View.INVISIBLE);
+                        }
                     } else {
                         mCurStageEditing = true;
                         fillStage();
@@ -429,7 +433,9 @@ public class MainActivity extends AppCompatActivity {
                             PrefHelper.getInstance().getCity(),
                             PrefHelper.getInstance().getState());
                     if (locations.size() > 0) {
-                        setList(R.string.title_street, PrefHelper.KEY_STREET, locations);
+                        if (!setList(R.string.title_street, PrefHelper.KEY_STREET, locations)) {
+                            mNext.setVisibility(View.INVISIBLE);
+                        }
                     } else {
                         mCurStageEditing = true;
                         fillStage();
@@ -561,7 +567,9 @@ public class MainActivity extends AppCompatActivity {
         return Long.toString(id);
     }
 
-    void setList(int textId, String key, List<String> list) {
+    // Return false if NoneSelected situation has occured.
+    boolean setList(int textId, String key, List<String> list) {
+        boolean hasSelection = true;
         mCurKey = key;
         String text = getString(textId);
         mTitle.setText(text);
@@ -575,6 +583,7 @@ public class MainActivity extends AppCompatActivity {
             String curValue = PrefHelper.getInstance().getString(key, null);
             if (curValue == null) {
                 mSimpleAdapter.setNoneSelected();
+                hasSelection = false;
             } else {
                 int position = mSimpleAdapter.setSelected(curValue);
                 if (position >= 0) {
@@ -582,12 +591,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        return hasSelection;
     }
 
     void onSelected(String text) {
         if (mCurKey != null) {
             PrefHelper.getInstance().setString(mCurKey, text);
-            if (mCurStage == Stage.PROJECT) {
+            if (mCurStage == Stage.PROJECT || mCurStage == Stage.CITY || mCurStage == Stage.STATE || mCurStage == Stage.STREET) {
                 mNext.setVisibility(View.VISIBLE);
             }
         }
