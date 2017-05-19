@@ -1,4 +1,4 @@
-include ':ocrTest'
+include ':ocrTest', ':testplay'
 include ':supportLib'
 include ':ocrLib'
 include ':appOcrTest'

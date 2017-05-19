@@ -31,6 +31,9 @@ Might need this setup on client first: ssh-keygen -t rsa
 
 ssh -i cartlc.pem ubuntu@cartlc.arqnetworks.com
 
+Copy file:
+scp -i .ssh/cartlc.pem Downloads/cartlc.sql  ubuntu@cartlc.arqnetworks.com:/home/ubuntu/cartlc.sql
+
 Terminal MySQL Client:
 ----------------------
 Help: http://www.dummies.com/programming/databases/how-to-use-the-mysql-client/
@@ -65,6 +68,10 @@ Notes:
 
 Source: https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-16-04#step-one-—-install-phpmyadmin
 
+FIX:
+IMPORT create_tables.sql
+sudo vi /etc/phpmyadmin/config.inc.php
+
 WYSIWYG HTML Editor:
 -------------------
 Add PageEdit as extension in Chrome
@@ -72,3 +79,26 @@ Add PageEdit as extension in Chrome
 Setup LAMP stack:
 ----------------
 https://www.digitalocean.com/community/tutorials/how-to-set-up-an-apache-mysql-and-python-lamp-server-without-frameworks-on-ubuntu-14-04
+
+TOMCAT:
+-------
+Restart server:
+sudo /etc/init.d/tomcat7 restart
+
+Local MySQL p/w: root,cartlc
+
+PLAY:
+-----
+https://www.playframework.com
+
+DEPLOYMENT:
+----------
+/path/to/yourapp/bin/yourapp -Dplay.crypto.secret="QCY?tAnfk?aZ?iwrNwnxIlR6CTf:G3gf:90Latabg@5241AB`R5W:1uDFN];Ik@n"
+
+NOTES:
+-----
+mysql> GRANT ALL PRIVILEGES ON cartlc.* TO 'cartlc'@'%' IDENTIFIED BY 'cartcl' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES
+ON cartlc.*
+TO 'cartcl'@'%'
+IDENTIFIED BY 'cartcl';
