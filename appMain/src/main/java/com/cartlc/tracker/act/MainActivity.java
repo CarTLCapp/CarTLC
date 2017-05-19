@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (mCurStage == Stage.TRUCK_NUMBER) {
             String value = mEntrySimple.getText().toString();
-            if (TextUtils.isDigitsOnly(value)) {
+            if (!TextUtils.isEmpty(value) && TextUtils.isDigitsOnly(value)) {
                 PrefHelper.getInstance().setTruckNumber(Long.parseLong(value));
             } else {
                 if (isNext) {
