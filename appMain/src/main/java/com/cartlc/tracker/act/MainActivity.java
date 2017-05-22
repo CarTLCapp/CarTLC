@@ -41,6 +41,7 @@ import com.cartlc.tracker.data.TableEquipmentProjectCollection;
 import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
+import com.cartlc.tracker.server.ServerHelper;
 
 import java.util.List;
 
@@ -64,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-    TBApplication mApp;
 
     enum Stage {
         LOGIN,
@@ -112,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
     Stage     mCurStage = Stage.LOGIN;
     String    mCurKey   = PrefHelper.KEY_STATE;
     MyHandler mHandler  = new MyHandler();
+    TBApplication              mApp;
     boolean                    mCurStageEditing;
     SimpleListAdapter          mSimpleAdapter;
     ProjectListAdapter         mProjectAdapter;
@@ -201,6 +201,14 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (ServerHelper.getInstance().hasConnection()) {
+            mApp.flushEvents();
+        }
+    }
+
     void computeCurStage() {
         if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
             mCurStage = Stage.LOGIN;
@@ -233,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
                 showError(getString(R.string.error_enter_your_name));
                 return false;
             }
+            mApp.flushEvents();
         } else if (mCurStage == Stage.TRUCK_NUMBER) {
             String value = mEntrySimple.getText().toString();
             if (!TextUtils.isEmpty(value) && TextUtils.isDigitsOnly(value)) {

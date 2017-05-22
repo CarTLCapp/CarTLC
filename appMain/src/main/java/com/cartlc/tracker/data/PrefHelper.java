@@ -138,6 +138,10 @@ public class PrefHelper extends PrefHelperBase {
         return getString(KEY_LAST_NAME, null);
     }
 
+    public boolean hasName() {
+        return !TextUtils.isEmpty(getFirstName()) && !TextUtils.isEmpty(getLastName());
+    }
+
     public int getRequiredNumberPictures() {
         return getInt(KEY_REQUIRED_NUMBER_PICTURES, REQUIRED_NUMBER_PICTURES_DEFAULT);
     }

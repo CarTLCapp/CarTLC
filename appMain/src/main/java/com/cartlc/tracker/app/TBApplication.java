@@ -1,11 +1,14 @@
 package com.cartlc.tracker.app;
 
 import android.app.Application;
+import android.content.Intent;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.data.DatabaseManager;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TestData;
+import com.cartlc.tracker.server.DCService;
+import com.cartlc.tracker.server.ServerHelper;
 
 import timber.log.Timber;
 
@@ -26,10 +29,15 @@ public class TBApplication extends Application {
         super.onCreate();
         DatabaseManager.Init(this);
         PrefHelper.Init(this);
+        ServerHelper.Init(this);
 
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }
         TestData.Init();
+    }
+
+    public void flushEvents() {
+        startService(new Intent(this, DCService.class));
     }
 }
