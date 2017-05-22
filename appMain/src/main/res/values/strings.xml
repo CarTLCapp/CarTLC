@@ -50,6 +50,8 @@
     <string name="error_empty">No elements</string>
     <string name="error_need_note_fields">These fields still need entries:</string>
 
+    <string name="perm_read_phone_state">Need to be able to tell if you have a MOBILE connection.</string>
+
     <string name="loading">LOADING...</string>
 
 </resources>

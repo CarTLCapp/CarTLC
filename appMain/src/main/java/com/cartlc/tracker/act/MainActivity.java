@@ -42,6 +42,7 @@ import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.server.ServerHelper;
+import com.cartlc.tracker.util.PermissionHelper;
 
 import java.util.List;
 
@@ -183,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
         PrefHelper.getInstance().setupFromCurrentProjectId();
         computeCurStage();
         fillStage();
+        mApp.checkPermissions(this, null);
     }
 
     @Override
@@ -199,6 +201,12 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String [] permissions, int [] grantResults)
+    {
+        PermissionHelper.getInstance().handlePermissionResult(requestCode, permissions, grantResults);
     }
 
     @Override
