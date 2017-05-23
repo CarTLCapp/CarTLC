@@ -1,0 +1,4 @@
+[0m[[0mdebug[0m] [0mCopy resource mappings: [0m
+[0m[[0mdebug[0m] [0m	(/media/vokal/cartlc/CarTLC/server/play-ebean/conf/evolutions,/media/vokal/cartlc/CarTLC/server/play-ebean/target/scala-2.11/classes/evolutions)[0m
+[0m[[0mdebug[0m] [0m	(/media/vokal/cartlc/CarTLC/server/play-ebean/conf/evolutions/default,/media/vokal/cartlc/CarTLC/server/play-ebean/target/scala-2.11/classes/evolutions/default)[0m
+[0m[[0mdebug[0m] [0m	(/media/vokal/cartlc/CarTLC/server/play-ebean/conf/evolutions/default/1.sql,/media/vokal/cartlc/CarTLC/server/play-ebean/target/scala-2.11/classes/evolutions/default/1.sql)[0m
