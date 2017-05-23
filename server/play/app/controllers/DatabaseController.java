@@ -7,14 +7,6 @@ import play.*;
 import play.mvc.*;
 import play.db.*;
 
-import services.Counter;
-
-/**
- * This controller demonstrates how to use dependency injection to
- * bind a component into a controller class. The class contains an
- * action that shows an incrementing count to users. The {@link Counter}
- * object is injected by the Guice dependency injection system.
- */
 @Singleton
 public class DatabaseController extends Controller {
 

@@ -5,20 +5,23 @@ import play.*;
 import play.mvc.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
+import play.db.*;
+import java.sql.*;
 
 import services.Counter;
 
 @Singleton
 public class RegisterController extends Controller
 {
+	private Database db;
+
 	@Inject
-	public RegisterController()
-	{
+	public RegisterController(Database db) {
+		this.db = db;
 	}
 
 	@BodyParser.Of(BodyParser.Json.class)
-	public Result register()
-	{
+	public Result register() {
 		JsonNode json = request().body().asJson();
 		ArrayList<String> missing = new ArrayList();
 		String first_name = json.findPath("first_name").textValue();
