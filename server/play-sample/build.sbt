@@ -1,8 +1,6 @@
-name := """play-java"""
+name := """play-sample"""
 
 version := "1.0-SNAPSHOT"
-
-lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 scalaVersion := "2.11.11"
 
@@ -12,5 +10,4 @@ libraryDependencies += javaWs
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.21"
 
-lazy val myProject = (project in file("."))
-  .enablePlugins(PlayJava, PlayEbean)
+lazy val myProject = (project in file(".")).enablePlugins(PlayJava, PlayEbean)

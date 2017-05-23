@@ -1,7 +1,7 @@
 
 // @GENERATOR:play-routes-compiler
-// @SOURCE:/home/dug/src/play/play-java-ebean-example/conf/routes
-// @DATE:Mon May 22 22:16:19 CDT 2017
+// @SOURCE:/media/vokal/cartlc/CarTLC/server/play-ebean/conf/routes
+// @DATE:Tue May 23 11:40:00 CDT 2017
 
 import play.api.mvc.{ QueryStringBindable, PathBindable, Call, JavascriptLiteral }
 import play.core.routing.{ HandlerDef, ReverseRouteContext, queryString, dynamicString }

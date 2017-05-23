@@ -17115,7 +17115,7 @@
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-sbt#template-resolver;0.1!template-resolver.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#jline;2.10.6!jline.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.fusesource.jansi#jansi;1.4!jansi.jar[0m
-[0m[[0mdebug[0m] [0m:: resolution report :: resolve 2545ms :: artifacts dl 51ms[0m
+[0m[[0mdebug[0m] [0m:: resolution report :: resolve 2413ms :: artifacts dl 34ms[0m
 [0m[[0mdebug[0m] [0m	report for default#play-ebean-build;0.1-SNAPSHOT compile produced in /media/vokal/cartlc/CarTLC/server/play-ebean/project/target/resolution-cache/reports/default-play-ebean-build-compile.xml[0m
 [0m[[0mdebug[0m] [0m	report for default#play-ebean-build;0.1-SNAPSHOT runtime produced in /media/vokal/cartlc/CarTLC/server/play-ebean/project/target/resolution-cache/reports/default-play-ebean-build-runtime.xml[0m
 [0m[[0mdebug[0m] [0m	report for default#play-ebean-build;0.1-SNAPSHOT test produced in /media/vokal/cartlc/CarTLC/server/play-ebean/project/target/resolution-cache/reports/default-play-ebean-build-test.xml[0m
@@ -17129,5 +17129,5 @@
 [0m[[0mdebug[0m] [0m	report for default#play-ebean-build;0.1-SNAPSHOT docs produced in /media/vokal/cartlc/CarTLC/server/play-ebean/project/target/resolution-cache/reports/default-play-ebean-build-docs.xml[0m
 [0m[[0mdebug[0m] [0m	report for default#play-ebean-build;0.1-SNAPSHOT pom produced in /media/vokal/cartlc/CarTLC/server/play-ebean/project/target/resolution-cache/reports/default-play-ebean-build-pom.xml[0m
 [0m[[0mdebug[0m] [0m	report for default#play-ebean-build;0.1-SNAPSHOT scala-tool produced in /media/vokal/cartlc/CarTLC/server/play-ebean/project/target/resolution-cache/reports/default-play-ebean-build-scala-tool.xml[0m
-[0m[[0mdebug[0m] [0m	resolve done (2545ms resolve - 51ms download)[0m
+[0m[[0mdebug[0m] [0m	resolve done (2413ms resolve - 34ms download)[0m
 [0m[[0minfo[0m] [0mDone updating.[0m
