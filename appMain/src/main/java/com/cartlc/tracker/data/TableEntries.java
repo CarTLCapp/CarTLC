@@ -21,7 +21,7 @@ public class TableEntries {
     static final String KEY_DATE = "date";
     static final String KEY_PROJECT_ID = "project_id";
     static final String KEY_ADDRESS_ID = "address_id";
-    static final String KEY_EQUIPMENT_COLLECTION_ID = "requipment_collection_id";
+    static final String KEY_EQUIPMENT_COLLECTION_ID = "equipment_collection_id";
     static final String KEY_PICTURE_COLLECTION_ID = "picture_collection_id";
     static final String KEY_TRUCK_NUMBER = "truck_number";
     static final String KEY_UPLOADED = "uploaded";

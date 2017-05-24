@@ -3,16 +3,17 @@ package models;
 import java.util.*;
 import javax.persistence.*;
 
-import play.db.ebean.*;
+import com.avaje.ebean.Model;
+import play.data.format.*;
 import play.data.validation.*;
 
-
+import com.avaje.ebean.*;
 
 /**
  * Company entity managed by Ebean
  */
 @Entity 
-public class Company extends com.avaje.ebean.Model {
+public class Company extends Model {
 
     private static final long serialVersionUID = 1L;
 
@@ -21,19 +22,38 @@ public class Company extends com.avaje.ebean.Model {
     
     @Constraints.Required
     public String name;
-    
+
+    @Constraints.Required
+    public String street;
+
+    @Constraints.Required
+    public String city;
+
+    @Constraints.Required
+    public String state;
+
     /**
-     * Generic query helper for entity Company with id Long
+     * Generic query helper for entity Computer with id Long
      */
     public static Find<Long,Company> find = new Find<Long,Company>(){};
-
-    public static Map<String,String> options() {
-        LinkedHashMap<String,String> options = new LinkedHashMap<String,String>();
-        for(Company c: Company.find.orderBy("name").findList()) {
-            options.put(c.id.toString(), c.name);
-        }
-        return options;
+    
+    /**
+     * Return a paged list of computer
+     *
+     * @param page Page to display
+     * @param pageSize Number of computers per page
+     * @param sortBy Computer property used for sorting
+     * @param order Sort order (either or asc or desc)
+     * @param filter Filter applied on the name column
+     */
+    public static PagedList<Computer> page(int page, int pageSize, String sortBy, String order, String filter) {
+        return
+            find.where()
+                .ilike("name", "%" + filter + "%")
+                .orderBy(sortBy + " " + order)
+                .fetch("company")
+                .findPagedList(page, pageSize);
     }
-
+    
 }
 
