@@ -1,12 +1,8 @@
 @(currentPage: List[Client])
 
-@main("FLeetTLC - List Users") {
+@main("FleetTLC - List Users") {
 
-    <div id="actions">
-
-        <a class="btn success" id="add" href="@routes.ClientController.create()">Add a new user</a>
-
-    </div>
+    <h1 id="homeTitle">@Messages("users.list.title", currentPage.size())</h1>
 
     @if(currentPage.size() == 0) {
         
@@ -21,6 +17,7 @@
                 <tr>
                     <th>First Name</th>
                     <th>Last Name</th>
+                    <th>Tech ID</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -43,7 +40,10 @@
                             }
                         </td>
                         <td>
-                            <td><a href="@routes.ClientController.edit(client.id)">Edit</a></td>
+                            @client.id
+                        </td>
+                        <td>
+                            <a href="@routes.ClientController.edit(client.id)">Edit</a>
                         </td>
                     </tr>
                 }
@@ -52,7 +52,8 @@
         </table>
         
     }
-        
+
+    <a class="btn success" id="add" href="@routes.ClientController.create()">Add a new user</a>
 }
 
             

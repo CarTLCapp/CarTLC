@@ -42,3 +42,5 @@ proguard/
 # Tizen
 Debug/
 Release/
+
+target/

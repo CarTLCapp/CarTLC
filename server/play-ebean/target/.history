@@ -21,3 +21,5 @@ compile
 clean
 compile
 run 9003
+compile
+run 9003

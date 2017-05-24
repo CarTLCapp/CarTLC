@@ -1,0 +1,38 @@
+# general
+*~
+*.log
+*.iml
+*.ipr
+*.iws
+*.class
+tmp
+dump
+
+# Eclipse
+.settings
+.cache
+.project
+.classpath
+.scala_dependencies
+bin
+.idea
+out
+
+.*.swp
+.*.swo
+
+#swp SBT
+dist
+project/boot
+project/target
+project/plugins/target
+target/
+.target
+
+classes
+target/streams
+$global
+
+# Play
+logs
+RUNNING_PID
