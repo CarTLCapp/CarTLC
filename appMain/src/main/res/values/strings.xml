@@ -37,7 +37,7 @@
     <string name="title_confirmation">Confirmation</string>
     <string name="title_entries_">Entries:</string>
     <string name="title_uploaded_">Uploaded:</string>
-    <string name="title_picture">Taking Picture</string>
+    <string name="title_picture">Photo</string>
     <string name="title_pictures_">Pictures:</string>
 
     <string name="error_enter_your_name">Please enter your name</string>
@@ -45,7 +45,7 @@
     <string name="error_need_a_number">Need a number</string>
     <string name="error_cannot_take_picture">Cannot take picture</string>
     <string name="error_while_loading_picture">Out of Memory</string>
-    <string name="error_need_more_pictures">Need to take %d more pictures</string>
+    <string name="error_picture_removed">Picture removed</string>
     <string name="error_need_equipment">Need to select at least one equipment item</string>
     <string name="error_empty">No elements</string>
     <string name="error_need_note_fields">These fields still need entries:</string>

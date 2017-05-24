@@ -62,9 +62,11 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
             int           countUploaded = TableEntries.getInstance().countUploaded(projectGroup.projectNameId);
             StringBuilder sbuf          = new StringBuilder();
             sbuf.append(mContext.getString(R.string.title_entries_));
+            sbuf.append(" ");
             sbuf.append(Integer.toString(countTotal));
             sbuf.append("   ");
             sbuf.append(mContext.getString(R.string.title_uploaded_));
+            sbuf.append(" ");
             sbuf.append(Integer.toString(countUploaded));
             holder.mProjectNotes.setText(sbuf.toString());
             holder.mProjectNotes.setVisibility(View.VISIBLE);

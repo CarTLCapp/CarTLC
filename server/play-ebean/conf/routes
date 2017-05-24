@@ -2,23 +2,90 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Default path will just redirect to the computer list
-GET     /                           controllers.HomeController.index()
+### ENTRIES ###
 
-# Computers list (look at the default values for pagination parameters)
-GET     /computers                  controllers.HomeController.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+# Default path may ask for a login and give a list of options of what to do.
+GET     /                         controllers.HomeController.index()
 
-# Add computer
-GET     /computers/new              controllers.HomeController.create()
-POST    /computers                  controllers.HomeController.save()
+# Entries list (look at the default values for pagination parameters)
+GET     /entry                    controllers.HomeController.list_entries()
 
-# Edit existing computer
-GET     /computers/:id              controllers.HomeController.edit(id:Long)
-POST    /computers/:id              controllers.HomeController.update(id:Long)
+# Add Entry
+GET     /entry/new                controllers.HomeController.create_entry()
+POST    /entry                    controllers.HomeController.save_entry()
 
-# Delete a computer
-POST    /computers/:id/delete       controllers.HomeController.delete(id:Long)
+# Edit existing entry
+GET     /entry/:id                controllers.HomeController.edit_entry(id:Long)
+POST    /entry/:id                controllers.HomeController.update_entry(id:Long)
+
+# Delete a entry
+POST    /entry/:id/delete         controllers.HomeController.delete_entry(id:Long)
+
+### USERS ###
+
+# Users list 
+GET     /user                      controllers.HomeController.list_users()
+
+# Add User
+GET     /user/new                  controllers.HomeController.create_user()
+POST    /user                      controllers.HomeController.save_user()
+
+# Edit existing user
+GET     /user/:id                  controllers.HomeController.edit_user(id:Long)
+POST    /user/:id                  controllers.HomeController.update_user(id:Long)
+
+# Delete a user
+POST    /user/:id/delete           controllers.HomeController.delete_user(id:Long)
+
+### PROJECTS ###
+
+# Projects list
+GET     /project                   controllers.HomeController.list_projects()
+
+# Add project
+GET     /project/new                controllers.HomeController.create_project()
+POST    /project                    controllers.HomeController.save_project()
+
+# Edit existing project
+GET     /project/:id                controllers.HomeController.edit_project(id:Long)
+POST    /project/:id                controllers.HomeController.update_project(id:Long)
+
+# Delete a project
+POST    /project/:id/delete         controllers.HomeController.delete_project(id:Long)
+
+### COMPANIES ###
+
+# Company list
+GET     /company                    controllers.HomeController.list_companies()
+
+# Add project
+GET     /company/new                controllers.HomeController.create_company()
+POST    /company                    controllers.HomeController.save_company()
+
+# Edit existing project
+GET     /company/:id                controllers.HomeController.edit_company(id:Long)
+POST    /company/:id                controllers.HomeController.update_company(id:Long)
+
+# Delete a project
+POST    /company/:id/delete         controllers.HomeController.delete_company(id:Long)
+
+### EQUIPMENTS ###
+
+# Company list
+GET     /equipment                  controllers.HomeController.list_equipments()
+GET     /equipment/:id              controllers.HomeController.list_equipment(id:Long)
+
+# Add project
+GET     /equipment/new              controllers.HomeController.create_equipment()
+POST    /equipment                  controllers.HomeController.save_equipment()
+
+# Edit existing project
+GET     /equipment/:id              controllers.HomeController.edit_equipment(id:Long)
+POST    /equipment/:id              controllers.HomeController.update_equipment(id:Long)
+
+# Delete a project
+POST    /equipment/:id/delete       controllers.HomeController.delete_equipment(id:Long)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /assets/*file                 controllers.Assets.at(path="/public", file)
 

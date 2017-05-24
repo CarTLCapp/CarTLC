@@ -124,4 +124,13 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         return sbuf.toString();
     }
 
+    public boolean hasNotesEntered() {
+        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
+        for (DataNote note : TableNoteProjectCollection.getInstance().getNotes(curGroup.projectNameId)) {
+            if (!TextUtils.isEmpty(note.value)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -3,6 +3,8 @@ package com.cartlc.tracker.act;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,6 +29,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
@@ -42,7 +45,6 @@ import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.server.ServerHelper;
-import com.cartlc.tracker.util.PermissionHelper;
 
 import java.util.List;
 
@@ -122,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
     InputMethodManager         mInputMM;
     ConfirmationFrame          mConfirmationFrame;
     DataEntry                  mCurEntry;
+    OnEditorActionListener     mAutoNext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,17 +177,18 @@ public class MainActivity extends AppCompatActivity {
         mPictureList.setAdapter(mPictureAdapter);
         mNoteAdapter = new NoteListEntryAdapter(this);
         mConfirmationFrame = new ConfirmationFrame(mConfirmationFrameView);
-        mLastName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mAutoNext = new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 mHandler.sendEmptyMessageDelayed(MSG_AUTO_RETURN, AUTO_RETURN_DELAY_MS);
                 return false;
             }
-        });
+        };
+        mLastName.setOnEditorActionListener(mAutoNext);
+        mEntrySimple.setOnEditorActionListener(mAutoNext);
         PrefHelper.getInstance().setupFromCurrentProjectId();
         computeCurStage();
         fillStage();
-        mApp.checkPermissions(this, null);
     }
 
     @Override
@@ -201,12 +205,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String [] permissions, int [] grantResults)
-    {
-        PermissionHelper.getInstance().handlePermissionResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -230,8 +228,23 @@ public class MainActivity extends AppCompatActivity {
             mCurStage = Stage.CITY;
         } else if (TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
             mCurStage = Stage.STREET;
-        } else if (mCurStage.ordinal() <= Stage.CURRENT_PROJECT.ordinal()) {
-            mCurStage = Stage.CURRENT_PROJECT;
+        } else {
+            boolean hasTruckNumber = !TextUtils.isEmpty(getTruckNumber());
+            boolean hasNotes = mNoteAdapter.hasNotesEntered();
+            boolean hasEquip = mEquipmentAdapter.hasChecked();
+            boolean hasPictures = TablePendingPictures.getInstance().queryPictures().size() > 0;
+
+            if (!hasTruckNumber && !hasNotes && !hasEquip && !hasPictures) {
+                mCurStage = Stage.CURRENT_PROJECT;
+            } else if (!hasTruckNumber) {
+                mCurStage = Stage.TRUCK_NUMBER;
+            } else if (!hasEquip) {
+                mCurStage = Stage.EQUIPMENT;
+            } else if (!hasNotes) {
+                mCurStage = Stage.NOTES;
+            } else {
+                mCurStage = Stage.PICTURE;
+            }
         }
     }
 
@@ -263,15 +276,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 return false;
-            }
-        } else if (mCurStage == Stage.PICTURE) {
-            if (isNext) {
-                int numberTaken = TablePendingPictures.getInstance().count();
-                int requiredCount = PrefHelper.getInstance().getRequiredNumberPictures();
-                if (numberTaken < requiredCount) {
-                    showError(getString(R.string.error_need_more_pictures, requiredCount - numberTaken));
-                    return false;
-                }
             }
         } else if (mCurStage == Stage.EQUIPMENT) {
             if (isNext) {
@@ -473,7 +477,7 @@ public class MainActivity extends AppCompatActivity {
                     mNew.setVisibility(View.VISIBLE);
                     mAdd.setVisibility(View.VISIBLE);
                     mCurKey = null;
-                    mNew.setText(R.string.btn_new);
+                    mNew.setText(R.string.btn_new_project);
                     mTitle.setText(R.string.title_current_project);
                     mMainList.setAdapter(mProjectAdapter);
                     mProjectAdapter.onDataChanged();
@@ -523,13 +527,10 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case PICTURE:
                 int numberTaken = TablePendingPictures.getInstance().count();
-                int requiredCount = PrefHelper.getInstance().getRequiredNumberPictures();
                 StringBuilder sbuf = new StringBuilder();
                 sbuf.append(getString(R.string.title_picture));
                 sbuf.append(" ");
                 sbuf.append(numberTaken);
-                sbuf.append("/");
-                sbuf.append(requiredCount);
                 mTitle.setText(sbuf.toString());
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing || numberTaken == 0) {
@@ -538,10 +539,8 @@ public class MainActivity extends AppCompatActivity {
                         showError(getString(R.string.error_cannot_take_picture));
                     }
                 } else {
-                    if (numberTaken >= requiredCount) {
-                        mNext.setVisibility(View.VISIBLE);
-                        mNext.setText(R.string.btn_done);
-                    }
+                    mNext.setVisibility(View.VISIBLE);
+                    mNext.setText(R.string.btn_done);
                     mNew.setVisibility(View.VISIBLE);
                     mNew.setText(R.string.btn_another);
                     mPictureFrame.setVisibility(View.VISIBLE);
@@ -626,11 +625,19 @@ public class MainActivity extends AppCompatActivity {
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             Uri pictureUri = TablePendingPictures.getInstance().genNewPictureUri(this);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
+            // Grant permissions
+            List<ResolveInfo> resInfoList = getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo resolveInfo : resInfoList) {
+                String packageName = resolveInfo.activityInfo.packageName;
+                grantUriPermission(packageName, pictureUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            // Start Camera activity
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             return true;
         }
         return false;
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

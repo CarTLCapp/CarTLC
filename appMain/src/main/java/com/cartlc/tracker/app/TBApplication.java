@@ -1,9 +1,10 @@
 package com.cartlc.tracker.app;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.R;
@@ -12,9 +13,8 @@ import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TestData;
 import com.cartlc.tracker.server.DCService;
 import com.cartlc.tracker.server.ServerHelper;
-import com.cartlc.tracker.util.PermissionHelper;
-import com.cartlc.tracker.util.PermissionHelper.PermissionRequest;
-import com.cartlc.tracker.util.PermissionHelper.PermissionListener;
+
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -26,9 +26,6 @@ public class TBApplication extends Application {
 
     public static final String OTHER = "Other";
 
-    static final PermissionRequest[] PERMISSIONS = {
-            new PermissionRequest(android.Manifest.permission.READ_PHONE_STATE, R.string.perm_read_phone_state)};
-
     public TBApplication() {
         super();
     }
@@ -39,7 +36,6 @@ public class TBApplication extends Application {
         DatabaseManager.Init(this);
         PrefHelper.Init(this);
         ServerHelper.Init(this);
-        PermissionHelper.Init();
 
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
@@ -51,7 +47,4 @@ public class TBApplication extends Application {
         startService(new Intent(this, DCService.class));
     }
 
-    public void checkPermissions(Activity act, PermissionListener listener) {
-        PermissionHelper.getInstance().checkPermissions(act, PERMISSIONS, listener);
-    }
 }

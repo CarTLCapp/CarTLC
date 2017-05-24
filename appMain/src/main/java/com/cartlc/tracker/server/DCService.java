@@ -70,9 +70,6 @@ public class DCService extends IntentService {
             connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             Writer writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
             writer.write(json.toString());
-
-            Timber.d("MYDEBUG: SENT: " + json.toString());
-
             writer.close();
             InputStream inputStream = connection.getInputStream();
             if (inputStream == null) {

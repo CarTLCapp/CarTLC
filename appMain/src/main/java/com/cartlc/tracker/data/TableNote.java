@@ -214,8 +214,6 @@ public class TableNote {
     }
 
     public void updateValue(DataNote item) {
-        Log.d("MYDEBUG", "updateValue(): " + item.name + "=" + item.value);
-
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();

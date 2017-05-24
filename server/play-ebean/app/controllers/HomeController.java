@@ -45,7 +45,7 @@ public class HomeController  extends Controller {
      * @param order Sort order (either asc or desc)
      * @param filter Filter applied on computer names
      */
-    public Result list(int page, String sortBy, String order, String filter) {
+    public Result list_entries(int page, String sortBy, String order, String filter) {
         return ok(
             views.html.list.render(
                 Computer.page(page, 10, sortBy, order, filter),

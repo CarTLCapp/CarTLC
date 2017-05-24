@@ -36,7 +36,7 @@ public class PictureThumbnailListAdapter extends PictureListAdapter {
     }
 
     @Override
-    protected int getMaxDimension() {
+    protected int getMaxHeightResource() {
         return R.dimen.image_thumbnail_max_height;
     }
 

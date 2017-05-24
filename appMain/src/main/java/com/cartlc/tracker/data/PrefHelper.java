@@ -26,8 +26,6 @@ public class PrefHelper extends PrefHelperBase {
         new PrefHelper(ctx);
     }
 
-    static final int REQUIRED_NUMBER_PICTURES_DEFAULT = 5;
-
     static public final String KEY_PROJECT                      = "project";
     static public final String KEY_COMPANY                      = "company";
     static public final String KEY_STREET                       = "street";
@@ -41,7 +39,6 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
     static final        String KEY_TECH_ID                      = "tech_id";
-    static final        String KEY_REQUIRED_NUMBER_PICTURES     = "required_number_pictures";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss";
 
@@ -140,14 +137,6 @@ public class PrefHelper extends PrefHelperBase {
 
     public boolean hasName() {
         return !TextUtils.isEmpty(getFirstName()) && !TextUtils.isEmpty(getLastName());
-    }
-
-    public int getRequiredNumberPictures() {
-        return getInt(KEY_REQUIRED_NUMBER_PICTURES, REQUIRED_NUMBER_PICTURES_DEFAULT);
-    }
-
-    public void setRequiredNumberPictures(int count) {
-        setInt(KEY_TRUCK_NUMBER, count);
     }
 
     public long getTruckNumber() {
