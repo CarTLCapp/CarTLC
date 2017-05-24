@@ -8,26 +8,26 @@ import java.util.List;
 /**
  * Created by dug on 5/16/17.
  */
-public class TableEquipmentProjectCollection extends TableCollection {
+public class TableEquipmentCollection extends TableCollection {
     static final String TABLE_NAME = "project_equipment_collection";
 
-    static TableEquipmentProjectCollection sInstance;
+    static TableEquipmentCollection sInstance;
 
     static void Init(SQLiteDatabase db) {
-        new TableEquipmentProjectCollection(db);
+        new TableEquipmentCollection(db);
     }
 
-    public static TableEquipmentProjectCollection getInstance() {
+    public static TableEquipmentCollection getInstance() {
         return sInstance;
     }
 
-    public TableEquipmentProjectCollection(SQLiteDatabase db) {
+    public TableEquipmentCollection(SQLiteDatabase db) {
         super(db, TABLE_NAME);
         sInstance = this;
     }
 
-    public DataEquipmentProjectCollection queryForProject(long projectNameId) {
-        DataEquipmentProjectCollection collection = new DataEquipmentProjectCollection(projectNameId);
+    public DataEquipmentCollection queryForProject(long projectNameId) {
+        DataEquipmentCollection collection = new DataEquipmentCollection(projectNameId);
         collection.equipmentListIds = query(projectNameId);
         return collection;
     }

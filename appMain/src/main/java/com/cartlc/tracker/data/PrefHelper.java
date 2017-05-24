@@ -36,9 +36,9 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_FIRST_NAME                   = "first_name";
     static final        String KEY_LAST_NAME                    = "last_name";
     static final        String KEY_TRUCK_NUMBER                 = "truck_number";
-    static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
     static final        String KEY_TECH_ID                      = "tech_id";
+    static final        String KEY_EQUIPMENT_ID                 = "equipment_id";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss";
 
@@ -117,6 +117,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setSavedProjectGroupId(long id) {
         setLong(KEY_SAVED_PROJECT_GROUP_ID, id);
+    }
+
+    public void setEquipmentId(long id) {
+        setLong(KEY_EQUIPMENT_ID, id);
+    }
+
+    public long getEquipmentId() {
+        return getLong(KEY_EQUIPMENT_ID, -1L);
     }
 
     public void setFirstName(String name) {
@@ -200,13 +208,14 @@ public class PrefHelper extends PrefHelperBase {
         setProject(null);
         setSavedProjectGroupId(getCurrentProjectGroupId());
         setCurrentProjectGroupId(-1L);
+        setEquipmentId(-1);
     }
 
     public void clearLastEntry() {
         setTruckNumber(0);
-        TableEquipment.getInstance().clearChecked();
         TablePendingPictures.getInstance().clear();
         TableNote.getInstance().clearValues();
+        setEquipmentId(-1);
     }
 
     public boolean hasCurProject() {
@@ -261,14 +270,6 @@ public class PrefHelper extends PrefHelperBase {
         setState(address.state);
     }
 
-    public long getNextEquipmentCollectionID() {
-        return getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L);
-    }
-
-    public void incNextEquipmentCollectionID() {
-        setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, getNextEquipmentCollectionID() + 1);
-    }
-
     public long getNextPictureCollectionID() {
         return getLong(KEY_NEXT_PICTURE_COLLECTION_ID, 0L);
     }
@@ -288,8 +289,7 @@ public class PrefHelper extends PrefHelperBase {
         }
         DataEntry entry = new DataEntry();
         entry.projectNameId = projectGroup.projectNameId;
-        entry.equipmentCollection = new DataEquipmentEntryCollection(getNextEquipmentCollectionID());
-        entry.equipmentCollection.addChecked();
+        entry.equipmentId = getEquipmentId();
         entry.pictureCollection = TablePendingPictures.getInstance().createCollection();
         entry.addressId = projectGroup.addressId;
         entry.truckNumber = getTruckNumber();

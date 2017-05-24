@@ -62,7 +62,7 @@ public abstract class TableCollection {
     }
 
     public void add(DataEquipmentCollection collection) {
-        add(collection.id, collection.equipmentListIds);
+        add(collection.projectId, collection.equipmentListIds);
     }
 
     public void add(long collectionId, List<Long> ids) {

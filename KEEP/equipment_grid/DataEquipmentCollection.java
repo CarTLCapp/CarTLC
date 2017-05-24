@@ -7,12 +7,12 @@ import java.util.List;
  * Created by dug on 5/10/17.
  */
 
-public class DataEquipmentCollection {
-    public long projectId;
+public abstract class DataEquipmentCollection {
+    public long id;
     public List<Long> equipmentListIds = new ArrayList();
 
-    public DataEquipmentCollection(long projectId) {
-        this.projectId = projectId;
+    public DataEquipmentCollection(long id) {
+        this.id = id;
     }
 
     public void add(long equipmentId) {

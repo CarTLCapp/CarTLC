@@ -40,7 +40,7 @@ import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntries;
 import com.cartlc.tracker.data.TableEquipment;
-import com.cartlc.tracker.data.TableEquipmentProjectCollection;
+import com.cartlc.tracker.data.TableEquipmentCollection;
 import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             boolean hasTruckNumber = !TextUtils.isEmpty(getTruckNumber());
             boolean hasNotes = mNoteAdapter.hasNotesEntered();
-            boolean hasEquip = mEquipmentAdapter.hasChecked();
+            boolean hasEquip = PrefHelper.getInstance().getEquipmentId() >= 0;
             boolean hasPictures = TablePendingPictures.getInstance().queryPictures().size() > 0;
 
             if (!hasTruckNumber && !hasNotes && !hasEquip && !hasPictures) {
@@ -279,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (mCurStage == Stage.EQUIPMENT) {
             if (isNext) {
-                if (TableEquipment.getInstance().countChecked() == 0) {
+                if (PrefHelper.getInstance().getEquipmentId() < 0) {
                     showError(getString(R.string.error_need_equipment));
                     return false;
                 }
@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
                 String name = getEditText(mEntrySimple);
                 if (!TextUtils.isEmpty(name)) {
                     DataProjectAddressCombo group = PrefHelper.getInstance().getCurrentProjectGroup();
-                    TableEquipmentProjectCollection.getInstance().addLocal(name, group.projectNameId);
+                    TableEquipmentCollection.getInstance().addLocal(name, group.projectNameId);
                 }
             }
         }

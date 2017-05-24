@@ -43,7 +43,7 @@ public class TestData {
     };
 
     static void AddCollections() {
-        TableEquipmentProjectCollection.getInstance().addByName("Five Cubits", Arrays.asList(new String[]{
+        TableEquipmentCollection.getInstance().addByName("Five Cubits", Arrays.asList(new String[]{
                 "OBC",
                 "RDT",
                 "VMX",
@@ -56,14 +56,14 @@ public class TestData {
                 "Uninstall",
                 "Other",
         }));
-        TableEquipmentProjectCollection.getInstance().addByName("Digital Fleet", Arrays.asList(new String[]{
+        TableEquipmentCollection.getInstance().addByName("Digital Fleet", Arrays.asList(new String[]{
                 "Tablet",
                 "Canbus",
                 "Repair Work",
                 "Uninstall",
                 "Other",
         }));
-        TableEquipmentProjectCollection.getInstance().addByName("Smart Witness", Arrays.asList(new String[]{
+        TableEquipmentCollection.getInstance().addByName("Smart Witness", Arrays.asList(new String[]{
                 "KP1S",
                 "CPI",
                 "SVC 1080",
@@ -77,7 +77,7 @@ public class TestData {
                 "Uninstall",
                 "Other",
         }));
-        TableEquipmentProjectCollection.getInstance().addByName("Fed Ex", Arrays.asList(new String[]{
+        TableEquipmentCollection.getInstance().addByName("Fed Ex", Arrays.asList(new String[]{
                 "KP1S",
                 "Driver Facing Camera",
                 "Modem",
@@ -88,7 +88,7 @@ public class TestData {
                 "Uninstall",
                 "Other",
         }));
-        TableEquipmentProjectCollection.getInstance().addByName("Verifi", Arrays.asList(new String[]{
+        TableEquipmentCollection.getInstance().addByName("Verifi", Arrays.asList(new String[]{
                 "V3 Full Install",
                 "V4 Full Install",
                 "Admix Tank",

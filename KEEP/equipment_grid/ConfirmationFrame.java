@@ -24,10 +24,11 @@ public class ConfirmationFrame {
     @BindView(R.id.project_name_value)    TextView                    mProjectNameValue;
     @BindView(R.id.truck_number_value)    TextView                    mTruckNumberValue;
     @BindView(R.id.project_address_value) TextView                    mAddressValue;
-    @BindView(R.id.equipment_item)        TextView                    mEquipmentView;
+    @BindView(R.id.equipment_grid)        RecyclerView                mEquipmentGrid;
     @BindView(R.id.notes_list)            RecyclerView                mNoteList;
     @BindView(R.id.confirm_pictures_list) RecyclerView                mPictureList;
     final                                 FrameLayout                 mTop;
+    final                                 SimpleListAdapter           mSimpleAdapter;
     final                                 NoteListAdapter             mNoteAdapter;
     final                                 PictureThumbnailListAdapter mPictureAdapter;
 
@@ -35,6 +36,10 @@ public class ConfirmationFrame {
         final Context ctx = top.getContext();
         mTop = top;
         ButterKnife.bind(this, top);
+        mSimpleAdapter = new SimpleListAdapter(ctx, R.layout.entry_item_confirm);
+        mEquipmentGrid.setAdapter(mSimpleAdapter);
+        GridLayoutManager gridLayout = new GridLayoutManager(ctx, 2);
+        mEquipmentGrid.setLayoutManager(gridLayout);
         mNoteAdapter = new NoteListAdapter(ctx);
         mNoteList.setAdapter(mNoteAdapter);
         mNoteList.setLayoutManager(new LinearLayoutManager(ctx));
@@ -65,7 +70,7 @@ public class ConfirmationFrame {
             mTruckNumberValue.setVisibility(View.VISIBLE);
             mTruckNumberValue.setText(Long.toString(entry.truckNumber));
         }
-        mEquipmentView.setText(entry.getEquipmentName());
+        mSimpleAdapter.setList(entry.getEquipmentNames());
         mPictureAdapter.setList(entry.getPictures());
     }
 }

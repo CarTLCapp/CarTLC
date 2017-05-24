@@ -7,14 +7,14 @@ import java.util.List;
  */
 
 public class DataEntry {
-    public long                         id;
-    public long                         date;
-    public long                         projectNameId;
-    public long                         addressId;
-    public DataEquipmentEntryCollection equipmentCollection;
-    public DataPictureCollection        pictureCollection;
-    public long                         truckNumber;
-    public boolean                      uploaded;
+    public long                  id;
+    public long                  date;
+    public long                  projectNameId;
+    public long                  addressId;
+    public long                  equipmentId;
+    public DataPictureCollection pictureCollection;
+    public long                  truckNumber;
+    public boolean               uploaded;
 
     public DataEntry() {
     }
@@ -35,9 +35,10 @@ public class DataEntry {
         return TableNoteEntryCollection.getInstance().query(id);
     }
 
-    public List<String> getEquipmentNames() {
-        if (equipmentCollection != null) {
-            return equipmentCollection.getEquipmentNames();
+    public String getEquipmentName() {
+        DataEquipment eq = TableEquipment.getInstance().query(equipmentId);
+        if (eq != null) {
+            return eq.name;
         }
         return null;
     }
