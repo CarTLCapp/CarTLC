@@ -43,14 +43,12 @@ Seq[Any](format.raw/*1.33*/("""
     <body>
         
         <header class="topbar">
-            <h1 class="fill">
-                <h1>"""),_display_(/*22.22*/header),format.raw/*22.28*/("""</h1>
-            </h1>
+            <h1 class="fill">"""),_display_(/*21.31*/header),format.raw/*21.37*/("""</h1>
         </header>
         
         <section id="main">
-            """),_display_(/*27.14*/content),format.raw/*27.21*/("""
-        """),format.raw/*28.9*/("""</section>
+            """),_display_(/*25.14*/content),format.raw/*25.21*/("""
+        """),format.raw/*26.9*/("""</section>
         
     </body>
 </html>
@@ -74,11 +72,11 @@ Seq[Any](format.raw/*1.33*/("""
 object main extends main_Scope0.main
               /*
                   -- GENERATED --
-                  DATE: Wed May 24 17:18:37 CDT 2017
+                  DATE: Wed May 24 17:29:12 CDT 2017
                   SOURCE: /media/vokal/cartlc/CarTLC/server/play-ebean/app/views/main.scala.html
-                  HASH: 5a50068d578430cbf892b3c6274a48ccc91c10a1
-                  MATRIX: 748->1|874->32|902->34|1004->607|1040->616|1128->677|1143->683|1208->726|1300->791|1315->797|1370->831|1517->951|1544->957|1663->1049|1691->1056|1727->1065
-                  LINES: 27->1|32->1|34->3|38->13|39->14|39->14|39->14|39->14|41->16|41->16|41->16|47->22|47->22|52->27|52->27|53->28
+                  HASH: 55b43348ad7a660d7050ecd751af3378b6f8c034
+                  MATRIX: 748->1|874->32|902->34|1004->607|1040->616|1128->677|1143->683|1208->726|1300->791|1315->797|1370->831|1496->930|1523->936|1624->1010|1652->1017|1688->1026
+                  LINES: 27->1|32->1|34->3|38->13|39->14|39->14|39->14|39->14|41->16|41->16|41->16|46->21|46->21|50->25|50->25|51->26
                   -- GENERATED --
               */
           

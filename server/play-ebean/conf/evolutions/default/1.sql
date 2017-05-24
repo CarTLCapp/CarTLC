@@ -1,4 +1,4 @@
-# --- First database schema
+# --- Database schema
 
 # --- !Ups
 
@@ -18,57 +18,57 @@ create table company (
   disabled          bit
 );
 
-create table projects (
+create table project (
   id                int auto_increment primary key,
   name              varchar(64),
   disabled          bit
 );
 
-create table equipments (
+create table equipment (
   id                int auto_increment primary key,
   name              varchar(128),
   disabled          bit
 );
 
-create table collection_project_equipment (
+create table projectEquipmentCollection (
   id                int auto_increment primary key,
   project_id        int,
   equipment_id      int
 );
 
-alter table collection_project_equipment add constraint fk_cpe_project_id foreign key (project_id) references projects (id) on delete restrict on update restrict;
-alter table collection_project_equipment add constraint fk_cpe_equipment_id foreign key (equipment_id) references equipments (id) on delete restrict on update restrict;
+alter table projectEquipmentCollection add constraint fk_cpe_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table projectEquipmentCollection add constraint fk_cpe_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
 
-create table notes (
+create table note (
   id                int auto_increment primary key,
   name              varchar(128),
   type              smallint,
   disabled          bit
 );
 
-create table collection_project_note (
+create table projectNoteCollection (
   id                int auto_increment primary key,
   project_id        int,
   note_id           int
 );
 
-alter table collection_project_note add constraint fk_cpn_project_id foreign key (project_id) references projects (id) on delete restrict on update restrict;
-alter table collection_project_note add constraint fk_cpn_note_id foreign key (note_id) references notes (id) on delete restrict on update restrict;
+alter table projectNoteCollection add constraint fk_cpn_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table projectNoteCollection add constraint fk_cpn_note_id foreign key (note_id) references note (id) on delete restrict on update restrict;
 
-create table pictures (
+create table picture (
   id                int auto_increment primary key,
   filename          varchar(255)
 );
 
-create table picture_collection (
+create table pictureCollection (
   id                int auto_increment primary key,
   collection_id     int,
   picture_id        int
 );
 
-alter table picture_collection add constraint fk_picture_id foreign key (picture_id) references pictures (id) on delete restrict on update restrict;
+alter table pictureCollection add constraint fk_picture_id foreign key (picture_id) references picture (id) on delete restrict on update restrict;
 
-create table entries (
+create table entry (
   id                       int auto_increment primary key,
   entry_time               date,
   project_id               int,
@@ -78,7 +78,12 @@ create table entries (
   truck_number             int
 );
 
-create table states (
+alter table entry add constraint fk_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table entry add constraint fk_entry_address_id foreign key (address_id) references company (id) on delete restrict on update restrict;
+alter table entry add constraint fk_entry_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
+alter table entry add constraint fk_entry_picture_collection_id foreign key (picture_collection_id) references pictureCollection (id) on delete restrict on update restrict;
+
+create table state (
   id        int auto_increment primary key,
   name      varchar(64),
   abbr      varchar(8)
@@ -88,16 +93,17 @@ create table states (
 
 SET REFERENTIAL_INTEGRITY FALSE;
 
-drop table if exists users;
-drop table if exists companies;
-drop table if exists projects;
-drop table if exists equipments;
-drop table if exists collection_project_equipment;
-drop table if exists notes;
-drop table if exists collection_project_note;
-drop table if exists pictures;
-drop table if exists picture_collection;
-drop table if exists entries;
+drop table if exists client;
+drop table if exists company;
+drop table if exists project;
+drop table if exists equipment;
+drop table if exists projectEquipmentCollection;
+drop table if exists note;
+drop table if exists projectNoteCollection;
+drop table if exists picture;
+drop table if exists pictureCollection;
+drop table if exists entry;
+drop table if exists state;
 
 SET REFERENTIAL_INTEGRITY TRUE;
 

@@ -17,6 +17,11 @@
 
         </fieldset>
 
+        <div class="actions">
+            <input type="submit" value="Save this user" class="btn primary"> or
+            <a href="@routes.ClientController.list()" class="btn">Cancel</a>
+        </div>
+
     }
     
     @b3.form(routes.ClientController.delete(id), 'class -> "topRight") {
