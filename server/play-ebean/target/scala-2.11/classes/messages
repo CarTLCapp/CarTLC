@@ -1,5 +1,0 @@
-# Messages
-
-users.list.title={0,choice,0#No users|1#One user|1<{0,number,integer} users} found
-
-
