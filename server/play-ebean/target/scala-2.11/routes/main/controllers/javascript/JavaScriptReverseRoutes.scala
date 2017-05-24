@@ -1,7 +1,7 @@
 
 // @GENERATOR:play-routes-compiler
 // @SOURCE:/media/vokal/cartlc/CarTLC/server/play-ebean/conf/routes
-// @DATE:Tue May 23 11:40:00 CDT 2017
+// @DATE:Wed May 24 17:18:37 CDT 2017
 
 import play.api.routing.JavaScriptReverseRoute
 import play.api.mvc.{ QueryStringBindable, PathBindable, Call, JavascriptLiteral }
@@ -11,11 +11,81 @@ import play.core.routing.{ HandlerDef, ReverseRouteContext, queryString, dynamic
 import _root_.controllers.Assets.Asset
 import _root_.play.libs.F
 
-// @LINE:6
+// @LINE:7
 package controllers.javascript {
   import ReverseRouteContext.empty
 
-  // @LINE:6
+  // @LINE:12
+  class ReverseClientController(_prefix: => String) {
+
+    def _defaultPrefix: String = {
+      if (_prefix.endsWith("/")) "" else "/"
+    }
+
+  
+    // @LINE:23
+    def delete: JavaScriptReverseRoute = JavaScriptReverseRoute(
+      "controllers.ClientController.delete",
+      """
+        function(id0) {
+          return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "client/" + (""" + implicitly[PathBindable[Long]].javascriptUnbind + """)("id", id0) + "/delete"})
+        }
+      """
+    )
+  
+    // @LINE:15
+    def create: JavaScriptReverseRoute = JavaScriptReverseRoute(
+      "controllers.ClientController.create",
+      """
+        function() {
+          return _wA({method:"GET", url:"""" + _prefix + { _defaultPrefix } + """" + "client/new"})
+        }
+      """
+    )
+  
+    // @LINE:19
+    def edit: JavaScriptReverseRoute = JavaScriptReverseRoute(
+      "controllers.ClientController.edit",
+      """
+        function(id0) {
+          return _wA({method:"GET", url:"""" + _prefix + { _defaultPrefix } + """" + "client/" + (""" + implicitly[PathBindable[Long]].javascriptUnbind + """)("id", id0)})
+        }
+      """
+    )
+  
+    // @LINE:20
+    def update: JavaScriptReverseRoute = JavaScriptReverseRoute(
+      "controllers.ClientController.update",
+      """
+        function(id0) {
+          return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "client/" + (""" + implicitly[PathBindable[Long]].javascriptUnbind + """)("id", id0)})
+        }
+      """
+    )
+  
+    // @LINE:12
+    def list: JavaScriptReverseRoute = JavaScriptReverseRoute(
+      "controllers.ClientController.list",
+      """
+        function() {
+          return _wA({method:"GET", url:"""" + _prefix + { _defaultPrefix } + """" + "client"})
+        }
+      """
+    )
+  
+    // @LINE:16
+    def save: JavaScriptReverseRoute = JavaScriptReverseRoute(
+      "controllers.ClientController.save",
+      """
+        function() {
+          return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "client"})
+        }
+      """
+    )
+  
+  }
+
+  // @LINE:7
   class ReverseHomeController(_prefix: => String) {
 
     def _defaultPrefix: String = {
@@ -23,67 +93,7 @@ package controllers.javascript {
     }
 
   
-    // @LINE:20
-    def delete: JavaScriptReverseRoute = JavaScriptReverseRoute(
-      "controllers.HomeController.delete",
-      """
-        function(id0) {
-          return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "computers/" + (""" + implicitly[PathBindable[Long]].javascriptUnbind + """)("id", id0) + "/delete"})
-        }
-      """
-    )
-  
-    // @LINE:12
-    def create: JavaScriptReverseRoute = JavaScriptReverseRoute(
-      "controllers.HomeController.create",
-      """
-        function() {
-          return _wA({method:"GET", url:"""" + _prefix + { _defaultPrefix } + """" + "computers/new"})
-        }
-      """
-    )
-  
-    // @LINE:16
-    def edit: JavaScriptReverseRoute = JavaScriptReverseRoute(
-      "controllers.HomeController.edit",
-      """
-        function(id0) {
-          return _wA({method:"GET", url:"""" + _prefix + { _defaultPrefix } + """" + "computers/" + (""" + implicitly[PathBindable[Long]].javascriptUnbind + """)("id", id0)})
-        }
-      """
-    )
-  
-    // @LINE:17
-    def update: JavaScriptReverseRoute = JavaScriptReverseRoute(
-      "controllers.HomeController.update",
-      """
-        function(id0) {
-          return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "computers/" + (""" + implicitly[PathBindable[Long]].javascriptUnbind + """)("id", id0)})
-        }
-      """
-    )
-  
-    // @LINE:9
-    def list: JavaScriptReverseRoute = JavaScriptReverseRoute(
-      "controllers.HomeController.list",
-      """
-        function(p0,s1,o2,f3) {
-          return _wA({method:"GET", url:"""" + _prefix + { _defaultPrefix } + """" + "computers" + _qS([(p0 == null ? null : (""" + implicitly[QueryStringBindable[Int]].javascriptUnbind + """)("p", p0)), (s1 == null ? null : (""" + implicitly[QueryStringBindable[String]].javascriptUnbind + """)("s", s1)), (o2 == null ? null : (""" + implicitly[QueryStringBindable[String]].javascriptUnbind + """)("o", o2)), (f3 == null ? null : (""" + implicitly[QueryStringBindable[String]].javascriptUnbind + """)("f", f3))])})
-        }
-      """
-    )
-  
-    // @LINE:13
-    def save: JavaScriptReverseRoute = JavaScriptReverseRoute(
-      "controllers.HomeController.save",
-      """
-        function() {
-          return _wA({method:"POST", url:"""" + _prefix + { _defaultPrefix } + """" + "computers"})
-        }
-      """
-    )
-  
-    // @LINE:6
+    // @LINE:7
     def index: JavaScriptReverseRoute = JavaScriptReverseRoute(
       "controllers.HomeController.index",
       """
@@ -95,7 +105,7 @@ package controllers.javascript {
   
   }
 
-  // @LINE:23
+  // @LINE:92
   class ReverseAssets(_prefix: => String) {
 
     def _defaultPrefix: String = {
@@ -103,7 +113,7 @@ package controllers.javascript {
     }
 
   
-    // @LINE:23
+    // @LINE:92
     def at: JavaScriptReverseRoute = JavaScriptReverseRoute(
       "controllers.Assets.at",
       """

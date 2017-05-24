@@ -1,0 +1,58 @@
+@(currentPage: List[Client])
+
+@main("FLeetTLC - List Users") {
+
+    <div id="actions">
+
+        <a class="btn success" id="add" href="@routes.ClientController.create()">Add a new user</a>
+
+    </div>
+
+    @if(currentPage.size() == 0) {
+        
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+        
+    } else {
+        
+        <table class="clients zebra-striped">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(client <- currentPage) {
+                    <tr>
+                        <td>
+                            @if(client.first_name == null) {
+                                <em>-</em>
+                            } else {
+                                @client.first_name
+                            }
+                        </td>
+                        <td>
+                            @if(client.last_name == null) {
+                                <em>-</em>
+                            } else {
+                                @client.last_name
+                            }
+                        </td>
+                        <td>
+                            <td><a href="@routes.ClientController.edit(client.id)">Edit</a></td>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        
+    }
+        
+}
+
+            

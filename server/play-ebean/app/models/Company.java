@@ -32,6 +32,9 @@ public class Company extends Model {
     @Constraints.Required
     public String state;
 
+    @Constraints.Required
+    public boolean disabled;
+
     /**
      * Generic query helper for entity Computer with id Long
      */
@@ -46,7 +49,7 @@ public class Company extends Model {
      * @param order Sort order (either or asc or desc)
      * @param filter Filter applied on the name column
      */
-    public static PagedList<Computer> page(int page, int pageSize, String sortBy, String order, String filter) {
+    public static PagedList<Company> page(int page, int pageSize, String sortBy, String order, String filter) {
         return
             find.where()
                 .ilike("name", "%" + filter + "%")

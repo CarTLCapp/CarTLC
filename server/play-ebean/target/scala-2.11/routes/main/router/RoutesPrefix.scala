@@ -1,7 +1,7 @@
 
 // @GENERATOR:play-routes-compiler
 // @SOURCE:/media/vokal/cartlc/CarTLC/server/play-ebean/conf/routes
-// @DATE:Tue May 23 11:40:00 CDT 2017
+// @DATE:Wed May 24 17:18:37 CDT 2017
 
 
 package router {

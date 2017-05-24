@@ -2,28 +2,32 @@
 
 # --- !Ups
 
-create table users (
-  id                bigint auto_increment primary key,
+create table client (
+  id                int auto_increment primary key,
   first_name        varchar(255),
-  last_name         varchar(255)
+  last_name         varchar(255),
+  disabled          bit
 );
 
-create table companies (
-  id                bigint auto_increment primary key,
+create table company (
+  id                int auto_increment primary key,
   name              varchar(255),
   street            varchar(255),
   city              varchar(128),
-  state             varchar(64)
+  state             varchar(64),
+  disabled          bit
 );
 
 create table projects (
   id                int auto_increment primary key,
-  name              varchar(64)
+  name              varchar(64),
+  disabled          bit
 );
 
 create table equipments (
   id                int auto_increment primary key,
-  name              varchar(128)
+  name              varchar(128),
+  disabled          bit
 );
 
 create table collection_project_equipment (
@@ -32,10 +36,14 @@ create table collection_project_equipment (
   equipment_id      int
 );
 
+alter table collection_project_equipment add constraint fk_cpe_project_id foreign key (project_id) references projects (id) on delete restrict on update restrict;
+alter table collection_project_equipment add constraint fk_cpe_equipment_id foreign key (equipment_id) references equipments (id) on delete restrict on update restrict;
+
 create table notes (
   id                int auto_increment primary key,
   name              varchar(128),
-  type              smallint
+  type              smallint,
+  disabled          bit
 );
 
 create table collection_project_note (
@@ -43,6 +51,9 @@ create table collection_project_note (
   project_id        int,
   note_id           int
 );
+
+alter table collection_project_note add constraint fk_cpn_project_id foreign key (project_id) references projects (id) on delete restrict on update restrict;
+alter table collection_project_note add constraint fk_cpn_note_id foreign key (note_id) references notes (id) on delete restrict on update restrict;
 
 create table pictures (
   id                int auto_increment primary key,
@@ -55,6 +66,8 @@ create table picture_collection (
   picture_id        int
 );
 
+alter table picture_collection add constraint fk_picture_id foreign key (picture_id) references pictures (id) on delete restrict on update restrict;
+
 create table entries (
   id                       int auto_increment primary key,
   entry_time               date,
@@ -65,11 +78,11 @@ create table entries (
   truck_number             int
 );
 
-alter table collection_project_equipment add constraint fk_cpe_project_id foreign key (project_id) references projects (id) on delete restrict on update restrict;
-alter table collection_project_equipment add constraint fk_cpe_equipment_id foreign key (equipment_id) references equipments (id) on delete restrict on update restrict;
-alter table collection_project_note add constraint fk_cpn_project_id foreign key (project_id) references projects (id) on delete restrict on update restrict;
-alter table collection_project_note add constraint fk_cpn_note_id foreign key (note_id) references notes (id) on delete restrict on update restrict;
-alter table picture_collection add constraint fk_picture_id foreign key (picture_id) references pictures (id) on delete restrict on update restrict;
+create table states (
+  id        int auto_increment primary key,
+  name      varchar(64),
+  abbr      varchar(8)
+);
 
 # --- !Downs
 

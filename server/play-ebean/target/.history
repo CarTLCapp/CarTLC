@@ -10,3 +10,14 @@ pwd
 exit
 clean
 compile
+clean
+compile
+run 9003
+clean
+compile
+run 9003
+clean
+compile
+clean
+compile
+run 9003

@@ -2,89 +2,91 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-### ENTRIES ###
+### HOME ###
 
-# Default path may ask for a login and give a list of options of what to do.
 GET     /                         controllers.HomeController.index()
-
-# Entries list (look at the default values for pagination parameters)
-GET     /entry                    controllers.HomeController.list_entries()
-
-# Add Entry
-GET     /entry/new                controllers.HomeController.create_entry()
-POST    /entry                    controllers.HomeController.save_entry()
-
-# Edit existing entry
-GET     /entry/:id                controllers.HomeController.edit_entry(id:Long)
-POST    /entry/:id                controllers.HomeController.update_entry(id:Long)
-
-# Delete a entry
-POST    /entry/:id/delete         controllers.HomeController.delete_entry(id:Long)
 
 ### USERS ###
 
-# Users list 
-GET     /user                      controllers.HomeController.list_users()
+# Users list
+GET     /client                    controllers.ClientController.list()
 
 # Add User
-GET     /user/new                  controllers.HomeController.create_user()
-POST    /user                      controllers.HomeController.save_user()
+GET     /client/new                controllers.ClientController.create()
+POST    /client                    controllers.ClientController.save()
 
 # Edit existing user
-GET     /user/:id                  controllers.HomeController.edit_user(id:Long)
-POST    /user/:id                  controllers.HomeController.update_user(id:Long)
+GET     /client/:id                controllers.ClientController.edit(id:Long)
+POST    /client/:id                controllers.ClientController.update(id:Long)
 
 # Delete a user
-POST    /user/:id/delete           controllers.HomeController.delete_user(id:Long)
+POST    /client/:id/delete         controllers.ClientController.delete(id:Long)
+
+### ENTRIES ###
+
+# Entries list (look at the default values for pagination parameters)
+# GET     /entry                    controllers.EntryController.list()
+
+# Add Entry
+# GET     /entry/new                controllers.EntryController.create()
+# POST    /entry                    controllers.EntryController.save()
+
+# Edit existing entry
+# GET     /entry/:id                controllers.EntryController.edit(id:Long)
+# POST    /entry/:id                controllers.EntryController.update(id:Long)
+
+# Delete a entry
+# POST    /entry/:id/delete         controllers.EntryController.delete(id:Long)
+
 
 ### PROJECTS ###
 
 # Projects list
-GET     /project                   controllers.HomeController.list_projects()
+# GET     /project                    controllers.ProjectController.list()
 
 # Add project
-GET     /project/new                controllers.HomeController.create_project()
-POST    /project                    controllers.HomeController.save_project()
+# GET     /project/new                controllers.ProjectController.create()
+# POST    /project                    controllers.ProjectController.save()
 
 # Edit existing project
-GET     /project/:id                controllers.HomeController.edit_project(id:Long)
-POST    /project/:id                controllers.HomeController.update_project(id:Long)
+# GET     /project/:id                controllers.ProjectController.edit(id:Long)
+# POST    /project/:id                controllers.ProjectController.update(id:Long)
 
 # Delete a project
-POST    /project/:id/delete         controllers.HomeController.delete_project(id:Long)
+# POST    /project/:id/delete         controllers.ProjectController.delete(id:Long)
 
 ### COMPANIES ###
 
 # Company list
-GET     /company                    controllers.HomeController.list_companies()
+# GET     /company                    controllers.CompanyController.list()
 
 # Add project
-GET     /company/new                controllers.HomeController.create_company()
-POST    /company                    controllers.HomeController.save_company()
+# GET     /company/new                controllers.CompanyController.create()
+# POST    /company                    controllers.CompanyController.save()
 
 # Edit existing project
-GET     /company/:id                controllers.HomeController.edit_company(id:Long)
-POST    /company/:id                controllers.HomeController.update_company(id:Long)
+# GET     /company/:id                controllers.CompanyController.edit(id:Long)
+# POST    /company/:id                controllers.CompanyController.update(id:Long)
 
 # Delete a project
-POST    /company/:id/delete         controllers.HomeController.delete_company(id:Long)
+# POST    /company/:id/delete         controllers.CompanyController.delete(id:Long)
 
 ### EQUIPMENTS ###
 
-# Company list
-GET     /equipment                  controllers.HomeController.list_equipments()
-GET     /equipment/:id              controllers.HomeController.list_equipment(id:Long)
+# Equipment list
+# GET     /equipment                  controllers.EquipmentController.list()
+# GET     /equipment/:id              controllers.EquipmentController.list(id:Long)
 
-# Add project
-GET     /equipment/new              controllers.HomeController.create_equipment()
-POST    /equipment                  controllers.HomeController.save_equipment()
+# Add equipment
+# GET     /equipment/new              controllers.EquipmentController.create()
+# POST    /equipment                  controllers.EquipmentController.save()
 
-# Edit existing project
-GET     /equipment/:id              controllers.HomeController.edit_equipment(id:Long)
-POST    /equipment/:id              controllers.HomeController.update_equipment(id:Long)
+# Edit existing equipment
+# GET     /equipment/:id              controllers.EquipmentController.edit(id:Long)
+# POST    /equipment/:id              controllers.EquipmentController.update(id:Long)
 
-# Delete a project
-POST    /equipment/:id/delete       controllers.HomeController.delete_equipment(id:Long)
+# Delete an equipment
+# POST    /equipment/:id/delete       controllers.EquipmentController.delete(id:Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                 controllers.Assets.at(path="/public", file)
