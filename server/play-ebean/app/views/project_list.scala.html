@@ -1,0 +1,49 @@
+@(currentPage: List[Project])
+
+@main("FleetTLC - List Projects") {
+
+    <h1 id="homeTitle">@Messages("project.list.title", currentPage.size())</h1>
+
+    @if(currentPage.size() == 0) {
+        
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+        
+    } else {
+        
+        <table class="projects zebra-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(project <- currentPage) {
+                    <tr>
+                        <td>
+                            @if(project.name == null) {
+                                <em>-</em>
+                            } else {
+                                @project.name
+                            }
+                        </td>
+                        <td>
+                            <a href="@routes.ProjectController.edit(project.id)">Edit</a>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        
+    }
+
+    <a class="btn success" id="add" href="@routes.ProjectController.create()">Add a new project</a>
+    <a class="btn success" id="addMany" href="@routes.ProjectController.createMany()">Add many projects</a>
+
+}
+
+            

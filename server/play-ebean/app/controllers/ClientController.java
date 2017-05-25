@@ -33,13 +33,12 @@ public class ClientController extends Controller {
     }
     
     /**
-     * Display the 'edit form' of a existing Client.
+     * Display the 'edit form' of an existing Client.
      *
-     * @param id Id of the computer to edit
+     * @param id Id of the user to edit
      */
     public Result edit(Long id) {
-        Form<Client> clientForm = formFactory.form(Client.class).fill(
-                Client.find.byId(id)
+        Form<Client> clientForm = formFactory.form(Client.class).fill(Client.find.byId(id)
         );
         return ok(
             views.html.client_editForm.render(id, clientForm)

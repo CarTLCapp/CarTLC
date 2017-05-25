@@ -22,6 +22,26 @@ POST    /client/:id                controllers.ClientController.update(id:Long)
 # Delete a user
 POST    /client/:id/delete         controllers.ClientController.delete(id:Long)
 
+### PROJECTS ###
+
+# Projects list
+GET     /project                    controllers.ProjectController.list()
+
+# Add project
+GET     /project/new                controllers.ProjectController.create()
+POST    /project                    controllers.ProjectController.save()
+
+# Add many projects
+GET     /project/new/many           controllers.ProjectController.createMany()
+POST    /project/many               controllers.ProjectController.saveMany()
+
+# Edit existing project
+GET     /project/:id                controllers.ProjectController.edit(id:Long)
+POST    /project/:id                controllers.ProjectController.update(id:Long)
+
+# Delete a project
+POST    /project/:id/delete         controllers.ProjectController.delete(id:Long)
+
 ### ENTRIES ###
 
 # Entries list (look at the default values for pagination parameters)
@@ -39,21 +59,6 @@ POST    /client/:id/delete         controllers.ClientController.delete(id:Long)
 # POST    /entry/:id/delete         controllers.EntryController.delete(id:Long)
 
 
-### PROJECTS ###
-
-# Projects list
-# GET     /project                    controllers.ProjectController.list()
-
-# Add project
-# GET     /project/new                controllers.ProjectController.create()
-# POST    /project                    controllers.ProjectController.save()
-
-# Edit existing project
-# GET     /project/:id                controllers.ProjectController.edit(id:Long)
-# POST    /project/:id                controllers.ProjectController.update(id:Long)
-
-# Delete a project
-# POST    /project/:id/delete         controllers.ProjectController.delete(id:Long)
 
 ### COMPANIES ###
 

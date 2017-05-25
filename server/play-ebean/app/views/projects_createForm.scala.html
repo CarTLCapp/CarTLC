@@ -1,0 +1,25 @@
+@(linesForm: Form[InputLines])
+
+@import helper._
+
+@import b3.vertical.fieldConstructor
+
+@main("Fleet TLC - New Projects") {
+    
+    <h1>Add many projects</h1>
+
+    <p>You may create several projects at once. One project name per line.</p>
+
+    @helper.form(routes.ProjectController.saveMany()) {
+
+        <fieldset>
+            @helper.textarea(linesForm("lines"), 'rows -> 10, 'cols -> 80, '_label -> "")
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Add these projects" class="btn primary"> or
+            <a href="@routes.ProjectController.list()" class="btn">Cancel</a>
+        </div>
+    }
+
+}
