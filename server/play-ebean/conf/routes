@@ -59,7 +59,6 @@ POST    /project/:id/delete         controllers.ProjectController.delete(id:Long
 # POST    /entry/:id/delete         controllers.EntryController.delete(id:Long)
 
 
-
 ### COMPANIES ###
 
 # Company list

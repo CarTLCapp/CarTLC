@@ -83,12 +83,6 @@ alter table entry add constraint fk_entry_address_id foreign key (address_id) re
 alter table entry add constraint fk_entry_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
 alter table entry add constraint fk_entry_picture_collection_id foreign key (picture_collection_id) references pictureCollection (id) on delete restrict on update restrict;
 
-create table state (
-  id        int auto_increment primary key,
-  name      varchar(64),
-  abbr      varchar(8)
-);
-
 # --- !Downs
 
 SET REFERENTIAL_INTEGRITY FALSE;
