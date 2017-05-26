@@ -12,7 +12,7 @@ create table client (
   id                int auto_increment primary key,
   first_name        varchar(255),
   last_name         varchar(255),
-  imei              varchar(255),
+  device_id         varchar(255),
   disabled          bit
 );
 

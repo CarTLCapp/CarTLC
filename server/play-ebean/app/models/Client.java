@@ -20,9 +20,9 @@ public class Client extends com.avaje.ebean.Model {
         return find.all();
     }
 
-    public static Client findByImei(String imei) throws DataErrorException {
+    public static Client findByDeviceId(String device_id) throws DataErrorException {
         List<Client> items = find.where()
-                .eq("imei", imei)
+                .eq("device_id", device_id)
                 .findList();
         if (items.size() == 1) {
             return items.get(0);
@@ -42,7 +42,7 @@ public class Client extends com.avaje.ebean.Model {
     public String last_name;
 
     @Constraints.Required
-    public String imei;
+    public String device_id;
 
     @Constraints.Required
     public boolean disabled;

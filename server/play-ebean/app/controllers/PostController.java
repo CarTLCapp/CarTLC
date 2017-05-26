@@ -34,17 +34,17 @@ public class PostController extends Controller
 		{
 			missing.add("last_name");
 		}
-		String imei = json.findPath("imei").textValue();
-		if (imei == null)
+		String device_id = json.findPath("device_id").textValue();
+		if (device_id == null)
 		{
-			missing.add("imei");
+			missing.add("device_id");
 		}
 		if (missing.size() > 0) {
 			return missingRequest(missing);
 		}
 		Client client;
 		try {
-			client = Client.findByImei(imei);
+			client = Client.findByDeviceId(device_id);
 			if (client == null) {
 				client = new Client();
 			}
@@ -53,7 +53,7 @@ public class PostController extends Controller
 		}
 		client.first_name = first_name;
 		client.last_name = last_name;
-		client.imei = imei;
+		client.device_id = device_id;
 		client.save();
 
 		return ok(Long.toString(client.id));
@@ -63,10 +63,10 @@ public class PostController extends Controller
 	public Result ping() {
 		ArrayList<String> missing = new ArrayList();
 		JsonNode json = request().body().asJson();
-		String imei = json.findPath("imei").textValue();
+		String device_id = json.findPath("device_id").textValue();
 		if (imei == null)
 		{
-			missing.add("imei");
+			missing.add("device_id");
 		}
 		if (missing.size() > 0) {
 			return missingRequest(missing);
