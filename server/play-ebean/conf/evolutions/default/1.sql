@@ -97,7 +97,6 @@ drop table if exists projectNoteCollection;
 drop table if exists picture;
 drop table if exists pictureCollection;
 drop table if exists entry;
-drop table if exists state;
 
 SET REFERENTIAL_INTEGRITY TRUE;
 

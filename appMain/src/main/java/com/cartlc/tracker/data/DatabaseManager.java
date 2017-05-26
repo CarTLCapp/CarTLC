@@ -31,7 +31,7 @@ public class DatabaseManager {
                 TableAddress.getInstance().create();
                 TableEntries.getInstance().create();
                 TableEquipment.getInstance().create();
-                TableEquipmentCollection.getInstance().create();
+                TableEquipmentProjectCollection.getInstance().create();
                 TableNote.getInstance().create();
                 TableNoteEntryCollection.getInstance().create();
                 TableNoteProjectCollection.getInstance().create();
@@ -49,7 +49,7 @@ public class DatabaseManager {
             TableAddress.Init(db);
             TableEntries.Init(db);
             TableEquipment.Init(db);
-            TableEquipmentCollection.Init(db);
+            TableEquipmentProjectCollection.Init(db);
             TableNote.Init(db);
             TableNoteEntryCollection.Init(db);
             TableNoteProjectCollection.Init(db);

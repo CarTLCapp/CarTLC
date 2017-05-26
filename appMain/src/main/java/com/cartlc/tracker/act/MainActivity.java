@@ -39,8 +39,7 @@ import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntries;
-import com.cartlc.tracker.data.TableEquipment;
-import com.cartlc.tracker.data.TableEquipmentCollection;
+import com.cartlc.tracker.data.TableEquipmentProjectCollection;
 import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
@@ -304,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
                 String name = getEditText(mEntrySimple);
                 if (!TextUtils.isEmpty(name)) {
                     DataProjectAddressCombo group = PrefHelper.getInstance().getCurrentProjectGroup();
-                    TableEquipmentCollection.getInstance().addLocal(name, group.projectNameId);
+                    TableEquipmentProjectCollection.getInstance().addLocal(name, group.projectNameId);
                 }
             }
         }

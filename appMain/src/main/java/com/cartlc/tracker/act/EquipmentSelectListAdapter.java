@@ -1,8 +1,6 @@
 package com.cartlc.tracker.act;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,11 +10,10 @@ import android.widget.RadioButton;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEquipment;
-import com.cartlc.tracker.data.DataEquipmentCollection;
+import com.cartlc.tracker.data.DataEquipmentProjectCollection;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.PrefHelper;
-import com.cartlc.tracker.data.TableEquipment;
-import com.cartlc.tracker.data.TableEquipmentCollection;
+import com.cartlc.tracker.data.TableEquipmentProjectCollection;
 
 import java.util.List;
 
@@ -93,7 +90,7 @@ public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSe
 
     public void onDataChanged() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        DataEquipmentCollection collection = TableEquipmentCollection.getInstance().queryForProject(curGroup.projectNameId);
+        DataEquipmentProjectCollection collection = TableEquipmentProjectCollection.getInstance().queryForProject(curGroup.projectNameId);
         mItems = collection.getEquipment();
         mLastCheckedItem = null;
         mLastCheckedView = null;

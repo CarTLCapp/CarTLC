@@ -18,6 +18,15 @@ public class Project extends Model {
 
     private static final long serialVersionUID = 1L;
 
+	@Id
+    public Long id;
+    
+    @Constraints.Required
+    public String name;
+
+    @Constraints.Required
+    public boolean disabled;
+
     public static Finder<Long,Project> find = new Finder<Long,Project>(Project.class);
 
     public static List<Project> list() { return find.all(); }
@@ -33,15 +42,6 @@ public class Project extends Model {
         }
         return null;
     }
-
-	@Id
-    public Long id;
-    
-    @Constraints.Required
-    public String name;
-
-    @Constraints.Required
-    public boolean disabled;
 
 }
 

@@ -2,6 +2,7 @@
 
 users.list.title={0,choice,0#No users|1#One user|1<{0,number,integer} users} found
 project.list.title={0,choice,0#No projects|1#One project|1<{0,number,integer} projects} found
+company.list.title={0,choice,0#No companies|1#One company|1<{0,number,integer} companies} found
 
 
 

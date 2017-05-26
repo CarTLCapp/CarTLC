@@ -1,0 +1,73 @@
+@(currentPage: List[Company])
+
+@main("FleetTLC - List Companies") {
+
+    <h1 id="homeTitle">@Messages("company.list.title", currentPage.size())</h1>
+
+    @if(currentPage.size() == 0) {
+        
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+        
+    } else {
+        
+        <table class="companies zebra-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Street</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(company <- currentPage) {
+                    <tr>
+                        <td>
+                            @if(company.name == null) {
+                                <em>-</em>
+                            } else {
+                                @company.name
+                            }
+                        </td>
+                        <td>
+                            @if(company.street == null) {
+                                <em>-</em>
+                            } else {
+                                @company.street
+                            }
+                        </td>
+                        <td>
+                            @if(company.city == null) {
+                             <em>-</em>
+                            } else {
+                                @company.city
+                            }
+                        </td>
+                        <td>
+                            @if(company.state == null) {
+                                <em>-</em>
+                            } else {
+                                @company.state
+                            }
+                        </td>
+                        <td>
+                            <a href="@routes.CompanyController.edit(company.id)">Edit</a>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        
+    }
+
+    <a class="btn success" id="add" href="@routes.CompanyController.create()">Add a new company</a>
+    <a class="btn success" id="addMany" href="@routes.CompanyController.createMany()">Add many companies</a>
+
+}
+
+            

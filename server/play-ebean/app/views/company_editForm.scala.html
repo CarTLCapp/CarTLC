@@ -1,0 +1,33 @@
+@(id: Long, companyForm: Form[Company])
+
+@import helper._
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - Edit Company") {
+    
+    <h1>Edit company</h1>
+    
+    @b3.form(routes.CompanyController.update(id)) {
+        
+        <fieldset>
+        
+            @b3.text(companyForm("name"), '_label -> "Name", '_help -> "")
+            @b3.text(companyForm("street"), '_label -> "Street", '_help -> "")
+            @b3.text(companyForm("city"), '_label -> "City", '_help -> "")
+            @b3.text(companyForm("state"), '_label -> "State", '_help -> "")
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Save this company" class="btn primary"> or
+            <a href="@routes.CompanyController.list()" class="btn">Cancel</a>
+        </div>
+
+    }
+    
+    @b3.form(routes.CompanyController.delete(id), 'class -> "topRight") {
+        <input type="submit" value="Delete this company" class="btn danger">
+    }
+    
+}
