@@ -64,7 +64,7 @@ public class PostController extends Controller
 		ArrayList<String> missing = new ArrayList();
 		JsonNode json = request().body().asJson();
 		String device_id = json.findPath("device_id").textValue();
-		if (imei == null)
+		if (device_id == null)
 		{
 			missing.add("device_id");
 		}

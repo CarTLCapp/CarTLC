@@ -18,7 +18,7 @@
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Tech ID</th>
-                    <th>IMEI</th>
+                    <th>Device ID</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -44,7 +44,7 @@
                             @client.id
                         </td>
                         <td>
-                            @client.imei
+                            @client.device_id
                         </td>
                         <td>
                             <a href="@routes.ClientController.edit(client.id)">Edit</a>

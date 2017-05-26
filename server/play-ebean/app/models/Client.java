@@ -27,7 +27,7 @@ public class Client extends com.avaje.ebean.Model {
         if (items.size() == 1) {
             return items.get(0);
         } else if (items.size() > 1) {
-            new DataErrorException("Too many clients with: " + imei);
+            new DataErrorException("Too many clients with: " + device_id);
         }
         return null;
     }
