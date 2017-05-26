@@ -1,0 +1,53 @@
+@(currentPage: List[Equipment])
+
+@main("FleetTLC - List Equipments") {
+
+    <h1 id="homeTitle">@Messages("equipment.list.title", currentPage.size())</h1>
+
+    @if(currentPage.size() == 0) {
+        
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+        
+    } else {
+        
+        <table class="equipments zebra-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Projects</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(equipment <- currentPage) {
+                    <tr>
+                        <td>
+                            @if(equipment.name == null) {
+                                <em>-</em>
+                            } else {
+                                @equipment.name
+                            }
+                        </td>
+                        <td>
+                            @equipment.getProjectsLine()
+                        </td>
+                        <td>
+                            <a href="@routes.EquipmentController.edit(equipment.id)">Edit</a>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        
+    }
+
+    <a class="btn success" id="add" href="@routes.EquipmentController.create()">Add a new equipment item</a>
+    <a class="btn success" id="addMany" href="@routes.EquipmentController.createMany()">Add many equipment items</a>
+
+}
+
+            

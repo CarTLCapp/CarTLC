@@ -30,14 +30,14 @@ create table equipment (
   disabled          bit
 );
 
-create table projectEquipmentCollection (
+create table project_equipment_collection (
   id                int auto_increment primary key,
   project_id        int,
   equipment_id      int
 );
 
-alter table projectEquipmentCollection add constraint fk_cpe_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
-alter table projectEquipmentCollection add constraint fk_cpe_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
+alter table project_equipment_collection add constraint fk_cpe_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table project_equipment_collection add constraint fk_cpe_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
 
 create table note (
   id                int auto_increment primary key,
@@ -46,35 +46,35 @@ create table note (
   disabled          bit
 );
 
-create table projectNoteCollection (
+create table project_note_collection (
   id                int auto_increment primary key,
   project_id        int,
   note_id           int
 );
 
-alter table projectNoteCollection add constraint fk_cpn_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
-alter table projectNoteCollection add constraint fk_cpn_note_id foreign key (note_id) references note (id) on delete restrict on update restrict;
+alter table project_note_collection add constraint fk_cpn_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table project_note_collection add constraint fk_cpn_note_id foreign key (note_id) references note (id) on delete restrict on update restrict;
 
 create table picture (
   id                int auto_increment primary key,
   filename          varchar(255)
 );
 
-create table pictureCollection (
+create table picture_collection (
   id                int auto_increment primary key,
   collection_id     int,
   picture_id        int
 );
 
-alter table pictureCollection add constraint fk_picture_id foreign key (picture_id) references picture (id) on delete restrict on update restrict;
+alter table picture_collection add constraint fk_picture_id foreign key (picture_id) references picture (id) on delete restrict on update restrict;
 
-create table equipmentEntryCollection (
+create table equipment_entry_collection (
   id                int auto_increment primary key,
   collection_id     int,
   equipment_id      int
 );
 
-alter table equipmentEntryCollection add constraint fk_eec_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
+alter table equipment_entry_collection add constraint fk_eec_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
 
 create table entry (
   id                       int auto_increment primary key,
@@ -97,12 +97,12 @@ drop table if exists client;
 drop table if exists company;
 drop table if exists project;
 drop table if exists equipment;
-drop table if exists projectEquipmentCollection;
-drop table if exists equipmentEntryCollection;
+drop table if exists project_equipment_collection;
+drop table if exists equipment_entry_collection;
 drop table if exists note;
-drop table if exists projectNoteCollection;
+drop table if exists project_note_collection;
 drop table if exists picture;
-drop table if exists pictureCollection;
+drop table if exists picture_collection;
 drop table if exists entry;
 
 SET REFERENTIAL_INTEGRITY TRUE;

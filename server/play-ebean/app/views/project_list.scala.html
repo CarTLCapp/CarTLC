@@ -16,6 +16,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Equipment</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -29,6 +30,9 @@
                             } else {
                                 @project.name
                             }
+                        </td>
+                        <td>
+                            @project.getEquipmentsLine()
                         </td>
                         <td>
                             <a href="@routes.ProjectController.edit(project.id)">Edit</a>

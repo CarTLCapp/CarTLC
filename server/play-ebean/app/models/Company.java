@@ -44,7 +44,7 @@ public class Company extends Model {
     /**
      * Generic query helper for entity Computer with id Long
      */
-    public static Find<Long,Company> find = new Find<Long,Company>(){};
+    public static Finder<Long,Company> find = new Finder<Long,Company>(Company.class);
 
     /**
      * Return a paged list of companies

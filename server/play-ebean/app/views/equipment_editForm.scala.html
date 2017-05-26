@@ -1,0 +1,30 @@
+@(id: Long, equipmentForm: Form[Equipment])
+
+@import helper._
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - Edit Equipment") {
+    
+    <h1>Edit equipment</h1>
+    
+    @b3.form(routes.EquipmentController.update(id)) {
+        
+        <fieldset>
+        
+            @b3.text(equipmentForm("name"), '_label -> "Name", '_help -> "")
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Save this equipment" class="btn primary"> or
+            <a href="@routes.EquipmentController.list()" class="btn">Cancel</a>
+        </div>
+
+    }
+    
+    @b3.form(routes.EquipmentController.delete(id), 'class -> "topRight") {
+        <input type="submit" value="Delete this equipment" class="btn danger">
+    }
+    
+}

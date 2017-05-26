@@ -14,7 +14,7 @@ import com.avaje.ebean.*;
  * Project entity managed by Ebean
  */
 @Entity 
-public class Project extends Model {
+public class Project extends Model implements Comparable<Project> {
 
     private static final long serialVersionUID = 1L;
 
@@ -41,6 +41,24 @@ public class Project extends Model {
             Logger.error("Too many projects named: " + name);
         }
         return null;
+    }
+
+    public String getEquipmentsLine() {
+        List<Equipment> items = ProjectEquipmentCollection.findEquipments(id);
+        Collections.sort(items);
+        StringBuilder sbuf = new StringBuilder();
+        for (Equipment item : items) {
+            if (sbuf.length() > 0) {
+                sbuf.append(", ");
+            }
+            sbuf.append(item.name);
+        }
+        return sbuf.toString();
+    }
+
+    @Override
+    public int compareTo(Project project) {
+        return name.compareTo(project.name);
     }
 
 }
