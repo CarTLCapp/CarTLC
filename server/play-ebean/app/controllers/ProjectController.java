@@ -67,6 +67,8 @@ public class ProjectController extends Controller {
                 savedProject.update();
                 flash("success", "Project " + projectForm.get().name + " has been updated");
                 txn.commit();
+
+                Version.inc(Version.PROJECT);
             }
         } finally {
             txn.end();
@@ -129,6 +131,8 @@ public class ProjectController extends Controller {
                 }
             }
         }
+        Version.inc(Version.PROJECT);
+
         return list();
     }
 
@@ -138,6 +142,7 @@ public class ProjectController extends Controller {
     public Result delete(Long id) {
         // TODO: If the client is in the database, mark it as disabled instead.
         Project.find.ref(id).delete();
+        Version.inc(Version.PROJECT);
         flash("success", "Project has been deleted");
         return list();
     }

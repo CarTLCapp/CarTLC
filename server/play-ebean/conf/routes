@@ -112,7 +112,8 @@ POST    /note/:id/delete       controllers.NoteController.delete(id:Long)
 
 ### EXTERNAL: ENTRIES AS SENT FROM THE APP ###
 
-POST    /register              controllers.RegisterController.register
+POST    /register              controllers.PostController.register
+POST    /ping                  controllers.PostController.ping
 
 ### ENTRIES ###
 

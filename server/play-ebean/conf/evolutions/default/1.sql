@@ -2,6 +2,12 @@
 
 # --- !Ups
 
+create table version (
+  id                int auto_increment primary key,
+  skey              varchar(255),
+  ivalue            int
+);
+
 create table client (
   id                int auto_increment primary key,
   first_name        varchar(255),
@@ -92,7 +98,7 @@ alter table entry add constraint fk_entry_address_id foreign key (address_id) re
 
 # --- !Downs
 
-SET REFERENTIAL_INTEGRITY FALSE;
+# SET REFERENTIAL_INTEGRITY FALSE;
 
 drop table if exists client;
 drop table if exists company;
@@ -105,6 +111,7 @@ drop table if exists picture;
 drop table if exists picture_collection;
 drop table if exists entry_equipment_collection;
 drop table if exists entry;
+drop table if exists version;
 
-SET REFERENTIAL_INTEGRITY TRUE;
+# SET REFERENTIAL_INTEGRITY TRUE;
 

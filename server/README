@@ -4,7 +4,7 @@ admin/: Misc helpful files
 
 Login To Server:
 
-ssh -i admin/cartlc.pem ubuntu@cartlc.arqnetworks.com
+ssh -i ~/.ssh/cartlc.pem ubuntu@cartlc.arqnetworks.com
 
 Web Access:
 

@@ -5,15 +5,18 @@ import play.*;
 import play.mvc.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import play.libs.Json;
 
 import play.db.ebean.Transactional;
 import models.Client;
+import models.Version;
 
 @Singleton
-public class RegisterController extends Controller
+public class PostController extends Controller
 {
 	@Inject
-	public RegisterController() {
+	public PostController() {
 	}
 
 	@Transactional
@@ -36,17 +39,8 @@ public class RegisterController extends Controller
 		{
 			missing.add("imei");
 		}
-		StringBuilder sbuf = new StringBuilder();
-
 		if (missing.size() > 0) {
-			sbuf.append("Missing fields:");
-			for (String field : missing)
-			{
-				sbuf.append(" ");
-				sbuf.append(field);
-			}
-			sbuf.append("\n");
-			return badRequest(sbuf.toString());
+			return missingRequest(missing);
 		}
 		Client client;
 		try {
@@ -65,4 +59,35 @@ public class RegisterController extends Controller
 		return ok(Long.toString(client.id));
 	}
 
+	@BodyParser.Of(BodyParser.Json.class)
+	public Result ping() {
+		ArrayList<String> missing = new ArrayList();
+		JsonNode json = request().body().asJson();
+		String imei = json.findPath("imei").textValue();
+		if (imei == null)
+		{
+			missing.add("imei");
+		}
+		if (missing.size() > 0) {
+			return missingRequest(missing);
+		}
+		ObjectNode result = Json.newObject();
+		result.put(Version.PROJECT, Version.get(Version.PROJECT));
+		result.put(Version.COMPANY, Version.get(Version.COMPANY));
+		result.put(Version.EQUIPMENT, Version.get(Version.EQUIPMENT));
+		result.put(Version.NOTE, Version.get(Version.NOTE));
+		return ok(result);
+	}
+
+	Result missingRequest(ArrayList<String> missing) {
+		StringBuilder sbuf = new StringBuilder();
+		sbuf.append("Missing fields:");
+		for (String field : missing)
+		{
+			sbuf.append(" ");
+			sbuf.append(field);
+		}
+		sbuf.append("\n");
+		return badRequest(sbuf.toString());
+	}
 }
