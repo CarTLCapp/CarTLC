@@ -18,6 +18,7 @@ import play.db.ebean.Transactional;
  */
 public class CompanyController extends Controller {
 
+    private static final int PAGE_SIZE = 30;
     private FormFactory formFactory;
 
     @Inject
@@ -25,8 +26,12 @@ public class CompanyController extends Controller {
         this.formFactory = formFactory;
     }
 
+    public Result list(int page, String sortBy, String order, String filter) {
+        return ok(views.html.company_list.render(Company.list(page, PAGE_SIZE, sortBy, order, filter), sortBy, order, filter));
+    }
+
     public Result list() {
-        return ok(views.html.company_list.render(Company.list()));
+        return list(0, "name", "asc", "");
     }
 
     public Result edit(Long id) {

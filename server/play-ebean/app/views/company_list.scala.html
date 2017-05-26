@@ -1,30 +1,55 @@
-@(currentPage: List[Company])
+@(currentPage: com.avaje.ebean.PagedList[Company], currentSortBy: String, currentOrder: String, currentFilter: String)
+
+@link(newPage:Int, newSortBy:String) = @{
+    var sortBy = currentSortBy
+    var order = currentOrder
+    if(newSortBy != null) {
+        sortBy = newSortBy
+        if(currentSortBy == newSortBy) {
+            if(currentOrder == "asc") {
+                order = "desc"
+            } else {
+                order = "asc"
+            }
+        } else {
+            order = "asc"
+        }
+    }
+    // Generate the link
+    routes.CompanyController.list(newPage, sortBy, order, currentFilter)
+}
+
+@header(key:String, title:String) = {
+    <th class="@key.replace(".","_") header @if(currentSortBy == key) @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
+        <a href="@link(0, key)">@title</a>
+    </th>
+}
 
 @main("FleetTLC - List Companies") {
 
-    <h1 id="homeTitle">@Messages("company.list.title", currentPage.size())</h1>
+    <h1 id="homeTitle">@Messages("company.list.title", currentPage.getTotalRowCount)</h1>
 
-    @if(currentPage.size() == 0) {
-        
+    @if(currentPage.getTotalRowCount == 0) {
+
         <div class="well">
             <em>Nothing to display</em>
         </div>
-        
+
     } else {
-        
+
         <table class="companies zebra-striped">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Street</th>
-                    <th>City</th>
-                    <th>State</th>
+                    @header("name", "Name")
+                    @header("street", "Street")
+                    @header("city", "City")
+                    @header("state", "State")
                     <th>Edit</th>
                 </tr>
             </thead>
             <tbody>
 
-                @for(company <- currentPage) {
+                @for(company <- currentPage.getList) {
                     <tr>
                         <td>
                             @if(company.name == null) {
@@ -62,7 +87,32 @@
 
             </tbody>
         </table>
-        
+
+        <div id="pagination" class="pagination">
+            <ul>
+                @if(currentPage.hasPrev) {
+                <li class="prev">
+                    <a href="@link(currentPage.getPageIndex - 1, null)">&larr; Previous</a>
+                </li>
+                } else {
+                <li class="prev disabled">
+                    <a>&larr; Previous</a>
+                </li>
+                }
+                <li class="current">
+                    <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
+                </li>
+                @if(currentPage.hasNext) {
+                <li class="next">
+                    <a href="@link(currentPage.getPageIndex + 1, null)">Next &rarr;</a>
+                </li>
+                } else {
+                <li class="next disabled">
+                    <a>Next &rarr;</a>
+                </li>
+                }
+            </ul>
+        </div>
     }
 
     <a class="btn success" id="add" href="@routes.CompanyController.create()">Add a new company</a>

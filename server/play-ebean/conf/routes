@@ -45,7 +45,7 @@ POST    /project/:id/delete         controllers.ProjectController.delete(id:Long
 ### COMPANIES ###
 
 # Company list
-GET     /company                    controllers.CompanyController.list()
+GET     /company                    controllers.CompanyController.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
 
 # Add company
 GET     /company/new                controllers.CompanyController.create()

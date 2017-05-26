@@ -55,16 +55,13 @@ public class Company extends Model {
      * @param order Sort order (either or asc or desc)
      * @param filter Filter applied on the name column
      */
-    public static PagedList<Company> page(int page, int pageSize, String sortBy, String order, String filter) {
+    public static PagedList<Company> list(int page, int pageSize, String sortBy, String order, String filter) {
         return
                 find.where()
                         .ilike("name", "%" + filter + "%")
                         .orderBy(sortBy + " " + order)
-                        .fetch("company")
                         .findPagedList(page, pageSize);
     }
-
-    public static List<Company> list() { return find.all(); }
 
     public static boolean has(Company company) {
         List<Company> companies =
