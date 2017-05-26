@@ -45,6 +45,7 @@ import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.server.ServerHelper;
+import com.cartlc.tracker.util.PermissionHelper;
 
 import java.util.List;
 
@@ -189,6 +190,16 @@ public class MainActivity extends AppCompatActivity {
         PrefHelper.getInstance().setupFromCurrentProjectId();
         computeCurStage();
         fillStage();
+        mApp.checkPermissions(this, new PermissionHelper.PermissionListener() {
+            @Override
+            public void onGranted(String permission) {
+                mApp.flushEvents();
+            }
+
+            @Override
+            public void onDenied(String permission) {
+            }
+        });
     }
 
     @Override

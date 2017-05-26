@@ -39,6 +39,7 @@ public class TBApplication extends Application {
         DatabaseManager.Init(this);
         PrefHelper.Init(this);
         ServerHelper.Init(this);
+        PermissionHelper.Init();
 
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
