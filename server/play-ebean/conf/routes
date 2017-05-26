@@ -110,6 +110,10 @@ GET    /note/:id/project/:projectId/remove    controllers.NoteController.removeP
 # Delete an note
 POST    /note/:id/delete       controllers.NoteController.delete(id:Long)
 
+### EXTERNAL: ENTRIES AS SENT FROM THE APP ###
+
+POST    /register              controllers.RegisterController.register
+
 ### ENTRIES ###
 
 # Entries list (look at the default values for pagination parameters)

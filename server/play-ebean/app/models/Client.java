@@ -20,6 +20,18 @@ public class Client extends com.avaje.ebean.Model {
         return find.all();
     }
 
+    public static Client findByImei(String imei) throws DataErrorException {
+        List<Client> items = find.where()
+                .eq("imei", imei)
+                .findList();
+        if (items.size() == 1) {
+            return items.get(0);
+        } else if (items.size() > 1) {
+            new DataErrorException("Too many clients with: " + imei);
+        }
+        return null;
+    }
+
     @Id
     public Long id;
     
@@ -28,6 +40,9 @@ public class Client extends com.avaje.ebean.Model {
 
     @Constraints.Required
     public String last_name;
+
+    @Constraints.Required
+    public String imei;
 
     @Constraints.Required
     public boolean disabled;

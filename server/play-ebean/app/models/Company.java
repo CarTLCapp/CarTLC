@@ -15,12 +15,6 @@ import com.avaje.ebean.*;
 @Entity 
 public class Company extends Model {
 
-    public static class MalformedFieldException extends Exception {
-        public MalformedFieldException(String message) {
-            super(message);
-        }
-    }
-
     private static final long serialVersionUID = 1L;
 
 	@Id
@@ -74,10 +68,10 @@ public class Company extends Model {
         return companies.size() > 0;
     }
 
-    public static Company parse(String line) throws MalformedFieldException {
+    public static Company parse(String line) throws DataErrorException {
         String [] fields = line.split(",");
         if (fields.length != 4) {
-            throw new MalformedFieldException("Invalid number of fields, expected 4: " + line);
+            throw new DataErrorException("Invalid number of fields, expected 4: " + line);
         }
         List<Company> companies = find.where()
                 .eq("name", fields[0].trim())
@@ -88,18 +82,18 @@ public class Company extends Model {
         company.city = fields[2].trim();
         State state = State.find(fields[3].trim());
         if (state == null) {
-            throw new MalformedFieldException("Invalid state:" + fields[3]);
+            throw new DataErrorException("Invalid state:" + fields[3]);
         }
         company.state = state.abbr;
 
         if (company.name.isEmpty()) {
-            throw new MalformedFieldException("Must enter a company name");
+            throw new DataErrorException("Must enter a company name");
         }
         if (company.street.isEmpty()) {
-            throw new MalformedFieldException("Must enter a company street");
+            throw new DataErrorException("Must enter a company street");
         }
         if (company.city.isEmpty()) {
-            throw new MalformedFieldException("Must enter a company city");
+            throw new DataErrorException("Must enter a company city");
         }
         return company;
     }
