@@ -100,18 +100,18 @@ alter table entry add constraint fk_entry_address_id foreign key (address_id) re
 
 # SET REFERENTIAL_INTEGRITY FALSE;
 
+drop table if exists version;
+drop table if exists project_equipment_collection;
+drop table if exists picture_collection;
+drop table if exists project_note_collection;
+drop table if exists entry_equipment_collection;
 drop table if exists client;
 drop table if exists company;
 drop table if exists project;
 drop table if exists equipment;
-drop table if exists project_equipment_collection;
 drop table if exists note;
-drop table if exists project_note_collection;
 drop table if exists picture;
-drop table if exists picture_collection;
-drop table if exists entry_equipment_collection;
 drop table if exists entry;
-drop table if exists version;
 
 # SET REFERENTIAL_INTEGRITY TRUE;
 
