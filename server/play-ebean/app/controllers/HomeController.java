@@ -17,5 +17,6 @@ public class HomeController  extends Controller {
         return ok(views.html.home.render());
     }
 
+    public static Result HOME() { return Results.redirect(routes.HomeController.index()); }
 }
             

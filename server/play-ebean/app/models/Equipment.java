@@ -59,8 +59,12 @@ public class Equipment extends Model implements Comparable<Equipment> {
         return null;
     }
 
+    public List<Project> getProjects() {
+        return ProjectEquipmentCollection.findProjects(id);
+    }
+
     public String getProjectsLine() {
-        List<Project> items = ProjectEquipmentCollection.findProjects(id);
+        List<Project> items = getProjects();
         Collections.sort(items);
         StringBuilder sbuf = new StringBuilder();
         for (Project project : items) {
@@ -70,6 +74,23 @@ public class Equipment extends Model implements Comparable<Equipment> {
             sbuf.append(project.name);
         }
         return sbuf.toString();
+    }
+
+    public static boolean hasProject(long equipment_id, long project_id) {
+        Equipment equipment = find.byId(equipment_id);
+        if (equipment != null) {
+            return equipment.hasProject(project_id);
+        }
+        return false;
+    }
+
+    public boolean hasProject(long project_id) {
+        for (Project project : getProjects()) {
+            if (project.id == project_id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

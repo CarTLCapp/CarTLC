@@ -16,6 +16,30 @@
 
         </fieldset>
 
+        <table class="projects zebra-striped">
+            <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+                @for(project <- Project.list()) {
+                    <tr>
+                        <td>@project.name</td>
+                        <td>
+                            @if(Equipment.hasProject(id, project.id)) {
+                                <a href="@routes.EquipmentController.removeProject(id, project.id)">Delete</a>
+                            } else {
+                                <a href="@routes.EquipmentController.addProject(id, project.id)">Add</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
         <div class="actions">
             <input type="submit" value="Save this equipment" class="btn primary"> or
             <a href="@routes.EquipmentController.list()" class="btn">Cancel</a>

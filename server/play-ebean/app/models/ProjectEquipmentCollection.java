@@ -72,5 +72,17 @@ public class ProjectEquipmentCollection extends Model {
         return items.size() > 0;
     }
 
+    public static ProjectEquipmentCollection get(ProjectEquipmentCollection collection) {
+        List<ProjectEquipmentCollection> items =
+                find.where()
+                        .eq("project_id", collection.project_id)
+                        .eq("equipment_id", collection.equipment_id)
+                        .findList();
+        if  (items.size() > 0) {
+            return items.get(0);
+        }
+        return null;
+    }
+
 }
 

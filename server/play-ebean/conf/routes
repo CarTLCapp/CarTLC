@@ -79,6 +79,10 @@ POST    /equipment/many             controllers.EquipmentController.saveMany()
 GET     /equipment/:id              controllers.EquipmentController.edit(id:Long)
 POST    /equipment/:id              controllers.EquipmentController.update(id:Long)
 
+# Add/Remove project from equipment
+GET    /equipment/:id/project/:projectId/add       controllers.EquipmentController.addProject(id:Long, projectId:Long)
+GET    /equipment/:id/project/:projectId/remove    controllers.EquipmentController.removeProject(id:Long, projectId:Long)
+
 # Delete an equipment
 POST    /equipment/:id/delete       controllers.EquipmentController.delete(id:Long)
 

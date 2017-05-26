@@ -29,9 +29,7 @@ public class EquipmentController extends Controller {
      * Display the list of equipments.
      */
     public Result list() {
-        return ok(
-                views.html.equipment_list.render(Equipment.list())
-        );
+        return ok(views.html.equipment_list.render(Equipment.list()));
     }
 
     /**
@@ -40,9 +38,7 @@ public class EquipmentController extends Controller {
      * @param id Id of the equipment to edit
      */
     public Result edit(Long id) {
-        Form<Equipment> equipmentForm = formFactory.form(Equipment.class).fill(
-                Equipment.find.byId(id)
-        );
+        Form<Equipment> equipmentForm = formFactory.form(Equipment.class).fill(Equipment.find.byId(id));
         return ok(
             views.html.equipment_editForm.render(id, equipmentForm)
         );
@@ -89,7 +85,7 @@ public class EquipmentController extends Controller {
      */
     public Result save() {
         Form<Equipment> equipmentForm = formFactory.form(Equipment.class).bindFromRequest();
-        if(equipmentForm.hasErrors()) {
+        if (equipmentForm.hasErrors()) {
             return badRequest(views.html.equipment_createForm.render(equipmentForm));
         }
         equipmentForm.get().save();
@@ -156,6 +152,28 @@ public class EquipmentController extends Controller {
         return list();
     }
 
+    @Transactional
+    public Result addProject(Long id, Long project_id) {
+        ProjectEquipmentCollection collection = new ProjectEquipmentCollection();
+        collection.project_id = project_id;
+        collection.equipment_id = id;
+        if (!ProjectEquipmentCollection.has(collection)) {
+            collection.save();
+        }
+        return edit(id);
+    }
+
+    @Transactional
+    public Result removeProject(Long id, Long project_id) {
+        ProjectEquipmentCollection collection = new ProjectEquipmentCollection();
+        collection.project_id = project_id;
+        collection.equipment_id = id;
+        collection = ProjectEquipmentCollection.get(collection);
+        if (collection != null) {
+            ProjectEquipmentCollection.find.ref(collection.id).delete();
+        }
+        return edit(id);
+    }
 
 }
 
