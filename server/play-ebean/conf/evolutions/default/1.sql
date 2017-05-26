@@ -106,12 +106,12 @@ drop table if exists picture_collection;
 drop table if exists project_note_collection;
 drop table if exists entry_equipment_collection;
 drop table if exists client;
-drop table if exists company;
 drop table if exists project;
 drop table if exists equipment;
 drop table if exists note;
 drop table if exists picture;
 drop table if exists entry;
+drop table if exists company;
 
 # SET REFERENTIAL_INTEGRITY TRUE;
 
