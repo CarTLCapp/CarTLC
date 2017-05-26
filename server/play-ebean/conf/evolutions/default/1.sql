@@ -68,13 +68,13 @@ create table picture_collection (
 
 alter table picture_collection add constraint fk_picture_id foreign key (picture_id) references picture (id) on delete restrict on update restrict;
 
-create table equipment_entry_collection (
+create table entry_equipment_collection (
   id                int auto_increment primary key,
   collection_id     int,
   equipment_id      int
 );
 
-alter table equipment_entry_collection add constraint fk_eec_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
+alter table entry_equipment_collection add constraint fk_eec_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
 
 create table entry (
   id                       int auto_increment primary key,
@@ -98,11 +98,11 @@ drop table if exists company;
 drop table if exists project;
 drop table if exists equipment;
 drop table if exists project_equipment_collection;
-drop table if exists equipment_entry_collection;
 drop table if exists note;
 drop table if exists project_note_collection;
 drop table if exists picture;
 drop table if exists picture_collection;
+drop table if exists entry_equipment_collection;
 drop table if exists entry;
 
 SET REFERENTIAL_INTEGRITY TRUE;
