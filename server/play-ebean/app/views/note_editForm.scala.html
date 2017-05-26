@@ -1,0 +1,54 @@
+@(id: Long, noteForm: Form[Note])
+
+@import helper._
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - Edit Note") {
+    
+    <h1>Edit note</h1>
+    
+    @b3.form(routes.NoteController.update(id)) {
+        
+        <fieldset>
+        
+            @b3.text(noteForm("name"), '_label -> "Name", '_help -> "")
+
+        </fieldset>
+
+        <table class="projects zebra-striped">
+            <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+                @for(project <- Project.list()) {
+                    <tr>
+                        <td>@project.name</td>
+                        <td>
+                            @if(Note.hasProject(id, project.id)) {
+                                <a href="@routes.NoteController.removeProject(id, project.id)">Delete</a>
+                            } else {
+                                <a href="@routes.NoteController.addProject(id, project.id)">Add</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="actions">
+            <input type="submit" value="Save this note" class="btn primary"> or
+            <a href="@routes.NoteController.list()" class="btn">Cancel</a>
+        </div>
+
+    }
+    
+    @b3.form(routes.NoteController.delete(id), 'class -> "topRight") {
+        <input type="submit" value="Delete this note" class="btn danger">
+    }
+    
+}

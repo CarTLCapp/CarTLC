@@ -4,6 +4,7 @@ users.list.title={0,choice,0#No users|1#One user|1<{0,number,integer} users} fou
 project.list.title={0,choice,0#No projects|1#One project|1<{0,number,integer} projects} found
 company.list.title={0,choice,0#No companies|1#One company|1<{0,number,integer} companies} found
 equipment.list.title={0,choice,0#No equipments|1#One equipment|1<{0,number,integer} equipments} found
+note.list.title={0,choice,0#No notes|1#One note|1<{0,number,integer} notes} found
 
 
 

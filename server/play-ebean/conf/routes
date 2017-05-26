@@ -86,6 +86,30 @@ GET    /equipment/:id/project/:projectId/remove    controllers.EquipmentControll
 # Delete an equipment
 POST    /equipment/:id/delete       controllers.EquipmentController.delete(id:Long)
 
+### NOTES ###
+
+# Note list
+GET     /note                  controllers.NoteController.list()
+
+# Add Note
+GET     /note/new              controllers.NoteController.create()
+POST    /note                  controllers.NoteController.save()
+
+# Add many note
+GET     /note/new/many         controllers.NoteController.createMany()
+POST    /note/many             controllers.NoteController.saveMany()
+
+# Edit existing note
+GET     /note/:id              controllers.NoteController.edit(id:Long)
+POST    /note/:id              controllers.NoteController.update(id:Long)
+
+# Add/Remove project from note
+GET    /note/:id/project/:projectId/add       controllers.NoteController.addProject(id:Long, projectId:Long)
+GET    /note/:id/project/:projectId/remove    controllers.NoteController.removeProject(id:Long, projectId:Long)
+
+# Delete an note
+POST    /note/:id/delete       controllers.NoteController.delete(id:Long)
+
 ### ENTRIES ###
 
 # Entries list (look at the default values for pagination parameters)

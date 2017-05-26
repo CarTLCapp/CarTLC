@@ -1,0 +1,24 @@
+@(noteForm: Form[Note])
+
+@import helper._
+
+@import b3.vertical.fieldConstructor
+
+@main("Fleet TLC - New Note") {
+    
+    <h1>Add a note</h1>
+    
+    @b3.form(routes.NoteController.save()) {
+        
+        <fieldset>
+            @b3.text(noteForm("name"), '_label -> "Name", '_help -> "")
+        </fieldset>
+        
+        <div class="actions">
+            <input type="submit" value="Create this note" class="btn primary"> or
+            <a href="@routes.NoteController.list()" class="btn">Cancel</a>
+        </div>
+        
+    }
+
+}
