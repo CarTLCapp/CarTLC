@@ -15,7 +15,7 @@ import com.avaje.ebean.*;
 @Entity 
 public class Company extends Model {
 
-    public class MalformedFieldException extends Exception {
+    public static class MalformedFieldException extends Exception {
         public MalformedFieldException(String message) {
             super(message);
         }
@@ -55,7 +55,7 @@ public class Company extends Model {
      * @param order Sort order (either or asc or desc)
      * @param filter Filter applied on the name column
      */
-    public static List<Company> page(int page, int pageSize, String sortBy, String order, String filter) {
+    public static PagedList<Company> page(int page, int pageSize, String sortBy, String order, String filter) {
         return
                 find.where()
                         .ilike("name", "%" + filter + "%")
@@ -66,20 +66,26 @@ public class Company extends Model {
 
     public static List<Company> list() { return find.all(); }
 
+    public static boolean has(Company company) {
+        List<Company> companies =
+                find.where()
+                        .eq("name", company.name)
+                        .eq("street", company.street)
+                        .eq("city", company.city)
+                        .eq("state", company.state)
+                        .findList();
+        return companies.size() > 0;
+    }
+
     public static Company parse(String line) throws MalformedFieldException {
-        List<Company> companies = find.where()
-                .eq("name", name)
-                .findList();
-        Company company;
-        if (companies.size() == 0) {
-            company = new Company();
-        } else {
-            company = companies.get(0);
-        }
         String [] fields = line.split(",");
-        if (fields.size() != 4) {
+        if (fields.length != 4) {
             throw new MalformedFieldException("Invalid number of fields, expected 4: " + line);
         }
+        List<Company> companies = find.where()
+                .eq("name", fields[0].trim())
+                .findList();
+        Company company = new Company();
         company.name = fields[0].trim();
         company.street = fields[1].trim();
         company.city = fields[2].trim();
@@ -88,6 +94,16 @@ public class Company extends Model {
             throw new MalformedFieldException("Invalid state:" + fields[3]);
         }
         company.state = state.abbr;
+
+        if (company.name.isEmpty()) {
+            throw new MalformedFieldException("Must enter a company name");
+        }
+        if (company.street.isEmpty()) {
+            throw new MalformedFieldException("Must enter a company street");
+        }
+        if (company.city.isEmpty()) {
+            throw new MalformedFieldException("Must enter a company city");
+        }
         return company;
     }
 

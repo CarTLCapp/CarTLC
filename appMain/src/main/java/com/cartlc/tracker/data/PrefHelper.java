@@ -37,8 +37,8 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_LAST_NAME                    = "last_name";
     static final        String KEY_TRUCK_NUMBER                 = "truck_number";
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
+    static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
     static final        String KEY_TECH_ID                      = "tech_id";
-    static final        String KEY_EQUIPMENT_ID                 = "equipment_id";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss";
 
@@ -117,14 +117,6 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setSavedProjectGroupId(long id) {
         setLong(KEY_SAVED_PROJECT_GROUP_ID, id);
-    }
-
-    public void setEquipmentId(long id) {
-        setLong(KEY_EQUIPMENT_ID, id);
-    }
-
-    public long getEquipmentId() {
-        return getLong(KEY_EQUIPMENT_ID, -1L);
     }
 
     public void setFirstName(String name) {
@@ -208,14 +200,14 @@ public class PrefHelper extends PrefHelperBase {
         setProject(null);
         setSavedProjectGroupId(getCurrentProjectGroupId());
         setCurrentProjectGroupId(-1L);
-        setEquipmentId(-1);
+        TableEquipment.getInstance().clearChecked();
     }
 
     public void clearLastEntry() {
         setTruckNumber(0);
         TablePendingPictures.getInstance().clear();
         TableNote.getInstance().clearValues();
-        setEquipmentId(-1);
+        TableEquipment.getInstance().clearChecked();
     }
 
     public boolean hasCurProject() {
@@ -231,9 +223,9 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public boolean saveNewProjectIfNeeded() {
-        String state   = getState();
-        String street  = getStreet();
-        String city    = getCity();
+        String state = getState();
+        String street = getStreet();
+        String city = getCity();
         String company = getCompany();
         String project = getProjectName();
         if (TextUtils.isEmpty(project) || TextUtils.isEmpty(state) || TextUtils.isDigitsOnly(street)
@@ -278,6 +270,14 @@ public class PrefHelper extends PrefHelperBase {
         setLong(KEY_NEXT_PICTURE_COLLECTION_ID, getNextPictureCollectionID() + 1);
     }
 
+    public long getNextEquipmentCollectionID() {
+        return getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L);
+    }
+
+    public void incNextEquipmentCollectionID() {
+        setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, getNextEquipmentCollectionID() + 1);
+    }
+
     public DataEntry createEntry() {
         long projectGroupId = getCurrentProjectGroupId();
         if (projectGroupId < 0) {
@@ -289,7 +289,8 @@ public class PrefHelper extends PrefHelperBase {
         }
         DataEntry entry = new DataEntry();
         entry.projectNameId = projectGroup.projectNameId;
-        entry.equipmentId = getEquipmentId();
+        entry.equipmentCollection = new DataEquipmentEntryCollection(getNextEquipmentCollectionID());
+        entry.equipmentCollection.addChecked();
         entry.pictureCollection = TablePendingPictures.getInstance().createCollection();
         entry.addressId = projectGroup.addressId;
         entry.truckNumber = getTruckNumber();
@@ -299,9 +300,9 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public String genPictureFilename() {
-        long          tech_id    = getTechID();
-        long          project_id = getProjectId();
-        StringBuilder sbuf       = new StringBuilder();
+        long tech_id = getTechID();
+        long project_id = getProjectId();
+        StringBuilder sbuf = new StringBuilder();
         sbuf.append("picture_");
         sbuf.append(tech_id);
         sbuf.append("_");

@@ -7,11 +7,13 @@ package com.cartlc.tracker.data;
 public class DataEquipment {
     public long id;
     public final String name;
+    public boolean isChecked;
     public boolean isLocal;
 
-    public DataEquipment(long id, String name, boolean isLocal) {
+    public DataEquipment(long id, String name, boolean isChecked, boolean isLocal) {
         this.id = id;
         this.name = name;
+        this.isChecked = isChecked;
         this.isLocal = isLocal;
     }
 
@@ -24,16 +26,10 @@ public class DataEquipment {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("NAME=");
         sbuf.append(name);
+        sbuf.append(", checked=");
+        sbuf.append(isChecked);
         sbuf.append(", local=");
         sbuf.append(isLocal);
         return sbuf.toString();
-    }
-
-    public boolean isChecked() {
-        return PrefHelper.getInstance().getEquipmentId() == id;
-    }
-
-    public void setChecked() {
-        PrefHelper.getInstance().setEquipmentId(id);
     }
 }

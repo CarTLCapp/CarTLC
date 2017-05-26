@@ -39,6 +39,7 @@ import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntries;
+import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableEquipmentProjectCollection;
 import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
@@ -230,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             boolean hasTruckNumber = !TextUtils.isEmpty(getTruckNumber());
             boolean hasNotes = mNoteAdapter.hasNotesEntered();
-            boolean hasEquip = PrefHelper.getInstance().getEquipmentId() >= 0;
+            boolean hasEquip = mEquipmentAdapter.hasChecked();;
             boolean hasPictures = TablePendingPictures.getInstance().queryPictures().size() > 0;
 
             if (!hasTruckNumber && !hasNotes && !hasEquip && !hasPictures) {
@@ -278,21 +279,21 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (mCurStage == Stage.EQUIPMENT) {
             if (isNext) {
-                if (PrefHelper.getInstance().getEquipmentId() < 0) {
+                if (TableEquipment.getInstance().countChecked() == 0) {
                     showError(getString(R.string.error_need_equipment));
                     return false;
                 }
             }
         } else if (mCurStage == Stage.NOTES) {
             if (isNext) {
-                if (!mNoteAdapter.hasEnoughValues()) {
-                    StringBuilder sbuf = new StringBuilder();
-                    sbuf.append(getString(R.string.error_need_note_fields));
-                    sbuf.append("\n");
-                    sbuf.append(mNoteAdapter.getEmptyFields());
-                    showError(sbuf.toString());
-                    return false;
-                }
+//                if (!mNoteAdapter.hasEnoughValues()) {
+//                    StringBuilder sbuf = new StringBuilder();
+//                    sbuf.append(getString(R.string.error_need_note_fields));
+//                    sbuf.append("\n");
+//                    sbuf.append(mNoteAdapter.getEmptyFields());
+//                    showError(sbuf.toString());
+//                    return false;
+//                }
             }
         } else if (mCurStageEditing) {
             if (mCurStage == Stage.CITY) {

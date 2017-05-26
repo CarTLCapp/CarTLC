@@ -21,7 +21,7 @@ public class TableEntries {
     static final String KEY_DATE = "date";
     static final String KEY_PROJECT_ID = "project_id";
     static final String KEY_ADDRESS_ID = "address_id";
-    static final String KEY_EQUIPMENT_ID = "equipmentId";
+    static final String KEY_EQUIPMENT_COLLECTION_ID = "equipment_collection_id";
     static final String KEY_PICTURE_COLLECTION_ID = "picture_collection_id";
     static final String KEY_TRUCK_NUMBER = "truck_number";
     static final String KEY_UPLOADED = "uploaded";
@@ -63,7 +63,7 @@ public class TableEntries {
         sbuf.append(" long, ");
         sbuf.append(KEY_ADDRESS_ID);
         sbuf.append(" long, ");
-        sbuf.append(KEY_EQUIPMENT_ID);
+        sbuf.append(KEY_EQUIPMENT_COLLECTION_ID);
         sbuf.append(" long, ");
         sbuf.append(KEY_PICTURE_COLLECTION_ID);
         sbuf.append(" long, ");
@@ -99,14 +99,14 @@ public class TableEntries {
         ArrayList<DataEntry> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID,
-                    KEY_DATE, KEY_PROJECT_ID, KEY_ADDRESS_ID, KEY_EQUIPMENT_ID,
+                    KEY_DATE, KEY_PROJECT_ID, KEY_ADDRESS_ID, KEY_EQUIPMENT_COLLECTION_ID,
                     KEY_PICTURE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_UPLOADED};
             final String orderBy = KEY_DATE + " DESC";
             Cursor cursor = mDb.query(TABLE_NAME, columns, where, whereArgs, null, null, orderBy, null);
             int idxRow = cursor.getColumnIndex(KEY_ROWID);
             int idxProjectNameId = cursor.getColumnIndex(KEY_PROJECT_ID);
             int idxAddress = cursor.getColumnIndex(KEY_ADDRESS_ID);
-            int idxEquipmentId = cursor.getColumnIndex(KEY_EQUIPMENT_ID);
+            int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
             int idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID);
             int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
             int idxUploaded = cursor.getColumnIndex(KEY_UPLOADED);
@@ -116,7 +116,8 @@ public class TableEntries {
                 entry.id = cursor.getLong(idxRow);
                 entry.projectNameId = cursor.getLong(idxProjectNameId);
                 entry.addressId = cursor.getLong(idxAddress);
-                entry.equipmentId = cursor.getLong(idxEquipmentId);;
+                long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
+                entry.equipmentCollection = new DataEquipmentEntryCollection(equipmentCollectionId);
                 entry.pictureCollection = new DataPictureCollection(cursor.getLong(idxPictureCollectionId));
                 entry.truckNumber = cursor.getInt(idxTruckNumber);
                 entry.uploaded = cursor.getShort(idxUploaded) != 0;
@@ -165,8 +166,10 @@ public class TableEntries {
     public void add(DataEntry entry) {
         mDb.beginTransaction();
         try {
+            TableEquipmentEntryCollection.getInstance().add(entry.equipmentCollection);
             TablePictureCollection.getInstance().add(entry.pictureCollection);
 
+            PrefHelper.getInstance().incNextEquipmentCollectionID();
             PrefHelper.getInstance().incNextPictureCollectionID();
 
             ContentValues values = new ContentValues();
@@ -174,7 +177,7 @@ public class TableEntries {
             values.put(KEY_DATE, entry.date);
             values.put(KEY_PROJECT_ID, entry.projectNameId);
             values.put(KEY_ADDRESS_ID, entry.addressId);
-            values.put(KEY_EQUIPMENT_ID, entry.equipmentId);
+            values.put(KEY_EQUIPMENT_COLLECTION_ID, entry.equipmentCollection.id);
             values.put(KEY_TRUCK_NUMBER, entry.truckNumber);
             mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();

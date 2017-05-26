@@ -68,20 +68,26 @@ create table pictureCollection (
 
 alter table pictureCollection add constraint fk_picture_id foreign key (picture_id) references picture (id) on delete restrict on update restrict;
 
+create table equipmentEntryCollection (
+  id                int auto_increment primary key,
+  collection_id     int,
+  equipment_id      int
+);
+
+alter table equipmentEntryCollection add constraint fk_eec_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
+
 create table entry (
   id                       int auto_increment primary key,
   entry_time               date,
   project_id               int,
   address_id               int,
-  equipment_id             int,
+  equipment_collection_id  int,
   picture_collection_id    int,
   truck_number             int
 );
 
 alter table entry add constraint fk_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 alter table entry add constraint fk_entry_address_id foreign key (address_id) references company (id) on delete restrict on update restrict;
-alter table entry add constraint fk_entry_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
-alter table entry add constraint fk_entry_picture_collection_id foreign key (picture_collection_id) references pictureCollection (id) on delete restrict on update restrict;
 
 # --- !Downs
 
@@ -92,6 +98,7 @@ drop table if exists company;
 drop table if exists project;
 drop table if exists equipment;
 drop table if exists projectEquipmentCollection;
+drop table if exists equipmentEntryCollection;
 drop table if exists note;
 drop table if exists projectNoteCollection;
 drop table if exists picture;

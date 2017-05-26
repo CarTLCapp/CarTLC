@@ -61,8 +61,8 @@ public abstract class TableCollection {
         return count;
     }
 
-    public void add(DataEquipmentProjectCollection collection) {
-        add(collection.projectId, collection.equipmentListIds);
+    public void add(DataEquipmentCollection collection) {
+        add(collection.id, collection.equipmentListIds);
     }
 
     public void add(long collectionId, List<Long> ids) {

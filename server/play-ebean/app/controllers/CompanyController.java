@@ -37,12 +37,12 @@ public class CompanyController extends Controller {
     public Result update(Long id) throws PersistenceException {
         Form<Company> companyForm = formFactory.form(Company.class).bindFromRequest();
         if (companyForm.hasErrors()) {
-            return badRequest(views.html.company_editForm.render(id, projectForm));
+            return badRequest(views.html.company_editForm.render(id, companyForm));
         }
         Transaction txn = Ebean.beginTransaction();
         try {
             Company savedCompany = Company.find.byId(id);
-            if (savedProject != null) {
+            if (savedCompany != null) {
                 Company newCompanyData = companyForm.get();
                 savedCompany.name = newCompanyData.name;
                 savedCompany.street = newCompanyData.street;
@@ -84,15 +84,20 @@ public class CompanyController extends Controller {
         if (linesForm.hasErrors()) {
             return badRequest(views.html.companies_createForm.render(linesForm));
         }
-        String[] lines = linesForm.get().getLines();
-        for (String line : lines) {
-            line = line.trim();
-            if (!line.isEmpty()) {
-                Company company = Company.parse(line);
-                if (newCompany != null) {
-                    company.save();
+        try {
+            String[] lines = linesForm.get().getLines();
+            for (String line : lines) {
+                line = line.trim();
+                if (!line.isEmpty()) {
+                    Company company = Company.parse(line);
+                    if (!Company.has(company)) {
+                        company.save();
+                    }
                 }
             }
+        } catch (Exception ex) {
+            linesForm.reject("lines", ex.getMessage());
+            return badRequest(views.html.companies_createForm.render(linesForm));
         }
         return list();
     }

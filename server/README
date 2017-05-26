@@ -15,3 +15,7 @@ Starting Play:
 cd play
 sbt
 TestProd
+
+
+
+sbt -mem 2048

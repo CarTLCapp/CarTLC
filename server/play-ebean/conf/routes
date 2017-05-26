@@ -42,6 +42,26 @@ POST    /project/:id                controllers.ProjectController.update(id:Long
 # Delete a project
 POST    /project/:id/delete         controllers.ProjectController.delete(id:Long)
 
+### COMPANIES ###
+
+# Company list
+GET     /company                    controllers.CompanyController.list()
+
+# Add company
+GET     /company/new                controllers.CompanyController.create()
+POST    /company                    controllers.CompanyController.save()
+
+# Add many companies
+GET     /company/new/many           controllers.CompanyController.createMany()
+POST    /company/many               controllers.CompanyController.saveMany()
+
+# Edit existing company
+GET     /company/:id                controllers.CompanyController.edit(id:Long)
+POST    /company/:id                controllers.CompanyController.update(id:Long)
+
+# Delete a company
+POST    /company/:id/delete         controllers.CompanyController.delete(id:Long)
+
 ### ENTRIES ###
 
 # Entries list (look at the default values for pagination parameters)
@@ -58,22 +78,6 @@ POST    /project/:id/delete         controllers.ProjectController.delete(id:Long
 # Delete a entry
 # POST    /entry/:id/delete         controllers.EntryController.delete(id:Long)
 
-
-### COMPANIES ###
-
-# Company list
-# GET     /company                    controllers.CompanyController.list()
-
-# Add project
-# GET     /company/new                controllers.CompanyController.create()
-# POST    /company                    controllers.CompanyController.save()
-
-# Edit existing project
-# GET     /company/:id                controllers.CompanyController.edit(id:Long)
-# POST    /company/:id                controllers.CompanyController.update(id:Long)
-
-# Delete a project
-# POST    /company/:id/delete         controllers.CompanyController.delete(id:Long)
 
 ### EQUIPMENTS ###
 

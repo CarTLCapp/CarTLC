@@ -7,7 +7,7 @@ import play.Logger;
  */
 public class State {
 
-    public static String [] STATES = {
+    public static State [] STATES = {
             new State("Alabama", "AL"),
             new State("Alaska", "AK"),
             new State("Arizona", "AZ"),
@@ -46,7 +46,7 @@ public class State {
             new State("Oklahoma", "OK"),
             new State("Oregon", "OR"),
             new State("Pennslyvania", "PA"),
-            new State("Rhode Island", "RI"),"
+            new State("Rhode Island", "RI"),
             new State("South Caroline", "SC"),
             new State("South Dakota", "SD"),
             new State("Tennessee", "TN"),
@@ -66,13 +66,14 @@ public class State {
                 return state;
             }
         }
+        return null;
     }
 
     public State(String name, String abbr) {
         this.name = name;
         this.abbr = abbr;
     }
-ZZ
+
     public String name;
     public String abbr;
 }

@@ -84,18 +84,15 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/grid_confirmation"/>
 
-        <TextView
-            android:id="@+id/equipment_item"
-            style="@style/ConfirmText"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/equipment_grid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
             android:layout_marginTop="10dp"
-            android:ellipsize="marquee"
-            android:maxLines="1"
-            android:paddingBottom="10dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingTop="10dp"
+            android:background="@drawable/background_shadow"
+            android:elevation="3dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/confirm_equipment_label"/>
@@ -109,7 +106,7 @@
             android:layout_marginTop="@dimen/confirm_gap_height"
             android:text="@string/title_notes_"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/equipment_item"/>
+            app:layout_constraintTop_toBottomOf="@id/equipment_grid"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/notes_list"
