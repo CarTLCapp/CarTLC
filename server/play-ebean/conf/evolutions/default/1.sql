@@ -5,7 +5,7 @@
 create table version (
   id                int auto_increment primary key,
   skey              varchar(255),
-  ivalue            int
+  ivalue            int default 1
 );
 
 create table client (

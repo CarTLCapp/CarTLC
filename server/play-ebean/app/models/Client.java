@@ -28,6 +28,7 @@ public class Client extends com.avaje.ebean.Model {
         if (items.size() == 1) {
             return items.get(0);
         } else if (items.size() > 1) {
+            // THEN enhance this function to scan for disabled.
             new DataErrorException("Too many clients with: " + device_id);
         }
         return null;
@@ -44,6 +45,11 @@ public class Client extends com.avaje.ebean.Model {
         }
         if (items.size() > 1) {
             // Get rid of others.
+            // TODO: ONLY REMOVE IF IT IS SAFE TO DO SO.
+            // THAT IS, there are NO ENTRIES of this TECH-ID.
+            // INSTEAD, set the DISABLED flag.
+
+            // THEN enhance this function to scan for disabled.
             for (int i = 1; i < items.size(); i++) {
                 items.get(i).delete();
             }
