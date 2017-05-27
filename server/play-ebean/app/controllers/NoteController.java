@@ -64,7 +64,7 @@ public class NoteController extends Controller {
                 flash("success", "Note " + noteForm.get().name + " has been updated");
                 txn.commit();
 
-                Version.inc(Version.NOTE);
+                Version.inc(Version.VERSION_NOTE);
             }
         } finally {
             txn.end();
@@ -141,7 +141,7 @@ public class NoteController extends Controller {
                 }
             }
         }
-        Version.inc(Version.NOTE);
+        Version.inc(Version.VERSION_NOTE);
 
         return list();
     }
@@ -152,7 +152,7 @@ public class NoteController extends Controller {
     public Result delete(Long id) {
         // TODO: If the client is in the database, mark it as disabled instead.
         Note.find.ref(id).delete();
-        Version.inc(Version.NOTE);
+        Version.inc(Version.VERSION_NOTE);
         flash("success", "Note has been deleted");
         return list();
     }
@@ -163,7 +163,7 @@ public class NoteController extends Controller {
         collection.project_id = project_id;
         collection.note_id = id;
         if (!ProjectNoteCollection.has(collection)) {
-            Version.inc(Version.NOTE);
+            Version.inc(Version.VERSION_NOTE);
             collection.save();
         }
         return edit(id);
@@ -177,7 +177,7 @@ public class NoteController extends Controller {
         collection = ProjectNoteCollection.get(collection);
         if (collection != null) {
             ProjectNoteCollection.find.ref(collection.id).delete();
-            Version.inc(Version.NOTE);
+            Version.inc(Version.VERSION_NOTE);
         }
         return edit(id);
     }

@@ -73,7 +73,7 @@ public class PostController extends Controller
 		}
 		ObjectNode result = Json.newObject();
 		result.put(Version.VERSION_PROJECT, Version.get(Version.VERSION_PROJECT));
-		result.put(Version.VERSION_COMPANY, Version.get(Version.VERION_COMPANY));
+		result.put(Version.VERSION_COMPANY, Version.get(Version.VERSION_COMPANY));
 		result.put(Version.VERSION_EQUIPMENT, Version.get(Version.VERSION_EQUIPMENT));
 		result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
 		return ok(result);

@@ -64,7 +64,7 @@ public class EquipmentController extends Controller {
                 flash("success", "Equipment " + equipmentForm.get().name + " has been updated");
                 txn.commit();
 
-                Version.inc(Version.EQUIPMENT);
+                Version.inc(Version.VERSION_EQUIPMENT);
             }
         } finally {
             txn.end();
@@ -141,7 +141,7 @@ public class EquipmentController extends Controller {
                 }
             }
         }
-        Version.inc(Version.EQUIPMENT);
+        Version.inc(Version.VERSION_EQUIPMENT);
 
         return list();
     }
@@ -152,7 +152,7 @@ public class EquipmentController extends Controller {
     public Result delete(Long id) {
         // TODO: If the client is in the database, mark it as disabled instead.
         Equipment.find.ref(id).delete();
-        Version.inc(Version.EQUIPMENT);
+        Version.inc(Version.VERSION_EQUIPMENT);
         flash("success", "Equipment has been deleted");
         return list();
     }
@@ -164,7 +164,7 @@ public class EquipmentController extends Controller {
         collection.equipment_id = id;
         if (!ProjectEquipmentCollection.has(collection)) {
             collection.save();
-            Version.inc(Version.EQUIPMENT);
+            Version.inc(Version.VERSION_EQUIPMENT);
         }
         return edit(id);
     }
@@ -177,7 +177,7 @@ public class EquipmentController extends Controller {
         collection = ProjectEquipmentCollection.get(collection);
         if (collection != null) {
             ProjectEquipmentCollection.find.ref(collection.id).delete();
-            Version.inc(Version.EQUIPMENT);
+            Version.inc(Version.VERSION_EQUIPMENT);
         }
         return edit(id);
     }

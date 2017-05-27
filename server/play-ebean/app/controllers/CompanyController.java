@@ -57,7 +57,7 @@ public class CompanyController extends Controller {
                 flash("success", "Company " + companyForm.get().name + " has been updated");
                 txn.commit();
 
-                Version.inc(Version.COMPANY);
+                Version.inc(Version.VERSION_COMPANY);
             }
         } finally {
             txn.end();
@@ -102,7 +102,7 @@ public class CompanyController extends Controller {
                     }
                 }
             }
-            Version.inc(Version.COMPANY);
+            Version.inc(Version.VERSION_COMPANY);
         } catch (Exception ex) {
             linesForm.reject("lines", ex.getMessage());
             return badRequest(views.html.companies_createForm.render(linesForm));
@@ -113,7 +113,7 @@ public class CompanyController extends Controller {
     public Result delete(Long id) {
         // TODO: If the client is in the database, mark it as disabled instead.
         Company.find.ref(id).delete();
-        Version.inc(Version.COMPANY);
+        Version.inc(Version.VERSION_COMPANY);
         flash("success", "Company has been deleted");
         return list();
     }

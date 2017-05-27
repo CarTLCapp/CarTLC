@@ -24,9 +24,7 @@ out
 
 #swp SBT
 dist
-project/boot
-project/target
-project/plugins/target
+project
 target/
 target
 .target
