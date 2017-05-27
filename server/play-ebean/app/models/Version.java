@@ -10,10 +10,10 @@ import play.db.ebean.Transactional;
 @Entity 
 public class Version extends com.avaje.ebean.Model {
 
-    public static final String PROJECT = "project";
-    public static final String COMPANY = "company";
-    public static final String EQUIPMENT = "equipment";
-    public static final String NOTE = "note";
+    public static final String VERSION_PROJECT                  = "version_project";
+    public static final String VERSION_COMPANY                  = "version_company";
+    public static final String VERSION_EQUIPMENT                = "version_equipment";
+    public static final String VERSION_NOTE                     = "version_note";
 
     private static final long serialVersionUID = 1L;
 

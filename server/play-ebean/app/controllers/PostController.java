@@ -72,10 +72,10 @@ public class PostController extends Controller
 			return missingRequest(missing);
 		}
 		ObjectNode result = Json.newObject();
-		result.put(Version.PROJECT, Version.get(Version.PROJECT));
-		result.put(Version.COMPANY, Version.get(Version.COMPANY));
-		result.put(Version.EQUIPMENT, Version.get(Version.EQUIPMENT));
-		result.put(Version.NOTE, Version.get(Version.NOTE));
+		result.put(Version.VERSION_PROJECT, Version.get(Version.VERSION_PROJECT));
+		result.put(Version.VERSION_COMPANY, Version.get(Version.VERION_COMPANY));
+		result.put(Version.VERSION_EQUIPMENT, Version.get(Version.VERSION_EQUIPMENT));
+		result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
 		return ok(result);
 	}
 

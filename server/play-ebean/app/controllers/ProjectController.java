@@ -12,6 +12,7 @@ import models.*;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
+import play.libs.Json;
 
 /**
  * Manage a database of projects.
@@ -147,6 +148,9 @@ public class ProjectController extends Controller {
         return list();
     }
 
+    public Result query() {
+        return ok(Json.toJson(Project.list()));
+    }
 
 }
 
