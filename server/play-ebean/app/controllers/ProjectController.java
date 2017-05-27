@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
 import play.libs.Json;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /**
  * Manage a database of projects.
@@ -149,7 +151,16 @@ public class ProjectController extends Controller {
     }
 
     public Result query() {
-        return ok(Json.toJson(Project.list()));
+        ObjectNode top = Json.newObject();
+        ArrayNode array = top.putArray("projects");
+        for (Project project : Project.list()) {
+            if (!project.disabled) {
+                ObjectNode node = array.addObject();
+                node.put("id", project.id);
+                node.put("name", project.name);
+            }
+        }
+        return ok(top);
     }
 
 }

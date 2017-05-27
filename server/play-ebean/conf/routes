@@ -5,6 +5,7 @@
 ### HOME ###
 
 GET     /                         controllers.HomeController.index()
+GET     /test                     controllers.ProjectController.query()
 
 ### USERS ###
 
