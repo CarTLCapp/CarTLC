@@ -39,6 +39,7 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
     static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
     static final        String KEY_TECH_ID                      = "tech_id";
+    static final        String KEY_REGISTRATION_CHANGED         = "registration_changed";
     public static final String VERSION_PROJECT                  = "version_project";
     public static final String VERSION_COMPANY                  = "version_company";
     public static final String VERSION_EQUIPMENT                = "version_equipment";
@@ -51,12 +52,12 @@ public class PrefHelper extends PrefHelperBase {
         sInstance = this;
     }
 
-    public long getTechID() {
-        return getLong(KEY_TECH_ID, 0);
+    public int getTechID() {
+        return getInt(KEY_TECH_ID, 0);
     }
 
-    public void setTechID(long id) {
-        setLong(KEY_TECH_ID, id);
+    public void setTechID(int id) {
+        setInt(KEY_TECH_ID, id);
     }
 
     public String getStreet() {
@@ -193,6 +194,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public List<String> addCompany(List<String> list) {
         return addIfNotFound(list, getCompany());
+    }
+
+    public boolean hasRegistrationChanged() {
+        return getInt(KEY_REGISTRATION_CHANGED, 0) != 0;
+    }
+
+    public void setRegistrationChanged(boolean flag) {
+        setInt(KEY_REGISTRATION_CHANGED, flag ? 1 : 0);
     }
 
     public List<String> addIfNotFound(List<String> list, String element) {

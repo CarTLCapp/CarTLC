@@ -51,9 +51,9 @@ public class TableProjects {
         sbuf.append(" integer primary key autoincrement, ");
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" integer, ");
-        sbuf.append(KEY_NAME);
         sbuf.append(KEY_DISABLED);
         sbuf.append(" bit, ");
+        sbuf.append(KEY_NAME);
         sbuf.append(" text not null)");
         mDb.execSQL(sbuf.toString());
     }
@@ -306,7 +306,7 @@ public class TableProjects {
         return rowId;
     }
 
-    public void chkDisable(DataProject project) {
+    public void removeOrDisable(DataProject project) {
         if (TableEntries.getInstance().count(project.id) == 0) {
             // No entries for this, so just remove.
             remove(project.id);

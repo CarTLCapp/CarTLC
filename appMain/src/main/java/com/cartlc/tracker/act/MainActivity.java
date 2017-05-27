@@ -273,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
                 showError(getString(R.string.error_enter_your_name));
                 return false;
             }
+            PrefHelper.getInstance().setRegistrationChanged(true);
             mApp.ping();
         } else if (mCurStage == Stage.TRUCK_NUMBER) {
             String value = mEntrySimple.getText().toString();

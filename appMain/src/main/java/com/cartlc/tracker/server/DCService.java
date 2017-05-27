@@ -3,12 +3,9 @@ package com.cartlc.tracker.server;
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.PrefHelper;
-import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
 
 import org.json.JSONArray;
@@ -22,7 +19,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
@@ -50,7 +46,7 @@ public class DCService extends IntentService {
             Timber.i("No connection -- service aborted");
             return;
         }
-        if (PrefHelper.getInstance().getTechID() == 0) {
+        if (PrefHelper.getInstance().getTechID() == 0 || PrefHelper.getInstance().hasRegistrationChanged()) {
             if (PrefHelper.getInstance().hasName()) {
                 sendRegistration();
             }
@@ -67,7 +63,9 @@ public class DCService extends IntentService {
             jsonObject.accumulate("last_name", PrefHelper.getInstance().getLastName());
             jsonObject.accumulate("device_id", deviceId);
             String result = post(REGISTER, jsonObject);
-            Timber.d("GOT THIS RESULT BACK: " + result);
+            int tech_id = Integer.parseInt(result);
+            PrefHelper.getInstance().setTechID(tech_id);
+            PrefHelper.getInstance().setRegistrationChanged(false);
         } catch (Exception ex) {
             Timber.e(ex);
         }
@@ -93,18 +91,21 @@ public class DCService extends IntentService {
             if (PrefHelper.getInstance().getVersionProject() != version_project) {
                 Timber.i("New project version " + version_project);
                 queryProjects();
-                // PrefHelper.getInstance().setVersionProject(version_project);
+                PrefHelper.getInstance().setVersionProject(version_project);
             }
             if (PrefHelper.getInstance().getVersionCompany() != version_company) {
                 Timber.i("New company version " + version_company);
+//                queryCompanies();
                 // PrefHelper.getInstance().setVersionCompany(version_company);
             }
             if (PrefHelper.getInstance().getVersionEquipment() != version_equipment) {
                 Timber.i("New equipment version " + version_equipment);
+//                queryEquipments();
                 // PrefHelper.getInstance().setVersionEquipment(version_equipment);
             }
             if (PrefHelper.getInstance().getVersionNote() != version_note) {
                 Timber.i("New note version " + version_note);
+//                queryNotes();
                 // PrefHelper.getInstance().setVersionNote(version_note);
             }
         } catch (Exception ex) {
@@ -130,30 +131,34 @@ public class DCService extends IntentService {
                 String name = ele.getString("name");
                 DataProject project = TableProjects.getInstance().queryByServerId(server_id);
                 if (project == null) {
-                    TableProjects.getInstance().add(name, server_id);
-                    // If this name already exists, disable the old one.
                     if (unprocessed.contains(name)) {
+                        // If this name already exists, convert the existing one by simply giving it the server_id.
                         DataProject existing = TableProjects.getInstance().queryByName(name);
-                        TableProjects.getInstance().chkDisable(existing);
-                        unprocessed.remove(name);
+                        existing.server_id = server_id;
+                        TableProjects.getInstance().update(existing);
+                        Timber.i("Commandeer local: " + name);
+                    } else {
+                        // Otherwise just add the new project.
+                        Timber.i("New project: " + name);
+                        TableProjects.getInstance().add(name, server_id);
                     }
                 } else {
                     // Name change?
                     if (!name.equals(project.name)) {
+                        Timber.i("New name: " + name);
                         project.name = name;
                         TableProjects.getInstance().update(project);
-                        unprocessed.remove(name);
                     } else {
-                        // Nothing has changed.
-                        unprocessed.remove(name);
+                        Timber.i("No change: " + name);
                     }
                 }
+                unprocessed.remove(name);
             }
             // Remaining unprocessed elements are disabled if they have entries.
             for (String name : unprocessed) {
                 DataProject existing = TableProjects.getInstance().queryByName(name);
                 if (existing != null) {
-                    TableProjects.getInstance().chkDisable(existing);
+                    TableProjects.getInstance().removeOrDisable(existing);
                 }
             }
         } catch (Exception ex) {
@@ -184,9 +189,15 @@ public class DCService extends IntentService {
             Writer writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
             writer.write(json.toString());
             writer.close();
-            InputStream inputStream = connection.getInputStream();
+            InputStream inputStream;
+            try {
+                inputStream = connection.getInputStream();
+            } catch (Exception ignored) {
+                Timber.e("Server not available.");
+                return null;
+            }
             if (inputStream == null) {
-                Timber.e("Unexpected NULL response from server");
+                Timber.e("NULL response from server");
                 return null;
             }
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
