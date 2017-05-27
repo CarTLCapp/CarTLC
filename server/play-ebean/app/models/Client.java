@@ -5,6 +5,7 @@ import javax.persistence.*;
 
 import play.db.ebean.*;
 import play.data.validation.*;
+import play.db.ebean.Transactional;
 
 /**
  * User entity managed by Ebean
@@ -30,6 +31,24 @@ public class Client extends com.avaje.ebean.Model {
             new DataErrorException("Too many clients with: " + device_id);
         }
         return null;
+    }
+
+    @Transactional
+    public static Client findByName(String first_name, String last_name) throws DataErrorException {
+        List<Client> items = find.where()
+                .eq("first_name", first_name)
+                .eq("last_name", last_name)
+                .findList();
+        if (items.size() == 0) {
+            return null;
+        }
+        if (items.size() > 1) {
+            // Get rid of others.
+            for (int i = 1; i < items.size(); i++) {
+                items.get(i).delete();
+            }
+        }
+        return items.get(0);
     }
 
     @Id

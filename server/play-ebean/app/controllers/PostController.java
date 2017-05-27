@@ -7,7 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.libs.Json;
-
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Transaction;
 import play.db.ebean.Transactional;
 import models.Client;
 import models.Version;
@@ -19,7 +20,6 @@ public class PostController extends Controller
 	public PostController() {
 	}
 
-	@Transactional
 	@BodyParser.Of(BodyParser.Json.class)
 	public Result register() {
 		JsonNode json = request().body().asJson();
@@ -42,21 +42,29 @@ public class PostController extends Controller
 		if (missing.size() > 0) {
 			return missingRequest(missing);
 		}
-		Client client;
+        Transaction txn = Ebean.beginTransaction();
+        Result res;
 		try {
-			client = Client.findByDeviceId(device_id);
+			Client client = Client.findByDeviceId(device_id);
 			if (client == null) {
-				client = new Client();
+                // Locate by pure name
+                client = Client.findByName(first_name, last_name);
+                if (client == null) {
+                    client = new Client();
+                }
 			}
-		} catch (Exception ex) {
-			return badRequest(ex.getMessage());
-		}
-		client.first_name = first_name;
-		client.last_name = last_name;
-		client.device_id = device_id;
-		client.save();
-
-		return ok(Long.toString(client.id));
+            client.first_name = first_name;
+            client.last_name = last_name;
+            client.device_id = device_id;
+            client.save();
+            txn.commit();
+            res = ok(Long.toString(client.id));
+        } catch (Exception ex) {
+            res = badRequest(ex.getMessage());
+        } finally {
+            txn.end();
+        }
+		return res;
 	}
 
 	@BodyParser.Of(BodyParser.Json.class)
