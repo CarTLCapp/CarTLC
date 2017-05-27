@@ -39,6 +39,10 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
     static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
     static final        String KEY_TECH_ID                      = "tech_id";
+    public static final String VERSION_PROJECT                  = "version_project";
+    public static final String VERSION_COMPANY                  = "version_company";
+    public static final String VERSION_EQUIPMENT                = "version_equipment";
+    public static final String VERSION_NOTE                     = "version_note";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss";
 
@@ -145,6 +149,38 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setTruckNumber(long id) {
         setLong(KEY_TRUCK_NUMBER, id);
+    }
+
+    public int getVersionProject() {
+        return getInt(VERSION_PROJECT, 0);
+    }
+
+    public void setVersionProject(int value) {
+        setInt(VERSION_PROJECT, value);
+    }
+
+    public int getVersionEquipment() {
+        return getInt(VERSION_EQUIPMENT, 0);
+    }
+
+    public void setVersionEquipment(int value) {
+        setInt(VERSION_EQUIPMENT, value);
+    }
+
+    public int getVersionNote() {
+        return getInt(VERSION_NOTE, 0);
+    }
+
+    public void setVersionNote(int value) {
+        setInt(VERSION_NOTE, value);
+    }
+
+    public int getVersionCompany() {
+        return getInt(VERSION_COMPANY, 0);
+    }
+
+    public void setVersionCompany(int value) {
+        setInt(VERSION_COMPANY, value);
     }
 
     public List<String> addState(List<String> list) {

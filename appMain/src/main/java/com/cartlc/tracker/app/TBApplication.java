@@ -26,8 +26,8 @@ public class TBApplication extends Application {
 
     public static final String OTHER = "Other";
 
-    static final PermissionRequest[] PERMISSIONS = {
-            new PermissionRequest(android.Manifest.permission.READ_PHONE_STATE, R.string.perm_read_phone_state)};
+//    static final PermissionRequest[] PERMISSIONS = {
+//            new PermissionRequest(android.Manifest.permission.READ_PHONE_STATE, R.string.perm_read_phone_state)};
 
     public TBApplication() {
         super();
@@ -47,12 +47,12 @@ public class TBApplication extends Application {
         TestData.Init();
     }
 
-    public void flushEvents() {
+    public void ping() {
         startService(new Intent(this, DCService.class));
     }
-
-    public void checkPermissions(Activity act, PermissionListener listener) {
-        PermissionHelper.getInstance().checkPermissions(act, PERMISSIONS, listener);
-    }
+//
+//    public void checkPermissions(Activity act, PermissionListener listener) {
+//        PermissionHelper.getInstance().checkPermissions(act, PERMISSIONS, listener);
+//    }
 
 }

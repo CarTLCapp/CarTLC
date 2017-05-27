@@ -30,11 +30,7 @@ public class DCService extends IntentService {
     static final String SERVER_URL  = "http://cartlc.arqnetworks.com/";
     static final String REGISTER    = SERVER_URL + "/register";
     static final String PING        = SERVER_URL + "/ping";
-
-    public static final String PROJECT = "project";
-    public static final String COMPANY = "company";
-    public static final String EQUIPMENT = "equipment";
-    public static final String NOTE = "note";
+    static final String PROJECTS    = SERVER_URL + "/projects";
 
     public DCService() {
         super(SERVER_NAME);
@@ -53,6 +49,7 @@ public class DCService extends IntentService {
                 sendRegistration();
             }
         }
+        ping();
     }
 
     void sendRegistration() {
@@ -61,33 +58,73 @@ public class DCService extends IntentService {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("first_name", PrefHelper.getInstance().getFirstName());
             jsonObject.accumulate("last_name", PrefHelper.getInstance().getLastName());
-            jsonObject.accumulate("imei", deviceId);
+            jsonObject.accumulate("device_id", deviceId);
             post(REGISTER, jsonObject);
         } catch (Exception ex) {
             Timber.e(ex);
         }
     }
 
-
     void ping() {
         try {
-            String deviceId = ServerHelper.getInstance().getDeviceId();
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.accumulate("imei", deviceId);
-            String response = post(REGISTER, jsonObject);
-
-            JSONObject object = parseResult(response);
-            if (object == null) {
+            String response = post(PING);
+            if (response == null) {
                 Timber.e("Unexpected NULL response from server");
+                return;
             }
-            int project_version = object.getInt(PROJECT);
-            int equipment_version = object.getInt(EQUIPMENT);
-            int note_version = object.getInt(NOTE);
-            int company_version = object.getInt(COMPANY);
+            JSONObject object = parseResult(response);
 
+            int version_project = object.getInt(PrefHelper.VERSION_PROJECT);
+            int version_equipment = object.getInt(PrefHelper.VERSION_EQUIPMENT);
+            int version_note = object.getInt(PrefHelper.VERSION_NOTE);
+            int version_company = object.getInt(PrefHelper.VERSION_COMPANY);
+
+            if (PrefHelper.getInstance().getVersionProject() != version_project) {
+                Timber.i("New project version " + version_project);
+                queryProjects();
+                // PrefHelper.getInstance().setVersionProject(version_project);
+            }
+            if (PrefHelper.getInstance().getVersionCompany() != version_company) {
+                Timber.i("New company version " + version_company);
+                // PrefHelper.getInstance().setVersionCompany(version_company);
+            }
+            if (PrefHelper.getInstance().getVersionEquipment() != version_equipment) {
+                Timber.i("New equipment version " + version_equipment);
+                // PrefHelper.getInstance().setVersionEquipment(version_equipment);
+            }
+            if (PrefHelper.getInstance().getVersionNote() != version_note) {
+                Timber.i("New note version " + version_note);
+                // PrefHelper.getInstance().setVersionNote(version_note);
+            }
         } catch (Exception ex) {
             Timber.e(ex);
         }
+    }
+
+    void queryProjects() {
+        try {
+            String response = post(PROJECTS);
+            if (response == null) {
+                Timber.e("Unexpected NULL response from server");
+                return;
+            }
+            Timber.i("queryProjects():\n" + response);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+
+    }
+
+    String post(String target) {
+        try {
+            String deviceId = ServerHelper.getInstance().getDeviceId();
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.accumulate("device_id", deviceId);
+            return post(target, jsonObject);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return null;
     }
 
     String post(String target, JSONObject json) {
@@ -121,14 +158,10 @@ public class DCService extends IntentService {
         }
     }
 
-    JSONObject parseResult(String result)
-    {
-        try
-        {
+    JSONObject parseResult(String result) {
+        try {
             return new JSONObject(result);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Timber.e("Got bad result back from server: " + result + "\n" + ex.getMessage());
         }
         return new JSONObject();

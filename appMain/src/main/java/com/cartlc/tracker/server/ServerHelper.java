@@ -6,6 +6,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 
+import com.google.android.gms.iid.InstanceID;
+
+import java.util.UUID;
+
 /**
  * Created by dug on 5/22/17.
  */
@@ -26,13 +30,11 @@ public class ServerHelper {
 
     final Context             mCtx;
     final ConnectivityManager mCM;
-    final TelephonyManager    mTM;
 
     public ServerHelper(Context ctx) {
         sInstance = this;
         mCtx = ctx;
         mCM = (ConnectivityManager) mCtx.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mTM = (TelephonyManager) mCtx.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     public boolean hasConnection() {
@@ -40,14 +42,12 @@ public class ServerHelper {
         if (ni != null) {
             if (ni.getType() == ConnectivityManager.TYPE_WIFI) {
                 return true;
-            } else if (ni.getType() == ConnectivityManager.TYPE_MOBILE) {
-                return true;
             }
         }
         return false;
     }
 
     public String getDeviceId() {
-        return mTM.getDeviceId();
+        return InstanceID.getInstance(mCtx).getId();
     }
 }

@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class TableProjects extends TableString {
 
-
     static final String TABLE_NAME = "list_projects";
 
     static TableProjects sInstance;

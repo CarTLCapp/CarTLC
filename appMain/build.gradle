@@ -41,6 +41,7 @@ dependencies {
     compile 'com.jakewharton.timber:timber:4.5.0'
     compile 'com.jakewharton:butterknife:8.5.1'
     compile 'com.squareup.picasso:picasso:2.6.0-SNAPSHOT'
+    compile 'com.google.android.gms:play-services:10.2.6'
 
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 }

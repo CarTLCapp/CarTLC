@@ -190,16 +190,16 @@ public class MainActivity extends AppCompatActivity {
         PrefHelper.getInstance().setupFromCurrentProjectId();
         computeCurStage();
         fillStage();
-        mApp.checkPermissions(this, new PermissionHelper.PermissionListener() {
-            @Override
-            public void onGranted(String permission) {
-                mApp.flushEvents();
-            }
-
-            @Override
-            public void onDenied(String permission) {
-            }
-        });
+//        mApp.checkPermissions(this, new PermissionHelper.PermissionListener() {
+//            @Override
+//            public void onGranted(String permission) {
+//                mApp.ping();
+//            }
+//
+//            @Override
+//            public void onDenied(String permission) {
+//            }
+//        });
     }
 
     @Override
@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         if (ServerHelper.getInstance().hasConnection()) {
-            mApp.flushEvents();
+            mApp.ping();
         }
     }
 
@@ -273,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
                 showError(getString(R.string.error_enter_your_name));
                 return false;
             }
-            mApp.flushEvents();
+            mApp.ping();
         } else if (mCurStage == Stage.TRUCK_NUMBER) {
             String value = mEntrySimple.getText().toString();
             if (!TextUtils.isEmpty(value) && TextUtils.isDigitsOnly(value)) {
