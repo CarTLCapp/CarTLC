@@ -153,7 +153,7 @@ public class ProjectController extends Controller {
     public Result query() {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("projects");
-        for (Project project : Project.list()) {
+        for (Project project : Project.find.all()) {
             if (!project.disabled) {
                 ObjectNode node = array.addObject();
                 node.put("id", project.id);

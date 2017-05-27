@@ -6,8 +6,12 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
+import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.data.TableProjectAddressCombo;
+import com.cartlc.tracker.data.TableProjects;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -18,6 +22,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -53,25 +59,30 @@ public class DCService extends IntentService {
     }
 
     void sendRegistration() {
+        Timber.i("sendRegistration()");
         try {
             String deviceId = ServerHelper.getInstance().getDeviceId();
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("first_name", PrefHelper.getInstance().getFirstName());
             jsonObject.accumulate("last_name", PrefHelper.getInstance().getLastName());
             jsonObject.accumulate("device_id", deviceId);
-            post(REGISTER, jsonObject);
+            String result = post(REGISTER, jsonObject);
+            Timber.d("GOT THIS RESULT BACK: " + result);
         } catch (Exception ex) {
             Timber.e(ex);
         }
     }
 
     void ping() {
+        Timber.i("ping()");
         try {
             String response = post(PING);
             if (response == null) {
                 Timber.e("Unexpected NULL response from server");
                 return;
             }
+            Timber.d("GOT THIS RESULT BACK: " + response);
+
             JSONObject object = parseResult(response);
 
             int version_project = object.getInt(PrefHelper.VERSION_PROJECT);
@@ -102,13 +113,49 @@ public class DCService extends IntentService {
     }
 
     void queryProjects() {
+        Timber.i("queryProjects()");
         try {
             String response = post(PROJECTS);
             if (response == null) {
                 Timber.e("Unexpected NULL response from server");
                 return;
             }
-            Timber.i("queryProjects():\n" + response);
+            List<String> unprocessed = TableProjects.getInstance().query();
+
+            JSONObject object = parseResult(response);
+            JSONArray array = object.getJSONArray("projects");
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject ele = array.getJSONObject(i);
+                int server_id = ele.getInt("id");
+                String name = ele.getString("name");
+                DataProject project = TableProjects.getInstance().queryByServerId(server_id);
+                if (project == null) {
+                    TableProjects.getInstance().add(name, server_id);
+                    // If this name already exists, disable the old one.
+                    if (unprocessed.contains(name)) {
+                        DataProject existing = TableProjects.getInstance().queryByName(name);
+                        TableProjects.getInstance().chkDisable(existing);
+                        unprocessed.remove(name);
+                    }
+                } else {
+                    // Name change?
+                    if (!name.equals(project.name)) {
+                        project.name = name;
+                        TableProjects.getInstance().update(project);
+                        unprocessed.remove(name);
+                    } else {
+                        // Nothing has changed.
+                        unprocessed.remove(name);
+                    }
+                }
+            }
+            // Remaining unprocessed elements are disabled if they have entries.
+            for (String name : unprocessed) {
+                DataProject existing = TableProjects.getInstance().queryByName(name);
+                if (existing != null) {
+                    TableProjects.getInstance().chkDisable(existing);
+                }
+            }
         } catch (Exception ex) {
             Timber.e(ex);
         }
