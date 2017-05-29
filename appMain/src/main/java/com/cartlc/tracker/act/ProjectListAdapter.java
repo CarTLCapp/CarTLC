@@ -56,7 +56,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     public void onBindViewHolder(CustomViewHolder holder, final int position) {
         final DataProjectAddressCombo projectGroup = mProjectGroups.get(position);
         holder.mProjectName.setText(projectGroup.getProjectName());
-        int countTotal = TableEntries.getInstance().count(projectGroup.projectNameId);
+        int countTotal = TableEntries.getInstance().countProjects(projectGroup.projectNameId);
 
         if (countTotal > 0) {
             int           countUploaded = TableEntries.getInstance().countUploaded(projectGroup.projectNameId);

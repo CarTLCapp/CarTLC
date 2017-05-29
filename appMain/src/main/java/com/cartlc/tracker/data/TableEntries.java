@@ -130,11 +130,25 @@ public class TableEntries {
         return list;
     }
 
-    public int count(long projectNameId) {
+    public int countProjects(long projectNameId) {
         int count = 0;
         try {
             final String selection = KEY_PROJECT_ID + " =?";
             final String[] selectionArgs = {Long.toString(projectNameId)};
+            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
+    public int countAddresses(long addressId) {
+        int count = 0;
+        try {
+            final String selection = KEY_ADDRESS_ID + " =?";
+            final String[] selectionArgs = {Long.toString(addressId)};
             Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
             count = cursor.getCount();
             cursor.close();

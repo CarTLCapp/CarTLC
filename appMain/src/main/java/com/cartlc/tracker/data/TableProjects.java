@@ -307,7 +307,7 @@ public class TableProjects {
     }
 
     public void removeOrDisable(DataProject project) {
-        if (TableEntries.getInstance().count(project.id) == 0) {
+        if (TableEntries.getInstance().countProjects(project.id) == 0) {
             // No entries for this, so just remove.
             remove(project.id);
         } else {

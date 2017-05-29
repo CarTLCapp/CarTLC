@@ -12,7 +12,9 @@ import models.*;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
-
+import play.libs.Json;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 /**
  * Manage a database of companies and their addresses.
  */
@@ -118,6 +120,21 @@ public class CompanyController extends Controller {
         return list();
     }
 
+    public Result query() {
+        ObjectNode top = Json.newObject();
+        ArrayNode array = top.putArray("companies");
+        for (Company item : Company.find.all()) {
+            if (!item.disabled) {
+                ObjectNode node = array.addObject();
+                node.put("id", item.id);
+                node.put("name", item.name);
+                node.put("street", item.street);
+                node.put("city", item.city);
+                node.put("state", item.state);
+            }
+        }
+        return ok(top);
+    }
 
 }
 

@@ -4,8 +4,10 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 
+import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableProjects;
 
 import org.json.JSONArray;
@@ -33,6 +35,7 @@ public class DCService extends IntentService {
     static final String REGISTER    = SERVER_URL + "/register";
     static final String PING        = SERVER_URL + "/ping";
     static final String PROJECTS    = SERVER_URL + "/projects";
+    static final String COMPANIES   = SERVER_URL + "/companies";
 
     public DCService() {
         super(SERVER_NAME);
@@ -95,7 +98,7 @@ public class DCService extends IntentService {
             }
             if (PrefHelper.getInstance().getVersionCompany() != version_company) {
                 Timber.i("New company version " + version_company);
-//                queryCompanies();
+                queryCompanies();
                 // PrefHelper.getInstance().setVersionCompany(version_company);
             }
             if (PrefHelper.getInstance().getVersionEquipment() != version_equipment) {
@@ -164,7 +167,70 @@ public class DCService extends IntentService {
         } catch (Exception ex) {
             Timber.e(ex);
         }
+    }
 
+    void queryCompanies() {
+        Timber.i("queryCompanies()");
+        try {
+            String response = post(COMPANIES);
+            if (response == null) {
+                Timber.e("Unexpected NULL response from server");
+                return;
+            }
+            List<DataAddress> unprocessed = TableAddress.getInstance().query();
+
+            JSONObject object = parseResult(response);
+            JSONArray array = object.getJSONArray("companies");
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject ele = array.getJSONObject(i);
+                int server_id = ele.getInt("id");
+                String name = ele.getString("name");
+                String street = ele.getString("street");
+                String city = ele.getString("city");
+                String state = ele.getString("state");
+                DataAddress item = TableAddress.getInstance().queryByServerId(server_id);
+                DataAddress incoming = new DataAddress(server_id, name, street, city, state);
+                if (item == null) {
+                    DataAddress match = get(unprocessed, incoming);
+                    if (match != null) {
+                        // If this name already exists, convert the existing one by simply giving it the server_id.
+                        match.server_id = server_id;
+                        TableAddress.getInstance().update(match);
+                        Timber.i("Commandeer local: " + name);
+                        unprocessed.remove(match);
+                    } else {
+                        // Otherwise just add the new entry.
+                        Timber.i("New company: " + name);
+                        TableAddress.getInstance().add(incoming);
+                    }
+                } else {
+                    // Change of name, street, city or state?
+                    if (!incoming.equals(item)) {
+                        Timber.i("Change: " + name);
+                        incoming.id = item.id;
+                        incoming.server_id = item.server_id;
+                        TableAddress.getInstance().update(incoming);
+                    } else {
+                        Timber.i("No change: " + name);
+                    }
+                }
+            }
+            // Remaining unprocessed elements are disabled if they have entries.
+            for (DataAddress item : unprocessed) {
+                TableAddress.getInstance().removeOrDisable(item);
+            }
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
+    DataAddress get(List<DataAddress> items, DataAddress match) {
+        for (DataAddress item : items) {
+            if (item.equals(match)) {
+                return item;
+            }
+        }
+        return null;
     }
 
     String post(String target) {
