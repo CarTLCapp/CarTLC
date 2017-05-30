@@ -334,7 +334,7 @@ public class PrefHelper extends PrefHelperBase {
         }
         DataEntry entry = new DataEntry();
         entry.projectNameId = projectGroup.projectNameId;
-        entry.equipmentCollection = new DataEquipmentEntryCollection(getNextEquipmentCollectionID());
+        entry.equipmentCollection = new DataCollectionEquipmentEntry(getNextEquipmentCollectionID());
         entry.equipmentCollection.addChecked();
         entry.pictureCollection = TablePendingPictures.getInstance().createCollection();
         entry.addressId = projectGroup.addressId;

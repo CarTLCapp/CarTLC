@@ -43,7 +43,7 @@ public class TestData {
     };
 
     static void AddCollections() {
-        TableEquipmentProjectCollection.getInstance().addByName("Five Cubits", Arrays.asList(new String[]{
+        TableCollectionEquipmentProject.getInstance().addByName("Five Cubits", Arrays.asList(new String[]{
                 "OBC",
                 "RDT",
                 "VMX",
@@ -56,14 +56,14 @@ public class TestData {
                 "Uninstall",
                 "Other",
         }));
-        TableEquipmentProjectCollection.getInstance().addByName("Digital Fleet", Arrays.asList(new String[]{
+        TableCollectionEquipmentProject.getInstance().addByName("Digital Fleet", Arrays.asList(new String[]{
                 "Tablet",
                 "Canbus",
                 "Repair Work",
                 "Uninstall",
                 "Other",
         }));
-        TableEquipmentProjectCollection.getInstance().addByName("Smart Witness", Arrays.asList(new String[]{
+        TableCollectionEquipmentProject.getInstance().addByName("Smart Witness", Arrays.asList(new String[]{
                 "KP1S",
                 "CPI",
                 "SVC 1080",
@@ -77,7 +77,7 @@ public class TestData {
                 "Uninstall",
                 "Other",
         }));
-        TableEquipmentProjectCollection.getInstance().addByName("Fed Ex", Arrays.asList(new String[]{
+        TableCollectionEquipmentProject.getInstance().addByName("Fed Ex", Arrays.asList(new String[]{
                 "KP1S",
                 "Driver Facing Camera",
                 "Modem",
@@ -88,7 +88,7 @@ public class TestData {
                 "Uninstall",
                 "Other",
         }));
-        TableEquipmentProjectCollection.getInstance().addByName("Verifi", Arrays.asList(new String[]{
+        TableCollectionEquipmentProject.getInstance().addByName("Verifi", Arrays.asList(new String[]{
                 "V3 Full Install",
                 "V4 Full Install",
                 "Admix Tank",
@@ -105,24 +105,24 @@ public class TestData {
     }
 
     static void AddNotes() {
-        TableNoteProjectCollection.getInstance().addByName("Five Cubits", Arrays.asList(new DataNote[]{
+        TableCollectionNoteProject.getInstance().addByName("Five Cubits", Arrays.asList(new DataNote[]{
                 new DataNote("Serial #", DataNote.Type.ALPHANUMERIC),
                 new DataNote("IMEI #", DataNote.Type.NUMERIC),
                 new DataNote("Other", DataNote.Type.MULTILINE),
         }));
-        TableNoteProjectCollection.getInstance().addByName("Digital Fleet", Arrays.asList(new DataNote[]{
+        TableCollectionNoteProject.getInstance().addByName("Digital Fleet", Arrays.asList(new DataNote[]{
                 new DataNote("Serial #"),
                 new DataNote("IMEI #"),
                 new DataNote("Other"),
         }));
-        TableNoteProjectCollection.getInstance().addByName("Smart Witness", Arrays.asList(new DataNote[]{
+        TableCollectionNoteProject.getInstance().addByName("Smart Witness", Arrays.asList(new DataNote[]{
                 new DataNote("Serial #"),
                 new DataNote("IMEI #"),
                 new DataNote("Sim #", DataNote.Type.NUMERIC_WITH_SPACES),
                 new DataNote("DRID #", DataNote.Type.TEXT),
                 new DataNote("Other"),
         }));
-        TableNoteProjectCollection.getInstance().addByName("Fed Ex", Arrays.asList(new DataNote[]{
+        TableCollectionNoteProject.getInstance().addByName("Fed Ex", Arrays.asList(new DataNote[]{
                 new DataNote("Serial #"),
                 new DataNote("IMEI #"),
                 new DataNote("Sim #"),
@@ -130,7 +130,7 @@ public class TestData {
                 new DataNote("Mobileye", DataNote.Type.TEXT),
                 new DataNote("Other"),
         }));
-        TableNoteProjectCollection.getInstance().addByName("Other", Arrays.asList(new DataNote[]{
+        TableCollectionNoteProject.getInstance().addByName("Other", Arrays.asList(new DataNote[]{
                 new DataNote("Serial #"),
                 new DataNote("IMEI #"),
                 new DataNote("Other")

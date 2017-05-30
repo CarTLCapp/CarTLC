@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ import timber.log.Timber;
  * Created by dug on 5/16/17.
  */
 
-public class TableNoteEntryCollection {
+public class TableCollectionNoteEntry {
 
     static final String TABLE_NAME = "note_entry_collection";
 
@@ -24,19 +23,19 @@ public class TableNoteEntryCollection {
     static final String KEY_NOTE_ID  = "note_id";
     static final String KEY_VALUE    = "value";
 
-    static TableNoteEntryCollection sInstance;
+    static TableCollectionNoteEntry sInstance;
 
     static void Init(SQLiteDatabase db) {
-        new TableNoteEntryCollection(db);
+        new TableCollectionNoteEntry(db);
     }
 
-    public static TableNoteEntryCollection getInstance() {
+    public static TableCollectionNoteEntry getInstance() {
         return sInstance;
     }
 
     final SQLiteDatabase mDb;
 
-    public TableNoteEntryCollection(SQLiteDatabase db) {
+    public TableCollectionNoteEntry(SQLiteDatabase db) {
         mDb = db;
         sInstance = this;
     }
@@ -59,7 +58,7 @@ public class TableNoteEntryCollection {
     }
 
     public void store(long projectNameId, long entryId) {
-        List<DataNote> notes = TableNoteProjectCollection.getInstance().getNotes(projectNameId);
+        List<DataNote> notes = TableCollectionNoteProject.getInstance().getNotes(projectNameId);
         mDb.beginTransaction();
         try {
             String where = KEY_ENTRY_ID + "=?";

@@ -11,7 +11,7 @@ public class DataEntry {
     public long                         date;
     public long                         projectNameId;
     public long                         addressId;
-    public DataEquipmentEntryCollection equipmentCollection;
+    public DataCollectionEquipmentEntry equipmentCollection;
     public DataPictureCollection        pictureCollection;
     public long                         truckNumber;
     public boolean                      uploaded;
@@ -32,7 +32,7 @@ public class DataEntry {
     }
 
     public List<DataNote> getNotes() {
-        return TableNoteEntryCollection.getInstance().query(id);
+        return TableCollectionNoteEntry.getInstance().query(id);
     }
 
     public List<String> getEquipmentNames() {
@@ -47,6 +47,6 @@ public class DataEntry {
     }
 
     public void saveNotes() {
-        TableNoteEntryCollection.getInstance().store(projectNameId, id);
+        TableCollectionNoteEntry.getInstance().store(projectNameId, id);
     }
 }

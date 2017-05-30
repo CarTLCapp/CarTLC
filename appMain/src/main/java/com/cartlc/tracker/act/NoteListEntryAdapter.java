@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,7 @@ import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableNote;
-import com.cartlc.tracker.data.TableNoteProjectCollection;
+import com.cartlc.tracker.data.TableCollectionNoteProject;
 
 import java.util.List;
 
@@ -94,7 +93,7 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
 
     public void onDataChanged() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        mItems = TableNoteProjectCollection.getInstance().getNotes(curGroup.projectNameId);
+        mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId);
         notifyDataSetChanged();
     }
 
@@ -126,7 +125,7 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
 
     public boolean hasNotesEntered() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        for (DataNote note : TableNoteProjectCollection.getInstance().getNotes(curGroup.projectNameId)) {
+        for (DataNote note : TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId)) {
             if (!TextUtils.isEmpty(note.value)) {
                 return true;
             }

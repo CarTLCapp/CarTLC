@@ -7,15 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.RadioButton;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEquipment;
-import com.cartlc.tracker.data.DataEquipmentProjectCollection;
+import com.cartlc.tracker.data.DataCollectionEquipmentProject;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableEquipment;
-import com.cartlc.tracker.data.TableEquipmentProjectCollection;
+import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 
 import java.util.List;
 
@@ -72,14 +71,14 @@ public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSe
 
     public void onDataChanged() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        DataEquipmentProjectCollection collection = TableEquipmentProjectCollection.getInstance().queryForProject(curGroup.projectNameId);
+        DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
         mItems = collection.getEquipment();
         notifyDataSetChanged();
     }
 
     public boolean hasChecked() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        DataEquipmentProjectCollection collection = TableEquipmentProjectCollection.getInstance().queryForProject(curGroup.projectNameId);
+        DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
         for (DataEquipment item : collection.getEquipment()) {
             if (item.isChecked) {
                 return true;

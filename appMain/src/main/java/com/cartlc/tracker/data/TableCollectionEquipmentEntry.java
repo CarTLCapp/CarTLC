@@ -6,20 +6,20 @@ import android.database.sqlite.SQLiteDatabase;
  * Created by dug on 5/16/17.
  */
 
-public class TableEquipmentEntryCollection extends TableCollection {
+public class TableCollectionEquipmentEntry extends TableCollection {
     static final String TABLE_NAME = "entry_equipment_collection";
 
-    static TableEquipmentEntryCollection sInstance;
+    static TableCollectionEquipmentEntry sInstance;
 
     static void Init(SQLiteDatabase db) {
-        new TableEquipmentEntryCollection(db);
+        new TableCollectionEquipmentEntry(db);
     }
 
-    public static TableEquipmentEntryCollection getInstance() {
+    public static TableCollectionEquipmentEntry getInstance() {
         return sInstance;
     }
 
-    public TableEquipmentEntryCollection(SQLiteDatabase db) {
+    public TableCollectionEquipmentEntry(SQLiteDatabase db) {
         super(db, TABLE_NAME);
         sInstance = this;
     }

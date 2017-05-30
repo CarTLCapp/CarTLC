@@ -1,15 +1,12 @@
 package com.cartlc.tracker.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by dug on 5/10/17.
  */
 
-public class DataEquipmentEntryCollection extends DataEquipmentCollection {
+public class DataCollectionEquipmentEntry extends DataCollectionEquipment {
 
-    public DataEquipmentEntryCollection(long collectionId) {
+    public DataCollectionEquipmentEntry(long collectionId) {
         super(collectionId);
     }
 

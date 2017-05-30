@@ -11,21 +11,21 @@ import timber.log.Timber;
  * Created by dug on 5/16/17.
  */
 
-public class TableNoteProjectCollection extends TableCollection {
+public class TableCollectionNoteProject extends TableCollection {
 
     static final String TABLE_NAME = "note_project_collection";
 
-    static TableNoteProjectCollection sInstance;
+    static TableCollectionNoteProject sInstance;
 
     static void Init(SQLiteDatabase db) {
-        new TableNoteProjectCollection(db);
+        new TableCollectionNoteProject(db);
     }
 
-    public static TableNoteProjectCollection getInstance() {
+    public static TableCollectionNoteProject getInstance() {
         return sInstance;
     }
 
-    public TableNoteProjectCollection(SQLiteDatabase db) {
+    public TableCollectionNoteProject(SQLiteDatabase db) {
         super(db, TABLE_NAME);
         sInstance = this;
     }

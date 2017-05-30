@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import com.cartlc.tracker.data.DataAddress;
+import com.cartlc.tracker.data.DataCollectionItem;
 import com.cartlc.tracker.data.DataEquipment;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
+import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableProjects;
 
@@ -39,7 +41,6 @@ public class DCService extends IntentService {
     static final String PROJECTS          = SERVER_URL + "/projects";
     static final String COMPANIES         = SERVER_URL + "/companies";
     static final String EQUIPMENTS        = SERVER_URL + "/equipments";
-    static final String PROJECT_EQUIPMENT = SERVER_URL + "/project_equipment";
 
     public DCService() {
         super(SERVER_NAME);
@@ -245,56 +246,108 @@ public class DCService extends IntentService {
                 Timber.e("Unexpected NULL response from server");
                 return;
             }
-            List<DataEquipment> unprocessed = TableEquipment.getInstance().query();
             JSONObject object = parseResult(response);
-            JSONArray array = object.getJSONArray("equipments");
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject ele = array.getJSONObject(i);
-                int server_id = ele.getInt("id");
-                String name = ele.getString("name");
-                DataEquipment incoming = new DataEquipment(name, server_id);
-                DataEquipment item = TableEquipment.getInstance().queryByServerId(server_id);
-                if (item == null) {
-                    DataEquipment match = get(unprocessed, incoming);
-                    if (match != null) {
-                        // If this name already exists, convert the existing one by simply giving it the server_id.
-                        match.server_id = server_id;
-                        TableEquipment.getInstance().update(match);
-                        Timber.i("Commandeer local: " + name);
-                        unprocessed.remove(match);
+            {
+                List<DataEquipment> unprocessed = TableEquipment.getInstance().query();
+                JSONArray array = object.getJSONArray("equipments");
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject ele = array.getJSONObject(i);
+                    int server_id = ele.getInt("id");
+                    String name = ele.getString("name");
+                    DataEquipment incoming = new DataEquipment(name, server_id);
+                    DataEquipment item = TableEquipment.getInstance().queryByServerId(server_id);
+                    if (item == null) {
+                        DataEquipment match = get(unprocessed, incoming);
+                        if (match != null) {
+                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            match.server_id = server_id;
+                            TableEquipment.getInstance().update(match);
+                            Timber.i("Commandeer local: " + name);
+                            unprocessed.remove(match);
+                        } else {
+                            // Otherwise just add the new entry.
+                            Timber.i("New company: " + name);
+                            TableEquipment.getInstance().add(incoming);
+                        }
                     } else {
-                        // Otherwise just add the new entry.
-                        Timber.i("New company: " + name);
-                        TableEquipment.getInstance().add(incoming);
-                    }
-                } else {
-                    // Change of name
-                    if (!incoming.equals(item)) {
-                        Timber.i("Change: " + name);
-                        incoming.id = item.id;
-                        incoming.server_id = item.server_id;
-                        incoming.isLocal = false;
-                        TableEquipment.getInstance().update(incoming);
-                    } else {
-                        Timber.i("No change: " + name);
+                        // Change of name
+                        if (!incoming.equals(item)) {
+                            Timber.i("Change: " + name);
+                            incoming.id = item.id;
+                            incoming.server_id = item.server_id;
+                            incoming.isLocal = false;
+                            TableEquipment.getInstance().update(incoming);
+                        } else {
+                            Timber.i("No change: " + name);
+                        }
                     }
                 }
             }
-            response = post(PROJECT_EQUIPMENT);
-            if (response == null) {
-                Timber.e("Unexpected NULL response from server");
-                return;
+            {
+                List<DataCollectionItem> unprocessed = TableCollectionEquipmentProject.getInstance().query();
+                JSONArray array = object.getJSONArray("project_equipment");
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject ele = array.getJSONObject(i);
+                    int server_id = ele.getInt("id");
+                    int server_project_id = ele.getInt("project_id");
+                    int server_equipment_id = ele.getInt("equipment_id");
+                    DataCollectionItem incoming =  new DataCollectionItem();
+                    incoming.server_id = server_id;
+                    // Note: project ID is from the perspective of the server, not the APP.
+                    DataProject project = TableProjects.getInstance().queryByServerId(server_project_id);
+                    if (project == null) {
+                        Timber.e("Can't find project with ID " + server_project_id);
+                        continue;
+                    }
+                    incoming.collection_id = project.id;
+                    DataEquipment equipment = TableEquipment.getInstance().queryByServerId(server_equipment_id);
+                    if (equipment == null) {
+                        Timber.e("Can't find equipment with ID " + server_equipment_id);
+                        continue;
+                    }
+                    incoming.equipment_id = equipment.id;
+                    DataCollectionItem item = TableCollectionEquipmentProject.getInstance().queryByServerId(server_id);
+                    if (item == null) {
+                        DataCollectionItem match = get(unprocessed, incoming);
+                        if (match != null) {
+                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            match.server_id = server_id;
+                            TableCollectionEquipmentProject.getInstance().update(match);
+                            Timber.i("Commandeer local: PROJECT COLLECTION " + match.collection_id + ", " + match.equipment_id);
+                            unprocessed.remove(match);
+                        } else {
+                            // Otherwise just add the new entry.
+                            Timber.i("New project colleciton. " + incoming.collection_id + ", " + incoming.equipment_id);
+                            TableCollectionEquipmentProject.getInstance().add(incoming);
+                        }
+                    } else {
+                        // Change of IDs. A little weird, but we will allow it.
+                        if (!incoming.equals(item)) {
+                            Timber.i("Change? " + item.collection_id + ", " + item.equipment_id);
+                            incoming.id = item.id;
+                            incoming.server_id = item.server_id;
+                            TableCollectionEquipmentProject.getInstance().update(incoming);
+                        }
+                    }
+                }
             }
-
-
         } catch (Exception ex) {
             Timber.e(ex);
         }
     }
 
-
     DataEquipment get(List<DataEquipment> items, DataEquipment match) {
         for (DataEquipment item : items) {
+            if (item.equals(match)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+
+    DataCollectionItem get(List<DataCollectionItem> items, DataCollectionItem match) {
+        for (DataCollectionItem item : items) {
             if (item.equals(match)) {
                 return item;
             }
