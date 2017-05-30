@@ -37,14 +37,14 @@ import timber.log.Timber;
  */
 public class DCService extends IntentService {
 
-    static final String SERVER_NAME       = "CarTLC.DataCollectionService";
-    static final String SERVER_URL        = "http://cartlc.arqnetworks.com/";
-    static final String REGISTER          = SERVER_URL + "/register";
-    static final String PING              = SERVER_URL + "/ping";
-    static final String PROJECTS          = SERVER_URL + "/projects";
-    static final String COMPANIES         = SERVER_URL + "/companies";
-    static final String EQUIPMENTS        = SERVER_URL + "/equipments";
-    static final String NOTES             = SERVER_URL + "/notes";
+    static final String SERVER_NAME = "CarTLC.DataCollectionService";
+    static final String SERVER_URL  = "http://cartlc.arqnetworks.com/";
+    static final String REGISTER    = SERVER_URL + "/register";
+    static final String PING        = SERVER_URL + "/ping";
+    static final String PROJECTS    = SERVER_URL + "/projects";
+    static final String COMPANIES   = SERVER_URL + "/companies";
+    static final String EQUIPMENTS  = SERVER_URL + "/equipments";
+    static final String NOTES       = SERVER_URL + "/notes";
 
     public DCService() {
         super(SERVER_NAME);
@@ -117,8 +117,8 @@ public class DCService extends IntentService {
             }
             if (PrefHelper.getInstance().getVersionNote() != version_note) {
                 Timber.i("New note version " + version_note);
-//                queryNotes();
-                // PrefHelper.getInstance().setVersionNote(version_note);
+                queryNotes();
+                PrefHelper.getInstance().setVersionNote(version_note);
             }
         } catch (Exception ex) {
             Timber.e(ex);
@@ -294,8 +294,8 @@ public class DCService extends IntentService {
                     JSONObject ele = array.getJSONObject(i);
                     int server_id = ele.getInt("id");
                     int server_project_id = ele.getInt("project_id");
-                    int server_equipment_id = ele.getInt("value_id");
-                    DataCollectionItem incoming =  new DataCollectionItem();
+                    int server_equipment_id = ele.getInt("equipment_id");
+                    DataCollectionItem incoming = new DataCollectionItem();
                     incoming.server_id = server_id;
                     // Note: project ID is from the perspective of the server, not the APP.
                     DataProject project = TableProjects.getInstance().queryByServerId(server_project_id);
@@ -321,7 +321,7 @@ public class DCService extends IntentService {
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
-                            Timber.i("New project colleciton. " + incoming.collection_id + ", " + incoming.value_id);
+                            Timber.i("New project collection. " + incoming.collection_id + ", " + incoming.value_id);
                             TableCollectionEquipmentProject.getInstance().add(incoming);
                         }
                     } else {
@@ -413,7 +413,7 @@ public class DCService extends IntentService {
                     int server_id = ele.getInt("id");
                     int server_project_id = ele.getInt("project_id");
                     int server_note_id = ele.getInt("note_id");
-                    DataCollectionItem incoming =  new DataCollectionItem();
+                    DataCollectionItem incoming = new DataCollectionItem();
                     incoming.server_id = server_id;
                     // Note: project ID is from the perspective of the server, not the APP.
                     DataProject project = TableProjects.getInstance().queryByServerId(server_project_id);

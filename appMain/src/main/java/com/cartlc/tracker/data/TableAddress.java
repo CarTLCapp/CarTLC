@@ -154,7 +154,7 @@ public class TableAddress {
     public DataAddress query(long id) {
         DataAddress address = null;
         try {
-            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET, KEY_SERVER_ID};
+            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET, KEY_SERVER_ID, KEY_DISABLED};
             final String orderBy = KEY_COMPANY + " ASC";
             final String selection = KEY_ROWID + " =?";
             final String[] selectionArgs = {Long.toString(id)};
@@ -165,7 +165,6 @@ public class TableAddress {
             int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
-
             if (cursor.moveToFirst()) {
                 address = new DataAddress(cursor.getInt(idxServerId),
                         cursor.getString(idxCompany),
