@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import com.cartlc.tracker.data.DataAddress;
+import com.cartlc.tracker.data.DataEquipment;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
+import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableProjects;
 
 import org.json.JSONArray;
@@ -30,12 +32,14 @@ import timber.log.Timber;
  */
 public class DCService extends IntentService {
 
-    static final String SERVER_NAME = "CarTLC.DataCollectionService";
-    static final String SERVER_URL  = "http://cartlc.arqnetworks.com/";
-    static final String REGISTER    = SERVER_URL + "/register";
-    static final String PING        = SERVER_URL + "/ping";
-    static final String PROJECTS    = SERVER_URL + "/projects";
-    static final String COMPANIES   = SERVER_URL + "/companies";
+    static final String SERVER_NAME       = "CarTLC.DataCollectionService";
+    static final String SERVER_URL        = "http://cartlc.arqnetworks.com/";
+    static final String REGISTER          = SERVER_URL + "/register";
+    static final String PING              = SERVER_URL + "/ping";
+    static final String PROJECTS          = SERVER_URL + "/projects";
+    static final String COMPANIES         = SERVER_URL + "/companies";
+    static final String EQUIPMENTS        = SERVER_URL + "/equipments";
+    static final String PROJECT_EQUIPMENT = SERVER_URL + "/project_equipment";
 
     public DCService() {
         super(SERVER_NAME);
@@ -99,12 +103,12 @@ public class DCService extends IntentService {
             if (PrefHelper.getInstance().getVersionCompany() != version_company) {
                 Timber.i("New company version " + version_company);
                 queryCompanies();
-                // PrefHelper.getInstance().setVersionCompany(version_company);
+                PrefHelper.getInstance().setVersionCompany(version_company);
             }
             if (PrefHelper.getInstance().getVersionEquipment() != version_equipment) {
                 Timber.i("New equipment version " + version_equipment);
-//                queryEquipments();
-                // PrefHelper.getInstance().setVersionEquipment(version_equipment);
+                queryEquipments();
+                PrefHelper.getInstance().setVersionEquipment(version_equipment);
             }
             if (PrefHelper.getInstance().getVersionNote() != version_note) {
                 Timber.i("New note version " + version_note);
@@ -188,8 +192,8 @@ public class DCService extends IntentService {
                 String street = ele.getString("street");
                 String city = ele.getString("city");
                 String state = ele.getString("state");
-                DataAddress item = TableAddress.getInstance().queryByServerId(server_id);
                 DataAddress incoming = new DataAddress(server_id, name, street, city, state);
+                DataAddress item = TableAddress.getInstance().queryByServerId(server_id);
                 if (item == null) {
                     DataAddress match = get(unprocessed, incoming);
                     if (match != null) {
@@ -232,6 +236,72 @@ public class DCService extends IntentService {
         }
         return null;
     }
+
+    void queryEquipments() {
+        Timber.i("queryEquipments()");
+        try {
+            String response = post(EQUIPMENTS);
+            if (response == null) {
+                Timber.e("Unexpected NULL response from server");
+                return;
+            }
+            List<DataEquipment> unprocessed = TableEquipment.getInstance().query();
+            JSONObject object = parseResult(response);
+            JSONArray array = object.getJSONArray("equipments");
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject ele = array.getJSONObject(i);
+                int server_id = ele.getInt("id");
+                String name = ele.getString("name");
+                DataEquipment incoming = new DataEquipment(name, server_id);
+                DataEquipment item = TableEquipment.getInstance().queryByServerId(server_id);
+                if (item == null) {
+                    DataEquipment match = get(unprocessed, incoming);
+                    if (match != null) {
+                        // If this name already exists, convert the existing one by simply giving it the server_id.
+                        match.server_id = server_id;
+                        TableEquipment.getInstance().update(match);
+                        Timber.i("Commandeer local: " + name);
+                        unprocessed.remove(match);
+                    } else {
+                        // Otherwise just add the new entry.
+                        Timber.i("New company: " + name);
+                        TableEquipment.getInstance().add(incoming);
+                    }
+                } else {
+                    // Change of name
+                    if (!incoming.equals(item)) {
+                        Timber.i("Change: " + name);
+                        incoming.id = item.id;
+                        incoming.server_id = item.server_id;
+                        incoming.isLocal = false;
+                        TableEquipment.getInstance().update(incoming);
+                    } else {
+                        Timber.i("No change: " + name);
+                    }
+                }
+            }
+            response = post(PROJECT_EQUIPMENT);
+            if (response == null) {
+                Timber.e("Unexpected NULL response from server");
+                return;
+            }
+
+
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
+
+    DataEquipment get(List<DataEquipment> items, DataEquipment match) {
+        for (DataEquipment item : items) {
+            if (item.equals(match)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
 
     String post(String target) {
         try {

@@ -7,6 +7,7 @@ package com.cartlc.tracker.data;
 public class DataEquipment {
     public long id;
     public final String name;
+    public long server_id;
     public boolean isChecked;
     public boolean isLocal;
 
@@ -21,6 +22,11 @@ public class DataEquipment {
         this.name = name;
     }
 
+    public DataEquipment(String name, int server_id) {
+        this.name = name;
+        this.server_id = server_id;
+    }
+
     public String toString()
     {
         StringBuilder sbuf = new StringBuilder();
@@ -31,5 +37,9 @@ public class DataEquipment {
         sbuf.append(", local=");
         sbuf.append(isLocal);
         return sbuf.toString();
+    }
+
+    public boolean equals(DataEquipment item) {
+        return name.equals(item.name);
     }
 }

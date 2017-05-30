@@ -48,7 +48,6 @@ public abstract class TableCollection {
         mDb.execSQL(sbuf.toString());
     }
 
-
     public int count() {
         int count = 0;
         try {

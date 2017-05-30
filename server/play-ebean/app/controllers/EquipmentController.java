@@ -182,5 +182,27 @@ public class EquipmentController extends Controller {
         return edit(id);
     }
 
+
+    public Result query() {
+        ObjectNode top = Json.newObject();
+        ArrayNode array = top.putArray("equipments");
+        for (Equipment item : Equipment.find.all()) {
+            if (!item.disabled) {
+                ObjectNode node = array.addObject();
+                node.put("id", item.id);
+                node.put("name", item.name);
+            }
+        }
+        array = top.putArray("project_equipment");
+        for (ProjectEquipmentCollection item : ProjectEquipmentCollection.find.all()) {
+            ObjectNode node = array.addObject();
+            node.put("id", item.id);
+            node.put("project_id", item.project_id);
+            node.put("equipment_id", item.equipment_id);
+        }
+        return ok(top);
+    }
+
+
 }
 
