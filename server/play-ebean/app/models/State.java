@@ -69,6 +69,14 @@ public class State {
         return null;
     }
 
+    public static String getFull(String name) {
+        State state = find(name);
+        if (state != null) {
+            return state.name;
+        }
+        return name;
+    }
+
     public State(String name, String abbr) {
         this.name = name;
         this.abbr = abbr;

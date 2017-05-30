@@ -17,6 +17,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Projects</th>
+                    <th>Type</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -33,6 +34,9 @@
                         </td>
                         <td>
                             @note.getProjectsLine()
+                        </td>
+                        <td>
+                            @note.getTypeString()
                         </td>
                         <td>
                             <a href="@routes.NoteController.edit(note.id)">Edit</a>

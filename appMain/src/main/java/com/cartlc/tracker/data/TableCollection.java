@@ -1,7 +1,6 @@
 package com.cartlc.tracker.data;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -108,7 +107,7 @@ public abstract class TableCollection {
             ContentValues values = new ContentValues();
             values.clear();
             values.put(KEY_COLLECTION_ID, item.collection_id);
-            values.put(KEY_VALUE_ID, item.equipment_id);
+            values.put(KEY_VALUE_ID, item.value_id);
             values.put(KEY_SERVER_ID, item.server_id);
             item.id = mDb.insert(mTableName, null, values);
             mDb.setTransactionSuccessful();
@@ -124,7 +123,7 @@ public abstract class TableCollection {
             ContentValues values = new ContentValues();
             values.clear();
             values.put(KEY_COLLECTION_ID, item.collection_id);
-            values.put(KEY_VALUE_ID, item.equipment_id);
+            values.put(KEY_VALUE_ID, item.value_id);
             values.put(KEY_SERVER_ID, item.server_id);
             String where = KEY_ROWID + "=?";
             String [] whereArgs = { Long.toString(item.id) };
@@ -170,7 +169,7 @@ public abstract class TableCollection {
                 DataCollectionItem item = new DataCollectionItem();
                 item.id = cursor.getLong(idxRowId);
                 item.collection_id = cursor.getLong(idxCollectionId);
-                item.equipment_id = cursor.getLong(idxValue);
+                item.value_id = cursor.getLong(idxValue);
                 item.server_id = cursor.getInt(idxServerId);
                 items.add(item);
             }
@@ -200,7 +199,7 @@ public abstract class TableCollection {
                 item = new DataCollectionItem();
                 item.id = cursor.getLong(idxRowId);
                 item.collection_id = cursor.getLong(idxCollectionId);
-                item.equipment_id = cursor.getLong(idxValue);
+                item.value_id = cursor.getLong(idxValue);
                 item.server_id = server_id;
             }
             mDb.setTransactionSuccessful();

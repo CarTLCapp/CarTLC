@@ -36,14 +36,16 @@ public class TBApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
+        Timber.i("MYDEBUG: onCreate()");
         DatabaseManager.Init(this);
         PrefHelper.Init(this);
         ServerHelper.Init(this);
         PermissionHelper.Init();
 
-        if (BuildConfig.DEBUG) {
-            Timber.plant(new Timber.DebugTree());
-        }
         TestData.Init();
     }
 

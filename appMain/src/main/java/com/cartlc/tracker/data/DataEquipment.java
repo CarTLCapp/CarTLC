@@ -39,6 +39,14 @@ public class DataEquipment {
         return sbuf.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DataEquipment) {
+            return equals((DataEquipment) obj);
+        }
+        return super.equals(obj);
+    }
+
     public boolean equals(DataEquipment item) {
         return name.equals(item.name);
     }

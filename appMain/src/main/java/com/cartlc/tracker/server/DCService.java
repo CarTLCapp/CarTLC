@@ -7,11 +7,14 @@ import android.support.annotation.Nullable;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataCollectionItem;
 import com.cartlc.tracker.data.DataEquipment;
+import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
+import com.cartlc.tracker.data.TableCollectionNoteProject;
 import com.cartlc.tracker.data.TableEquipment;
+import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TableProjects;
 
 import org.json.JSONArray;
@@ -41,6 +44,7 @@ public class DCService extends IntentService {
     static final String PROJECTS          = SERVER_URL + "/projects";
     static final String COMPANIES         = SERVER_URL + "/companies";
     static final String EQUIPMENTS        = SERVER_URL + "/equipments";
+    static final String NOTES             = SERVER_URL + "/notes";
 
     public DCService() {
         super(SERVER_NAME);
@@ -290,7 +294,7 @@ public class DCService extends IntentService {
                     JSONObject ele = array.getJSONObject(i);
                     int server_id = ele.getInt("id");
                     int server_project_id = ele.getInt("project_id");
-                    int server_equipment_id = ele.getInt("equipment_id");
+                    int server_equipment_id = ele.getInt("value_id");
                     DataCollectionItem incoming =  new DataCollectionItem();
                     incoming.server_id = server_id;
                     // Note: project ID is from the perspective of the server, not the APP.
@@ -305,7 +309,7 @@ public class DCService extends IntentService {
                         Timber.e("Can't find equipment with ID " + server_equipment_id);
                         continue;
                     }
-                    incoming.equipment_id = equipment.id;
+                    incoming.value_id = equipment.id;
                     DataCollectionItem item = TableCollectionEquipmentProject.getInstance().queryByServerId(server_id);
                     if (item == null) {
                         DataCollectionItem match = get(unprocessed, incoming);
@@ -313,17 +317,17 @@ public class DCService extends IntentService {
                             // If this name already exists, convert the existing one by simply giving it the server_id.
                             match.server_id = server_id;
                             TableCollectionEquipmentProject.getInstance().update(match);
-                            Timber.i("Commandeer local: PROJECT COLLECTION " + match.collection_id + ", " + match.equipment_id);
+                            Timber.i("Commandeer local: PROJECT COLLECTION " + match.collection_id + ", " + match.value_id);
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
-                            Timber.i("New project colleciton. " + incoming.collection_id + ", " + incoming.equipment_id);
+                            Timber.i("New project colleciton. " + incoming.collection_id + ", " + incoming.value_id);
                             TableCollectionEquipmentProject.getInstance().add(incoming);
                         }
                     } else {
                         // Change of IDs. A little weird, but we will allow it.
                         if (!incoming.equals(item)) {
-                            Timber.i("Change? " + item.collection_id + ", " + item.equipment_id);
+                            Timber.i("Change? " + item.collection_id + ", " + item.value_id);
                             incoming.id = item.id;
                             incoming.server_id = item.server_id;
                             TableCollectionEquipmentProject.getInstance().update(incoming);
@@ -345,7 +349,6 @@ public class DCService extends IntentService {
         return null;
     }
 
-
     DataCollectionItem get(List<DataCollectionItem> items, DataCollectionItem match) {
         for (DataCollectionItem item : items) {
             if (item.equals(match)) {
@@ -355,6 +358,114 @@ public class DCService extends IntentService {
         return null;
     }
 
+    void queryNotes() {
+        Timber.i("queryNotes()");
+        try {
+            String response = post(NOTES);
+            if (response == null) {
+                Timber.e("Unexpected NULL response from server");
+                return;
+            }
+            JSONObject object = parseResult(response);
+            {
+                List<DataNote> unprocessed = TableNote.getInstance().query();
+                JSONArray array = object.getJSONArray("notes");
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject ele = array.getJSONObject(i);
+                    int server_id = ele.getInt("id");
+                    String name = ele.getString("name");
+                    String typeStr = ele.getString("type");
+                    DataNote.Type type = DataNote.Type.from(typeStr);
+
+                    DataNote incoming = new DataNote(name, type, server_id);
+                    DataNote item = TableNote.getInstance().queryByServerId(server_id);
+                    if (item == null) {
+                        DataNote match = get(unprocessed, incoming);
+                        if (match != null) {
+                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            match.server_id = server_id;
+                            TableNote.getInstance().update(match);
+                            Timber.i("Commandeer local: " + name);
+                            unprocessed.remove(match);
+                        } else {
+                            // Otherwise just add the new entry.
+                            Timber.i("New note: " + name);
+                            TableNote.getInstance().add(incoming);
+                        }
+                    } else {
+                        // Change of name
+                        if (!incoming.equals(item)) {
+                            Timber.i("Change: " + name);
+                            incoming.id = item.id;
+                            incoming.server_id = item.server_id;
+                            TableNote.getInstance().update(incoming);
+                        } else {
+                            Timber.i("No change: " + name);
+                        }
+                    }
+                }
+            }
+            {
+                List<DataCollectionItem> unprocessed = TableCollectionNoteProject.getInstance().query();
+                JSONArray array = object.getJSONArray("project_note");
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject ele = array.getJSONObject(i);
+                    int server_id = ele.getInt("id");
+                    int server_project_id = ele.getInt("project_id");
+                    int server_note_id = ele.getInt("note_id");
+                    DataCollectionItem incoming =  new DataCollectionItem();
+                    incoming.server_id = server_id;
+                    // Note: project ID is from the perspective of the server, not the APP.
+                    DataProject project = TableProjects.getInstance().queryByServerId(server_project_id);
+                    if (project == null) {
+                        Timber.e("Can't find project with ID " + server_project_id);
+                        continue;
+                    }
+                    incoming.collection_id = project.id;
+                    DataNote note = TableNote.getInstance().queryByServerId(server_note_id);
+                    if (note == null) {
+                        Timber.e("Can't find note with ID " + server_note_id);
+                        continue;
+                    }
+                    incoming.value_id = note.id;
+                    DataCollectionItem item = TableCollectionNoteProject.getInstance().queryByServerId(server_id);
+                    if (item == null) {
+                        DataCollectionItem match = get(unprocessed, incoming);
+                        if (match != null) {
+                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            match.server_id = server_id;
+                            TableCollectionNoteProject.getInstance().update(match);
+                            Timber.i("Commandeer local: NOTE COLLECTION " + match.collection_id + ", " + match.value_id);
+                            unprocessed.remove(match);
+                        } else {
+                            // Otherwise just add the new entry.
+                            Timber.i("New note collection. " + incoming.collection_id + ", " + incoming.value_id);
+                            TableCollectionNoteProject.getInstance().add(incoming);
+                        }
+                    } else {
+                        // Change of IDs. A little weird, but we will allow it.
+                        if (!incoming.equals(item)) {
+                            Timber.i("Change? " + item.collection_id + ", " + item.value_id);
+                            incoming.id = item.id;
+                            incoming.server_id = item.server_id;
+                            TableCollectionNoteProject.getInstance().update(incoming);
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
+    DataNote get(List<DataNote> items, DataNote match) {
+        for (DataNote item : items) {
+            if (item.equals(match)) {
+                return item;
+            }
+        }
+        return null;
+    }
 
     String post(String target) {
         try {

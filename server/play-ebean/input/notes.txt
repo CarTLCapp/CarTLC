@@ -1,7 +1,7 @@
 Five Cubits
-		Serial #
-		IMEI #
-		Other
+		Serial #: ALPHANUMERIC
+		IMEI #: NUMERIC
+		Other: MULTILINE
 Digital Fleet
 		Serial #
 		IMEI #
@@ -9,8 +9,8 @@ Digital Fleet
 Smart Witness
 		Serial #
 		IMEI #
-		Sim #
-		DRID #
+		Sim #: NUMERIC_WITH_SPACES
+		DRID #: TEXT
 		Other
 Fed Ex
 		Serial #

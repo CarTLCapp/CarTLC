@@ -13,6 +13,10 @@ import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
 
+import play.libs.Json;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 /**
  * Manage a database of note.
  */
@@ -60,6 +64,7 @@ public class NoteController extends Controller {
             if (savedNote != null) {
                 Note newNoteData = noteForm.get();
                 savedNote.name = newNoteData.name;
+                savedNote.type = newNoteData.type;
                 savedNote.update();
                 flash("success", "Note " + noteForm.get().name + " has been updated");
                 txn.commit();
@@ -123,10 +128,24 @@ public class NoteController extends Controller {
                 if (project != null) {
                     activeProject = project;
                 } else {
+                    Note.Type type = null;
+                    int pos = name.indexOf(':');
+                    if (pos >= 0) {
+                        String typeStr = name.substring(pos+1).trim();
+                        name = name.substring(0, pos).trim();
+                        type = Note.Type.from(typeStr);
+                    }
                     Note note = Note.findByName(name);
                     if (note == null) {
+                        if (type == null) {
+                            type = Note.Type.TEXT;
+                        }
                         note = new Note();
                         note.name = name;
+                        note.type = type;
+                        note.save();
+                    } else if (type != null) {
+                        note.type = type;
                         note.save();
                     }
                     if (activeProject != null) {
@@ -181,6 +200,28 @@ public class NoteController extends Controller {
         }
         return edit(id);
     }
+
+    public Result query() {
+        ObjectNode top = Json.newObject();
+        ArrayNode array = top.putArray("notes");
+        for (Note item : Note.find.all()) {
+            if (!item.disabled) {
+                ObjectNode node = array.addObject();
+                node.put("id", item.id);
+                node.put("name", item.name);
+                node.put("type", item.type.toString());
+            }
+        }
+        array = top.putArray("project_note");
+        for (ProjectNoteCollection item : ProjectNoteCollection.find.all()) {
+            ObjectNode node = array.addObject();
+            node.put("id", item.id);
+            node.put("project_id", item.project_id);
+            node.put("note_id", item.note_id);
+        }
+        return ok(top);
+    }
+
 
 }
 

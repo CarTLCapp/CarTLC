@@ -130,7 +130,7 @@ public class CompanyController extends Controller {
                 node.put("name", item.name);
                 node.put("street", item.street);
                 node.put("city", item.city);
-                node.put("state", item.state);
+                node.put("state", State.getFull(item.state));
             }
         }
         return ok(top);

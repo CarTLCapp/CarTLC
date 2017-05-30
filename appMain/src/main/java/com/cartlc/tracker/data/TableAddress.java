@@ -12,7 +12,6 @@ import timber.log.Timber;
 /**
  * Created by dug on 5/10/17.
  */
-
 public class TableAddress {
 
     static TableAddress sInstance;
@@ -69,6 +68,8 @@ public class TableAddress {
         sbuf.append(KEY_DISABLED);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
+
+        Timber.d("MYDEBUG TableAddress.CREATE: " + sbuf.toString());
     }
 
     public void add(List<DataAddress> list) {
@@ -186,7 +187,7 @@ public class TableAddress {
         try {
             final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET, KEY_ROWID, KEY_SERVER_ID, KEY_DISABLED};
             final String orderBy = KEY_COMPANY + " ASC";
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, orderBy, null);
+            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, orderBy, null);
             int idxState = cursor.getColumnIndex(KEY_STATE);
             int idxCity = cursor.getColumnIndex(KEY_CITY);
             int idxStreet = cursor.getColumnIndex(KEY_STREET);

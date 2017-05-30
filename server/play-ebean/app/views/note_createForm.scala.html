@@ -12,6 +12,12 @@
         
         <fieldset>
             @b3.text(noteForm("name"), '_label -> "Name", '_help -> "")
+            @b3.select(
+                noteForm("type"),
+                options(Note.options),
+                    '_label -> "Input Type", '_default -> "-- Choose a type --",
+                    '_showConstraints -> false
+                )
         </fieldset>
         
         <div class="actions">

@@ -16,6 +16,39 @@ import play.Logger;
 @Entity 
 public class Note extends Model implements Comparable<Note> {
 
+    public enum Type {
+        TEXT("Text"),
+        NUMERIC("Numeric"),
+        ALPHANUMERIC("Alphanumeric"),
+        NUMERIC_WITH_SPACES("Numeric w/ Spaces"),
+        MULTILINE("Multiline");
+
+        public String display;
+
+        Type(String display) {
+            this.display = display;
+        }
+
+        public static Type from(int ord) {
+            for (Type value : values()) {
+                if (value.ordinal() == ord) {
+                    return value;
+                }
+            }
+            return Type.TEXT;
+        }
+
+        public static Type from(String item) {
+            String search = item.toLowerCase();
+            for (Type value : values()) {
+                if (value.toString().toLowerCase().equals(search)) {
+                    return value;
+                }
+            }
+            return Type.TEXT;
+        }
+    }
+
     public static class MalformedFieldException extends Exception {
         public MalformedFieldException(String message) {
             super(message);
@@ -31,7 +64,7 @@ public class Note extends Model implements Comparable<Note> {
     public String name;
 
     @Constraints.Required
-    public short type;
+    public Type type = Type.TEXT;
 
     @Constraints.Required
     public boolean disabled;
@@ -44,8 +77,7 @@ public class Note extends Model implements Comparable<Note> {
     public static List<Note> list() { return list("name", "asc"); }
 
     public static List<Note> list(String sortBy, String order) {
-        return
-                find.where()
+        return find.where()
                         .orderBy(sortBy + " " + order)
                         .findList();
     }
@@ -79,6 +111,8 @@ public class Note extends Model implements Comparable<Note> {
         return sbuf.toString();
     }
 
+    public String getTypeString() { return type.display; }
+
     public static boolean hasProject(long note_id, long project_id) {
         Note note = find.byId(note_id);
         if (note != null) {
@@ -99,6 +133,14 @@ public class Note extends Model implements Comparable<Note> {
     @Override
     public int compareTo(Note item) {
         return name.compareTo(item.name);
+    }
+
+    public static Map<String,String> options() {
+        LinkedHashMap<String,String> options = new LinkedHashMap();
+        for(Type t: Type.values()) {
+            options.put(t.toString(), t.display);
+        }
+        return options;
     }
 }
 

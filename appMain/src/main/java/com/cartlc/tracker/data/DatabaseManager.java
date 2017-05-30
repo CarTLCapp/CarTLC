@@ -27,6 +27,8 @@ public class DatabaseManager {
         @Override
         public void onCreate(SQLiteDatabase db) {
             init(db);
+            Timber.d("MYDEBUG onCreate()");
+
             try {
                 TableAddress.getInstance().create();
                 TableEntries.getInstance().create();
@@ -47,6 +49,7 @@ public class DatabaseManager {
         }
 
         void init(SQLiteDatabase db) {
+            Timber.d("MYDEBUG init()");
             TableAddress.Init(db);
             TableEntries.Init(db);
             TableEquipment.Init(db);
