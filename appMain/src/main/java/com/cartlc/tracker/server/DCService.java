@@ -310,7 +310,12 @@ public class DCService extends IntentService {
                         } else {
                             Timber.i("No change: " + name);
                         }
+                        unprocessed.remove(item);
                     }
+                }
+                // Remaining unprocessed elements are disabled if they have entries.
+                for (DataEquipment item : unprocessed) {
+                    // TableEquipment.getInstance().removeOrDisable(item);
                 }
             }
             {
@@ -428,7 +433,12 @@ public class DCService extends IntentService {
                         } else {
                             Timber.i("No change: " + name);
                         }
+                        unprocessed.remove(item);
                     }
+                }
+                // Remove or disable unprocessed elements
+                for (DataNote note : unprocessed) {
+                    // TODO
                 }
             }
             {
@@ -552,6 +562,7 @@ public class DCService extends IntentService {
                         jobj.put("name", note.name);
                     }
                     jobj.put("value", note.value);
+                    jarray.put(jobj);
                 }
                 jsonObject.put("notes", jarray);
             }

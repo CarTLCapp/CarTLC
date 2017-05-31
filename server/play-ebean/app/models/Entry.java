@@ -33,7 +33,7 @@ public class Entry extends com.avaje.ebean.Model {
     @Constraints.Required
     public int tech_id;
 
-    @Formats.DateTime(pattern="yyyy-MM-dd kk:mm")
+    @Formats.DateTime(pattern="w")
     public Date entry_time;
 
     @Constraints.Required

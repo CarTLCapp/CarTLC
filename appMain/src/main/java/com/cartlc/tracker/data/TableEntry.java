@@ -109,6 +109,7 @@ public class TableEntry {
             int idxRow = cursor.getColumnIndex(KEY_ROWID);
             int idxProjectNameId = cursor.getColumnIndex(KEY_PROJECT_ID);
             int idxAddress = cursor.getColumnIndex(KEY_ADDRESS_ID);
+            int idxDate = cursor.getColumnIndex(KEY_DATE);
             int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
             int idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID);
             int idxNotetCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
@@ -118,11 +119,13 @@ public class TableEntry {
             while (cursor.moveToNext()) {
                 entry = new DataEntry();
                 entry.id = cursor.getLong(idxRow);
+                entry.date = cursor.getLong(idxDate);
                 entry.projectNameId = cursor.getLong(idxProjectNameId);
                 entry.addressId = cursor.getLong(idxAddress);
                 long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
-                entry.equipmentCollection = new DataCollectionEquipmentEntry(equipmentCollectionId);
-                entry.pictureCollection = new DataPictureCollection(cursor.getLong(idxPictureCollectionId));
+                entry.equipmentCollection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
+                long pictureCollectionId = cursor.getLong(idxPictureCollectionId);
+                entry.pictureCollection = TablePictureCollection.getInstance().query(pictureCollectionId);
                 entry.noteCollectionId = cursor.getLong(idxNotetCollectionId);
                 entry.truckNumber = cursor.getInt(idxTruckNumber);
                 entry.uploaded = cursor.getShort(idxUploaded) != 0;

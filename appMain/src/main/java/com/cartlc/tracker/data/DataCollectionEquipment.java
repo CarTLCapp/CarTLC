@@ -3,6 +3,8 @@ package com.cartlc.tracker.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Created by dug on 5/10/17.
  */

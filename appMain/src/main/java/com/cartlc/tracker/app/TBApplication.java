@@ -40,7 +40,6 @@ public class TBApplication extends Application {
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }
-        Timber.i("MYDEBUG: onCreate()");
         DatabaseManager.Init(this);
         PrefHelper.Init(this);
         ServerHelper.Init(this);

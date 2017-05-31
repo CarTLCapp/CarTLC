@@ -302,7 +302,6 @@ public class TableEquipment {
         }
     }
 
-
     public void update(DataEquipment item) {
         mDb.beginTransaction();
         try {

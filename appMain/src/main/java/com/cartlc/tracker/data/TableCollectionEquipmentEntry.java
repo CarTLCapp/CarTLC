@@ -23,4 +23,11 @@ public class TableCollectionEquipmentEntry extends TableCollection {
         super(db, TABLE_NAME);
         sInstance = this;
     }
+
+    public DataCollectionEquipmentEntry queryForCollectionId(long collectionId) {
+        DataCollectionEquipmentEntry collection = new DataCollectionEquipmentEntry(collectionId);
+        collection.equipmentListIds = query(collectionId);
+        return collection;
+    }
+
 }

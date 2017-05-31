@@ -72,8 +72,6 @@ public class TableAddress {
         sbuf.append(KEY_DISABLED);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
-
-        Timber.d("MYDEBUG TableAddress.CREATE: " + sbuf.toString());
     }
 
     public void add(List<DataAddress> list) {

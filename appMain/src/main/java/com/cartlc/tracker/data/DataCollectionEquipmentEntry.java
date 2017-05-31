@@ -1,5 +1,7 @@
 package com.cartlc.tracker.data;
 
+import timber.log.Timber;
+
 /**
  * Created by dug on 5/10/17.
  */
