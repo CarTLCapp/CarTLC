@@ -102,7 +102,6 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         notifyDataSetChanged();
     }
 
-
     @Override
     public int getItemCount() {
         return mProjectGroups.size();

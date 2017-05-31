@@ -44,12 +44,14 @@ import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
+import com.cartlc.tracker.event.EventServerPingDone;
 import com.cartlc.tracker.server.ServerHelper;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     static final int AUTO_RETURN_DELAY_MS = 100;
     static final int MSG_AUTO_RETURN      = 0;
+    static final int MSG_REFRESH_PROJECTS = 1;
 
     class MyHandler extends Handler {
         @Override
@@ -65,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
             switch (msg.what) {
                 case MSG_AUTO_RETURN:
                     doNext();
+                    break;
+                case MSG_REFRESH_PROJECTS:
+                    mProjectAdapter.onDataChanged();
                     break;
             }
         }
@@ -193,6 +199,8 @@ public class MainActivity extends AppCompatActivity {
         PrefHelper.getInstance().setupFromCurrentProjectId();
         computeCurStage();
         fillStage();
+        EventBus.getDefault().register(this);
+
 //        mApp.checkPermissions(this, new PermissionHelper.PermissionListener() {
 //            @Override
 //            public void onGranted(String permission) {
@@ -225,6 +233,18 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         mApp.ping();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    public void onEvent(EventServerPingDone event) {
+        if (mCurStage == Stage.CURRENT_PROJECT) {
+            mHandler.sendEmptyMessage(MSG_REFRESH_PROJECTS);
+        }
     }
 
     void computeCurStage() {

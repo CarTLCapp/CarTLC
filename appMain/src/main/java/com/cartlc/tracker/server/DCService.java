@@ -19,6 +19,7 @@ import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TableProjects;
+import com.cartlc.tracker.event.EventServerPingDone;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,6 +34,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
 /**
@@ -136,7 +138,8 @@ public class DCService extends IntentService {
             }
             List<DataEntry> list = TableEntry.getInstance().queryPendingUploaded();
             if (list.size() > 0) {
-                sendEntries(list);
+                int count = sendEntries(list);
+                EventBus.getDefault().post(new EventServerPingDone(count));
             }
         } catch (Exception ex) {
             Timber.e(ex);
@@ -505,13 +508,18 @@ public class DCService extends IntentService {
         }
     }
 
-    void sendEntries(List<DataEntry> list) {
+    int sendEntries(List<DataEntry> list) {
+        int count = 0;
         for (DataEntry entry : list) {
-            sendEntry(entry);
+            if (sendEntry(entry)) {
+                count++;
+            }
         }
+        return count;
     }
 
-    void sendEntry(DataEntry entry) {
+    boolean sendEntry(DataEntry entry) {
+        boolean success = false;
         Timber.i("sendEntry(" + entry.id + ")");
         try {
             JSONObject jsonObject = new JSONObject();
@@ -521,7 +529,7 @@ public class DCService extends IntentService {
             DataProject project = entry.getProject();
             if (project == null) {
                 Timber.e("No project name for entry -- abort");
-                return;
+                return false;
             }
             if (project.server_id > 0) {
                 jsonObject.accumulate("project_id", project.server_id);
@@ -531,7 +539,7 @@ public class DCService extends IntentService {
             DataAddress address = entry.getAddress();
             if (address == null) {
                 Timber.e("No address for entry -- abort");
-                return;
+                return false;
             }
             if (address.server_id > 0) {
                 jsonObject.accumulate("address_id", address.server_id);
@@ -583,6 +591,7 @@ public class DCService extends IntentService {
                 int code = Integer.parseInt(result);
                 if (code == 0) {
                     TableEntry.getInstance().setUploaded(entry, true);
+                    success = true;
                 } else {
                     Timber.e("While trying to send entry " + entry.id + ": " + code);
                 }
@@ -591,7 +600,9 @@ public class DCService extends IntentService {
             }
         } catch (Exception ex) {
             Timber.e(ex);
+            return false;
         }
+        return success;
     }
 
     DataNote get(List<DataNote> items, DataNote match) {
