@@ -193,6 +193,7 @@ public class TableEntry {
 
             PrefHelper.getInstance().incNextEquipmentCollectionID();
             PrefHelper.getInstance().incNextPictureCollectionID();
+            PrefHelper.getInstance().incNextNoteCollectionID();
 
             ContentValues values = new ContentValues();
             values.clear();
