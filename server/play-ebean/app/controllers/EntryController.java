@@ -225,7 +225,7 @@ public class EntryController extends Controller {
                     }
                     collection.save();
                 }
-                entry.picture_collection_id = collection_id;
+                entry.note_collection_id = collection_id;
             }
         }
         if (missing.size() > 0) {

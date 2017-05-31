@@ -50,6 +50,8 @@ public class DCService extends IntentService {
     static final String EQUIPMENTS  = SERVER_URL + "equipments";
     static final String NOTES       = SERVER_URL + "notes";
 
+    static final String UPLOAD_RESET_TRIGGER = "upload_reset";
+
     public DCService() {
         super(SERVER_NAME);
     }
@@ -91,7 +93,11 @@ public class DCService extends IntentService {
     void ping() {
         Timber.i("ping()");
         try {
-            String response = post(PING);
+            String deviceId = ServerHelper.getInstance().getDeviceId();
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.accumulate("device_id", deviceId);
+            jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
+            String response = post(PING, jsonObject);
             if (response == null) {
                 Timber.e("ping(): Unexpected NULL response from server");
                 return;
@@ -122,6 +128,11 @@ public class DCService extends IntentService {
                 Timber.i("New note version " + version_note);
                 queryNotes();
                 PrefHelper.getInstance().setVersionNote(version_note);
+            }
+            if (object.has(UPLOAD_RESET_TRIGGER)) {
+                if (object.getBoolean(UPLOAD_RESET_TRIGGER)) {
+                    TableEntry.getInstance().setUploaded(false);
+                }
             }
             List<DataEntry> list = TableEntry.getInstance().queryPendingUploaded();
             if (list.size() > 0) {
@@ -546,7 +557,7 @@ public class DCService extends IntentService {
                 JSONArray jarray = new JSONArray();
                 for (DataPicture picture : pictures) {
                     JSONObject jobj = new JSONObject();
-                    jobj.put("filename", picture.pictureFilename);
+                    jobj.put("filename", picture.getTailname());
                     jarray.put(jobj);
                 }
                 jsonObject.put("picture", jarray);

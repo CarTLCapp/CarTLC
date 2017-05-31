@@ -37,6 +37,14 @@ public class DataPicture {
         return pictureFile;
     }
 
+    public String getTailname() {
+        int pos = pictureFilename.lastIndexOf("/");
+        if (pos >= 0) {
+            return pictureFilename.substring(pos + 1);
+        }
+        return pictureFilename;
+    }
+
     public boolean exists() {
         return getPictureFile().exists();
     }

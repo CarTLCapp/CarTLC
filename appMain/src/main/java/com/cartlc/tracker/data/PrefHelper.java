@@ -381,11 +381,11 @@ public class PrefHelper extends PrefHelperBase {
         long tech_id = getTechID();
         long project_id = getProjectId();
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("picture_");
+        sbuf.append("picture_t");
         sbuf.append(tech_id);
-        sbuf.append("_");
+        sbuf.append("_p");
         sbuf.append(project_id);
-        sbuf.append("_");
+        sbuf.append("_d");
         SimpleDateFormat fmt = new SimpleDateFormat(PICTURE_DATE_FORMAT);
         sbuf.append(fmt.format(new Date(System.currentTimeMillis())));
         sbuf.append(".jpg");

@@ -6,6 +6,7 @@ import javax.persistence.*;
 import play.db.ebean.*;
 import play.data.validation.*;
 import play.db.ebean.Transactional;
+import play.data.format.*;
 
 /**
  * User entity managed by Ebean
@@ -69,8 +70,14 @@ public class Client extends com.avaje.ebean.Model {
     @Constraints.Required
     public String device_id;
 
+    @Formats.DateTime(pattern="yyyy-MM-dd kk:mm")
+    public Date last_ping;
+
     @Constraints.Required
     public boolean disabled;
+
+    @Constraints.Required
+    public boolean reset_upload;
 
     public String fullName() {
         StringBuilder sbuf = new StringBuilder();

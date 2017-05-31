@@ -13,7 +13,9 @@ create table client (
   first_name        varchar(255),
   last_name         varchar(255),
   device_id         varchar(255),
-  disabled          bit
+  last_ping         date,
+  disabled          bit,
+  reset_upload      bit
 );
 
 create table company (

@@ -230,4 +230,20 @@ public class TableEntry {
             mDb.endTransaction();
         }
     }
+
+    public void setUploaded(boolean flag) {
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_UPLOADED, flag ? 1 : 0);
+            if (mDb.update(TABLE_NAME, values, null, null) == 0) {
+                Timber.e("Unable to update entries");
+            }
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
+    }
 }

@@ -12,6 +12,7 @@ import com.avaje.ebean.Transaction;
 import play.db.ebean.Transactional;
 import models.Client;
 import models.Version;
+import java.lang.System;
 
 @Singleton
 public class PostController extends Controller
@@ -67,14 +68,24 @@ public class PostController extends Controller
 		return res;
 	}
 
+	@Transactional
 	@BodyParser.Of(BodyParser.Json.class)
 	public Result ping() {
 		ArrayList<String> missing = new ArrayList();
 		JsonNode json = request().body().asJson();
-		String device_id = json.findPath("device_id").textValue();
-		if (device_id == null)
-		{
+		JsonNode node = json.findValue("device_id");
+		String deviceId;
+		if (node == null) {
 			missing.add("device_id");
+		} else {
+			deviceId = node.textValue();
+		}
+		node = json.findValue("tech_id");
+		int tech_id;
+		if (node == null) {
+			missing.add("tech_id");
+		} else {
+			tech_id = node.intValue();
 		}
 		if (missing.size() > 0) {
 			return missingRequest(missing);
@@ -84,6 +95,15 @@ public class PostController extends Controller
 		result.put(Version.VERSION_COMPANY, Version.get(Version.VERSION_COMPANY));
 		result.put(Version.VERSION_EQUIPMENT, Version.get(Version.VERSION_EQUIPMENT));
 		result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
+
+		Client client = Client.find.byId((long) tech_id);
+		if (client.reset_upload) {
+			result.put("reset_upload", true);
+			client.reset_upload = false;
+		}
+		client.last_ping = new Date(System.currentTimeMillis());
+		client.save();
+
 		return ok(result);
 	}
 
