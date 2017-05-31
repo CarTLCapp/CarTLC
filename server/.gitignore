@@ -24,9 +24,9 @@ out
 
 #swp SBT
 dist
-project
-target/
-target
+play-ebean/project/project
+play-ebean/project/target
+play-ebean/target
 .target
 
 # Play
