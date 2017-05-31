@@ -40,7 +40,7 @@ public class EntryController extends Controller {
     }
 
     public Result list() {
-        return list(0, "date", "desc");
+        return list(0, "entry_time", "desc");
     }
 
     /**
