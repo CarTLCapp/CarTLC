@@ -129,10 +129,18 @@ public class CompanyController extends Controller {
                 ObjectNode node = array.addObject();
                 node.put("id", item.id);
                 node.put("name", item.name);
-                node.put("street", item.street);
-                node.put("city", item.city);
-                node.put("state", State.getFull(item.state));
-                node.put("zipcode", item.zipcode);
+                if (item.street != null) {
+                    node.put("street", item.street);
+                }
+                if (item.city != null) {
+                    node.put("city", item.city);
+                }
+                if (item.state != null) {
+                    node.put("state", State.getFull(item.state));
+                }
+                if (item.zipcode != null) {
+                    node.put("zipcode", item.zipcode);
+                }
             }
         }
         return ok(top);

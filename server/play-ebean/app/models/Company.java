@@ -90,7 +90,7 @@ public class Company extends Model {
             company.state = state.abbr;
 
             if (fields.length == 5) {
-                company.zipcode = fields[3].trim();
+                company.zipcode = fields[4].trim();
             }
             if (company.street.isEmpty()) {
                 throw new DataErrorException("Must enter a company street");

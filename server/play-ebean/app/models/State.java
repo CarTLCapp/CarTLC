@@ -70,6 +70,9 @@ public class State {
     }
 
     public static String getFull(String name) {
+        if (name == null) {
+            return null;
+        }
         State state = find(name);
         if (state != null) {
             return state.name;
