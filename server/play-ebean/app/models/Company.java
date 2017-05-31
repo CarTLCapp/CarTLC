@@ -131,7 +131,7 @@ public class Company extends Model {
                 sbuf.append(state);
             }
         }
-        if (zipcode.length() > 0) {
+        if (zipcode != null && zipcode.length() > 0) {
             sbuf.append(", ");
             sbuf.append(zipcode);
         }

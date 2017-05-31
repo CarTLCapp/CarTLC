@@ -113,7 +113,7 @@ POST    /note/:id/delete       controllers.NoteController.delete(id:Long)
 ### ENTRIES ###
 
 # Entries list (look at the default values for pagination parameters)
-GET     /entry                 controllers.EntryController.list(p:Int ?= 0, s ?= "date", o ?= "desc")
+GET     /entry                 controllers.EntryController.list(p:Int ?= 0, s ?= "entry_time", o ?= "desc")
 GET     /entry/:id/pictures    controllers.EntryController.pictures(id:Long)
 GET     /entry/:id/notes       controllers.EntryController.notes(id:Long)
 
