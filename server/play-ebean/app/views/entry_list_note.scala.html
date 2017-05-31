@@ -1,0 +1,38 @@
+@(currentPage: List[EntryNoteCollection])
+
+@main("FleetTLC - List Notes") {
+
+    <h1 id="homeTitle">@Messages("note.list.title", currentPage.size())</h1>
+
+    @if(currentPage.size() == 0) {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+    } else {
+
+        <table class="notes zebra-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(entry <- currentPage) {
+                    <tr>
+                        <td>@entry.getName()</td>
+                        <td>@entry.note_value</td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+    }
+
+}
+
+            

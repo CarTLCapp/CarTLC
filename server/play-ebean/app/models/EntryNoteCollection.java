@@ -31,5 +31,19 @@ public class EntryNoteCollection extends Model {
     public String note_value;
 
     public static Finder<Long,EntryNoteCollection> find = new Finder<Long,EntryNoteCollection>(EntryNoteCollection.class);
+
+    public String getName() {
+        Note note = Note.find.byId(note_id);
+        if (note == null) {
+            return "INVALID ID " + note_id;
+        }
+        return note.name;
+    }
+
+    public static List<EntryNoteCollection> findByCollectionId(long collection_id) {
+        return find.where()
+                .eq("collection_id", collection_id)
+                .findList();
+    }
 }
 

@@ -47,16 +47,22 @@ public class EntryController extends Controller {
      * Display the picture for an entry.
      */
     public Result pictures(Long entry_id) {
-        return ok(Integer.toString(0));
-        // views.html.picture_list.render(entry)
+        Entry entry = Entry.find.byId(entry_id);
+        if (entry == null) {
+            return badRequest("Could not find entry ID " + entry_id);
+        }
+        return ok(views.html.entry_list_picture.render(entry.getPictures()));
     }
 
     /**
      * Display the notes for an entry.
      */
     public Result notes(Long entry_id) {
-        return ok(Integer.toString(0));
-        // views.html.picture_list.render(entry)
+        Entry entry = Entry.find.byId(entry_id);
+        if (entry == null) {
+            return badRequest("Could not find entry ID " + entry_id);
+        }
+        return ok(views.html.entry_list_note.render(entry.getNotes()));
     }
 
     @Transactional

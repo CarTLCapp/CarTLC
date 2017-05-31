@@ -33,7 +33,7 @@ public class Entry extends com.avaje.ebean.Model {
     @Constraints.Required
     public int tech_id;
 
-    @Formats.DateTime(pattern="w")
+    @Formats.DateTime(pattern="yyyy-MM-dd kk:mm")
     public Date entry_time;
 
     @Constraints.Required
@@ -92,6 +92,14 @@ public class Entry extends com.avaje.ebean.Model {
             sbuf.append(equipment.name);
         }
         return sbuf.toString();
+    }
+
+    public List<PictureCollection> getPictures() {
+        return PictureCollection.findByCollectionId(picture_collection_id);
+    }
+
+    public List<EntryNoteCollection> getNotes() {
+        return EntryNoteCollection.findByCollectionId(note_collection_id);
     }
 }
 

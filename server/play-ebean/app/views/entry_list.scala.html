@@ -55,7 +55,7 @@
                 @for(entry <- currentPage.getList) {
                     <tr>
                         <td>@entry.getTechName()</td>
-                        <td>@entry.entry_time.format()</td>
+                        <td>@entry.entry_time.format("yyyy-MM-dd kk:mm")</td>
                         <td>@entry.getProjectLine()</td>
                         <td>@entry.getAddressLine()</td>
                         <td>@entry.getTruckLine()</td>
