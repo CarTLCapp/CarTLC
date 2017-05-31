@@ -50,7 +50,9 @@ public class TBApplication extends Application {
     }
 
     public void ping() {
-        startService(new Intent(this, DCService.class));
+        if (ServerHelper.getInstance().hasConnection()) {
+            startService(new Intent(this, DCService.class));
+        }
     }
 //
 //    public void checkPermissions(Activity act, PermissionListener listener) {

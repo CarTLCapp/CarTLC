@@ -73,7 +73,7 @@ public class TableEntry {
         sbuf.append(KEY_TRUCK_NUMBER);
         sbuf.append(" int, ");
         sbuf.append(KEY_UPLOADED);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 

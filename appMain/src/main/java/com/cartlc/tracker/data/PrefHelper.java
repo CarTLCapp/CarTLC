@@ -278,19 +278,34 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public boolean saveNewProjectIfNeeded() {
+        String project = getProjectName();
+        if (TextUtils.isEmpty((project))) {
+            return false;
+        }
+        String company = getCompany();
+        if (TextUtils.isEmpty(company)) {
+            return false;
+        }
         String state = getState();
         String street = getStreet();
         String city = getCity();
-        String company = getCompany();
-        String project = getProjectName();
-        if (TextUtils.isEmpty(project) || TextUtils.isEmpty(state) || TextUtils.isDigitsOnly(street)
-                || TextUtils.isEmpty(city) || TextUtils.isEmpty(company)) {
-            return false;
-        }
-        long addressId = TableAddress.getInstance().queryAddressId(company, street, city, state);
-        if (addressId < 0) {
-            DataAddress address = new DataAddress(company, street, city, state);
-            addressId = TableAddress.getInstance().add(address);
+        String zipcode = getZipCode();
+        long addressId;
+        if (TextUtils.isEmpty(state) || TextUtils.isEmpty(street) || TextUtils.isEmpty(city)) {
+            if (TextUtils.isEmpty(zipcode)) {
+                return false;
+            }
+            addressId = TableAddress.getInstance().queryAddressId(company, zipcode);
+            if (addressId < 0) {
+                DataAddress address = new DataAddress(company, zipcode);
+                addressId = TableAddress.getInstance().add(address);
+            }
+        } else {
+            addressId = TableAddress.getInstance().queryAddressId(company, street, city, state);
+            if (addressId < 0) {
+                DataAddress address = new DataAddress(company, street, city, state);
+                addressId = TableAddress.getInstance().add(address);
+            }
         }
         long projectNameId = TableProjects.getInstance().queryProjectName(project);
         if (addressId >= 0 && projectNameId >= 0) {

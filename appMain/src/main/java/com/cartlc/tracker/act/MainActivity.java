@@ -50,6 +50,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -223,9 +224,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (ServerHelper.getInstance().hasConnection()) {
-            mApp.ping();
-        }
+        mApp.ping();
     }
 
     void computeCurStage() {
@@ -322,6 +321,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!TextUtils.isEmpty(value) && !value.equals(mByAddress)) {
                     PrefHelper.getInstance().setZipCode(value);
                     mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() - 1);
+                    Timber.d("JUMPING TO CURRENT_PROJECT!");
                 }
             }
         } else if (mCurStageEditing) {
@@ -333,7 +333,9 @@ public class MainActivity extends AppCompatActivity {
                 String name = getEditText(mEntrySimple);
                 if (!TextUtils.isEmpty(name)) {
                     DataProjectAddressCombo group = PrefHelper.getInstance().getCurrentProjectGroup();
-                    TableCollectionEquipmentProject.getInstance().addLocal(name, group.projectNameId);
+                    if (group != null) {
+                        TableCollectionEquipmentProject.getInstance().addLocal(name, group.projectNameId);
+                    }
                 }
             } else if (mCurStage == Stage.ZIPCODE) {
                 PrefHelper.getInstance().setZipCode(getEditText(mEntrySimple));
@@ -532,8 +534,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (!PrefHelper.getInstance().hasCurProject() || TableProjectAddressCombo.getInstance().count() == 0) {
                     computeCurStage();
-                    fillStage();
-                } else {
+                }
+                if (mCurStage == Stage.CURRENT_PROJECT) {
                     mMainListFrame.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
                     mAdd.setVisibility(View.VISIBLE);
@@ -542,6 +544,8 @@ public class MainActivity extends AppCompatActivity {
                     mTitle.setText(R.string.title_current_project);
                     mMainList.setAdapter(mProjectAdapter);
                     mProjectAdapter.onDataChanged();
+                } else {
+                    fillStage();
                 }
                 break;
             case TRUCK_NUMBER:
@@ -621,6 +625,7 @@ public class MainActivity extends AppCompatActivity {
             case ADD_ELEMENT:
                 TableEntry.getInstance().add(mCurEntry);
                 PrefHelper.getInstance().clearLastEntry();
+                mApp.ping();
                 mCurStage = Stage.CURRENT_PROJECT;
                 mCurEntry = null;
                 fillStage();

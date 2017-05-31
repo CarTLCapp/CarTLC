@@ -71,17 +71,21 @@ public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSe
 
     public void onDataChanged() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
-        mItems = collection.getEquipment();
-        notifyDataSetChanged();
+        if (curGroup != null) {
+            DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
+            mItems = collection.getEquipment();
+            notifyDataSetChanged();
+        }
     }
 
     public boolean hasChecked() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
-        for (DataEquipment item : collection.getEquipment()) {
-            if (item.isChecked) {
-                return true;
+        if (curGroup != null) {
+            DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
+            for (DataEquipment item : collection.getEquipment()) {
+                if (item.isChecked) {
+                    return true;
+                }
             }
         }
         return false;

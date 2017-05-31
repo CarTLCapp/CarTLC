@@ -555,6 +555,7 @@ public class DCService extends IntentService {
                 }
                 jsonObject.put("notes", jarray);
             }
+            Timber.i("SENDING " + jsonObject.toString());
             String result = post(ENTER, jsonObject);
             try {
                 int code = Integer.parseInt(result);

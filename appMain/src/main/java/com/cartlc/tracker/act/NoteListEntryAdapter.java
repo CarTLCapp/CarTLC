@@ -93,8 +93,10 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
 
     public void onDataChanged() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId);
-        notifyDataSetChanged();
+        if (curGroup != null) {
+            mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId);
+            notifyDataSetChanged();
+        }
     }
 
     public boolean hasEnoughValues() {
@@ -125,9 +127,11 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
 
     public boolean hasNotesEntered() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        for (DataNote note : TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId)) {
-            if (!TextUtils.isEmpty(note.value)) {
-                return true;
+        if (curGroup != null) {
+            for (DataNote note : TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId)) {
+                if (!TextUtils.isEmpty(note.value)) {
+                    return true;
+                }
             }
         }
         return false;

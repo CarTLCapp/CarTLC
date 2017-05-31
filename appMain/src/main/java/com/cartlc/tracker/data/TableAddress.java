@@ -401,6 +401,30 @@ public class TableAddress {
         return id;
     }
 
+
+    public long queryAddressId(String company, String zipcode) {
+        long id = -1L;
+        try {
+            final String[] columns = {KEY_ROWID};
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(KEY_COMPANY);
+            sbuf.append(" =? AND ");
+            sbuf.append(KEY_ZIPCODE);
+            sbuf.append(" =?");
+            final String selection = sbuf.toString();
+            final String[] selectionArgs = {company, zipcode};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+            if (cursor.moveToFirst()) {
+                id = cursor.getLong(idxRowId);
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return id;
+    }
+
     public DataAddress queryByServerId(int serverId) {
         DataAddress data = null;
         try {
