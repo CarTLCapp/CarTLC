@@ -1,8 +1,9 @@
 package com.cartlc.tracker.app;
 
-import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.support.multidex.MultiDex;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.R;
@@ -15,8 +16,6 @@ import com.cartlc.tracker.server.ServerHelper;
 import timber.log.Timber;
 
 import com.cartlc.tracker.util.PermissionHelper;
-import com.cartlc.tracker.util.PermissionHelper.PermissionRequest;
-import com.cartlc.tracker.util.PermissionHelper.PermissionListener;
 
 /**
  * Created by dug on 4/14/17.
@@ -53,7 +52,16 @@ public class TBApplication extends Application {
             startService(new Intent(this, DCService.class));
         }
     }
-//
+
+
+
+    @Override
+    protected void attachBaseContext(Context base)
+    {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
+
 //    public void checkPermissions(Activity act, PermissionListener listener) {
 //        PermissionHelper.getInstance().checkPermissions(act, PERMISSIONS, listener);
 //    }

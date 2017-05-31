@@ -1,6 +1,7 @@
 
 play/: The source for the server, built using Play Framework.
 admin/: Misc helpful files
+NOTES.odt : details
 
 Login To Server:
 
@@ -13,9 +14,13 @@ http://cartlc.arqnetworks.com/
 Starting Play:
 
 cd play
-sbt
-TestProd
-
-
-
 sbt -mem 2048
+testProd
+
+Deployment:
+
+within sbt do 'dist'
+Copy zip file from target/universal to server using "wrap" script in this directory.
+
+Then on Server execute:
+run-server &
