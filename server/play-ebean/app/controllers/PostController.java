@@ -13,6 +13,7 @@ import play.db.ebean.Transactional;
 import models.Client;
 import models.Version;
 import java.lang.System;
+import java.util.Date;
 
 @Singleton
 public class PostController extends Controller
@@ -77,6 +78,7 @@ public class PostController extends Controller
 		String deviceId;
 		if (node == null) {
 			missing.add("device_id");
+			deviceId = ""; // to get rid of warning
 		} else {
 			deviceId = node.textValue();
 		}
@@ -84,6 +86,7 @@ public class PostController extends Controller
 		int tech_id;
 		if (node == null) {
 			missing.add("tech_id");
+			tech_id = 0; // to get rid of warning
 		} else {
 			tech_id = node.intValue();
 		}
