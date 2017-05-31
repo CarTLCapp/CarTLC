@@ -34,7 +34,7 @@ public class Entry extends com.avaje.ebean.Model {
     public int tech_id;
 
     @Formats.DateTime(pattern="yyyy-MM-dd kk:mm")
-    public Date created;
+    public Date entry_time;
 
     @Constraints.Required
     public long project_id;

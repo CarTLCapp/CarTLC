@@ -76,7 +76,7 @@ public class EntryController extends Controller {
         if (value == null) {
             missing.add("date");
         } else {
-            entry.created = new Date(value.longValue());
+            entry.entry_time = new Date(value.longValue());
         }
         value = json.findValue("truck_number");
         if (value == null) {
