@@ -20,10 +20,9 @@ public class Entry extends com.avaje.ebean.Model {
 
     public static Finder<Long,Entry> find = new Finder<Long,Entry>(Entry.class);
 
-    public static PagedList<Entry> list(int page, int pageSize, String sortBy, String order, String filter) {
+    public static PagedList<Entry> list(int page, int pageSize, String sortBy, String order) {
         return
                 find.where()
-                        .ilike("name", "%" + filter + "%")
                         .orderBy(sortBy + " " + order)
                         .findPagedList(page, pageSize);
     }

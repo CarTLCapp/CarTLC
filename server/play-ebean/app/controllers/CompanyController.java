@@ -55,6 +55,7 @@ public class CompanyController extends Controller {
                 savedCompany.street = newCompanyData.street;
                 savedCompany.state = newCompanyData.state;
                 savedCompany.city = newCompanyData.city;
+                savedCompany.zipcode = newCompanyData.zipcode;
                 savedCompany.update();
                 flash("success", "Company " + companyForm.get().name + " has been updated");
                 txn.commit();
@@ -105,7 +106,7 @@ public class CompanyController extends Controller {
                 }
             }
             Version.inc(Version.VERSION_COMPANY);
-        } catch (Exception ex) {
+        } catch (DataErrorException ex) {
             linesForm.reject("lines", ex.getMessage());
             return badRequest(views.html.companies_createForm.render(linesForm));
         }
@@ -131,6 +132,7 @@ public class CompanyController extends Controller {
                 node.put("street", item.street);
                 node.put("city", item.city);
                 node.put("state", State.getFull(item.state));
+                node.put("zipcode", item.zipcode);
             }
         }
         return ok(top);

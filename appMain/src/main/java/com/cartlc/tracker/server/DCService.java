@@ -203,7 +203,8 @@ public class DCService extends IntentService {
                 String street = ele.getString("street");
                 String city = ele.getString("city");
                 String state = ele.getString("state");
-                DataAddress incoming = new DataAddress(server_id, name, street, city, state);
+                String zipcode = ele.getString("zipcode");
+                DataAddress incoming = new DataAddress(server_id, name, street, city, state, zipcode);
                 DataAddress item = TableAddress.getInstance().queryByServerId(server_id);
                 if (item == null) {
                     DataAddress match = get(unprocessed, incoming);

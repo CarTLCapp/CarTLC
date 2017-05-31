@@ -35,12 +35,12 @@ public class EntryController extends Controller {
         this.formFactory = formFactory;
     }
 
-    public Result list(int page, String sortBy, String order, String filter) {
-        return ok(views.html.entry_list.render(Entry.list(page, PAGE_SIZE, sortBy, order, filter), sortBy, order, filter));
+    public Result list(int page, String sortBy, String order) {
+        return ok(views.html.entry_list.render(Entry.list(page, PAGE_SIZE, sortBy, order), sortBy, order));
     }
 
     public Result list() {
-        return list(0, "date", "desc", "");
+        return list(0, "date", "desc");
     }
 
     /**

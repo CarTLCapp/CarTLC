@@ -10,9 +10,17 @@
 
     <p>You may enter in many companies at once. One company with their address per line.</p>
 
-    <p>Address is in standard format, with fields separated by commas: Company,Street,City,State</p>
+    <p>Address is in standard format, with fields separated by commas: Company,Street,City,State [ZIP optional]</p>
 
-    <p>Example: IMI, 1201 Mason Street, San Francisco, California</p>
+    <p><pre>IMI, 1201 Mason Street, San Francisco, California</pre></p>
+
+    <p>Or:</p>
+
+    <p><pre>IMI, 1201 Mason Street, San Francisco, California, 94116</pre></p>
+
+    <p>Or, you may enter in just the ZIP CODE, like this: Company,ZIP</p>
+
+    <p><pre>IMI, 94110</pre></p>
 
     @helper.form(routes.CompanyController.saveMany()) {
 

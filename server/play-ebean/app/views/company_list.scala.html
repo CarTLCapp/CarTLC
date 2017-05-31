@@ -44,6 +44,7 @@
                     @header("street", "Street")
                     @header("city", "City")
                     @header("state", "State")
+                    @header("zipcode", "ZIP");
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -77,6 +78,13 @@
                                 <em>-</em>
                             } else {
                                 @company.state
+                            }
+                        </td>
+                        <td>
+                            @if(company.zipcode == null) {
+                                <em>-</em>
+                            } else {
+                                @company.zipcode
                             }
                         </td>
                         <td>

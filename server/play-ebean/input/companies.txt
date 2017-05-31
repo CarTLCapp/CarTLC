@@ -1,19 +1,19 @@
-IMI,1201 Mason Street,San Francisco,California
+IMI,1201 Mason Street,San Francisco,California,94106
 Alamo RM,1155 Battery Street,San Francisco,California
-Ozinga,865 Market Street,San Francisco,California
-CW Roberts,120 4th Street,San Francisco,California
-CW Roberts,2222 Fillmore Street,San Francisco,California
+Ozinga,865 Market Street,San Francisco,California,94115
+CW Roberts,94134
+CW Roberts,2222 Fillmore Street,San Francisco,California,94160
 CW Roberts,499 Bay Street,San Francisco,California
 Point RM,1111 S Figueroa Street,Los Angeles,California
 Central Concrete,111 S Grand Avenue,Los Angeles,California
 IMI,1 S State Street,Chicago,Illinois
-Alamo RM,111 N State Street,Chicago,Illinois
-Ozinga,200 E Ohio Street,Chicago,Illinois
-Ozinga,521 N State Street,Chicago,Illinois
+Alamo RM,111 N State Street,Chicago,Illinois,60626
+Ozinga,200 E Ohio Street,Chicago,Illinois,60626
+Ozinga,521 N State Street,Chicago,Illinois,60112
 CW Roberts,601 W Dayton Street,Madison,Wisconsin
 Point RM,62424 University Avenue,Madison,Wisconsin
 Central Concrete,2115 King Street,Madison,Wisconsin
 IMI,1001 Howard Street,Detroit,Michigan
-Alamo RM,1425 W Lafayette Boulevard,Detroit,Michigan
+Alamo RM,1425 W Lafayette Boulevard,Detroit,Michigan,48208
 Alamo RM,100 Renaissance Center,Detroit,Michigan
-Alamo RM,2155 Gratiot Avenue,Detroit,Michigan
+Alamo RM,48231

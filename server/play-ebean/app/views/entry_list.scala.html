@@ -1,4 +1,4 @@
-@(currentPage: com.avaje.ebean.PagedList[Entry], currentSortBy: String, currentOrder: String, currentFilter: String)
+@(currentPage: com.avaje.ebean.PagedList[Entry], currentSortBy: String, currentOrder: String)
 
 @link(newPage:Int, newSortBy:String) = @{
     var sortBy = currentSortBy
@@ -16,20 +16,20 @@
         }
     }
     // Generate the link
-    routes.EntryController.list(newPage, sortBy, order, currentFilter)
+    routes.EntryController.list(newPage, sortBy, order)
 }
 
 @header(key:String, title:String) = {
-    <th class="@key.replace(".","_") header @if(currentSortBy == key) @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
+    <th class="@key header @if(currentSortBy == key) @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
         <a href="@link(0, key)">@title</a>
     </th>
 }
 
 @main("FleetTLC - List Entries") {
 
-    <h1 id="homeTitle">@Messages("entry.list.title", currentPage.getTotalRowCount)</h1>
+    <h1 id="homeTitle">@Messages("entry.list.title", currentPage.getTotalRowCount())</h1>
 
-    @if(currentPage.getTotalRowCount == 0) {
+    @if(currentPage.getTotalRowCount() == 0) {
 
         <div class="well">
             <em>Nothing to display</em>
@@ -40,7 +40,7 @@
         <table class="entries zebra-striped">
             <thead>
                 <tr>
-                    @header("name", "Name")
+                    @header("tech_id", "Name")
                     @header("date", "Date")
                     @header("project_id", "Project")
                     @header("address_id", "Address")

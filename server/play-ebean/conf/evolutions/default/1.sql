@@ -22,6 +22,7 @@ create table company (
   street            varchar(255),
   city              varchar(128),
   state             varchar(64),
+  zipcode           varchar(64),
   disabled          bit
 );
 

@@ -31,6 +31,7 @@ public class TableAddress {
     static final String KEY_STREET = "street";
     static final String KEY_CITY = "city";
     static final String KEY_STATE = "state";
+    static final String KEY_ZIPCODE = "zipcode";
     static final String KEY_SERVER_ID = "server_id";
     static final String KEY_DISABLED = "disabled";
 
@@ -63,6 +64,8 @@ public class TableAddress {
         sbuf.append(" text, ");
         sbuf.append(KEY_STATE);
         sbuf.append(" text, ");
+        sbuf.append(KEY_ZIPCODE);
+        sbuf.append(" text, ");
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
         sbuf.append(KEY_DISABLED);
@@ -82,6 +85,7 @@ public class TableAddress {
                 values.put(KEY_STREET, address.street);
                 values.put(KEY_CITY, address.city);
                 values.put(KEY_STATE, address.state);
+                values.put(KEY_ZIPCODE, address.zipcode);
                 values.put(KEY_SERVER_ID, address.server_id);
                 values.put(KEY_DISABLED, address.disabled ? 1 : 0);
                 mDb.insert(TABLE_NAME, null, values);
@@ -104,6 +108,7 @@ public class TableAddress {
             values.put(KEY_STREET, address.street);
             values.put(KEY_CITY, address.city);
             values.put(KEY_STATE, address.state);
+            values.put(KEY_ZIPCODE, address.zipcode);
             values.put(KEY_SERVER_ID, address.server_id);
             values.put(KEY_DISABLED, address.disabled ? 1 : 0);
             id = mDb.insert(TABLE_NAME, null, values);
@@ -125,6 +130,7 @@ public class TableAddress {
             values.put(KEY_STREET, address.street);
             values.put(KEY_CITY, address.city);
             values.put(KEY_STATE, address.state);
+            values.put(KEY_ZIPCODE, address.zipcode);
             values.put(KEY_SERVER_ID, address.server_id);
             values.put(KEY_DISABLED, address.disabled ? 1 : 0);
             String where = KEY_ROWID + "=?";
@@ -163,6 +169,7 @@ public class TableAddress {
             int idxCity = cursor.getColumnIndex(KEY_CITY);
             int idxStreet = cursor.getColumnIndex(KEY_STREET);
             int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
+            int idxZipCode = cursor.getColumnIndex(KEY_ZIPCODE);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
             if (cursor.moveToFirst()) {
@@ -170,7 +177,8 @@ public class TableAddress {
                         cursor.getString(idxCompany),
                         cursor.getString(idxStreet),
                         cursor.getString(idxCity),
-                        cursor.getString(idxState));
+                        cursor.getString(idxState),
+                        cursor.getString(idxZipCode));
                 address.id = id;
                 address.disabled = cursor.getShort(idxDisabled) == 1;
             }
@@ -191,6 +199,7 @@ public class TableAddress {
             int idxCity = cursor.getColumnIndex(KEY_CITY);
             int idxStreet = cursor.getColumnIndex(KEY_STREET);
             int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
+            int idxZipCode = cursor.getColumnIndex(KEY_ZIPCODE);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
@@ -201,7 +210,8 @@ public class TableAddress {
                         cursor.getString(idxCompany),
                         cursor.getString(idxStreet),
                         cursor.getString(idxCity),
-                        cursor.getString(idxState)));
+                        cursor.getString(idxState),
+                        cursor.getString(idxZipCode)));
                 address.disabled = cursor.getShort(idxDisabled) == 1;
             }
             cursor.close();
@@ -210,6 +220,36 @@ public class TableAddress {
         }
         return list;
     }
+
+
+    public List<String> queryZipCodes(String company) {
+        ArrayList<String> list = new ArrayList();
+        try {
+            final String[] columns = {KEY_ZIPCODE};
+            final String orderBy = KEY_ZIPCODE + " ASC";
+            String selection;
+            String[] selectionArgs;
+            if (company == null) {
+                selection = null;
+                selectionArgs = null;
+            } else {
+                selection = KEY_COMPANY + " =?";
+                selectionArgs = new String[]{company};
+            }
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            int idxValue = cursor.getColumnIndex(KEY_ZIPCODE);
+            String state;
+            while (cursor.moveToNext()) {
+                state = cursor.getString(idxValue);
+                list.add(state);
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return list;
+    }
+
 
     public List<String> queryStates(String company) {
         ArrayList<String> list = new ArrayList();
@@ -339,6 +379,7 @@ public class TableAddress {
             int idxState = cursor.getColumnIndex(KEY_STATE);
             int idxCity = cursor.getColumnIndex(KEY_CITY);
             int idxStreet = cursor.getColumnIndex(KEY_STREET);
+            int idxZipCode = cursor.getColumnIndex(KEY_ZIPCODE);
             int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
             int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
             if (cursor.moveToFirst()) {
@@ -347,7 +388,8 @@ public class TableAddress {
                         cursor.getString(idxCompany),
                         cursor.getString(idxStreet),
                         cursor.getString(idxCity),
-                        cursor.getString(idxState));
+                        cursor.getString(idxState),
+                        cursor.getString(idxZipCode));
                 data.disabled = cursor.getShort(idxDisabled) == 1;
             }
             cursor.close();
