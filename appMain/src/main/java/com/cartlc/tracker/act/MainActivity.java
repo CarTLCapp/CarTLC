@@ -38,7 +38,7 @@ import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
-import com.cartlc.tracker.data.TableEntries;
+import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 import com.cartlc.tracker.data.TablePendingPictures;
@@ -569,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
                 mTitle.setText(R.string.title_confirmation);
                 break;
             case ADD_ELEMENT:
-                TableEntries.getInstance().add(mCurEntry);
+                TableEntry.getInstance().add(mCurEntry);
                 PrefHelper.getInstance().clearLastEntry();
                 mCurStage = Stage.CURRENT_PROJECT;
                 mCurEntry = null;

@@ -33,7 +33,7 @@ public class TableCollectionEquipmentProject extends TableCollection {
     }
 
     public void addByName(String projectName, List<String> equipments) {
-        long projectNameId = TableProjects.getInstance().query(projectName);
+        long projectNameId = TableProjects.getInstance().queryProjectName(projectName);
         if (projectNameId < 0) {
             projectNameId = TableProjects.getInstance().add(projectName);
         }

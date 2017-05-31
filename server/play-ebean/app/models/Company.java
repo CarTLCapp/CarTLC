@@ -98,5 +98,17 @@ public class Company extends Model {
         return company;
     }
 
+    public String getLine() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(name);
+        sbuf.append(", ");
+        sbuf.append(street);
+        sbuf.append(", ");
+        sbuf.append(city);
+        sbuf.append(", ");
+        sbuf.append(state);
+        return sbuf.toString();
+    }
+
 }
 

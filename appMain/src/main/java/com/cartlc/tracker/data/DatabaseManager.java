@@ -31,7 +31,7 @@ public class DatabaseManager {
 
             try {
                 TableAddress.getInstance().create();
-                TableEntries.getInstance().create();
+                TableEntry.getInstance().create();
                 TableEquipment.getInstance().create();
                 TableCollectionEquipmentEntry.getInstance().create();
                 TableCollectionEquipmentProject.getInstance().create();
@@ -51,7 +51,7 @@ public class DatabaseManager {
         void init(SQLiteDatabase db) {
             Timber.d("MYDEBUG init()");
             TableAddress.Init(db);
-            TableEntries.Init(db);
+            TableEntry.Init(db);
             TableEquipment.Init(db);
             TableCollectionEquipmentEntry.Init(db);
             TableCollectionEquipmentProject.Init(db);

@@ -18,10 +18,10 @@ public class TableCollectionNoteEntry {
 
     static final String TABLE_NAME = "note_entry_collection";
 
-    static final String KEY_ROWID    = "_id";
-    static final String KEY_ENTRY_ID = "entry_id";
-    static final String KEY_NOTE_ID  = "note_id";
-    static final String KEY_VALUE    = "value";
+    static final String KEY_ROWID         = "_id";
+    static final String KEY_COLLECTION_ID = "collection_id";
+    static final String KEY_NOTE_ID       = "note_id";
+    static final String KEY_VALUE         = "value";
 
     static TableCollectionNoteEntry sInstance;
 
@@ -47,7 +47,7 @@ public class TableCollectionNoteEntry {
         sbuf.append(" (");
         sbuf.append(KEY_ROWID);
         sbuf.append(" integer primary key autoincrement, ");
-        sbuf.append(KEY_ENTRY_ID);
+        sbuf.append(KEY_COLLECTION_ID);
         sbuf.append(" long, ");
         sbuf.append(KEY_NOTE_ID);
         sbuf.append(" long, ");
@@ -57,18 +57,15 @@ public class TableCollectionNoteEntry {
         mDb.execSQL(sbuf.toString());
     }
 
-    public void store(long projectNameId, long entryId) {
+    public void store(long projectNameId, long collectionId) {
         List<DataNote> notes = TableCollectionNoteProject.getInstance().getNotes(projectNameId);
         mDb.beginTransaction();
         try {
-            String where = KEY_ENTRY_ID + "=?";
-            String[] whereArgs = new String[]{Long.toString(entryId)};
-            mDb.delete(TABLE_NAME, where, whereArgs);
             ContentValues values = new ContentValues();
             for (DataNote note : notes) {
                 if (!TextUtils.isEmpty(note.value)) {
                     values.clear();
-                    values.put(KEY_ENTRY_ID, entryId);
+                    values.put(KEY_COLLECTION_ID, collectionId);
                     values.put(KEY_NOTE_ID, note.id);
                     values.put(KEY_VALUE, note.value);
                     mDb.insert(TABLE_NAME, null, values);
@@ -82,12 +79,12 @@ public class TableCollectionNoteEntry {
         }
     }
 
-    public List<DataNote> query(long entryId) {
+    public List<DataNote> query(long collectionId) {
         List<DataNote> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID, KEY_NOTE_ID, KEY_VALUE};
-            final String selection = KEY_ENTRY_ID + " =?";
-            final String[] selectionArgs = {Long.toString(entryId)};
+            final String selection = KEY_COLLECTION_ID + " =?";
+            final String[] selectionArgs = {Long.toString(collectionId)};
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxNoteId = cursor.getColumnIndex(KEY_NOTE_ID);
@@ -105,16 +102,6 @@ public class TableCollectionNoteEntry {
             Timber.e(ex);
         }
         return list;
-    }
-
-    public void deleteNotes(long entryId) {
-        try {
-            String where = KEY_ENTRY_ID + "=?";
-            String[] whereArgs = new String[]{Long.toString(entryId)};
-            mDb.delete(TABLE_NAME, where, whereArgs);
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
     }
 
 }

@@ -38,8 +38,7 @@ public class ClientController extends Controller {
      * @param id Id of the user to edit
      */
     public Result edit(Long id) {
-        Form<Client> clientForm = formFactory.form(Client.class).fill(Client.find.byId(id)
-        );
+        Form<Client> clientForm = formFactory.form(Client.class).fill(Client.find.byId(id));
         return ok(
             views.html.client_editForm.render(id, clientForm)
         );

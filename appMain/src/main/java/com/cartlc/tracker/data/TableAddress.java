@@ -368,7 +368,7 @@ public class TableAddress {
     }
 
     public void removeOrDisable(DataAddress item) {
-        if (TableEntries.getInstance().countAddresses(item.id) == 0) {
+        if (TableEntry.getInstance().countAddresses(item.id) == 0) {
             // No entries for this, so just remove.
             remove(item.id);
         } else {

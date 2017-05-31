@@ -13,6 +13,7 @@ public class DataEntry {
     public long                         addressId;
     public DataCollectionEquipmentEntry equipmentCollection;
     public DataPictureCollection        pictureCollection;
+    public long                         noteCollectionId;
     public long                         truckNumber;
     public boolean                      uploaded;
 
@@ -20,7 +21,15 @@ public class DataEntry {
     }
 
     public String getProjectName() {
-        return TableProjects.getInstance().query(projectNameId);
+        return TableProjects.getInstance().queryProjectName(projectNameId);
+    }
+
+    public DataProject getProject() {
+        return TableProjects.getInstance().queryById(projectNameId);
+    }
+
+    public DataAddress getAddress() {
+        return TableAddress.getInstance().query(addressId);
     }
 
     public String getAddressText() {
@@ -32,7 +41,7 @@ public class DataEntry {
     }
 
     public List<DataNote> getNotes() {
-        return TableCollectionNoteEntry.getInstance().query(id);
+        return TableCollectionNoteEntry.getInstance().query(noteCollectionId);
     }
 
     public List<String> getEquipmentNames() {
@@ -42,11 +51,19 @@ public class DataEntry {
         return null;
     }
 
+    public List<DataEquipment> getEquipment() {
+        if (equipmentCollection != null) {
+            return equipmentCollection.getEquipment();
+        }
+        return null;
+    }
+
     public List<DataPicture> getPictures() {
         return pictureCollection.pictures;
     }
 
-    public void saveNotes() {
-        TableCollectionNoteEntry.getInstance().store(projectNameId, id);
+    public void saveNotes(long collectionId) {
+        noteCollectionId = collectionId;
+        TableCollectionNoteEntry.getInstance().store(projectNameId, noteCollectionId);
     }
 }

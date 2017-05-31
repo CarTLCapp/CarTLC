@@ -6,13 +6,16 @@ import android.support.annotation.Nullable;
 
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataCollectionItem;
+import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataEquipment;
 import com.cartlc.tracker.data.DataNote;
+import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 import com.cartlc.tracker.data.TableCollectionNoteProject;
+import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TableProjects;
@@ -40,6 +43,7 @@ public class DCService extends IntentService {
     static final String SERVER_NAME = "CarTLC.DataCollectionService";
     static final String SERVER_URL  = "http://cartlc.arqnetworks.com/";
     static final String REGISTER    = SERVER_URL + "/register";
+    static final String ENTER       = SERVER_URL + "/enter";
     static final String PING        = SERVER_URL + "/ping";
     static final String PROJECTS    = SERVER_URL + "/projects";
     static final String COMPANIES   = SERVER_URL + "/companies";
@@ -91,8 +95,6 @@ public class DCService extends IntentService {
                 Timber.e("Unexpected NULL response from server");
                 return;
             }
-            Timber.d("GOT THIS RESULT BACK: " + response);
-
             JSONObject object = parseResult(response);
 
             int version_project = object.getInt(PrefHelper.VERSION_PROJECT);
@@ -119,6 +121,10 @@ public class DCService extends IntentService {
                 Timber.i("New note version " + version_note);
                 queryNotes();
                 PrefHelper.getInstance().setVersionNote(version_note);
+            }
+            List<DataEntry> list = TableEntry.getInstance().queryPendingUploaded();
+            if (list.size() > 0) {
+                sendEntries(list);
             }
         } catch (Exception ex) {
             Timber.e(ex);
@@ -452,6 +458,93 @@ public class DCService extends IntentService {
                         }
                     }
                 }
+            }
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
+    void sendEntries(List<DataEntry> list) {
+        for (DataEntry entry : list) {
+            sendEntry(entry);
+        }
+    }
+
+    void sendEntry(DataEntry entry) {
+        Timber.i("sendEntry(" + entry.id + ")");
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
+            jsonObject.accumulate("date", entry.date);
+            jsonObject.accumulate("truck_number", entry.truckNumber);
+            DataProject project = entry.getProject();
+            if (project == null) {
+                Timber.e("No project name for entry -- abort");
+                return;
+            }
+            if (project.server_id > 0) {
+                jsonObject.accumulate("project_id", project.server_id);
+            } else {
+                jsonObject.accumulate("project_name", project.name);
+            }
+            DataAddress address = entry.getAddress();
+            if (address == null) {
+                Timber.e("No address for entry -- abort");
+                return;
+            }
+            if (address.server_id > 0) {
+                jsonObject.accumulate("address_id", address.server_id);
+            } else {
+                jsonObject.accumulate("address", address.getLine());
+            }
+            List<DataEquipment> equipments = entry.getEquipment();
+            if (equipments.size() > 0) {
+                JSONArray jarray = new JSONArray();
+                for (DataEquipment equipment : equipments) {
+                    JSONObject jobj = new JSONObject();
+                    if (equipment.server_id > 0) {
+                        jobj.accumulate("equipment_id", equipment.server_id);
+                    } else {
+                        jobj.accumulate("equipment_name", equipment.name);
+                    }
+                    jarray.put(jobj);
+                }
+                jsonObject.put("equipment", jarray);
+            }
+            List<DataPicture> pictures = entry.getPictures();
+            if (pictures.size() > 0) {
+                JSONArray jarray = new JSONArray();
+                for (DataPicture picture : pictures) {
+                    JSONObject jobj = new JSONObject();
+                    jobj.put("filename", picture.pictureFilename);
+                    jarray.put(jobj);
+                }
+                jsonObject.put("picture", jarray);
+            }
+            List<DataNote> notes = entry.getNotes();
+            if (notes.size() > 0) {
+                JSONArray jarray = new JSONArray();
+                for (DataNote note : notes) {
+                    JSONObject jobj = new JSONObject();
+                    if (note.server_id > 0) {
+                        jobj.put("id", note.server_id);
+                    } else {
+                        jobj.put("name", note.name);
+                    }
+                    jobj.put("value", note.value);
+                }
+                jsonObject.put("notes", jarray);
+            }
+            String result = post(ENTER, jsonObject);
+            try {
+                int code = Integer.parseInt(result);
+                if (code == 0) {
+                    TableEntry.getInstance().setUploaded(entry, true);
+                } else {
+                    Timber.e("While trying to send entry " + entry.id + ": " + code);
+                }
+            } catch (Exception ex) {
+                Timber.e("While trying to send entry " + entry.id + ": " + result);
             }
         } catch (Exception ex) {
             Timber.e(ex);

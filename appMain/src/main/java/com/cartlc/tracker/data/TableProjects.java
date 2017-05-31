@@ -194,7 +194,7 @@ public class TableProjects {
         return list;
     }
 
-    public String query(long id) {
+    public String queryProjectName(long id) {
         String projectName = null;
         try {
             final String[] columns = {KEY_NAME};
@@ -263,6 +263,30 @@ public class TableProjects {
         return project;
     }
 
+    public DataProject queryById(long id) {
+        DataProject project = null;
+        try {
+            final String[] columns = {KEY_NAME, KEY_DISABLED, KEY_SERVER_ID};
+            final String selection = KEY_ROWID + "=?";
+            final String[] selectionArgs = {Long.toString(id)};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+            int idxName = cursor.getColumnIndex(KEY_NAME);
+            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
+            if (cursor.moveToFirst()) {
+                project = new DataProject();
+                project.name = cursor.getString(idxName);
+                project.disabled = cursor.getShort(idxDisabled) != 0;
+                project.server_id = cursor.getInt(idxServerId);
+                project.id = id;
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return project;
+    }
+
     public DataProject queryByName(String name) {
         DataProject project = null;
         try {
@@ -288,7 +312,7 @@ public class TableProjects {
     }
 
 
-    public long query(String name) {
+    public long queryProjectName(String name) {
         long rowId = -1L;
         try {
             final String[] columns = {KEY_ROWID};
@@ -307,7 +331,7 @@ public class TableProjects {
     }
 
     public void removeOrDisable(DataProject project) {
-        if (TableEntries.getInstance().countProjects(project.id) == 0) {
+        if (TableEntry.getInstance().countProjects(project.id) == 0) {
             // No entries for this, so just remove.
             remove(project.id);
         } else {

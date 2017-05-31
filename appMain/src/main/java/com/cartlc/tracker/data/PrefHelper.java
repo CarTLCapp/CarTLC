@@ -38,6 +38,7 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_TRUCK_NUMBER                 = "truck_number";
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
     static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
+    static final        String KEY_NEXT_NOTE_COLLECTION_ID      = "next_note_collection_id";
     static final        String KEY_TECH_ID                      = "tech_id";
     static final        String KEY_REGISTRATION_CHANGED         = "registration_changed";
     public static final String VERSION_PROJECT                  = "version_project";
@@ -97,7 +98,7 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public Long getProjectId() {
-        long projectNameId = TableProjects.getInstance().query(getProjectName());
+        long projectNameId = TableProjects.getInstance().queryProjectName(getProjectName());
         if (projectNameId >= 0) {
             return projectNameId;
         }
@@ -282,7 +283,7 @@ public class PrefHelper extends PrefHelperBase {
             DataAddress address = new DataAddress(company, street, city, state);
             addressId = TableAddress.getInstance().add(address);
         }
-        long projectNameId = TableProjects.getInstance().query(project);
+        long projectNameId = TableProjects.getInstance().queryProjectName(project);
         if (addressId >= 0 && projectNameId >= 0) {
             long projectGroupId = TableProjectAddressCombo.getInstance().queryProjectGroupId(projectNameId, addressId);
             if (projectGroupId < 0) {
@@ -323,6 +324,14 @@ public class PrefHelper extends PrefHelperBase {
         setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, getNextEquipmentCollectionID() + 1);
     }
 
+    public long getNextNoteCollectionID() {
+        return getLong(KEY_NEXT_NOTE_COLLECTION_ID, 0L);
+    }
+
+    public void incNextNoteCollectionID() {
+        setLong(KEY_NEXT_NOTE_COLLECTION_ID, getNextEquipmentCollectionID() + 1);
+    }
+
     public DataEntry createEntry() {
         long projectGroupId = getCurrentProjectGroupId();
         if (projectGroupId < 0) {
@@ -339,7 +348,7 @@ public class PrefHelper extends PrefHelperBase {
         entry.pictureCollection = TablePendingPictures.getInstance().createCollection();
         entry.addressId = projectGroup.addressId;
         entry.truckNumber = getTruckNumber();
-        entry.saveNotes();
+        entry.saveNotes(getNextNoteCollectionID());
         entry.date = System.currentTimeMillis();
         return entry;
     }

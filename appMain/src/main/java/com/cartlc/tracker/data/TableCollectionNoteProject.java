@@ -31,7 +31,7 @@ public class TableCollectionNoteProject extends TableCollection {
     }
 
     public void addByName(String projectName, List<DataNote> notes) {
-        long projectNameId = TableProjects.getInstance().query(projectName);
+        long projectNameId = TableProjects.getInstance().queryProjectName(projectName);
         if (projectNameId < 0) {
             projectNameId = TableProjects.getInstance().add(projectName);
         }

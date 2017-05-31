@@ -1,0 +1,103 @@
+@(currentPage: com.avaje.ebean.PagedList[Entry], currentSortBy: String, currentOrder: String, currentFilter: String)
+
+@link(newPage:Int, newSortBy:String) = @{
+    var sortBy = currentSortBy
+    var order = currentOrder
+    if(newSortBy != null) {
+        sortBy = newSortBy
+        if(currentSortBy == newSortBy) {
+            if(currentOrder == "asc") {
+                order = "desc"
+            } else {
+                order = "asc"
+            }
+        } else {
+            order = "asc"
+        }
+    }
+    // Generate the link
+    routes.EntryController.list(newPage, sortBy, order, currentFilter)
+}
+
+@header(key:String, title:String) = {
+    <th class="@key.replace(".","_") header @if(currentSortBy == key) @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
+        <a href="@link(0, key)">@title</a>
+    </th>
+}
+
+@main("FleetTLC - List Entries") {
+
+    <h1 id="homeTitle">@Messages("entry.list.title", currentPage.getTotalRowCount)</h1>
+
+    @if(currentPage.getTotalRowCount == 0) {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+    } else {
+
+        <table class="entries zebra-striped">
+            <thead>
+                <tr>
+                    @header("name", "Name")
+                    @header("date", "Date")
+                    @header("project_id", "Project")
+                    @header("address_id", "Address")
+                    @header("truck_number", "Truck#")
+                    <th>Equipment</th>
+                    <th>Pictures</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(entry <- currentPage.getList) {
+                    <tr>
+                        <td>@entry.getTechName()</td>
+                        <td>@entry.getProjectLine()</td>
+                        <td>@entry.getAddressLine()</td>
+                        <td>@entry.getTruckLine()</td>
+                        <td>@entry.getEquipmentLine()</td>
+                        <td>
+                            <a href="@routes.EntryController.pictures(entry.id)">Pictures</a>
+                        </td>
+                        <td>
+                            <a href="@routes.EntryController.notes(entry.id)">Notes</a>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+        <div id="pagination" class="pagination">
+            <ul>
+                @if(currentPage.hasPrev) {
+                <li class="prev">
+                    <a href="@link(currentPage.getPageIndex - 1, null)">&larr; Previous</a>
+                </li>
+                } else {
+                <li class="prev disabled">
+                    <a>&larr; Previous</a>
+                </li>
+                }
+                <li class="current">
+                    <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
+                </li>
+                @if(currentPage.hasNext) {
+                <li class="next">
+                    <a href="@link(currentPage.getPageIndex + 1, null)">Next &rarr;</a>
+                </li>
+                } else {
+                <li class="next disabled">
+                    <a>Next &rarr;</a>
+                </li>
+                }
+            </ul>
+        </div>
+    }
+
+}
+
+            

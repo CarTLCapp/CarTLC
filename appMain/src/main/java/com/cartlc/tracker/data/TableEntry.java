@@ -13,32 +13,33 @@ import timber.log.Timber;
  * Created by dug on 4/17/17.
  */
 
-public class TableEntries {
+public class TableEntry {
 
     static final String TABLE_NAME = "table_entries";
 
-    static final String KEY_ROWID = "_id";
-    static final String KEY_DATE = "date";
-    static final String KEY_PROJECT_ID = "project_id";
-    static final String KEY_ADDRESS_ID = "address_id";
+    static final String KEY_ROWID                   = "_id";
+    static final String KEY_DATE                    = "date";
+    static final String KEY_PROJECT_ID              = "project_id";
+    static final String KEY_ADDRESS_ID              = "address_id";
     static final String KEY_EQUIPMENT_COLLECTION_ID = "equipment_collection_id";
-    static final String KEY_PICTURE_COLLECTION_ID = "picture_collection_id";
-    static final String KEY_TRUCK_NUMBER = "truck_number";
-    static final String KEY_UPLOADED = "uploaded";
+    static final String KEY_PICTURE_COLLECTION_ID   = "picture_collection_id";
+    static final String KEY_NOTE_COLLECTION_ID      = "note_collection_id";
+    static final String KEY_TRUCK_NUMBER            = "truck_number";
+    static final String KEY_UPLOADED                = "uploaded";
 
-    static TableEntries sInstance;
+    static TableEntry sInstance;
 
     static void Init(SQLiteDatabase db) {
-        new TableEntries(db);
+        new TableEntry(db);
     }
 
-    public static TableEntries getInstance() {
+    public static TableEntry getInstance() {
         return sInstance;
     }
 
     final SQLiteDatabase mDb;
 
-    TableEntries(SQLiteDatabase db) {
+    TableEntry(SQLiteDatabase db) {
         sInstance = this;
         this.mDb = db;
     }
@@ -67,6 +68,8 @@ public class TableEntries {
         sbuf.append(" long, ");
         sbuf.append(KEY_PICTURE_COLLECTION_ID);
         sbuf.append(" long, ");
+        sbuf.append(KEY_NOTE_COLLECTION_ID);
+        sbuf.append(" long, ");
         sbuf.append(KEY_TRUCK_NUMBER);
         sbuf.append(" int, ");
         sbuf.append(KEY_UPLOADED);
@@ -91,7 +94,7 @@ public class TableEntries {
     }
 
     public List<DataEntry> queryPendingUploaded() {
-        String where = KEY_UPLOADED + "=1";
+        String where = KEY_UPLOADED + "=0";
         return query(where, null);
     }
 
@@ -100,7 +103,7 @@ public class TableEntries {
         try {
             final String[] columns = {KEY_ROWID,
                     KEY_DATE, KEY_PROJECT_ID, KEY_ADDRESS_ID, KEY_EQUIPMENT_COLLECTION_ID,
-                    KEY_PICTURE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_UPLOADED};
+                    KEY_PICTURE_COLLECTION_ID, KEY_NOTE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_UPLOADED};
             final String orderBy = KEY_DATE + " DESC";
             Cursor cursor = mDb.query(TABLE_NAME, columns, where, whereArgs, null, null, orderBy, null);
             int idxRow = cursor.getColumnIndex(KEY_ROWID);
@@ -108,6 +111,7 @@ public class TableEntries {
             int idxAddress = cursor.getColumnIndex(KEY_ADDRESS_ID);
             int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
             int idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID);
+            int idxNotetCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
             int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
             int idxUploaded = cursor.getColumnIndex(KEY_UPLOADED);
             DataEntry entry;
@@ -119,6 +123,7 @@ public class TableEntries {
                 long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
                 entry.equipmentCollection = new DataCollectionEquipmentEntry(equipmentCollectionId);
                 entry.pictureCollection = new DataPictureCollection(cursor.getLong(idxPictureCollectionId));
+                entry.noteCollectionId = cursor.getLong(idxNotetCollectionId);
                 entry.truckNumber = cursor.getInt(idxTruckNumber);
                 entry.uploaded = cursor.getShort(idxUploaded) != 0;
                 list.add(entry);
@@ -193,6 +198,7 @@ public class TableEntries {
             values.put(KEY_ADDRESS_ID, entry.addressId);
             values.put(KEY_EQUIPMENT_COLLECTION_ID, entry.equipmentCollection.id);
             values.put(KEY_TRUCK_NUMBER, entry.truckNumber);
+            values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
             mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -202,9 +208,10 @@ public class TableEntries {
         }
     }
 
-    public void setUploaded(DataEntry entry) {
+    public void setUploaded(DataEntry entry, boolean flag) {
+        mDb.beginTransaction();
         try {
-            entry.uploaded = true;
+            entry.uploaded = flag;
             ContentValues values = new ContentValues();
             values.put(KEY_UPLOADED, entry.uploaded ? 1 : 0);
             String where = KEY_ROWID + "=?";

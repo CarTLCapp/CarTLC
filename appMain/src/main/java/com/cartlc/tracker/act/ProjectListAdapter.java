@@ -11,7 +11,7 @@ import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.PrefHelper;
-import com.cartlc.tracker.data.TableEntries;
+import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 
 import java.util.List;
@@ -56,10 +56,10 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     public void onBindViewHolder(CustomViewHolder holder, final int position) {
         final DataProjectAddressCombo projectGroup = mProjectGroups.get(position);
         holder.mProjectName.setText(projectGroup.getProjectName());
-        int countTotal = TableEntries.getInstance().countProjects(projectGroup.projectNameId);
+        int countTotal = TableEntry.getInstance().countProjects(projectGroup.projectNameId);
 
         if (countTotal > 0) {
-            int           countUploaded = TableEntries.getInstance().countUploaded(projectGroup.projectNameId);
+            int           countUploaded = TableEntry.getInstance().countUploaded(projectGroup.projectNameId);
             StringBuilder sbuf          = new StringBuilder();
             sbuf.append(mContext.getString(R.string.title_entries_));
             sbuf.append(" ");

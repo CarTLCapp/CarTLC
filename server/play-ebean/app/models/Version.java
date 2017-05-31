@@ -14,6 +14,9 @@ public class Version extends com.avaje.ebean.Model {
     public static final String VERSION_COMPANY                  = "version_company";
     public static final String VERSION_EQUIPMENT                = "version_equipment";
     public static final String VERSION_NOTE                     = "version_note";
+    public static final String NEXT_EQUIPMENT_COLLECTION_ID     = "next_equipment_collection_id";
+    public static final String NEXT_PICTURE_COLLECTION_ID       = "next_picture_collection_id";
+    public static final String NEXT_NOTE_COLLECTION_ID          = "next_note_collection_id";
 
     private static final long serialVersionUID = 1L;
 
@@ -45,7 +48,7 @@ public class Version extends com.avaje.ebean.Model {
     }
 
     @Transactional
-    public static void inc(String key) {
+    public static int inc(String key) {
         Version version = get_(key);
         if (version == null) {
             version = new Version();
@@ -54,5 +57,6 @@ public class Version extends com.avaje.ebean.Model {
         }
         version.ivalue++;
         version.save();
+        return version.ivalue;
     }
 }
