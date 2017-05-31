@@ -42,13 +42,13 @@ public class DCService extends IntentService {
 
     static final String SERVER_NAME = "CarTLC.DataCollectionService";
     static final String SERVER_URL  = "http://cartlc.arqnetworks.com/";
-    static final String REGISTER    = SERVER_URL + "/register";
-    static final String ENTER       = SERVER_URL + "/enter";
-    static final String PING        = SERVER_URL + "/ping";
-    static final String PROJECTS    = SERVER_URL + "/projects";
-    static final String COMPANIES   = SERVER_URL + "/companies";
-    static final String EQUIPMENTS  = SERVER_URL + "/equipments";
-    static final String NOTES       = SERVER_URL + "/notes";
+    static final String REGISTER    = SERVER_URL + "register";
+    static final String ENTER       = SERVER_URL + "enter";
+    static final String PING        = SERVER_URL + "ping";
+    static final String PROJECTS    = SERVER_URL + "projects";
+    static final String COMPANIES   = SERVER_URL + "companies";
+    static final String EQUIPMENTS  = SERVER_URL + "equipments";
+    static final String NOTES       = SERVER_URL + "notes";
 
     public DCService() {
         super(SERVER_NAME);

@@ -65,7 +65,7 @@ public class EntryController extends Controller {
         Entry entry = new Entry();
         ArrayList<String> missing = new ArrayList();
         JsonNode json = request().body().asJson();
-        System.out.println("GOT: " + json.toString());
+        Logger.debug("GOT: " + json.toString());
         JsonNode value = json.findValue("tech_id");
         if (value == null) {
             missing.add("tech_id");
