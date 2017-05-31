@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         LOGIN,
         PROJECT,
         COMPANY,
+        ZIPCODE,
         STATE,
         CITY,
         STREET,
@@ -125,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
     ConfirmationFrame          mConfirmationFrame;
     DataEntry                  mCurEntry;
     OnEditorActionListener     mAutoNext;
+    String                     mByAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mByAddress = getString(R.string.entry_by_address);
         mInputMM = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mNext.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -226,22 +229,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void computeCurStage() {
+        boolean inEntry = false;
         if (TextUtils.isEmpty(PrefHelper.getInstance().getLastName())) {
             mCurStage = Stage.LOGIN;
         } else if (TextUtils.isEmpty(PrefHelper.getInstance().getProjectName())) {
             mCurStage = Stage.PROJECT;
         } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCompany())) {
             mCurStage = Stage.COMPANY;
-        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getState())) {
-            mCurStage = Stage.STATE;
-        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCity())) {
-            mCurStage = Stage.CITY;
-        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
-            mCurStage = Stage.STREET;
         } else {
+            if (TextUtils.isEmpty(PrefHelper.getInstance().getZipCode()) &&
+                    TextUtils.isEmpty(PrefHelper.getInstance().getState()) &&
+                    TextUtils.isEmpty(PrefHelper.getInstance().getCity()) &&
+                    TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
+                mCurStage = Stage.ZIPCODE;
+            } else {
+                if (TextUtils.isEmpty(PrefHelper.getInstance().getZipCode())) {
+                    if (TextUtils.isEmpty(PrefHelper.getInstance().getState())) {
+                        mCurStage = Stage.STATE;
+                    } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCity())) {
+                        mCurStage = Stage.CITY;
+                    } else if (TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
+                        mCurStage = Stage.STREET;
+                    } else {
+                        inEntry = true;
+                    }
+                } else {
+                    inEntry = true;
+                }
+            }
+        }
+        if (inEntry) {
             boolean hasTruckNumber = !TextUtils.isEmpty(getTruckNumber());
             boolean hasNotes = mNoteAdapter.hasNotesEntered();
-            boolean hasEquip = mEquipmentAdapter.hasChecked();;
+            boolean hasEquip = mEquipmentAdapter.hasChecked();
+            ;
             boolean hasPictures = TablePendingPictures.getInstance().queryPictures().size() > 0;
 
             if (!hasTruckNumber && !hasNotes && !hasEquip && !hasPictures) {
@@ -295,16 +316,13 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             }
-        } else if (mCurStage == Stage.NOTES) {
+        } else if (mCurStage == Stage.ZIPCODE) {
             if (isNext) {
-//                if (!mNoteAdapter.hasEnoughValues()) {
-//                    StringBuilder sbuf = new StringBuilder();
-//                    sbuf.append(getString(R.string.error_need_note_fields));
-//                    sbuf.append("\n");
-//                    sbuf.append(mNoteAdapter.getEmptyFields());
-//                    showError(sbuf.toString());
-//                    return false;
-//                }
+                String value = mEntrySimple.getText().toString();
+                if (!TextUtils.isEmpty(value) && !value.equals(mByAddress)) {
+                    PrefHelper.getInstance().setZipCode(value);
+                    mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() - 1);
+                }
             }
         } else if (mCurStageEditing) {
             if (mCurStage == Stage.CITY) {
@@ -317,6 +335,9 @@ public class MainActivity extends AppCompatActivity {
                     DataProjectAddressCombo group = PrefHelper.getInstance().getCurrentProjectGroup();
                     TableCollectionEquipmentProject.getInstance().addLocal(name, group.projectNameId);
                 }
+            } else if (mCurStage == Stage.ZIPCODE) {
+                PrefHelper.getInstance().setZipCode(getEditText(mEntrySimple));
+                mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() - 1);
             }
         }
         mCurStageEditing = false;
@@ -401,6 +422,35 @@ public class MainActivity extends AppCompatActivity {
                 PrefHelper.getInstance().addCompany(companies);
                 setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
                 break;
+            case ZIPCODE: {
+                mMainListFrame.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
+                mNext.setVisibility(View.VISIBLE);
+                String company = PrefHelper.getInstance().getCompany();
+                if (TableAddress.getInstance().hasZipOnly(company)) {
+                    if (mCurStageEditing) {
+                        mTitle.setText(R.string.title_zipcode);
+                        mEntryFrame.setVisibility(View.VISIBLE);
+                        mEntrySimple.setHint(R.string.title_zipcode);
+                        mEntrySimple.setText("");
+                        mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS);
+                    } else {
+                        List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
+                        if (zipcodes.size() > 0) {
+                            zipcodes.add(0, mByAddress);
+                            setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
+                            mNew.setVisibility(View.VISIBLE);
+                        } else {
+                            mCurStageEditing = true;
+                            fillStage();
+                        }
+                    }
+                } else {
+                    mCurStage = Stage.from(mCurStage.ordinal() + 1);
+                    fillStage();
+                }
+                break;
+            }
             case STATE:
                 mMainListFrame.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);

@@ -3,6 +3,7 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,14 +27,14 @@ public class TableAddress {
 
     static final String TABLE_NAME = "list_address";
 
-    static final String KEY_ROWID = "_id";
-    static final String KEY_COMPANY = "company";
-    static final String KEY_STREET = "street";
-    static final String KEY_CITY = "city";
-    static final String KEY_STATE = "state";
-    static final String KEY_ZIPCODE = "zipcode";
+    static final String KEY_ROWID     = "_id";
+    static final String KEY_COMPANY   = "company";
+    static final String KEY_STREET    = "street";
+    static final String KEY_CITY      = "city";
+    static final String KEY_STATE     = "state";
+    static final String KEY_ZIPCODE   = "zipcode";
     static final String KEY_SERVER_ID = "server_id";
-    static final String KEY_DISABLED = "disabled";
+    static final String KEY_DISABLED  = "disabled";
 
     final SQLiteDatabase mDb;
 
@@ -134,7 +135,7 @@ public class TableAddress {
             values.put(KEY_SERVER_ID, address.server_id);
             values.put(KEY_DISABLED, address.disabled ? 1 : 0);
             String where = KEY_ROWID + "=?";
-            String [] whereArgs = { Long.toString(address.id) };
+            String[] whereArgs = {Long.toString(address.id)};
             mDb.update(TABLE_NAME, values, where, whereArgs);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -157,10 +158,32 @@ public class TableAddress {
         return count;
     }
 
+
+    public boolean hasZipOnly(String company) {
+
+        int count = 0;
+        try {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(KEY_COMPANY);
+            sbuf.append("=? AND ");
+            sbuf.append(KEY_ZIPCODE);
+            sbuf.append(" IS NOT NULL");
+            final String selection = sbuf.toString();
+            final String [] selectionArgs = { company };
+            Cursor cursor = mDb.query(true, TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count > 0;
+    }
+
+
     public DataAddress query(long id) {
         DataAddress address = null;
         try {
-            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET, KEY_SERVER_ID, KEY_DISABLED};
+            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET, KEY_ZIPCODE, KEY_SERVER_ID, KEY_DISABLED};
             final String orderBy = KEY_COMPANY + " ASC";
             final String selection = KEY_ROWID + " =?";
             final String[] selectionArgs = {Long.toString(id)};
@@ -192,7 +215,7 @@ public class TableAddress {
     public List<DataAddress> query() {
         ArrayList<DataAddress> list = new ArrayList();
         try {
-            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET, KEY_ROWID, KEY_SERVER_ID, KEY_DISABLED};
+            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET, KEY_ROWID, KEY_SERVER_ID, KEY_DISABLED, KEY_ZIPCODE};
             final String orderBy = KEY_COMPANY + " ASC";
             Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, orderBy, null);
             int idxState = cursor.getColumnIndex(KEY_STATE);
@@ -238,10 +261,12 @@ public class TableAddress {
             }
             Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_ZIPCODE);
-            String state;
+            String zipcode;
             while (cursor.moveToNext()) {
-                state = cursor.getString(idxValue);
-                list.add(state);
+                zipcode = cursor.getString(idxValue);
+                if (!TextUtils.isEmpty(zipcode)) {
+                    list.add(zipcode);
+                }
             }
             cursor.close();
         } catch (Exception ex) {
@@ -270,7 +295,9 @@ public class TableAddress {
             String state;
             while (cursor.moveToNext()) {
                 state = cursor.getString(idxValue);
-                list.add(state);
+                if (state != null) {
+                    list.add(state);
+                }
             }
             cursor.close();
         } catch (Exception ex) {
@@ -289,7 +316,10 @@ public class TableAddress {
             Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_CITY);
             while (cursor.moveToNext()) {
-                list.add(cursor.getString(idxValue));
+                String city = cursor.getString(idxValue);
+                if (city != null) {
+                    list.add(city);
+                }
             }
             cursor.close();
         } catch (Exception ex) {
@@ -332,7 +362,10 @@ public class TableAddress {
             Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_STREET);
             while (cursor.moveToNext()) {
-                list.add(cursor.getString(idxValue));
+                String street = cursor.getString(idxValue);
+                if (street != null) {
+                    list.add(street);
+                }
             }
             cursor.close();
         } catch (Exception ex) {
@@ -371,7 +404,7 @@ public class TableAddress {
     public DataAddress queryByServerId(int serverId) {
         DataAddress data = null;
         try {
-            final String[] columns = {KEY_COMPANY, KEY_STREET, KEY_CITY, KEY_STATE, KEY_ROWID, KEY_DISABLED};
+            final String[] columns = {KEY_COMPANY, KEY_STREET, KEY_CITY, KEY_STATE, KEY_ZIPCODE, KEY_ROWID, KEY_DISABLED};
             final String selection = KEY_SERVER_ID + "=?";
             final String[] selectionArgs = {Integer.toString(serverId)};
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);

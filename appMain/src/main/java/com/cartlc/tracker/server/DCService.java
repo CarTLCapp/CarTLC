@@ -82,6 +82,7 @@ public class DCService extends IntentService {
             int tech_id = Integer.parseInt(result);
             PrefHelper.getInstance().setTechID(tech_id);
             PrefHelper.getInstance().setRegistrationChanged(false);
+            Timber.i("TECH ID=" + tech_id);
         } catch (Exception ex) {
             Timber.e(ex);
         }
@@ -92,7 +93,7 @@ public class DCService extends IntentService {
         try {
             String response = post(PING);
             if (response == null) {
-                Timber.e("Unexpected NULL response from server");
+                Timber.e("ping(): Unexpected NULL response from server");
                 return;
             }
             JSONObject object = parseResult(response);
@@ -136,7 +137,7 @@ public class DCService extends IntentService {
         try {
             String response = post(PROJECTS);
             if (response == null) {
-                Timber.e("Unexpected NULL response from server");
+                Timber.e("queryProjects(): Unexpected NULL response from server");
                 return;
             }
             List<String> unprocessed = TableProjects.getInstance().query();
@@ -189,21 +190,39 @@ public class DCService extends IntentService {
         try {
             String response = post(COMPANIES);
             if (response == null) {
-                Timber.e("Unexpected NULL response from server");
+                Timber.e("queryCompanies(): Unexpected NULL response from server");
                 return;
             }
             List<DataAddress> unprocessed = TableAddress.getInstance().query();
 
             JSONObject object = parseResult(response);
             JSONArray array = object.getJSONArray("companies");
+            String name, street, city, state, zipcode;
+
             for (int i = 0; i < array.length(); i++) {
                 JSONObject ele = array.getJSONObject(i);
                 int server_id = ele.getInt("id");
-                String name = ele.getString("name");
-                String street = ele.getString("street");
-                String city = ele.getString("city");
-                String state = ele.getString("state");
-                String zipcode = ele.getString("zipcode");
+                name = ele.getString("name");
+                if (ele.has("street")) {
+                    street = ele.getString("street");
+                } else {
+                    street = null;
+                }
+                if (ele.has("city")) {
+                    city = ele.getString("city");
+                } else {
+                    city = null;
+                }
+                if (ele.has("state")) {
+                    state = ele.getString("state");
+                } else {
+                    state = null;
+                }
+                if (ele.has("zipcode")) {
+                    zipcode = ele.getString("zipcode");
+                } else {
+                    zipcode = null;
+                }
                 DataAddress incoming = new DataAddress(server_id, name, street, city, state, zipcode);
                 DataAddress item = TableAddress.getInstance().queryByServerId(server_id);
                 if (item == null) {
@@ -254,7 +273,7 @@ public class DCService extends IntentService {
         try {
             String response = post(EQUIPMENTS);
             if (response == null) {
-                Timber.e("Unexpected NULL response from server");
+                Timber.e("queryEquipments(): Unexpected NULL response from server");
                 return;
             }
             JSONObject object = parseResult(response);
@@ -370,7 +389,7 @@ public class DCService extends IntentService {
         try {
             String response = post(NOTES);
             if (response == null) {
-                Timber.e("Unexpected NULL response from server");
+                Timber.e("queryNotes(): Unexpected NULL response from server");
                 return;
             }
             JSONObject object = parseResult(response);

@@ -81,7 +81,9 @@ public class DataAddress {
     }
 
     boolean hasAddress() {
-        return street.length() > 0 || city.length() > 0 || state.length() > 0;
+        return (street != null && street.length() > 0) ||
+                (city != null && city.length() > 0) ||
+                (state != null && state.length() > 0);
     }
 
     boolean hasZipCode() {

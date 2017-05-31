@@ -25,6 +25,7 @@
     <string name="title_company">Company</string>
     <string name="title_street">Street</string>
     <string name="title_address_">Address:</string>
+    <string name="title_zipcode">ZIP</string>
     <string name="title_current_project">Current Project</string>
     <string name="title_truck_number">Truck Number</string>
     <string name="title_truck_number_">Truck Number:</string>
@@ -53,5 +54,7 @@
     <!--<string name="perm_read_phone_state">Need to be able to tell if you have a MOBILE connection.</string>-->
 
     <string name="loading">LOADING...</string>
+
+    <string name="entry_by_address">BY ADDRESS</string>
 
 </resources>

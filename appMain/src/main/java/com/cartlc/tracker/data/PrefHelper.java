@@ -31,6 +31,7 @@ public class PrefHelper extends PrefHelperBase {
     static public final String KEY_STREET                       = "street";
     static public final String KEY_STATE                        = "state";
     static public final String KEY_CITY                         = "city";
+    static public final String KEY_ZIPCODE                      = "zipcode";
     static final        String KEY_CURRENT_PROJECT_GROUP_ID     = "current_project_group_id";
     static final        String KEY_SAVED_PROJECT_GROUP_ID       = "saved_project_group_id";
     static final        String KEY_FIRST_NAME                   = "first_name";
@@ -91,6 +92,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setCity(String value) {
         setString(KEY_CITY, value);
+    }
+
+    public String getZipCode() {
+        return getString(KEY_ZIPCODE, null);
+    }
+
+    public void setZipCode(String value) {
+        setString(KEY_ZIPCODE, value);
     }
 
     public String getProjectName() {
