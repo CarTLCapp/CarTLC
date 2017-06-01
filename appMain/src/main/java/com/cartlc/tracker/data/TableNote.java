@@ -124,26 +124,6 @@ public class TableNote {
         return item.id;
     }
 
-    public void update(DataNote item) {
-        mDb.beginTransaction();
-        try {
-            ContentValues values = new ContentValues();
-            values.clear();
-            values.put(KEY_NAME, item.name);
-            values.put(KEY_TYPE, item.type.ordinal());
-            values.put(KEY_VALUE, item.value);
-            values.put(KEY_SERVER_ID, item.server_id);
-            String where = KEY_ROWID + "=?";
-            String [] whereArgs = { Long.toString(item.id) };
-            mDb.update(TABLE_NAME, values, where, whereArgs);
-            mDb.setTransactionSuccessful();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        } finally {
-            mDb.endTransaction();
-        }
-    }
-
     public void clearValues() {
         mDb.beginTransaction();
         try {
@@ -270,6 +250,26 @@ public class TableNote {
             Timber.e(ex);
         }
         return name;
+    }
+
+    public void update(DataNote item) {
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.clear();
+            values.put(KEY_NAME, item.name);
+            values.put(KEY_TYPE, item.type.ordinal());
+            values.put(KEY_VALUE, item.value);
+            values.put(KEY_SERVER_ID, item.server_id);
+            String where = KEY_ROWID + "=?";
+            String [] whereArgs = { Long.toString(item.id) };
+            mDb.update(TABLE_NAME, values, where, whereArgs);
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
     }
 
     public void updateValue(DataNote item) {

@@ -80,10 +80,11 @@ public class AmazonHelper {
         if (uploadingFilename == null) {
             return;
         }
+        init();
+
         File uploadingFile = new File(uploadingFilename);
         String key = item.getPictureFile().getName();
 
-        init();
         TransferObserver observer = mTrans.upload(
                 BUCKET_NAME,        /* The bucket to upload to */
                 key,                /* The key for the uploaded object */

@@ -2,8 +2,10 @@ package com.cartlc.tracker.act;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,14 +59,21 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         final DataNote item = mItems.get(position);
         holder.label.setText(item.name);
         holder.entry.setText(item.value);
-        // TODO: REPLACE THIS WITH A TEXT WATCHER
-        holder.entry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        holder.entry.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    item.value = holder.entry.getText().toString();
-                    TableNote.getInstance().updateValue(item);
-                }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                item.value = s.toString();
+                TableNote.getInstance().updateValue(item);
             }
         });
         if (item.type == DataNote.Type.ALPHANUMERIC) {
@@ -97,32 +106,6 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
             mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId);
             notifyDataSetChanged();
         }
-    }
-
-    public boolean hasEnoughValues() {
-        for (DataNote note : mItems) {
-            if (!TBApplication.OTHER.equals(note.name)) {
-                if (TextUtils.isEmpty(note.value)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    public String getEmptyFields() {
-        StringBuilder sbuf = new StringBuilder();
-        for (DataNote note : mItems) {
-            if (!TBApplication.OTHER.equals(note.name)) {
-                if (TextUtils.isEmpty(note.value)) {
-                    if (sbuf.length() > 0) {
-                        sbuf.append(", ");
-                    }
-                    sbuf.append(note.name);
-                }
-            }
-        }
-        return sbuf.toString();
     }
 
     public boolean hasNotesEntered() {
