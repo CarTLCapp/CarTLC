@@ -47,6 +47,11 @@ public class TableEquipment {
         }
     }
 
+
+    public void drop() {
+        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+    }
+
     public void create() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("create table ");

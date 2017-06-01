@@ -1,6 +1,7 @@
 package com.cartlc.tracker.data;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
 
@@ -375,6 +376,10 @@ public class PrefHelper extends PrefHelperBase {
         entry.saveNotes(getNextNoteCollectionID());
         entry.date = System.currentTimeMillis();
         return entry;
+    }
+
+    public Uri genNewPictureUri(Context ctx) {
+        return DataPicture.getUri(ctx, genFullPictureFile());
     }
 
     public String genPictureFilename() {

@@ -1,10 +1,7 @@
 package com.cartlc.tracker.data;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
-import android.support.v4.content.FileProvider;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,16 +32,6 @@ public class TablePendingPictures extends TableString {
         sInstance = this;
     }
 
-    public File genNewPictureFile() {
-        File filePicture = PrefHelper.getInstance().genFullPictureFile();
-        add(filePicture.getAbsolutePath());
-        return filePicture;
-    }
-
-    public Uri genNewPictureUri(Context ctx) {
-        return DataPicture.getUri(ctx, genNewPictureFile());
-    }
-
     public List<DataPicture> queryPictures() {
         ArrayList<DataPicture> list = new ArrayList();
         try {
@@ -63,8 +50,8 @@ public class TablePendingPictures extends TableString {
         return list;
     }
 
-    public DataPictureCollection createCollection() {
-        DataPictureCollection collection = new DataPictureCollection(
+    public DataPictureCollectionItem createCollection() {
+        DataPictureCollectionItem collection = new DataPictureCollectionItem(
                 PrefHelper.getInstance().getNextPictureCollectionID());
         collection.pictures = queryPictures();
         return collection;
@@ -76,5 +63,9 @@ public class TablePendingPictures extends TableString {
             filePicture.delete();
         }
         clear();
+    }
+
+    public void setUploaded(DataPicture item) {
+        remove(item.id);
     }
 }

@@ -35,6 +35,10 @@ public abstract class TableCollection {
         }
     }
 
+    public void drop() {
+        mDb.execSQL("DROP TABLE IF EXISTS " + mTableName);
+    }
+
     public void create() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("create table ");

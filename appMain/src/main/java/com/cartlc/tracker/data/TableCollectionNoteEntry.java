@@ -57,6 +57,10 @@ public class TableCollectionNoteEntry {
         mDb.execSQL(sbuf.toString());
     }
 
+    public void drop() {
+        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+    }
+
     public void store(long projectNameId, long collectionId) {
         List<DataNote> notes = TableCollectionNoteProject.getInstance().getNotes(projectNameId);
         mDb.beginTransaction();

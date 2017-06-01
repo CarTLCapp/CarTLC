@@ -60,6 +60,11 @@ public class TableNote {
         mDb.execSQL(sbuf.toString());
     }
 
+
+    public void drop() {
+        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+    }
+
     public void clear() {
         try {
             mDb.delete(TABLE_NAME, null, null);

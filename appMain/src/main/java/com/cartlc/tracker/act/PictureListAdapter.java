@@ -9,20 +9,17 @@ import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v7.graphics.Target;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import butterknife.BindView;

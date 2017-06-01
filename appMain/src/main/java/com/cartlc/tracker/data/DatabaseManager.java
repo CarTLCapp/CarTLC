@@ -64,6 +64,8 @@ public class DatabaseManager {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            if (newVersion > DATABASE_VERSION) {
+            }
         }
 
         @Override

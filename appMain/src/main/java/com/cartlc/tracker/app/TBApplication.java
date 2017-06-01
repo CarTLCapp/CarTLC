@@ -10,6 +10,7 @@ import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DatabaseManager;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TestData;
+import com.cartlc.tracker.server.AmazonHelper;
 import com.cartlc.tracker.server.DCService;
 import com.cartlc.tracker.server.ServerHelper;
 
@@ -43,6 +44,7 @@ public class TBApplication extends Application {
         PrefHelper.Init(this);
         ServerHelper.Init(this);
         PermissionHelper.Init();
+        AmazonHelper.Init();
 
         TestData.Init();
     }

@@ -28,6 +28,11 @@ public abstract class TableString {
         this.mDb = db;
     }
 
+
+    public void drop() {
+        mDb.execSQL("DROP TABLE IF EXISTS " + mTableName);
+    }
+
     public void create() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("create table ");

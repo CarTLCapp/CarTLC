@@ -18,6 +18,9 @@ public class DataPicture {
 
     public long id;
     public String pictureFilename;
+    public String uploadingFilename;
+    public boolean uploaded;
+
     File pictureFile;
 
     public DataPicture(long id, String filename) {
@@ -25,12 +28,13 @@ public class DataPicture {
         pictureFilename = filename;
     }
 
-    public DataPicture(String filename) {
-        id = -1L;
+    public DataPicture(long id, String filename, boolean uploaded) {
+        this.id = id;
         pictureFilename = filename;
+        this.uploaded = uploaded;
     }
 
-    File getPictureFile() {
+    public File getPictureFile() {
         if (pictureFile == null) {
             pictureFile = new File(pictureFilename);
         }

@@ -18,6 +18,7 @@ import com.cartlc.tracker.data.TableCollectionNoteProject;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNote;
+import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.event.EventServerPingDone;
 
@@ -136,9 +137,14 @@ public class DCService extends IntentService {
                     TableEntry.getInstance().setUploaded(false);
                 }
             }
-            List<DataEntry> list = TableEntry.getInstance().queryPendingUploaded();
-            if (list.size() > 0) {
-                int count = sendEntries(list);
+            List<DataEntry> entries = TableEntry.getInstance().queryPendingUploaded();
+            int count = 0;
+            if (entries.size() > 0) {
+                count = sendEntries(entries);
+            }
+            AmazonHelper.getInstance().sendPictures();
+
+            if (count > 0) {
                 EventBus.getDefault().post(new EventServerPingDone(count));
             }
         } catch (Exception ex) {
@@ -511,6 +517,8 @@ public class DCService extends IntentService {
     int sendEntries(List<DataEntry> list) {
         int count = 0;
         for (DataEntry entry : list) {
+            AmazonHelper.getInstance().requestSendPictures(entry);
+
             if (sendEntry(entry)) {
                 count++;
             }

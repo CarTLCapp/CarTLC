@@ -705,11 +705,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     boolean dispatchPictureRequest() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            Uri pictureUri = TablePendingPictures.getInstance().genNewPictureUri(this);
+            Uri pictureUri = PrefHelper.getInstance().genNewPictureUri(this);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
             // Grant permissions
             List<ResolveInfo> resInfoList = getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);

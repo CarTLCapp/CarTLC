@@ -2,8 +2,6 @@ package com.cartlc.tracker.data;
 
 import java.util.List;
 
-import timber.log.Timber;
-
 /**
  * Created by dug on 5/13/17.
  */
@@ -14,7 +12,7 @@ public class DataEntry {
     public long                         projectNameId;
     public long                         addressId;
     public DataCollectionEquipmentEntry equipmentCollection;
-    public DataPictureCollection        pictureCollection;
+    public DataPictureCollectionItem    pictureCollection;
     public long                         noteCollectionId;
     public long                         truckNumber;
     public boolean                      uploaded;

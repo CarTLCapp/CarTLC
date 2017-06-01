@@ -41,6 +41,9 @@ public class TableProjects {
         sInstance = this;
     }
 
+    public void drop() {
+        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+    }
 
     public void create() {
         StringBuilder sbuf = new StringBuilder();
