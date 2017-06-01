@@ -5,9 +5,7 @@ package com.cartlc.tracker.event;
  */
 
 public class EventServerPingDone {
-    public int numUploads;
 
-    public EventServerPingDone(int numUploads) {
-        this.numUploads = numUploads;
+    public EventServerPingDone() {
     }
 }

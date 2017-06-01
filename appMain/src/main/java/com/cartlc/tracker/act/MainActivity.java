@@ -41,12 +41,12 @@ import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
-import com.cartlc.tracker.data.TablePendingPictures;
+import com.cartlc.tracker.data.TablePictureCollection;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.event.EventServerPingDone;
-import com.cartlc.tracker.server.ServerHelper;
 
+import java.io.File;
 import java.util.List;
 
 import butterknife.BindView;
@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
             boolean hasNotes = mNoteAdapter.hasNotesEntered();
             boolean hasEquip = mEquipmentAdapter.hasChecked();
             ;
-            boolean hasPictures = TablePendingPictures.getInstance().queryPictures().size() > 0;
+            boolean hasPictures = TablePictureCollection.getInstance().countPendingPictures() > 0;
 
             if (!hasTruckNumber && !hasNotes && !hasEquip && !hasPictures) {
                 mCurStage = Stage.CURRENT_PROJECT;
@@ -611,7 +611,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case PICTURE:
-                int numberTaken = TablePendingPictures.getInstance().count();
+                int numberTaken = TablePictureCollection.getInstance().countPendingPictures();
                 StringBuilder sbuf = new StringBuilder();
                 sbuf.append(getString(R.string.title_picture));
                 sbuf.append(" ");
@@ -630,7 +630,7 @@ public class MainActivity extends AppCompatActivity {
                     mNew.setText(R.string.btn_another);
                     mPictureFrame.setVisibility(View.VISIBLE);
                     mPictureList.setVisibility(View.VISIBLE);
-                    mPictureAdapter.setList(TablePendingPictures.getInstance().queryPictures());
+                    mPictureAdapter.setList(TablePictureCollection.getInstance().queryPendingPictures());
                 }
                 break;
             case CONFIRM:
@@ -708,7 +708,9 @@ public class MainActivity extends AppCompatActivity {
     boolean dispatchPictureRequest() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            Uri pictureUri = PrefHelper.getInstance().genNewPictureUri(this);
+            File pictureFile = PrefHelper.getInstance().genFullPictureFile();
+            TablePictureCollection.getInstance().add(pictureFile);
+            Uri pictureUri = TBApplication.getUri(this, pictureFile);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
             // Grant permissions
             List<ResolveInfo> resInfoList = getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);

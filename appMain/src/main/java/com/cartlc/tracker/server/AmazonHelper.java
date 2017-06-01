@@ -1,6 +1,5 @@
 package com.cartlc.tracker.server;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.amazonaws.AmazonClientException;
@@ -13,8 +12,8 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataPicture;
-import com.cartlc.tracker.data.TablePendingPictures;
-import com.cartlc.tracker.util.BitmapHelper;
+import com.cartlc.tracker.data.TableEntry;
+import com.cartlc.tracker.data.TablePictureCollection;
 
 import java.io.File;
 import java.util.List;
@@ -54,12 +53,10 @@ public class AmazonHelper {
         mClient.setRegion(Region.getRegion(REGION));
     }
 
-    boolean pushFile(File file) {
+    boolean pushFile(String key, File file) {
         try {
-            Bitmap bitmap = BitmapHelper.scaleFile(file, 100, 100);
-
             Timber.i("SENDING " + file.toString() + " as " + file.getName());
-            PutObjectRequest por = new PutObjectRequest(BUCKET_NAME, file.getName(), file);
+            PutObjectRequest por = new PutObjectRequest(BUCKET_NAME, key, file);
             mClient.putObject(por);
             return true;
         } catch (AmazonServiceException ase) {
@@ -78,18 +75,36 @@ public class AmazonHelper {
         return false;
     }
 
-    public void sendPictures() {
-        List<DataPicture> pictures = TablePendingPictures.getInstance().queryPictures();
-        for (DataPicture picture : pictures) {
-            if (pushFile(picture.getPictureFile())) {
-                TablePendingPictures.getInstance().setUploaded(picture);
-            }
+    public int sendPictures(List<DataEntry> list) {
+        int count = 0;
+        for (DataEntry entry : list) {
+            count += sendPictures(entry);
         }
+        return count;
     }
 
-    public void requestSendPictures(DataEntry entry) {
+    int sendPictures(DataEntry entry) {
+        int count = 0;
         for (DataPicture item : entry.pictureCollection.pictures) {
-            TablePendingPictures.getInstance().add(item.getPictureFile().getAbsolutePath());
+            if (item.uploaded) {
+                count++;
+            } else if (sendPicture(item)) {
+                item.uploaded = true;
+                TablePictureCollection.getInstance().update(item, null);
+                count++;
+            }
         }
+        if (count == entry.pictureCollection.pictures.size()) {
+            TableEntry.getInstance().setUploadedAws(entry, true);
+        }
+        return count;
     }
+
+    boolean sendPicture(DataPicture item) {
+        String uploadingFilename = item.getUploadingFilename();
+        File uploadingFile = new File(uploadingFilename);
+        String key = item.getPictureFile().getName();
+        return pushFile(key, uploadingFile);
+    }
+
 }

@@ -12,10 +12,11 @@ public class DataEntry {
     public long                         projectNameId;
     public long                         addressId;
     public DataCollectionEquipmentEntry equipmentCollection;
-    public DataPictureCollectionItem    pictureCollection;
+    public DataPictureCollection        pictureCollection;
     public long                         noteCollectionId;
     public long                         truckNumber;
-    public boolean                      uploaded;
+    public boolean                      uploadedMaster;
+    public boolean                      uploadedAws;
 
     public DataEntry() {
     }

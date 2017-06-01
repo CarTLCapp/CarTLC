@@ -18,7 +18,6 @@ import com.cartlc.tracker.data.TableCollectionNoteProject;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNote;
-import com.cartlc.tracker.data.TablePendingPictures;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.event.EventServerPingDone;
 
@@ -134,18 +133,20 @@ public class DCService extends IntentService {
             }
             if (object.has(UPLOAD_RESET_TRIGGER)) {
                 if (object.getBoolean(UPLOAD_RESET_TRIGGER)) {
-                    TableEntry.getInstance().setUploaded(false);
+                    TableEntry.getInstance().clearUploaded();
                 }
             }
-            List<DataEntry> entries = TableEntry.getInstance().queryPendingUploaded();
+            List<DataEntry> entries = TableEntry.getInstance().queryPendingUploadedMaster();
             int count = 0;
             if (entries.size() > 0) {
                 count = sendEntries(entries);
             }
-            AmazonHelper.getInstance().sendPictures();
-
+            entries = TableEntry.getInstance().queryPendingUploadedAws();
+            if (entries.size() > 0) {
+                count += AmazonHelper.getInstance().sendPictures(entries);
+            }
             if (count > 0) {
-                EventBus.getDefault().post(new EventServerPingDone(count));
+                EventBus.getDefault().post(new EventServerPingDone());
             }
         } catch (Exception ex) {
             Timber.e(ex);
@@ -517,8 +518,6 @@ public class DCService extends IntentService {
     int sendEntries(List<DataEntry> list) {
         int count = 0;
         for (DataEntry entry : list) {
-            AmazonHelper.getInstance().requestSendPictures(entry);
-
             if (sendEntry(entry)) {
                 count++;
             }
@@ -598,7 +597,7 @@ public class DCService extends IntentService {
             try {
                 int code = Integer.parseInt(result);
                 if (code == 0) {
-                    TableEntry.getInstance().setUploaded(entry, true);
+                    TableEntry.getInstance().setUploadedMaster(entry, true);
                     success = true;
                 } else {
                     Timber.e("While trying to send entry " + entry.id + ": " + code);

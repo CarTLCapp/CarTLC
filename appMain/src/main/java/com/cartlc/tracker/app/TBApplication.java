@@ -3,7 +3,9 @@ package com.cartlc.tracker.app;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.multidex.MultiDex;
+import android.support.v4.content.FileProvider;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.R;
@@ -17,6 +19,8 @@ import com.cartlc.tracker.server.ServerHelper;
 import timber.log.Timber;
 
 import com.cartlc.tracker.util.PermissionHelper;
+
+import java.io.File;
 
 /**
  * Created by dug on 4/14/17.
@@ -55,13 +59,15 @@ public class TBApplication extends Application {
         }
     }
 
-
-
     @Override
     protected void attachBaseContext(Context base)
     {
         super.attachBaseContext(base);
         MultiDex.install(this);
+    }
+
+    public static Uri getUri(Context ctx, File file) {
+        return FileProvider.getUriForFile(ctx, "com.cartcl.tracker.fileprovider", file);
     }
 
 //    public void checkPermissions(Activity act, PermissionListener listener) {

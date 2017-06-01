@@ -1,7 +1,6 @@
 package com.cartlc.tracker.data;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
 
@@ -261,7 +260,7 @@ public class PrefHelper extends PrefHelperBase {
 
     public void clearLastEntry() {
         setTruckNumber(0);
-        TablePendingPictures.getInstance().clear();
+        TablePictureCollection.getInstance().clearPendingPictures();
         TableNote.getInstance().clearValues();
         TableEquipment.getInstance().clearChecked();
     }
@@ -370,16 +369,12 @@ public class PrefHelper extends PrefHelperBase {
         entry.projectNameId = projectGroup.projectNameId;
         entry.equipmentCollection = new DataCollectionEquipmentEntry(getNextEquipmentCollectionID());
         entry.equipmentCollection.addChecked();
-        entry.pictureCollection = TablePendingPictures.getInstance().createCollection();
+        entry.pictureCollection = TablePictureCollection.getInstance().createCollectionFromPending();
         entry.addressId = projectGroup.addressId;
         entry.truckNumber = getTruckNumber();
         entry.saveNotes(getNextNoteCollectionID());
         entry.date = System.currentTimeMillis();
         return entry;
-    }
-
-    public Uri genNewPictureUri(Context ctx) {
-        return DataPicture.getUri(ctx, genFullPictureFile());
     }
 
     public String genPictureFilename() {

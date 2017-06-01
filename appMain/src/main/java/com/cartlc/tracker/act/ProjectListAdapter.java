@@ -59,7 +59,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         int countTotal = TableEntry.getInstance().countProjects(projectGroup.projectNameId);
 
         if (countTotal > 0) {
-            int           countUploaded = TableEntry.getInstance().countUploaded(projectGroup.projectNameId);
+            int           countUploaded = TableEntry.getInstance().countFullyUploaded(projectGroup.projectNameId);
             StringBuilder sbuf          = new StringBuilder();
             sbuf.append(mContext.getString(R.string.title_entries_));
             sbuf.append(" ");

@@ -25,7 +25,8 @@ public class TableEntry {
     static final String KEY_PICTURE_COLLECTION_ID   = "picture_collection_id";
     static final String KEY_NOTE_COLLECTION_ID      = "note_collection_id";
     static final String KEY_TRUCK_NUMBER            = "truck_number";
-    static final String KEY_UPLOADED                = "uploaded";
+    static final String KEY_UPLOADED_MASTER         = "uploaded_master";
+    static final String KEY_UPLOADED_AWS            = "uploaded_aws";
 
     static TableEntry sInstance;
 
@@ -76,7 +77,9 @@ public class TableEntry {
         sbuf.append(" long, ");
         sbuf.append(KEY_TRUCK_NUMBER);
         sbuf.append(" int, ");
-        sbuf.append(KEY_UPLOADED);
+        sbuf.append(KEY_UPLOADED_MASTER);
+        sbuf.append(" bit default 0, ");
+        sbuf.append(KEY_UPLOADED_AWS);
         sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
@@ -97,8 +100,14 @@ public class TableEntry {
         return list;
     }
 
-    public List<DataEntry> queryPendingUploaded() {
-        String where = KEY_UPLOADED + "=0";
+    public List<DataEntry> queryPendingUploadedMaster() {
+        String where = KEY_UPLOADED_MASTER + "=0";
+        return query(where, null);
+    }
+
+
+    public List<DataEntry> queryPendingUploadedAws() {
+        String where = KEY_UPLOADED_AWS + "=0";
         return query(where, null);
     }
 
@@ -107,7 +116,7 @@ public class TableEntry {
         try {
             final String[] columns = {KEY_ROWID,
                     KEY_DATE, KEY_PROJECT_ID, KEY_ADDRESS_ID, KEY_EQUIPMENT_COLLECTION_ID,
-                    KEY_PICTURE_COLLECTION_ID, KEY_NOTE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_UPLOADED};
+                    KEY_PICTURE_COLLECTION_ID, KEY_NOTE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_UPLOADED_MASTER, KEY_UPLOADED_AWS};
             final String orderBy = KEY_DATE + " DESC";
             Cursor cursor = mDb.query(TABLE_NAME, columns, where, whereArgs, null, null, orderBy, null);
             int idxRow = cursor.getColumnIndex(KEY_ROWID);
@@ -118,7 +127,8 @@ public class TableEntry {
             int idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID);
             int idxNotetCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
             int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
-            int idxUploaded = cursor.getColumnIndex(KEY_UPLOADED);
+            int idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER);
+            int idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS);
             DataEntry entry;
             while (cursor.moveToNext()) {
                 entry = new DataEntry();
@@ -132,7 +142,8 @@ public class TableEntry {
                 entry.pictureCollection = TablePictureCollection.getInstance().query(pictureCollectionId);
                 entry.noteCollectionId = cursor.getLong(idxNotetCollectionId);
                 entry.truckNumber = cursor.getInt(idxTruckNumber);
-                entry.uploaded = cursor.getShort(idxUploaded) != 0;
+                entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
+                entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
                 list.add(entry);
             }
             cursor.close();
@@ -170,13 +181,15 @@ public class TableEntry {
         return count;
     }
 
-    public int countUploaded(long projectNameId) {
+    public int countFullyUploaded(long projectNameId) {
         int count = 0;
         try {
             StringBuilder sbuf = new StringBuilder();
             sbuf.append(KEY_PROJECT_ID);
             sbuf.append("=? AND ");
-            sbuf.append(KEY_UPLOADED);
+            sbuf.append(KEY_UPLOADED_MASTER);
+            sbuf.append("=1 AND ");
+            sbuf.append(KEY_UPLOADED_AWS);
             sbuf.append("=1");
             final String selection = sbuf.toString();
             final String[] selectionArgs = {Long.toString(projectNameId)};
@@ -216,12 +229,22 @@ public class TableEntry {
         }
     }
 
-    public void setUploaded(DataEntry entry, boolean flag) {
+    public void setUploadedMaster(DataEntry entry, boolean flag) {
+        entry.uploadedMaster = flag;
+        setUploaded(entry, KEY_UPLOADED_MASTER, flag);
+    }
+
+
+    public void setUploadedAws(DataEntry entry, boolean flag) {
+        entry.uploadedAws = flag;
+        setUploaded(entry, KEY_UPLOADED_AWS, flag);
+    }
+
+    void setUploaded(DataEntry entry, String key, boolean flag) {
         mDb.beginTransaction();
         try {
-            entry.uploaded = flag;
             ContentValues values = new ContentValues();
-            values.put(KEY_UPLOADED, entry.uploaded ? 1 : 0);
+            values.put(key, flag ? 1 : 0);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(entry.id)};
             if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {
@@ -235,11 +258,13 @@ public class TableEntry {
         }
     }
 
-    public void setUploaded(boolean flag) {
+    public void clearUploaded()
+    {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(KEY_UPLOADED, flag ? 1 : 0);
+            values.put(KEY_UPLOADED_MASTER, 0);
+            values.put(KEY_UPLOADED_AWS, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
                 Timber.e("Unable to update entries");
             }
