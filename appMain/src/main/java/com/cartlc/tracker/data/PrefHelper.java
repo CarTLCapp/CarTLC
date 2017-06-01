@@ -333,7 +333,8 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public long getNextPictureCollectionID() {
-        return getLong(KEY_NEXT_PICTURE_COLLECTION_ID, 0L);
+        // Note: ID zero has a special meaning, it means that the set is pending.
+        return getLong(KEY_NEXT_PICTURE_COLLECTION_ID, 1L);
     }
 
     public void incNextPictureCollectionID() {

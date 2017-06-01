@@ -100,13 +100,13 @@ public class TableEntry {
         return list;
     }
 
-    public List<DataEntry> queryPendingUploadedMaster() {
+    public List<DataEntry> queryPendingDataToUploadToMaster() {
         String where = KEY_UPLOADED_MASTER + "=0";
         return query(where, null);
     }
 
 
-    public List<DataEntry> queryPendingUploadedAws() {
+    public List<DataEntry> queryPendingPicturesToUpload() {
         String where = KEY_UPLOADED_AWS + "=0";
         return query(where, null);
     }
@@ -220,6 +220,7 @@ public class TableEntry {
             values.put(KEY_EQUIPMENT_COLLECTION_ID, entry.equipmentCollection.id);
             values.put(KEY_TRUCK_NUMBER, entry.truckNumber);
             values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
+            values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollection.id);
             mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {

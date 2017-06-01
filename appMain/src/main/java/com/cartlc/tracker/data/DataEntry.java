@@ -1,6 +1,10 @@
 package com.cartlc.tracker.data;
 
+import com.cartlc.tracker.event.EventServerPingDone;
+
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by dug on 5/13/17.
@@ -66,5 +70,15 @@ public class DataEntry {
     public void saveNotes(long collectionId) {
         noteCollectionId = collectionId;
         TableCollectionNoteEntry.getInstance().store(projectNameId, noteCollectionId);
+    }
+
+    public void checkPictureUploadComplete() {
+        for (DataPicture item : pictureCollection.pictures) {
+            if (!item.uploaded) {
+                return;
+            }
+        }
+        TableEntry.getInstance().setUploadedAws(this, true);
+        EventBus.getDefault().post(new EventServerPingDone());
     }
 }

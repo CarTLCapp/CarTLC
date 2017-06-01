@@ -1,18 +1,17 @@
 package com.cartlc.tracker.server;
 
-import android.graphics.Bitmap;
+import android.content.Context;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Region;
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataPicture;
-import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TablePictureCollection;
 
 import java.io.File;
@@ -32,79 +31,89 @@ public class AmazonHelper {
         return sInstance;
     }
 
-    static public void Init() {
+    static public void Init(Context ctx) {
         if (sInstance == null) {
-            new AmazonHelper();
+            new AmazonHelper(ctx.getApplicationContext());
         }
     }
 
-    final static String  KEY_AAK     = "AKIAJF5DCYNIXY36SB6Q";
-    final static String  KEY_ASK     = "SHf467aH25t6Q1eAPg0iqfabVrUMA6gqBTrN78rD";
-    final static String  BUCKET_NAME = "cartlc";
-    static final Regions REGION      = Regions.US_EAST_1;
+    final static String BUCKET_NAME = "cartlc";
 
-    BasicAWSCredentials mCred;
-    AmazonS3            mClient;
+    CognitoCachingCredentialsProvider mCred;
+    AmazonS3                          mClient;
+    TransferUtility                   mTrans;
+    final Context mCtx;
 
-    public AmazonHelper() {
+    public AmazonHelper(Context ctx) {
         sInstance = this;
-        mCred = new BasicAWSCredentials(KEY_AAK, KEY_ASK);
-        mClient = new AmazonS3Client(mCred);
-        mClient.setRegion(Region.getRegion(REGION));
+        mCtx = ctx;
     }
 
-    boolean pushFile(String key, File file) {
-        try {
-            Timber.i("SENDING " + file.toString() + " as " + file.getName());
-            PutObjectRequest por = new PutObjectRequest(BUCKET_NAME, key, file);
-            mClient.putObject(por);
-            return true;
-        } catch (AmazonServiceException ase) {
-            Timber.e("Caught an AmazonServiceException, which means your request made it to Amazon S3, but was rejected with an error response for some reason.");
-            Timber.e("Error Message:    " + ase.getMessage());
-            Timber.e("HTTP Status Code: " + ase.getStatusCode());
-            Timber.e("AWS Error Code:   " + ase.getErrorCode());
-            Timber.e("Error Type:       " + ase.getErrorType());
-            Timber.e("Request ID:       " + ase.getRequestId());
-        } catch (AmazonClientException ace) {
-            System.out.println("Caught an AmazonClientException, which means the client encountered an internal error while trying to communicate with S3,  such as not being able to access the network.");
-            Timber.e("Error Message: " + ace.getMessage());
-        } catch (Exception ex) {
-            Timber.e(ex);
+    void init() {
+        if (mCred == null) {
+            mCred = new CognitoCachingCredentialsProvider(
+                    mCtx,
+                    "us-east-2:38d2f2a2-9454-4472-9fec-9468f3700ba5", // Identity Pool ID
+                    Regions.US_EAST_2 // Region
+            );
+            mClient = new AmazonS3Client(mCred);
+            mTrans = new TransferUtility(mClient, mCtx);
         }
-        return false;
     }
 
-    public int sendPictures(List<DataEntry> list) {
-        int count = 0;
+    public void sendPictures(List<DataEntry> list) {
         for (DataEntry entry : list) {
-            count += sendPictures(entry);
+            sendPictures(entry);
         }
-        return count;
     }
 
-    int sendPictures(DataEntry entry) {
-        int count = 0;
+    void sendPictures(DataEntry entry) {
         for (DataPicture item : entry.pictureCollection.pictures) {
-            if (item.uploaded) {
-                count++;
-            } else if (sendPicture(item)) {
-                item.uploaded = true;
-                TablePictureCollection.getInstance().update(item, null);
-                count++;
+            if (!item.uploaded) {
+                sendPicture(entry, item);
             }
         }
-        if (count == entry.pictureCollection.pictures.size()) {
-            TableEntry.getInstance().setUploadedAws(entry, true);
-        }
-        return count;
     }
 
-    boolean sendPicture(DataPicture item) {
+    void sendPicture(final DataEntry entry, final DataPicture item) {
         String uploadingFilename = item.getUploadingFilename();
+        if (uploadingFilename == null) {
+            return;
+        }
         File uploadingFile = new File(uploadingFilename);
         String key = item.getPictureFile().getName();
-        return pushFile(key, uploadingFile);
+
+        init();
+        TransferObserver observer = mTrans.upload(
+                BUCKET_NAME,        /* The bucket to upload to */
+                key,                /* The key for the uploaded object */
+                uploadingFile       /* The file where the data to upload exists */
+        );
+        observer.setTransferListener(new TransferListener() {
+            @Override
+            public void onStateChanged(int id, TransferState state) {
+                Timber.d("onStateChanged(" + state.toString() + ")");
+                if (state == TransferState.COMPLETED) {
+                    uploadComplete(entry, item);
+                }
+            }
+
+            @Override
+            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+//                int percentage = (int) (bytesCurrent/bytesTotal * 100);
+            }
+
+            @Override
+            public void onError(int id, Exception ex) {
+                Timber.e(ex);
+            }
+        });
+    }
+
+    synchronized void uploadComplete(DataEntry entry, DataPicture item) {
+        item.uploaded = true;
+        TablePictureCollection.getInstance().update(item, null);
+        entry.checkPictureUploadComplete();
     }
 
 }

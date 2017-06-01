@@ -46,9 +46,9 @@ dependencies {
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.android.support:multidex:1.0.1'
 
-    compile 'com.amazonaws:aws-android-sdk-core:2.2.+'
-    compile 'com.amazonaws:aws-android-sdk-s3:2.2.+'
-    compile 'com.amazonaws:aws-android-sdk-ddb:2.2.+'
+    compile 'com.amazonaws:aws-android-sdk-core:2.4.+'
+    compile 'com.amazonaws:aws-android-sdk-s3:2.4.+'
+    compile 'com.amazonaws:aws-android-sdk-ddb:2.4.+'
 
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 }

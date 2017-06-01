@@ -630,7 +630,9 @@ public class MainActivity extends AppCompatActivity {
                     mNew.setText(R.string.btn_another);
                     mPictureFrame.setVisibility(View.VISIBLE);
                     mPictureList.setVisibility(View.VISIBLE);
-                    mPictureAdapter.setList(TablePictureCollection.getInstance().queryPendingPictures());
+                    mPictureAdapter.setList(
+                            TablePictureCollection.getInstance().removeNonExistant(
+                                    TablePictureCollection.getInstance().queryPendingPictures()));
                 }
                 break;
             case CONFIRM:
@@ -724,7 +726,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

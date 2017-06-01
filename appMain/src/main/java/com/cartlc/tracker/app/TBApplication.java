@@ -48,7 +48,7 @@ public class TBApplication extends Application {
         PrefHelper.Init(this);
         ServerHelper.Init(this);
         PermissionHelper.Init();
-        AmazonHelper.Init();
+        AmazonHelper.Init(this);
 
         TestData.Init();
     }

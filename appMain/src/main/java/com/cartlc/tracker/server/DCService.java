@@ -95,6 +95,9 @@ public class DCService extends IntentService {
     void ping() {
         Timber.i("ping()");
         try {
+            if (PrefHelper.getInstance().getTechID() == 0) {
+                return;
+            }
             String deviceId = ServerHelper.getInstance().getDeviceId();
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("device_id", deviceId);
@@ -136,17 +139,17 @@ public class DCService extends IntentService {
                     TableEntry.getInstance().clearUploaded();
                 }
             }
-            List<DataEntry> entries = TableEntry.getInstance().queryPendingUploadedMaster();
+            List<DataEntry> entries = TableEntry.getInstance().queryPendingDataToUploadToMaster();
             int count = 0;
             if (entries.size() > 0) {
                 count = sendEntries(entries);
             }
-            entries = TableEntry.getInstance().queryPendingUploadedAws();
-            if (entries.size() > 0) {
-                count += AmazonHelper.getInstance().sendPictures(entries);
-            }
             if (count > 0) {
                 EventBus.getDefault().post(new EventServerPingDone());
+            }
+            entries = TableEntry.getInstance().queryPendingPicturesToUpload();
+            if (entries.size() > 0) {
+                AmazonHelper.getInstance().sendPictures(entries);
             }
         } catch (Exception ex) {
             Timber.e(ex);
@@ -599,6 +602,7 @@ public class DCService extends IntentService {
                 if (code == 0) {
                     TableEntry.getInstance().setUploadedMaster(entry, true);
                     success = true;
+                    Timber.i("SUCCESS");
                 } else {
                     Timber.e("While trying to send entry " + entry.id + ": " + code);
                 }

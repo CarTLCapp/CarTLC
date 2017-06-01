@@ -61,7 +61,7 @@ public class TablePictureCollection {
         sbuf.append(KEY_ROWID);
         sbuf.append(" integer primary key autoincrement, ");
         sbuf.append(KEY_COLLECTION_ID);
-        sbuf.append(" long, ");
+        sbuf.append(" long default 0, ");
         sbuf.append(KEY_PICTURE_FILENAME);
         sbuf.append(" text, ");
         sbuf.append(KEY_UPLOADING_FILENAME);
@@ -142,6 +142,18 @@ public class TablePictureCollection {
         return list;
     }
 
+    public List<DataPicture> removeNonExistant(List<DataPicture> list) {
+        List<DataPicture> filtered = new ArrayList();
+        for (DataPicture item : list) {
+            if (item.exists()) {
+                filtered.add(item);
+            } else {
+                remove(item);
+            }
+        }
+        return filtered;
+    }
+
     public int countPendingPictures() {
         int count = 0;
         try {
@@ -158,7 +170,8 @@ public class TablePictureCollection {
     public DataPictureCollection createCollectionFromPending() {
         DataPictureCollection collection = new DataPictureCollection(
                 PrefHelper.getInstance().getNextPictureCollectionID());
-        collection.pictures = queryPendingPictures();
+        collection.pictures = removeNonExistant(queryPendingPictures());
+        Timber.i("CREATED COLLECTION WITH ID " + collection.id);
         return collection;
     }
 
@@ -166,6 +179,16 @@ public class TablePictureCollection {
         try {
             final String where = KEY_COLLECTION_ID + " =0";
             mDb.delete(TABLE_NAME, where, null);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
+    public void remove(DataPicture item) {
+        try {
+            final String where = KEY_COLLECTION_ID + "=?";
+            final String [] whereArgs = { Long.toString(item.id) };
+            mDb.delete(TABLE_NAME, where, whereArgs);
         } catch (Exception ex) {
             Timber.e(ex);
         }
