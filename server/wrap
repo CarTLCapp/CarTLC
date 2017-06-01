@@ -5,7 +5,7 @@
 #
 DATE=`date +%F`
 WRAP=~/cartlc/wrap/$DATE
-FILE=`ls play-ebean/target/universal/*.zip`
+FILE=`ls play/target/universal/*.zip`
 mkdir -p $WRAP
 cp $FILE $WRAP/
 
