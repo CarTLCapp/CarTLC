@@ -13,7 +13,7 @@ create table client (
   first_name        varchar(255),
   last_name         varchar(255),
   device_id         varchar(255),
-  last_ping         date,
+  last_ping         datetime,
   disabled          bit,
   reset_upload      bit
 );
@@ -91,7 +91,7 @@ alter table entry_note_collection add constraint fk_enc_note_id foreign key (not
 create table entry (
   id                       int auto_increment primary key,
   tech_id                  int,
-  entry_time               date,
+  entry_time               datetime,
   project_id               int,
   address_id               int,
   equipment_collection_id  int,
