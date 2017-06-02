@@ -21,9 +21,7 @@
             <tbody>
 
                 @for(entry <- currentPage) {
-                    <tr>
-                        <td>@entry.picture</td>
-                    </tr>
+                    <tr><td><img src='@routes.EntryController.getImage(entry.picture)'/></td></tr>
                 }
 
             </tbody>

@@ -38,10 +38,10 @@ public class AmazonHelper {
         final File targetFile;
         Download download;
 
-        DownloadActivity(String filename, File targetFile, OnDownloadComplete listener) {
+        DownloadActivity(String filename, OnDownloadComplete listener) {
             this.key = filename;
             this.listener = listener;
-            this.targetFile = targetFile;
+            this.targetFile = getLocalFile(filename);
         }
 
         void run() throws DownloadException {
@@ -71,9 +71,12 @@ public class AmazonHelper {
     }
 
     public void download(String filename, OnDownloadComplete listener) throws DownloadException {
+        new DownloadActivity(filename, listener).run();
+    }
+
+    public File getLocalFile(String filename) {
         String downloadDir = configuration.getString("pictureDownloadDir");
-        File targetFile = new File(downloadDir, filename);
-        new DownloadActivity(filename, targetFile, listener).run();
+        return new File(downloadDir, filename);
     }
 }
 

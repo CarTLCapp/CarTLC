@@ -59,17 +59,29 @@ public class EntryController extends Controller {
         }
         List<PictureCollection> pictures = entry.getPictures();
         for (PictureCollection picture : pictures) {
-            try {
-                amazonHelper.download(picture.picture, new OnDownloadComplete() {
-                    public void onDownloadComplete(File file) {
-                        Logger.info("COMPLETE: " + file.getAbsolutePath());
-                    }
-                });
-            } catch (Exception ex) {
-                Logger.error(ex.getMessage());
+            File localFile = amazonHelper.getLocalFile(picture.picture);
+            if (!localFile.exists()) {
+                try {
+                    amazonHelper.download(picture.picture, new OnDownloadComplete() {
+                        public void onDownloadComplete(File file) {
+                            Logger.info("COMPLETED: " + file.getAbsolutePath());
+                        }
+                    });
+                } catch (Exception ex) {
+                    Logger.error(ex.getMessage());
+                }
             }
         }
         return ok(views.html.entry_list_picture.render(pictures));
+    }
+
+    public Result getImage(String picture) {
+        File localFile = amazonHelper.getLocalFile(picture);
+        if (localFile.exists()) {
+            return ok(localFile);
+        } else {
+            return ok(picture);
+        }
     }
 
     /**

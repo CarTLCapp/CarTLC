@@ -113,9 +113,10 @@ POST    /note/:id/delete       controllers.NoteController.delete(id:Long)
 ### ENTRIES ###
 
 # Entries list (look at the default values for pagination parameters)
-GET     /entry                 controllers.EntryController.list(p:Int ?= 0, s ?= "entry_time", o ?= "desc")
-GET     /entry/:id/pictures    controllers.EntryController.pictures(id:Long)
-GET     /entry/:id/notes       controllers.EntryController.notes(id:Long)
+GET     /entry                      controllers.EntryController.list(p:Int ?= 0, s ?= "entry_time", o ?= "desc")
+GET     /entry/:id/pictures         controllers.EntryController.pictures(id:Long)
+GET     /entry/:filename/picture    controllers.EntryController.getImage(filename:String)
+GET     /entry/:id/notes            controllers.EntryController.notes(id:Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file          controllers.Assets.at(path="/public", file)

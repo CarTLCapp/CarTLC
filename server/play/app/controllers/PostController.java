@@ -100,13 +100,16 @@ public class PostController extends Controller
 		result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
 
 		Client client = Client.find.byId((long) tech_id);
-		if (client.reset_upload) {
-			result.put("reset_upload", true);
-			client.reset_upload = false;
+		if (client != null) {
+			if (client.reset_upload) {
+				result.put("reset_upload", true);
+				client.reset_upload = false;
+			}
+			client.last_ping = new Date(System.currentTimeMillis());
+			client.save();
+		} else {
+			Logger.error("ping(): could not find technician with ID " + tech_id);
 		}
-		client.last_ping = new Date(System.currentTimeMillis());
-		client.save();
-
 		return ok(result);
 	}
 
