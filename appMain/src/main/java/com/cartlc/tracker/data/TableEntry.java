@@ -17,16 +17,15 @@ public class TableEntry {
 
     static final String TABLE_NAME = "table_entries";
 
-    static final String KEY_ROWID                   = "_id";
-    static final String KEY_DATE                    = "date";
-    static final String KEY_PROJECT_ID              = "project_id";
-    static final String KEY_ADDRESS_ID              = "address_id";
-    static final String KEY_EQUIPMENT_COLLECTION_ID = "equipment_collection_id";
-    static final String KEY_PICTURE_COLLECTION_ID   = "picture_collection_id";
-    static final String KEY_NOTE_COLLECTION_ID      = "note_collection_id";
-    static final String KEY_TRUCK_NUMBER            = "truck_number";
-    static final String KEY_UPLOADED_MASTER         = "uploaded_master";
-    static final String KEY_UPLOADED_AWS            = "uploaded_aws";
+    static final String KEY_ROWID                    = "_id";
+    static final String KEY_DATE                     = "date";
+    static final String KEY_PROJECT_ADDRESS_COMBO_ID = "combo_id";
+    static final String KEY_EQUIPMENT_COLLECTION_ID  = "equipment_collection_id";
+    static final String KEY_PICTURE_COLLECTION_ID    = "picture_collection_id";
+    static final String KEY_NOTE_COLLECTION_ID       = "note_collection_id";
+    static final String KEY_TRUCK_NUMBER             = "truck_number";
+    static final String KEY_UPLOADED_MASTER          = "uploaded_master";
+    static final String KEY_UPLOADED_AWS             = "uploaded_aws";
 
     static TableEntry sInstance;
 
@@ -65,9 +64,7 @@ public class TableEntry {
         sbuf.append(" integer primary key autoincrement, ");
         sbuf.append(KEY_DATE);
         sbuf.append(" long, ");
-        sbuf.append(KEY_PROJECT_ID);
-        sbuf.append(" long, ");
-        sbuf.append(KEY_ADDRESS_ID);
+        sbuf.append(KEY_PROJECT_ADDRESS_COMBO_ID);
         sbuf.append(" long, ");
         sbuf.append(KEY_EQUIPMENT_COLLECTION_ID);
         sbuf.append(" long, ");
@@ -82,22 +79,6 @@ public class TableEntry {
         sbuf.append(KEY_UPLOADED_AWS);
         sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
-    }
-
-    public List<Long> queryProjects() {
-        ArrayList<Long> list = new ArrayList();
-        try {
-            final String[] columns = {KEY_PROJECT_ID};
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, null, null);
-            int idxValue = cursor.getColumnIndex(KEY_PROJECT_ID);
-            while (cursor.moveToNext()) {
-                list.add(cursor.getLong(idxValue));
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return list;
     }
 
     public List<DataEntry> queryPendingDataToUploadToMaster() {
@@ -115,13 +96,12 @@ public class TableEntry {
         ArrayList<DataEntry> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID,
-                    KEY_DATE, KEY_PROJECT_ID, KEY_ADDRESS_ID, KEY_EQUIPMENT_COLLECTION_ID,
+                    KEY_DATE, KEY_PROJECT_ADDRESS_COMBO_ID, KEY_EQUIPMENT_COLLECTION_ID,
                     KEY_PICTURE_COLLECTION_ID, KEY_NOTE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_UPLOADED_MASTER, KEY_UPLOADED_AWS};
             final String orderBy = KEY_DATE + " DESC";
             Cursor cursor = mDb.query(TABLE_NAME, columns, where, whereArgs, null, null, orderBy, null);
             int idxRow = cursor.getColumnIndex(KEY_ROWID);
-            int idxProjectNameId = cursor.getColumnIndex(KEY_PROJECT_ID);
-            int idxAddress = cursor.getColumnIndex(KEY_ADDRESS_ID);
+            int idxProjectAddressCombo = cursor.getColumnIndex(KEY_PROJECT_ADDRESS_COMBO_ID);
             int idxDate = cursor.getColumnIndex(KEY_DATE);
             int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
             int idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID);
@@ -134,8 +114,8 @@ public class TableEntry {
                 entry = new DataEntry();
                 entry.id = cursor.getLong(idxRow);
                 entry.date = cursor.getLong(idxDate);
-                entry.projectNameId = cursor.getLong(idxProjectNameId);
-                entry.addressId = cursor.getLong(idxAddress);
+                long projectAddressComboId = cursor.getLong(idxProjectAddressCombo);
+                entry.projectAddressCombo = TableProjectAddressCombo.getInstance().query(projectAddressComboId);
                 long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
                 entry.equipmentCollection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
                 long pictureCollectionId = cursor.getLong(idxPictureCollectionId);
@@ -153,11 +133,11 @@ public class TableEntry {
         return list;
     }
 
-    public int countProjects(long projectNameId) {
+    public int countProjectAddressCombo(long comboId) {
         int count = 0;
         try {
-            final String selection = KEY_PROJECT_ID + " =?";
-            final String[] selectionArgs = {Long.toString(projectNameId)};
+            final String selection = KEY_PROJECT_ADDRESS_COMBO_ID + " =?";
+            final String[] selectionArgs = {Long.toString(comboId)};
             Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
             count = cursor.getCount();
             cursor.close();
@@ -170,10 +150,17 @@ public class TableEntry {
     public int countAddresses(long addressId) {
         int count = 0;
         try {
-            final String selection = KEY_ADDRESS_ID + " =?";
-            final String[] selectionArgs = {Long.toString(addressId)};
-            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
-            count = cursor.getCount();
+            final String[] columns = {KEY_PROJECT_ADDRESS_COMBO_ID};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
+            int idxProjectAddressCombo = cursor.getColumnIndex(KEY_PROJECT_ADDRESS_COMBO_ID);
+            DataProjectAddressCombo projectAddressCombo;
+            while (cursor.moveToNext()) {
+                long projectAddressComboId = cursor.getLong(idxProjectAddressCombo);
+                projectAddressCombo = TableProjectAddressCombo.getInstance().query(projectAddressComboId);
+                if (projectAddressCombo.addressId == addressId) {
+                    count++;
+                }
+            }
             cursor.close();
         } catch (Exception ex) {
             Timber.e(ex);
@@ -181,18 +168,40 @@ public class TableEntry {
         return count;
     }
 
-    public int countFullyUploaded(long projectNameId) {
+
+    public int countProjects(long projectId) {
+        int count = 0;
+        try {
+            final String[] columns = {KEY_PROJECT_ADDRESS_COMBO_ID};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
+            int idxProjectAddressCombo = cursor.getColumnIndex(KEY_PROJECT_ADDRESS_COMBO_ID);
+            DataProjectAddressCombo projectAddressCombo;
+            while (cursor.moveToNext()) {
+                long projectAddressComboId = cursor.getLong(idxProjectAddressCombo);
+                projectAddressCombo = TableProjectAddressCombo.getInstance().query(projectAddressComboId);
+                if (projectAddressCombo.projectNameId == projectId) {
+                    count++;
+                }
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
+    public int countFullyUploaded(long comboId) {
         int count = 0;
         try {
             StringBuilder sbuf = new StringBuilder();
-            sbuf.append(KEY_PROJECT_ID);
+            sbuf.append(KEY_PROJECT_ADDRESS_COMBO_ID);
             sbuf.append("=? AND ");
             sbuf.append(KEY_UPLOADED_MASTER);
             sbuf.append("=1 AND ");
             sbuf.append(KEY_UPLOADED_AWS);
             sbuf.append("=1");
             final String selection = sbuf.toString();
-            final String[] selectionArgs = {Long.toString(projectNameId)};
+            final String[] selectionArgs = {Long.toString(comboId)};
             Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
             count = cursor.getCount();
             cursor.close();
@@ -215,8 +224,7 @@ public class TableEntry {
             ContentValues values = new ContentValues();
             values.clear();
             values.put(KEY_DATE, entry.date);
-            values.put(KEY_PROJECT_ID, entry.projectNameId);
-            values.put(KEY_ADDRESS_ID, entry.addressId);
+            values.put(KEY_PROJECT_ADDRESS_COMBO_ID, entry.projectAddressCombo.id);
             values.put(KEY_EQUIPMENT_COLLECTION_ID, entry.equipmentCollection.id);
             values.put(KEY_TRUCK_NUMBER, entry.truckNumber);
             values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
@@ -259,8 +267,7 @@ public class TableEntry {
         }
     }
 
-    public void clearUploaded()
-    {
+    public void clearUploaded() {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();

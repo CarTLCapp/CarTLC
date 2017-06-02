@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Created by dug on 4/17/17.
  */
@@ -367,11 +369,10 @@ public class PrefHelper extends PrefHelperBase {
             return null;
         }
         DataEntry entry = new DataEntry();
-        entry.projectNameId = projectGroup.projectNameId;
+        entry.projectAddressCombo = projectGroup;
         entry.equipmentCollection = new DataCollectionEquipmentEntry(getNextEquipmentCollectionID());
         entry.equipmentCollection.addChecked();
         entry.pictureCollection = TablePictureCollection.getInstance().createCollectionFromPending();
-        entry.addressId = projectGroup.addressId;
         entry.truckNumber = getTruckNumber();
         entry.saveNotes(getNextNoteCollectionID());
         entry.date = System.currentTimeMillis();

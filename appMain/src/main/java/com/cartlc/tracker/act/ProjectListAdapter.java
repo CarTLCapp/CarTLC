@@ -18,6 +18,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Created by dug on 5/10/17.
@@ -56,10 +57,9 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     public void onBindViewHolder(CustomViewHolder holder, final int position) {
         final DataProjectAddressCombo projectGroup = mProjectGroups.get(position);
         holder.mProjectName.setText(projectGroup.getProjectName());
-        int countTotal = TableEntry.getInstance().countProjects(projectGroup.projectNameId);
-
+        int countTotal = TableEntry.getInstance().countProjectAddressCombo(projectGroup.id);
         if (countTotal > 0) {
-            int           countUploaded = TableEntry.getInstance().countFullyUploaded(projectGroup.projectNameId);
+            int           countUploaded = TableEntry.getInstance().countFullyUploaded(projectGroup.id);
             StringBuilder sbuf          = new StringBuilder();
             sbuf.append(mContext.getString(R.string.title_entries_));
             sbuf.append(" ");

@@ -124,7 +124,9 @@ public class TableProjectAddressCombo {
             int            idxProjectId  = cursor.getColumnIndex(KEY_PROJECT_ID);
             int            idxAddressId  = cursor.getColumnIndex(KEY_ADDRESS_ID);
             if (cursor.moveToFirst()) {
-                item = new DataProjectAddressCombo(cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
+                item = new DataProjectAddressCombo(id,
+                        cursor.getLong(idxProjectId),
+                        cursor.getLong(idxAddressId));
             }
             cursor.close();
         } catch (Exception ex) {

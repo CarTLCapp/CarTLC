@@ -13,8 +13,7 @@ import de.greenrobot.event.EventBus;
 public class DataEntry {
     public long                         id;
     public long                         date;
-    public long                         projectNameId;
-    public long                         addressId;
+    public DataProjectAddressCombo      projectAddressCombo;
     public DataCollectionEquipmentEntry equipmentCollection;
     public DataPictureCollection        pictureCollection;
     public long                         noteCollectionId;
@@ -26,19 +25,19 @@ public class DataEntry {
     }
 
     public String getProjectName() {
-        return TableProjects.getInstance().queryProjectName(projectNameId);
+        return projectAddressCombo.getProjectName();
     }
 
     public DataProject getProject() {
-        return TableProjects.getInstance().queryById(projectNameId);
+        return projectAddressCombo.getProject();
     }
 
     public DataAddress getAddress() {
-        return TableAddress.getInstance().query(addressId);
+        return projectAddressCombo.getAddress();
     }
 
     public String getAddressText() {
-        DataAddress address = TableAddress.getInstance().query(addressId);
+        DataAddress address = getAddress();
         if (address != null) {
             return address.getBlock();
         }
@@ -69,7 +68,7 @@ public class DataEntry {
 
     public void saveNotes(long collectionId) {
         noteCollectionId = collectionId;
-        TableCollectionNoteEntry.getInstance().store(projectNameId, noteCollectionId);
+        TableCollectionNoteEntry.getInstance().store(projectAddressCombo.projectNameId, noteCollectionId);
     }
 
     public void checkPictureUploadComplete() {

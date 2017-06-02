@@ -36,6 +36,10 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
         return mProjectName;
     }
 
+    public DataProject getProject() {
+        return TableProjects.getInstance().queryById(projectNameId);
+    }
+
     public DataAddress getAddress() {
         if (mAddress == null) {
             mAddress = TableAddress.getInstance().query(addressId);
