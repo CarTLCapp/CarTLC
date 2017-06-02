@@ -10,6 +10,7 @@ import play.Logger;
 import models.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
@@ -20,6 +21,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import java.util.Date;
 import java.util.Iterator;
+import modules.AmazonHelper;
+import modules.AmazonHelper.OnDownloadComplete;
+import java.io.File;
 
 /**
  * Manage a database of equipment.
@@ -29,10 +33,12 @@ public class EntryController extends Controller {
     private static final int PAGE_SIZE = 100;
 
     private FormFactory formFactory;
+    private AmazonHelper amazonHelper;
 
     @Inject
-    public EntryController(FormFactory formFactory) {
+    public EntryController(FormFactory formFactory, AmazonHelper amazonHelper) {
         this.formFactory = formFactory;
+        this.amazonHelper = amazonHelper;
     }
 
     public Result list(int page, String sortBy, String order) {
@@ -51,7 +57,19 @@ public class EntryController extends Controller {
         if (entry == null) {
             return badRequest("Could not find entry ID " + entry_id);
         }
-        return ok(views.html.entry_list_picture.render(entry.getPictures()));
+        List<PictureCollection> pictures = entry.getPictures();
+        for (PictureCollection picture : pictures) {
+            try {
+                amazonHelper.download(picture.picture, new OnDownloadComplete() {
+                    public void onDownloadComplete(File file) {
+                        Logger.info("COMPLETE: " + file.getAbsolutePath());
+                    }
+                });
+            } catch (Exception ex) {
+                Logger.error(ex.getMessage());
+            }
+        }
+        return ok(views.html.entry_list_picture.render(pictures));
     }
 
     /**
