@@ -2,6 +2,7 @@ package com.cartlc.tracker.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Environment;
 
 import java.io.File;
@@ -69,6 +70,20 @@ public class BitmapHelper {
             return srcWidth / dstWidth;
         } else {
             return srcHeight / dstHeight;
+        }
+    }
+
+    public static void rotateCW(File picture) {
+        try {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(90);
+            Bitmap bitmap = BitmapFactory.decodeFile(picture.getAbsolutePath());
+            Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            FileOutputStream fos = new FileOutputStream(picture.getAbsoluteFile());
+            rotated.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
         }
     }
 }

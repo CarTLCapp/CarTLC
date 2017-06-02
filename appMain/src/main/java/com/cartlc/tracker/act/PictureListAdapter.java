@@ -33,10 +33,10 @@ import timber.log.Timber;
 public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.CustomViewHolder> {
 
     static final int MSG_DECREASE_SIZE = 0;
-    static final int MSG_REMOVE_ITEM = 1;
+    static final int MSG_REMOVE_ITEM   = 1;
 
     static final int DELAY_DECREASE_SIZE = 100;
-    static final int DELAY_REMOVE_ITEM = 100;
+    static final int DELAY_REMOVE_ITEM   = 100;
 
     class MyHandler extends Handler {
         @Override
@@ -67,9 +67,10 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
     }
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
-        protected @BindView(R.id.picture)          ImageView imageView;
-        protected @Nullable @BindView(R.id.remove) ImageView removeView;
-        protected @BindView(R.id.loading)          TextView  loading;
+        protected @BindView(R.id.picture)             ImageView imageView;
+        protected @Nullable @BindView(R.id.remove)    ImageView removeView;
+        protected @Nullable @BindView(R.id.rotate_cw) ImageView rotateCWView;
+        protected @BindView(R.id.loading)             TextView  loading;
 
         public CustomViewHolder(View view) {
             super(view);
@@ -152,6 +153,15 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
                     public void onClick(View v) {
                         item.remove();
                         mItems.remove(item);
+                        notifyDataSetChanged();
+                    }
+                });
+            }
+            if (holder.rotateCWView != null) {
+                holder.rotateCWView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        item.rotateCW();
                         notifyDataSetChanged();
                     }
                 });

@@ -57,17 +57,24 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     public void onBindViewHolder(CustomViewHolder holder, final int position) {
         final DataProjectAddressCombo projectGroup = mProjectGroups.get(position);
         holder.mProjectName.setText(projectGroup.getProjectName());
-        int countTotal = TableEntry.getInstance().countProjectAddressCombo(projectGroup.id);
-        if (countTotal > 0) {
-            int           countUploaded = TableEntry.getInstance().countFullyUploaded(projectGroup.id);
-            StringBuilder sbuf          = new StringBuilder();
+        TableEntry.Count count = TableEntry.getInstance().countProjectAddressCombo(projectGroup.id);
+        if (count.totalEntries > 0) {
+            StringBuilder sbuf = new StringBuilder();
             sbuf.append(mContext.getString(R.string.title_entries_));
             sbuf.append(" ");
-            sbuf.append(Integer.toString(countTotal));
+            sbuf.append(Integer.toString(count.totalEntries));
             sbuf.append("   ");
-            sbuf.append(mContext.getString(R.string.title_uploaded_));
-            sbuf.append(" ");
-            sbuf.append(Integer.toString(countUploaded));
+
+            if (count.uploadedAll()) {
+                sbuf.append(mContext.getString(R.string.title_uploaded_done));
+            } else {
+                sbuf.append(" ");
+                sbuf.append(Integer.toString(count.totalUploadedMaster));
+                if (count.totalUploadedMaster != count.totalUploadedAws) {
+                    sbuf.append("/");
+                    sbuf.append(Integer.toString(count.totalUploadedAws));
+                }
+            }
             holder.mProjectNotes.setText(sbuf.toString());
             holder.mProjectNotes.setVisibility(View.VISIBLE);
         } else {

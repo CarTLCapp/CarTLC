@@ -29,11 +29,11 @@ public class TablePictureCollection {
 
     static final String TABLE_NAME = "picture_collection";
 
-    static final String KEY_ROWID = "_id";
-    static final String KEY_COLLECTION_ID = "collection_id";
-    static final String KEY_PICTURE_FILENAME = "picture_filename";
+    static final String KEY_ROWID              = "_id";
+    static final String KEY_COLLECTION_ID      = "collection_id";
+    static final String KEY_PICTURE_FILENAME   = "picture_filename";
     static final String KEY_UPLOADING_FILENAME = "uploading_filename";
-    static final String KEY_UPLOADED = "uploaded";
+    static final String KEY_UPLOADED           = "uploaded";
 
     final SQLiteDatabase mDb;
 
@@ -106,10 +106,10 @@ public class TablePictureCollection {
             collection = new DataPictureCollection(collection_id);
             while (cursor.moveToNext()) {
                 collection.add(new DataPicture(
-                                    cursor.getLong(idxRowId),
-                                    cursor.getString(idxPicture),
-                                    cursor.getString(idxUploading),
-                                    cursor.getShort(idxUploaded) != 0));
+                        cursor.getLong(idxRowId),
+                        cursor.getString(idxPicture),
+                        cursor.getString(idxUploading),
+                        cursor.getShort(idxUploaded) != 0));
             }
             cursor.close();
         } catch (Exception ex) {
@@ -157,10 +157,28 @@ public class TablePictureCollection {
     public int countPendingPictures() {
         int count = 0;
         try {
+            final String[] columns = {KEY_ROWID, KEY_PICTURE_FILENAME};
             final String selection = KEY_COLLECTION_ID + " =0";
-            Cursor cursor = mDb.query(TABLE_NAME, null, selection, null, null, null, null, null);
-            count = cursor.getCount();
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, null, null, null, null, null);
+            int idxPicture = cursor.getColumnIndex(KEY_PICTURE_FILENAME);
+            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+            ArrayList<Long> delete = new ArrayList();
+            while (cursor.moveToNext()) {
+                String filename = cursor.getString(idxPicture);
+                File file = new File(filename);
+                if (file.exists()) {
+                    count++;
+                } else {
+                    delete.add(cursor.getLong(idxRowId));
+                }
+            }
             cursor.close();
+
+            String where = KEY_ROWID + "=?";
+            for (Long id : delete) {
+                String[] whereArgs = {Long.toString(id)};
+                mDb.delete(TABLE_NAME, where, whereArgs);
+            }
         } catch (Exception ex) {
             Timber.e(ex);
         }
@@ -187,7 +205,7 @@ public class TablePictureCollection {
     public void remove(DataPicture item) {
         try {
             final String where = KEY_COLLECTION_ID + "=?";
-            final String [] whereArgs = { Long.toString(item.id) };
+            final String[] whereArgs = {Long.toString(item.id)};
             mDb.delete(TABLE_NAME, where, whereArgs);
         } catch (Exception ex) {
             Timber.e(ex);

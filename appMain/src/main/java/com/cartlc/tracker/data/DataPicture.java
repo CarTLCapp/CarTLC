@@ -80,4 +80,8 @@ public class DataPicture {
         }
         return uploadingFilename;
     }
+
+    public void rotateCW() {
+        BitmapHelper.rotateCW(getPictureFile());
+    }
 }

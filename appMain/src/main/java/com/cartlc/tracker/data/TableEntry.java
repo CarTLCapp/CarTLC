@@ -15,6 +15,21 @@ import timber.log.Timber;
 
 public class TableEntry {
 
+    public static class Count {
+        public long comboId;
+        public int totalEntries        = 0;
+        public int totalUploadedAws    = 0;
+        public int totalUploadedMaster = 0;
+
+        public Count(long id) {
+            comboId = id;
+        }
+
+        public boolean uploadedAll() {
+            return totalUploadedAws >= totalEntries && totalUploadedMaster >= totalEntries;
+        }
+    }
+
     static final String TABLE_NAME = "table_entries";
 
     static final String KEY_ROWID                    = "_id";
@@ -136,13 +151,24 @@ public class TableEntry {
         return list;
     }
 
-    public int countProjectAddressCombo(long comboId) {
-        int count = 0;
+    public Count countProjectAddressCombo(long comboId) {
+        Count count = new Count(comboId);
         try {
             final String selection = KEY_PROJECT_ADDRESS_COMBO_ID + " =?";
             final String[] selectionArgs = {Long.toString(comboId)};
-            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
-            count = cursor.getCount();
+            final String[] columns = {KEY_UPLOADED_AWS, KEY_UPLOADED_MASTER};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            int idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS);
+            int idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER);
+            while (cursor.moveToNext()) {
+                if (cursor.getShort(idxUploadedAws) != 0) {
+                    count.totalUploadedAws++;
+                }
+                if (cursor.getShort(idxUploadedMaster) != 0) {
+                    count.totalUploadedMaster++;
+                }
+                count.totalEntries++;
+            }
             cursor.close();
         } catch (Exception ex) {
             Timber.e(ex);
@@ -193,26 +219,6 @@ public class TableEntry {
         return count;
     }
 
-    public int countFullyUploaded(long comboId) {
-        int count = 0;
-        try {
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append(KEY_PROJECT_ADDRESS_COMBO_ID);
-            sbuf.append("=? AND ");
-            sbuf.append(KEY_UPLOADED_MASTER);
-            sbuf.append("=1 AND ");
-            sbuf.append(KEY_UPLOADED_AWS);
-            sbuf.append("=1");
-            final String selection = sbuf.toString();
-            final String[] selectionArgs = {Long.toString(comboId)};
-            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
-            count = cursor.getCount();
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return count;
-    }
 
     public void add(DataEntry entry) {
         mDb.beginTransaction();
