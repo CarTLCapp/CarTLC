@@ -45,6 +45,7 @@ public class AmazonHelper {
         }
 
         void run() throws DownloadException {
+            Logger.info("DOWNLOAD: KEY=" + key + " TARGET=" + targetFile.getAbsolutePath());
             try {
                 TransferManager xferManager = TransferManagerBuilder.defaultTransferManager();
                 GetObjectRequest obj = new GetObjectRequest(BUCKET_NAME, key);
@@ -56,6 +57,7 @@ public class AmazonHelper {
                     }
                 });
             } catch (AmazonServiceException e) {
+                Logger.error("ERROR: " + e.getMessage());
                 throw(new DownloadException(e.getErrorMessage()));
             }
         }
