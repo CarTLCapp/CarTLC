@@ -116,6 +116,9 @@ public class TableEntry {
                 entry.date = cursor.getLong(idxDate);
                 long projectAddressComboId = cursor.getLong(idxProjectAddressCombo);
                 entry.projectAddressCombo = TableProjectAddressCombo.getInstance().query(projectAddressComboId);
+                if (entry.projectAddressCombo == null) {
+                    Timber.e("MYDEBUG NULL ENCOUNTERED FOR " + projectAddressComboId);
+                }
                 long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
                 entry.equipmentCollection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
                 long pictureCollectionId = cursor.getLong(idxPictureCollectionId);

@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -134,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
     DataEntry                  mCurEntry;
     OnEditorActionListener     mAutoNext;
     String                     mByAddress;
+    DividerItemDecoration      mDivider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,9 +171,10 @@ public class MainActivity extends AppCompatActivity {
                 doNext();
             }
         });
-        LinearLayoutManager linearLayoutManager;
-        mMainList.setLayoutManager(linearLayoutManager = new LinearLayoutManager(this));
-        mMainList.addItemDecoration(new DividerItemDecoration(mMainList.getContext(), linearLayoutManager.getOrientation()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        mMainList.setLayoutManager(linearLayoutManager);
+        mDivider = new DividerItemDecoration(mMainList.getContext(), linearLayoutManager.getOrientation());
+        mMainList.addItemDecoration(mDivider);
         mSimpleAdapter = new SimpleListAdapter(this, new SimpleListAdapter.OnItemSelectedListener() {
             @Override
             public void onSelectedItem(int position, String text) {
@@ -303,7 +306,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     boolean save(boolean isNext) {
-        if (mCurStage == Stage.LOGIN) {
+        if (mCurStageEditing) {
+            if (mCurStage == Stage.CITY) {
+                PrefHelper.getInstance().setCity(getEditText(mEntrySimple));
+            } else if (mCurStage == Stage.STREET) {
+                PrefHelper.getInstance().setStreet(getEditText(mEntrySimple));
+            } else if (mCurStage == Stage.EQUIPMENT) {
+                String name = getEditText(mEntrySimple);
+                if (!TextUtils.isEmpty(name)) {
+                    DataProjectAddressCombo group = PrefHelper.getInstance().getCurrentProjectGroup();
+                    if (group != null) {
+                        TableCollectionEquipmentProject.getInstance().addLocal(name, group.projectNameId);
+                    }
+                }
+            } else if (mCurStage == Stage.ZIPCODE) {
+                PrefHelper.getInstance().setZipCode(getEditText(mEntrySimple));
+                mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() - 1);
+            }
+        } else if (mCurStage == Stage.LOGIN) {
             String firstName = getEditText(mFirstName);
             String lastName = getEditText(mLastName);
             PrefHelper.getInstance().setFirstName(firstName);
@@ -337,29 +357,10 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (mCurStage == Stage.ZIPCODE) {
             if (isNext) {
-                String value = mEntrySimple.getText().toString();
+                String value = PrefHelper.getInstance().getZipCode();
                 if (!TextUtils.isEmpty(value) && !value.equals(mByAddress)) {
-                    PrefHelper.getInstance().setZipCode(value);
                     mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() - 1);
-                    Timber.d("JUMPING TO CURRENT_PROJECT!");
                 }
-            }
-        } else if (mCurStageEditing) {
-            if (mCurStage == Stage.CITY) {
-                PrefHelper.getInstance().setCity(getEditText(mEntrySimple));
-            } else if (mCurStage == Stage.STREET) {
-                PrefHelper.getInstance().setStreet(getEditText(mEntrySimple));
-            } else if (mCurStage == Stage.EQUIPMENT) {
-                String name = getEditText(mEntrySimple);
-                if (!TextUtils.isEmpty(name)) {
-                    DataProjectAddressCombo group = PrefHelper.getInstance().getCurrentProjectGroup();
-                    if (group != null) {
-                        TableCollectionEquipmentProject.getInstance().addLocal(name, group.projectNameId);
-                    }
-                }
-            } else if (mCurStage == Stage.ZIPCODE) {
-                PrefHelper.getInstance().setZipCode(getEditText(mEntrySimple));
-                mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() - 1);
             }
         }
         mCurStageEditing = false;
@@ -378,6 +379,8 @@ public class MainActivity extends AppCompatActivity {
         if (mCurStage == Stage.PROJECT) {
             PrefHelper.getInstance().recoverProject();
             mCurStage = Stage.CURRENT_PROJECT;
+        } else if (mCurStage == Stage.STATE) {
+            mCurStage = Stage.COMPANY;
         } else {
             mCurStage = Stage.from(mCurStage.ordinal() - 1);
         }
@@ -445,7 +448,6 @@ public class MainActivity extends AppCompatActivity {
                 setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
                 break;
             case ZIPCODE: {
-                mMainListFrame.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
                 String company = PrefHelper.getInstance().getCompany();
@@ -455,8 +457,9 @@ public class MainActivity extends AppCompatActivity {
                         mEntryFrame.setVisibility(View.VISIBLE);
                         mEntrySimple.setHint(R.string.title_zipcode);
                         mEntrySimple.setText("");
-                        mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS);
+                        mEntrySimple.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                     } else {
+                        mMainListFrame.setVisibility(View.VISIBLE);
                         List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
                         if (zipcodes.size() > 0) {
                             zipcodes.add(0, mByAddress);

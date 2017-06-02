@@ -93,7 +93,6 @@ public class AmazonHelper {
         observer.setTransferListener(new TransferListener() {
             @Override
             public void onStateChanged(int id, TransferState state) {
-                Timber.d("onStateChanged(" + state.toString() + ")");
                 if (state == TransferState.COMPLETED) {
                     uploadComplete(entry, item);
                 }

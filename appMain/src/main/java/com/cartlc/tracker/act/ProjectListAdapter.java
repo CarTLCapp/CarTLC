@@ -81,11 +81,9 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
             holder.mProjectAddress.setText(address.getBlock());
         }
         if (projectGroup.id == mCurProjectGroupId) {
-            holder.mProjectName.setBackgroundResource(R.color.project_highlight);
-            holder.mProjectAddress.setBackgroundResource(R.color.address_highlight);
+            holder.itemView.setBackgroundResource(R.color.project_highlight);
         } else {
-            holder.mProjectName.setBackgroundResource(R.color.project_normal);
-            holder.mProjectAddress.setBackgroundResource(R.color.address_normal);
+            holder.itemView.setBackgroundResource(R.color.project_normal);
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
