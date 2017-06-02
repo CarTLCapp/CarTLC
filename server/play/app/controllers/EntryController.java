@@ -87,7 +87,7 @@ public class EntryController extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public Result enter() {
         Entry entry = new Entry();
-        ArrayList<String> missing = new ArrayList();
+        ArrayList<String> missing = new ArrayList<String>();
         JsonNode json = request().body().asJson();
         Logger.debug("GOT: " + json.toString());
         JsonNode value = json.findValue("tech_id");

@@ -25,7 +25,7 @@ public class PostController extends Controller
 	@BodyParser.Of(BodyParser.Json.class)
 	public Result register() {
 		JsonNode json = request().body().asJson();
-		ArrayList<String> missing = new ArrayList();
+		ArrayList<String> missing = new ArrayList<String>();
 		String first_name = json.findPath("first_name").textValue();
 		if (first_name == null)
 		{
@@ -72,7 +72,7 @@ public class PostController extends Controller
 	@Transactional
 	@BodyParser.Of(BodyParser.Json.class)
 	public Result ping() {
-		ArrayList<String> missing = new ArrayList();
+		ArrayList<String> missing = new ArrayList<String>();
 		JsonNode json = request().body().asJson();
 		JsonNode node = json.findValue("device_id");
 		String deviceId;

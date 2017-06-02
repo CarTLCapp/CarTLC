@@ -136,7 +136,7 @@ public class Note extends Model implements Comparable<Note> {
     }
 
     public static Map<String,String> options() {
-        LinkedHashMap<String,String> options = new LinkedHashMap();
+        LinkedHashMap<String,String> options = new LinkedHashMap<String,String>();
         for(Type t: Type.values()) {
             options.put(t.toString(), t.display);
         }
