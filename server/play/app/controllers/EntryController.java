@@ -55,7 +55,7 @@ public class EntryController extends Controller {
     public Result pictures(Long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry == null) {
-            return badRequest("Could not find entry ID " + entry_id);
+            return badRequest2("Could not find entry ID " + entry_id);
         }
         List<PictureCollection> pictures = entry.getPictures();
         for (PictureCollection picture : pictures) {
@@ -90,7 +90,7 @@ public class EntryController extends Controller {
     public Result notes(Long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry == null) {
-            return badRequest("Could not find entry ID " + entry_id);
+            return badRequest2("Could not find entry ID " + entry_id);
         }
         return ok(views.html.entry_list_note.render(entry.getNotes()));
     }
@@ -133,7 +133,7 @@ public class EntryController extends Controller {
                     project.save();
                     Version.inc(Version.VERSION_PROJECT);
                 } else {
-                    return badRequest("project_name");
+                    return badRequest2("project_name");
                 }
             }
         } else {
@@ -149,13 +149,13 @@ public class EntryController extends Controller {
                 if (address.length() > 0) {
                     try {
                         Company company = Company.parse(address);
-                        company.is_local = 1;
+                        company.is_local = true;
                         company.save();
                     } catch (Exception ex) {
-                        return badRequest("address: " + ex.getMessage());
+                        return badRequest2("address: " + ex.getMessage());
                     }
                 } else {
-                    return badRequest("address");
+                    return badRequest2("address");
                 }
             }
         } else {
@@ -164,7 +164,7 @@ public class EntryController extends Controller {
         value = json.findValue("equipment");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                return badRequest("Expected array for element 'equipment'");
+                return badRequest2("Expected array for element 'equipment'");
             } else {
                 int collection_id = Version.inc(Version.NEXT_EQUIPMENT_COLLECTION_ID);
                 boolean newEquipmentCreated = false;
@@ -200,7 +200,7 @@ public class EntryController extends Controller {
         value = json.findValue("picture");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                return badRequest("Expected array for element 'picture'");
+                return badRequest2("Expected array for element 'picture'");
             } else {
                 int collection_id = Version.inc(Version.NEXT_PICTURE_COLLECTION_ID);
                 Iterator<JsonNode> iterator = value.elements();
@@ -222,7 +222,7 @@ public class EntryController extends Controller {
         value = json.findValue("notes");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                return badRequest("Expected array for element 'notes'");
+                return badRequest2("Expected array for element 'notes'");
             } else {
                 int collection_id = Version.inc(Version.NEXT_NOTE_COLLECTION_ID);
                 Iterator<JsonNode> iterator = value.elements();
@@ -274,7 +274,12 @@ public class EntryController extends Controller {
             sbuf.append(field);
         }
         sbuf.append("\n");
-        return badRequest(sbuf.toString());
+        return badRequest2(sbuf.toString());
+    }
+
+    Result badRequest2(String field) {
+        Logger.error("ERROR: " + field);
+        return badRequest(field);
     }
 }
 

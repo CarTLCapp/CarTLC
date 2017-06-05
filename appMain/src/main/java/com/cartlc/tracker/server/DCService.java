@@ -652,8 +652,8 @@ public class DCService extends IntentService {
             InputStream inputStream;
             try {
                 inputStream = connection.getInputStream();
-            } catch (Exception ignored) {
-                Timber.e("Server not available.");
+            } catch (Exception ex) {
+                Timber.e("Server response not available. (" + ex.getMessage() + ")");
                 return null;
             }
             if (inputStream == null) {
