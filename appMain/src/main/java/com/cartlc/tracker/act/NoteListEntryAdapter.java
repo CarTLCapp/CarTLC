@@ -41,8 +41,8 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         }
     }
 
-    final protected Context        mContext;
-    protected       List<DataNote> mItems;
+    final protected Context                    mContext;
+    protected       List<DataNote>             mItems;
 
     public NoteListEntryAdapter(Context context) {
         mContext = context;

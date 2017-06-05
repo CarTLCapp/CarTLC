@@ -11,7 +11,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -25,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -77,6 +77,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    class SoftKeyboardDetect implements ViewTreeObserver.OnGlobalLayoutListener {
+
+        int mInitialHeight;
+
+        void SoftKeyboardDetect() {
+        }
+
+        public void clear() {
+            mButtons.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onGlobalLayout() {
+            int heightDiff = Math.abs(mRoot.getRootView().getHeight() - mRoot.getHeight());
+            if (mInitialHeight == 0) {
+                mInitialHeight = heightDiff;
+            } else {
+                // If the diff has increased assume it's the soft keyboard.
+                if (heightDiff > mInitialHeight) {
+                    hideButtons();
+                } else {
+                    restoreButtons();
+                }
+            }
+        }
+
+        void hideButtons() {
+            if (mButtons.getVisibility() == View.VISIBLE) {
+                mButtons.setVisibility(View.GONE);
+            }
+        }
+
+        void restoreButtons() {
+            if (mButtons.getVisibility() != View.VISIBLE) {
+                mButtons.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
     enum Stage {
         LOGIN,
         PROJECT,
@@ -108,8 +147,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.entry_simple)       EditText             mEntrySimple;
     @BindView(R.id.frame_login)        ViewGroup            mLoginFrame;
     @BindView(R.id.frame_new_entry)    ViewGroup            mEntryFrame;
-    @BindView(R.id.list)               RecyclerView         mMainList;
-    @BindView(R.id.list_container)     FrameLayout          mMainListFrame;
+    @BindView(R.id.main_list)          RecyclerView         mMainList;
+    @BindView(R.id.main_list_frame)    FrameLayout          mMainListFrame;
     @BindView(R.id.next)               Button               mNext;
     @BindView(R.id.prev)               Button               mPrev;
     @BindView(R.id.new_entry)          Button               mNew;
@@ -119,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.frame_pictures)     ViewGroup            mPictureFrame;
     @BindView(R.id.list_pictures)      RecyclerView         mPictureList;
     @BindView(R.id.empty)              TextView             mEmptyView;
+    @BindView(R.id.root)               ViewGroup            mRoot;
+    @BindView(R.id.buttons)            ViewGroup            mButtons;
 
     Stage     mCurStage = Stage.LOGIN;
     String    mCurKey   = PrefHelper.KEY_STATE;
@@ -136,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
     OnEditorActionListener     mAutoNext;
     String                     mByAddress;
     DividerItemDecoration      mDivider;
+    SoftKeyboardDetect mSoftKeyboardDetect = new SoftKeyboardDetect();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mByAddress = getString(R.string.entry_by_address);
+        mRoot.getViewTreeObserver().addOnGlobalLayoutListener(mSoftKeyboardDetect);
         mInputMM = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mNext.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -364,6 +407,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         mCurStageEditing = false;
+        mSoftKeyboardDetect.clear();
         return true;
     }
 
@@ -580,21 +624,6 @@ public class MainActivity extends AppCompatActivity {
                 mEntrySimple.setText(getTruckNumber());
                 mEntrySimple.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 break;
-            case NOTES:
-                mNext.setVisibility(View.VISIBLE);
-                mPrev.setVisibility(View.VISIBLE);
-                mNoteAdapter.onDataChanged();
-                mTitle.setText(R.string.title_notes);
-                mMainListFrame.setVisibility(View.VISIBLE);
-                if (mNoteAdapter.getItemCount() == 0) {
-                    mMainList.setVisibility(View.GONE);
-                    mEmptyView.setVisibility(View.VISIBLE);
-                } else {
-                    mMainList.setAdapter(mNoteAdapter);
-                    mMainList.setVisibility(View.VISIBLE);
-                    mEmptyView.setVisibility(View.GONE);
-                }
-                break;
             case EQUIPMENT:
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
@@ -611,6 +640,21 @@ public class MainActivity extends AppCompatActivity {
                     mMainList.setAdapter(mEquipmentAdapter);
                     mEquipmentAdapter.onDataChanged();
                     mMainListFrame.setVisibility(View.VISIBLE);
+                }
+                break;
+            case NOTES:
+                mNext.setVisibility(View.VISIBLE);
+                mPrev.setVisibility(View.VISIBLE);
+                mNoteAdapter.onDataChanged();
+                mTitle.setText(R.string.title_notes);
+                mMainListFrame.setVisibility(View.VISIBLE);
+                if (mNoteAdapter.getItemCount() == 0) {
+                    mMainList.setVisibility(View.GONE);
+                    mEmptyView.setVisibility(View.VISIBLE);
+                } else {
+                    mMainList.setAdapter(mNoteAdapter);
+                    mMainList.setVisibility(View.VISIBLE);
+                    mEmptyView.setVisibility(View.GONE);
                 }
                 break;
             case PICTURE:
