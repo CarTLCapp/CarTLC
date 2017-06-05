@@ -24,6 +24,14 @@ public class DataAddress {
         this.state = state;
     }
 
+    public DataAddress(String company, String street, String city, String state, String zipcode) {
+        this.company = company;
+        this.street = street;
+        this.city = city;
+        this.state = state;
+        this.zipcode = zipcode;
+    }
+
     public DataAddress(String company, String zipcode) {
         this.company = company;
         this.zipcode = zipcode;

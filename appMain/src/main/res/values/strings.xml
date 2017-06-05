@@ -16,6 +16,7 @@
     <string name="entry_hint_last_name">Last Name</string>
     <string name="entry_hint_first_name">First Name</string>
     <string name="entry_hint_notes">Add any notes here</string>
+    <string name="entry_hint_skip_zip">Enter ZIP or hit NEXT</string>
 
     <string name="title_profile">Profile</string>
     <string name="title_login">Login</string>
@@ -59,6 +60,6 @@
 
     <string name="loading">LOADING...</string>
 
-    <string name="entry_by_address">BY ADDRESS</string>
+    <!--<string name="entry_by_address">BY ADDRESS</string>-->
 
 </resources>

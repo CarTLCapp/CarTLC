@@ -196,13 +196,13 @@ public class PrefHelper extends PrefHelperBase {
         setInt(VERSION_COMPANY, value);
     }
 
-    public List<String> addState(List<String> list) {
-        return addIfNotFound(list, getState());
-    }
+//    public List<String> addState(List<String> list) {
+//        return addIfNotFound(list, getState());
+//    }
 
-    public List<String> addCity(List<String> list) {
-        return addIfNotFound(list, getCity());
-    }
+//    public List<String> addCity(List<String> list) {
+//        return addIfNotFound(list, getCity());
+//    }
 
     public boolean hasRegistrationChanged() {
         return getInt(KEY_REGISTRATION_CHANGED, 0) != 0;
@@ -276,7 +276,7 @@ public class PrefHelper extends PrefHelperBase {
         return true;
     }
 
-    public boolean saveNewProjectIfNeeded() {
+    public boolean saveProjectAndAddressCombo() {
         String project = getProjectName();
         if (TextUtils.isEmpty((project))) {
             return false;
@@ -297,12 +297,14 @@ public class PrefHelper extends PrefHelperBase {
             addressId = TableAddress.getInstance().queryAddressId(company, zipcode);
             if (addressId < 0) {
                 DataAddress address = new DataAddress(company, zipcode);
+                address.isLocal = true;
                 addressId = TableAddress.getInstance().add(address);
             }
         } else {
-            addressId = TableAddress.getInstance().queryAddressId(company, street, city, state);
+            addressId = TableAddress.getInstance().queryAddressId(company, street, city, state, zipcode);
             if (addressId < 0) {
-                DataAddress address = new DataAddress(company, street, city, state);
+                DataAddress address = new DataAddress(company, street, city, state, zipcode);
+                address.isLocal = true;
                 addressId = TableAddress.getInstance().add(address);
             }
         }

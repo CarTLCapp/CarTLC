@@ -62,8 +62,7 @@ public class DataStates {
             "Wyoming",
     };
 
-    public static List<String> getUnusedStates() {
-        List<String> usedStates = TableAddress.getInstance().queryStates(null);
+    public static List<String> getUnusedStates(List<String> usedStates) {
         List<String> unused = new ArrayList();
         for (String state : STATES) {
             if (!usedStates.contains(state)) {

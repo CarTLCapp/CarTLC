@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -50,13 +49,11 @@ import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.event.EventServerPingDone;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
-import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -179,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
     ConfirmationFrame          mConfirmationFrame;
     DataEntry                  mCurEntry;
     OnEditorActionListener     mAutoNext;
-    String                     mByAddress;
+    //    String                     mByAddress;
     DividerItemDecoration      mDivider;
     String                     mCompanyEditing;
 
@@ -191,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mByAddress = getString(R.string.entry_by_address);
+//        mByAddress = getString(R.string.entry_by_address);
         mRoot.getViewTreeObserver().addOnGlobalLayoutListener(mSoftKeyboardDetect);
         mInputMM = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mNext.setOnClickListener(new View.OnClickListener() {
@@ -368,7 +365,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else if (mCurStage == Stage.ZIPCODE) {
                 PrefHelper.getInstance().setZipCode(getEditText(mEntrySimple));
-                mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() - 1);
             } else if (mCurStage == Stage.COMPANY) {
                 String newCompanyName = getEditText(mEntrySimple).trim();
                 if (isNext) {
@@ -377,12 +373,7 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     }
                     PrefHelper.getInstance().setCompany(newCompanyName);
-
-                    if (mCompanyEditing == null) {
-                        if (!TableAddress.getInstance().hasCompanyName(newCompanyName)) {
-                            TableAddress.getInstance().add(newCompanyName);
-                        }
-                    } else {
+                    if (mCompanyEditing != null) {
                         List<DataAddress> companies = TableAddress.getInstance().queryByCompanyName(mCompanyEditing);
                         for (DataAddress address : companies) {
                             address.company = newCompanyName;
@@ -423,13 +414,6 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             }
-        } else if (mCurStage == Stage.ZIPCODE) {
-            if (isNext) {
-                String value = PrefHelper.getInstance().getZipCode();
-                if (!TextUtils.isEmpty(value) && !value.equals(mByAddress)) {
-                    mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() - 1);
-                }
-            }
         } else if (mCurStage == Stage.COMPANY) {
             if (isNext) {
                 if (TextUtils.isEmpty(PrefHelper.getInstance().getCompany())) {
@@ -445,9 +429,13 @@ public class MainActivity extends AppCompatActivity {
 
     void doNext() {
         if (save(true)) {
-            mCurStage = Stage.from(mCurStage.ordinal() + 1);
-            fillStage();
+            doNext_();
         }
+    }
+
+    void doNext_() {
+        mCurStage = Stage.from(mCurStage.ordinal() + 1);
+        fillStage();
     }
 
     void doPrev() {
@@ -540,58 +528,64 @@ public class MainActivity extends AppCompatActivity {
             case ZIPCODE: {
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
-                String company = PrefHelper.getInstance().getCompany();
-                if (TableAddress.getInstance().hasZipOnly(company)) {
+                final String company = PrefHelper.getInstance().getCompany();
+                List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
+                final boolean isLocal = TableAddress.getInstance().isLocalCompanyOnly(company) || !TableAddress.getInstance().hasCompanyName(company);
+                final boolean hasZipCodes = zipcodes.size() > 0;
+                if (hasZipCodes || isLocal) {
+                    if (!hasZipCodes) {
+                        mCurStageEditing = true;
+                    }
                     if (mCurStageEditing) {
                         mTitle.setText(R.string.title_zipcode);
                         mEntryFrame.setVisibility(View.VISIBLE);
-                        mEntrySimple.setHint(R.string.title_zipcode);
+                        if (isLocal) {
+                            mEntrySimple.setHint(R.string.entry_hint_skip_zip);
+                        } else {
+                            mEntrySimple.setHint(R.string.title_zipcode);
+                        }
                         mEntrySimple.setText("");
                         mEntrySimple.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                     } else {
                         mMainListFrame.setVisibility(View.VISIBLE);
-                        List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
-                        if (zipcodes.size() > 0) {
-                            zipcodes.add(0, mByAddress);
-                            setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
-                            mNew.setVisibility(View.VISIBLE);
-                        } else {
-                            mCurStageEditing = true;
-                            fillStage();
-                        }
+                        setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
+                        mNew.setVisibility(View.VISIBLE);
                     }
                 } else {
-                    mCurStage = Stage.from(mCurStage.ordinal() + 1);
-                    fillStage();
+                    doNext_();
                 }
                 break;
             }
-            case STATE:
+            case STATE: {
                 mMainListFrame.setVisibility(View.VISIBLE);
-                mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
+                final String company = PrefHelper.getInstance().getCompany();
+                final String zipcode = PrefHelper.getInstance().getZipCode();
+                List<String> states = TableAddress.getInstance().queryStates(company, zipcode);
+                if (states.size() == 0) {
+                    mCurStageEditing = true;
+                }
                 if (mCurStageEditing) {
-                    List<String> states = DataStates.getUnusedStates();
+                    states = DataStates.getUnusedStates(states);
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
-                    String company = PrefHelper.getInstance().getCompany();
-                    List<String> states = TableAddress.getInstance().queryStates(company);
-                    if (states.size() > 0) {
-                        PrefHelper.getInstance().addState(states);
-                        if (!setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
-                            mNext.setVisibility(View.INVISIBLE);
-                        }
-                        mNew.setVisibility(View.VISIBLE);
-                    } else {
-                        mCurStageEditing = true;
-                        fillStage();
+                    if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
+                        mNext.setVisibility(View.VISIBLE);
                     }
+                    mNew.setVisibility(View.VISIBLE);
                 }
                 break;
-            case CITY:
-                mNext.setVisibility(View.VISIBLE);
+            }
+            case CITY: {
                 mPrev.setVisibility(View.VISIBLE);
+                final String company = PrefHelper.getInstance().getCompany();
+                final String zipcode = PrefHelper.getInstance().getZipCode();
+                final String state = PrefHelper.getInstance().getState();
+                List<String> cities = TableAddress.getInstance().queryCities(company, zipcode, state);
+                if (cities.size() == 0) {
+                    mCurStageEditing = true;
+                }
                 if (mCurStageEditing) {
                     mEntryFrame.setVisibility(View.VISIBLE);
                     mTitle.setText(R.string.title_city);
@@ -600,22 +594,22 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mMainListFrame.setVisibility(View.VISIBLE);
                     mNew.setVisibility(View.VISIBLE);
-                    String state = PrefHelper.getInstance().getState();
-                    List<String> cities = TableAddress.getInstance().queryCities(state);
-                    if (cities.size() > 0) {
-                        PrefHelper.getInstance().addCity(cities);
-                        if (!setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
-                            mNext.setVisibility(View.INVISIBLE);
-                        }
-                    } else {
-                        mCurStageEditing = true;
-                        fillStage();
+                    if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
+                        mNext.setVisibility(View.VISIBLE);
                     }
                 }
                 break;
-            case STREET:
-                mNext.setVisibility(View.VISIBLE);
+            }
+            case STREET: {
                 mPrev.setVisibility(View.VISIBLE);
+                List<String> streets = TableAddress.getInstance().queryStreets(
+                        PrefHelper.getInstance().getCompany(),
+                        PrefHelper.getInstance().getCity(),
+                        PrefHelper.getInstance().getState(),
+                        PrefHelper.getInstance().getZipCode());
+                if (streets.size() == 0) {
+                    mCurStageEditing = true;
+                }
                 if (mCurStageEditing) {
                     mTitle.setText(R.string.title_street);
                     mEntryFrame.setVisibility(View.VISIBLE);
@@ -625,22 +619,14 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mNew.setVisibility(View.VISIBLE);
                     mMainListFrame.setVisibility(View.VISIBLE);
-                    List<String> locations = TableAddress.getInstance().queryStreets(
-                            PrefHelper.getInstance().getCompany(),
-                            PrefHelper.getInstance().getCity(),
-                            PrefHelper.getInstance().getState());
-                    if (locations.size() > 0) {
-                        if (!setList(R.string.title_street, PrefHelper.KEY_STREET, locations)) {
-                            mNext.setVisibility(View.INVISIBLE);
-                        }
-                    } else {
-                        mCurStageEditing = true;
-                        fillStage();
+                    if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
+                        mNext.setVisibility(View.VISIBLE);
                     }
                 }
                 break;
+            }
             case CURRENT_PROJECT:
-                PrefHelper.getInstance().saveNewProjectIfNeeded();
+                PrefHelper.getInstance().saveProjectAndAddressCombo();
                 if (mCurStageEditing) {
                     PrefHelper.getInstance().clearCurProject();
                     mCurStageEditing = false;
@@ -855,16 +841,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     boolean isLocalCompany() {
-        String company = PrefHelper.getInstance().getCompany();
-        List<DataAddress> list = TableAddress.getInstance().queryByCompanyName(company);
-        if (list.size() == 0) {
-            return false;
-        }
-        for (DataAddress address : list) {
-            if (!address.isLocal) {
-                return false;
-            }
-        }
-        return true;
+        return TableAddress.getInstance().isLocalCompanyOnly(PrefHelper.getInstance().getCompany());
     }
 }
