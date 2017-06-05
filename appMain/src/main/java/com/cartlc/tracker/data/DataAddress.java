@@ -15,6 +15,7 @@ public class DataAddress {
     public String  state;
     public String  zipcode;
     public boolean disabled;
+    public boolean isLocal;
 
     public DataAddress(String company, String street, String city, String state) {
         this.company = company;

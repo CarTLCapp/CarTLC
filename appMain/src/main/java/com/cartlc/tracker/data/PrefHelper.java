@@ -204,10 +204,6 @@ public class PrefHelper extends PrefHelperBase {
         return addIfNotFound(list, getCity());
     }
 
-    public List<String> addCompany(List<String> list) {
-        return addIfNotFound(list, getCompany());
-    }
-
     public boolean hasRegistrationChanged() {
         return getInt(KEY_REGISTRATION_CHANGED, 0) != 0;
     }
@@ -216,6 +212,7 @@ public class PrefHelper extends PrefHelperBase {
         setInt(KEY_REGISTRATION_CHANGED, flag ? 1 : 0);
     }
 
+    // Return true if added.
     public List<String> addIfNotFound(List<String> list, String element) {
         if (element != null && !list.contains(element)) {
             list.add(element);

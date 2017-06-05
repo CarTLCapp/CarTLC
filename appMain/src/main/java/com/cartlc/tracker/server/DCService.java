@@ -254,6 +254,7 @@ public class DCService extends IntentService {
                     if (match != null) {
                         // If this name already exists, convert the existing one by simply giving it the server_id.
                         match.server_id = server_id;
+                        match.isLocal = false;
                         TableAddress.getInstance().update(match);
                         Timber.i("Commandeer local: " + name);
                         unprocessed.remove(match);
@@ -264,10 +265,11 @@ public class DCService extends IntentService {
                     }
                 } else {
                     // Change of name, street, city or state?
-                    if (!incoming.equals(item)) {
+                    if (!incoming.equals(item) || (incoming.isLocal != item.isLocal)) {
                         Timber.i("Change: " + name);
                         incoming.id = item.id;
                         incoming.server_id = item.server_id;
+                        incoming.isLocal = false;
                         TableAddress.getInstance().update(incoming);
                     } else {
                         Timber.i("No change: " + name);
