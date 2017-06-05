@@ -149,8 +149,8 @@ public class EntryController extends Controller {
                 if (address.length() > 0) {
                     try {
                         Company company = Company.parse(address);
+                        company.is_local = 1;
                         company.save();
-                        Version.inc(Version.VERSION_COMPANY);
                     } catch (Exception ex) {
                         return badRequest("address: " + ex.getMessage());
                     }

@@ -24,3 +24,7 @@ Copy zip file from target/universal to server using "wrap" script in this direct
 
 Then on Server execute:
 run-server &
+
+Amazon:
+
+https://aws.amazon.com/

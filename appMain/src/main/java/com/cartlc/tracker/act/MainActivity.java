@@ -272,6 +272,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.profile:
                 setStage(Stage.LOGIN);
                 break;
+            case R.id.upload:
+                mApp.ping();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

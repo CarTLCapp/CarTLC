@@ -19,6 +19,7 @@
     <string name="entry_hint_skip_zip">Enter ZIP or hit NEXT</string>
 
     <string name="title_profile">Profile</string>
+    <string name="title_upload">Upload</string>
     <string name="title_login">Login</string>
     <string name="title_project">Project</string>
     <string name="title_project_">Project:</string>
