@@ -14,8 +14,8 @@ create table client (
   last_name         varchar(255),
   device_id         varchar(255),
   last_ping         datetime,
-  disabled          bit,
-  reset_upload      bit
+  disabled          bit default 0,
+  reset_upload      bit default 0
 );
 
 create table company (
@@ -25,20 +25,21 @@ create table company (
   city              varchar(128),
   state             varchar(64),
   zipcode           varchar(64),
-  disabled          bit,
+  disabled          bit default 0,
   is_local          bit default 0
 );
 
 create table project (
   id                int auto_increment primary key,
   name              varchar(64),
-  disabled          bit
+  disabled          bit default 0,
+  is_local          bit default 0
 );
 
 create table equipment (
   id                int auto_increment primary key,
   name              varchar(128),
-  disabled          bit
+  disabled          bit default 0
 );
 
 create table project_equipment_collection (
@@ -54,7 +55,8 @@ create table note (
   id                int auto_increment primary key,
   name              varchar(128),
   type              smallint,
-  disabled          bit
+  disabled          bit default 0,
+  is_local          bit default 0
 );
 
 create table project_note_collection (
