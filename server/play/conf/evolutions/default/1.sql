@@ -39,7 +39,8 @@ create table project (
 create table equipment (
   id                int auto_increment primary key,
   name              varchar(128),
-  disabled          bit default 0
+  disabled          bit default 0,
+  is_local          bit default 0
 );
 
 create table project_equipment_collection (
