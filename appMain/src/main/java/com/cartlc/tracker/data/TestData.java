@@ -101,7 +101,7 @@ public class TestData {
                 "Uninstall",
                 "Other",
         }));
-        TableProjects.getInstance().add(TBApplication.OTHER);
+        TableProjects.getInstance().addTest(TBApplication.OTHER);
     }
 
     static void AddNotes() {

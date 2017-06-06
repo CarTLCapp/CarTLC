@@ -24,6 +24,7 @@ public class TableNote {
     static final String KEY_VALUE     = "value";
     static final String KEY_TYPE      = "type";
     static final String KEY_SERVER_ID = "server_id";
+    static final String KEY_IS_TEST   = "is_test";
 
     static TableNote sInstance;
 
@@ -56,10 +57,11 @@ public class TableNote {
         sbuf.append(KEY_TYPE);
         sbuf.append(" int, ");
         sbuf.append(KEY_SERVER_ID);
-        sbuf.append(" int)");
+        sbuf.append(" int, ");
+        sbuf.append(KEY_IS_TEST);
+        sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
-
 
     public void drop() {
         mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
@@ -95,6 +97,7 @@ public class TableNote {
                 values.put(KEY_TYPE, value.type.ordinal());
                 values.put(KEY_VALUE, value.value);
                 values.put(KEY_SERVER_ID, value.server_id);
+                values.put(KEY_IS_TEST, value.isTest ? 1 : 0);
                 mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -114,6 +117,7 @@ public class TableNote {
             values.put(KEY_TYPE, item.type.ordinal());
             values.put(KEY_VALUE, item.value);
             values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_IS_TEST, item.isTest ? 1 : 0);
             item.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -157,67 +161,40 @@ public class TableNote {
     }
 
     public DataNote query(long id) {
-        DataNote item = null;
-        try {
-            final String[] columns = {KEY_NAME, KEY_VALUE, KEY_TYPE, KEY_SERVER_ID};
-            final String selection = KEY_ROWID + "=?";
-            final String[] selectionArgs = {Long.toString(id)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
-            int idxName = cursor.getColumnIndex(KEY_NAME);
-            int idxValue = cursor.getColumnIndex(KEY_VALUE);
-            int idxType = cursor.getColumnIndex(KEY_TYPE);
-            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
-            if (cursor.moveToFirst()) {
-                item = new DataNote();
-                item.id = id;
-                item.name = cursor.getString(idxName);
-                item.value = cursor.getString(idxValue);
-                item.type = DataNote.Type.from(cursor.getInt(idxType));
-                item.server_id = cursor.getInt(idxServerId);
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
+        final String selection = KEY_ROWID + "=?";
+        final String[] selectionArgs = {Long.toString(id)};
+        List<DataNote> list = query(selection, selectionArgs);
+        if (list.size() > 0) {
+            return list.get(0);
         }
-        return item;
+        return null;
     }
 
     public DataNote queryByServerId(int server_id) {
-        DataNote item = null;
-        try {
-            final String[] columns = {KEY_NAME, KEY_VALUE, KEY_TYPE, KEY_ROWID};
-            final String selection = KEY_SERVER_ID + "=?";
-            final String[] selectionArgs = {Integer.toString(server_id)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
-            int idxName = cursor.getColumnIndex(KEY_NAME);
-            int idxValue = cursor.getColumnIndex(KEY_VALUE);
-            int idxType = cursor.getColumnIndex(KEY_TYPE);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            if (cursor.moveToFirst()) {
-                item = new DataNote();
-                item.id = cursor.getLong(idxRowId);
-                item.name = cursor.getString(idxName);
-                item.value = cursor.getString(idxValue);
-                item.type = DataNote.Type.from(cursor.getInt(idxType));
-                item.server_id = server_id;
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
+        final String selection = KEY_SERVER_ID + "=?";
+        final String[] selectionArgs = {Integer.toString(server_id)};
+        List<DataNote> list = query(selection, selectionArgs);
+        if (list.size() > 0) {
+            return list.get(0);
         }
-        return item;
+        return null;
     }
 
     public List<DataNote> query() {
+        return query(null, null);
+    }
+
+    public List<DataNote> query(String selection, String [] selectionArgs) {
         List<DataNote> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_VALUE, KEY_TYPE, KEY_SERVER_ID};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null);
+            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_VALUE, KEY_TYPE, KEY_SERVER_ID, KEY_IS_TEST};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxName = cursor.getColumnIndex(KEY_NAME);
             int idxValue = cursor.getColumnIndex(KEY_VALUE);
             int idxType = cursor.getColumnIndex(KEY_TYPE);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
             while (cursor.moveToNext()) {
                 DataNote item = new DataNote();
                 item.id = cursor.getLong(idxRowId);
@@ -225,6 +202,7 @@ public class TableNote {
                 item.value = cursor.getString(idxValue);
                 item.type = DataNote.Type.from(cursor.getInt(idxType));
                 item.server_id = cursor.getInt(idxServerId);
+                item.isTest = cursor.getShort(idxTest) != 0;
                 list.add(item);
             }
             cursor.close();
@@ -262,7 +240,7 @@ public class TableNote {
             values.put(KEY_VALUE, item.value);
             values.put(KEY_SERVER_ID, item.server_id);
             String where = KEY_ROWID + "=?";
-            String [] whereArgs = { Long.toString(item.id) };
+            String[] whereArgs = {Long.toString(item.id)};
             mDb.update(TABLE_NAME, values, where, whereArgs);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -285,6 +263,15 @@ public class TableNote {
             Timber.e(ex);
         } finally {
             mDb.endTransaction();
+        }
+    }
+
+    public void removeTest() {
+        try {
+            String where = KEY_IS_TEST + "=1";
+            mDb.delete(TABLE_NAME, where, null);
+        } catch (Exception ex) {
+            Timber.e(ex);
         }
     }
 }

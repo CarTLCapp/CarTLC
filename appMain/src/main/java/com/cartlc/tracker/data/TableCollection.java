@@ -19,6 +19,7 @@ public abstract class TableCollection {
     static final String KEY_COLLECTION_ID = "collection_id";
     static final String KEY_VALUE_ID      = "value_id";
     static final String KEY_SERVER_ID     = "server_id";
+    static final String KEY_IS_TEST       = "is_test";
 
     final SQLiteDatabase mDb;
     final String         mTableName;
@@ -51,7 +52,9 @@ public abstract class TableCollection {
         sbuf.append(KEY_VALUE_ID);
         sbuf.append(" long, ");
         sbuf.append(KEY_SERVER_ID);
-        sbuf.append(" int)");
+        sbuf.append(" int, ");
+        sbuf.append(KEY_IS_TEST);
+        sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -89,6 +92,25 @@ public abstract class TableCollection {
         }
     }
 
+    public void addTest(long collectionId, List<Long> ids) {
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            for (Long id : ids) {
+                values.clear();
+                values.put(KEY_COLLECTION_ID, collectionId);
+                values.put(KEY_VALUE_ID, id);
+                values.put(KEY_IS_TEST, 1);
+                mDb.insert(mTableName, null, values);
+            }
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
+    }
+
     public void add(long collectionId, long valueId) {
         mDb.beginTransaction();
         try {
@@ -113,6 +135,7 @@ public abstract class TableCollection {
             values.put(KEY_COLLECTION_ID, item.collection_id);
             values.put(KEY_VALUE_ID, item.value_id);
             values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_IS_TEST, item.isTest);
             item.id = mDb.insert(mTableName, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -121,6 +144,7 @@ public abstract class TableCollection {
             mDb.endTransaction();
         }
     }
+
     public void update(DataCollectionItem item) {
         mDb.beginTransaction();
         try {
@@ -129,6 +153,7 @@ public abstract class TableCollection {
             values.put(KEY_COLLECTION_ID, item.collection_id);
             values.put(KEY_VALUE_ID, item.value_id);
             values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_IS_TEST, item.isTest);
             String where = KEY_ROWID + "=?";
             String [] whereArgs = { Long.toString(item.id) };
             mDb.update(mTableName, values, where, whereArgs);
@@ -163,18 +188,20 @@ public abstract class TableCollection {
         List<DataCollectionItem> items = new ArrayList();
         mDb.beginTransaction();
         try {
-            final String[] columns = {KEY_ROWID, KEY_COLLECTION_ID, KEY_VALUE_ID, KEY_SERVER_ID};
+            final String[] columns = {KEY_ROWID, KEY_COLLECTION_ID, KEY_VALUE_ID, KEY_SERVER_ID, KEY_IS_TEST};
             Cursor cursor = mDb.query(mTableName, columns, null, null, null, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_VALUE_ID);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxCollectionId = cursor.getColumnIndex(KEY_COLLECTION_ID);
+            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
             while (cursor.moveToNext()) {
                 DataCollectionItem item = new DataCollectionItem();
                 item.id = cursor.getLong(idxRowId);
                 item.collection_id = cursor.getLong(idxCollectionId);
                 item.value_id = cursor.getLong(idxValue);
                 item.server_id = cursor.getInt(idxServerId);
+                item.isTest = cursor.getShort(idxTest) != 0;
                 items.add(item);
             }
             cursor.close();
@@ -187,7 +214,6 @@ public abstract class TableCollection {
         return items;
     }
 
-
     public DataCollectionItem queryByServerId(int server_id) {
         DataCollectionItem item = null;
         mDb.beginTransaction();
@@ -199,12 +225,14 @@ public abstract class TableCollection {
             int idxValue = cursor.getColumnIndex(KEY_VALUE_ID);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxCollectionId = cursor.getColumnIndex(KEY_COLLECTION_ID);
+            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
             if (cursor.moveToFirst()) {
                 item = new DataCollectionItem();
                 item.id = cursor.getLong(idxRowId);
                 item.collection_id = cursor.getLong(idxCollectionId);
                 item.value_id = cursor.getLong(idxValue);
                 item.server_id = server_id;
+                item.isTest = cursor.getShort(idxTest) != 0;
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -215,6 +243,13 @@ public abstract class TableCollection {
         return item;
     }
 
-
+    public void removeTest() {
+        try {
+            String where = KEY_IS_TEST + "=1";
+            mDb.delete(mTableName, where, null);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
 
 }

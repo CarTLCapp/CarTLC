@@ -63,8 +63,11 @@ public class Company extends Model {
                         .findPagedList(page, pageSize);
     }
 
-    public static List<Company> nonLocal() {
-        return find.where().eq("is_local", false).findList();
+    public static List<Company> appList() {
+        return find.where()
+                .eq("is_local", false)
+                .eq("disabled", false)
+                .findList();
     }
 
     public static boolean has(Company company) {

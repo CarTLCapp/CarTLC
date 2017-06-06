@@ -3,6 +3,7 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.ContactsContract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class TableEquipment {
     static final String KEY_SERVER_ID = "server_id";
     static final String KEY_CHECKED   = "is_checked";
     static final String KEY_LOCAL     = "is_local";
+    static final String KEY_IS_TEST   = "is_test";
 
     static TableEquipment sInstance;
 
@@ -66,6 +68,8 @@ public class TableEquipment {
         sbuf.append(KEY_CHECKED);
         sbuf.append(" bit, ");
         sbuf.append(KEY_LOCAL);
+        sbuf.append(" bit, ");
+        sbuf.append(KEY_IS_TEST);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
@@ -95,12 +99,13 @@ public class TableEquipment {
         return count;
     }
 
-    public long add(String name) {
+    public long addTest(String name) {
         long id = -1L;
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, name);
+            values.put(KEY_IS_TEST, 1);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -138,6 +143,7 @@ public class TableEquipment {
                 values.put(KEY_CHECKED, value.isChecked ? 1 : 0);
                 values.put(KEY_LOCAL, value.isLocal ? 1 : 0);
                 values.put(KEY_SERVER_ID, value.server_id);
+                values.put(KEY_IS_TEST, value.isTest);
                 value.id = mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -157,6 +163,7 @@ public class TableEquipment {
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
             values.put(KEY_LOCAL, item.isLocal ? 1 : 0);
             values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_IS_TEST, item.isTest);
             item.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -167,44 +174,39 @@ public class TableEquipment {
     }
 
     public DataEquipment query(long id) {
-        try {
-            return query_(id);
-        } catch (Exception ex) {
-            Timber.e(ex);
+        final String selection = KEY_ROWID + "=?";
+        final String[] selectionArgs = {Long.toString(id)};
+        List<DataEquipment> list = query(selection, selectionArgs);
+        if (list.size() > 0) {
+            return list.get(0);
         }
         return null;
     }
 
-    public DataEquipment query_(long id) {
-        DataEquipment item = null;
-        final String[] columns = {KEY_NAME, KEY_CHECKED, KEY_LOCAL, KEY_SERVER_ID};
-        final String selection = KEY_ROWID + "=?";
-        final String[] selectionArgs = {Long.toString(id)};
-        Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-        final int idxName = cursor.getColumnIndex(KEY_NAME);
-        final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
-        final int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
-        final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
-        if (cursor.moveToFirst()) {
-            String name = cursor.getString(idxName);
-            boolean checked = cursor.getShort(idxChecked) != 0 ? true : false;
-            boolean local = cursor.getShort(idxLocal) != 0 ? true : false;
-            item = new DataEquipment(id, name, checked, local);
-            item.server_id = cursor.getInt(idxServerId);
+    public DataEquipment queryByServerId(int server_id) {
+        final String selection = KEY_SERVER_ID + "=?";
+        final String[] selectionArgs = {Integer.toString(server_id)};
+        List<DataEquipment> list = query(selection, selectionArgs);
+        if (list.size() > 0) {
+            return list.get(0);
         }
-        cursor.close();
-        return item;
+        return null;
     }
 
     public List<DataEquipment> query() {
+        return query(null, null);
+    }
+
+    List<DataEquipment> query(String selection, String[] selectionArgs) {
         ArrayList<DataEquipment> list = new ArrayList();
-        final String[] columns = {KEY_ROWID, KEY_NAME, KEY_CHECKED, KEY_LOCAL, KEY_SERVER_ID};
-        Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
+        final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_CHECKED, KEY_LOCAL, KEY_IS_TEST};
+        Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+        final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
         final int idxName = cursor.getColumnIndex(KEY_NAME);
+        final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
         final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
         final int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
-        final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
-        final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+        final int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
         DataEquipment item;
         while (cursor.moveToNext()) {
             item = new DataEquipment(
@@ -213,36 +215,11 @@ public class TableEquipment {
                     cursor.getShort(idxChecked) != 0,
                     cursor.getShort(idxLocal) != 0);
             item.server_id = cursor.getInt(idxServerId);
+            item.isTest = cursor.getShort(idxTest) != 0;
             list.add(item);
         }
         cursor.close();
         return list;
-    }
-
-    public DataEquipment queryByServerId(int server_id) {
-        DataEquipment item = null;
-        try {
-            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_CHECKED, KEY_LOCAL};
-            final String selection = KEY_SERVER_ID + "=?";
-            final String[] selectionArgs = {Integer.toString(server_id)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            final int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
-            final int idxName = cursor.getColumnIndex(KEY_NAME);
-            final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
-            if (cursor.moveToFirst()) {
-                item = new DataEquipment(
-                        cursor.getLong(idxRowId),
-                        cursor.getString(idxName),
-                        cursor.getShort(idxChecked) != 0,
-                        cursor.getShort(idxLocal) != 0);
-                item.server_id = server_id;
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return item;
     }
 
     public List<Long> queryChecked() {
@@ -264,7 +241,7 @@ public class TableEquipment {
 
     public long query(String name) {
         long id = -1L;
-        final String[] columns = {KEY_ROWID, KEY_CHECKED, KEY_LOCAL};
+        final String[] columns = {KEY_ROWID};
         final String selection = KEY_NAME + "=?";
         final String[] selectionArgs = {name};
         Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
@@ -314,6 +291,7 @@ public class TableEquipment {
             values.put(KEY_NAME, item.name);
             values.put(KEY_LOCAL, item.isLocal ? 1 : 0);
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
+            values.put(KEY_IS_TEST, item.isTest ? 1 : 0);
             values.put(KEY_SERVER_ID, item.server_id);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(item.id)};
@@ -323,6 +301,15 @@ public class TableEquipment {
             Timber.e(ex);
         } finally {
             mDb.endTransaction();
+        }
+    }
+
+    public void removeTest() {
+        try {
+            String where = KEY_IS_TEST + "=1";
+            mDb.delete(TABLE_NAME, where, null);
+        } catch (Exception ex) {
+            Timber.e(ex);
         }
     }
 }

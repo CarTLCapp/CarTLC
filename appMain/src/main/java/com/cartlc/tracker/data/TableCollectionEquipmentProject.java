@@ -35,21 +35,21 @@ public class TableCollectionEquipmentProject extends TableCollection {
     public void addByName(String projectName, List<String> equipments) {
         long projectNameId = TableProjects.getInstance().queryProjectName(projectName);
         if (projectNameId < 0) {
-            projectNameId = TableProjects.getInstance().add(projectName);
+            projectNameId = TableProjects.getInstance().addTest(projectName);
         }
-        addByName(projectNameId, equipments);
+        addByNameTest(projectNameId, equipments);
     }
 
-    public void addByName(long collectionId, List<String> names) {
+    public void addByNameTest(long collectionId, List<String> names) {
         List<Long> list = new ArrayList();
         for (String name : names) {
             long id = TableEquipment.getInstance().query(name);
             if (id < 0) {
-                id = TableEquipment.getInstance().add(name);
+                id = TableEquipment.getInstance().addTest(name);
             }
             list.add(id);
         }
-        add(collectionId, list);
+        addTest(collectionId, list);
     }
 
     public void addLocal(String name, long projectNameId) {

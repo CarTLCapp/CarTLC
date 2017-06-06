@@ -10,16 +10,13 @@ public class DataEquipment {
     public long server_id;
     public boolean isChecked;
     public boolean isLocal;
+    public boolean isTest;
 
     public DataEquipment(long id, String name, boolean isChecked, boolean isLocal) {
         this.id = id;
         this.name = name;
         this.isChecked = isChecked;
         this.isLocal = isLocal;
-    }
-
-    public DataEquipment(String name) {
-        this.name = name;
     }
 
     public DataEquipment(String name, int server_id) {
@@ -36,6 +33,8 @@ public class DataEquipment {
         sbuf.append(isChecked);
         sbuf.append(", local=");
         sbuf.append(isLocal);
+        sbuf.append(", test=");
+        sbuf.append(isTest);
         return sbuf.toString();
     }
 

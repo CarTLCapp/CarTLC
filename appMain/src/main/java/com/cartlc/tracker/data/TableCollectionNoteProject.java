@@ -33,12 +33,12 @@ public class TableCollectionNoteProject extends TableCollection {
     public void addByName(String projectName, List<DataNote> notes) {
         long projectNameId = TableProjects.getInstance().queryProjectName(projectName);
         if (projectNameId < 0) {
-            projectNameId = TableProjects.getInstance().add(projectName);
+            projectNameId = TableProjects.getInstance().addTest(projectName);
         }
-        addByName(projectNameId, notes);
+        addByNameTest(projectNameId, notes);
     }
 
-    void addByName(long projectNameId, List<DataNote> notes) {
+    void addByNameTest(long projectNameId, List<DataNote> notes) {
         List<Long> list = new ArrayList();
         for (DataNote note : notes) {
             long id = TableNote.getInstance().query(note.name);
@@ -47,7 +47,7 @@ public class TableCollectionNoteProject extends TableCollection {
             }
             list.add(id);
         }
-        add(projectNameId, list);
+        addTest(projectNameId, list);
     }
 
     public List<DataNote> getNotes(long projectNameId) {

@@ -5,7 +5,7 @@
 #
 DATE=`date +%F`
 WRAP=~/cartlc/wrap/$DATE
-FILE=`ls play/target/universal/*.zip`
+FILE=`ls server/play/target/universal/*.zip`
 mkdir -p $WRAP
 cp $FILE $WRAP/
 
@@ -16,5 +16,6 @@ scp -i ~/.ssh/cartlc.pem $COPY ubuntu@cartlc.arqnetworks.com:/home/ubuntu/server
 
 echo "UPLOAD COMPLETE.":
 echo "Now on the server do this:"
-echo " unzip server/$DATE/*.zip"
+echo " cd server/$DATE; unzip *.zip"
+echo " cd ..; rm active; ln -s $DATE active"
 echo " run-server &"

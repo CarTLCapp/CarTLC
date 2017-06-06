@@ -38,6 +38,7 @@ public class DataNote {
     public String value;
     public Type   type;
     public int    server_id;
+    public boolean isTest;
 
     public DataNote() {
     }
@@ -49,6 +50,7 @@ public class DataNote {
     public DataNote(String name, Type type) {
         this.name = name;
         this.type = type;
+        this.isTest = true;
     }
 
     public DataNote(String name, Type type, int server_id) {

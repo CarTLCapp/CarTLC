@@ -16,12 +16,14 @@ public class DataAddress {
     public String  zipcode;
     public boolean disabled;
     public boolean isLocal;
+    public boolean isTest;
 
     public DataAddress(String company, String street, String city, String state) {
         this.company = company;
         this.street = street;
         this.city = city;
         this.state = state;
+        this.isTest = true;
     }
 
     public DataAddress(String company, String street, String city, String state, String zipcode) {
@@ -116,14 +118,48 @@ public class DataAddress {
         return false;
     }
 
-    public boolean equals(DataAddress item) {
-        if (hasZipCode()) {
-            return company.equals(item.company) &&
-                    zipcode.equals(item.zipcode);
+    static boolean equals(String field1, String field2) {
+        if (field1 == null && field2 == null) {
+            return true;
         }
-        return company.equals(item.company) &&
-                street.equals(item.street) &&
-                city.equals(item.city) &&
-                state.equals(item.state);
+        if (field1 != null && field2 == null) {
+            return false;
+        }
+        if (field1 == null && field2 != null) {
+            return false;
+        }
+        return field1.equals(field2);
+    }
+
+    public boolean equals(DataAddress item) {
+        return equals(company, item.company) &&
+                equals(street, item.street) &&
+                equals(city, item.city) &&
+                equals(state, item.state) &&
+                equals(zipcode, item.zipcode);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(company);
+        sbuf.append(", ");
+        sbuf.append(street);
+        sbuf.append(", ");
+        sbuf.append(city);
+        sbuf.append(", ");
+        sbuf.append(state);
+        sbuf.append(", ");
+        sbuf.append(zipcode);
+        sbuf.append(", ");
+        sbuf.append(", L(");
+        sbuf.append(isLocal);
+        sbuf.append("), D(");
+        sbuf.append(disabled);
+        sbuf.append(")");
+        sbuf.append(", S[");
+        sbuf.append(server_id);
+        sbuf.append("]");
+        return sbuf.toString();
     }
 }

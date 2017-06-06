@@ -164,6 +164,9 @@ public class DCService extends IntentService {
                 Timber.e("queryProjects(): Unexpected NULL response from server");
                 return;
             }
+            TableProjects.getInstance().removeTest();
+            TableCollectionEquipmentProject.getInstance().removeTest();
+            TableCollectionNoteProject.getInstance().removeTest();
             List<String> unprocessed = TableProjects.getInstance().query();
 
             JSONObject object = parseResult(response);
@@ -217,6 +220,7 @@ public class DCService extends IntentService {
                 Timber.e("queryCompanies(): Unexpected NULL response from server");
                 return;
             }
+            TableAddress.getInstance().removeTest();
             List<DataAddress> unprocessed = TableAddress.getInstance().query();
 
             JSONObject object = parseResult(response);
@@ -256,20 +260,20 @@ public class DCService extends IntentService {
                         match.server_id = server_id;
                         match.isLocal = false;
                         TableAddress.getInstance().update(match);
-                        Timber.i("Commandeer local: " + name);
+                        Timber.i("Commandeer local: " + match.toString());
                         unprocessed.remove(match);
                     } else {
                         // Otherwise just add the new entry.
-                        Timber.i("New company: " + name);
+                        Timber.i("New company: " + incoming.toString());
                         TableAddress.getInstance().add(incoming);
                     }
                 } else {
                     // Change of name, street, city or state?
                     if (!incoming.equals(item) || (incoming.isLocal != item.isLocal)) {
-                        Timber.i("Change: " + name);
                         incoming.id = item.id;
                         incoming.server_id = item.server_id;
                         incoming.isLocal = false;
+                        Timber.i("Change: " + incoming.toString());
                         TableAddress.getInstance().update(incoming);
                     } else {
                         Timber.i("No change: " + name);
@@ -302,6 +306,8 @@ public class DCService extends IntentService {
                 Timber.e("queryEquipments(): Unexpected NULL response from server");
                 return;
             }
+            TableEquipment.getInstance().removeTest();
+            TableCollectionEquipmentProject.getInstance().removeTest();
             JSONObject object = parseResult(response);
             {
                 List<DataEquipment> unprocessed = TableEquipment.getInstance().query();
@@ -322,7 +328,7 @@ public class DCService extends IntentService {
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
-                            Timber.i("New company: " + name);
+                            Timber.i("New equipment: " + name);
                             TableEquipment.getInstance().add(incoming);
                         }
                     } else {
@@ -423,6 +429,8 @@ public class DCService extends IntentService {
                 Timber.e("queryNotes(): Unexpected NULL response from server");
                 return;
             }
+            TableNote.getInstance().removeTest();
+            TableCollectionNoteProject.getInstance().removeTest();
             JSONObject object = parseResult(response);
             {
                 List<DataNote> unprocessed = TableNote.getInstance().query();

@@ -23,6 +23,7 @@ public class TableProjects {
     static final String KEY_NAME      = "name";
     static final String KEY_SERVER_ID = "server_id";
     static final String KEY_DISABLED  = "disabled";
+    static final String KEY_IS_TEST   = "is_test";
 
     final SQLiteDatabase mDb;
 
@@ -52,12 +53,14 @@ public class TableProjects {
         sbuf.append(" (");
         sbuf.append(KEY_ROWID);
         sbuf.append(" integer primary key autoincrement, ");
+        sbuf.append(KEY_NAME);
+        sbuf.append(" text not null, ");
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" integer, ");
         sbuf.append(KEY_DISABLED);
         sbuf.append(" bit, ");
-        sbuf.append(KEY_NAME);
-        sbuf.append(" text not null)");
+        sbuf.append(KEY_IS_TEST);
+        sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -89,6 +92,15 @@ public class TableProjects {
         }
     }
 
+    public void removeTest() {
+        try {
+            String where = KEY_IS_TEST + "=1";
+            mDb.delete(TABLE_NAME, where, null);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
     public void add(List<String> list) {
         mDb.beginTransaction();
         try {
@@ -106,12 +118,13 @@ public class TableProjects {
         }
     }
 
-    public long add(String item) {
+    public long addTest(String item) {
         long id = -1L;
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, item);
+            values.put(KEY_IS_TEST, 1);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -148,6 +161,7 @@ public class TableProjects {
             values.put(KEY_NAME, project.name);
             values.put(KEY_SERVER_ID, project.server_id);
             values.put(KEY_DISABLED, project.disabled ? 1 : 0);
+            values.put(KEY_IS_TEST, project.isTest ? 1 : 0);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(project.id)};
             if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {
@@ -215,96 +229,66 @@ public class TableProjects {
         return projectName;
     }
 
-
-    public List<DataProject> queryProjects() {
-        ArrayList<DataProject> list = new ArrayList();
-        try {
-            final String[] columns = {KEY_NAME, KEY_ROWID, KEY_DISABLED, KEY_SERVER_ID};
-
-            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null);
-            int idxValue = cursor.getColumnIndex(KEY_NAME);
-            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
-            DataProject project;
-            while (cursor.moveToNext()) {
-                project = new DataProject();
-                project.name = cursor.getString(idxValue);
-                project.disabled = cursor.getShort(idxDisabled) != 0;
-                project.server_id = cursor.getInt(idxServerId);
-                project.id = cursor.getLong(idxRowId);
-                list.add(project);
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return list;
-    }
+//    public List<DataProject> queryProjects() {
+//        ArrayList<DataProject> list = new ArrayList();
+//        try {
+//            final String[] columns = {KEY_NAME, KEY_ROWID, KEY_DISABLED, KEY_SERVER_ID};
+//
+//            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null);
+//            int idxValue = cursor.getColumnIndex(KEY_NAME);
+//            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+//            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+//            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
+//            DataProject project;
+//            while (cursor.moveToNext()) {
+//                project = new DataProject();
+//                project.name = cursor.getString(idxValue);
+//                project.disabled = cursor.getShort(idxDisabled) != 0;
+//                project.server_id = cursor.getInt(idxServerId);
+//                project.id = cursor.getLong(idxRowId);
+//                list.add(project);
+//            }
+//            cursor.close();
+//        } catch (Exception ex) {
+//            Timber.e(ex);
+//        }
+//        return list;
+//    }
 
     public DataProject queryByServerId(int server_id) {
-        DataProject project = null;
-        try {
-            final String[] columns = {KEY_NAME, KEY_ROWID, KEY_DISABLED};
-            final String selection = KEY_SERVER_ID + "=?";
-            final String[] selectionArgs = {Integer.toString(server_id)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
-            int idxValue = cursor.getColumnIndex(KEY_NAME);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
-            if (cursor.moveToFirst()) {
-                project = new DataProject();
-                project.name = cursor.getString(idxValue);
-                project.disabled = cursor.getShort(idxDisabled) != 0;
-                project.server_id = server_id;
-                project.id = cursor.getLong(idxRowId);
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return project;
+        final String selection = KEY_SERVER_ID + "=?";
+        final String[] selectionArgs = {Integer.toString(server_id)};
+        return query(selection, selectionArgs);
     }
 
     public DataProject queryById(long id) {
-        DataProject project = null;
-        try {
-            final String[] columns = {KEY_NAME, KEY_DISABLED, KEY_SERVER_ID};
-            final String selection = KEY_ROWID + "=?";
-            final String[] selectionArgs = {Long.toString(id)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
-            int idxName = cursor.getColumnIndex(KEY_NAME);
-            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
-            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
-            if (cursor.moveToFirst()) {
-                project = new DataProject();
-                project.name = cursor.getString(idxName);
-                project.disabled = cursor.getShort(idxDisabled) != 0;
-                project.server_id = cursor.getInt(idxServerId);
-                project.id = id;
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return project;
+        final String selection = KEY_ROWID + "=?";
+        final String[] selectionArgs = {Long.toString(id)};
+        return query(selection, selectionArgs);
     }
 
     public DataProject queryByName(String name) {
+        final String selection = KEY_NAME + "=?";
+        final String[] selectionArgs = {name};
+        return query(selection, selectionArgs);
+    }
+
+    DataProject query(String selection, String [] selectionArgs) {
         DataProject project = null;
         try {
-            final String[] columns = {KEY_ROWID, KEY_DISABLED, KEY_SERVER_ID};
-            final String selection = KEY_NAME + "=?";
-            final String[] selectionArgs = {name};
+            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_DISABLED, KEY_IS_TEST, };
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+            int idxValue = cursor.getColumnIndex(KEY_NAME);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
+            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
             if (cursor.moveToFirst()) {
                 project = new DataProject();
-                project.name = name;
+                project.name = cursor.getString(idxValue);
                 project.disabled = cursor.getShort(idxDisabled) != 0;
-                project.server_id = cursor.getInt(idxServerId);
+                project.isTest = cursor.getShort(idxTest) != 0;
+                project.server_id = cursor.getShort(idxServerId);
                 project.id = cursor.getLong(idxRowId);
             }
             cursor.close();
@@ -313,7 +297,6 @@ public class TableProjects {
         }
         return project;
     }
-
 
     public long queryProjectName(String name) {
         long rowId = -1L;

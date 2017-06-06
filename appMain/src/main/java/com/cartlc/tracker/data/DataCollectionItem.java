@@ -9,6 +9,7 @@ public class DataCollectionItem {
     public long collection_id; // project_id or collection_id
     public long value_id;
     public int  server_id;
+    public boolean isTest;
 
     @Override
     public boolean equals(Object obj) {

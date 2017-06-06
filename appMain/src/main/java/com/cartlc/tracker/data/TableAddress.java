@@ -17,11 +17,10 @@ public class TableAddress {
 
     class SelectionArgs {
 
-        String selection;
-        String [] selectionArgs;
+        String   selection;
+        String[] selectionArgs;
 
-        SelectionArgs(String company, String street, String city, String state, String zipcode)
-        {
+        SelectionArgs(String company, String street, String city, String state, String zipcode) {
             StringBuilder sbuf = new StringBuilder();
             ArrayList<String> args = new ArrayList();
 
@@ -93,6 +92,7 @@ public class TableAddress {
     static final String KEY_SERVER_ID = "server_id";
     static final String KEY_DISABLED  = "disabled";
     static final String KEY_LOCAL     = "local";
+    static final String KEY_IS_TEST   = "is_test";
 
     final SQLiteDatabase mDb;
 
@@ -134,6 +134,8 @@ public class TableAddress {
         sbuf.append(KEY_DISABLED);
         sbuf.append(" bit, ");
         sbuf.append(KEY_LOCAL);
+        sbuf.append(" bit, ");
+        sbuf.append(KEY_IS_TEST);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
@@ -152,6 +154,7 @@ public class TableAddress {
                 values.put(KEY_SERVER_ID, address.server_id);
                 values.put(KEY_DISABLED, address.disabled ? 1 : 0);
                 values.put(KEY_LOCAL, address.isLocal ? 1 : 0);
+                values.put(KEY_IS_TEST, address.isTest ? 1 : 0);
                 mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -176,6 +179,7 @@ public class TableAddress {
             values.put(KEY_SERVER_ID, address.server_id);
             values.put(KEY_DISABLED, address.disabled ? 1 : 0);
             values.put(KEY_LOCAL, address.isLocal ? 1 : 0);
+            values.put(KEY_IS_TEST, address.isTest ? 1 : 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -217,6 +221,7 @@ public class TableAddress {
             values.put(KEY_SERVER_ID, address.server_id);
             values.put(KEY_DISABLED, address.disabled ? 1 : 0);
             values.put(KEY_LOCAL, address.isLocal ? 1 : 0);
+            values.put(KEY_IS_TEST, address.isTest ? 1 : 0);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(address.id)};
             mDb.update(TABLE_NAME, values, where, whereArgs);
@@ -240,26 +245,6 @@ public class TableAddress {
         return count;
     }
 
-
-    public boolean hasZipCodes(String company) {
-        int count = 0;
-        try {
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append(KEY_COMPANY);
-            sbuf.append("=? AND ");
-            sbuf.append(KEY_ZIPCODE);
-            sbuf.append(" IS NOT NULL");
-            final String selection = sbuf.toString();
-            final String[] selectionArgs = {company};
-            Cursor cursor = mDb.query(true, TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
-            count = cursor.getCount();
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return count > 0;
-    }
-
     public boolean isLocalCompanyOnly(String company) {
         List<DataAddress> list = TableAddress.getInstance().queryByCompanyName(company);
         if (list.size() == 0) {
@@ -274,92 +259,56 @@ public class TableAddress {
     }
 
     public DataAddress query(long id) {
-        DataAddress address = null;
-        try {
-            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET, KEY_ZIPCODE, KEY_SERVER_ID, KEY_DISABLED, KEY_LOCAL};
-            final String orderBy = KEY_COMPANY + " ASC";
-            final String selection = KEY_ROWID + " =?";
-            final String[] selectionArgs = {Long.toString(id)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
-            int idxState = cursor.getColumnIndex(KEY_STATE);
-            int idxCity = cursor.getColumnIndex(KEY_CITY);
-            int idxStreet = cursor.getColumnIndex(KEY_STREET);
-            int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
-            int idxZipCode = cursor.getColumnIndex(KEY_ZIPCODE);
-            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
-            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
-            int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
-            if (cursor.moveToFirst()) {
-                address = new DataAddress(cursor.getInt(idxServerId),
-                        cursor.getString(idxCompany),
-                        cursor.getString(idxStreet),
-                        cursor.getString(idxCity),
-                        cursor.getString(idxState),
-                        cursor.getString(idxZipCode));
-                address.id = id;
-                address.disabled = cursor.getShort(idxDisabled) == 1;
-                address.isLocal = cursor.getShort(idxLocal) == 1;
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
+        final String orderBy = KEY_COMPANY + " ASC";
+        final String selection = KEY_ROWID + " =?";
+        final String[] selectionArgs = {Long.toString(id)};
+        List<DataAddress> list = query(selection, selectionArgs, orderBy);
+        if (list.size() > 0) {
+            return list.get(0);
         }
-        return address;
+        return null;
     }
 
     public List<DataAddress> queryByCompanyName(String name) {
-        List<DataAddress> list = new ArrayList();
-        try {
-            final String[] columns = {KEY_ROWID, KEY_STATE, KEY_CITY, KEY_STREET, KEY_ZIPCODE, KEY_SERVER_ID, KEY_DISABLED, KEY_LOCAL};
-            final String selection = KEY_COMPANY + " =?";
-            final String[] selectionArgs = {name};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            int idxState = cursor.getColumnIndex(KEY_STATE);
-            int idxCity = cursor.getColumnIndex(KEY_CITY);
-            int idxStreet = cursor.getColumnIndex(KEY_STREET);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            int idxZipCode = cursor.getColumnIndex(KEY_ZIPCODE);
-            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
-            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
-            int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
-            while (cursor.moveToNext()) {
-                DataAddress address = new DataAddress(
-                        cursor.getInt(idxRowId),
-                        cursor.getInt(idxServerId),
-                        name,
-                        cursor.getString(idxStreet),
-                        cursor.getString(idxCity),
-                        cursor.getString(idxState),
-                        cursor.getString(idxZipCode));
-                address.disabled = cursor.getShort(idxDisabled) == 1;
-                address.isLocal = cursor.getShort(idxLocal) == 1;
-                list.add(address);
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return list;
+        final String selection = KEY_COMPANY + " =?";
+        final String[] selectionArgs = {name};
+        return query(selection, selectionArgs, null);
     }
 
     public List<DataAddress> query() {
+        final String orderBy = KEY_COMPANY + " ASC";
+        return query(null, null, orderBy);
+    }
+
+    public DataAddress queryByServerId(int serverId) {
+        final String selection = KEY_SERVER_ID + "=?";
+        final String[] selectionArgs = {Integer.toString(serverId)};
+        List<DataAddress> list = query(selection, selectionArgs, null);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
+    List<DataAddress> query(String selection, String[] selectionArgs, String orderBy) {
         ArrayList<DataAddress> list = new ArrayList();
         try {
-            final String[] columns = {KEY_STATE, KEY_CITY, KEY_COMPANY, KEY_STREET, KEY_ROWID, KEY_SERVER_ID, KEY_DISABLED, KEY_LOCAL, KEY_ZIPCODE};
-            final String orderBy = KEY_COMPANY + " ASC";
-            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, orderBy, null);
+            final String[] columns = {KEY_ROWID, KEY_COMPANY, KEY_STATE, KEY_CITY, KEY_STREET, KEY_ZIPCODE, KEY_SERVER_ID, KEY_DISABLED, KEY_LOCAL, KEY_IS_TEST};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
             int idxState = cursor.getColumnIndex(KEY_STATE);
             int idxCity = cursor.getColumnIndex(KEY_CITY);
             int idxStreet = cursor.getColumnIndex(KEY_STREET);
-            int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
             int idxZipCode = cursor.getColumnIndex(KEY_ZIPCODE);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
             int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
+            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
             while (cursor.moveToNext()) {
                 DataAddress address;
-                list.add(address = new DataAddress(cursor.getLong(idxRowId),
+                list.add(address = new DataAddress(
+                        cursor.getLong(idxRowId),
                         cursor.getInt(idxServerId),
                         cursor.getString(idxCompany),
                         cursor.getString(idxStreet),
@@ -368,6 +317,7 @@ public class TableAddress {
                         cursor.getString(idxZipCode)));
                 address.disabled = cursor.getShort(idxDisabled) == 1;
                 address.isLocal = cursor.getShort(idxLocal) == 1;
+                address.isTest = cursor.getShort(idxTest) == 1;
             }
             cursor.close();
         } catch (Exception ex) {
@@ -375,7 +325,6 @@ public class TableAddress {
         }
         return list;
     }
-
 
     public List<String> queryZipCodes(String company) {
         ArrayList<String> list = new ArrayList();
@@ -533,39 +482,6 @@ public class TableAddress {
         return has;
     }
 
-    public DataAddress queryByServerId(int serverId) {
-        DataAddress data = null;
-        try {
-            final String[] columns = {KEY_COMPANY, KEY_STREET, KEY_CITY, KEY_STATE, KEY_ZIPCODE, KEY_ROWID, KEY_DISABLED, KEY_LOCAL};
-            final String selection = KEY_SERVER_ID + "=?";
-            final String[] selectionArgs = {Integer.toString(serverId)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            int idxState = cursor.getColumnIndex(KEY_STATE);
-            int idxCity = cursor.getColumnIndex(KEY_CITY);
-            int idxStreet = cursor.getColumnIndex(KEY_STREET);
-            int idxZipCode = cursor.getColumnIndex(KEY_ZIPCODE);
-            int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
-            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
-            int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
-            if (cursor.moveToFirst()) {
-                data = new DataAddress(cursor.getLong(idxRowId),
-                        serverId,
-                        cursor.getString(idxCompany),
-                        cursor.getString(idxStreet),
-                        cursor.getString(idxCity),
-                        cursor.getString(idxState),
-                        cursor.getString(idxZipCode));
-                data.disabled = cursor.getShort(idxDisabled) == 1;
-                data.isLocal = cursor.getShort(idxLocal) == 1;
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return data;
-    }
-
     public void remove(long id) {
         try {
             String where = KEY_ROWID + "=?";
@@ -583,6 +499,15 @@ public class TableAddress {
         } else {
             item.disabled = true;
             update(item);
+        }
+    }
+
+    public void removeTest() {
+        try {
+            String where = KEY_IS_TEST + "=1";
+            mDb.delete(TABLE_NAME, where, null);
+        } catch (Exception ex) {
+            Timber.e(ex);
         }
     }
 }
