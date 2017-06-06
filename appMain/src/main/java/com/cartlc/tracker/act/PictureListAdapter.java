@@ -5,8 +5,10 @@ import java.util.List;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataPicture;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
 import android.content.Context;
 import android.net.Uri;
@@ -67,10 +69,11 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
     }
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
-        protected @BindView(R.id.picture)             ImageView imageView;
-        protected @Nullable @BindView(R.id.remove)    ImageView removeView;
-        protected @Nullable @BindView(R.id.rotate_cw) ImageView rotateCWView;
-        protected @BindView(R.id.loading)             TextView  loading;
+        protected @BindView(R.id.picture)              ImageView imageView;
+        protected @Nullable @BindView(R.id.remove)     ImageView removeView;
+        protected @Nullable @BindView(R.id.rotate_cw)  ImageView rotateCWView;
+        protected @Nullable @BindView(R.id.rotate_ccw) ImageView rotateCCWView;
+        protected @BindView(R.id.loading) TextView loading;
 
         public CustomViewHolder(View view) {
             super(view);
@@ -142,8 +145,8 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
                     .load(item.getUri(mContext))
                     .placeholder(R.drawable.loading)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
-                    .resize(0, getMaxHeight())
                     .centerInside()
+                    .resize(0, getMaxHeight())
                     .into(holder.imageView);
             holder.loading.setVisibility(View.GONE);
 
@@ -162,6 +165,15 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
                     @Override
                     public void onClick(View v) {
                         item.rotateCW();
+                        notifyDataSetChanged();
+                    }
+                });
+            }
+            if (holder.rotateCCWView != null) {
+                holder.rotateCCWView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        item.rotateCCW();
                         notifyDataSetChanged();
                     }
                 });

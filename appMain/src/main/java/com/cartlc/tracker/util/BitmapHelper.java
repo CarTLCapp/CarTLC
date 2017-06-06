@@ -73,10 +73,10 @@ public class BitmapHelper {
         }
     }
 
-    public static void rotateCW(File picture) {
+    public static void rotate(File picture, int degrees) {
         try {
             Matrix matrix = new Matrix();
-            matrix.postRotate(90);
+            matrix.postRotate(degrees);
             Bitmap bitmap = BitmapFactory.decodeFile(picture.getAbsolutePath());
             Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
             FileOutputStream fos = new FileOutputStream(picture.getAbsoluteFile());
@@ -85,5 +85,15 @@ public class BitmapHelper {
         } catch (Exception ex) {
             Timber.e(ex);
         }
+    }
+
+    public static int [] getImageSize(String pathname) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(pathname, options);
+        int [] result = new int[2];
+        result[0] = options.outWidth;
+        result[1] = options.outHeight;
+        return result;
     }
 }

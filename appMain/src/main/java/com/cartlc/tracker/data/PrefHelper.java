@@ -290,29 +290,19 @@ public class PrefHelper extends PrefHelperBase {
         String city = getCity();
         String zipcode = getZipCode();
         long addressId;
-        if (TextUtils.isEmpty(state) || TextUtils.isEmpty(street) || TextUtils.isEmpty(city)) {
-            if (TextUtils.isEmpty(zipcode)) {
-                return false;
-            }
-            addressId = TableAddress.getInstance().queryAddressId(company, zipcode);
-            if (addressId < 0) {
-                DataAddress address = new DataAddress(company, zipcode);
-                address.isLocal = true;
-                addressId = TableAddress.getInstance().add(address);
-            }
-        } else {
-            addressId = TableAddress.getInstance().queryAddressId(company, street, city, state, zipcode);
-            if (addressId < 0) {
-                DataAddress address = new DataAddress(company, street, city, state, zipcode);
-                address.isLocal = true;
-                addressId = TableAddress.getInstance().add(address);
-            }
+        addressId = TableAddress.getInstance().queryAddressId(company, street, city, state, zipcode);
+        if (addressId < 0) {
+            DataAddress address = new DataAddress(company, street, city, state, zipcode);
+            address.isLocal = true;
+            addressId = TableAddress.getInstance().add(address);
         }
         long projectNameId = TableProjects.getInstance().queryProjectName(project);
         if (addressId >= 0 && projectNameId >= 0) {
             long projectGroupId = TableProjectAddressCombo.getInstance().queryProjectGroupId(projectNameId, addressId);
             if (projectGroupId < 0) {
                 projectGroupId = TableProjectAddressCombo.getInstance().add(new DataProjectAddressCombo(projectNameId, addressId));
+            } else {
+                TableProjectAddressCombo.getInstance().updateUsed(projectGroupId);
             }
             setCurrentProjectGroupId(projectGroupId);
             return true;

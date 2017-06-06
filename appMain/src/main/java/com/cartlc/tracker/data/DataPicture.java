@@ -28,6 +28,7 @@ public class DataPicture {
     public boolean uploaded;
 
     File pictureFile;
+    int [] imgSize;
 
     public DataPicture() {
     }
@@ -62,7 +63,7 @@ public class DataPicture {
         if (!exists()) {
             return null;
         }
-        return TBApplication.getUri(ctx, pictureFile);
+        return TBApplication.getUri(ctx, getPictureFile());
     }
 
     public void remove() {
@@ -82,6 +83,17 @@ public class DataPicture {
     }
 
     public void rotateCW() {
-        BitmapHelper.rotateCW(getPictureFile());
+        BitmapHelper.rotate(getPictureFile(), 90);
+    }
+
+    public void rotateCCW() {
+        BitmapHelper.rotate(getPictureFile(), -90);
+    }
+
+    public int [] getImageSize() {
+        if (imgSize == null) {
+            imgSize = BitmapHelper.getImageSize(getPictureFile().getAbsolutePath());
+        }
+        return imgSize;
     }
 }

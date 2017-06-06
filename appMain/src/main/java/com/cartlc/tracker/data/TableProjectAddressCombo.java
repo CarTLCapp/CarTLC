@@ -31,6 +31,7 @@ public class TableProjectAddressCombo {
     static final String KEY_ROWID      = "_id";
     static final String KEY_PROJECT_ID = "project_id";
     static final String KEY_ADDRESS_ID = "address_id";
+    static final String KEY_LAST_USED  = "last_used";
 
     final SQLiteDatabase mDb;
 
@@ -61,6 +62,8 @@ public class TableProjectAddressCombo {
         sbuf.append(KEY_PROJECT_ID);
         sbuf.append(" long, ");
         sbuf.append(KEY_ADDRESS_ID);
+        sbuf.append(" long, ");
+        sbuf.append(KEY_LAST_USED);
         sbuf.append(" long)");
         mDb.execSQL(sbuf.toString());
     }
@@ -71,6 +74,7 @@ public class TableProjectAddressCombo {
             ContentValues values = new ContentValues();
             values.put(KEY_PROJECT_ID, projectGroup.projectNameId);
             values.put(KEY_ADDRESS_ID, projectGroup.addressId);
+            values.put(KEY_LAST_USED, System.currentTimeMillis());
             projectGroup.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -96,11 +100,12 @@ public class TableProjectAddressCombo {
     public List<DataProjectAddressCombo> query() {
         ArrayList<DataProjectAddressCombo> list = new ArrayList();
         try {
-            final String[]   columns      = {KEY_ROWID, KEY_PROJECT_ID, KEY_ADDRESS_ID};
-            Cursor           cursor       = mDb.query(true, TABLE_NAME, columns, null, null, null, null, null, null);
-            int              idxRowId     = cursor.getColumnIndex(KEY_ROWID);
-            int              idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
-            int              idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
+            String orderBy = KEY_LAST_USED + " DESC";
+            final String[] columns = {KEY_ROWID, KEY_PROJECT_ID, KEY_ADDRESS_ID};
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, orderBy, null);
+            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+            int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+            int idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
             DataProjectAddressCombo item;
             while (cursor.moveToNext()) {
                 item = new DataProjectAddressCombo(cursor.getLong(idxRowId), cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
@@ -110,19 +115,18 @@ public class TableProjectAddressCombo {
         } catch (Exception ex) {
             Timber.e(ex);
         }
-        Collections.sort(list);
         return list;
     }
 
     public DataProjectAddressCombo query(long id) {
         DataProjectAddressCombo item = null;
         try {
-            final String[] columns       = {KEY_PROJECT_ID, KEY_ADDRESS_ID};
-            final String   selection     = KEY_ROWID + " =?";
+            final String[] columns = {KEY_PROJECT_ID, KEY_ADDRESS_ID};
+            final String selection = KEY_ROWID + " =?";
             final String[] selectionArgs = {Long.toString(id)};
-            Cursor         cursor        = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            int            idxProjectId  = cursor.getColumnIndex(KEY_PROJECT_ID);
-            int            idxAddressId  = cursor.getColumnIndex(KEY_ADDRESS_ID);
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+            int idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
             if (cursor.moveToFirst()) {
                 item = new DataProjectAddressCombo(id,
                         cursor.getLong(idxProjectId),
@@ -139,15 +143,15 @@ public class TableProjectAddressCombo {
         long id = -1L;
         try {
             final String[] columns = {KEY_ROWID};
-            StringBuilder  sbuf    = new StringBuilder();
+            StringBuilder sbuf = new StringBuilder();
             sbuf.append(KEY_PROJECT_ID);
             sbuf.append(" =? AND ");
             sbuf.append(KEY_ADDRESS_ID);
             sbuf.append(" =?");
-            final String   selection     = sbuf.toString();
+            final String selection = sbuf.toString();
             final String[] selectionArgs = {Long.toString(projectNameId), Long.toString(addressId)};
-            Cursor         cursor        = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            int            idxRowId      = cursor.getColumnIndex(KEY_ROWID);
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             if (cursor.moveToFirst()) {
                 id = cursor.getLong(idxRowId);
             }
@@ -156,6 +160,18 @@ public class TableProjectAddressCombo {
             Timber.e(ex);
         }
         return id;
+    }
+
+    public void updateUsed(long id) {
+        try {
+            String where = KEY_ROWID + "=?";
+            String [] whereArgs = {Long.toString(id)};
+            ContentValues values = new ContentValues();
+            values.put(KEY_LAST_USED, System.currentTimeMillis());
+            mDb.update(TABLE_NAME, values, where, whereArgs);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
     }
 
 }
