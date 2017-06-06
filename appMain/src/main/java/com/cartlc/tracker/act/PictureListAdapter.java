@@ -5,19 +5,15 @@ import java.util.List;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataPicture;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
 
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v7.graphics.Target;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -133,7 +129,7 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
                 mHandler.sendEmptyMessageDelayed(MSG_DECREASE_SIZE, DELAY_DECREASE_SIZE);
             }
         });
-        if (!item.exists()) {
+        if (!item.existsUnscaled()) {
             Message msg = new Message();
             msg.what = MSG_REMOVE_ITEM;
             msg.obj = item;
@@ -142,7 +138,7 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
             holder.loading.setText(R.string.error_picture_removed);
         } else {
             builder.build()
-                    .load(item.getUri(mContext))
+                    .load(item.getUnscaledUri(mContext))
                     .placeholder(R.drawable.loading)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .centerInside()

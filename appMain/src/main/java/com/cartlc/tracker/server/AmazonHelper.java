@@ -76,19 +76,18 @@ public class AmazonHelper {
     }
 
     void sendPicture(final DataEntry entry, final DataPicture item) {
-        String uploadingFilename = item.getUploadingFilename();
-        if (uploadingFilename == null) {
+        File uploadingFile = item.getScaledFile();
+        if (uploadingFile == null) {
             return;
         }
         init();
 
-        File uploadingFile = new File(uploadingFilename);
-        String key = item.getPictureFile().getName();
+        String key = item.getUnscaledFile().getName();
 
         TransferObserver observer = mTrans.upload(
                 BUCKET_NAME,        /* The bucket to upload to */
                 key,                /* The key for the uploaded object */
-                uploadingFile       /* The file where the data to upload exists */
+                uploadingFile       /* The file where the data to upload existsUnscaled */
         );
         observer.setTransferListener(new TransferListener() {
             @Override
@@ -111,8 +110,7 @@ public class AmazonHelper {
     }
 
     synchronized void uploadComplete(DataEntry entry, DataPicture item) {
-        item.uploaded = true;
-        TablePictureCollection.getInstance().update(item, null);
+        TablePictureCollection.getInstance().setUploaded(item);
         entry.checkPictureUploadComplete();
     }
 

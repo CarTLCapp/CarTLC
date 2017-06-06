@@ -14,7 +14,7 @@ COPY=`ls $WRAP/*.zip`
 ssh -i ~/.ssh/cartlc.pem ubuntu@cartlc.arqnetworks.com mkdir -p server/$DATE
 scp -i ~/.ssh/cartlc.pem $COPY ubuntu@cartlc.arqnetworks.com:/home/ubuntu/server/$DATE
 
-echo "UPLOAD COMPLETE.":
+echo "UPLOAD COMPLETE."
 echo "Now on the server do this:"
 echo " cd server/$DATE; unzip *.zip"
 echo " cd ..; rm active; ln -s $DATE active"

@@ -18,6 +18,7 @@ import com.cartlc.tracker.data.TableCollectionNoteProject;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNote;
+import com.cartlc.tracker.data.TablePictureCollection;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.event.EventServerPingDone;
 
@@ -53,6 +54,7 @@ public class DCService extends IntentService {
     static final String NOTES       = SERVER_URL + "notes";
 
     static final String UPLOAD_RESET_TRIGGER = "upload_reset";
+    static final String RE_REGISTER_TRIGGER  = "re-register";
 
     public DCService() {
         super(SERVER_NAME);
@@ -136,7 +138,14 @@ public class DCService extends IntentService {
             }
             if (object.has(UPLOAD_RESET_TRIGGER)) {
                 if (object.getBoolean(UPLOAD_RESET_TRIGGER)) {
+                    Timber.i("UPLOAD RESET!");
                     TableEntry.getInstance().clearUploaded();
+                }
+            }
+            if (object.has(RE_REGISTER_TRIGGER)) {
+                if (object.getBoolean(RE_REGISTER_TRIGGER)) {
+                    Timber.i("RE-REGISTER DETECTED!");
+                    sendRegistration();
                 }
             }
             List<DataEntry> entries = TableEntry.getInstance().queryPendingDataToUploadToMaster();
@@ -151,6 +160,7 @@ public class DCService extends IntentService {
             if (entries.size() > 0) {
                 AmazonHelper.getInstance().sendPictures(entries);
             }
+            TablePictureCollection.getInstance().clearUploadedUnscaledPhotos();
         } catch (Exception ex) {
             Timber.e(ex);
         }
@@ -178,7 +188,7 @@ public class DCService extends IntentService {
                 DataProject project = TableProjects.getInstance().queryByServerId(server_id);
                 if (project == null) {
                     if (unprocessed.contains(name)) {
-                        // If this name already exists, convert the existing one by simply giving it the server_id.
+                        // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                         DataProject existing = TableProjects.getInstance().queryByName(name);
                         existing.server_id = server_id;
                         TableProjects.getInstance().update(existing);
@@ -256,7 +266,7 @@ public class DCService extends IntentService {
                 if (item == null) {
                     DataAddress match = get(unprocessed, incoming);
                     if (match != null) {
-                        // If this name already exists, convert the existing one by simply giving it the server_id.
+                        // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                         match.server_id = server_id;
                         match.isLocal = false;
                         TableAddress.getInstance().update(match);
@@ -321,7 +331,7 @@ public class DCService extends IntentService {
                     if (item == null) {
                         DataEquipment match = get(unprocessed, incoming);
                         if (match != null) {
-                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                             match.server_id = server_id;
                             TableEquipment.getInstance().update(match);
                             Timber.i("Commandeer local: " + name);
@@ -377,7 +387,7 @@ public class DCService extends IntentService {
                     if (item == null) {
                         DataCollectionItem match = get(unprocessed, incoming);
                         if (match != null) {
-                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                             match.server_id = server_id;
                             TableCollectionEquipmentProject.getInstance().update(match);
                             Timber.i("Commandeer local: PROJECT COLLECTION " + match.collection_id + ", " + match.value_id);
@@ -447,7 +457,7 @@ public class DCService extends IntentService {
                     if (item == null) {
                         DataNote match = get(unprocessed, incoming);
                         if (match != null) {
-                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                             match.server_id = server_id;
                             TableNote.getInstance().update(match);
                             Timber.i("Commandeer local: " + name);
@@ -502,7 +512,7 @@ public class DCService extends IntentService {
                     if (item == null) {
                         DataCollectionItem match = get(unprocessed, incoming);
                         if (match != null) {
-                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                             match.server_id = server_id;
                             TableCollectionNoteProject.getInstance().update(match);
                             Timber.i("Commandeer local: NOTE COLLECTION " + match.collection_id + ", " + match.value_id);

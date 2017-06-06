@@ -3,7 +3,6 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -73,7 +72,7 @@ public class TablePictureCollection {
 
     public DataPicture add(File picture) {
         DataPicture item = new DataPicture();
-        item.pictureFilename = picture.getAbsolutePath();
+        item.unscaledFilename = picture.getAbsolutePath();
         update(item, null);
         return item;
     }
@@ -93,37 +92,23 @@ public class TablePictureCollection {
     }
 
     public DataPictureCollection query(long collection_id) {
-        DataPictureCollection collection = null;
-        try {
-            final String[] columns = {KEY_ROWID, KEY_PICTURE_FILENAME, KEY_UPLOADING_FILENAME, KEY_UPLOADED};
-            final String selection = KEY_COLLECTION_ID + " =?";
-            final String[] selectionArgs = {Long.toString(collection_id)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            int idxPicture = cursor.getColumnIndex(KEY_PICTURE_FILENAME);
-            int idxUploading = cursor.getColumnIndex(KEY_UPLOADING_FILENAME);
-            int idxUploaded = cursor.getColumnIndex(KEY_UPLOADED);
-            collection = new DataPictureCollection(collection_id);
-            while (cursor.moveToNext()) {
-                collection.add(new DataPicture(
-                        cursor.getLong(idxRowId),
-                        cursor.getString(idxPicture),
-                        cursor.getString(idxUploading),
-                        cursor.getShort(idxUploaded) != 0));
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
+        final String selection = KEY_COLLECTION_ID + " =?";
+        final String[] selectionArgs = {Long.toString(collection_id)};
+        DataPictureCollection collection = new DataPictureCollection(collection_id);
+        collection.pictures = query(selection, selectionArgs);
         return collection;
     }
 
     public List<DataPicture> queryPendingPictures() {
+        final String selection = KEY_COLLECTION_ID + " =0";
+        return query(selection, null);
+    }
+
+    public List<DataPicture> query(String selection, String[] selectionArgs) {
         List<DataPicture> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID, KEY_PICTURE_FILENAME, KEY_UPLOADING_FILENAME, KEY_UPLOADED};
-            final String selection = KEY_COLLECTION_ID + " =0";
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, null, null, null, null, null);
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxPicture = cursor.getColumnIndex(KEY_PICTURE_FILENAME);
             int idxUploading = cursor.getColumnIndex(KEY_UPLOADING_FILENAME);
@@ -142,16 +127,28 @@ public class TablePictureCollection {
         return list;
     }
 
+
     public List<DataPicture> removeNonExistant(List<DataPicture> list) {
         List<DataPicture> filtered = new ArrayList();
         for (DataPicture item : list) {
-            if (item.exists()) {
+            if (item.existsUnscaled()) {
                 filtered.add(item);
             } else {
                 remove(item);
             }
         }
         return filtered;
+    }
+
+    synchronized
+    public void clearUploadedUnscaledPhotos() {
+        String selection = KEY_UPLOADED + "=1";
+        List<DataPicture> list = query(selection, null);
+        for (DataPicture item : list) {
+            if (item.existsUnscaled()) {
+                item.getUnscaledFile().delete();
+            }
+        }
     }
 
     public int countPendingPictures() {
@@ -189,7 +186,6 @@ public class TablePictureCollection {
         DataPictureCollection collection = new DataPictureCollection(
                 PrefHelper.getInstance().getNextPictureCollectionID());
         collection.pictures = removeNonExistant(queryPendingPictures());
-        Timber.i("CREATED COLLECTION WITH ID " + collection.id);
         return collection;
     }
 
@@ -212,12 +208,18 @@ public class TablePictureCollection {
         }
     }
 
+    synchronized
+    public void setUploaded(DataPicture item) {
+        item.uploaded = true;
+        update(item, null);
+    }
+
     public void update(DataPicture item, Long collection_id) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(KEY_PICTURE_FILENAME, item.pictureFilename);
-            values.put(KEY_UPLOADING_FILENAME, item.uploadingFilename);
+            values.put(KEY_PICTURE_FILENAME, item.unscaledFilename);
+            values.put(KEY_UPLOADING_FILENAME, item.scaledFilename);
             values.put(KEY_UPLOADED, item.uploaded ? 1 : 0);
             if (collection_id != null) {
                 values.put(KEY_COLLECTION_ID, collection_id);
