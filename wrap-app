@@ -3,11 +3,33 @@
 # 1. To prepare: run 'dist' from sbt.
 # 2. Run this script.
 #
-VERSION="0.1"
 DATE=`date +%F`
-WRAP=~/cartlc/wrap/$DATE
+VERSION=`grep versionName appMain/build.gradle | awk '{gsub(/"/, "", $2); print $2}'`
 SRCFILE=`ls appMain/*.apk`
 TGTFILE="CarTLC-r${VERSION}.apk"
+WRAP=~/cartlc/wrap/$DATE
+DROPBOX=~/Dropbox/Publish
+
+while [[ $# -gt 1 ]]
+do
+	key="$1"
+
+	case $key in
+		-d|--debug)
+			SRCFILE="./appMain/build/outputs/apk/appMain-debug.apk"
+			TGTFILE="CarTLC-d${VERSION}.apk"
+    		shift # past argument
+    	;;
+		*)
+			print "Unknown opton: $key"
+			exit 1;
+            # unknown option
+		;;
+	esac
+done
+
 mkdir -p $WRAP
 cp $SRCFILE $WRAP/$TGTFILE
-cp $WRAP/$TGTFILE ~/Dropbox/Publish/
+cp $WRAP/$TGTFILE $DROPBOX/
+
+echo "Created $TGTFILE in $WRAP and $DROPBOX"
