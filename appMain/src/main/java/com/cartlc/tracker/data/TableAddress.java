@@ -15,6 +15,63 @@ import timber.log.Timber;
  */
 public class TableAddress {
 
+    class SelectionArgs {
+
+        String selection;
+        String [] selectionArgs;
+
+        SelectionArgs(String company, String street, String city, String state, String zipcode)
+        {
+            StringBuilder sbuf = new StringBuilder();
+            ArrayList<String> args = new ArrayList();
+
+            if (company != null && !TextUtils.isEmpty(company)) {
+                sbuf.append(KEY_COMPANY);
+                sbuf.append("=?");
+                args.add(company);
+            }
+            if (zipcode != null && !TextUtils.isEmpty(zipcode)) {
+                if (sbuf.length() > 0) {
+                    sbuf.append(" AND ");
+                }
+                sbuf.append(KEY_ZIPCODE);
+                sbuf.append("=?");
+                args.add(zipcode);
+            }
+            if (state != null && !TextUtils.isEmpty(state)) {
+                if (sbuf.length() > 0) {
+                    sbuf.append(" AND ");
+                }
+                sbuf.append(KEY_STATE);
+                sbuf.append("=?");
+                args.add(state);
+            }
+            if (city != null && !TextUtils.isEmpty(city)) {
+                if (sbuf.length() > 0) {
+                    sbuf.append(" AND ");
+                }
+                sbuf.append(KEY_CITY);
+                sbuf.append("=?");
+                args.add(city);
+            }
+            if (street != null && !TextUtils.isEmpty(street)) {
+                if (sbuf.length() > 0) {
+                    sbuf.append(" AND ");
+                }
+                sbuf.append(KEY_STREET);
+                sbuf.append("=?");
+                args.add(street);
+            }
+            if (sbuf.length() > 0) {
+                selection = sbuf.toString();
+                selectionArgs = args.toArray(new String[args.size()]);
+            } else {
+                selection = null;
+                selectionArgs = null;
+            }
+        }
+    }
+
     static TableAddress sInstance;
 
     static void Init(SQLiteDatabase db) {
@@ -325,16 +382,8 @@ public class TableAddress {
         try {
             final String[] columns = {KEY_ZIPCODE};
             final String orderBy = KEY_ZIPCODE + " ASC";
-            String selection;
-            String[] selectionArgs;
-            if (company == null) {
-                selection = null;
-                selectionArgs = null;
-            } else {
-                selection = KEY_COMPANY + " =?";
-                selectionArgs = new String[]{company};
-            }
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            SelectionArgs args = new SelectionArgs(company, null, null, null, null);
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_ZIPCODE);
             String zipcode;
             while (cursor.moveToNext()) {
@@ -355,31 +404,8 @@ public class TableAddress {
         try {
             final String[] columns = {KEY_STATE};
             final String orderBy = KEY_STATE + " ASC";
-            String selection;
-            String[] selectionArgs;
-            if (company == null) {
-                if (zipcode == null) {
-                    selection = null;
-                    selectionArgs = null;
-                } else {
-                    selection = KEY_ZIPCODE + "=?";
-                    selectionArgs = new String[]{zipcode};
-                }
-            } else {
-                if (zipcode == null) {
-                    selection = KEY_COMPANY + "=?";
-                    selectionArgs = new String[]{company};
-                } else {
-                    StringBuilder sbuf = new StringBuilder();
-                    sbuf.append(KEY_COMPANY);
-                    sbuf.append("=? AND ");
-                    sbuf.append(KEY_ZIPCODE);
-                    sbuf.append("=?");
-                    selection = sbuf.toString();
-                    selectionArgs = new String[]{company, zipcode};
-                }
-            }
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            SelectionArgs args = new SelectionArgs(company, null, null, null, zipcode);
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_STATE);
             String state;
             String zip;
@@ -401,33 +427,8 @@ public class TableAddress {
         try {
             final String[] columns = {KEY_CITY};
             final String orderBy = KEY_CITY + " ASC";
-            StringBuilder sbuf = new StringBuilder();
-            ArrayList<String> args = new ArrayList();
-            if (company != null) {
-                sbuf.append(KEY_COMPANY);
-                sbuf.append("=?");
-                args.add(company);
-            }
-            if (zipcode != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(KEY_ZIPCODE);
-                sbuf.append("=?");
-                args.add(zipcode);
-            }
-            if (state != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(KEY_STATE);
-                sbuf.append("=?");
-                sbuf.append(state);
-                args.add(state);
-            }
-            String selection = sbuf.toString();
-            String [] selectionArgs = args.toArray(new String[args.size()]);
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            SelectionArgs args = new SelectionArgs(company, null, null, state, zipcode);
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_CITY);
             while (cursor.moveToNext()) {
                 String city = cursor.getString(idxValue);
@@ -447,42 +448,8 @@ public class TableAddress {
         try {
             final String[] columns = {KEY_STREET};
             final String orderBy = KEY_STREET + " ASC";
-            StringBuilder sbuf = new StringBuilder();
-            ArrayList<String> args = new ArrayList();
-            if (company != null) {
-                sbuf.append(KEY_COMPANY);
-                sbuf.append("=?");
-                args.add(company);
-            }
-            if (zipcode != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(KEY_ZIPCODE);
-                sbuf.append("=?");
-                args.add(zipcode);
-            }
-            if (state != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(KEY_STATE);
-                sbuf.append("=?");
-                sbuf.append(state);
-                args.add(state);
-            }
-            if (city != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(KEY_CITY);
-                sbuf.append("=?");
-                sbuf.append(city);
-                args.add(city);
-            }
-            String selection = sbuf.toString();
-            String [] selectionArgs = args.toArray(new String[args.size()]);
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            SelectionArgs args = new SelectionArgs(company, null, city, state, zipcode);
+            Cursor cursor = mDb.query(true, TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, orderBy, null);
             int idxValue = cursor.getColumnIndex(KEY_STREET);
             while (cursor.moveToNext()) {
                 String street = cursor.getString(idxValue);
@@ -519,51 +486,8 @@ public class TableAddress {
         long id = -1L;
         try {
             final String[] columns = {KEY_ROWID};
-            StringBuilder sbuf = new StringBuilder();
-            ArrayList<String> args = new ArrayList();
-            if (company != null) {
-                sbuf.append(KEY_COMPANY);
-                sbuf.append("=?");
-                args.add(company);
-            }
-            if (zipcode != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(KEY_ZIPCODE);
-                sbuf.append("=?");
-                args.add(zipcode);
-            }
-            if (state != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(KEY_STATE);
-                sbuf.append("=?");
-                sbuf.append(state);
-                args.add(state);
-            }
-            if (city != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(KEY_CITY);
-                sbuf.append("=?");
-                sbuf.append(city);
-                args.add(city);
-            }
-            if (street != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(KEY_STREET);
-                sbuf.append("=?");
-                sbuf.append(street);
-                args.add(street);
-            }
-            String selection = sbuf.toString();
-            String [] selectionArgs = args.toArray(new String[args.size()]);
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            SelectionArgs args = new SelectionArgs(company, street, city, state, zipcode);
+            Cursor cursor = mDb.query(TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             if (cursor.moveToFirst()) {
                 id = cursor.getLong(idxRowId);
@@ -579,14 +503,8 @@ public class TableAddress {
         long id = -1L;
         try {
             final String[] columns = {KEY_ROWID};
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append(KEY_COMPANY);
-            sbuf.append(" =? AND ");
-            sbuf.append(KEY_ZIPCODE);
-            sbuf.append(" =?");
-            final String selection = sbuf.toString();
-            final String[] selectionArgs = {company, zipcode};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            SelectionArgs args = new SelectionArgs(company, null, null, null, zipcode);
+            Cursor cursor = mDb.query(TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             if (cursor.moveToFirst()) {
                 id = cursor.getLong(idxRowId);
