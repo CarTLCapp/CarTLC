@@ -26,7 +26,7 @@ create table company (
   state             varchar(64),
   zipcode           varchar(64),
   disabled          bit,
-  is_local          bit
+  is_local          bit default 0
 );
 
 create table project (

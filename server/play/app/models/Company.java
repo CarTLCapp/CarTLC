@@ -63,6 +63,10 @@ public class Company extends Model {
                         .findPagedList(page, pageSize);
     }
 
+    public static List<Company> nonLocal() {
+        return find.where().eq("is_local", false).findList();
+    }
+
     public static boolean has(Company company) {
         if (company.hasAddress()) {
             return find.where()

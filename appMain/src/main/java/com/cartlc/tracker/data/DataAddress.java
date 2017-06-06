@@ -75,6 +75,7 @@ public class DataAddress {
         return sbuf.toString();
     }
 
+    // Used to send address to the server.
     public String getLine() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(company);
@@ -88,7 +89,7 @@ public class DataAddress {
             sbuf.append(state);
         }
         if (!TextUtils.isEmpty(zipcode)) {
-            sbuf.append(" ");
+            sbuf.append(", ");
             sbuf.append(zipcode);
         }
         return sbuf.toString();

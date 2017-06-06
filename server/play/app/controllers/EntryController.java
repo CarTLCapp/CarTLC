@@ -151,6 +151,7 @@ public class EntryController extends Controller {
                         Company company = Company.parse(address);
                         company.is_local = true;
                         company.save();
+                        entry.address_id = company.id;
                     } catch (Exception ex) {
                         return badRequest2("address: " + ex.getMessage());
                     }
