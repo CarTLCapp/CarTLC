@@ -38,6 +38,7 @@ proguard/
 # Log Files
 *.log
 *~
+.*lock*
 
 # Tizen
 Debug/

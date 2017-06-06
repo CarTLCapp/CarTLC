@@ -19,6 +19,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,6 +55,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -247,6 +249,7 @@ public class MainActivity extends AppCompatActivity {
         computeCurStage();
         fillStage();
         EventBus.getDefault().register(this);
+        setTitle(getVersionedTitle());
 
 //        mApp.checkPermissions(this, new PermissionHelper.PermissionListener() {
 //            @Override
@@ -573,10 +576,15 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
-                    if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
-                        mNext.setVisibility(View.VISIBLE);
+                    if (!TextUtils.isEmpty(zipcode) && states.size() == 1) {
+                        PrefHelper.getInstance().setState(states.get(0));
+                        doNext();
+                    } else {
+                        if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
+                            mNext.setVisibility(View.VISIBLE);
+                        }
+                        mNew.setVisibility(View.VISIBLE);
                     }
-                    mNew.setVisibility(View.VISIBLE);
                 }
                 break;
             }
@@ -595,10 +603,15 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
-                    mMainListFrame.setVisibility(View.VISIBLE);
-                    mNew.setVisibility(View.VISIBLE);
-                    if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
-                        mNext.setVisibility(View.VISIBLE);
+                    if (!TextUtils.isEmpty(zipcode) && !TextUtils.isEmpty(state) && cities.size() == 1) {
+                        PrefHelper.getInstance().setCity(cities.get(0));
+                        doNext();
+                    } else {
+                        mMainListFrame.setVisibility(View.VISIBLE);
+                        mNew.setVisibility(View.VISIBLE);
+                        if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
+                            mNext.setVisibility(View.VISIBLE);
+                        }
                     }
                 }
                 break;
@@ -845,5 +858,23 @@ public class MainActivity extends AppCompatActivity {
 
     boolean isLocalCompany() {
         return TableAddress.getInstance().isLocalCompanyOnly(PrefHelper.getInstance().getCompany());
+    }
+
+    String getVersionedTitle()
+    {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(getString(R.string.app_name));
+        sbuf.append(" - ");
+        try
+        {
+            String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            sbuf.append("v");
+            sbuf.append(version);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+        return sbuf.toString();
     }
 }
