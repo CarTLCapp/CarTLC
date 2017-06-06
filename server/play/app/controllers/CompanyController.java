@@ -124,7 +124,7 @@ public class CompanyController extends Controller {
     public Result query() {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("companies");
-        for (Company item : Company.nonLocal()) {
+        for (Company item : Company.appList()) {
             if (!item.disabled) {
                 ObjectNode node = array.addObject();
                 node.put("id", item.id);

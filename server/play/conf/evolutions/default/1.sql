@@ -118,4 +118,5 @@ drop table if exists equipment;
 drop table if exists note;
 drop table if exists picture;
 drop table if exists company;
+drop table if exists project;
 

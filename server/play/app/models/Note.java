@@ -69,6 +69,8 @@ public class Note extends Model implements Comparable<Note> {
     @Constraints.Required
     public boolean disabled;
 
+    @Constraints.Required
+    public boolean is_local;
     /**
      * Generic query helper for entity Computer with id Long
      */

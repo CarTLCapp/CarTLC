@@ -183,6 +183,7 @@ public class EntryController extends Controller {
                         } else {
                             Equipment equipment = new Equipment();
                             equipment.name = subvalue.textValue();
+                            equipment.is_local = true;
                             equipment.save();
                             collection.equipment_id = equipment.id;
                             newEquipmentCreated = true;

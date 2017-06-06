@@ -46,6 +46,7 @@
                     @header("state", "State")
                     @header("zipcode", "ZIP");
                     <th>Edit</th>
+                    <th>Local</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,6 +90,11 @@
                         </td>
                         <td>
                             <a href="@routes.CompanyController.edit(company.id)">Edit</a>
+                        </td>
+                        <td>
+                            @if(company.is_local) {
+                                <em>L</em>
+                            }
                         </td>
                     </tr>
                 }
