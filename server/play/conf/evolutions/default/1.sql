@@ -49,8 +49,8 @@ create table project_equipment_collection (
   equipment_id      int
 );
 
-alter table project_equipment_collection add constraint fk_cpe_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
-alter table project_equipment_collection add constraint fk_cpe_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
+alter table project_equipment_collection add constraint c_pec_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table project_equipment_collection add constraint c_pec_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
 
 create table note (
   id                int auto_increment primary key,
@@ -59,15 +59,15 @@ create table note (
   disabled          bit default 0,
   is_local          bit default 0
 );
-
+#
 create table project_note_collection (
   id                int auto_increment primary key,
   project_id        int,
   note_id           int
 );
 
-alter table project_note_collection add constraint fk_cpn_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
-alter table project_note_collection add constraint fk_cpn_note_id foreign key (note_id) references note (id) on delete restrict on update restrict;
+alter table project_note_collection add constraint c_pnc_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table project_note_collection add constraint c_pnc_note_id foreign key (note_id) references note (id) on delete restrict on update restrict;
 
 create table picture_collection (
   id                int auto_increment primary key,
@@ -81,7 +81,7 @@ create table entry_equipment_collection (
   equipment_id      int
 );
 
-alter table entry_equipment_collection add constraint fk_eec_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
+alter table entry_equipment_collection add constraint c_eec_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
 
 create table entry_note_collection (
   id                int auto_increment primary key,
@@ -90,7 +90,7 @@ create table entry_note_collection (
   note_value        varchar(255)
 );
 
-alter table entry_note_collection add constraint fk_enc_note_id foreign key (note_id) references note (id) on delete restrict on update restrict;
+alter table entry_note_collection add constraint c_enc_note_id foreign key (note_id) references note (id) on delete restrict on update restrict;
 
 create table entry (
   id                       int auto_increment primary key,
@@ -104,22 +104,25 @@ create table entry (
   truck_number             int
 );
 
-alter table entry add constraint fk_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
-alter table entry add constraint fk_entry_address_id foreign key (address_id) references company (id) on delete restrict on update restrict;
+alter table entry add constraint c_e_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table entry add constraint c_e_entry_address_id foreign key (address_id) references company (id) on delete restrict on update restrict;
+alter table entry add constraint c_e_tech_id foreign key (tech_id) references client (id) on delete restrict on update restrict;
+alter table entry add constraint c_e_equip_collection_id foreign key (equipment_collection_id) references entry_equipment_collection (collection_id) on delete restrict on update restrict;
+alter table entry add constraint c_e_note_collection_id foreign key (note_collection_id) references entry_note_collection (collection_id) on delete restrict on update restrict;
+alter table entry add constraint c_e_picture_collection_id foreign key (picture_collection_id) references picture_collection (collection_id) on delete restrict on update restrict;
 
 # --- !Downs
 
 drop table if exists version;
+drop table if exists entry;
 drop table if exists project_equipment_collection;
-drop table if exists picture_collection;
 drop table if exists project_note_collection;
+drop table if exists picture_collection;
 drop table if exists entry_equipment_collection;
 drop table if exists entry_note_collection;
 drop table if exists client;
-drop table if exists entry;
 drop table if exists equipment;
 drop table if exists note;
-drop table if exists picture;
 drop table if exists company;
 drop table if exists project;
 

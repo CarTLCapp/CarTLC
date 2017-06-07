@@ -184,7 +184,7 @@ public class TableNote {
         return query(null, null);
     }
 
-    public List<DataNote> query(String selection, String [] selectionArgs) {
+    public List<DataNote> query(String selection, String[] selectionArgs) {
         List<DataNote> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID, KEY_NAME, KEY_VALUE, KEY_TYPE, KEY_SERVER_ID, KEY_IS_TEST};
@@ -266,12 +266,29 @@ public class TableNote {
         }
     }
 
+    void remove(long id) {
+        String where = KEY_ROWID + "=?";
+        String[] whereArgs = {Long.toString(id)};
+        mDb.delete(TABLE_NAME, where, whereArgs);
+    }
+
     public void removeTest() {
+        mDb.beginTransaction();
         try {
             String where = KEY_IS_TEST + "=1";
-            mDb.delete(TABLE_NAME, where, null);
+            List<DataNote> notes = query(where, null);
+            for (DataNote note : notes) {
+                if (TableEntry.getInstance().countNotes(note.id) == 0) {
+                    remove(note.id);
+                } else {
+                    // TODO: Update isLocal flag I guess.
+                }
+            }
+            mDb.setTransactionSuccessful();
         } catch (Exception ex) {
             Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
         }
     }
 }

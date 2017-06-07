@@ -197,6 +197,50 @@ public class TableEntry {
         return count;
     }
 
+    public int countEquipments(final long equipmentId) {
+        int count = 0;
+        try {
+            final String[] columns = {KEY_EQUIPMENT_COLLECTION_ID};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
+            int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
+            while (cursor.moveToNext()) {
+                long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
+                DataCollectionEquipmentEntry collection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
+                for (long equipId : collection.equipmentListIds) {
+                    if (equipId == equipmentId) {
+                        count++;
+                    }
+                }
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
+
+    public int countNotes(final long noteId) {
+        int count = 0;
+        try {
+            final String[] columns = {KEY_NOTE_COLLECTION_ID};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
+            int idxNoteCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
+            while (cursor.moveToNext()) {
+                long noteCollectionId = cursor.getLong(idxNoteCollectionId);
+                List<DataNote> notes = TableCollectionNoteEntry.getInstance().query(noteCollectionId);
+                for (DataNote note : notes) {
+                    if (noteId == note.id) {
+                        count++;
+                    }
+                }
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
 
     public int countProjects(long projectId) {
         int count = 0;

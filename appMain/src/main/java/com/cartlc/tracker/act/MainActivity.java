@@ -19,7 +19,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -178,9 +177,9 @@ public class MainActivity extends AppCompatActivity {
     ConfirmationFrame          mConfirmationFrame;
     DataEntry                  mCurEntry;
     OnEditorActionListener     mAutoNext;
-    //    String                     mByAddress;
     DividerItemDecoration      mDivider;
     String                     mCompanyEditing;
+    boolean                    mWasNext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -440,12 +439,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void doNext_() {
+        mWasNext = true;
         mCurStage = Stage.from(mCurStage.ordinal() + 1);
         fillStage();
     }
 
     void doPrev() {
         save(false);
+        doPrev_();
+    }
+
+    void doPrev_() {
+        mWasNext = false;
         if (mCurStage == Stage.PROJECT) {
             PrefHelper.getInstance().recoverProject();
             mCurStage = Stage.CURRENT_PROJECT;
@@ -557,8 +562,10 @@ public class MainActivity extends AppCompatActivity {
                         setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
                         mNew.setVisibility(View.VISIBLE);
                     }
-                } else {
+                } else if (mWasNext) {
                     doNext_();
+                } else {
+                    doPrev_();
                 }
                 break;
             }
@@ -576,7 +583,7 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
-                    if (!TextUtils.isEmpty(zipcode) && states.size() == 1) {
+                    if (!TextUtils.isEmpty(zipcode) && states.size() == 1 && mWasNext) {
                         PrefHelper.getInstance().setState(states.get(0));
                         doNext();
                     } else {
@@ -603,7 +610,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
-                    if (!TextUtils.isEmpty(zipcode) && !TextUtils.isEmpty(state) && cities.size() == 1) {
+                    if (!TextUtils.isEmpty(zipcode) && !TextUtils.isEmpty(state) && cities.size() == 1 && mWasNext) {
                         PrefHelper.getInstance().setCity(cities.get(0));
                         doNext();
                     } else {
@@ -860,19 +867,15 @@ public class MainActivity extends AppCompatActivity {
         return TableAddress.getInstance().isLocalCompanyOnly(PrefHelper.getInstance().getCompany());
     }
 
-    String getVersionedTitle()
-    {
+    String getVersionedTitle() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(getString(R.string.app_name));
         sbuf.append(" - ");
-        try
-        {
+        try {
             String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
             sbuf.append("v");
             sbuf.append(version);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Timber.e(e);
         }
         return sbuf.toString();

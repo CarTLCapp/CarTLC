@@ -304,12 +304,31 @@ public class TableEquipment {
         }
     }
 
+    void remove(long id) {
+        String where = KEY_ROWID + "=?";
+        String [] whereArgs = { Long.toString(id) };
+        mDb.delete(TABLE_NAME, where, whereArgs);
+    }
+
     public void removeTest() {
+        mDb.beginTransaction();
         try {
             String where = KEY_IS_TEST + "=1";
-            mDb.delete(TABLE_NAME, where, null);
+            List<DataEquipment> list = query(where, null);
+            for (DataEquipment item : list) {
+                if (TableEntry.getInstance().countEquipments(item.id) == 0) {
+                    remove(item.id);
+                } else {
+                    item.isLocal = true;
+                    update(item);
+                }
+            }
+            mDb.setTransactionSuccessful();
         } catch (Exception ex) {
             Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
         }
+
     }
 }

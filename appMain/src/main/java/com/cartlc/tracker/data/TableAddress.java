@@ -327,99 +327,41 @@ public class TableAddress {
     }
 
     public List<String> queryZipCodes(String company) {
-        ArrayList<String> list = new ArrayList();
-        try {
-            final String[] columns = {KEY_ZIPCODE};
-            final String orderBy = KEY_ZIPCODE + " ASC";
-            SelectionArgs args = new SelectionArgs(company, null, null, null, null);
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, orderBy, null);
-            int idxValue = cursor.getColumnIndex(KEY_ZIPCODE);
-            String zipcode;
-            while (cursor.moveToNext()) {
-                zipcode = cursor.getString(idxValue);
-                if (!TextUtils.isEmpty(zipcode)) {
-                    list.add(zipcode);
-                }
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return list;
+        SelectionArgs args = new SelectionArgs(company, null, null, null, null);
+        return queryStrings(KEY_ZIPCODE, args);
     }
 
     public List<String> queryStates(String company, String zipcode) {
-        ArrayList<String> list = new ArrayList();
-        try {
-            final String[] columns = {KEY_STATE};
-            final String orderBy = KEY_STATE + " ASC";
-            SelectionArgs args = new SelectionArgs(company, null, null, null, zipcode);
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, orderBy, null);
-            int idxValue = cursor.getColumnIndex(KEY_STATE);
-            String state;
-            String zip;
-            while (cursor.moveToNext()) {
-                state = cursor.getString(idxValue);
-                if (state != null) {
-                    list.add(state);
-                }
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return list;
+        SelectionArgs args = new SelectionArgs(company, null, null, null, zipcode);
+        return queryStrings(KEY_STATE, args);
     }
 
     public List<String> queryCities(String company, String zipcode, String state) {
-        ArrayList<String> list = new ArrayList();
-        try {
-            final String[] columns = {KEY_CITY};
-            final String orderBy = KEY_CITY + " ASC";
-            SelectionArgs args = new SelectionArgs(company, null, null, state, zipcode);
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, orderBy, null);
-            int idxValue = cursor.getColumnIndex(KEY_CITY);
-            while (cursor.moveToNext()) {
-                String city = cursor.getString(idxValue);
-                if (city != null) {
-                    list.add(city);
-                }
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return list;
+        SelectionArgs args = new SelectionArgs(company, null, null, state, zipcode);
+        return queryStrings(KEY_CITY, args);
     }
 
     public List<String> queryStreets(String company, String city, String state, String zipcode) {
-        ArrayList<String> list = new ArrayList();
-        try {
-            final String[] columns = {KEY_STREET};
-            final String orderBy = KEY_STREET + " ASC";
-            SelectionArgs args = new SelectionArgs(company, null, city, state, zipcode);
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, orderBy, null);
-            int idxValue = cursor.getColumnIndex(KEY_STREET);
-            while (cursor.moveToNext()) {
-                String street = cursor.getString(idxValue);
-                if (street != null) {
-                    list.add(street);
-                }
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return list;
+        SelectionArgs args = new SelectionArgs(company, null, city, state, zipcode);
+        return queryStrings(KEY_STREET, args);
     }
 
     public List<String> queryCompanies() {
+        return queryStrings(KEY_COMPANY, null);
+    }
+
+    public List<String> queryStrings(final String key, SelectionArgs args) {
         ArrayList<String> list = new ArrayList();
         try {
-            final String[] columns = {KEY_COMPANY};
-            final String orderBy = KEY_COMPANY + " ASC";
-            Cursor cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, orderBy, null);
-            int idxValue = cursor.getColumnIndex(KEY_COMPANY);
+            final String[] columns = {key};
+            final String orderBy = key + " ASC";
+            Cursor cursor;
+            if (args != null) {
+                cursor = mDb.query(true, TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, orderBy, null);
+            } else {
+                cursor = mDb.query(true, TABLE_NAME, columns, null, null, null, null, orderBy, null);
+            }
+            int idxValue = cursor.getColumnIndex(key);
             while (cursor.moveToNext()) {
                 list.add(cursor.getString(idxValue));
             }
@@ -429,7 +371,6 @@ public class TableAddress {
         }
         return list;
     }
-
 
     public long queryAddressId(String company, String street, String city, String state, String zipcode) {
         long id = -1L;
@@ -494,7 +435,6 @@ public class TableAddress {
 
     public void removeOrDisable(DataAddress item) {
         if (TableEntry.getInstance().countAddresses(item.id) == 0) {
-            // No entries for this, so just remove.
             remove(item.id);
         } else {
             item.disabled = true;
@@ -503,11 +443,15 @@ public class TableAddress {
     }
 
     public void removeTest() {
-        try {
-            String where = KEY_IS_TEST + "=1";
-            mDb.delete(TABLE_NAME, where, null);
-        } catch (Exception ex) {
-            Timber.e(ex);
+        String where = KEY_IS_TEST + "=1";
+        List<DataAddress> list = query(where, null, null);
+        for (DataAddress item : list) {
+            if (TableEntry.getInstance().countAddresses(item.id) == 0) {
+                remove(item.id);
+            } else {
+                item.isLocal = true;
+                update(item);
+            }
         }
     }
 }
