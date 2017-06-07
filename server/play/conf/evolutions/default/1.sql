@@ -107,9 +107,9 @@ create table entry (
 alter table entry add constraint c_e_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 alter table entry add constraint c_e_entry_address_id foreign key (address_id) references company (id) on delete restrict on update restrict;
 alter table entry add constraint c_e_tech_id foreign key (tech_id) references client (id) on delete restrict on update restrict;
-alter table entry add constraint c_e_equip_collection_id foreign key (equipment_collection_id) references entry_equipment_collection (collection_id) on delete restrict on update restrict;
-alter table entry add constraint c_e_note_collection_id foreign key (note_collection_id) references entry_note_collection (collection_id) on delete restrict on update restrict;
-alter table entry add constraint c_e_picture_collection_id foreign key (picture_collection_id) references picture_collection (collection_id) on delete restrict on update restrict;
+# alter table entry add constraint c_e_equip_collection_id foreign key (equipment_collection_id) references entry_equipment_collection (collection_id) on delete restrict on update restrict;
+# alter table entry add constraint c_e_note_collection_id foreign key (note_collection_id) references entry_note_collection (collection_id) on delete restrict on update restrict;
+# alter table entry add constraint c_e_picture_collection_id foreign key (picture_collection_id) references picture_collection (collection_id) on delete restrict on update restrict;
 
 # --- !Downs
 
