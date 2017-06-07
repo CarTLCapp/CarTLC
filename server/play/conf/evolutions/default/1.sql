@@ -41,7 +41,7 @@ create table equipment (
   id                int auto_increment primary key,
   name              varchar(128),
   created_by        int default 0,
-  disabled          bit default 0,
+  disabled          bit default 0
 );
 
 alter table equipment add constraint c_e_tech_id foreign key (created_by) references client (id) on delete restrict on update restrict;
