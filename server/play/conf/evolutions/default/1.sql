@@ -44,7 +44,7 @@ create table equipment (
   disabled          bit default 0
 );
 
-alter table equipment add constraint c_e_tech_id foreign key (created_by) references client (id) on delete restrict on update restrict;
+alter table equipment add constraint c_eq_tech_id foreign key (created_by) references client (id) on delete restrict on update restrict;
 
 create table project_equipment_collection (
   id                int auto_increment primary key,
