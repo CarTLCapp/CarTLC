@@ -31,10 +31,11 @@ public class Equipment extends Model implements Comparable<Equipment> {
     public String name;
 
     @Constraints.Required
-    public boolean disabled;
+    public int created_by;
 
     @Constraints.Required
-    public boolean is_local;
+    public boolean disabled;
+
     /**
      * Generic query helper for entity Computer with id Long
      */
@@ -43,10 +44,20 @@ public class Equipment extends Model implements Comparable<Equipment> {
     public static List<Equipment> list() { return list("name", "asc"); }
 
     public static List<Equipment> list(String sortBy, String order) {
-        return
-                find.where()
+        return find.where()
                         .orderBy(sortBy + " " + order)
                         .findList();
+    }
+
+    public static List<Equipment> appList(int tech_id) {
+        List<Equipment> items = find.where().eq("disabled", false).findList();
+        List<Equipment> result = new ArrayList<Equipment>();
+        for (Equipment item : items) {
+            if (item.created_by == 0 || item.created_by == tech_id) {
+                result.add(item);
+            }
+        }
+        return result;
     }
 
     public static Equipment findByName(String name) {
@@ -62,7 +73,17 @@ public class Equipment extends Model implements Comparable<Equipment> {
     }
 
     public List<Project> getProjects() {
-        return ProjectEquipmentCollection.findProjects(id);
+        List<Project> list = ProjectEquipmentCollection.findProjects(id);
+        if (created_by != 0) {
+            for (Project project : Project.find.all()) {
+                if (Entry.hasEquipment(project.id, id)) {
+                    if (!list.contains(project)) {
+                        list.add(project);
+                    }
+                }
+            }
+        }
+        return list;
     }
 
     public String getProjectsLine() {
@@ -76,6 +97,16 @@ public class Equipment extends Model implements Comparable<Equipment> {
             sbuf.append(project.name);
         }
         return sbuf.toString();
+    }
+
+    public String getCreatedBy() {
+        if (created_by != 0) {
+            Client client = Client.find.byId((long) created_by);
+            if (client != null) {
+                return client.fullName();
+            }
+        }
+        return "";
     }
 
     public static boolean hasProject(long equipment_id, long project_id) {
@@ -98,6 +129,17 @@ public class Equipment extends Model implements Comparable<Equipment> {
     @Override
     public int compareTo(Equipment item) {
         return name.compareTo(item.name);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Equipment) {
+            return name.equals(((Equipment) other).name);
+        }
+        if (other instanceof Long) {
+            return id == ((Long) other);
+        }
+        return super.equals(other);
     }
 }
 

@@ -3,9 +3,6 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +21,7 @@ public class TableNote {
     static final String KEY_VALUE     = "value";
     static final String KEY_TYPE      = "type";
     static final String KEY_SERVER_ID = "server_id";
-    static final String KEY_IS_TEST   = "is_test";
+    static final String KEY_IS_BOOT   = "is_boot_strap";
 
     static TableNote sInstance;
 
@@ -58,7 +55,7 @@ public class TableNote {
         sbuf.append(" int, ");
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
-        sbuf.append(KEY_IS_TEST);
+        sbuf.append(KEY_IS_BOOT);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
@@ -97,7 +94,7 @@ public class TableNote {
                 values.put(KEY_TYPE, value.type.ordinal());
                 values.put(KEY_VALUE, value.value);
                 values.put(KEY_SERVER_ID, value.server_id);
-                values.put(KEY_IS_TEST, value.isTest ? 1 : 0);
+                values.put(KEY_IS_BOOT, value.isBootStrap ? 1 : 0);
                 mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -117,7 +114,7 @@ public class TableNote {
             values.put(KEY_TYPE, item.type.ordinal());
             values.put(KEY_VALUE, item.value);
             values.put(KEY_SERVER_ID, item.server_id);
-            values.put(KEY_IS_TEST, item.isTest ? 1 : 0);
+            values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
             item.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -187,14 +184,14 @@ public class TableNote {
     public List<DataNote> query(String selection, String[] selectionArgs) {
         List<DataNote> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_VALUE, KEY_TYPE, KEY_SERVER_ID, KEY_IS_TEST};
+            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_VALUE, KEY_TYPE, KEY_SERVER_ID, KEY_IS_BOOT};
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxName = cursor.getColumnIndex(KEY_NAME);
             int idxValue = cursor.getColumnIndex(KEY_VALUE);
             int idxType = cursor.getColumnIndex(KEY_TYPE);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
-            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
+            int idxTest = cursor.getColumnIndex(KEY_IS_BOOT);
             while (cursor.moveToNext()) {
                 DataNote item = new DataNote();
                 item.id = cursor.getLong(idxRowId);
@@ -202,7 +199,7 @@ public class TableNote {
                 item.value = cursor.getString(idxValue);
                 item.type = DataNote.Type.from(cursor.getInt(idxType));
                 item.server_id = cursor.getInt(idxServerId);
-                item.isTest = cursor.getShort(idxTest) != 0;
+                item.isBootStrap = cursor.getShort(idxTest) != 0;
                 list.add(item);
             }
             cursor.close();
@@ -275,7 +272,7 @@ public class TableNote {
     public void removeTest() {
         mDb.beginTransaction();
         try {
-            String where = KEY_IS_TEST + "=1";
+            String where = KEY_IS_BOOT + "=1";
             List<DataNote> notes = query(where, null);
             for (DataNote note : notes) {
                 if (TableEntry.getInstance().countNotes(note.id) == 0) {

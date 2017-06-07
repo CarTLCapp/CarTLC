@@ -23,7 +23,7 @@ public class TableProjects {
     static final String KEY_NAME      = "name";
     static final String KEY_SERVER_ID = "server_id";
     static final String KEY_DISABLED  = "disabled";
-    static final String KEY_IS_TEST   = "is_test";
+    static final String KEY_IS_BOOT   = "is_boot_strap";
 
     final SQLiteDatabase mDb;
 
@@ -59,7 +59,7 @@ public class TableProjects {
         sbuf.append(" integer, ");
         sbuf.append(KEY_DISABLED);
         sbuf.append(" bit, ");
-        sbuf.append(KEY_IS_TEST);
+        sbuf.append(KEY_IS_BOOT);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
@@ -92,9 +92,9 @@ public class TableProjects {
         }
     }
 
-    public void removeTest() {
+    public void removeBootStrap() {
         try {
-            String where = KEY_IS_TEST + "=1";
+            String where = KEY_IS_BOOT + "=1";
             mDb.delete(TABLE_NAME, where, null);
         } catch (Exception ex) {
             Timber.e(ex);
@@ -124,7 +124,7 @@ public class TableProjects {
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, item);
-            values.put(KEY_IS_TEST, 1);
+            values.put(KEY_IS_BOOT, 1);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -161,7 +161,7 @@ public class TableProjects {
             values.put(KEY_NAME, project.name);
             values.put(KEY_SERVER_ID, project.server_id);
             values.put(KEY_DISABLED, project.disabled ? 1 : 0);
-            values.put(KEY_IS_TEST, project.isTest ? 1 : 0);
+            values.put(KEY_IS_BOOT, project.isBootStrap ? 1 : 0);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(project.id)};
             if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {
@@ -276,18 +276,18 @@ public class TableProjects {
     DataProject query(String selection, String [] selectionArgs) {
         DataProject project = null;
         try {
-            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_DISABLED, KEY_IS_TEST, };
+            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_DISABLED, KEY_IS_BOOT, };
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_NAME);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
-            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
+            int idxTest = cursor.getColumnIndex(KEY_IS_BOOT);
             if (cursor.moveToFirst()) {
                 project = new DataProject();
                 project.name = cursor.getString(idxValue);
                 project.disabled = cursor.getShort(idxDisabled) != 0;
-                project.isTest = cursor.getShort(idxTest) != 0;
+                project.isBootStrap = cursor.getShort(idxTest) != 0;
                 project.server_id = cursor.getShort(idxServerId);
                 project.id = cursor.getLong(idxRowId);
             }

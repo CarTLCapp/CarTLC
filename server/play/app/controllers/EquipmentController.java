@@ -8,7 +8,7 @@ import static play.data.Form.*;
 import play.Logger;
 
 import models.*;
-
+import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
@@ -119,27 +119,32 @@ public class EquipmentController extends Controller {
         }
         String[] lines = linesForm.get().getLines();
         Project activeProject = null;
+        final String PROJECT = "Project:";
         for (String name : lines) {
             name = name.trim();
             if (!name.isEmpty()) {
-                Project project = Project.findByName(name);
-                if (project != null) {
-                    activeProject = project;
-                } else {
-                    Equipment equipment = Equipment.findByName(name);
-                    if (equipment == null) {
-                        equipment = new Equipment();
-                        equipment.name = name;
-                        equipment.save();
+                if (name.startsWith(PROJECT)) {
+                    Project project = Project.findByName(name.substring(PROJECT.length()).trim());
+                    if (project != null) {
+                        activeProject = project;
+                        continue;
                     }
-                    if (activeProject != null) {
-                        ProjectEquipmentCollection collection = new ProjectEquipmentCollection();
-                        collection.project_id = activeProject.id;
-                        collection.equipment_id = equipment.id;
-
-                        if (!ProjectEquipmentCollection.has(collection)) {
-                            collection.save();
-                        }
+                }
+                if (activeProject == null) {
+                    return badRequest("First line must indicate valid project");
+                }
+                Equipment equipment = Equipment.findByName(name);
+                if (equipment == null) {
+                    equipment = new Equipment();
+                    equipment.name = name;
+                    equipment.save();
+                }
+                if (activeProject != null) {
+                    ProjectEquipmentCollection collection = new ProjectEquipmentCollection();
+                    collection.project_id = activeProject.id;
+                    collection.equipment_id = equipment.id;
+                    if (!ProjectEquipmentCollection.has(collection)) {
+                        collection.save();
                     }
                 }
             }
@@ -185,23 +190,26 @@ public class EquipmentController extends Controller {
         return edit(id);
     }
 
-
-    public Result query() {
+    public Result query(int tech_id) {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("equipments");
-        for (Equipment item : Equipment.find.all()) {
-            if (!item.disabled) {
-                ObjectNode node = array.addObject();
-                node.put("id", item.id);
-                node.put("name", item.name);
+        List<Equipment> equipments = Equipment.appList(tech_id);
+        for (Equipment item : equipments) {
+            ObjectNode node = array.addObject();
+            node.put("id", item.id);
+            node.put("name", item.name);
+            if (item.created_by != 0) {
+                node.put("is_local", true);
             }
         }
         array = top.putArray("project_equipment");
         for (ProjectEquipmentCollection item : ProjectEquipmentCollection.find.all()) {
-            ObjectNode node = array.addObject();
-            node.put("id", item.id);
-            node.put("project_id", item.project_id);
-            node.put("equipment_id", item.equipment_id);
+            if (equipments.contains(item.equipment_id)) {
+                ObjectNode node = array.addObject();
+                node.put("id", item.id);
+                node.put("project_id", item.project_id);
+                node.put("equipment_id", item.equipment_id);
+            }
         }
         return ok(top);
     }

@@ -33,12 +33,12 @@ public class DataNote {
         }
     }
 
-    public long   id;
-    public String name;
-    public String value;
-    public Type   type;
-    public int    server_id;
-    public boolean isTest;
+    public long    id;
+    public String  name;
+    public String  value;
+    public Type    type;
+    public int     server_id;
+    public boolean isBootStrap;
 
     public DataNote() {
     }
@@ -50,7 +50,7 @@ public class DataNote {
     public DataNote(String name, Type type) {
         this.name = name;
         this.type = type;
-        this.isTest = true;
+        this.isBootStrap = true;
     }
 
     public DataNote(String name, Type type, int server_id) {

@@ -122,20 +122,7 @@ public class EntryController extends Controller {
         }
         value = json.findValue("project_id");
         if (value == null) {
-            value = json.findValue("project_name");
-            if (value == null) {
-                missing.add("project_id");
-            } else {
-                String projectName = value.textValue().trim();
-                if (projectName.length() > 0) {
-                    Project project = new Project();
-                    project.name = projectName;
-                    project.save();
-                    Version.inc(Version.VERSION_PROJECT);
-                } else {
-                    return badRequest2("project_name");
-                }
-            }
+            missing.add("project_id");
         } else {
             entry.project_id = value.longValue();
         }
@@ -149,7 +136,7 @@ public class EntryController extends Controller {
                 if (address.length() > 0) {
                     try {
                         Company company = Company.parse(address);
-                        company.is_local = true;
+                        company.created_by = entry.tech_id;
                         company.save();
                         entry.address_id = company.id;
                     } catch (Exception ex) {
@@ -183,7 +170,7 @@ public class EntryController extends Controller {
                         } else {
                             Equipment equipment = new Equipment();
                             equipment.name = subvalue.textValue();
-                            equipment.is_local = true;
+                            equipment.created_by = entry.tech_id;
                             equipment.save();
                             collection.equipment_id = equipment.id;
                             newEquipmentCreated = true;
@@ -192,9 +179,6 @@ public class EntryController extends Controller {
                         collection.equipment_id = subvalue.longValue();
                     }
                     collection.save();
-                }
-                if (newEquipmentCreated) {
-                    Version.inc(Version.VERSION_EQUIPMENT);
                 }
                 entry.equipment_collection_id = collection_id;
             }
@@ -241,6 +225,7 @@ public class EntryController extends Controller {
                             String name = subvalue.textValue();
                             Note note = Note.findByName(name);
                             if (note == null) {
+                                // No ability to create notes in version 1.
                                 missing.add("note:" + name);
                             } else {
                                 collection.note_id = note.id;

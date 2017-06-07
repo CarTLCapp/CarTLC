@@ -9,6 +9,7 @@ import play.Logger;
 
 import models.*;
 
+import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
@@ -121,26 +122,27 @@ public class CompanyController extends Controller {
         return list();
     }
 
-    public Result query() {
+    public Result query(int tech_id) {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("companies");
-        for (Company item : Company.appList()) {
-            if (!item.disabled) {
-                ObjectNode node = array.addObject();
-                node.put("id", item.id);
-                node.put("name", item.name);
-                if (item.street != null) {
-                    node.put("street", item.street);
-                }
-                if (item.city != null) {
-                    node.put("city", item.city);
-                }
-                if (item.state != null) {
-                    node.put("state", State.getFull(item.state));
-                }
-                if (item.zipcode != null) {
-                    node.put("zipcode", item.zipcode);
-                }
+        for (Company item : Company.appList(tech_id)) {
+            ObjectNode node = array.addObject();
+            node.put("id", item.id);
+            node.put("name", item.name);
+            if (item.street != null && !item.street.isEmpty()) {
+                node.put("street", item.street);
+            }
+            if (item.city != null && !item.city.isEmpty()) {
+                node.put("city", item.city);
+            }
+            if (item.state != null && !item.state.isEmpty()) {
+                node.put("state", State.getFull(item.state));
+            }
+            if (item.zipcode != null && !item.zipcode.isEmpty()) {
+                node.put("zipcode", item.zipcode);
+            }
+            if (item.created_by != 0) {
+                node.put("is_local", true);
             }
         }
         return ok(top);

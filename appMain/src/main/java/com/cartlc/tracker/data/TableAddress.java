@@ -23,19 +23,10 @@ public class TableAddress {
         SelectionArgs(String company, String street, String city, String state, String zipcode) {
             StringBuilder sbuf = new StringBuilder();
             ArrayList<String> args = new ArrayList();
-
             if (company != null && !TextUtils.isEmpty(company)) {
                 sbuf.append(KEY_COMPANY);
                 sbuf.append("=?");
                 args.add(company);
-            }
-            if (zipcode != null && !TextUtils.isEmpty(zipcode)) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" AND ");
-                }
-                sbuf.append(KEY_ZIPCODE);
-                sbuf.append("=?");
-                args.add(zipcode);
             }
             if (state != null && !TextUtils.isEmpty(state)) {
                 if (sbuf.length() > 0) {
@@ -60,6 +51,14 @@ public class TableAddress {
                 sbuf.append(KEY_STREET);
                 sbuf.append("=?");
                 args.add(street);
+            }
+            if (zipcode != null && !TextUtils.isEmpty(zipcode)) {
+                if (sbuf.length() > 0) {
+                    sbuf.append(" AND ");
+                }
+                sbuf.append(KEY_ZIPCODE);
+                sbuf.append("=?");
+                args.add(zipcode);
             }
             if (sbuf.length() > 0) {
                 selection = sbuf.toString();
@@ -92,7 +91,7 @@ public class TableAddress {
     static final String KEY_SERVER_ID = "server_id";
     static final String KEY_DISABLED  = "disabled";
     static final String KEY_LOCAL     = "local";
-    static final String KEY_IS_TEST   = "is_test";
+    static final String KEY_IS_BOOT   = "is_boot_strap";
 
     final SQLiteDatabase mDb;
 
@@ -135,7 +134,7 @@ public class TableAddress {
         sbuf.append(" bit, ");
         sbuf.append(KEY_LOCAL);
         sbuf.append(" bit, ");
-        sbuf.append(KEY_IS_TEST);
+        sbuf.append(KEY_IS_BOOT);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
@@ -154,7 +153,7 @@ public class TableAddress {
                 values.put(KEY_SERVER_ID, address.server_id);
                 values.put(KEY_DISABLED, address.disabled ? 1 : 0);
                 values.put(KEY_LOCAL, address.isLocal ? 1 : 0);
-                values.put(KEY_IS_TEST, address.isTest ? 1 : 0);
+                values.put(KEY_IS_BOOT, address.isBootStrap ? 1 : 0);
                 mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -179,7 +178,7 @@ public class TableAddress {
             values.put(KEY_SERVER_ID, address.server_id);
             values.put(KEY_DISABLED, address.disabled ? 1 : 0);
             values.put(KEY_LOCAL, address.isLocal ? 1 : 0);
-            values.put(KEY_IS_TEST, address.isTest ? 1 : 0);
+            values.put(KEY_IS_BOOT, address.isBootStrap ? 1 : 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -221,7 +220,7 @@ public class TableAddress {
             values.put(KEY_SERVER_ID, address.server_id);
             values.put(KEY_DISABLED, address.disabled ? 1 : 0);
             values.put(KEY_LOCAL, address.isLocal ? 1 : 0);
-            values.put(KEY_IS_TEST, address.isTest ? 1 : 0);
+            values.put(KEY_IS_BOOT, address.isBootStrap ? 1 : 0);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(address.id)};
             mDb.update(TABLE_NAME, values, where, whereArgs);
@@ -246,6 +245,9 @@ public class TableAddress {
     }
 
     public boolean isLocalCompanyOnly(String company) {
+        if (company == null) {
+            return false;
+        }
         List<DataAddress> list = TableAddress.getInstance().queryByCompanyName(company);
         if (list.size() == 0) {
             return false;
@@ -293,7 +295,7 @@ public class TableAddress {
     List<DataAddress> query(String selection, String[] selectionArgs, String orderBy) {
         ArrayList<DataAddress> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_COMPANY, KEY_STATE, KEY_CITY, KEY_STREET, KEY_ZIPCODE, KEY_SERVER_ID, KEY_DISABLED, KEY_LOCAL, KEY_IS_TEST};
+            final String[] columns = {KEY_ROWID, KEY_COMPANY, KEY_STATE, KEY_CITY, KEY_STREET, KEY_ZIPCODE, KEY_SERVER_ID, KEY_DISABLED, KEY_LOCAL, KEY_IS_BOOT};
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
             int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
             int idxState = cursor.getColumnIndex(KEY_STATE);
@@ -304,7 +306,7 @@ public class TableAddress {
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
             int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
-            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
+            int idxTest = cursor.getColumnIndex(KEY_IS_BOOT);
             while (cursor.moveToNext()) {
                 DataAddress address;
                 list.add(address = new DataAddress(
@@ -317,7 +319,7 @@ public class TableAddress {
                         cursor.getString(idxZipCode)));
                 address.disabled = cursor.getShort(idxDisabled) == 1;
                 address.isLocal = cursor.getShort(idxLocal) == 1;
-                address.isTest = cursor.getShort(idxTest) == 1;
+                address.isBootStrap = cursor.getShort(idxTest) == 1;
             }
             cursor.close();
         } catch (Exception ex) {
@@ -363,7 +365,10 @@ public class TableAddress {
             }
             int idxValue = cursor.getColumnIndex(key);
             while (cursor.moveToNext()) {
-                list.add(cursor.getString(idxValue));
+                String value = cursor.getString(idxValue);
+                if (!TextUtils.isEmpty(value)) {
+                    list.add(value);
+                }
             }
             cursor.close();
         } catch (Exception ex) {
@@ -442,8 +447,8 @@ public class TableAddress {
         }
     }
 
-    public void removeTest() {
-        String where = KEY_IS_TEST + "=1";
+    public void removeBootStrap() {
+        String where = KEY_IS_BOOT + "=1";
         List<DataAddress> list = query(where, null, null);
         for (DataAddress item : list) {
             if (TableEntry.getInstance().countAddresses(item.id) == 0) {

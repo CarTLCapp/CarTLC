@@ -92,9 +92,7 @@
                             <a href="@routes.CompanyController.edit(company.id)">Edit</a>
                         </td>
                         <td>
-                            @if(company.is_local) {
-                                <em>L</em>
-                            }
+                            @company.getCreatedBy()
                         </td>
                     </tr>
                 }

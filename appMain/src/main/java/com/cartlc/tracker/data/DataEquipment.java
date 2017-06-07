@@ -5,12 +5,12 @@ package com.cartlc.tracker.data;
  */
 
 public class DataEquipment {
-    public long id;
-    public final String name;
-    public long server_id;
-    public boolean isChecked;
-    public boolean isLocal;
-    public boolean isTest;
+    public       long    id;
+    public final String  name;
+    public       long    server_id;
+    public       boolean isChecked;
+    public       boolean isLocal;
+    public       boolean isBootStrap;
 
     public DataEquipment(long id, String name, boolean isChecked, boolean isLocal) {
         this.id = id;
@@ -24,8 +24,7 @@ public class DataEquipment {
         this.server_id = server_id;
     }
 
-    public String toString()
-    {
+    public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("NAME=");
         sbuf.append(name);
@@ -34,7 +33,7 @@ public class DataEquipment {
         sbuf.append(", local=");
         sbuf.append(isLocal);
         sbuf.append(", test=");
-        sbuf.append(isTest);
+        sbuf.append(isBootStrap);
         return sbuf.toString();
     }
 

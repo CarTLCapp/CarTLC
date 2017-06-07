@@ -10,7 +10,10 @@
 
     <p>You may create several equipments at once. One equipment name per line.</p>
 
-    <p>To assocate the equipment item with a project put a project name on it's own line. Then, subsequent equipment lines will be associated with that project.</p>
+    <p>The first line must begin with the string 'Project:' followed by a legal project name.
+        This indicates the project to associated the following equipment lines with.
+        To switch projects, just include a project line again.
+        Subsequent lines will be the equipment names to associate with that project. One equipment name per line.</p>
 
     @helper.form(routes.EquipmentController.saveMany()) {
 

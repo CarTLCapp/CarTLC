@@ -67,10 +67,10 @@ public class Note extends Model implements Comparable<Note> {
     public Type type = Type.TEXT;
 
     @Constraints.Required
-    public boolean disabled;
+    public int created_by;
 
     @Constraints.Required
-    public boolean is_local;
+    public boolean disabled;
     /**
      * Generic query helper for entity Computer with id Long
      */
@@ -80,8 +80,8 @@ public class Note extends Model implements Comparable<Note> {
 
     public static List<Note> list(String sortBy, String order) {
         return find.where()
-                        .orderBy(sortBy + " " + order)
-                        .findList();
+                .orderBy(sortBy + " " + order)
+                .findList();
     }
 
     public static Note findByName(String name) {
@@ -94,6 +94,17 @@ public class Note extends Model implements Comparable<Note> {
             Logger.error("Too many notes named: " + name);
         }
         return null;
+    }
+
+    public static List<Note> appList(int tech_id) {
+        List<Note> items = find.where().eq("disabled", false).findList();
+        List<Note> result = new ArrayList<Note>();
+        for (Note item : items) {
+            if (item.created_by == 0 || item.created_by == tech_id) {
+                result.add(item);
+            }
+        }
+        return result;
     }
 
     public List<Project> getProjects() {
@@ -132,17 +143,28 @@ public class Note extends Model implements Comparable<Note> {
         return false;
     }
 
-    @Override
-    public int compareTo(Note item) {
-        return name.compareTo(item.name);
-    }
-
     public static Map<String,String> options() {
         LinkedHashMap<String,String> options = new LinkedHashMap<String,String>();
         for(Type t: Type.values()) {
             options.put(t.toString(), t.display);
         }
         return options;
+    }
+
+    @Override
+    public int compareTo(Note item) {
+        return name.compareTo(item.name);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Note) {
+            return name.equals(((Note) other).name);
+        }
+        if (other instanceof Long) {
+            return id == ((Long) other);
+        }
+        return super.equals(other);
     }
 }
 

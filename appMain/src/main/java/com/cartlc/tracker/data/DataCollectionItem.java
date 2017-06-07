@@ -5,11 +5,11 @@ package com.cartlc.tracker.data;
  */
 
 public class DataCollectionItem {
-    public long id; // row_id
-    public long collection_id; // project_id or collection_id
-    public long value_id;
-    public int  server_id;
-    public boolean isTest;
+    public long    id; // row_id
+    public long    collection_id; // project_id or collection_id
+    public long    value_id;
+    public int     server_id;
+    public boolean isBootStrap;
 
     @Override
     public boolean equals(Object obj) {

@@ -25,23 +25,26 @@ create table company (
   city              varchar(128),
   state             varchar(64),
   zipcode           varchar(64),
-  disabled          bit default 0,
-  is_local          bit default 0
+  created_by        int default 0,
+  disabled          bit default 0
 );
+
+alter table company add constraint c_c_tech_id foreign key (created_by) references client (id) on delete restrict on update restrict;
 
 create table project (
   id                int auto_increment primary key,
   name              varchar(64),
-  disabled          bit default 0,
-  is_local          bit default 0
+  disabled          bit default 0
 );
 
 create table equipment (
   id                int auto_increment primary key,
   name              varchar(128),
+  created_by        int default 0,
   disabled          bit default 0,
-  is_local          bit default 0
 );
+
+alter table equipment add constraint c_e_tech_id foreign key (created_by) references client (id) on delete restrict on update restrict;
 
 create table project_equipment_collection (
   id                int auto_increment primary key,
@@ -56,10 +59,12 @@ create table note (
   id                int auto_increment primary key,
   name              varchar(128),
   type              smallint,
-  disabled          bit default 0,
-  is_local          bit default 0
+  created_by        int default 0,
+  disabled          bit default 0
 );
-#
+
+alter table note add constraint c_n_tech_id foreign key (created_by) references client (id) on delete restrict on update restrict;
+
 create table project_note_collection (
   id                int auto_increment primary key,
   project_id        int,
@@ -107,9 +112,6 @@ create table entry (
 alter table entry add constraint c_e_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 alter table entry add constraint c_e_entry_address_id foreign key (address_id) references company (id) on delete restrict on update restrict;
 alter table entry add constraint c_e_tech_id foreign key (tech_id) references client (id) on delete restrict on update restrict;
-# alter table entry add constraint c_e_equip_collection_id foreign key (equipment_collection_id) references entry_equipment_collection (collection_id) on delete restrict on update restrict;
-# alter table entry add constraint c_e_note_collection_id foreign key (note_collection_id) references entry_note_collection (collection_id) on delete restrict on update restrict;
-# alter table entry add constraint c_e_picture_collection_id foreign key (picture_collection_id) references picture_collection (collection_id) on delete restrict on update restrict;
 
 # --- !Downs
 
@@ -125,4 +127,3 @@ drop table if exists equipment;
 drop table if exists note;
 drop table if exists company;
 drop table if exists project;
-

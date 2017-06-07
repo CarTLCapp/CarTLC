@@ -16,14 +16,19 @@ public class DataAddress {
     public String  zipcode;
     public boolean disabled;
     public boolean isLocal;
-    public boolean isTest;
+    public boolean isBootStrap;
+
+    public DataAddress(String company) {
+        this.company = company;
+        this.isBootStrap = true;
+    }
 
     public DataAddress(String company, String street, String city, String state) {
         this.company = company;
         this.street = street;
         this.city = city;
         this.state = state;
-        this.isTest = true;
+        this.isBootStrap = true;
     }
 
     public DataAddress(String company, String street, String city, String state, String zipcode) {

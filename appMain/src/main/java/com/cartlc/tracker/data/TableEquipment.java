@@ -3,7 +3,6 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.ContactsContract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ public class TableEquipment {
     static final String KEY_SERVER_ID = "server_id";
     static final String KEY_CHECKED   = "is_checked";
     static final String KEY_LOCAL     = "is_local";
-    static final String KEY_IS_TEST   = "is_test";
+    static final String KEY_IS_BOOT   = "is_boot_strap";
 
     static TableEquipment sInstance;
 
@@ -69,7 +68,7 @@ public class TableEquipment {
         sbuf.append(" bit, ");
         sbuf.append(KEY_LOCAL);
         sbuf.append(" bit, ");
-        sbuf.append(KEY_IS_TEST);
+        sbuf.append(KEY_IS_BOOT);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
@@ -105,7 +104,7 @@ public class TableEquipment {
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, name);
-            values.put(KEY_IS_TEST, 1);
+            values.put(KEY_IS_BOOT, 1);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -143,7 +142,7 @@ public class TableEquipment {
                 values.put(KEY_CHECKED, value.isChecked ? 1 : 0);
                 values.put(KEY_LOCAL, value.isLocal ? 1 : 0);
                 values.put(KEY_SERVER_ID, value.server_id);
-                values.put(KEY_IS_TEST, value.isTest);
+                values.put(KEY_IS_BOOT, value.isBootStrap);
                 value.id = mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -163,7 +162,7 @@ public class TableEquipment {
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
             values.put(KEY_LOCAL, item.isLocal ? 1 : 0);
             values.put(KEY_SERVER_ID, item.server_id);
-            values.put(KEY_IS_TEST, item.isTest);
+            values.put(KEY_IS_BOOT, item.isBootStrap);
             item.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -199,14 +198,14 @@ public class TableEquipment {
 
     List<DataEquipment> query(String selection, String[] selectionArgs) {
         ArrayList<DataEquipment> list = new ArrayList();
-        final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_CHECKED, KEY_LOCAL, KEY_IS_TEST};
+        final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_CHECKED, KEY_LOCAL, KEY_IS_BOOT};
         Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
         final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
         final int idxName = cursor.getColumnIndex(KEY_NAME);
         final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
         final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
         final int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
-        final int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
+        final int idxTest = cursor.getColumnIndex(KEY_IS_BOOT);
         DataEquipment item;
         while (cursor.moveToNext()) {
             item = new DataEquipment(
@@ -215,7 +214,7 @@ public class TableEquipment {
                     cursor.getShort(idxChecked) != 0,
                     cursor.getShort(idxLocal) != 0);
             item.server_id = cursor.getInt(idxServerId);
-            item.isTest = cursor.getShort(idxTest) != 0;
+            item.isBootStrap = cursor.getShort(idxTest) != 0;
             list.add(item);
         }
         cursor.close();
@@ -291,7 +290,7 @@ public class TableEquipment {
             values.put(KEY_NAME, item.name);
             values.put(KEY_LOCAL, item.isLocal ? 1 : 0);
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
-            values.put(KEY_IS_TEST, item.isTest ? 1 : 0);
+            values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
             values.put(KEY_SERVER_ID, item.server_id);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(item.id)};
@@ -313,7 +312,7 @@ public class TableEquipment {
     public void removeTest() {
         mDb.beginTransaction();
         try {
-            String where = KEY_IS_TEST + "=1";
+            String where = KEY_IS_BOOT + "=1";
             List<DataEquipment> list = query(where, null);
             for (DataEquipment item : list) {
                 if (TableEntry.getInstance().countEquipments(item.id) == 0) {

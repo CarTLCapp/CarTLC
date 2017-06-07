@@ -174,11 +174,10 @@ public class DCService extends IntentService {
                 Timber.e("queryProjects(): Unexpected NULL response from server");
                 return;
             }
-            TableProjects.getInstance().removeTest();
-            TableCollectionEquipmentProject.getInstance().removeTest();
-            TableCollectionNoteProject.getInstance().removeTest();
+            TableProjects.getInstance().removeBootStrap();
+            TableCollectionEquipmentProject.getInstance().removeBootStrap();
+            TableCollectionNoteProject.getInstance().removeBootStrap();
             List<String> unprocessed = TableProjects.getInstance().query();
-
             JSONObject object = parseResult(response);
             JSONArray array = object.getJSONArray("projects");
             for (int i = 0; i < array.length(); i++) {
@@ -191,6 +190,7 @@ public class DCService extends IntentService {
                         // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                         DataProject existing = TableProjects.getInstance().queryByName(name);
                         existing.server_id = server_id;
+                        existing.isBootStrap = false;
                         TableProjects.getInstance().update(existing);
                         Timber.i("Commandeer local: " + name);
                     } else {
@@ -230,13 +230,11 @@ public class DCService extends IntentService {
                 Timber.e("queryCompanies(): Unexpected NULL response from server");
                 return;
             }
-            TableAddress.getInstance().removeTest();
+            TableAddress.getInstance().removeBootStrap();
             List<DataAddress> unprocessed = TableAddress.getInstance().query();
-
             JSONObject object = parseResult(response);
             JSONArray array = object.getJSONArray("companies");
             String name, street, city, state, zipcode;
-
             for (int i = 0; i < array.length(); i++) {
                 JSONObject ele = array.getJSONObject(i);
                 int server_id = ele.getInt("id");
@@ -269,6 +267,7 @@ public class DCService extends IntentService {
                         // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                         match.server_id = server_id;
                         match.isLocal = false;
+                        match.isBootStrap = false;
                         TableAddress.getInstance().update(match);
                         Timber.i("Commandeer local: " + match.toString());
                         unprocessed.remove(match);
@@ -317,7 +316,7 @@ public class DCService extends IntentService {
                 return;
             }
             TableEquipment.getInstance().removeTest();
-            TableCollectionEquipmentProject.getInstance().removeTest();
+            TableCollectionEquipmentProject.getInstance().removeBootStrap();
             JSONObject object = parseResult(response);
             {
                 List<DataEquipment> unprocessed = TableEquipment.getInstance().query();
@@ -331,8 +330,10 @@ public class DCService extends IntentService {
                     if (item == null) {
                         DataEquipment match = get(unprocessed, incoming);
                         if (match != null) {
-                            // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
+                            // If this name already exists, convert the existing one by simply giving it the server_id.
                             match.server_id = server_id;
+                            match.isBootStrap = false;
+                            match.isLocal = false;
                             TableEquipment.getInstance().update(match);
                             Timber.i("Commandeer local: " + name);
                             unprocessed.remove(match);
@@ -389,6 +390,7 @@ public class DCService extends IntentService {
                         if (match != null) {
                             // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                             match.server_id = server_id;
+                            match.isBootStrap = false;
                             TableCollectionEquipmentProject.getInstance().update(match);
                             Timber.i("Commandeer local: PROJECT COLLECTION " + match.collection_id + ", " + match.value_id);
                             unprocessed.remove(match);
@@ -440,7 +442,7 @@ public class DCService extends IntentService {
                 return;
             }
             TableNote.getInstance().removeTest();
-            TableCollectionNoteProject.getInstance().removeTest();
+            TableCollectionNoteProject.getInstance().removeBootStrap();
             JSONObject object = parseResult(response);
             {
                 List<DataNote> unprocessed = TableNote.getInstance().query();

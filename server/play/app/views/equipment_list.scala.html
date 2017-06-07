@@ -18,6 +18,7 @@
                     <th>Name</th>
                     <th>Projects</th>
                     <th>Edit</th>
+                    <th>Local</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,6 +37,9 @@
                         </td>
                         <td>
                             <a href="@routes.EquipmentController.edit(equipment.id)">Edit</a>
+                        </td>
+                        <td>
+                            @equipment.getCreatedBy()
                         </td>
                     </tr>
                 }

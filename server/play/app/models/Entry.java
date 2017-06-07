@@ -101,5 +101,28 @@ public class Entry extends com.avaje.ebean.Model {
     public List<EntryNoteCollection> getNotes() {
         return EntryNoteCollection.findByCollectionId(note_collection_id);
     }
+
+    static List<Entry> findByProjectId(long project_id) {
+        return find.where().eq("project_id", project_id).findList();
+    }
+
+    public static boolean hasEquipment(long project_id, long equipment_id) {
+        for (Entry entry : findByProjectId(project_id)) {
+            if (entry.hasEquipment(equipment_id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasEquipment(long equipment_id) {
+        List<Equipment> items = EntryEquipmentCollection.findEquipments(equipment_collection_id);
+        for (Equipment item : items) {
+            if (item.id == equipment_id) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 

@@ -61,5 +61,17 @@ public class Project extends Model implements Comparable<Project> {
         return name.compareTo(project.name);
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Project) {
+            return equals((Project) other);
+        }
+        return super.equals(other);
+    }
+
+    public boolean equals(Project other) {
+        return name.equals(other.name);
+    }
+
 }
 

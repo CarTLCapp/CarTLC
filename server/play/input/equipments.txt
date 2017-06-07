@@ -1,4 +1,4 @@
-Five Cubits
+Project: Five Cubits
 		OBC
 		RDT
 		VMX
@@ -10,13 +10,13 @@ Five Cubits
 		Repair Work
 		Uninstall
 		Other
-Digital Fleet
+Project: Digital Fleet
 		Tablet
 		Canbus
 		Repair Work
 		Uninstall
 		Other
-Smart Witness
+Project: Smart Witness
 		KP1S
 		CPI
 		SVC 1080
@@ -29,7 +29,7 @@ Smart Witness
 		Repair Work
 		Uninstall
 		Other
-Fed Ex
+Project: Fed Ex
 		KP1S
 		Driver Facing Camera
 		Modem
@@ -39,7 +39,7 @@ Fed Ex
 		Repair Work
 		Uninstall
 		Other
-Verifi
+Project: Verifi
 		V3 Full Install
 		V4 Full Install
 		Admix Tank
@@ -50,4 +50,6 @@ Verifi
 		Commissioning
 		Repair Work
 		Uninstall
+		Other
+Project: Other
 		Other

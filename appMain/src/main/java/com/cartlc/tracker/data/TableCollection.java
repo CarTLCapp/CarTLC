@@ -19,7 +19,7 @@ public abstract class TableCollection {
     static final String KEY_COLLECTION_ID = "collection_id";
     static final String KEY_VALUE_ID      = "value_id";
     static final String KEY_SERVER_ID     = "server_id";
-    static final String KEY_IS_TEST       = "is_test";
+    static final String KEY_IS_BOOT       = "is_boot_strap";
 
     final SQLiteDatabase mDb;
     final String         mTableName;
@@ -53,7 +53,7 @@ public abstract class TableCollection {
         sbuf.append(" long, ");
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
-        sbuf.append(KEY_IS_TEST);
+        sbuf.append(KEY_IS_BOOT);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
@@ -100,7 +100,7 @@ public abstract class TableCollection {
                 values.clear();
                 values.put(KEY_COLLECTION_ID, collectionId);
                 values.put(KEY_VALUE_ID, id);
-                values.put(KEY_IS_TEST, 1);
+                values.put(KEY_IS_BOOT, 1);
                 mDb.insert(mTableName, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -135,7 +135,7 @@ public abstract class TableCollection {
             values.put(KEY_COLLECTION_ID, item.collection_id);
             values.put(KEY_VALUE_ID, item.value_id);
             values.put(KEY_SERVER_ID, item.server_id);
-            values.put(KEY_IS_TEST, item.isTest);
+            values.put(KEY_IS_BOOT, item.isBootStrap);
             item.id = mDb.insert(mTableName, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -153,7 +153,7 @@ public abstract class TableCollection {
             values.put(KEY_COLLECTION_ID, item.collection_id);
             values.put(KEY_VALUE_ID, item.value_id);
             values.put(KEY_SERVER_ID, item.server_id);
-            values.put(KEY_IS_TEST, item.isTest);
+            values.put(KEY_IS_BOOT, item.isBootStrap);
             String where = KEY_ROWID + "=?";
             String [] whereArgs = { Long.toString(item.id) };
             mDb.update(mTableName, values, where, whereArgs);
@@ -188,20 +188,20 @@ public abstract class TableCollection {
         List<DataCollectionItem> items = new ArrayList();
         mDb.beginTransaction();
         try {
-            final String[] columns = {KEY_ROWID, KEY_COLLECTION_ID, KEY_VALUE_ID, KEY_SERVER_ID, KEY_IS_TEST};
+            final String[] columns = {KEY_ROWID, KEY_COLLECTION_ID, KEY_VALUE_ID, KEY_SERVER_ID, KEY_IS_BOOT};
             Cursor cursor = mDb.query(mTableName, columns, null, null, null, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_VALUE_ID);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxCollectionId = cursor.getColumnIndex(KEY_COLLECTION_ID);
-            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
+            int idxTest = cursor.getColumnIndex(KEY_IS_BOOT);
             while (cursor.moveToNext()) {
                 DataCollectionItem item = new DataCollectionItem();
                 item.id = cursor.getLong(idxRowId);
                 item.collection_id = cursor.getLong(idxCollectionId);
                 item.value_id = cursor.getLong(idxValue);
                 item.server_id = cursor.getInt(idxServerId);
-                item.isTest = cursor.getShort(idxTest) != 0;
+                item.isBootStrap = cursor.getShort(idxTest) != 0;
                 items.add(item);
             }
             cursor.close();
@@ -218,21 +218,21 @@ public abstract class TableCollection {
         DataCollectionItem item = null;
         mDb.beginTransaction();
         try {
-            final String[] columns = {KEY_ROWID, KEY_COLLECTION_ID, KEY_VALUE_ID};
+            final String[] columns = {KEY_ROWID, KEY_COLLECTION_ID, KEY_VALUE_ID, KEY_IS_BOOT};
             String selection = KEY_SERVER_ID + "=?";
             String selectionArgs [] = { Integer.toString(server_id) };
             Cursor cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_VALUE_ID);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxCollectionId = cursor.getColumnIndex(KEY_COLLECTION_ID);
-            int idxTest = cursor.getColumnIndex(KEY_IS_TEST);
+            int idxTest = cursor.getColumnIndex(KEY_IS_BOOT);
             if (cursor.moveToFirst()) {
                 item = new DataCollectionItem();
                 item.id = cursor.getLong(idxRowId);
                 item.collection_id = cursor.getLong(idxCollectionId);
                 item.value_id = cursor.getLong(idxValue);
                 item.server_id = server_id;
-                item.isTest = cursor.getShort(idxTest) != 0;
+                item.isBootStrap = cursor.getShort(idxTest) != 0;
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -243,9 +243,9 @@ public abstract class TableCollection {
         return item;
     }
 
-    public void removeTest() {
+    public void removeBootStrap() {
         try {
-            String where = KEY_IS_TEST + "=1";
+            String where = KEY_IS_BOOT + "=1";
             mDb.delete(mTableName, where, null);
         } catch (Exception ex) {
             Timber.e(ex);

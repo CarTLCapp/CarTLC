@@ -9,6 +9,7 @@ import play.Logger;
 
 import models.*;
 
+import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
@@ -119,45 +120,51 @@ public class NoteController extends Controller {
         if (linesForm.hasErrors()) {
             return badRequest(views.html.notes_createForm.render(linesForm));
         }
+        final String PROJECT = "Project:";
         String[] lines = linesForm.get().getLines();
         Project activeProject = null;
         for (String name : lines) {
             name = name.trim();
             if (!name.isEmpty()) {
-                Project project = Project.findByName(name);
-                if (project != null) {
-                    activeProject = project;
-                } else {
-                    Note.Type type = null;
-                    int pos = name.indexOf(':');
-                    if (pos >= 0) {
-                        String typeStr = name.substring(pos+1).trim();
-                        name = name.substring(0, pos).trim();
-                        type = Note.Type.from(typeStr);
-                    }
-                    Note note = Note.findByName(name);
-                    if (note == null) {
-                        if (type == null) {
-                            type = Note.Type.TEXT;
-                        }
-                        note = new Note();
-                        note.name = name;
-                        note.type = type;
-                        note.save();
-                    } else if (type != null) {
-                        note.type = type;
-                        note.save();
-                    }
-                    if (activeProject != null) {
-                        ProjectNoteCollection collection = new ProjectNoteCollection();
-                        collection.project_id = activeProject.id;
-                        collection.note_id = note.id;
-
-                        if (!ProjectNoteCollection.has(collection)) {
-                            collection.save();
-                        }
+                if (name.startsWith(PROJECT)) {
+                    Project project = Project.findByName(name.substring(PROJECT.length()).trim());
+                    if (project != null) {
+                        activeProject = project;
+                        continue;
                     }
                 }
+                if (activeProject == null) {
+                    return badRequest("First line must indicate valid project");
+                }
+                Note.Type type = null;
+                int pos = name.indexOf(':');
+                if (pos >= 0) {
+                    String typeStr = name.substring(pos+1).trim();
+                    name = name.substring(0, pos).trim();
+                    type = Note.Type.from(typeStr);
+                }
+                Note note = Note.findByName(name);
+                if (note == null) {
+                    if (type == null) {
+                        type = Note.Type.TEXT;
+                    }
+                    note = new Note();
+                    note.name = name;
+                    note.type = type;
+                    note.save();
+                } else if (type != null) {
+                    note.type = type;
+                    note.save();
+                }
+                if (activeProject != null) {
+                    ProjectNoteCollection collection = new ProjectNoteCollection();
+                    collection.project_id = activeProject.id;
+                    collection.note_id = note.id;
+                    if (!ProjectNoteCollection.has(collection)) {
+                        collection.save();
+                    }
+                }
+
             }
         }
         Version.inc(Version.VERSION_NOTE);
@@ -201,23 +208,27 @@ public class NoteController extends Controller {
         return edit(id);
     }
 
-    public Result query() {
+    public Result query(int tech_id) {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("notes");
-        for (Note item : Note.find.all()) {
-            if (!item.disabled) {
-                ObjectNode node = array.addObject();
-                node.put("id", item.id);
-                node.put("name", item.name);
-                node.put("type", item.type.toString());
+        List<Note> notes = Note.appList(tech_id);
+        for (Note item : notes) {
+            ObjectNode node = array.addObject();
+            node.put("id", item.id);
+            node.put("name", item.name);
+            node.put("type", item.type.toString());
+            if (item.created_by != 0) {
+                node.put("is_local", true);
             }
         }
         array = top.putArray("project_note");
         for (ProjectNoteCollection item : ProjectNoteCollection.find.all()) {
-            ObjectNode node = array.addObject();
-            node.put("id", item.id);
-            node.put("project_id", item.project_id);
-            node.put("note_id", item.note_id);
+            if (notes.contains(item.note_id)) {
+                ObjectNode node = array.addObject();
+                node.put("id", item.id);
+                node.put("project_id", item.project_id);
+                node.put("note_id", item.note_id);
+            }
         }
         return ok(top);
     }

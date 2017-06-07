@@ -10,5 +10,5 @@ public class DataProject {
     public int     server_id;
     public String  name;
     public boolean disabled;
-    public boolean isTest;
+    public boolean isBootStrap;
 }
