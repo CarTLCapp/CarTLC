@@ -649,9 +649,9 @@ public class DCService extends IntentService {
 
     String post(String target) {
         try {
-            String deviceId = ServerHelper.getInstance().getDeviceId();
             JSONObject jsonObject = new JSONObject();
-            jsonObject.accumulate("device_id", deviceId);
+            jsonObject.accumulate("device_id", ServerHelper.getInstance().getDeviceId());
+            jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
             return post(target, jsonObject);
         } catch (Exception ex) {
             Timber.e(ex);

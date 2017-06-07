@@ -15,6 +15,7 @@ import play.db.ebean.Transactional;
 import play.libs.Json;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Manage a database of equipment.
@@ -190,7 +191,13 @@ public class EquipmentController extends Controller {
         return edit(id);
     }
 
-    public Result query(int tech_id) {
+    public Result query() {
+        JsonNode json = request().body().asJson();
+        JsonNode value = json.findValue("tech_id");
+        if (value == null) {
+            return badRequest("missing field: tech_id");
+        }
+        int tech_id = value.intValue();
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("equipments");
         List<Equipment> equipments = Equipment.appList(tech_id);
@@ -213,7 +220,5 @@ public class EquipmentController extends Controller {
         }
         return ok(top);
     }
-
-
 }
 

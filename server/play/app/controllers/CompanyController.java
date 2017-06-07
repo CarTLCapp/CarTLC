@@ -16,6 +16,8 @@ import play.db.ebean.Transactional;
 import play.libs.Json;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * Manage a database of companies and their addresses.
  */
@@ -122,7 +124,13 @@ public class CompanyController extends Controller {
         return list();
     }
 
-    public Result query(int tech_id) {
+    public Result query() {
+        JsonNode json = request().body().asJson();
+        JsonNode value = json.findValue("tech_id");
+        if (value == null) {
+            return badRequest("missing field: tech_id");
+        }
+        int tech_id = value.intValue();
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("companies");
         for (Company item : Company.appList(tech_id)) {
@@ -147,6 +155,5 @@ public class CompanyController extends Controller {
         }
         return ok(top);
     }
-
 }
 

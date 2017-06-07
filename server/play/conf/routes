@@ -126,9 +126,9 @@ GET     /assets/*file          controllers.Assets.at(path="/public", file)
 POST    /register              controllers.PostController.register()
 POST    /ping                  controllers.PostController.ping()
 POST    /projects              controllers.ProjectController.query()
-POST    /companies/:id         controllers.CompanyController.query(id:Integer)
-POST    /equipments/:id        controllers.EquipmentController.query(id:Integer)
-POST    /notes/:id             controllers.NoteController.query(id:Integer)
+POST    /companies             controllers.CompanyController.query()
+POST    /equipments            controllers.EquipmentController.query()
+POST    /notes                 controllers.NoteController.query()
 POST    /enter                 controllers.EntryController.enter()
 
 
