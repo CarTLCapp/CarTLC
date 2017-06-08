@@ -69,6 +69,8 @@ public class Company extends Model {
         for (Company item : items) {
             if (item.created_by == 0 || item.created_by == tech_id) {
                 result.add(item);
+            } else if (Entry.hasEntryForCompany(tech_id, item.id)) {
+                result.add(item);
             }
         }
         return result;

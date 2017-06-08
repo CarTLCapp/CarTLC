@@ -55,6 +55,8 @@ public class Equipment extends Model implements Comparable<Equipment> {
         for (Equipment item : items) {
             if (item.created_by == 0 || item.created_by == tech_id) {
                 result.add(item);
+            } else if (Entry.hasEntryForEquipment(tech_id, item.id)) {
+                result.add(item);
             }
         }
         return result;

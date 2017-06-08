@@ -102,6 +102,8 @@ public class Note extends Model implements Comparable<Note> {
         for (Note item : items) {
             if (item.created_by == 0 || item.created_by == tech_id) {
                 result.add(item);
+            } else if (Entry.hasEntryForNote(tech_id, item.id)) {
+                result.add(item);
             }
         }
         return result;
