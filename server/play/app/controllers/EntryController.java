@@ -136,8 +136,14 @@ public class EntryController extends Controller {
                 if (address.length() > 0) {
                     try {
                         Company company = Company.parse(address);
-                        company.created_by = entry.tech_id;
-                        company.save();
+                        Company existing = Company.has(company);
+                        if (existing != null) {
+                            company = existing;
+                        } else {
+                            company.created_by = entry.tech_id;
+                            company.save();
+                            Version.inc(Version.VERSION_COMPANY);
+                        }
                         entry.address_id = company.id;
                     } catch (Exception ex) {
                         return badRequest2("address: " + ex.getMessage());
@@ -168,10 +174,15 @@ public class EntryController extends Controller {
                             missing.add("equipment_id");
                             missing.add("equipment_name");
                         } else {
-                            Equipment equipment = new Equipment();
-                            equipment.name = subvalue.textValue();
-                            equipment.created_by = entry.tech_id;
-                            equipment.save();
+                            String name = subvalue.textValue();
+                            Equipment equipment = Equipment.findByName(name);
+                            if (equipment == null) {
+                                equipment = new Equipment();
+                                equipment.name = name;
+                                equipment.created_by = entry.tech_id;
+                                equipment.save();
+                                Version.inc(Version.VERSION_EQUIPMENT);
+                            }
                             collection.equipment_id = equipment.id;
                             newEquipmentCreated = true;
                         }

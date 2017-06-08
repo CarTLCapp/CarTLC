@@ -76,14 +76,18 @@ public class Company extends Model {
         return result;
     }
 
-    public static boolean has(Company company) {
-        return find.where()
+    public static Company has(Company company) {
+        List<Company> items = find.where()
                 .eq("name", company.name)
                 .eq("street", company.street)
                 .eq("city", company.city)
                 .eq("state", company.state)
                 .eq("zipcode", company.zipcode)
-                .findList().size() > 0;
+                .findList();
+        if (items.size() > 0) {
+            return items.get(0);
+        }
+        return null;
     }
 
     public static Company parse(String line) throws DataErrorException {
