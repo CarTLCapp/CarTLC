@@ -29,8 +29,6 @@ create table company (
   disabled          bit default 0
 );
 
-alter table company add constraint c_c_tech_id foreign key (created_by) references client (id) on delete restrict on update restrict;
-
 create table project (
   id                int auto_increment primary key,
   name              varchar(64),
@@ -43,8 +41,6 @@ create table equipment (
   created_by        int default 0,
   disabled          bit default 0
 );
-
-alter table equipment add constraint c_eq_tech_id foreign key (created_by) references client (id) on delete restrict on update restrict;
 
 create table project_equipment_collection (
   id                int auto_increment primary key,
@@ -62,8 +58,6 @@ create table note (
   created_by        int default 0,
   disabled          bit default 0
 );
-
-alter table note add constraint c_n_tech_id foreign key (created_by) references client (id) on delete restrict on update restrict;
 
 create table project_note_collection (
   id                int auto_increment primary key,

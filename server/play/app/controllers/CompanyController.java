@@ -104,6 +104,7 @@ public class CompanyController extends Controller {
                 if (!line.isEmpty()) {
                     Company company = Company.parse(line);
                     if (!Company.has(company)) {
+                        company.created_by = 0;
                         company.save();
                     }
                 }
