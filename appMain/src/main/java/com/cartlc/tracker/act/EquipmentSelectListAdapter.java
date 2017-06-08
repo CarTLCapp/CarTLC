@@ -20,6 +20,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Created by dug on 5/12/17.
@@ -72,9 +73,12 @@ public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSe
     public void onDataChanged() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
         if (curGroup != null) {
+            Timber.d("MYDEBUG: PROJECT-ID=" + curGroup.projectNameId);
             DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
             mItems = collection.getEquipment();
             notifyDataSetChanged();
+        } else {
+            Timber.d("MYDEBUG: NULL GROUP");
         }
     }
 

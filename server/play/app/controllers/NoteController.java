@@ -10,6 +10,7 @@ import play.Logger;
 import models.*;
 
 import java.util.List;
+import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
@@ -218,6 +219,7 @@ public class NoteController extends Controller {
         int tech_id = value.intValue();
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("notes");
+        ArrayList<Long> noteIds = new ArrayList<Long>();
         List<Note> notes = Note.appList(tech_id);
         for (Note item : notes) {
             ObjectNode node = array.addObject();
@@ -227,10 +229,11 @@ public class NoteController extends Controller {
             if (item.created_by != 0) {
                 node.put("is_local", true);
             }
+            noteIds.add(item.id);
         }
         array = top.putArray("project_note");
         for (ProjectNoteCollection item : ProjectNoteCollection.find.all()) {
-            if (notes.contains(item.note_id)) {
+            if (noteIds.contains(item.note_id)) {
                 ObjectNode node = array.addObject();
                 node.put("id", item.id);
                 node.put("project_id", item.project_id);

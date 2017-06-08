@@ -279,10 +279,12 @@ public class PrefHelper extends PrefHelperBase {
     public boolean saveProjectAndAddressCombo() {
         String project = getProjectName();
         if (TextUtils.isEmpty((project))) {
+            Timber.i("saveProjectAndAddressCombo(): quit on empty project");
             return false;
         }
         String company = getCompany();
         if (TextUtils.isEmpty(company)) {
+            Timber.i("saveProjectAndAddressCombo(): quit on empty company");
             return false;
         }
         String state = getState();
@@ -295,6 +297,9 @@ public class PrefHelper extends PrefHelperBase {
             DataAddress address = new DataAddress(company, street, city, state, zipcode);
             address.isLocal = true;
             addressId = TableAddress.getInstance().add(address);
+            if (addressId < 0) {
+                Timber.i("saveProjectAndAddressCombo(): could not find address: " + address.toString());
+            }
         }
         long projectNameId = TableProjects.getInstance().queryProjectName(project);
         if (addressId >= 0 && projectNameId >= 0) {
@@ -307,6 +312,7 @@ public class PrefHelper extends PrefHelperBase {
             setCurrentProjectGroupId(projectGroupId);
             return true;
         }
+        Timber.i("saveProjectAndAddressCombo(): could not find project: " + project);
         return false;
     }
 

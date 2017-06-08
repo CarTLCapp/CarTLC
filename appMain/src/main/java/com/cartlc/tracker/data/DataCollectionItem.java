@@ -23,4 +23,16 @@ public class DataCollectionItem {
         return collection_id == other.collection_id &&
                 value_id == other.value_id;
     }
+
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("[");
+        sbuf.append(collection_id);
+        sbuf.append(",");
+        sbuf.append(value_id);
+        sbuf.append(",");
+        sbuf.append(server_id);
+        sbuf.append("]");
+        return sbuf.toString();
+    }
 }

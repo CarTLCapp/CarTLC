@@ -9,6 +9,7 @@ import play.Logger;
 
 import models.*;
 import java.util.List;
+import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
@@ -201,6 +202,7 @@ public class EquipmentController extends Controller {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("equipments");
         List<Equipment> equipments = Equipment.appList(tech_id);
+        List<Long> equipmentIds = new ArrayList<Long>();
         for (Equipment item : equipments) {
             ObjectNode node = array.addObject();
             node.put("id", item.id);
@@ -208,10 +210,11 @@ public class EquipmentController extends Controller {
             if (item.created_by != 0) {
                 node.put("is_local", true);
             }
+            equipmentIds.add(item.id);
         }
         array = top.putArray("project_equipment");
         for (ProjectEquipmentCollection item : ProjectEquipmentCollection.find.all()) {
-            if (equipments.contains(item.equipment_id)) {
+            if (equipmentIds.contains(item.equipment_id)) {
                 ObjectNode node = array.addObject();
                 node.put("id", item.id);
                 node.put("project_id", item.project_id);
