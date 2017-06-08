@@ -103,7 +103,7 @@ public class CompanyController extends Controller {
                 line = line.trim();
                 if (!line.isEmpty()) {
                     Company company = Company.parse(line);
-                    if (Company.has(company) != null) {
+                    if (Company.has(company) == null) {
                         company.created_by = 0;
                         company.save();
                     }
