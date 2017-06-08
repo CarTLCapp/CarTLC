@@ -1,10 +1,12 @@
 package com.cartlc.tracker.data;
 
+import android.support.annotation.NonNull;
+
 /**
  * Created by dug on 5/12/17.
  */
 
-public class DataEquipment {
+public class DataEquipment implements Comparable<DataEquipment> {
     public       long    id;
     public final String  name;
     public       long    server_id;
@@ -43,6 +45,12 @@ public class DataEquipment {
             return equals((DataEquipment) obj);
         }
         return super.equals(obj);
+    }
+
+
+    @Override
+    public int compareTo(@NonNull DataEquipment o) {
+        return name.compareTo(o.name);
     }
 
     public boolean equals(DataEquipment item) {

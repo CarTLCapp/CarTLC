@@ -16,6 +16,7 @@ import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -73,12 +74,10 @@ public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSe
     public void onDataChanged() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
         if (curGroup != null) {
-            Timber.d("MYDEBUG: PROJECT-ID=" + curGroup.projectNameId);
             DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
             mItems = collection.getEquipment();
+            Collections.sort(mItems);
             notifyDataSetChanged();
-        } else {
-            Timber.d("MYDEBUG: NULL GROUP");
         }
     }
 

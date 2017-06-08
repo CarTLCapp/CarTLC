@@ -694,6 +694,7 @@ public class MainActivity extends AppCompatActivity {
                     mMainList.setAdapter(mEquipmentAdapter);
                     mEquipmentAdapter.onDataChanged();
                     mMainListFrame.setVisibility(View.VISIBLE);
+                    mNew.setVisibility(View.VISIBLE);
                 }
                 break;
             case NOTES:

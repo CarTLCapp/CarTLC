@@ -31,10 +31,6 @@ public class TableCollectionEquipmentProject extends TableCollection {
     public DataCollectionEquipmentProject queryForProject(long projectNameId) {
         DataCollectionEquipmentProject collection = new DataCollectionEquipmentProject(projectNameId);
         collection.equipmentListIds = query(projectNameId);
-        Timber.d("MYDEBUG: ID=" + projectNameId);
-        for (DataCollectionItem item : query()) {
-            Timber.d(item.toString());
-        }
         return collection;
     }
 

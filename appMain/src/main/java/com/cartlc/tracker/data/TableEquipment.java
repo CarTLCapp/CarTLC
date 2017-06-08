@@ -122,6 +122,7 @@ public class TableEquipment {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, name);
             values.put(KEY_LOCAL, 1);
+            values.put(KEY_CHECKED, 1);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
