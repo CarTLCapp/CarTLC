@@ -1,0 +1,2 @@
+
+ssh -i ~/.ssh/FleetTLC.pem ubuntu@ec2-13-58-198-91.us-east-2.compute.amazonaws.com
