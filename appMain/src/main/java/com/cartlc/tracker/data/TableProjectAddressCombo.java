@@ -97,6 +97,34 @@ public class TableProjectAddressCombo {
         return count;
     }
 
+    public int countAddress(long addressId) {
+        int count = 0;
+        try {
+            String selection = KEY_ADDRESS_ID + "=?";
+            String [] selectionArgs = new String[] { Long.toString(addressId) };
+            Cursor cursor = mDb.query(true, TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
+    public int countProjects(long projectId) {
+        int count = 0;
+        try {
+            String selection = KEY_PROJECT_ID + "=?";
+            String [] selectionArgs = new String[] { Long.toString(projectId) };
+            Cursor cursor = mDb.query(true, TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
     public List<DataProjectAddressCombo> query() {
         ArrayList<DataProjectAddressCombo> list = new ArrayList();
         try {

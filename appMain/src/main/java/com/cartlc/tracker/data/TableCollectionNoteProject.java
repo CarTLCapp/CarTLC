@@ -63,4 +63,13 @@ public class TableCollectionNoteProject extends TableCollection {
         }
         return list;
     }
+
+    public void removeIfGone(DataCollectionItem item) {
+        if (item.isBootStrap) {
+            if (TableNote.getInstance().query(item.value_id) == null) {
+                Timber.i("remove(" + item.id + ", " + item.toString() + ")");
+                remove(item.id);
+            }
+        }
+    }
 }

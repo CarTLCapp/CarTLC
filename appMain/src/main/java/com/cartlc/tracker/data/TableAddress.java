@@ -439,24 +439,24 @@ public class TableAddress {
     }
 
     public void removeOrDisable(DataAddress item) {
-        if (TableEntry.getInstance().countAddresses(item.id) == 0) {
-            remove(item.id);
-        } else {
-            item.disabled = true;
-            update(item);
-        }
-    }
-
-    public void removeBootStrap() {
-        String where = KEY_IS_BOOT + "=1";
-        List<DataAddress> list = query(where, null, null);
-        for (DataAddress item : list) {
-            if (TableEntry.getInstance().countAddresses(item.id) == 0) {
+        if (item.isBootStrap) {
+            if ((TableEntry.getInstance().countAddresses(item.id) == 0) && (TableProjectAddressCombo.getInstance().countAddress(item.id) == 0)) {
+                Timber.i("remove(" + item.id + ", " + item.toString() + ")");
                 remove(item.id);
             } else {
-                item.isLocal = true;
+                Timber.i("disable(" + item.id + ", " + item.toString() + ")");
+                item.disabled = true;
                 update(item);
             }
         }
+    }
+
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        for (DataAddress address : query()) {
+            sbuf.append(address.toString());
+            sbuf.append("\n");
+        }
+        return sbuf.toString();
     }
 }

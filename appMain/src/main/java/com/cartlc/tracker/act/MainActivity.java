@@ -648,10 +648,11 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case CURRENT_PROJECT:
-                PrefHelper.getInstance().saveProjectAndAddressCombo();
                 if (mCurStageEditing) {
                     PrefHelper.getInstance().clearCurProject();
                     mCurStageEditing = false;
+                } else {
+                    PrefHelper.getInstance().saveProjectAndAddressCombo();
                 }
                 if (!PrefHelper.getInstance().hasCurProject() || TableProjectAddressCombo.getInstance().count() == 0) {
                     computeCurStage();

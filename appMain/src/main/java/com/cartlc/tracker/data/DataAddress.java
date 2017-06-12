@@ -164,6 +164,8 @@ public class DataAddress {
         sbuf.append(")");
         sbuf.append(", S[");
         sbuf.append(server_id);
+        sbuf.append("], ID[");
+        sbuf.append(id);
         sbuf.append("]");
         return sbuf.toString();
     }

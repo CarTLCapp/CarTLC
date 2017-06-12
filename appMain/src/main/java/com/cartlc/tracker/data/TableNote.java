@@ -269,23 +269,13 @@ public class TableNote {
         mDb.delete(TABLE_NAME, where, whereArgs);
     }
 
-    public void removeTest() {
-        mDb.beginTransaction();
-        try {
-            String where = KEY_IS_BOOT + "=1";
-            List<DataNote> notes = query(where, null);
-            for (DataNote note : notes) {
-                if (TableEntry.getInstance().countNotes(note.id) == 0) {
-                    remove(note.id);
-                } else {
-                    // TODO: Update isLocal flag I guess.
-                }
+    public void removeIfUnused(DataNote note) {
+        if (note.isBootStrap) {
+            if (TableCollectionNoteEntry.getInstance().countNotes(note.id) == 0) {
+                Timber.i("remove(" + note.id + ", " + note.name + ")");
+                remove(note.id);
             }
-            mDb.setTransactionSuccessful();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        } finally {
-            mDb.endTransaction();
         }
     }
+
 }

@@ -59,4 +59,13 @@ public class TableCollectionEquipmentProject extends TableCollection {
         add(projectNameId, equipId);
     }
 
+    public void removeIfGone(DataCollectionItem item) {
+        if (item.isBootStrap) {
+            if (TableEquipment.getInstance().query(item.value_id) == null) {
+                Timber.i("remove(" + item.id + ", " + item.toString() + ")");
+                remove(item.id);
+            }
+        }
+    }
+
 }

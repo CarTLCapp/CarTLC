@@ -93,11 +93,12 @@ public class TableProjects {
     }
 
     public void removeBootStrap() {
-        try {
-            String where = KEY_IS_BOOT + "=1";
-            mDb.delete(TABLE_NAME, where, null);
-        } catch (Exception ex) {
-            Timber.e(ex);
+        String where = KEY_IS_BOOT + "=1";
+        List<DataProject> list = query(where, null);
+        for (DataProject item : list) {
+            if ((TableEntry.getInstance().countProjects(item.id) == 0) && (TableProjectAddressCombo.getInstance().countProjects(item.id) == 0)) {
+                remove(item.id);
+            }
         }
     }
 
@@ -258,23 +259,35 @@ public class TableProjects {
     public DataProject queryByServerId(int server_id) {
         final String selection = KEY_SERVER_ID + "=?";
         final String[] selectionArgs = {Integer.toString(server_id)};
-        return query(selection, selectionArgs);
+        List<DataProject> list = query(selection, selectionArgs);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
     }
 
     public DataProject queryById(long id) {
         final String selection = KEY_ROWID + "=?";
         final String[] selectionArgs = {Long.toString(id)};
-        return query(selection, selectionArgs);
+        List<DataProject> list = query(selection, selectionArgs);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
     }
 
     public DataProject queryByName(String name) {
         final String selection = KEY_NAME + "=?";
         final String[] selectionArgs = {name};
-        return query(selection, selectionArgs);
+        List<DataProject> list = query(selection, selectionArgs);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
     }
 
-    DataProject query(String selection, String [] selectionArgs) {
-        DataProject project = null;
+    List<DataProject> query(String selection, String [] selectionArgs) {
+        List<DataProject> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_DISABLED, KEY_IS_BOOT, };
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
@@ -283,19 +296,20 @@ public class TableProjects {
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
             int idxTest = cursor.getColumnIndex(KEY_IS_BOOT);
-            if (cursor.moveToFirst()) {
-                project = new DataProject();
+            while (cursor.moveToNext()) {
+                DataProject project = new DataProject();
                 project.name = cursor.getString(idxValue);
                 project.disabled = cursor.getShort(idxDisabled) != 0;
                 project.isBootStrap = cursor.getShort(idxTest) != 0;
                 project.server_id = cursor.getShort(idxServerId);
                 project.id = cursor.getLong(idxRowId);
+                list.add(project);
             }
             cursor.close();
         } catch (Exception ex) {
             Timber.e(ex);
         }
-        return project;
+        return list;
     }
 
     public long queryProjectName(String name) {
@@ -317,12 +331,16 @@ public class TableProjects {
     }
 
     public void removeOrDisable(DataProject project) {
-        if (TableEntry.getInstance().countProjects(project.id) == 0) {
-            // No entries for this, so just remove.
-            remove(project.id);
-        } else {
-            project.disabled = true;
-            update(project);
+        if (project.isBootStrap) {
+            if ((TableEntry.getInstance().countProjects(project.id) == 0) && (TableProjectAddressCombo.getInstance().countProjects(project.id) == 0)) {
+                // No entries for this, so just remove.
+                Timber.i("remove(" + project.id + ", " + project.name + ")");
+                remove(project.id);
+            } else {
+                Timber.i("disable(" + project.id + ", " + project.name + ")");
+                project.disabled = true;
+                update(project);
+            }
         }
     }
 }

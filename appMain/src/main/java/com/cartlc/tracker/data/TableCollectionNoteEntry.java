@@ -57,8 +57,18 @@ public class TableCollectionNoteEntry {
         mDb.execSQL(sbuf.toString());
     }
 
-    public void drop() {
-        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+    public int countNotes(long noteId) {
+        int count = 0;
+        try {
+            String where = KEY_NOTE_ID + "=?";
+            String [] whereArgs = new String [] { Long.toString(noteId) };
+            Cursor cursor = mDb.query(TABLE_NAME, null, where, whereArgs, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
     }
 
     public void store(long projectNameId, long collectionId) {

@@ -27,7 +27,7 @@ import java.io.File;
 
 public class TBApplication extends Application {
 
-    public static final Boolean DEVELOPMENT_SERVER = false;
+    public static final Boolean DEVELOPMENT_SERVER = true;
 
     public static final String OTHER = "Other";
 

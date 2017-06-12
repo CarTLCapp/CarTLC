@@ -177,9 +177,7 @@ public class DCService extends IntentService {
                 Timber.e("queryProjects(): Unexpected NULL response from server");
                 return;
             }
-            TableProjects.getInstance().removeBootStrap();
-            TableCollectionEquipmentProject.getInstance().removeBootStrap();
-            TableCollectionNoteProject.getInstance().removeBootStrap();
+
             List<String> unprocessed = TableProjects.getInstance().query();
             JSONObject object = parseResult(response);
             JSONArray array = object.getJSONArray("projects");
@@ -233,7 +231,6 @@ public class DCService extends IntentService {
                 Timber.e("queryCompanies(): Unexpected NULL response from server");
                 return;
             }
-            TableAddress.getInstance().removeBootStrap();
             List<DataAddress> unprocessed = TableAddress.getInstance().query();
             JSONObject object = parseResult(response);
             JSONArray array = object.getJSONArray("companies");
@@ -318,8 +315,6 @@ public class DCService extends IntentService {
                 Timber.e("queryEquipments(): Unexpected NULL response from server");
                 return;
             }
-            TableEquipment.getInstance().removeTest();
-            TableCollectionEquipmentProject.getInstance().removeBootStrap();
             JSONObject object = parseResult(response);
             {
                 List<DataEquipment> unprocessed = TableEquipment.getInstance().query();
@@ -361,7 +356,7 @@ public class DCService extends IntentService {
                 }
                 // Remaining unprocessed elements are disabled if they have entries.
                 for (DataEquipment item : unprocessed) {
-                    // TableEquipment.getInstance().removeOrDisable(item);
+                    TableEquipment.getInstance().removeOrDisable(item);
                 }
             }
             {
@@ -412,6 +407,9 @@ public class DCService extends IntentService {
                         }
                     }
                 }
+                for (DataCollectionItem item : unprocessed) {
+                    TableCollectionEquipmentProject.getInstance().removeIfGone(item);
+                }
             }
         } catch (Exception ex) {
             Timber.e(ex);
@@ -444,8 +442,6 @@ public class DCService extends IntentService {
                 Timber.e("queryNotes(): Unexpected NULL response from server");
                 return;
             }
-            TableNote.getInstance().removeTest();
-            TableCollectionNoteProject.getInstance().removeBootStrap();
             JSONObject object = parseResult(response);
             {
                 List<DataNote> unprocessed = TableNote.getInstance().query();
@@ -487,7 +483,7 @@ public class DCService extends IntentService {
                 }
                 // Remove or disable unprocessed elements
                 for (DataNote note : unprocessed) {
-                    // TODO
+                    TableNote.getInstance().removeIfUnused(note);
                 }
             }
             {
@@ -536,6 +532,9 @@ public class DCService extends IntentService {
                             TableCollectionNoteProject.getInstance().update(incoming);
                         }
                     }
+                }
+                for (DataCollectionItem item : unprocessed) {
+                    TableCollectionNoteProject.getInstance().removeIfGone(item);
                 }
             }
         } catch (Exception ex) {

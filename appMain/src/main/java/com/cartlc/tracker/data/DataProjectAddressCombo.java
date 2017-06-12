@@ -45,6 +45,7 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
             mAddress = TableAddress.getInstance().query(addressId);
             if (mAddress == null) {
                 Timber.e("Could not find address ID=" + addressId);
+                Timber.e("ADDRESSES=" + TableAddress.getInstance().toString());
             }
         }
         return mAddress;

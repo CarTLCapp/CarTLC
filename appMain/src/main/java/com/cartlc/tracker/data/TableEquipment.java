@@ -23,6 +23,7 @@ public class TableEquipment {
     static final String KEY_CHECKED   = "is_checked";
     static final String KEY_LOCAL     = "is_local";
     static final String KEY_IS_BOOT   = "is_boot_strap";
+    static final String KEY_DISABLED  = "disabled";
 
     static TableEquipment sInstance;
 
@@ -69,6 +70,8 @@ public class TableEquipment {
         sbuf.append(KEY_LOCAL);
         sbuf.append(" bit, ");
         sbuf.append(KEY_IS_BOOT);
+        sbuf.append(" bit, ");
+        sbuf.append(KEY_DISABLED);
         sbuf.append(" bit)");
         mDb.execSQL(sbuf.toString());
     }
@@ -143,7 +146,8 @@ public class TableEquipment {
                 values.put(KEY_CHECKED, value.isChecked ? 1 : 0);
                 values.put(KEY_LOCAL, value.isLocal ? 1 : 0);
                 values.put(KEY_SERVER_ID, value.server_id);
-                values.put(KEY_IS_BOOT, value.isBootStrap);
+                values.put(KEY_IS_BOOT, value.isBootStrap ? 1 : 0);
+                values.put(KEY_DISABLED, value.disabled ? 1 : 0);
                 value.id = mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -163,7 +167,8 @@ public class TableEquipment {
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
             values.put(KEY_LOCAL, item.isLocal ? 1 : 0);
             values.put(KEY_SERVER_ID, item.server_id);
-            values.put(KEY_IS_BOOT, item.isBootStrap);
+            values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
+            values.put(KEY_DISABLED, item.disabled ? 1 : 0);
             item.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -199,7 +204,7 @@ public class TableEquipment {
 
     List<DataEquipment> query(String selection, String[] selectionArgs) {
         ArrayList<DataEquipment> list = new ArrayList();
-        final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_CHECKED, KEY_LOCAL, KEY_IS_BOOT};
+        final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_CHECKED, KEY_LOCAL, KEY_IS_BOOT, KEY_DISABLED};
         Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
         final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
         final int idxName = cursor.getColumnIndex(KEY_NAME);
@@ -207,6 +212,7 @@ public class TableEquipment {
         final int idxChecked = cursor.getColumnIndex(KEY_CHECKED);
         final int idxLocal = cursor.getColumnIndex(KEY_LOCAL);
         final int idxTest = cursor.getColumnIndex(KEY_IS_BOOT);
+        final int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
         DataEquipment item;
         while (cursor.moveToNext()) {
             item = new DataEquipment(
@@ -216,6 +222,7 @@ public class TableEquipment {
                     cursor.getShort(idxLocal) != 0);
             item.server_id = cursor.getInt(idxServerId);
             item.isBootStrap = cursor.getShort(idxTest) != 0;
+            item.disabled = cursor.getShort(idxDisabled) != 0;
             list.add(item);
         }
         cursor.close();
@@ -292,6 +299,7 @@ public class TableEquipment {
             values.put(KEY_LOCAL, item.isLocal ? 1 : 0);
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
             values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
+            values.put(KEY_DISABLED, item.disabled ? 1 : 0);
             values.put(KEY_SERVER_ID, item.server_id);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(item.id)};
@@ -310,25 +318,18 @@ public class TableEquipment {
         mDb.delete(TABLE_NAME, where, whereArgs);
     }
 
-    public void removeTest() {
-        mDb.beginTransaction();
-        try {
-            String where = KEY_IS_BOOT + "=1";
-            List<DataEquipment> list = query(where, null);
-            for (DataEquipment item : list) {
-                if (TableEntry.getInstance().countEquipments(item.id) == 0) {
-                    remove(item.id);
-                } else {
-                    item.isLocal = true;
-                    update(item);
-                }
-            }
-            mDb.setTransactionSuccessful();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        } finally {
-            mDb.endTransaction();
-        }
 
+    public void removeOrDisable(DataEquipment equip) {
+        if (equip.isBootStrap) {
+            if (TableCollectionEquipmentEntry.getInstance().countValues(equip.id) == 0) {
+                Timber.i("remove(" + equip.id + ", " + equip.name + ")");
+                remove(equip.id);
+            } else {
+                Timber.i("disable(" + equip.id + ", " + equip.name + ")");
+                equip.disabled = true;
+                update(equip);
+            }
+        }
     }
+
 }

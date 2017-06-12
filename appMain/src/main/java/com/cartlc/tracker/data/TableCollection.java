@@ -70,6 +70,20 @@ public abstract class TableCollection {
         return count;
     }
 
+    public int countValues(long valueId) {
+        int count = 0;
+        try {
+            String where = KEY_VALUE_ID + "=?";
+            String [] whereArgs = new String [] { Long.toString(valueId) };
+            Cursor cursor = mDb.query(mTableName, null, where, whereArgs, null, null, null);
+            count = cursor.getCount();
+            cursor.close();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        return count;
+    }
+
     public void add(DataCollectionEquipment collection) {
         add(collection.id, collection.equipmentListIds);
     }
@@ -155,7 +169,7 @@ public abstract class TableCollection {
             values.put(KEY_SERVER_ID, item.server_id);
             values.put(KEY_IS_BOOT, item.isBootStrap);
             String where = KEY_ROWID + "=?";
-            String [] whereArgs = { Long.toString(item.id) };
+            String[] whereArgs = {Long.toString(item.id)};
             mDb.update(mTableName, values, where, whereArgs);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -164,7 +178,6 @@ public abstract class TableCollection {
             mDb.endTransaction();
         }
     }
-
 
     public List<Long> query(long collection_id) {
         List<Long> collection = new ArrayList();
@@ -220,7 +233,7 @@ public abstract class TableCollection {
         try {
             final String[] columns = {KEY_ROWID, KEY_COLLECTION_ID, KEY_VALUE_ID, KEY_IS_BOOT};
             String selection = KEY_SERVER_ID + "=?";
-            String selectionArgs [] = { Integer.toString(server_id) };
+            String selectionArgs[] = {Integer.toString(server_id)};
             Cursor cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_VALUE_ID);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
@@ -243,10 +256,11 @@ public abstract class TableCollection {
         return item;
     }
 
-    public void removeBootStrap() {
+    public void remove(long id) {
         try {
-            String where = KEY_IS_BOOT + "=1";
-            mDb.delete(mTableName, where, null);
+            String where = KEY_ROWID + "=?";
+            String[] whereArgs = new String[]{Long.toString(id)};
+            mDb.delete(mTableName, where, whereArgs);
         } catch (Exception ex) {
             Timber.e(ex);
         }

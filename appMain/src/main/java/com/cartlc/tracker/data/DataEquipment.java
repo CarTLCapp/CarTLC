@@ -13,6 +13,7 @@ public class DataEquipment implements Comparable<DataEquipment> {
     public       boolean isChecked;
     public       boolean isLocal;
     public       boolean isBootStrap;
+    public       boolean disabled;
 
     public DataEquipment(long id, String name, boolean isChecked, boolean isLocal) {
         this.id = id;
