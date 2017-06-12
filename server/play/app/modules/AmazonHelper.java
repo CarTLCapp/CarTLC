@@ -15,8 +15,6 @@ import com.amazonaws.services.s3.transfer.internal.S3ProgressListener;
 import com.amazonaws.services.s3.transfer.PersistableTransfer;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 
-import java.net.InetAddress;
-
 import play.Logger;
 import play.Configuration;
 
@@ -71,13 +69,6 @@ public class AmazonHelper {
     @Inject
     public AmazonHelper(Configuration configuration) {
         this.configuration = configuration;
-
-        try {
-            String hostname = InetAddress.getLocalHost().getHostName();
-            Logger.info("HOSTNAME=" + hostname);
-        } catch (Exception ex) {
-
-        }
     }
 
     public void download(String filename, OnDownloadComplete listener) throws DownloadException {

@@ -5,7 +5,6 @@ import com.avaje.ebean.Transaction;
 import play.mvc.*;
 import play.data.*;
 import static play.data.Form.*;
-import play.Logger;
 
 import models.*;
 
@@ -13,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
-import play.db.ebean.Transactional;
-import play.libs.Json;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,7 +22,9 @@ import java.util.Iterator;
 import modules.AmazonHelper;
 import modules.AmazonHelper.OnDownloadComplete;
 import java.io.File;
-
+import play.db.ebean.Transactional;
+import play.libs.Json;
+import play.Logger;
 /**
  * Manage a database of equipment.
  */
@@ -53,6 +53,8 @@ public class EntryController extends Controller {
      * Display the picture for an entry.
      */
     public Result pictures(Long entry_id) {
+        Logger.info("PATH=" + request().path());
+        Logger.info("URI=" + request().uri());
         Entry entry = Entry.find.byId(entry_id);
         if (entry == null) {
             return badRequest2("Could not find entry ID " + entry_id);
