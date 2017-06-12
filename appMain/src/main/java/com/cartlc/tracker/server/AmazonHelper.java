@@ -10,6 +10,7 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.TablePictureCollection;
@@ -37,7 +38,12 @@ public class AmazonHelper {
         }
     }
 
-    final static String BUCKET_NAME = "cartlc";
+    final static String BUCKET_NAME_DEVELOP      = "cartlc";
+    final static String BUCKET_NAME_RELEASE      = "fleettlc";
+    final static String BUCKET_NAME              = TBApplication.DEVELOPMENT_SERVER ? BUCKET_NAME_DEVELOP : BUCKET_NAME_RELEASE;
+    final static String IDENTITY_POOL_ID_DEVELOP = "us-east-2:38d2f2a2-9454-4472-9fec-9468f3700ba5";
+    final static String IDENTITY_POOL_ID_RELEASE = "us-east-2:389282dd-de71-4849-a68b-2b126b3de5f3";
+    final static String IDENTITY_POOL_ID = TBApplication.DEVELOPMENT_SERVER ? IDENTITY_POOL_ID_DEVELOP : IDENTITY_POOL_ID_RELEASE;
 
     CognitoCachingCredentialsProvider mCred;
     AmazonS3                          mClient;
@@ -53,8 +59,8 @@ public class AmazonHelper {
         if (mCred == null) {
             mCred = new CognitoCachingCredentialsProvider(
                     mCtx,
-                    "us-east-2:38d2f2a2-9454-4472-9fec-9468f3700ba5", // Identity Pool ID
-                    Regions.US_EAST_2 // Region
+                    IDENTITY_POOL_ID,
+                    Regions.US_EAST_2
             );
             mClient = new AmazonS3Client(mCred);
             mTrans = new TransferUtility(mClient, mCtx);
@@ -99,7 +105,6 @@ public class AmazonHelper {
 
             @Override
             public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-//                int percentage = (int) (bytesCurrent/bytesTotal * 100);
             }
 
             @Override
