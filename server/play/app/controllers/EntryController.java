@@ -53,8 +53,6 @@ public class EntryController extends Controller {
      * Display the picture for an entry.
      */
     public Result pictures(Long entry_id) {
-        Logger.info("PATH=" + request().path());
-        Logger.info("URI=" + request().uri());
         Entry entry = Entry.find.byId(entry_id);
         if (entry == null) {
             return badRequest2("Could not find entry ID " + entry_id);
@@ -64,7 +62,7 @@ public class EntryController extends Controller {
             File localFile = amazonHelper.getLocalFile(picture.picture);
             if (!localFile.exists()) {
                 try {
-                    amazonHelper.download(picture.picture, new OnDownloadComplete() {
+                    amazonHelper.download(request().host(), picture.picture, new OnDownloadComplete() {
                         public void onDownloadComplete(File file) {
                             Logger.info("COMPLETED: " + file.getAbsolutePath());
                         }

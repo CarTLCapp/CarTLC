@@ -21,7 +21,8 @@ import play.Configuration;
 @Singleton
 public class AmazonHelper {
 
-    static final String BUCKET_NAME = "cartlc";
+    static final String BUCKET_NAME_DEVELOP = "cartlc";
+    static final String BUCKET_NAME_RELEASE = "fleettlc";
 
     public class DownloadException extends Exception {
         DownloadException(String msg) {
@@ -37,19 +38,27 @@ public class AmazonHelper {
         final String key;
         final OnDownloadComplete listener;
         final File targetFile;
+        final String host;
         Download download;
 
-        DownloadActivity(String filename, OnDownloadComplete listener) {
+        DownloadActivity(String host, String filename, OnDownloadComplete listener) {
             this.key = filename;
             this.listener = listener;
             this.targetFile = getLocalFile(filename);
+            this.host = host;
         }
 
         void run() throws DownloadException {
-            Logger.info("DOWNLOAD: KEY=" + key + " TARGET=" + targetFile.getAbsolutePath());
+            String bucketName;
+            if (host.startsWith("fleettlc")) {
+                bucketName = BUCKET_NAME_RELEASE;
+            } else {
+                bucketName = BUCKET_NAME_DEVELOP;
+            }
+            Logger.info("DOWNLOAD: BUCKET=" + bucketName + ", KEY=" + key + " TARGET=" + targetFile.getAbsolutePath());
             try {
                 TransferManager xferManager = TransferManagerBuilder.defaultTransferManager();
-                GetObjectRequest obj = new GetObjectRequest(BUCKET_NAME, key);
+                GetObjectRequest obj = new GetObjectRequest(bucketName, key);
                 download = xferManager.download(obj, targetFile, new S3SyncProgressListener() {
                     public void onPersistableTransfer(PersistableTransfer persistableTransfer) {
                         if (download.getState() == TransferState.Completed) {
@@ -71,8 +80,8 @@ public class AmazonHelper {
         this.configuration = configuration;
     }
 
-    public void download(String filename, OnDownloadComplete listener) throws DownloadException {
-        new DownloadActivity(filename, listener).run();
+    public void download(String host, String filename, OnDownloadComplete listener) throws DownloadException {
+        new DownloadActivity(host, filename, listener).run();
     }
 
     public File getLocalFile(String filename) {
