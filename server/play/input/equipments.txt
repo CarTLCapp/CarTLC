@@ -1,18 +1,30 @@
 Project: Five Cubits
+		Charging Converter
+		GDS Cup
 		OBC
+		OBC Bracket
 		RDT
 		VMX
-		6 pin Canbus
-		9 pin Canbus
-		Green Canbus
+		6 pin Canbus Cable
+		9 pin Canbus Cable
+		Green Canbus Cable
+		ODB II Canbus Cable
 		External Antenna
 		Internal Antenna
+		External Speaker
+		Microphone
 		Repair Work
+		Tablet
 		Uninstall
 		Other
 Project: Digital Fleet
+		Antenna
 		Tablet
+		Modem
+		JBox
 		Canbus
+		Ram Mount/Cradle
+		Charging Converter
 		Repair Work
 		Uninstall
 		Other

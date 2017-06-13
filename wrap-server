@@ -8,11 +8,31 @@ WRAP=~/cartlc/wrap/$DATE
 FILE=`ls server/play/target/universal/*.zip`
 mkdir -p $WRAP
 cp $FILE $WRAP/
-
 COPY=`ls $WRAP/*.zip`
 
-ssh -i ~/.ssh/cartlc.pem ubuntu@cartlc.arqnetworks.com mkdir -p server/$DATE
-scp -i ~/.ssh/cartlc.pem $COPY ubuntu@cartlc.arqnetworks.com:/home/ubuntu/server/$DATE
+PEM="~/.ssh/cartlc.pem"
+SERVER="ubuntu@cartlc.arqnetworks.com"
+
+while [[ $# -gt 1 ]]
+do
+	key="$1"
+
+	case $key in
+		-r)
+			PEM="~/.ssh/FleetTLC.pem"
+			SERVER="ubuntu@ec2-13-58-198-91.us-east-2.compute.amazonaws.com"
+    		shift
+    	;;
+		*)
+			print "Unknown opton: $key"
+			exit 1;
+            # unknown option
+		;;
+	esac
+done
+
+ssh -i $PEM $SERVER mkdir -p server/$DATE
+scp -i $PEM $COPY $SERVER:/home/ubuntu/server/$DATE
 
 echo "UPLOAD COMPLETE."
 echo "Now on the server do this:"
