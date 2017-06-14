@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_AUTO_RETURN:
-                    doNext();
+                    doAutoNext();
                     break;
                 case MSG_REFRESH_PROJECTS:
                     mProjectAdapter.onDataChanged();
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.main_list_frame)    FrameLayout          mMainListFrame;
     @BindView(R.id.next)               Button               mNext;
     @BindView(R.id.prev)               Button               mPrev;
-    @BindView(R.id.new_entry)          Button               mNew;
+    @BindView(R.id.new_entry)          Button               mCenter;
     @BindView(R.id.setup_title)        TextView             mTitle;
     @BindView(R.id.fab_add)            FloatingActionButton mAdd;
     @BindView(R.id.frame_confirmation) FrameLayout          mConfirmationFrameView;
@@ -195,25 +195,25 @@ public class MainActivity extends AppCompatActivity {
         mNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doNext();
+                doBtnNext();
             }
         });
         mPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doPrev();
+                doBtnPrev();
             }
         });
-        mNew.setOnClickListener(new View.OnClickListener() {
+        mCenter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doNewEntry();
+                doBtnCenter();
             }
         });
         mAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                doNext();
+                doBtnNext();
             }
         });
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -249,17 +249,6 @@ public class MainActivity extends AppCompatActivity {
         fillStage();
         EventBus.getDefault().register(this);
         setTitle(getVersionedTitle());
-
-//        mApp.checkPermissions(this, new PermissionHelper.PermissionListener() {
-//            @Override
-//            public void onGranted(String permission) {
-//                mApp.ping();
-//            }
-//
-//            @Override
-//            public void onDenied(String permission) {
-//            }
-//        });
     }
 
     @Override
@@ -434,13 +423,21 @@ public class MainActivity extends AppCompatActivity {
 
     void skip() {
         if (mWasNext) {
-            doNext();
+            doBtnNext();
         } else {
-            doPrev();
+            doBtnPrev();
         }
     }
 
-    void doNext() {
+    void doAutoNext() {
+        if (mCurStage == Stage.LOGIN) {
+            doBtnCenter();
+        } else {
+            doBtnNext();
+        }
+    }
+
+    void doBtnNext() {
         if (save(true)) {
             doNext_();
         }
@@ -452,7 +449,7 @@ public class MainActivity extends AppCompatActivity {
         fillStage();
     }
 
-    void doPrev() {
+    void doBtnPrev() {
         save(false);
         doPrev_();
     }
@@ -470,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
         fillStage();
     }
 
-    void doNewEntry() {
+    void doBtnCenter() {
         mCurStageEditing = true;
         fillStage();
     }
@@ -489,8 +486,8 @@ public class MainActivity extends AppCompatActivity {
         mNext.setVisibility(View.INVISIBLE);
         mNext.setText(R.string.btn_next);
         mPrev.setVisibility(View.INVISIBLE);
-        mNew.setVisibility(View.INVISIBLE);
-        mNew.setText(R.string.btn_add);
+        mCenter.setVisibility(View.INVISIBLE);
+        mCenter.setText(R.string.btn_add);
         mPrev.setText(R.string.btn_prev);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         mConfirmationFrame.setVisibility(View.GONE);
@@ -502,26 +499,27 @@ public class MainActivity extends AppCompatActivity {
 
         switch (mCurStage) {
             case LOGIN:
-                mLoginFrame.setVisibility(View.VISIBLE);
-                mNext.setVisibility(View.VISIBLE);
-                mTitle.setText(R.string.title_login);
-                mFirstName.setText(PrefHelper.getInstance().getFirstName());
-                mLastName.setText(PrefHelper.getInstance().getLastName());
+                if (mCurStageEditing) {
+                    mCurStageEditing = false;
+                    save(true);
+                    mCurStage = Stage.CURRENT_PROJECT;
+                    fillStage();
+                } else {
+                    mLoginFrame.setVisibility(View.VISIBLE);
+                    mCenter.setVisibility(View.VISIBLE);
+                    mCenter.setText(R.string.title_login);
+                    mTitle.setText(R.string.title_login);
+                    mFirstName.setText(PrefHelper.getInstance().getFirstName());
+                    mLastName.setText(PrefHelper.getInstance().getLastName());
+                }
                 break;
             case PROJECT:
-                if (mCurStageEditing) {
-                    showError("No projects!");
-                } else {
-                    if (TableProjectAddressCombo.getInstance().count() > 0) {
-                        mPrev.setVisibility(View.VISIBLE);
-                    }
-                    mMainListFrame.setVisibility(View.VISIBLE);
-
-                    if (PrefHelper.getInstance().getProjectName() != null) {
-                        mNext.setVisibility(View.VISIBLE);
-                    }
-                    setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
+                mPrev.setVisibility(View.VISIBLE);
+                mMainListFrame.setVisibility(View.VISIBLE);
+                if (PrefHelper.getInstance().getProjectName() != null) {
+                    mNext.setVisibility(View.VISIBLE);
                 }
+                setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
                 break;
             case COMPANY:
                 mPrev.setVisibility(View.VISIBLE);
@@ -538,7 +536,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     mMainListFrame.setVisibility(View.VISIBLE);
-                    mNew.setVisibility(View.VISIBLE);
+                    mCenter.setVisibility(View.VISIBLE);
                     List<String> companies = TableAddress.getInstance().queryCompanies();
                     setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
                     checkEdit();
@@ -561,7 +559,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mMainListFrame.setVisibility(View.VISIBLE);
                     setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
-                    mNew.setVisibility(View.VISIBLE);
+                    mCenter.setVisibility(View.VISIBLE);
                     mNext.setVisibility(View.VISIBLE);
                 }
                 break;
@@ -588,7 +586,7 @@ public class MainActivity extends AppCompatActivity {
                         if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
                             mNext.setVisibility(View.VISIBLE);
                         }
-                        mNew.setVisibility(View.VISIBLE);
+                        mCenter.setVisibility(View.VISIBLE);
                     }
                 }
                 break;
@@ -614,7 +612,7 @@ public class MainActivity extends AppCompatActivity {
                         skip();
                     } else {
                         mMainListFrame.setVisibility(View.VISIBLE);
-                        mNew.setVisibility(View.VISIBLE);
+                        mCenter.setVisibility(View.VISIBLE);
                         if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
                             mNext.setVisibility(View.VISIBLE);
                         }
@@ -639,7 +637,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setText("");
                     mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 } else {
-                    mNew.setVisibility(View.VISIBLE);
+                    mCenter.setVisibility(View.VISIBLE);
                     mMainListFrame.setVisibility(View.VISIBLE);
                     if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
                         mNext.setVisibility(View.VISIBLE);
@@ -651,23 +649,18 @@ public class MainActivity extends AppCompatActivity {
                 if (mCurStageEditing) {
                     PrefHelper.getInstance().clearCurProject();
                     mCurStageEditing = false;
+                    mCurStage = Stage.PROJECT;
+                    fillStage();
                 } else {
                     PrefHelper.getInstance().saveProjectAndAddressCombo();
-                }
-                if (!PrefHelper.getInstance().hasCurProject() || TableProjectAddressCombo.getInstance().count() == 0) {
-                    computeCurStage();
-                }
-                if (mCurStage == Stage.CURRENT_PROJECT) {
                     mMainListFrame.setVisibility(View.VISIBLE);
-                    mNew.setVisibility(View.VISIBLE);
+                    mCenter.setVisibility(View.VISIBLE);
                     mAdd.setVisibility(View.VISIBLE);
                     mCurKey = null;
-                    mNew.setText(R.string.btn_new_project);
+                    mCenter.setText(R.string.btn_new_project);
                     mTitle.setText(R.string.title_current_project);
                     mMainList.setAdapter(mProjectAdapter);
                     mProjectAdapter.onDataChanged();
-                } else {
-                    fillStage();
                 }
                 break;
             case TRUCK_NUMBER:
@@ -689,13 +682,13 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setText("");
                 } else {
                     if (isNewEquipmentOkay()) {
-                        mNew.setVisibility(View.VISIBLE);
+                        mCenter.setVisibility(View.VISIBLE);
                     }
                     mTitle.setText(R.string.title_equipment_installed);
                     mMainList.setAdapter(mEquipmentAdapter);
                     mEquipmentAdapter.onDataChanged();
                     mMainListFrame.setVisibility(View.VISIBLE);
-                    mNew.setVisibility(View.VISIBLE);
+                    mCenter.setVisibility(View.VISIBLE);
                 }
                 break;
             case NOTES:
@@ -729,8 +722,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mNext.setVisibility(View.VISIBLE);
                     mNext.setText(R.string.btn_done);
-                    mNew.setVisibility(View.VISIBLE);
-                    mNew.setText(R.string.btn_another);
+                    mCenter.setVisibility(View.VISIBLE);
+                    mCenter.setText(R.string.btn_another);
                     mPictureFrame.setVisibility(View.VISIBLE);
                     mPictureList.setVisibility(View.VISIBLE);
                     mPictureAdapter.setList(
@@ -782,7 +775,7 @@ public class MainActivity extends AppCompatActivity {
         mTitle.setText(text);
 
         if (list.size() == 0) {
-            doNewEntry();
+            doBtnCenter();
         } else {
             mSimpleAdapter.setList(list);
             mMainList.setAdapter(mSimpleAdapter);
@@ -857,9 +850,9 @@ public class MainActivity extends AppCompatActivity {
     void checkEdit() {
         if (mCurStage == Stage.COMPANY) {
             if (isLocalCompany()) {
-                mNew.setText(R.string.btn_edit);
+                mCenter.setText(R.string.btn_edit);
             } else {
-                mNew.setText(R.string.btn_add);
+                mCenter.setText(R.string.btn_add);
             }
         }
     }
@@ -876,6 +869,10 @@ public class MainActivity extends AppCompatActivity {
             String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
             sbuf.append("v");
             sbuf.append(version);
+
+            if (PrefHelper.getInstance().isDevelopment()) {
+                sbuf.append("d");
+            }
         } catch (Exception e) {
             Timber.e(e);
         }

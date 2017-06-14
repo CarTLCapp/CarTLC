@@ -47,20 +47,34 @@ public class DCService extends IntentService {
     static final String SERVER_NAME            = "CarTLC.DataCollectionService";
     static final String SERVER_URL_DEVELOPMENT = "http://cartlc.arqnetworks.com/";
     static final String SERVER_URL_RELEASE     = "http://fleettlc.arqnetworks.com/";
-    static final String SERVER_URL             = TBApplication.DEVELOPMENT_SERVER ? SERVER_URL_DEVELOPMENT : SERVER_URL_RELEASE;
-    static final String REGISTER               = SERVER_URL + "register";
-    static final String ENTER                  = SERVER_URL + "enter";
-    static final String PING                   = SERVER_URL + "ping";
-    static final String PROJECTS               = SERVER_URL + "projects";
-    static final String COMPANIES              = SERVER_URL + "companies";
-    static final String EQUIPMENTS             = SERVER_URL + "equipments";
-    static final String NOTES                  = SERVER_URL + "notes";
 
     static final String UPLOAD_RESET_TRIGGER = "upload_reset";
     static final String RE_REGISTER_TRIGGER  = "re-register";
 
+    final String SERVER_URL;
+    final String REGISTER;
+    final String ENTER;
+    final String PING;
+    final String PROJECTS;
+    final String COMPANIES;
+    final String EQUIPMENTS;
+    final String NOTES;
+
     public DCService() {
         super(SERVER_NAME);
+
+        if (PrefHelper.getInstance().isDevelopment()) {
+            SERVER_URL = SERVER_URL_DEVELOPMENT;
+        } else {
+            SERVER_URL = SERVER_URL_RELEASE;
+        }
+        REGISTER = SERVER_URL + "register";
+        ENTER = SERVER_URL + "enter";
+        PING = SERVER_URL + "ping";
+        PROJECTS = SERVER_URL + "projects";
+        COMPANIES = SERVER_URL + "companies";
+        EQUIPMENTS = SERVER_URL + "equipments";
+        NOTES = SERVER_URL + "notes";
     }
 
     @Override

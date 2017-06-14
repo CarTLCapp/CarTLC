@@ -27,12 +27,16 @@ import java.io.File;
 
 public class TBApplication extends Application {
 
-    public static final Boolean DEVELOPMENT_SERVER = true;
+    static final Boolean OVERRIDE_IS_DEVELOPMENT_SERVER = null;
+
+    public static boolean IsDevelopmentServer() {
+        if (OVERRIDE_IS_DEVELOPMENT_SERVER != null) {
+            return OVERRIDE_IS_DEVELOPMENT_SERVER;
+        }
+        return BuildConfig.DEBUG;
+    }
 
     public static final String OTHER = "Other";
-
-//    static final PermissionRequest[] PERMISSIONS = {
-//            new PermissionRequest(android.Manifest.permission.READ_PHONE_STATE, R.string.perm_read_phone_state)};
 
     public TBApplication() {
         super();

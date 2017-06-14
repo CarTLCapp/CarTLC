@@ -13,6 +13,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataPicture;
+import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TablePictureCollection;
 
 import java.io.File;
@@ -40,19 +41,27 @@ public class AmazonHelper {
 
     final static String BUCKET_NAME_DEVELOP      = "cartlc";
     final static String BUCKET_NAME_RELEASE      = "fleettlc";
-    final static String BUCKET_NAME              = TBApplication.DEVELOPMENT_SERVER ? BUCKET_NAME_DEVELOP : BUCKET_NAME_RELEASE;
     final static String IDENTITY_POOL_ID_DEVELOP = "us-east-2:38d2f2a2-9454-4472-9fec-9468f3700ba5";
     final static String IDENTITY_POOL_ID_RELEASE = "us-east-2:389282dd-de71-4849-a68b-2b126b3de5f3";
-    final static String IDENTITY_POOL_ID = TBApplication.DEVELOPMENT_SERVER ? IDENTITY_POOL_ID_DEVELOP : IDENTITY_POOL_ID_RELEASE;
 
+    final Context mCtx;
+    final String  BUCKET_NAME;
+    final String  IDENTITY_POOL_ID;
     CognitoCachingCredentialsProvider mCred;
     AmazonS3                          mClient;
     TransferUtility                   mTrans;
-    final Context mCtx;
 
     public AmazonHelper(Context ctx) {
         sInstance = this;
         mCtx = ctx;
+
+        if (PrefHelper.getInstance().isDevelopment()) {
+            BUCKET_NAME = BUCKET_NAME_DEVELOP;
+            IDENTITY_POOL_ID = IDENTITY_POOL_ID_DEVELOP;
+        } else {
+            BUCKET_NAME = BUCKET_NAME_RELEASE;
+            IDENTITY_POOL_ID = IDENTITY_POOL_ID_RELEASE;
+        }
     }
 
     void init() {

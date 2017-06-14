@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -44,10 +46,12 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_NEXT_NOTE_COLLECTION_ID      = "next_note_collection_id";
     static final        String KEY_TECH_ID                      = "tech_id";
     static final        String KEY_REGISTRATION_CHANGED         = "registration_changed";
-    public static final String VERSION_PROJECT                  = "version_project";
-    public static final String VERSION_COMPANY                  = "version_company";
-    public static final String VERSION_EQUIPMENT                = "version_equipment";
-    public static final String VERSION_NOTE                     = "version_note";
+    static final        String KEY_IS_DEVELOPMENT               = "is_development";
+
+    public static final String VERSION_PROJECT   = "version_project";
+    public static final String VERSION_COMPANY   = "version_company";
+    public static final String VERSION_EQUIPMENT = "version_equipment";
+    public static final String VERSION_NOTE      = "version_note";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss";
 
@@ -196,20 +200,16 @@ public class PrefHelper extends PrefHelperBase {
         setInt(VERSION_COMPANY, value);
     }
 
-//    public List<String> addState(List<String> list) {
-//        return addIfNotFound(list, getState());
-//    }
-
-//    public List<String> addCity(List<String> list) {
-//        return addIfNotFound(list, getCity());
-//    }
-
     public boolean hasRegistrationChanged() {
         return getInt(KEY_REGISTRATION_CHANGED, 0) != 0;
     }
 
     public void setRegistrationChanged(boolean flag) {
         setInt(KEY_REGISTRATION_CHANGED, flag ? 1 : 0);
+    }
+
+    public boolean isDevelopment() {
+        return getInt(KEY_IS_DEVELOPMENT, TBApplication.IsDevelopmentServer() ? 1 : 0) != 0;
     }
 
     // Return true if added.
