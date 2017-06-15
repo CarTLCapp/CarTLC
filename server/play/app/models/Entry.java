@@ -9,6 +9,7 @@ import play.db.ebean.Transactional;
 import play.data.format.*;
 
 import com.avaje.ebean.*;
+import modules.AmazonHelper;
 
 /**
  * Entry entity managed by Ebean
@@ -123,6 +124,13 @@ public class Entry extends com.avaje.ebean.Model {
             }
         }
         return false;
+    }
+
+    public void remove(AmazonHelper amazonHelper) {
+        EntryEquipmentCollection.deleteEntries(equipment_collection_id);
+        PictureCollection.deleteByCollectionId(picture_collection_id, amazonHelper);
+        EntryNoteCollection.deleteByCollectionId(note_collection_id);
+        delete();
     }
 
     public static boolean hasEntryForCompany(final int tech_id, final long address_id) {

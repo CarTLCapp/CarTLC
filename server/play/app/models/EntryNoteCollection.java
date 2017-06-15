@@ -45,5 +45,14 @@ public class EntryNoteCollection extends Model {
                 .eq("collection_id", collection_id)
                 .findList();
     }
+
+    public static void deleteByCollectionId(long collection_id) {
+        List<EntryNoteCollection> list = find.where()
+                .eq("collection_id", collection_id)
+                .findList();
+        for (EntryNoteCollection item : list) {
+            item.delete();
+        }
+    }
 }
 

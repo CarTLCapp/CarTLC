@@ -95,6 +95,26 @@ public class EntryController extends Controller {
         return ok(views.html.entry_list_note.render(entry.getNotes()));
     }
 
+    /**
+     * Display details for the entry including delete button.
+     */
+    public Result view(Long entry_id) {
+        Entry entry = Entry.find.byId(entry_id);
+        if (entry == null) {
+            return badRequest2("Could not find entry ID " + entry_id);
+        }
+        return ok(views.html.entry_view.render(entry));
+    }
+
+    public Result delete(Long entry_id) {
+        Entry entry = Entry.find.byId(entry_id);
+        if (entry != null) {
+            entry.remove(amazonHelper);
+            flash("success", "Entry has been deleted");
+        }
+        return ok(Integer.toString(0));
+    }
+
     @Transactional
     @BodyParser.Of(BodyParser.Json.class)
     public Result enter() {

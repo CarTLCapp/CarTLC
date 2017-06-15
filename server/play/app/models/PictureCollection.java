@@ -7,6 +7,8 @@ import com.avaje.ebean.Model;
 import play.data.format.*;
 import play.data.validation.*;
 import play.Logger;
+import modules.AmazonHelper;
+import java.io.File;
 
 import com.avaje.ebean.*;
 
@@ -35,6 +37,17 @@ public class PictureCollection extends Model {
         return find.where()
                 .eq("collection_id", collection_id)
                 .findList();
+    }
+
+    public static void deleteByCollectionId(long collection_id, AmazonHelper amazonHelper) {
+        List<PictureCollection> items = find.where()
+                .eq("collection_id", collection_id)
+                .findList();
+        for (PictureCollection item : items) {
+            File file = amazonHelper.getLocalFile(item.picture);
+            file.delete();
+            item.delete();
+        }
     }
 
 }

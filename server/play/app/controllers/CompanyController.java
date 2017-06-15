@@ -117,6 +117,7 @@ public class CompanyController extends Controller {
         return list();
     }
 
+    @Transactional
     public Result delete(Long id) {
         // TODO: If the client is in the database, mark it as disabled instead.
         Company.find.ref(id).delete();

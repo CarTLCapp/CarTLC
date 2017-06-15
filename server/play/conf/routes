@@ -2,6 +2,9 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file          controllers.Assets.at(path="/public", file)
+
 ### HOME ###
 
 GET     /                         controllers.HomeController.index()
@@ -117,11 +120,10 @@ GET     /entry                      controllers.EntryController.list(p:Int ?= 0,
 GET     /entry/:id/pictures         controllers.EntryController.pictures(id:Long)
 GET     /entry/:filename/picture    controllers.EntryController.getImage(filename:String)
 GET     /entry/:id/notes            controllers.EntryController.notes(id:Long)
+GET     /entry/:id/view             controllers.EntryController.view(id:Long)
+POST    /entry/:id/delete           controllers.EntryController.delete(id:Long)
 
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file          controllers.Assets.at(path="/public", file)
-
-### EXTERNAL: ENTRIES AS SENT FROM THE APP ###
+### EXTERNAL: APP REQUESTS & ENTRIES ###
 
 POST    /register              controllers.PostController.register()
 POST    /ping                  controllers.PostController.ping()
@@ -130,5 +132,3 @@ POST    /companies             controllers.CompanyController.query()
 POST    /equipments            controllers.EquipmentController.query()
 POST    /notes                 controllers.NoteController.query()
 POST    /enter                 controllers.EntryController.enter()
-
-

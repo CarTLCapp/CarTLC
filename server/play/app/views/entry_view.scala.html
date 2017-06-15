@@ -1,0 +1,71 @@
+@(entry: Entry)
+
+@main("FleetTLC - Show Entry") {
+
+    <h1 id="homeTitle">Elements</h1>
+
+    <table class="elements zebra-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Project</th>
+                <th>Address</th>
+                <th>Truck</th>
+                <th>Equipment</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@entry.getTechName()</td>
+                <td>@entry.entry_time.format("yyyy-MM-dd kk:mm")</td>
+                <td>@entry.getProjectLine()</td>
+                <td>@entry.getAddressLine()</td>
+                <td>@entry.getTruckLine()</td>
+                <td>@entry.getEquipmentLine()</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h1 id="noteTitle">Notes</h1>
+
+    <table class="notes zebra-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+        @for(note <- entry.getNotes()) {
+            <tr>
+                <td>@note.getName()</td>
+                <td>@note.note_value</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <h1 id="pictureTitle">Pictures</h1>
+
+    <table class="pictures zebra-striped">
+        <thead>
+        <tr>
+            <th>Pictures</th>
+        </tr>
+        </thead>
+        <tbody>
+            @for(item <- entry.getPictures()) {
+                <tr><td><img src='@routes.EntryController.getImage(item.picture)'/></td></tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="actions">
+        <input type="submit" value="Delete this entry" class="btn danger">
+    </div>
+
+}
+
+            
