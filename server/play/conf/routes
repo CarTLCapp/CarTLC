@@ -121,7 +121,7 @@ GET     /entry/:id/pictures         controllers.EntryController.pictures(id:Long
 GET     /entry/:filename/picture    controllers.EntryController.getImage(filename:String)
 GET     /entry/:id/notes            controllers.EntryController.notes(id:Long)
 GET     /entry/:id/view             controllers.EntryController.view(id:Long)
-POST    /entry/:id/delete           controllers.EntryController.delete(id:Long)
+GET     /entry/:id/delete            controllers.EntryController.delete(id:Long)
 
 ### EXTERNAL: APP REQUESTS & ENTRIES ###
 
