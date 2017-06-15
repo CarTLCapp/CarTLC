@@ -1,0 +1,9 @@
+#!/bin/bash 
+#
+# Build a distribution of the server.
+#
+rm server/play/target/universal/*.zip
+cd server/play
+sbt dist
+cd ../..
+ls server/play/target/universal/*.zip

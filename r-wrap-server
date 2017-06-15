@@ -31,11 +31,13 @@ do
 done
 
 echo "$SERVER:"
+echo "$COPY"
 ssh -i $PEM $SERVER mkdir -p server/$DATE
 scp -i $PEM $COPY $SERVER:/home/ubuntu/server/$DATE
+ssh -i $PEM $SERVER "cd server/$DATE; unzip *.zip"
 
 echo "UPLOAD COMPLETE."
 echo "Now on the server do this:"
-echo " cd ~/server/$DATE; unzip *.zip"
-echo " cd ~/server; rm -f active; ln -s $DATE active; cd"
-echo " run-server &"
+echo " kill-server"
+echo " cd server; rm -f active; ln -s $DATE active"
+echo " run-server"
