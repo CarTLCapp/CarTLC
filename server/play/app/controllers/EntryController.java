@@ -57,6 +57,12 @@ public class EntryController extends Controller {
         if (entry == null) {
             return badRequest2("Could not find entry ID " + entry_id);
         }
+        loadPictures(entry);
+        List<PictureCollection> pictures = entry.getPictures();
+        return ok(views.html.entry_list_picture.render(pictures));
+    }
+
+    void loadPictures(Entry entry) {
         List<PictureCollection> pictures = entry.getPictures();
         for (PictureCollection picture : pictures) {
             File localFile = amazonHelper.getLocalFile(picture.picture);
@@ -72,7 +78,6 @@ public class EntryController extends Controller {
                 }
             }
         }
-        return ok(views.html.entry_list_picture.render(pictures));
     }
 
     public Result getImage(String picture) {
@@ -103,6 +108,7 @@ public class EntryController extends Controller {
         if (entry == null) {
             return badRequest2("Could not find entry ID " + entry_id);
         }
+        loadPictures(entry);
         return ok(views.html.entry_view.render(entry));
     }
 
