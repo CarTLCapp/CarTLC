@@ -63,7 +63,7 @@
     </table>
 
     <div class="actions">
-        <a href="@routes.EntryController.delete(entry.id)" class="btn danger">Delete this entry</a>
+        <a href="@routes.EntryController.delete(entry.id)" class="btn danger" onclick="return confirm('This cannot be undone. Are you sure?');">Delete this entry</a>
     </div>
 
 }
