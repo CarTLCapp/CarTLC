@@ -118,7 +118,7 @@ public class EntryController extends Controller {
             entry.remove(amazonHelper);
             flash("success", "Entry has been deleted");
         }
-        return ok(Integer.toString(0));
+        return list();
     }
 
     @Transactional
