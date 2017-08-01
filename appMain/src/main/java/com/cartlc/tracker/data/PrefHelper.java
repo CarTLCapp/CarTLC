@@ -170,11 +170,11 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public String getLicensePlate() {
-        return getString(KEY_TRUCK_NUMBER, null);
+        return getString(KEY_LICENSE_PLATE, null);
     }
 
     public void setLicensePlate(String id) {
-        setString(KEY_TRUCK_NUMBER, id);
+        setString(KEY_LICENSE_PLATE, id);
     }
 
     public int getVersionProject() {
