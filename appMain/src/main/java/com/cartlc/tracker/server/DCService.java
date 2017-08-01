@@ -191,7 +191,6 @@ public class DCService extends IntentService {
                 Timber.e("queryProjects(): Unexpected NULL response from server");
                 return;
             }
-
             List<String> unprocessed = TableProjects.getInstance().query();
             JSONObject object = parseResult(response);
             JSONArray array = object.getJSONArray("projects");
@@ -573,7 +572,12 @@ public class DCService extends IntentService {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
             jsonObject.accumulate("date", entry.date);
-            jsonObject.accumulate("truck_number", entry.truckNumber);
+            if (entry.truckNumber > 0) {
+                jsonObject.accumulate("truck_number", entry.truckNumber);
+            }
+            if (entry.licensePlateNumber != null) {
+                jsonObject.accumulate("license_plate", entry.licensePlateNumber);
+            }
             DataProject project = entry.getProject();
             if (project == null) {
                 Timber.e("No project name for entry -- abort");

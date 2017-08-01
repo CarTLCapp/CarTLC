@@ -13,7 +13,7 @@ import timber.log.Timber;
 public class DatabaseManager {
 
     static final String DATABASE_NAME = "cartcl.db";
-    static final int DATABASE_VERSION = 1;
+    static final int DATABASE_VERSION = 2;
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -61,6 +61,7 @@ public class DatabaseManager {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             if (newVersion > DATABASE_VERSION) {
+                TableEntry.upgrade(db);
             }
         }
 

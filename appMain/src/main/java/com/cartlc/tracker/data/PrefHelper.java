@@ -30,23 +30,24 @@ public class PrefHelper extends PrefHelperBase {
         new PrefHelper(ctx);
     }
 
-    static public final String KEY_PROJECT                      = "project";
-    static public final String KEY_COMPANY                      = "company";
-    static public final String KEY_STREET                       = "street";
-    static public final String KEY_STATE                        = "state";
-    static public final String KEY_CITY                         = "city";
-    static public final String KEY_ZIPCODE                      = "zipcode";
-    static final        String KEY_CURRENT_PROJECT_GROUP_ID     = "current_project_group_id";
-    static final        String KEY_SAVED_PROJECT_GROUP_ID       = "saved_project_group_id";
-    static final        String KEY_FIRST_NAME                   = "first_name";
-    static final        String KEY_LAST_NAME                    = "last_name";
-    static final        String KEY_TRUCK_NUMBER                 = "truck_number";
-    static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
-    static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
-    static final        String KEY_NEXT_NOTE_COLLECTION_ID      = "next_note_collection_id";
-    static final        String KEY_TECH_ID                      = "tech_id";
-    static final        String KEY_REGISTRATION_CHANGED         = "registration_changed";
-    static final        String KEY_IS_DEVELOPMENT               = "is_development";
+    static public final String KEY_PROJECT                  = "project";
+    static public final String KEY_COMPANY                  = "company";
+    static public final String KEY_STREET                   = "street";
+    static public final String KEY_STATE                    = "state";
+    static public final String KEY_CITY                     = "city";
+    static public final String KEY_ZIPCODE                  = "zipcode";
+    static final        String KEY_CURRENT_PROJECT_GROUP_ID = "current_project_group_id";
+    static final        String KEY_SAVED_PROJECT_GROUP_ID   = "saved_project_group_id";
+    static final        String KEY_FIRST_NAME               = "first_name";
+    static final        String KEY_LAST_NAME                = "last_name";
+    static final        String KEY_TRUCK_NUMBER             = "truck_number";
+    static final        String KEY_LICENSE_PLATE            = "license_plate";
+    static final String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
+    static final String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
+    static final String KEY_NEXT_NOTE_COLLECTION_ID      = "next_note_collection_id";
+    static final String KEY_TECH_ID                      = "tech_id";
+    static final String KEY_REGISTRATION_CHANGED         = "registration_changed";
+    static final String KEY_IS_DEVELOPMENT               = "is_development";
 
     public static final String VERSION_PROJECT   = "version_project";
     public static final String VERSION_COMPANY   = "version_company";
@@ -168,6 +169,14 @@ public class PrefHelper extends PrefHelperBase {
         setLong(KEY_TRUCK_NUMBER, id);
     }
 
+    public String getLicensePlate() {
+        return getString(KEY_TRUCK_NUMBER, null);
+    }
+
+    public void setLicensePlate(String id) {
+        setString(KEY_TRUCK_NUMBER, id);
+    }
+
     public int getVersionProject() {
         return getInt(VERSION_PROJECT, 0);
     }
@@ -259,6 +268,7 @@ public class PrefHelper extends PrefHelperBase {
 
     public void clearLastEntry() {
         setTruckNumber(0);
+        setLicensePlate(null);
         TablePictureCollection.getInstance().clearPendingPictures();
         TableNote.getInstance().clearValues();
         TableEquipment.getInstance().clearChecked();
@@ -369,6 +379,7 @@ public class PrefHelper extends PrefHelperBase {
         entry.equipmentCollection.addChecked();
         entry.pictureCollection = TablePictureCollection.getInstance().createCollectionFromPending();
         entry.truckNumber = getTruckNumber();
+        entry.licensePlateNumber = getLicensePlate();
         entry.saveNotes(getNextNoteCollectionID());
         entry.date = System.currentTimeMillis();
         return entry;

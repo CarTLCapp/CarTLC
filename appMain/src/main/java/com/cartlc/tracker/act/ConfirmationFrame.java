@@ -64,11 +64,16 @@ public class ConfirmationFrame {
             mAddressValue.setText(address);
         }
         mNoteAdapter.setItems(entry.getNotes());
-        if (entry.truckNumber == 0) {
-            mTruckNumberValue.setVisibility(View.GONE);
+        if (entry.licensePlateNumber == null) {
+            if (entry.truckNumber == 0) {
+                mTruckNumberValue.setVisibility(View.GONE);
+            } else {
+                mTruckNumberValue.setVisibility(View.VISIBLE);
+                mTruckNumberValue.setText(Long.toString(entry.truckNumber));
+            }
         } else {
             mTruckNumberValue.setVisibility(View.VISIBLE);
-            mTruckNumberValue.setText(Long.toString(entry.truckNumber));
+            mTruckNumberValue.setText(entry.licensePlateNumber);
         }
         mSimpleAdapter.setList(entry.getEquipmentNames());
         mPictureAdapter.setList(entry.getPictures());

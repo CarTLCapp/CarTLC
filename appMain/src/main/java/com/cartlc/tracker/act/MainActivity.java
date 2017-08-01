@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (inEntry) {
-            boolean hasTruckNumber = !TextUtils.isEmpty(getTruckNumber());
+            boolean hasTruckNumber = !TextUtils.isEmpty(getTruckValue());
             boolean hasNotes = mNoteAdapter.hasNotesEntered();
             boolean hasEquip = mEquipmentAdapter.hasChecked();
             ;
@@ -389,17 +389,17 @@ public class MainActivity extends AppCompatActivity {
             mApp.ping();
         } else if (mCurStage == Stage.TRUCK_NUMBER) {
             String value = mEntrySimple.getText().toString();
-            if (!TextUtils.isEmpty(value) && TextUtils.isDigitsOnly(value)) {
-                PrefHelper.getInstance().setTruckNumber(Long.parseLong(value));
-            } else {
+            if (TextUtils.isEmpty(value)) {
                 if (isNext) {
-                    if (TextUtils.isEmpty(value)) {
-                        showError(getString(R.string.error_need_a_number));
-                    } else {
-                        showError(getString(R.string.error_not_a_number, value));
-                    }
+                    showError(getString(R.string.error_need_a_truck_number));
                 }
                 return false;
+            } else {
+                if (TextUtils.isDigitsOnly(value)) {
+                    PrefHelper.getInstance().setTruckNumber(Long.parseLong(value));
+                } else {
+                    PrefHelper.getInstance().setLicensePlate(value);
+                }
             }
         } else if (mCurStage == Stage.EQUIPMENT) {
             if (isNext) {
@@ -669,8 +669,8 @@ public class MainActivity extends AppCompatActivity {
                 mEntryFrame.setVisibility(View.VISIBLE);
                 mTitle.setText(R.string.title_truck_number);
                 mEntrySimple.setHint(R.string.title_truck_number);
-                mEntrySimple.setText(getTruckNumber());
-                mEntrySimple.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                mEntrySimple.setText(getTruckValue());
+                mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
                 break;
             case EQUIPMENT:
                 mNext.setVisibility(View.VISIBLE);
@@ -759,7 +759,11 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    String getTruckNumber() {
+    String getTruckValue() {
+        String value = PrefHelper.getInstance().getLicensePlate();
+        if (value != null) {
+            return value;
+        }
         long id = PrefHelper.getInstance().getTruckNumber();
         if (id == 0) {
             return "";

@@ -39,6 +39,7 @@ public class TableEntry {
     static final String KEY_PICTURE_COLLECTION_ID    = "picture_collection_id";
     static final String KEY_NOTE_COLLECTION_ID       = "note_collection_id";
     static final String KEY_TRUCK_NUMBER             = "truck_number";
+    static final String KEY_LICENSE_PLATE            = "license_plate";
     static final String KEY_UPLOADED_MASTER          = "uploaded_master";
     static final String KEY_UPLOADED_AWS             = "uploaded_aws";
 
@@ -57,6 +58,14 @@ public class TableEntry {
     TableEntry(SQLiteDatabase db) {
         sInstance = this;
         this.mDb = db;
+    }
+
+    public static void upgrade(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_LICENSE_PLATE + " text");
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
     }
 
     public void clear() {
@@ -89,6 +98,8 @@ public class TableEntry {
         sbuf.append(" long, ");
         sbuf.append(KEY_TRUCK_NUMBER);
         sbuf.append(" int, ");
+        sbuf.append(KEY_LICENSE_PLATE);
+        sbuf.append(" text, ");
         sbuf.append(KEY_UPLOADED_MASTER);
         sbuf.append(" bit default 0, ");
         sbuf.append(KEY_UPLOADED_AWS);
@@ -112,7 +123,7 @@ public class TableEntry {
         try {
             final String[] columns = {KEY_ROWID,
                     KEY_DATE, KEY_PROJECT_ADDRESS_COMBO_ID, KEY_EQUIPMENT_COLLECTION_ID,
-                    KEY_PICTURE_COLLECTION_ID, KEY_NOTE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_UPLOADED_MASTER, KEY_UPLOADED_AWS};
+                    KEY_PICTURE_COLLECTION_ID, KEY_NOTE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_LICENSE_PLATE, KEY_UPLOADED_MASTER, KEY_UPLOADED_AWS};
             final String orderBy = KEY_DATE + " DESC";
             Cursor cursor = mDb.query(TABLE_NAME, columns, where, whereArgs, null, null, orderBy, null);
             int idxRow = cursor.getColumnIndex(KEY_ROWID);
@@ -122,6 +133,7 @@ public class TableEntry {
             int idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID);
             int idxNotetCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
             int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
+            int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
             int idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER);
             int idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS);
             DataEntry entry;
@@ -137,6 +149,7 @@ public class TableEntry {
                 entry.pictureCollection = TablePictureCollection.getInstance().query(pictureCollectionId);
                 entry.noteCollectionId = cursor.getLong(idxNotetCollectionId);
                 entry.truckNumber = cursor.getInt(idxTruckNumber);
+                entry.licensePlateNumber = cursor.getString(idxLicensePlate);
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
                 entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
                 list.add(entry);
@@ -277,6 +290,7 @@ public class TableEntry {
             values.put(KEY_PROJECT_ADDRESS_COMBO_ID, entry.projectAddressCombo.id);
             values.put(KEY_EQUIPMENT_COLLECTION_ID, entry.equipmentCollection.id);
             values.put(KEY_TRUCK_NUMBER, entry.truckNumber);
+            values.put(KEY_LICENSE_PLATE, entry.licensePlateNumber);
             values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
             values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollection.id);
             mDb.insert(TABLE_NAME, null, values);

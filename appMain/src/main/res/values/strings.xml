@@ -26,7 +26,7 @@
     <string name="title_state">State</string>
     <string name="title_city">City</string>
     <string name="title_company">Company</string>
-    <string name="title_street">Street</string>
+    <string name="title_street">Plant Name or Street Address</string>
     <string name="title_address_">Address:</string>
     <string name="title_zipcode">ZIP</string>
     <string name="title_current_project">Current Project</string>
@@ -46,8 +46,7 @@
     <string name="title_pictures_">Pictures:</string>
 
     <string name="error_enter_your_name">Please enter your name</string>
-    <string name="error_not_a_number">Not a number: %s</string>
-    <string name="error_need_a_number">Need a number</string>
+    <string name="error_need_a_truck_number">Need a truck number</string>
     <string name="error_cannot_take_picture">Cannot take picture</string>
     <string name="error_while_loading_picture">Out of Memory</string>
     <string name="error_picture_removed">Picture removed</string>

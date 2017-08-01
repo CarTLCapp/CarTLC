@@ -18,6 +18,7 @@ public class DataEntry {
     public DataPictureCollection        pictureCollection;
     public long                         noteCollectionId;
     public long                         truckNumber;
+    public String                       licensePlateNumber;
     public boolean                      uploadedMaster;
     public boolean                      uploadedAws;
 

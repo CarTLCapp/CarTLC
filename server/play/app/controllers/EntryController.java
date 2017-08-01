@@ -141,10 +141,16 @@ public class EntryController extends Controller {
             entry.entry_time = new Date(value.longValue());
         }
         value = json.findValue("truck_number");
-        if (value == null) {
-            missing.add("truck_number");
-        } else {
+        if (value != null) {
             entry.truck_number = value.intValue();
+        }
+        value = json.findValue("license_plate");
+        if (value != null) {
+            entry.license_plate = value.textValue();
+        }
+        if (entry.truck_number == 0 && entry.license_plate == null) {
+            missing.add("truck_number");
+            missing.add("license_plate");
         }
         value = json.findValue("project_id");
         if (value == null) {

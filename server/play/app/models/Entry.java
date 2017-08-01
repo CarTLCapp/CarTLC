@@ -55,6 +55,9 @@ public class Entry extends com.avaje.ebean.Model {
     @Constraints.Required
     public int truck_number;
 
+    @Constraints.Required
+    public String license_plate;
+
     public String getTechName() {
         Client client = Client.find.byId((long) tech_id);
         if (client == null) {
@@ -80,6 +83,9 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getTruckLine() {
+        if (license_plate != null) {
+            return license_plate;
+        }
         return Integer.toString(truck_number);
     }
 
