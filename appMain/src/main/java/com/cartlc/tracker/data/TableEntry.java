@@ -61,6 +61,7 @@ public class TableEntry {
     }
 
     public static void upgrade(SQLiteDatabase db) {
+        Timber.d("MYDEBUG: upgrade()");
         try {
             db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_LICENSE_PLATE + " text");
         } catch (Exception ex) {
