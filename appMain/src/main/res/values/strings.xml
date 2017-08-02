@@ -26,7 +26,7 @@
     <string name="title_state">State</string>
     <string name="title_city">City</string>
     <string name="title_company">Company</string>
-    <string name="title_street">Plant Name or Street Address</string>
+    <string name="title_street">Street or Plant Name</string>
     <string name="title_address_">Address:</string>
     <string name="title_zipcode">ZIP</string>
     <string name="title_current_project">Current Project</string>

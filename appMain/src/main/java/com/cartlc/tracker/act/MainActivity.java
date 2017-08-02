@@ -121,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
         LOGIN,
         PROJECT,
         COMPANY,
-        ZIPCODE,
         STATE,
         CITY,
         STREET,
@@ -301,33 +300,39 @@ public class MainActivity extends AppCompatActivity {
             mCurStage = Stage.PROJECT;
         } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCompany())) {
             mCurStage = Stage.COMPANY;
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getState())) {
+            mCurStage = Stage.STATE;
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCity())) {
+            mCurStage = Stage.CITY;
+        } else if (TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
+            mCurStage = Stage.STREET;
         } else {
-            if (TextUtils.isEmpty(PrefHelper.getInstance().getZipCode()) &&
-                    TextUtils.isEmpty(PrefHelper.getInstance().getState()) &&
-                    TextUtils.isEmpty(PrefHelper.getInstance().getCity()) &&
-                    TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
-                mCurStage = Stage.ZIPCODE;
-            } else {
-                if (TextUtils.isEmpty(PrefHelper.getInstance().getZipCode())) {
-                    if (TextUtils.isEmpty(PrefHelper.getInstance().getState())) {
-                        mCurStage = Stage.STATE;
-                    } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCity())) {
-                        mCurStage = Stage.CITY;
-                    } else if (TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
-                        mCurStage = Stage.STREET;
-                    } else {
-                        inEntry = true;
-                    }
-                } else {
-                    inEntry = true;
-                }
-            }
+            inEntry = true;
         }
+//            if (TextUtils.isEmpty(PrefHelper.getInstance().getZipCode()) &&
+//                    TextUtils.isEmpty(PrefHelper.getInstance().getState()) &&
+//                    TextUtils.isEmpty(PrefHelper.getInstance().getCity()) &&
+//                    TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
+//                mCurStage = Stage.ZIPCODE;
+//            } else {
+//                if (TextUtils.isEmpty(PrefHelper.getInstance().getZipCode())) {
+//                    if (TextUtils.isEmpty(PrefHelper.getInstance().getState())) {
+//                        mCurStage = Stage.STATE;
+//                    } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCity())) {
+//                        mCurStage = Stage.CITY;
+//                    } else if (TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
+//                        mCurStage = Stage.STREET;
+//                    } else {
+//                        inEntry = true;
+//                    }
+//                } else {
+//                    inEntry = true;
+//                }
+//            }
         if (inEntry) {
             boolean hasTruckNumber = !TextUtils.isEmpty(getTruckValue());
             boolean hasNotes = mNoteAdapter.hasNotesEntered();
             boolean hasEquip = mEquipmentAdapter.hasChecked();
-            ;
             boolean hasPictures = TablePictureCollection.getInstance().countPendingPictures() > 0;
 
             if (!hasTruckNumber && !hasNotes && !hasEquip && !hasPictures) {
@@ -362,8 +367,8 @@ public class MainActivity extends AppCompatActivity {
                         TableCollectionEquipmentProject.getInstance().addLocal(name, group.projectNameId);
                     }
                 }
-            } else if (mCurStage == Stage.ZIPCODE) {
-                PrefHelper.getInstance().setZipCode(getEditText(mEntrySimple));
+//            } else if (mCurStage == Stage.ZIPCODE) {
+//                PrefHelper.getInstance().setZipCode(getEditText(mEntrySimple));
             } else if (mCurStage == Stage.COMPANY) {
                 String newCompanyName = getEditText(mEntrySimple).trim();
                 if (isNext) {
@@ -547,28 +552,28 @@ public class MainActivity extends AppCompatActivity {
                     checkEdit();
                 }
                 break;
-            case ZIPCODE: {
-                mPrev.setVisibility(View.VISIBLE);
-                final String company = PrefHelper.getInstance().getCompany();
-                List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
-                final boolean hasZipCodes = zipcodes.size() > 0;
-                if (!hasZipCodes) {
-                    mCurStageEditing = true;
-                }
-                if (mCurStageEditing) {
-                    mTitle.setText(R.string.title_zipcode);
-                    mEntryFrame.setVisibility(View.VISIBLE);
-                    mEntrySimple.setHint(R.string.title_zipcode);
-                    mEntrySimple.setText("");
-                    mEntrySimple.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                } else {
-                    mMainListFrame.setVisibility(View.VISIBLE);
-                    setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
-                    mCenter.setVisibility(View.VISIBLE);
-                    mNext.setVisibility(View.VISIBLE);
-                }
-                break;
-            }
+//            case ZIPCODE: {
+//                mPrev.setVisibility(View.VISIBLE);
+//                final String company = PrefHelper.getInstance().getCompany();
+//                List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
+//                final boolean hasZipCodes = zipcodes.size() > 0;
+//                if (!hasZipCodes) {
+//                    mCurStageEditing = true;
+//                }
+//                if (mCurStageEditing) {
+//                    mTitle.setText(R.string.title_zipcode);
+//                    mEntryFrame.setVisibility(View.VISIBLE);
+//                    mEntrySimple.setHint(R.string.title_zipcode);
+//                    mEntrySimple.setText("");
+//                    mEntrySimple.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+//                } else {
+//                    mMainListFrame.setVisibility(View.VISIBLE);
+//                    setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
+//                    mCenter.setVisibility(View.VISIBLE);
+//                    mNext.setVisibility(View.VISIBLE);
+//                }
+//                break;
+//            }
             case STATE: {
                 mMainListFrame.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
@@ -805,7 +810,7 @@ public class MainActivity extends AppCompatActivity {
     void onSelected(String text) {
         if (mCurKey != null) {
             PrefHelper.getInstance().setString(mCurKey, text);
-            if (mCurStage == Stage.PROJECT || mCurStage == Stage.CITY || mCurStage == Stage.STATE || mCurStage == Stage.STREET || mCurStage == Stage.ZIPCODE) {
+            if (mCurStage == Stage.PROJECT || mCurStage == Stage.CITY || mCurStage == Stage.STATE || mCurStage == Stage.STREET/* || mCurStage == Stage.ZIPCODE*/) {
                 mNext.setVisibility(View.VISIBLE);
             } else if (mCurStage == Stage.COMPANY) {
                 checkEdit();

@@ -144,7 +144,7 @@ public class DCService extends IntentService {
             int version_equipment = object.getInt(PrefHelper.VERSION_EQUIPMENT);
             int version_note = object.getInt(PrefHelper.VERSION_NOTE);
             int version_company = object.getInt(PrefHelper.VERSION_COMPANY);
-            
+
             if (PrefHelper.getInstance().getVersionProject() != version_project) {
                 Timber.i("New project version " + version_project);
                 queryProjects();

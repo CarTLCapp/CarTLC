@@ -43,6 +43,9 @@ public class ServerHelper {
             if (ni.getType() == ConnectivityManager.TYPE_WIFI) {
                 return true;
             }
+            if (ni.getType() == ConnectivityManager.TYPE_MOBILE) {
+                return true;
+            }
         }
         return false;
     }
