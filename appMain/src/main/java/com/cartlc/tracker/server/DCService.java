@@ -48,7 +48,7 @@ public class DCService extends IntentService {
     static final String SERVER_URL_DEVELOPMENT = "http://cartlc.arqnetworks.com/";
     static final String SERVER_URL_RELEASE     = "http://fleettlc.arqnetworks.com/";
 
-    static final String UPLOAD_RESET_TRIGGER = "upload_reset";
+    static final String UPLOAD_RESET_TRIGGER = "reset_upload";
     static final String RE_REGISTER_TRIGGER  = "re-register";
 
     final String SERVER_URL;
@@ -127,7 +127,18 @@ public class DCService extends IntentService {
                 return;
             }
             JSONObject object = parseResult(response);
-
+            if (object.has(UPLOAD_RESET_TRIGGER)) {
+                if (object.getBoolean(UPLOAD_RESET_TRIGGER)) {
+                    Timber.i("UPLOAD RESET!");
+                    TableEntry.getInstance().clearUploaded();
+                }
+            }
+            if (object.has(RE_REGISTER_TRIGGER)) {
+                if (object.getBoolean(RE_REGISTER_TRIGGER)) {
+                    Timber.i("RE-REGISTER DETECTED!");
+                    sendRegistration();
+                }
+            }
             int version_project = object.getInt(PrefHelper.VERSION_PROJECT);
             int version_equipment = object.getInt(PrefHelper.VERSION_EQUIPMENT);
             int version_note = object.getInt(PrefHelper.VERSION_NOTE);
@@ -153,18 +164,7 @@ public class DCService extends IntentService {
                 queryNotes();
                 PrefHelper.getInstance().setVersionNote(version_note);
             }
-            if (object.has(UPLOAD_RESET_TRIGGER)) {
-                if (object.getBoolean(UPLOAD_RESET_TRIGGER)) {
-                    Timber.i("UPLOAD RESET!");
-                    TableEntry.getInstance().clearUploaded();
-                }
-            }
-            if (object.has(RE_REGISTER_TRIGGER)) {
-                if (object.getBoolean(RE_REGISTER_TRIGGER)) {
-                    Timber.i("RE-REGISTER DETECTED!");
-                    sendRegistration();
-                }
-            }
+
             List<DataEntry> entries = TableEntry.getInstance().queryPendingDataToUploadToMaster();
             int count = 0;
             if (entries.size() > 0) {

@@ -110,6 +110,7 @@ public class PostController extends Controller
 		} else {
 			Logger.error("ping(): could not find technician with ID " + tech_id);
 			result.put("re-register", true);
+			result.put("reset_upload", true);
 		}
 		return ok(result);
 	}
