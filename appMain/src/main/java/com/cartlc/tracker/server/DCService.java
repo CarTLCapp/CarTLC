@@ -12,6 +12,7 @@ import com.cartlc.tracker.data.DataEquipment;
 import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.DataProject;
+import com.cartlc.tracker.data.DatabaseManager;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
@@ -130,7 +131,7 @@ public class DCService extends IntentService {
             if (object.has(UPLOAD_RESET_TRIGGER)) {
                 if (object.getBoolean(UPLOAD_RESET_TRIGGER)) {
                     Timber.i("UPLOAD RESET!");
-                    TableEntry.getInstance().clearUploaded();
+                    DatabaseManager.getInstance().clearUploaded();
                 }
             }
             if (object.has(RE_REGISTER_TRIGGER)) {
@@ -143,7 +144,7 @@ public class DCService extends IntentService {
             int version_equipment = object.getInt(PrefHelper.VERSION_EQUIPMENT);
             int version_note = object.getInt(PrefHelper.VERSION_NOTE);
             int version_company = object.getInt(PrefHelper.VERSION_COMPANY);
-
+            
             if (PrefHelper.getInstance().getVersionProject() != version_project) {
                 Timber.i("New project version " + version_project);
                 queryProjects();
@@ -164,7 +165,6 @@ public class DCService extends IntentService {
                 queryNotes();
                 PrefHelper.getInstance().setVersionNote(version_note);
             }
-
             List<DataEntry> entries = TableEntry.getInstance().queryPendingDataToUploadToMaster();
             int count = 0;
             if (entries.size() > 0) {

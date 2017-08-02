@@ -55,6 +55,7 @@ public class PrefHelper extends PrefHelperBase {
     public static final String VERSION_NOTE      = "version_note";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss";
+    static final int VERSION_RESET = -1;
 
     PrefHelper(Context ctx) {
         super(ctx);
@@ -178,7 +179,7 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public int getVersionProject() {
-        return getInt(VERSION_PROJECT, 0);
+        return getInt(VERSION_PROJECT, VERSION_RESET);
     }
 
     public void setVersionProject(int value) {
@@ -186,7 +187,7 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public int getVersionEquipment() {
-        return getInt(VERSION_EQUIPMENT, 0);
+        return getInt(VERSION_EQUIPMENT, VERSION_RESET);
     }
 
     public void setVersionEquipment(int value) {
@@ -194,7 +195,7 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public int getVersionNote() {
-        return getInt(VERSION_NOTE, 0);
+        return getInt(VERSION_NOTE, VERSION_RESET);
     }
 
     public void setVersionNote(int value) {
@@ -202,7 +203,7 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public int getVersionCompany() {
-        return getInt(VERSION_COMPANY, 0);
+        return getInt(VERSION_COMPANY, VERSION_RESET);
     }
 
     public void setVersionCompany(int value) {
@@ -402,5 +403,12 @@ public class PrefHelper extends PrefHelperBase {
 
     public File genFullPictureFile() {
         return new File(mCtx.getExternalFilesDir(Environment.DIRECTORY_PICTURES), genPictureFilename());
+    }
+
+    public void clearUploaded() {
+        setVersionNote(VERSION_RESET);
+        setVersionProject(VERSION_RESET);
+        setVersionEquipment(VERSION_RESET);
+        setVersionEquipment(VERSION_RESET);
     }
 }

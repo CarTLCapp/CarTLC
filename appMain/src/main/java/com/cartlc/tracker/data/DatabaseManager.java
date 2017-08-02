@@ -72,6 +72,10 @@ public class DatabaseManager {
         }
     }
 
+    public static DatabaseManager getInstance() {
+        return sInstance;
+    }
+
     static DatabaseManager sInstance;
 
     final DatabaseHelper mDbHelper;
@@ -83,5 +87,18 @@ public class DatabaseManager {
         mDbHelper = new DatabaseHelper(ctx);
         mDb = mDbHelper.getWritableDatabase();
         sInstance = this;
+    }
+
+    public void clearUploaded() {
+        PrefHelper.getInstance().clearUploaded();
+        TableEntry.getInstance().clearUploaded();
+        TableEquipment.getInstance().clearUploaded();
+        TableNote.getInstance().clearUploaded();
+        TablePictureCollection.getInstance().clearUploaded();
+        TableProjects.getInstance().clearUploaded();
+        TableAddress.getInstance().clearUploaded();
+        TableCollectionEquipmentEntry.getInstance().clearUploaded();
+        TableCollectionEquipmentProject.getInstance().clearUploaded();
+        TableCollectionNoteProject.getInstance().clearUploaded();
     }
 }

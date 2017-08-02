@@ -343,4 +343,20 @@ public class TableProjects {
             }
         }
     }
+
+    public void clearUploaded() {
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_SERVER_ID, 0);
+            if (mDb.update(TABLE_NAME, values, null, null) == 0) {
+                Timber.e("Unable to update entries");
+            }
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
+    }
 }
