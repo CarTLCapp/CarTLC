@@ -20,6 +20,9 @@ do
 			TGTFILE="CarTLC-d${VERSION}.apk"
     		shift # past argument
     	;;
+		-r)
+    		shift
+		;;
 		*)
 			print "Unknown opton: $key"
 			exit 1;

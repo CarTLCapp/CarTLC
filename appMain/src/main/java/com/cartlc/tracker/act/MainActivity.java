@@ -665,7 +665,9 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().saveProjectAndAddressCombo();
                     mMainListFrame.setVisibility(View.VISIBLE);
                     mCenter.setVisibility(View.VISIBLE);
-                    mAdd.setVisibility(View.VISIBLE);
+                    if (TableProjectAddressCombo.getInstance().count() > 0) {
+                        mAdd.setVisibility(View.VISIBLE);
+                    }
                     mCurKey = null;
                     mCenter.setText(R.string.btn_new_project);
                     mTitle.setText(R.string.title_current_project);
