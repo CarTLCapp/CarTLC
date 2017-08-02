@@ -28,7 +28,6 @@ public class DatabaseManager {
         public void onCreate(SQLiteDatabase db) {
             init(db);
             try {
-                Timber.d("MYDEBUG: onCreate()");
                 TableAddress.getInstance().create();
                 TableEntry.getInstance().create();
                 TableEquipment.getInstance().create();
@@ -46,7 +45,6 @@ public class DatabaseManager {
         }
 
         void init(SQLiteDatabase db) {
-            Timber.d("MYDEBUG: init()");
             TableAddress.Init(db);
             TableEntry.Init(db);
             TableEquipment.Init(db);
@@ -62,8 +60,7 @@ public class DatabaseManager {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Timber.d("MYDEBUG: onUpgrade(" + oldVersion + ", " + newVersion + ")");
-            if (newVersion > DATABASE_VERSION) {
+            if (newVersion == 2 && oldVersion == 1) {
                 init(db);
                 TableEntry.upgrade(db);
             }

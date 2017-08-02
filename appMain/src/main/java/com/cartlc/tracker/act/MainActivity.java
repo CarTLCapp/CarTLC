@@ -143,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    final static String KEY_STAGE = "stage";
+
     @BindView(R.id.first_name)         EditText             mFirstName;
     @BindView(R.id.last_name)          EditText             mLastName;
     @BindView(R.id.entry_simple)       EditText             mEntrySimple;
@@ -246,6 +248,9 @@ public class MainActivity extends AppCompatActivity {
         mEntrySimple.setOnEditorActionListener(mAutoNext);
         PrefHelper.getInstance().setupFromCurrentProjectId();
         computeCurStage();
+        if (savedInstanceState != null) {
+            mCurStage = Stage.from(savedInstanceState.getInt(KEY_STAGE));
+        }
         fillStage();
         EventBus.getDefault().register(this);
         setTitle(getVersionedTitle());
@@ -882,4 +887,18 @@ public class MainActivity extends AppCompatActivity {
         }
         return sbuf.toString();
     }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        mCurStage = Stage.from(savedInstanceState.getInt(KEY_STAGE));
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(KEY_STAGE, mCurStage.ordinal());
+        super.onSaveInstanceState(outState);
+    }
+
+
 }
