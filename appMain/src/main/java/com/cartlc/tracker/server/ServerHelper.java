@@ -39,15 +39,7 @@ public class ServerHelper {
 
     public boolean hasConnection() {
         final NetworkInfo ni = mCM.getActiveNetworkInfo();
-        if (ni != null) {
-            if (ni.getType() == ConnectivityManager.TYPE_WIFI) {
-                return true;
-            }
-            if (ni.getType() == ConnectivityManager.TYPE_MOBILE) {
-                return true;
-            }
-        }
-        return false;
+        return (ni != null && ni.isConnectedOrConnecting());
     }
 
     public String getDeviceId() {

@@ -8,6 +8,7 @@ WRAP=~/cartlc/wrap/$DATE
 FILE=`ls server/play/target/universal/*.zip`
 mkdir -p $WRAP
 cp $FILE $WRAP/
+echo "FOUND: $FILE"
 COPY=`ls $WRAP/*.zip`
 
 PEM=~/.ssh/cartlc.pem
