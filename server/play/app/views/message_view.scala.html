@@ -8,7 +8,7 @@
 
     <h1 id="trace">Trace</h1>
 
-    <p>@message.getTrace()</p>
+    <p>@Html(message.getTrace())</p>
 
     <div class="actions">
         <a href="@routes.MessageController.delete(message.id)" class="btn danger" onclick="return confirm('This cannot be undone. Are you sure?');">Delete the message</a>

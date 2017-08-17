@@ -64,7 +64,6 @@ public class TBApplication extends Application {
         if (ServerHelper.getInstance().hasConnection()) {
             startService(new Intent(this, DCService.class));
         }
-        Timber.e(new Exception("FAKE ERROR"));
     }
 
     @Override
