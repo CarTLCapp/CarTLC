@@ -46,6 +46,8 @@ import timber.log.Timber;
  */
 public class DCService extends IntentService {
 
+    static final String TAG = "DCService";
+
     static final String SERVER_NAME            = "CarTLC.DataCollectionService";
     static final String SERVER_URL_DEVELOPMENT = "http://cartlc.arqnetworks.com/";
     static final String SERVER_URL_RELEASE     = "http://fleettlc.arqnetworks.com/";
@@ -698,11 +700,11 @@ public class DCService extends IntentService {
             try {
                 inputStream = connection.getInputStream();
             } catch (Exception ex) {
-                Timber.e("Server response not available. (" + ex.getMessage() + ")");
+                Log.e(TAG, "Server response not available. (" + ex.getMessage() + ")\nJSON=" + json.toString());
                 return null;
             }
             if (inputStream == null) {
-                Timber.e("NULL response from server");
+                Log.e(TAG, "NULL response from server");
                 return null;
             }
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -716,7 +718,7 @@ public class DCService extends IntentService {
             }
             return sbuf.toString();
         } catch (Exception ex) {
-            Timber.e(ex);
+            Log.e(TAG, ex.getMessage());
             return null;
         }
     }
@@ -746,13 +748,13 @@ public class DCService extends IntentService {
             jsonObject.accumulate("message", line.message);
             jsonObject.accumulate("trace", line.trace);
             String result = post(MESSAGE, jsonObject);
-            if (Integer.parseInt(result) == 0) {
+            if (result != null && Integer.parseInt(result) == 0) {
                 TableCrash.getInstance().setUploaded(line);
             } else {
-                Log.e("DCService", "Unable to send previously trapped message: " + line.message);
+                Log.e(TAG, "Unable to send previously trapped message: " + line.message);
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            Log.e(TAG, ex.getMessage());
         }
     }
 

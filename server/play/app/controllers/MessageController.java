@@ -63,7 +63,7 @@ public class MessageController extends Controller {
         Message message = new Message();
         ArrayList<String> missing = new ArrayList<String>();
         JsonNode json = request().body().asJson();
-        Logger.debug("GOT: " + json.toString());
+        Logger.debug("GOT MSG: " + json.toString());
         JsonNode value = json.findValue("tech_id");
         if (value == null) {
             missing.add("tech_id");

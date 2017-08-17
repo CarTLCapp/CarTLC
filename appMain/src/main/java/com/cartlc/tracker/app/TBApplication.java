@@ -46,7 +46,7 @@ public class TBApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if (BuildConfig.DEBUG) {
+        if (false && BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         } else {
             Timber.plant(new CrashReportingTree());
@@ -56,11 +56,11 @@ public class TBApplication extends Application {
         ServerHelper.Init(this);
         PermissionHelper.Init();
         AmazonHelper.Init(this);
-
         BootstrapData.Init();
     }
 
     public void ping() {
+        Timber.w("PING!");
         if (ServerHelper.getInstance().hasConnection()) {
             startService(new Intent(this, DCService.class));
         }

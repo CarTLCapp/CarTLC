@@ -91,10 +91,9 @@ public class TableCrash {
     }
 
     public List<CrashLine> queryNeedsUploading() {
-        final String[] columns = {KEY_ROWID, KEY_DATE, KEY_CODE, KEY_MESSAGE, KEY_UPLOADED};
         final String orderBy = KEY_DATE + " DESC";
         String where = KEY_UPLOADED + "=0";
-        Cursor cursor = mDb.query(TABLE_NAME, columns, where, null, null, null, orderBy, null);
+        Cursor cursor = mDb.query(TABLE_NAME, null, where, null, null, null, orderBy, null);
         int idxRow = cursor.getColumnIndex(KEY_ROWID);
         int idxDate = cursor.getColumnIndex(KEY_DATE);
         int idxCode = cursor.getColumnIndex(KEY_CODE);
