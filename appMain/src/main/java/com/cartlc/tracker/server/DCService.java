@@ -744,7 +744,6 @@ public class DCService extends IntentService {
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
             jsonObject.accumulate("date", line.date);
             jsonObject.accumulate("code", line.code);
-            jsonObject.accumulate("tag", line.tag);
             jsonObject.accumulate("message", line.message);
             jsonObject.accumulate("trace", line.trace);
             String result = post(MESSAGE, jsonObject);
@@ -757,6 +756,5 @@ public class DCService extends IntentService {
             Log.e(TAG, ex.getMessage());
         }
     }
-
 
 }

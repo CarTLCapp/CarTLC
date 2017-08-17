@@ -43,7 +43,6 @@
                     @header("tech_id", "Name")
                     @header("log_time", "Date")
                     @header("code", "Code")
-                    @header("tag", "Tag")
                     @header("message", "Message")
                     <th>Trace</th>
                 </tr>
@@ -55,7 +54,6 @@
                         <td>@message.getTechName()</td>
                         <td>@message.log_time.format("yyyy-MM-dd kk:mm")</td>
                         <td>@message.getCodeName()</td>
-                        <td>@message.tag</td>
                         <td>@message.message</td>
                         @if(message.trace == null) {
                             <em>-</em>

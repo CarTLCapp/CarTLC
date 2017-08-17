@@ -60,7 +60,7 @@ public class TBApplication extends Application {
     }
 
     public void ping() {
-        Timber.w("PING!");
+        Timber.e("PING!");
         if (ServerHelper.getInstance().hasConnection()) {
             startService(new Intent(this, DCService.class));
         }

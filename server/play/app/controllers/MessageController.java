@@ -80,10 +80,6 @@ public class MessageController extends Controller {
         if (value != null) {
             message.code = value.intValue();
         }
-        value = json.findValue("tag");
-        if (value != null) {
-            message.tag = value.textValue();
-        }
         value = json.findValue("message");
         if (value != null) {
             message.message = value.textValue();

@@ -41,9 +41,6 @@ public class Message extends com.avaje.ebean.Model {
     public int code;
 
     @Constraints.Required
-    public String tag;
-
-    @Constraints.Required
     public String message;
 
     @Constraints.Required

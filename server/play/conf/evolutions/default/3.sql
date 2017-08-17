@@ -7,7 +7,6 @@ create table message (
   tech_id                  int,
   log_time                 datetime,
   code                     smallint,
-  tag                      varchar(32),
   message                  text,
   trace                    text
 );

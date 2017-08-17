@@ -19,7 +19,6 @@ public class TableCrash {
         public long    id;
         public int     code;
         public String  message;
-        public String  tag;
         public String  trace;
         public long    date;
         public boolean uploaded;
@@ -30,7 +29,6 @@ public class TableCrash {
     static final String KEY_ROWID    = "_id";
     static final String KEY_DATE     = "date";
     static final String KEY_CODE     = "code";
-    static final String KEY_TAG      = "tag";
     static final String KEY_MESSAGE  = "message";
     static final String KEY_TRACE    = "trace";
     static final String KEY_UPLOADED = "uploaded";
@@ -63,8 +61,6 @@ public class TableCrash {
         sbuf.append(" long, ");
         sbuf.append(KEY_CODE);
         sbuf.append(" smallint, ");
-        sbuf.append(KEY_TAG);
-        sbuf.append(" varchar(24), ");
         sbuf.append(KEY_MESSAGE);
         sbuf.append(" text, ");
         sbuf.append(KEY_TRACE);
@@ -97,7 +93,6 @@ public class TableCrash {
         int idxRow = cursor.getColumnIndex(KEY_ROWID);
         int idxDate = cursor.getColumnIndex(KEY_DATE);
         int idxCode = cursor.getColumnIndex(KEY_CODE);
-        int idxTag = cursor.getColumnIndex(KEY_TAG);
         int idxMessage = cursor.getColumnIndex(KEY_MESSAGE);
         int idxTrace = cursor.getColumnIndex(KEY_TRACE);
         int idxUploaded = cursor.getColumnIndex(KEY_UPLOADED);
@@ -106,7 +101,6 @@ public class TableCrash {
             CrashLine line = new CrashLine();
             line.id = cursor.getLong(idxRow);
             line.date = cursor.getLong(idxDate);
-            line.tag = cursor.getString(idxTag);
             line.code = cursor.getShort(idxCode);
             line.message = cursor.getString(idxMessage);
             line.trace = cursor.getString(idxTrace);
@@ -116,14 +110,13 @@ public class TableCrash {
         return lines;
     }
 
-    public void message(int code, String tag, String message, String trace) {
+    public void message(int code, String message, String trace) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             values.clear();
             values.put(KEY_DATE, System.currentTimeMillis());
             values.put(KEY_CODE, code);
-            values.put(KEY_TAG, tag);
             values.put(KEY_MESSAGE, message);
             values.put(KEY_TRACE, trace);
             mDb.insert(TABLE_NAME, null, values);
