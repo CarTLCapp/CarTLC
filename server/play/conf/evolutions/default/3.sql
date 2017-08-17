@@ -8,7 +8,7 @@ create table message (
   log_time                 datetime,
   code                     smallint,
   tag                      varchar(32),
-  messages                 text,
+  message                  text,
   trace                    text
 );
 
