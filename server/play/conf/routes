@@ -121,7 +121,13 @@ GET     /entry/:id/pictures         controllers.EntryController.pictures(id:Long
 GET     /entry/:filename/picture    controllers.EntryController.getImage(filename:String)
 GET     /entry/:id/notes            controllers.EntryController.notes(id:Long)
 GET     /entry/:id/view             controllers.EntryController.view(id:Long)
-GET     /entry/:id/delete            controllers.EntryController.delete(id:Long)
+GET     /entry/:id/delete           controllers.EntryController.delete(id:Long)
+
+### MESSAGES ###
+
+GET     /messages              controllers.MessageController.list(p:Int ?= 0, s ?= "log_time", o ?= "desc")
+GET     /messages/:id/view     controllers.MessageController.view(id:Long)
+GET     /messages/:id/delete   controllers.MessageController.delete(id:Long)
 
 ### EXTERNAL: APP REQUESTS & ENTRIES ###
 
@@ -132,3 +138,4 @@ POST    /companies             controllers.CompanyController.query()
 POST    /equipments            controllers.EquipmentController.query()
 POST    /notes                 controllers.NoteController.query()
 POST    /enter                 controllers.EntryController.enter()
+POST    /message               controllers.MessageController.message()

@@ -12,8 +12,8 @@ import timber.log.Timber;
 
 public class DatabaseManager {
 
-    static final String DATABASE_NAME = "cartcl.db";
-    static final int DATABASE_VERSION = 2;
+    static final String DATABASE_NAME    = "cartcl.db";
+    static final int    DATABASE_VERSION = 3;
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -39,6 +39,7 @@ public class DatabaseManager {
                 TablePictureCollection.getInstance().create();
                 TableProjectAddressCombo.getInstance().create();
                 TableProjects.getInstance().create();
+                TableCrash.getInstance().create();
             } catch (Exception ex) {
                 Timber.e(ex);
             }
@@ -56,13 +57,23 @@ public class DatabaseManager {
             TablePictureCollection.Init(db);
             TableProjectAddressCombo.Init(db);
             TableProjects.Init(db);
+            TableCrash.Init(db);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            if (newVersion == 2 && oldVersion == 1) {
-                init(db);
-                TableEntry.upgrade(db);
+            if (oldVersion == 1) {
+                if (newVersion >= 2) {
+                    init(db);
+                    TableEntry.upgrade(db);
+                    if (newVersion == 3) {
+                        TableCrash.getInstance().create();
+                    }
+                }
+            } else if (oldVersion == 2) {
+                if (newVersion == 3) {
+                    TableCrash.getInstance().create();
+                }
             }
         }
 
@@ -79,7 +90,7 @@ public class DatabaseManager {
     static DatabaseManager sInstance;
 
     final DatabaseHelper mDbHelper;
-    final Context mCtx;
+    final Context        mCtx;
     SQLiteDatabase mDb;
 
     DatabaseManager(Context ctx) {
@@ -100,5 +111,6 @@ public class DatabaseManager {
         TableCollectionEquipmentEntry.getInstance().clearUploaded();
         TableCollectionEquipmentProject.getInstance().clearUploaded();
         TableCollectionNoteProject.getInstance().clearUploaded();
+        TableCrash.getInstance().clearUploaded();
     }
 }

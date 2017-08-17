@@ -1,0 +1,15 @@
+@(message: Message)
+
+@main("FleetTLC - Show Error Message Trace") {
+
+    <h1 id="homeTitle">Message Trace</h1>
+
+    <p>@message.trace</p>
+
+    <div class="actions">
+        <a href="@routes.MessageController.delete(message.id)" class="btn danger" onclick="return confirm('This cannot be undone. Are you sure?');">Delete the message</a>
+    </div>
+
+}
+
+            

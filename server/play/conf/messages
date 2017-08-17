@@ -7,6 +7,7 @@ equipment.list.title={0,choice,0#No equipments|1#One equipment|1<{0,number,integ
 note.list.title={0,choice,0#No notes|1#One note|1<{0,number,integer} notes} found
 entry.list.title={0,choice,0#No entries|1#One Entry|1<{0,number,integer} entries} found
 picture.list.title={0,choice,0#No pictures|1#One Picture|1<{0,number,integer} pictures} found
+message.list.title={0,choice,0#No error messages|1#One Message|1<{0,number,integer} messages} found
 
 
 

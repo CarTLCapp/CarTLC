@@ -1,0 +1,100 @@
+@(currentPage: com.avaje.ebean.PagedList[Message], currentSortBy: String, currentOrder: String)
+
+@link(newPage:Int, newSortBy:String) = @{
+    var sortBy = currentSortBy
+    var order = currentOrder
+    if(newSortBy != null) {
+        sortBy = newSortBy
+        if(currentSortBy == newSortBy) {
+            if(currentOrder == "asc") {
+                order = "desc"
+            } else {
+                order = "asc"
+            }
+        } else {
+            order = "asc"
+        }
+    }
+    // Generate the link
+    routes.MessageController.list(newPage, sortBy, order)
+}
+
+@header(key:String, title:String) = {
+    <th class="@key header @if(currentSortBy == key) @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
+        <a href="@link(0, key)">@title</a>
+    </th>
+}
+
+@main("FleetTLC - List Error Messages") {
+
+    <h1 id="homeTitle">@Messages("message.list.title", currentPage.getTotalRowCount())</h1>
+
+    @if(currentPage.getTotalRowCount() == 0) {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+    } else {
+
+        <table class="messages zebra-striped">
+            <thead>
+                <tr>
+                    @header("tech_id", "Name")
+                    @header("log_time", "Date")
+                    @header("code", "Code")
+                    @header("tag", "Tag")
+                    @header("message", "Message")
+                    <th>Trace</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(message <- currentPage.getList) {
+                    <tr>
+                        <td>@message.getTechName()</td>
+                        <td>@message.log_time.format("yyyy-MM-dd kk:mm")</td>
+                        <td>@message.getCodeName()</td>
+                        <td>@message.tag</td>
+                        <td>@message.message</td>
+                        @if(message.trace == null) {
+                            <em>-</em>
+                        } else {
+                            <td><a href="@routes.MessageController.view(message.id)">Trace</a></td>
+                        }
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+        <div id="pagination" class="pagination">
+            <ul>
+                @if(currentPage.hasPrev) {
+                <li class="prev">
+                    <a href="@link(currentPage.getPageIndex - 1, null)">&larr; Previous</a>
+                </li>
+                } else {
+                <li class="prev disabled">
+                    <a>&larr; Previous</a>
+                </li>
+                }
+                <li class="current">
+                    <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
+                </li>
+                @if(currentPage.hasNext) {
+                <li class="next">
+                    <a href="@link(currentPage.getPageIndex + 1, null)">Next &rarr;</a>
+                </li>
+                } else {
+                <li class="next disabled">
+                    <a>Next &rarr;</a>
+                </li>
+                }
+            </ul>
+        </div>
+    }
+
+}
+
+            

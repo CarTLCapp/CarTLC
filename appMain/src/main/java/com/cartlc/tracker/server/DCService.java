@@ -3,8 +3,8 @@ package com.cartlc.tracker.server;
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
-import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataCollectionItem;
 import com.cartlc.tracker.data.DataEntry;
@@ -17,6 +17,7 @@ import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 import com.cartlc.tracker.data.TableCollectionNoteProject;
+import com.cartlc.tracker.data.TableCrash;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNote;
@@ -60,6 +61,7 @@ public class DCService extends IntentService {
     final String COMPANIES;
     final String EQUIPMENTS;
     final String NOTES;
+    final String MESSAGE;
 
     public DCService() {
         super(SERVER_NAME);
@@ -76,6 +78,7 @@ public class DCService extends IntentService {
         COMPANIES = SERVER_URL + "companies";
         EQUIPMENTS = SERVER_URL + "equipments";
         NOTES = SERVER_URL + "notes";
+        MESSAGE = SERVER_URL + "message";
     }
 
     @Override
@@ -178,6 +181,8 @@ public class DCService extends IntentService {
                 AmazonHelper.getInstance().sendPictures(entries);
             }
             TablePictureCollection.getInstance().clearUploadedUnscaledPhotos();
+            List<TableCrash.CrashLine> lines = TableCrash.getInstance().queryNeedsUploading();
+            sendCrashLines(lines);
         } catch (Exception ex) {
             Timber.e(ex);
         }
@@ -724,5 +729,32 @@ public class DCService extends IntentService {
         }
         return new JSONObject();
     }
+
+    void sendCrashLines(List<TableCrash.CrashLine> lines) {
+        for (TableCrash.CrashLine line : lines) {
+            sendCrashLine(line);
+        }
+    }
+
+    void sendCrashLine(TableCrash.CrashLine line) {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
+            jsonObject.accumulate("date", line.date);
+            jsonObject.accumulate("code", line.code);
+            jsonObject.accumulate("tag", line.tag);
+            jsonObject.accumulate("message", line.message);
+            jsonObject.accumulate("trace", line.trace);
+            String result = post(MESSAGE, jsonObject);
+            if (Integer.parseInt(result) == 0) {
+                TableCrash.getInstance().setUploaded(line);
+            } else {
+                Log.e("DCService", "Unable to send previously trapped message: " + line.message);
+            }
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
 
 }

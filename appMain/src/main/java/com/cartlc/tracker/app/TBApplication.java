@@ -48,6 +48,8 @@ public class TBApplication extends Application {
 
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
+        } else {
+            Timber.plant(new CrashReportingTree());
         }
         DatabaseManager.Init(this);
         PrefHelper.Init(this);
