@@ -74,5 +74,12 @@ public class Message extends com.avaje.ebean.Model {
                 return Integer.toString(code);
         }
     }
+
+    public String getTrace() {
+        if (trace != null) {
+            return trace.replaceAll("\\n", "<br/>");
+        }
+        return "";
+    }
 }
 
