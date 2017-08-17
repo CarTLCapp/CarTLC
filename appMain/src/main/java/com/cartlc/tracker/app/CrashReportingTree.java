@@ -32,13 +32,11 @@ public class CrashReportingTree extends Timber.Tree {
             } else if (priority == Log.ASSERT) {
                 Log.wtf(tag, message);
             }
-            String trace;
             if (t != null) {
-                trace = t.getMessage();
+                TableCrash.getInstance().message(priority, t.getMessage(), message);
             } else {
-                trace = null;
+                TableCrash.getInstance().message(priority, message, null);
             }
-            TableCrash.getInstance().message(priority, message, trace);
         }
     }
 }

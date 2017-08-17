@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.multidex.MultiDex;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.data.DatabaseManager;
@@ -60,10 +61,10 @@ public class TBApplication extends Application {
     }
 
     public void ping() {
-        Timber.e("PING!");
         if (ServerHelper.getInstance().hasConnection()) {
             startService(new Intent(this, DCService.class));
         }
+        Timber.e(new Exception("FAKE ERROR"));
     }
 
     @Override
