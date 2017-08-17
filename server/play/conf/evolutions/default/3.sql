@@ -2,7 +2,7 @@
 
 # --- !Ups
 
-create table messages (
+create table message (
   id                       int auto_increment primary key,
   tech_id                  int,
   log_time                 datetime,
@@ -14,4 +14,4 @@ create table messages (
 
 # --- !Downs
 
-drop table if exists messages;
+drop table if exists message;
