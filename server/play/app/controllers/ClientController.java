@@ -27,7 +27,7 @@ public class ClientController extends Controller {
      * Display the list of users.
      */
     public Result list() {
-        return ok(views.html.client_list.render(Client.list()));
+        return ok(views.html.client_list.render(Client.list(), Secured.getUserInfo(ctx())));
     }
     
     /**
@@ -37,8 +37,12 @@ public class ClientController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
-        Form<Client> clientForm = formFactory.form(Client.class).fill(Client.find.byId(id));
-        return ok(views.html.client_editForm.render(id, clientForm));
+        if (Secured.isAdmin(ctx())) {
+            Form<Client> clientForm = formFactory.form(Client.class).fill(Client.find.byId(id));
+            return ok(views.html.client_editForm.render(id, clientForm));
+        } else {
+            return badRequest(views.html.home.render(Secured.getUserInfo(ctx())));
+        }
     }
     
     /**
