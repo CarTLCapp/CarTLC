@@ -81,5 +81,10 @@ public class UserInfo extends com.avaje.ebean.Model {
             userInfo.save();
         }
     }
+
+    public static void initUserInfo() {
+        UserInfo.addUserInfo("admin", "admintlc", true);
+        UserInfo.addUserInfo("guest", "tlc", false);
+    }
 }
 

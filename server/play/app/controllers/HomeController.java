@@ -18,12 +18,6 @@ public class HomeController extends Controller {
 
     @Inject FormFactory formFactory;
 
-    public HomeController() {
-        super();
-        UserInfo.addUserInfo("admin", "admintlc", true);
-        UserInfo.addUserInfo("guest", "tlc", false);
-    }
-
     @Security.Authenticated(Secured.class)
     public Result index() {
         return ok(views.html.home.render());
@@ -36,6 +30,7 @@ public class HomeController extends Controller {
      * @return The Login page.
      */
     public Result login() {
+        UserInfo.initUserInfo();
         Form<LoginFormData> formData = formFactory.form(LoginFormData.class).bindFromRequest();
         return ok(views.html.login.render("Login", Secured.isLoggedIn(ctx()), Secured.getUserInfo(ctx()), formData));
     }

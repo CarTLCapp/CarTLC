@@ -31,3 +31,7 @@ run-server &
 Amazon:
 
 https://aws.amazon.com/
+
+PHPMyAdmin:
+   http://52.14.73.217/phpmyadmin
+   User: root p/w: cartlc
