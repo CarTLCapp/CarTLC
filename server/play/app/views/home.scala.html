@@ -31,8 +31,9 @@
 
     <p>Manage the list of notes and their association with projects.</p>
 
-    <h3><a href="@routes.MessageController.list()">Errors</a></h3>
+    @if(userInfo.is_admin) {
+        <h3><a href="@routes.MessageController.list()">Errors</a></h3>
 
-    <p>Display list of errors generated (developer use only)</p>
-
+        <p>Display list of errors generated (developer use only)</p>
+    }
 }

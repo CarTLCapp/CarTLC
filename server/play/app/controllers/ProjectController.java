@@ -32,7 +32,7 @@ public class ProjectController extends Controller {
      * Display the list of projects.
      */
     public Result list() {
-        return ok(views.html.project_list.render(Project.list()));
+        return ok(views.html.project_list.render(Project.list(), Secured.getUserInfo(ctx())));
     }
 
     /**
@@ -81,8 +81,12 @@ public class ProjectController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result create() {
-        Form<Project> projectForm = formFactory.form(Project.class);
-        return ok(views.html.project_createForm.render(projectForm));
+        if (Secured.isAdmin(ctx())) {
+            Form<Project> projectForm = formFactory.form(Project.class);
+            return ok(views.html.project_createForm.render(projectForm));
+        } else {
+            return badRequest(views.html.home.render(Secured.getUserInfo(ctx())));
+        }
     }
 
     /**
@@ -103,8 +107,12 @@ public class ProjectController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result createMany() {
-        Form<InputLines> linesForm = formFactory.form(InputLines.class);
-        return ok(views.html.projects_createForm.render(linesForm));
+        if (Secured.isAdmin(ctx())) {
+            Form<InputLines> linesForm = formFactory.form(InputLines.class);
+            return ok(views.html.projects_createForm.render(linesForm));
+        } else {
+            return badRequest(views.html.home.render(Secured.getUserInfo(ctx())));
+        }
     }
 
     /**
