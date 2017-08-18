@@ -68,10 +68,15 @@ public class Secured extends Security.Authenticator {
      */
     public static UserInfo getUserInfo(Context ctx) {
         try {
-            return (isLoggedIn(ctx) ? UserInfo.getUser(getUser(ctx)) : null);
+            if (isLoggedIn(ctx)) {
+                UserInfo userInfo = UserInfo.getUser(getUser(ctx));
+                if (userInfo != null) {
+                    return userInfo;
+                }
+            }
         } catch (Exception ex) {
-            return null;
         }
+        return new UserInfo();
     }
 
 }

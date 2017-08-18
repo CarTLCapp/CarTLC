@@ -28,9 +28,7 @@ public class HomeController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result index() {
         return ok(
-                views.html.home.render(
-                        Secured.isLoggedIn(ctx()),
-                        Secured.getUserInfo(ctx()))
+                views.html.home.render(Secured.getUserInfo(ctx()))
         );
     }
 
@@ -46,7 +44,7 @@ public class HomeController extends Controller {
     public Result login() {
         UserInfo.initUserInfo();
         Form<LoginFormData> formData = formFactory.form(LoginFormData.class).bindFromRequest();
-        return ok(views.html.login.render("Login", Secured.isLoggedIn(ctx()), Secured.getUserInfo(ctx()), formData));
+        return ok(views.html.login.render("Login", formData));
     }
 
     /**
@@ -62,7 +60,7 @@ public class HomeController extends Controller {
         Form<LoginFormData> formData = formFactory.form(LoginFormData.class).bindFromRequest();
         if (formData.hasErrors()) {
             flash("error", "Login credentials not valid.");
-            return badRequest(views.html.login.render("Login", Secured.isLoggedIn(ctx()), Secured.getUserInfo(ctx()), formData));
+            return badRequest(views.html.login.render("Login", formData));
         } else {
             // email/password OK, so now we set the session variable and only go to authenticated pages.
             session().clear();

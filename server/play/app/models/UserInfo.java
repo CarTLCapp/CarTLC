@@ -31,6 +31,10 @@ public class UserInfo extends com.avaje.ebean.Model {
 
     public static Finder<Long,UserInfo> find = new Finder<Long,UserInfo>(UserInfo.class);
 
+    public boolean isValid() {
+        return id != 0 && name != null;
+    }
+
     @Transactional
     public static UserInfo getUser(String username) {
         if (username == null) {

@@ -1,4 +1,4 @@
-@(header: String, isLoggedIn : Boolean = false, userInfo : UserInfo = null)(content: Html)
+@(header: String, userInfo : UserInfo = null)(content: Html)
 
 <!DOCTYPE html>
 <html>
@@ -14,10 +14,9 @@
             <h1 class="fill"><a href="@routes.HomeController.index">@header</a>
                 @if(userInfo!=null){
                     <span style="float:right;font-size:15px">
-                        @if(isLoggedIn){
-                            <a href="@routes.HomeController.logout()">Logout</a>
+                        @if(userInfo.isValid()){
+                            @userInfo.name: <a href="@routes.HomeController.logout()">logout</a>
                         } else {
-                            userInfo.name
                             <a href="@routes.HomeController.login()">Login</a>
                         }
                     </span>

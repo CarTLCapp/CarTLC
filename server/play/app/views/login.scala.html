@@ -1,9 +1,9 @@
-@(page: String, isLoggedIn: Boolean, userInfo: UserInfo, loginForm: Form[views.formdata.LoginFormData])
+@(page: String, loginForm: Form[views.formdata.LoginFormData])
 
 <html>
     <body>
         <div class="container">
-        @loginform(routes.HomeController.postLogin(), loginForm("username"), loginForm("password"))
+            @loginform(routes.HomeController.postLogin(), loginForm("username"), loginForm("password"))
         </div>
     </body>
 </html>
