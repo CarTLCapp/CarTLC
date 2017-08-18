@@ -44,11 +44,10 @@ public class NoteController extends Controller {
      *
      * @param id Id of the note to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         Form<Note> noteForm = formFactory.form(Note.class).fill(Note.find.byId(id));
-        return ok(
-            views.html.note_editForm.render(id, noteForm)
-        );
+        return ok(views.html.note_editForm.render(id, noteForm));
     }
 
     /**
@@ -83,11 +82,10 @@ public class NoteController extends Controller {
     /**
      * Display the 'new note form'.
      */
+    @Security.Authenticated(Secured.class)
     public Result create() {
         Form<Note> noteForm = formFactory.form(Note.class);
-        return ok(
-                views.html.note_createForm.render(noteForm)
-        );
+        return ok(views.html.note_createForm.render(noteForm));
     }
 
     /**
@@ -106,11 +104,10 @@ public class NoteController extends Controller {
     /**
      * Display a form to enter in many notes at once.
      */
+    @Security.Authenticated(Secured.class)
     public Result createMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class);
-        return ok(
-                views.html.notes_createForm.render(linesForm)
-        );
+        return ok(views.html.notes_createForm.render(linesForm));
     }
 
     /**

@@ -27,9 +27,7 @@ public class ClientController extends Controller {
      * Display the list of users.
      */
     public Result list() {
-        return ok(
-                views.html.client_list.render(Client.list())
-        );
+        return ok(views.html.client_list.render(Client.list()));
     }
     
     /**
@@ -37,11 +35,10 @@ public class ClientController extends Controller {
      *
      * @param id Id of the user to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         Form<Client> clientForm = formFactory.form(Client.class).fill(Client.find.byId(id));
-        return ok(
-            views.html.client_editForm.render(id, clientForm)
-        );
+        return ok(views.html.client_editForm.render(id, clientForm));
     }
     
     /**
@@ -74,11 +71,10 @@ public class ClientController extends Controller {
     /**
      * Display the 'new user form'.
      */
+    @Security.Authenticated(Secured.class)
     public Result create() {
         Form<Client> clientForm = formFactory.form(Client.class);
-        return ok(
-                views.html.client_createForm.render(clientForm)
-        );
+        return ok(views.html.client_createForm.render(clientForm));
     }
     
     /**
@@ -97,13 +93,13 @@ public class ClientController extends Controller {
     /**
      * Handle user deletion
      */
+    @Security.Authenticated(Secured.class)
     public Result delete(Long id) {
         // TODO: If the client is in the database, mark it as disabled instead.
         Client.find.ref(id).delete();
         flash("success", "Client has been deleted");
         return list();
     }
-    
 
 }
             

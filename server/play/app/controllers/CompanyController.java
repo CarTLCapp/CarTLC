@@ -39,6 +39,7 @@ public class CompanyController extends Controller {
         return list(0, "name", "asc", "");
     }
 
+    @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         Form<Company> companyForm = formFactory.form(Company.class).fill(Company.find.byId(id));
         return ok(views.html.company_editForm.render(id, companyForm));
@@ -71,6 +72,7 @@ public class CompanyController extends Controller {
         return list();
     }
 
+    @Security.Authenticated(Secured.class)
     public Result create() {
         Form<Company> companyForm = formFactory.form(Company.class);
         return ok(views.html.company_createForm.render(companyForm));
@@ -86,6 +88,7 @@ public class CompanyController extends Controller {
         return list();
     }
 
+    @Security.Authenticated(Secured.class)
     public Result createMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class);
         return ok(views.html.companies_createForm.render(linesForm));

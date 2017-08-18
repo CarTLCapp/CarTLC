@@ -42,11 +42,10 @@ public class EquipmentController extends Controller {
      *
      * @param id Id of the equipment to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         Form<Equipment> equipmentForm = formFactory.form(Equipment.class).fill(Equipment.find.byId(id));
-        return ok(
-            views.html.equipment_editForm.render(id, equipmentForm)
-        );
+        return ok(views.html.equipment_editForm.render(id, equipmentForm));
     }
 
     /**
@@ -80,16 +79,16 @@ public class EquipmentController extends Controller {
     /**
      * Display the 'new equipment form'.
      */
+    @Security.Authenticated(Secured.class)
     public Result create() {
         Form<Equipment> equipmentForm = formFactory.form(Equipment.class);
-        return ok(
-                views.html.equipment_createForm.render(equipmentForm)
-        );
+        return ok(views.html.equipment_createForm.render(equipmentForm));
     }
 
     /**
      * Handle the 'new user form' submission
      */
+    @Security.Authenticated(Secured.class)
     public Result save() {
         Form<Equipment> equipmentForm = formFactory.form(Equipment.class).bindFromRequest();
         if (equipmentForm.hasErrors()) {
@@ -103,11 +102,10 @@ public class EquipmentController extends Controller {
     /**
      * Display a form to enter in many equipments at once.
      */
+    @Security.Authenticated(Secured.class)
     public Result createMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class);
-        return ok(
-                views.html.equipments_createForm.render(linesForm)
-        );
+        return ok(views.html.equipments_createForm.render(linesForm));
     }
 
     /**

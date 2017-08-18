@@ -112,6 +112,7 @@ public class EntryController extends Controller {
         return ok(views.html.entry_view.render(entry));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result delete(Long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry != null) {

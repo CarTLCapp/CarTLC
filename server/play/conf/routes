@@ -8,6 +8,9 @@ GET     /assets/*file          controllers.Assets.at(path="/public", file)
 ### HOME ###
 
 GET     /                         controllers.HomeController.index()
+GET     /login                    controllers.HomeController.login()
+POST    /login                    controllers.HomeController.postLogin()
+GET     /logout                   controllers.HomeController.logout()
 
 ### USERS ###
 

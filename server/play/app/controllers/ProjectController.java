@@ -32,9 +32,7 @@ public class ProjectController extends Controller {
      * Display the list of projects.
      */
     public Result list() {
-        return ok(
-                views.html.project_list.render(Project.list())
-        );
+        return ok(views.html.project_list.render(Project.list()));
     }
 
     /**
@@ -42,13 +40,12 @@ public class ProjectController extends Controller {
      *
      * @param id Id of the project to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         Form<Project> projectForm = formFactory.form(Project.class).fill(
                 Project.find.byId(id)
         );
-        return ok(
-            views.html.project_editForm.render(id, projectForm)
-        );
+        return ok(views.html.project_editForm.render(id, projectForm));
     }
 
     /**
@@ -82,11 +79,10 @@ public class ProjectController extends Controller {
     /**
      * Display the 'new project form'.
      */
+    @Security.Authenticated(Secured.class)
     public Result create() {
         Form<Project> projectForm = formFactory.form(Project.class);
-        return ok(
-                views.html.project_createForm.render(projectForm)
-        );
+        return ok(views.html.project_createForm.render(projectForm));
     }
 
     /**
@@ -105,11 +101,10 @@ public class ProjectController extends Controller {
     /**
      * Display a form to enter in many projects at once.
      */
+    @Security.Authenticated(Secured.class)
     public Result createMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class);
-        return ok(
-                views.html.projects_createForm.render(linesForm)
-        );
+        return ok(views.html.projects_createForm.render(linesForm));
     }
 
     /**

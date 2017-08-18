@@ -48,6 +48,7 @@ public class MessageController extends Controller {
         return ok(views.html.message_view.render(message));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result delete(Long msg_id) {
         Message message = Message.find.byId(msg_id);
         if (message != null) {
