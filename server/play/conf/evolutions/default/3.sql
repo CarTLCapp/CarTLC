@@ -11,7 +11,7 @@ create table message (
   trace         text
 );
 
-create table userinfo (
+create table user_info (
     id          int auto_increment primary key,
     name        varchar(128),
     password    varchar(128),
@@ -21,4 +21,4 @@ create table userinfo (
 # --- !Downs
 
 drop table if exists message;
-drop table if exists userinfo;
+drop table if exists user_info;

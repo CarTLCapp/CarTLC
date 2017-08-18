@@ -2,8 +2,10 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+
 import play.mvc.*;
 import play.data.*;
+
 import static play.data.Form.*;
 
 import views.formdata.LoginFormData;
@@ -16,17 +18,29 @@ import javax.persistence.PersistenceException;
 
 public class HomeController extends Controller {
 
-    @Inject FormFactory formFactory;
+    private FormFactory formFactory;
+
+    @Inject
+    public HomeController(FormFactory formFactory) {
+        this.formFactory = formFactory;
+    }
 
     @Security.Authenticated(Secured.class)
     public Result index() {
-        return ok(views.html.home.render());
+        return ok(
+                views.html.home.render(
+                        Secured.isLoggedIn(ctx()),
+                        Secured.getUserInfo(ctx()))
+        );
     }
 
-    public static Result HOME() { return Results.redirect(routes.HomeController.index()); }
+    public static Result HOME() {
+        return Results.redirect(routes.HomeController.index());
+    }
 
     /**
      * Provides the Login page (only to unauthenticated users).
+     *
      * @return The Login page.
      */
     public Result login() {
@@ -41,6 +55,7 @@ public class HomeController extends Controller {
      * The binding process will invoke the LoginFormData.validate() method.
      * If errors are found, re-render the page, displaying the error data.
      * If errors not found, render the page with the good data.
+     *
      * @return The index page with the results of validation.
      */
     public Result postLogin() {
@@ -48,8 +63,7 @@ public class HomeController extends Controller {
         if (formData.hasErrors()) {
             flash("error", "Login credentials not valid.");
             return badRequest(views.html.login.render("Login", Secured.isLoggedIn(ctx()), Secured.getUserInfo(ctx()), formData));
-        }
-        else {
+        } else {
             // email/password OK, so now we set the session variable and only go to authenticated pages.
             session().clear();
             session("username", formData.get().username);
@@ -59,6 +73,7 @@ public class HomeController extends Controller {
 
     /**
      * Logs out (only for authenticated users) and returns them to the Index page.
+     *
      * @return A redirect to the Index page.
      */
     @Security.Authenticated(Secured.class)
