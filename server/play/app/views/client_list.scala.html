@@ -25,7 +25,11 @@
                 @for(client <- currentPage) {
                     <tr>
                         <td>@client.name</td>
-                        <td>@client.password</td>
+                        @if(curClient.is_admin || client.id == curClient.id) {
+                            <td>@client.password</td>
+                        } else {
+                            <td>***</td>
+                        }
                         <td>@client.getProjectsLine()</td>
                         <td>
                             @if(client.is_admin) {

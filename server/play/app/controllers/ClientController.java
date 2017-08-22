@@ -78,20 +78,6 @@ public class ClientController extends Controller {
         return list();
     }
 
-    @Transactional
-    @Security.Authenticated(Secured.class)
-    public Result addProject(long client_id, long project_id) {
-        ClientProjectAssociation.addEntry(client_id, project_id);
-        return edit(client_id);
-    }
-
-    @Transactional
-    @Security.Authenticated(Secured.class)
-    public Result removeProject(long client_id, long project_id) {
-        ClientProjectAssociation.deleteEntry(client_id, project_id);
-        return edit(client_id);
-    }
-
     /**
      * Display the 'new user form'.
      */
