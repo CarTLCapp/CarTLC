@@ -2,8 +2,10 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+
 import play.mvc.*;
 import play.data.*;
+
 import static play.data.Form.*;
 
 import models.*;
@@ -29,7 +31,7 @@ public class TechnicianController extends Controller {
     public Result list() {
         return ok(views.html.technician_list.render(Technician.list(), Secured.getClient(ctx())));
     }
-    
+
     /**
      * Display the 'edit form' of an existing Technician.
      *
@@ -44,9 +46,9 @@ public class TechnicianController extends Controller {
             return badRequest(views.html.home.render(Secured.getClient(ctx())));
         }
     }
-    
+
     /**
-     * Handle the 'edit form' submission 
+     * Handle the 'edit form' submission
      *
      * @param id Id of the user to edit
      */
@@ -71,29 +73,7 @@ public class TechnicianController extends Controller {
         }
         return list();
     }
-    
-    /**
-     * Display the 'new user form'.
-     */
-    @Security.Authenticated(Secured.class)
-    public Result create() {
-        Form<Technician> technicianForm = formFactory.form(Technician.class);
-        return ok(views.html.technician_createForm.render(technicianForm));
-    }
-    
-    /**
-     * Handle the 'new user form' submission
-     */
-    public Result save() {
-        Form<Technician> technicianForm = formFactory.form(Technician.class).bindFromRequest();
-        if(technicianForm.hasErrors()) {
-            return badRequest(views.html.technician_createForm.render(technicianForm));
-        }
-        technicianForm.get().save();
-        flash("success", "Technician " + technicianForm.get().fullName() + " has been created");
-        return list();
-    }
-    
+
     /**
      * Handle user deletion
      */

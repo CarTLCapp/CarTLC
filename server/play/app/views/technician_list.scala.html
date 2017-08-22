@@ -2,7 +2,7 @@
 
 @main("FleetTLC - List Technicians", client) {
 
-    <h1 id="homeTitle">@Messages("users.list.title", currentPage.size())</h1>
+    <h1 id="homeTitle">@Messages("technicians.list.title", currentPage.size())</h1>
 
     @if(currentPage.size() == 0) {
         
@@ -61,7 +61,6 @@
         
     }
 
-    <!--<a class="btn success" id="add" href="@routes.TechnicianController.create()">Add a new user</a>-->
 }
 
             

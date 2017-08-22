@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import play.db.ebean.*;
@@ -9,17 +10,18 @@ import play.db.ebean.Transactional;
 import play.data.format.*;
 
 import play.Logger;
+
 /**
  * User entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Client extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     public Long id;
-    
+
     @Constraints.Required
     public String name;
 
@@ -29,10 +31,17 @@ public class Client extends com.avaje.ebean.Model {
     @Constraints.Required
     public boolean is_admin;
 
-    public static Finder<Long,Client> find = new Finder<Long,Client>(Client.class);
+    // Used for the sake of forms:
+    public String projects;
+
+    public static Finder<Long, Client> find = new Finder<Long, Client>(Client.class);
 
     public boolean isValid() {
         return id != 0 && name != null;
+    }
+
+    public static List<Client> list() {
+        return find.all();
     }
 
     @Transactional
@@ -51,6 +60,7 @@ public class Client extends com.avaje.ebean.Model {
         }
         return items.get(0);
     }
+
     /**
      * Returns true if username and password are valid credentials.
      */
@@ -71,8 +81,9 @@ public class Client extends com.avaje.ebean.Model {
 
     /**
      * Adds the specified user to the DB.
-     * @param name Their name.
-     * @param email Their email.
+     *
+     * @param name     Their name.
+     * @param email    Their email.
      * @param password Their password.
      */
     @Transactional
@@ -89,6 +100,34 @@ public class Client extends com.avaje.ebean.Model {
     public static void initClient() {
         Client.addClient("admin", "admintlc", true);
         Client.addClient("guest", "tlc", false);
+    }
+
+    public String getProjects() {
+        StringBuilder sbuf = new StringBuilder();
+        List<Project> projects = ClientProjectAssociation.findProjects(id);
+        for (Project project : projects) {
+            if (sbuf.length() > 0) {
+                sbuf.append(", ");
+            }
+            sbuf.append(project.name);
+        }
+        return sbuf.toString();
+    }
+
+    public List<Project> getProjectsFromLine() throws DataErrorException {
+        List<Project> projects = new ArrayList<Project>();
+        String[] lines = this.projects.split("\\n");
+        for (String line : lines) {
+            line = line.trim();
+            if (!line.isEmpty()) {
+                Project project = Project.findByName(line);
+                if (project == null) {
+                    throw new DataErrorException("No such project named: " + line);
+                }
+                projects.add(project);
+            }
+        }
+        return projects;
     }
 }
 

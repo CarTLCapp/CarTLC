@@ -1,0 +1,48 @@
+@(currentPage: List[Client], curClient : Client)
+
+@main("FleetTLC - List Clients", curClient) {
+
+    <h1 id="homeTitle">@Messages("clients.list.title", currentPage.size())</h1>
+
+    @if(currentPage.size() == 0) {
+        
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+        
+    } else {
+        
+        <table class="clients zebra-striped">
+            <thead>
+                <tr>
+                    <th>Login Name</th>
+                    <th>Password</th>
+                    <th>Projects</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(client <- currentPage) {
+                    <tr>
+                        <td>@client.name</td>
+                        <td>@client.password</td>
+                        <td>@client.getProjects()</td>
+                        <td>
+                            @if(curClient.is_admin) {
+                                <a href="@routes.ClientController.edit(client.id)">Edit</a>
+                            } else {
+                                <em>-</em>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @if(curClient.is_admin) {
+        <a class="btn success" id="add" href="@routes.ClientController.create()">Add a new client</a>
+    }
+}
+
+            
