@@ -72,6 +72,7 @@ public class ClientController extends Controller {
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
         clientForm.get().save();
+        ClientProjectAssociation.addNew(id, getCheckedProjects(clientForm));
         flash("success", "Client " + clientForm.get().name + " has been updated");
 
         return list();
@@ -117,6 +118,12 @@ public class ClientController extends Controller {
         }
         Client newClient = clientForm.get();
         newClient.save();
+        ClientProjectAssociation.addNew(newClient.id, getCheckedProjects(clientForm));
+        flash("success", "Client " + newClient.name + " has been created");
+        return list();
+    }
+
+    List<Project> getCheckedProjects(Form<Client> clientForm) {
         List<Project> projects = new ArrayList<Project>();
         for (Project project : Project.list()) {
             if (clientForm.field(project.name) != null &&
@@ -125,9 +132,7 @@ public class ClientController extends Controller {
                 projects.add(project);
             }
         }
-        ClientProjectAssociation.addNew(newClient.id, projects);
-        flash("success", "Client " + newClient.name + " has been created");
-        return list();
+        return projects;
     }
 
     /**

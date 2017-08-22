@@ -18,7 +18,11 @@
             <h3>Projects</h3>
 
             @for(project <- Project.list()) {
-                @b3.checkbox(techForm(project.name), '_label -> project.name, '_value -> true)
+                @if(Client.hasProject(id, project.id)) {
+                    @b3.checkbox(techForm(project.name), '_label -> project.name, 'checked -> true)
+                } else {
+                    @b3.checkbox(techForm(project.name), '_label -> project.name)
+                }
                 <p><br></p>
             }
 
