@@ -18,11 +18,11 @@ create table user_info (
     is_admin    bit default 0
 );
 
-create table project_client_association {
+create table project_client_association (
     id           int auto_increment primary key,
     user_info_id int,
     project_id   int
-};
+);
 
 alter table project_client_association add constraint c_pca_user_info_id foreign key (user_info_id) references user_info (id) on delete restrict on update restrict;
 alter table project_client_association add constraint c_pca_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
