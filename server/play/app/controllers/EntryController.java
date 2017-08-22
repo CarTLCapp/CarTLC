@@ -109,7 +109,7 @@ public class EntryController extends Controller {
             return badRequest2("Could not find entry ID " + entry_id);
         }
         loadPictures(entry);
-        return ok(views.html.entry_view.render(entry, Secured.getClientInfo(ctx())));
+        return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
     }
 
     @Security.Authenticated(Secured.class)

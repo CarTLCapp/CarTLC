@@ -1,6 +1,6 @@
 package controllers;
 
-import models.ClientInfo;
+import models.Client;
 import play.mvc.Result;
 import play.mvc.Security;
 import play.mvc.Http.Context;
@@ -56,7 +56,7 @@ public class Secured extends Security.Authenticator {
      * True if there is the logged in user is an adminstrator, false otherwise.
      */
     public static boolean isAdmin(Context ctx) {
-        ClientInfo info = getClientInfo(ctx);
+        Client info = getClient(ctx);
         if (info != null) {
             return info.is_admin;
         }
@@ -66,17 +66,17 @@ public class Secured extends Security.Authenticator {
     /**
      * Return the ClientInfo of the logged in user, or null if no user is logged in.
      */
-    public static ClientInfo getClientInfo(Context ctx) {
+    public static Client getClient(Context ctx) {
         try {
             if (isLoggedIn(ctx)) {
-                ClientInfo clientInfo = ClientInfo.getUser(getUser(ctx));
-                if (clientInfo != null) {
-                    return clientInfo;
+                Client client = Client.getUser(getUser(ctx));
+                if (client != null) {
+                    return client;
                 }
             }
         } catch (Exception ex) {
         }
-        return new ClientInfo();
+        return new Client();
     }
 
 }

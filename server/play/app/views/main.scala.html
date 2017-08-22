@@ -1,4 +1,4 @@
-@(header: String, clientInfo : ClientInfo = null)(content: Html)
+@(header: String, client : Client = null)(content: Html)
 
 <!DOCTYPE html>
 <html>
@@ -12,10 +12,10 @@
         
         <header class="topbar">
             <h1 class="fill"><a href="@routes.HomeController.index">@header</a>
-                @if(clientInfo!=null){
+                @if(client!=null) {
                     <span style="float:right;font-size:15px">
-                        @if(clientInfo.isValid()){
-                            @clientInfo.name: <a href="@routes.HomeController.logout()">logout</a>
+                        @if(client.isValid()){
+                            @client.name: <a href="@routes.HomeController.logout()">logout</a>
                         } else {
                             <a href="@routes.HomeController.login()">Login</a>
                         }

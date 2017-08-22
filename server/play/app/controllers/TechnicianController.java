@@ -27,7 +27,7 @@ public class TechnicianController extends Controller {
      * Display the list of users.
      */
     public Result list() {
-        return ok(views.html.technician_list.render(Technician.list(), Secured.getClientInfo(ctx())));
+        return ok(views.html.technician_list.render(Technician.list(), Secured.getClient(ctx())));
     }
     
     /**
@@ -41,7 +41,7 @@ public class TechnicianController extends Controller {
             Form<Technician> technicianForm = formFactory.form(Technician.class).fill(Technician.find.byId(id));
             return ok(views.html.technician_editForm.render(id, technicianForm));
         } else {
-            return badRequest(views.html.home.render(Secured.getClientInfo(ctx())));
+            return badRequest(views.html.home.render(Secured.getClient(ctx())));
         }
     }
     

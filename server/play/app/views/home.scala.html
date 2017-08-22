@@ -1,11 +1,11 @@
-@(clientInfo : ClientInfo)
+@(client : Client)
 
 @*
 * Call the `main` template with two arguments. The first
 * argument is a `String` with the header of the page, the second
 * argument is an `Html` object containing the body of the page.
 *@
-@main("FleetTLC", clientInfo) {
+@main("FleetTLC", client) {
 
     <h3><a href="@routes.EntryController.list()">Entries</a></h3>
 
@@ -31,7 +31,7 @@
 
     <p>Manage the list of notes and their association with projects.</p>
 
-    @if(clientInfo.is_admin) {
+    @if(client.is_admin) {
         <h3><a href="@routes.MessageController.list()">Errors</a></h3>
 
         <p>Display list of errors generated (developer use only)</p>

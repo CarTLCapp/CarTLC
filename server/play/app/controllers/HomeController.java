@@ -27,9 +27,9 @@ public class HomeController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result index() {
-        ClientInfo.initClientInfo();
+        Client.initClient();
         return ok(
-                views.html.home.render(Secured.getClientInfo(ctx()))
+                views.html.home.render(Secured.getClient(ctx()))
         );
     }
 
@@ -43,7 +43,7 @@ public class HomeController extends Controller {
      * @return The Login page.
      */
     public Result login() {
-        ClientInfo.initClientInfo();
+        Client.initClient();
         Form<LoginFormData> formData = formFactory.form(LoginFormData.class).bindFromRequest();
         return ok(views.html.login.render("Login", formData));
     }

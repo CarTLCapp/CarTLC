@@ -1,6 +1,6 @@
-@(entry: Entry, clientInfo : ClientInfo)
+@(entry: Entry, client : Client)
 
-@main("FleetTLC - Show Entry", clientInfo) {
+@main("FleetTLC - Show Entry", client) {
 
     <h1 id="homeTitle">Elements</h1>
 
@@ -62,7 +62,7 @@
         </tbody>
     </table>
 
-    @if(clientInfo.is_admin) {
+    @if(client.is_admin) {
         <div class="actions">
             <a href="@routes.EntryController.delete(entry.id)" class="btn danger" onclick="return confirm('This cannot be undone. Are you sure?');">Delete this entry</a>
         </div>

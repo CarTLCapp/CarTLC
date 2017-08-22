@@ -3,7 +3,7 @@ package views.formdata;
 import play.data.validation.ValidationError;
 import java.util.ArrayList;
 import java.util.List;
-import models.ClientInfo;
+import models.Client;
 
 /**
  * Backing class for the login form.
@@ -26,14 +26,11 @@ public class LoginFormData {
    * @return Null if valid, or a List[ValidationError] if problems found.
    */
   public List<ValidationError> validate() {
-
     List<ValidationError> errors = new ArrayList<>();
-    
-    if (!ClientInfo.isValid(username, password)) {
+    if (!Client.isValid(username, password)) {
       errors.add(new ValidationError("username", ""));
       errors.add(new ValidationError("password", ""));      
     }
-
     return (errors.size() > 0) ? errors : null;
   }
 
