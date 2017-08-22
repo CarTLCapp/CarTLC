@@ -96,7 +96,7 @@ public class ClientController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result create() {
-        Form<InputClient> clientForm = formFactory.form(InputClient.class).fill(new InputClient());
+        Form<Client> clientForm = formFactory.form(Client.class).fill(new Client());
         return ok(views.html.client_createForm.render(clientForm));
     }
 
@@ -106,7 +106,7 @@ public class ClientController extends Controller {
     @Security.Authenticated(Secured.class)
     @Transactional
     public Result save() {
-        Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
+        Form<Client> clientForm = formFactory.form(Client.class).bindFromRequest();
         if (clientForm.hasErrors()) {
             return badRequest(views.html.client_createForm.render(clientForm));
         }
@@ -115,12 +115,15 @@ public class ClientController extends Controller {
             clientForm.reject("adminstrator", "Non administrators cannot create clients.");
             return badRequest(views.html.client_createForm.render(clientForm));
         }
-        InputClient input = clientForm.get();
-        Client newClient = new Client();
-        newClient.name = input.name;
-        newClient.password = input.password;
+        Client newClient = clientForm.get();
         newClient.save();
-        ClientProjectAssociation.addNew(newClient.id, input.getProjects());
+        List<Project> projects = new ArrayList<Project>();
+        for (Project project : Project.list()) {
+            if (clientForm.field(project.name) != null && clientForm.field(project.name).value().equals("true")) {
+                projects.add(project);
+            }
+        }
+        ClientProjectAssociation.addNew(newClient.id, projects);
         flash("success", "Client " + newClient.name + " has been created");
         return list();
     }
