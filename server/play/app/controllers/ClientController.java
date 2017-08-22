@@ -2,14 +2,18 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+import play.db.ebean.Transactional;
+
 import play.mvc.*;
 import play.data.*;
+
 import static play.data.Form.*;
 
 import models.*;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -31,7 +35,7 @@ public class ClientController extends Controller {
     public Result list() {
         return ok(views.html.client_list.render(Client.list(), Secured.getClient(ctx())));
     }
-    
+
     /**
      * Display the 'edit form' of an existing Technician.
      *
@@ -40,21 +44,22 @@ public class ClientController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         if (Secured.isAdmin(ctx())) {
-            Form<Client> clientForm = formFactory.form(Client.class).fill(Client.find.byId(id));
+            Form<InputClient> clientForm = formFactory.form(InputClient.class).fill(InputClient.find(id));
             return ok(views.html.client_editForm.render(id, clientForm));
         } else {
             return badRequest(views.html.home.render(Secured.getClient(ctx())));
         }
     }
-    
+
     /**
-     * Handle the 'edit form' submission 
+     * Handle the 'edit form' submission
      *
      * @param id Id of the user to edit
      */
+    @Transactional
     @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
-        Form<Client> clientForm = formFactory.form(Client.class).bindFromRequest();
+        Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
         if (clientForm.hasErrors()) {
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
@@ -66,23 +71,25 @@ public class ClientController extends Controller {
         Transaction txn = Ebean.beginTransaction();
         try {
             Client savedClient = Client.find.byId(id);
-            if (savedClient != null) {
-                Client newClientData = clientForm.get();
-                List<Project> projects;
-                try {
-                    projects = newClientData.getProjectsFromLine();
-                } catch (DataErrorException ex) {
-                    return badRequest(views.html.client_editForm.render(id, clientForm));
-                }
-                savedClient.name = newClientData.name;
-                savedClient.password = newClientData.password;
-                savedClient.update();
-
-                ClientProjectAssociation.addNew(id, projects);
-
-                flash("success", "Client " + clientForm.get().name + " has been updated");
-                txn.commit();
+            if (savedClient == null) {
+                clientForm.reject("adminstrator", "Bad id : " + id);
+                return badRequest(views.html.client_editForm.render(id, clientForm));
             }
+            InputClient newClientData = clientForm.get();
+            List<Project> projects;
+            try {
+                projects = newClientData.getProjectsFromLine();
+            } catch (DataErrorException ex) {
+                return badRequest(views.html.client_editForm.render(id, clientForm));
+            }
+            savedClient.name = newClientData.name;
+            savedClient.password = newClientData.password;
+            savedClient.update();
+
+            ClientProjectAssociation.addNew(id, projects);
+
+            flash("success", "Client " + savedClient.name + " has been updated");
+            txn.commit();
         } finally {
             txn.end();
         }
@@ -94,17 +101,18 @@ public class ClientController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result create() {
-        Form<Client> clientForm = formFactory.form(Client.class);
+        Form<InputClient> clientForm = formFactory.form(InputClient.class);
         return ok(views.html.client_createForm.render(clientForm));
     }
-    
+
     /**
      * Handle the 'new user form' submission
      */
     @Security.Authenticated(Secured.class)
+    @Transactional
     public Result save() {
-        Form<Client> clientForm = formFactory.form(Client.class).bindFromRequest();
-        if(clientForm.hasErrors()) {
+        Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
+        if (clientForm.hasErrors()) {
             return badRequest(views.html.client_createForm.render(clientForm));
         }
         Client curClient = Secured.getClient(ctx());
@@ -112,27 +120,32 @@ public class ClientController extends Controller {
             clientForm.reject("adminstrator", "Non administrators cannot create clients.");
             return badRequest(views.html.client_createForm.render(clientForm));
         }
+        InputClient input = clientForm.get();
         List<Project> projects;
         try {
-            projects = clientForm.get().getProjectsFromLine();
+            projects = input.getProjectsFromLine();
         } catch (DataErrorException ex) {
             clientForm.reject("projects", ex.getMessage());
             return badRequest(views.html.client_createForm.render(clientForm));
         }
-        clientForm.get().save();
-        ClientProjectAssociation.addNew(clientForm.get().id, projects);
-        flash("success", "Client " + clientForm.get().name + " has been created");
+        Client newClient = new Client();
+        newClient.name = input.name;
+        newClient.password = input.password;
+        newClient.save();
+        ClientProjectAssociation.addNew(newClient.id, projects);
+        flash("success", "Client " + newClient.name + " has been created");
         return list();
     }
-    
+
     /**
      * Handle user deletion
      */
     @Security.Authenticated(Secured.class)
+    @Transactional
     public Result delete(Long id) {
         Client curClient = Secured.getClient(ctx());
         if (!curClient.is_admin) {
-            Form<Client> clientForm = formFactory.form(Client.class).bindFromRequest();
+            Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
             clientForm.reject("adminstrator", "Non administrators cannot delete clients.");
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }

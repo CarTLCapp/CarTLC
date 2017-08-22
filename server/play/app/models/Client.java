@@ -31,9 +31,6 @@ public class Client extends com.avaje.ebean.Model {
     @Constraints.Required
     public boolean is_admin;
 
-    // Used for the sake of forms:
-    public String projects;
-
     public static Finder<Long, Client> find = new Finder<Long, Client>(Client.class);
 
     public boolean isValid() {
@@ -102,32 +99,25 @@ public class Client extends com.avaje.ebean.Model {
         Client.addClient("guest", "tlc", false);
     }
 
-    public String getProjects() {
+    public String getProjectsLine() {
+        return getProjects(", ");
+    }
+
+    public String getProjectsBlock() {
+        return getProjects("\n");
+    }
+
+    public String getProjects(String split) {
         StringBuilder sbuf = new StringBuilder();
         List<Project> projects = ClientProjectAssociation.findProjects(id);
         for (Project project : projects) {
             if (sbuf.length() > 0) {
-                sbuf.append(", ");
+                sbuf.append(split);
             }
             sbuf.append(project.name);
         }
         return sbuf.toString();
     }
 
-    public List<Project> getProjectsFromLine() throws DataErrorException {
-        List<Project> projects = new ArrayList<Project>();
-        String[] lines = this.projects.split("\\n");
-        for (String line : lines) {
-            line = line.trim();
-            if (!line.isEmpty()) {
-                Project project = Project.findByName(line);
-                if (project == null) {
-                    throw new DataErrorException("No such project named: " + line);
-                }
-                projects.add(project);
-            }
-        }
-        return projects;
-    }
 }
 
