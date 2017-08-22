@@ -27,6 +27,7 @@ public class HomeController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result index() {
+        UserInfo.initUserInfo();
         return ok(
                 views.html.home.render(Secured.getUserInfo(ctx()))
         );
