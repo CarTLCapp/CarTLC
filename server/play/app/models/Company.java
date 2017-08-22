@@ -150,9 +150,9 @@ public class Company extends Model {
 
     public String getCreatedBy() {
         if (created_by != 0) {
-            Client client = Client.find.byId((long) created_by);
-            if (client != null) {
-                return client.fullName();
+            Technician tech = Technician.find.byId((long) created_by);
+            if (tech != null) {
+                return tech.fullName();
             }
         }
         return "";

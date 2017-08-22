@@ -47,11 +47,11 @@ public class Message extends com.avaje.ebean.Model {
     public String trace;
 
     public String getTechName() {
-        Client client = Client.find.byId((long) tech_id);
-        if (client == null) {
+        Technician tech = Technician.find.byId((long) tech_id);
+        if (tech == null) {
             return "NOT FOUND: " + tech_id;
         }
-        return client.fullName();
+        return tech.fullName();
     }
 
     public String getCodeName() {

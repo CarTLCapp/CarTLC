@@ -11,24 +11,26 @@ create table message (
   trace         text
 );
 
-create table user_info (
+create table client_info (
     id          int auto_increment primary key,
     name        varchar(128),
     password    varchar(128),
     is_admin    bit default 0
 );
 
-create table user_project_association (
+create table client_project_association (
     id           int auto_increment primary key,
-    user_info_id int,
+    client_info_id int,
     project_id   int
 );
 
-alter table user_project_association add constraint c_upa_user_info_id foreign key (user_info_id) references user_info (id) on delete restrict on update restrict;
-alter table user_project_association add constraint c_upa_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table client rename technician;
+alter table client_project_association add constraint c_cpa_user_info_id foreign key (client_info_id) references client_info (id) on delete restrict on update restrict;
+alter table client_project_association add constraint c_cpa_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 
 # --- !Downs
 
 drop table if exists message;
-drop table if exists user_info;
-drop table if exists user_project_association;
+drop table if exists client_info;
+drop table if exists client_project_association;
+alter table technician rename client;

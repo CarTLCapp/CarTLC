@@ -12,21 +12,21 @@ GET     /login                    controllers.HomeController.login()
 POST    /login                    controllers.HomeController.postLogin()
 GET     /logout                   controllers.HomeController.logout()
 
-### USERS ###
+### TECHNICIANS ###
 
 # Users list
-GET     /client                    controllers.ClientController.list()
+GET     /tech                      controllers.TechnicianController.list()
 
-# Add User
-GET     /client/new                controllers.ClientController.create()
-POST    /client                    controllers.ClientController.save()
+# Add Technician
+GET     /tech/new                controllers.TechnicianController.create()
+POST    /tech                    controllers.TechnicianController.save()
 
-# Edit existing user
-GET     /client/:id                controllers.ClientController.edit(id:Long)
-POST    /client/:id                controllers.ClientController.update(id:Long)
+# Edit existing technician
+GET     /tech/:id                controllers.TechnicianController.edit(id:Long)
+POST    /tech/:id                controllers.TechnicianController.update(id:Long)
 
-# Delete a user
-POST    /client/:id/delete         controllers.ClientController.delete(id:Long)
+# Delete a technician
+POST    /tech/:id/delete         controllers.TechnicianController.delete(id:Long)
 
 ### PROJECTS ###
 

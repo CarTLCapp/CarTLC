@@ -12,18 +12,18 @@ import play.data.format.*;
  * User entity managed by Ebean
  */
 @Entity 
-public class Client extends com.avaje.ebean.Model {
+public class Technician extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
-    public static Finder<Long,Client> find = new Finder<Long,Client>(Client.class);
+    public static Finder<Long,Technician> find = new Finder<Long,Technician>(Technician.class);
 
-    public static List<Client> list() {
+    public static List<Technician> list() {
         return find.all();
     }
 
-    public static Client findByDeviceId(String device_id) throws DataErrorException {
-        List<Client> items = find.where()
+    public static Technician findByDeviceId(String device_id) throws DataErrorException {
+        List<Technician> items = find.where()
                 .eq("device_id", device_id)
                 .findList();
         if (items.size() == 1) {
@@ -36,8 +36,8 @@ public class Client extends com.avaje.ebean.Model {
     }
 
     @Transactional
-    public static Client findByName(String first_name, String last_name) throws DataErrorException {
-        List<Client> items = find.where()
+    public static Technician findByName(String first_name, String last_name) throws DataErrorException {
+        List<Technician> items = find.where()
                 .eq("first_name", first_name)
                 .eq("last_name", last_name)
                 .findList();

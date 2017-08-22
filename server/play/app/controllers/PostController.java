@@ -10,7 +10,7 @@ import play.libs.Json;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import play.db.ebean.Transactional;
-import models.Client;
+import models.Technician;
 import models.Version;
 import java.lang.System;
 import java.util.Date;
@@ -47,20 +47,20 @@ public class PostController extends Controller
         Transaction txn = Ebean.beginTransaction();
         Result res;
 		try {
-			Client client = Client.findByDeviceId(device_id);
-			if (client == null) {
+			Technician tech = Technician.findByDeviceId(device_id);
+			if (tech == null) {
                 // Locate by pure name
-                client = Client.findByName(first_name, last_name);
-                if (client == null) {
-                    client = new Client();
+                tech = Technician.findByName(first_name, last_name);
+                if (tech == null) {
+                    tech = new Technician();
                 }
 			}
-            client.first_name = first_name;
-            client.last_name = last_name;
-            client.device_id = device_id;
-            client.save();
+            tech.first_name = first_name;
+            tech.last_name = last_name;
+            tech.device_id = device_id;
+            tech.save();
             txn.commit();
-            res = ok(Long.toString(client.id));
+            res = ok(Long.toString(tech.id));
         } catch (Exception ex) {
             res = badRequest(ex.getMessage());
         } finally {
@@ -99,14 +99,14 @@ public class PostController extends Controller
 		result.put(Version.VERSION_EQUIPMENT, Version.get(Version.VERSION_EQUIPMENT));
 		result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
 
-		Client client = Client.find.byId((long) tech_id);
-		if (client != null) {
-			if (client.reset_upload) {
+		Technician tech = Technician.find.byId((long) tech_id);
+		if (tech != null) {
+			if (tech.reset_upload) {
 				result.put("reset_upload", true);
-				client.reset_upload = false;
+				tech.reset_upload = false;
 			}
-			client.last_ping = new Date(System.currentTimeMillis());
-			client.save();
+			tech.last_ping = new Date(System.currentTimeMillis());
+			tech.save();
 		} else {
 			Logger.error("ping(): could not find technician with ID " + tech_id);
 			result.put("re-register", true);

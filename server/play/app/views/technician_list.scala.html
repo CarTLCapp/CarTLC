@@ -1,4 +1,4 @@
-@(currentPage: List[Client], userInfo : UserInfo)
+@(currentPage: List[Technician], userInfo : UserInfo)
 
 @main("FleetTLC - List Users", userInfo) {
 
@@ -12,7 +12,7 @@
         
     } else {
         
-        <table class="clients zebra-striped">
+        <table class="techs zebra-striped">
             <thead>
                 <tr>
                     <th>First Name</th>
@@ -24,31 +24,31 @@
             </thead>
             <tbody>
 
-                @for(client <- currentPage) {
+                @for(tech <- currentPage) {
                     <tr>
                         <td>
-                            @if(client.first_name == null) {
+                            @if(tech.first_name == null) {
                                 <em>-</em>
                             } else {
-                                @client.first_name
+                                @tech.first_name
                             }
                         </td>
                         <td>
-                            @if(client.last_name == null) {
+                            @if(tech.last_name == null) {
                                 <em>-</em>
                             } else {
-                                @client.last_name
+                                @tech.last_name
                             }
                         </td>
                         <td>
-                            @client.id
+                            @tech.id
                         </td>
                         <td>
-                            @client.device_id
+                            @tech.device_id
                         </td>
                         <td>
                             @if(userInfo.is_admin) {
-                                <a href="@routes.ClientController.edit(client.id)">Edit</a>
+                                <a href="@routes.TechnicianController.edit(tech.id)">Edit</a>
                             } else {
                                 <em>-</em>
                             }
@@ -61,7 +61,7 @@
         
     }
 
-    <!--<a class="btn success" id="add" href="@routes.ClientController.create()">Add a new user</a>-->
+    <!--<a class="btn success" id="add" href="@routes.TechnicianController.create()">Add a new user</a>-->
 }
 
             
