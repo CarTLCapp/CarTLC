@@ -119,7 +119,9 @@ public class ClientController extends Controller {
         newClient.save();
         List<Project> projects = new ArrayList<Project>();
         for (Project project : Project.list()) {
-            if (clientForm.field(project.name) != null && clientForm.field(project.name).value().equals("true")) {
+            if (clientForm.field(project.name) != null &&
+                    clientForm.field(project.name).value() != null &&
+                    clientForm.field(project.name).value().equals("true")) {
                 projects.add(project);
             }
         }

@@ -13,6 +13,9 @@
         <fieldset>
             @b3.text(techForm("name"), '_label -> "Logon name:  ", '_help -> "")
             @b3.text(techForm("password"), '_label -> "Password:  ", '_help -> "")
+
+            <h3>Projects</h3>
+
             @for(project <- Project.list()) {
                 @b3.checkbox(techForm(project.name), '_label -> project.name)
                 <p><br></p>
