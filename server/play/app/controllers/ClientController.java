@@ -71,7 +71,7 @@ public class ClientController extends Controller {
             clientForm.reject("adminstrator", "Non administrators cannot change clients.");
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
-        clientForm.get().save();
+        clientForm.get().update();
         ClientProjectAssociation.addNew(id, getCheckedProjects(clientForm));
         flash("success", "Client " + clientForm.get().name + " has been updated");
 
