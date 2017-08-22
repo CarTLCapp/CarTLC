@@ -19,38 +19,38 @@ public class InputClient extends Model {
 
     public String password;
 
-    public String projects;
+    public List<Long> projects = new ArrayList<Long>();
+//
+//    public static InputClient get(long client_id) {
+//        return new InputClient(Client.find.byId(client_id));
+//    }
 
-    public String[] getProjectLines() {
-        return projects.split("\\n");
-    }
-
-    public static InputClient find(long client_id) {
-        Client client = Client.find.byId(client_id);
-        if (client == null) {
-            return null;
+    public void addProject(long project_id) {
+        if (!projects.contains(project_id)) {
+            projects.add(project_id);
         }
-        InputClient input = new InputClient();
-        input.name = client.name;
-        input.password = client.password;
-        input.projects = client.getProjectsBlock();
-        return input;
     }
 
-    public List<Project> getProjectsFromLine() throws DataErrorException {
+    public void removeProject(long project_id) {
+        if (projects.contains(project_id)) {
+            projects.remove(project_id);
+        }
+    }
+
+    public boolean hasProject(long project_id) {
+        return projects.contains(project_id);
+    }
+
+    public List<Project> getProjects() {
         List<Project> projects = new ArrayList<Project>();
-        String[] lines = this.projects.split("\\n");
-        for (String line : lines) {
-            line = line.trim();
-            if (!line.isEmpty()) {
-                Project project = Project.findByName(line);
-                if (project == null) {
-                    throw new DataErrorException("No such project named: " + line);
-                }
+        for (Long id : this.projects) {
+            Project project = Project.find.byId(id);
+            if (project != null) {
                 projects.add(project);
             }
         }
         return projects;
     }
+
 }
 

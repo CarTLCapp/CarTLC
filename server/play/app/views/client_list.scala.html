@@ -28,10 +28,14 @@
                         <td>@client.password</td>
                         <td>@client.getProjectsLine()</td>
                         <td>
-                            @if(curClient.is_admin) {
-                                <a href="@routes.ClientController.edit(client.id)">Edit</a>
+                            @if(client.is_admin) {
+                                <em>Admin</em>
                             } else {
-                                <em>-</em>
+                                if(curClient.is_admin){
+                                    <a href="@routes.ClientController.edit(client.id)">Edit</a>
+                                } else {
+                                    <em>-</em>
+                                }
                             }
                         </td>
                     </tr>

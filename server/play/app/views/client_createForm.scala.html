@@ -13,7 +13,30 @@
         <fieldset>
             @b3.text(techForm("name"), '_label -> "Logon name", '_help -> "")
             @b3.text(techForm("password"), '_label -> "Password", '_help -> "")
-            @helper.textarea(techForm("projects"), 'rows -> 10, 'cols -> 80, '_label -> "Projects")
+
+            <table class="projects zebra-striped">
+                <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                @for(project <- Project.list()) {
+                <tr>
+                    <td>@project.name</td>
+                    <td>
+                        @if(techForm.get().hasProject(project.id)) {
+                            <a href="@routes.ClientController.removeProjectCreate(project.id)">Delete</a>
+                        } else {
+                            <a href="@routes.ClientController.addProjectCreate(project.id)">Add</a>
+                        }
+                    </td>
+                </tr>
+                }
+                </tbody>
+            </table>
         </fieldset>
         
         <div class="actions">

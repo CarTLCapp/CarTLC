@@ -11,6 +11,7 @@ import play.data.validation.*;
 import play.Logger;
 
 import com.avaje.ebean.*;
+import play.db.ebean.Transactional;
 
 /**
  * Project entity managed by Ebean
@@ -49,6 +50,35 @@ public class ClientProjectAssociation extends Model {
             }
         }
         return list;
+    }
+
+    public static boolean hasProject(long client_id, long project_id) {
+        List<ClientProjectAssociation> items = find.where()
+                .eq("client_id", client_id)
+                .eq("project_id", project_id)
+                .findList();
+        return items.size() > 0;
+    }
+
+    @Transactional
+    public static void addEntry(long client_id, long project_id) {
+        if (!hasProject(client_id, project_id)) {
+            ClientProjectAssociation entry = new ClientProjectAssociation();
+            entry.client_id = client_id;
+            entry.project_id = project_id;
+            entry.save();
+        }
+    }
+
+    @Transactional
+    public static void deleteEntry(long client_id, long project_id) {
+        List<ClientProjectAssociation> items = find.where()
+                .eq("client_id", client_id)
+                .eq("project_id", project_id)
+                .findList();
+        for (ClientProjectAssociation item : items) {
+            item.delete();
+        }
     }
 
     public static void deleteEntries(long client_id) {

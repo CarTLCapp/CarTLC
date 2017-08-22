@@ -2,6 +2,7 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+
 import play.db.ebean.Transactional;
 
 import play.mvc.*;
@@ -43,10 +44,11 @@ public class ClientController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
+        Form<Client> clientForm = formFactory.form(Client.class).fill(Client.find.byId(id));
         if (Secured.isAdmin(ctx())) {
-            Form<InputClient> clientForm = formFactory.form(InputClient.class).fill(InputClient.find(id));
             return ok(views.html.client_editForm.render(id, clientForm));
         } else {
+            clientForm.reject("adminstrator", "Non administrators cannot change clients.");
             return badRequest(views.html.home.render(Secured.getClient(ctx())));
         }
     }
@@ -59,7 +61,7 @@ public class ClientController extends Controller {
     @Transactional
     @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
-        Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
+        Form<Client> clientForm = formFactory.form(Client.class).bindFromRequest();
         if (clientForm.hasErrors()) {
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
@@ -68,32 +70,40 @@ public class ClientController extends Controller {
             clientForm.reject("adminstrator", "Non administrators cannot change clients.");
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
-        Transaction txn = Ebean.beginTransaction();
-        try {
-            Client savedClient = Client.find.byId(id);
-            if (savedClient == null) {
-                clientForm.reject("adminstrator", "Bad id : " + id);
-                return badRequest(views.html.client_editForm.render(id, clientForm));
-            }
-            InputClient newClientData = clientForm.get();
-            List<Project> projects;
-            try {
-                projects = newClientData.getProjectsFromLine();
-            } catch (DataErrorException ex) {
-                return badRequest(views.html.client_editForm.render(id, clientForm));
-            }
-            savedClient.name = newClientData.name;
-            savedClient.password = newClientData.password;
-            savedClient.update();
+        clientForm.get().save();
+        flash("success", "Client " + clientForm.get().name + " has been updated");
 
-            ClientProjectAssociation.addNew(id, projects);
-
-            flash("success", "Client " + savedClient.name + " has been updated");
-            txn.commit();
-        } finally {
-            txn.end();
-        }
         return list();
+    }
+
+    @Transactional
+    @Security.Authenticated(Secured.class)
+    public Result addProject(long client_id, long project_id) {
+        ClientProjectAssociation.addEntry(client_id, project_id);
+        return edit(client_id);
+    }
+
+    @Transactional
+    @Security.Authenticated(Secured.class)
+    public Result removeProject(long client_id, long project_id) {
+        ClientProjectAssociation.deleteEntry(client_id, project_id);
+        return edit(client_id);
+    }
+
+    @Transactional
+    @Security.Authenticated(Secured.class)
+    public Result addProjectCreate(long project_id) {
+        Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
+        clientForm.get().addProject(project_id);
+        return ok(views.html.client_createForm.render(clientForm));
+    }
+
+    @Transactional
+    @Security.Authenticated(Secured.class)
+    public Result removeProjectCreate(long project_id) {
+        Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
+        clientForm.get().removeProject(project_id);
+        return ok(views.html.client_createForm.render(clientForm));
     }
 
     /**
@@ -121,18 +131,11 @@ public class ClientController extends Controller {
             return badRequest(views.html.client_createForm.render(clientForm));
         }
         InputClient input = clientForm.get();
-        List<Project> projects;
-        try {
-            projects = input.getProjectsFromLine();
-        } catch (DataErrorException ex) {
-            clientForm.reject("projects", ex.getMessage());
-            return badRequest(views.html.client_createForm.render(clientForm));
-        }
         Client newClient = new Client();
         newClient.name = input.name;
         newClient.password = input.password;
         newClient.save();
-        ClientProjectAssociation.addNew(newClient.id, projects);
+        ClientProjectAssociation.addNew(newClient.id, input.getProjects());
         flash("success", "Client " + newClient.name + " has been created");
         return list();
     }
@@ -145,7 +148,7 @@ public class ClientController extends Controller {
     public Result delete(Long id) {
         Client curClient = Secured.getClient(ctx());
         if (!curClient.is_admin) {
-            Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
+            Form<Client> clientForm = formFactory.form(Client.class).bindFromRequest();
             clientForm.reject("adminstrator", "Non administrators cannot delete clients.");
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
