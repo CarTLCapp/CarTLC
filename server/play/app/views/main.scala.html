@@ -1,4 +1,4 @@
-@(header: String, client : Client = null)(content: Html)
+@(header: String, client : Client = null, home : String = "/")(content: Html)
 
 <!DOCTYPE html>
 <html>
@@ -11,7 +11,7 @@
     <body>
         
         <header class="topbar">
-            <h1 class="fill"><a href="@routes.HomeController.index">@header</a>
+            <h1 class="fill"><a href=@home>@header</a>
                 @if(client!=null) {
                     <span style="float:right;font-size:15px">
                         @if(client.isValid()){
