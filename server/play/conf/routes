@@ -126,8 +126,6 @@ GET     /client/:id                             controllers.ClientController.edi
 POST    /client/:id                             controllers.ClientController.update(id:Long)
 GET     /client/:id/project/:projectId/add      controllers.ClientController.addProject(id:Long, projectId:Long)
 GET     /client/:id/project/:projectId/remove   controllers.ClientController.removeProject(id:Long, projectId:Long)
-GET     /client/project/:projectId/add          controllers.ClientController.addProjectCreate(projectId:Long)
-GET     /client/project/:projectId/remove       controllers.ClientController.removeProjectCreate(projectId:Long)
 
 # Delete a client
 POST    /client/:id/delete         controllers.ClientController.delete(id:Long)

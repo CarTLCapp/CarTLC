@@ -17,6 +17,7 @@ import javax.persistence.PersistenceException;
 
 import java.util.List;
 import java.util.ArrayList;
+import play.Logger;
 
 /**
  * Manage a database of users
@@ -88,22 +89,6 @@ public class ClientController extends Controller {
     public Result removeProject(long client_id, long project_id) {
         ClientProjectAssociation.deleteEntry(client_id, project_id);
         return edit(client_id);
-    }
-
-    @Transactional
-    @Security.Authenticated(Secured.class)
-    public Result addProjectCreate(long project_id) {
-        Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
-        clientForm.get().addProject(project_id);
-        return ok(views.html.client_createForm.render(clientForm));
-    }
-
-    @Transactional
-    @Security.Authenticated(Secured.class)
-    public Result removeProjectCreate(long project_id) {
-        Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
-        clientForm.get().removeProject(project_id);
-        return ok(views.html.client_createForm.render(clientForm));
     }
 
     /**
