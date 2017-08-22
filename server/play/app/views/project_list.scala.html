@@ -1,6 +1,6 @@
-@(currentPage: List[Project], userInfo : UserInfo)
+@(currentPage: List[Project], clientInfo : ClientInfo)
 
-@main("FleetTLC - List Projects", userInfo) {
+@main("FleetTLC - List Projects", clientInfo) {
 
     <h1 id="homeTitle">@Messages("project.list.title", currentPage.size())</h1>
 
@@ -35,7 +35,7 @@
                             @project.getEquipmentsLine()
                         </td>
                         <td>
-                            @if(userInfo.is_admin) {
+                            @if(clientInfo.is_admin) {
                                 <a href="@routes.ProjectController.edit(project.id)">Edit</a>
                             } else {
                                 <em>-</em>
@@ -49,7 +49,7 @@
         
     }
 
-    @if(userInfo.is_admin) {
+    @if(clientInfo.is_admin) {
         <a class="btn success" id="add" href="@routes.ProjectController.create()">Add a new project</a>
         <a class="btn success" id="addMany" href="@routes.ProjectController.createMany()">Add many projects</a>
     }

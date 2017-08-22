@@ -1,6 +1,6 @@
-@(currentPage: List[Technician], userInfo : UserInfo)
+@(currentPage: List[Technician], clientInfo : ClientInfo)
 
-@main("FleetTLC - List Users", userInfo) {
+@main("FleetTLC - List Technicians", clientInfo) {
 
     <h1 id="homeTitle">@Messages("users.list.title", currentPage.size())</h1>
 
@@ -47,7 +47,7 @@
                             @tech.device_id
                         </td>
                         <td>
-                            @if(userInfo.is_admin) {
+                            @if(clientInfo.is_admin) {
                                 <a href="@routes.TechnicianController.edit(tech.id)">Edit</a>
                             } else {
                                 <em>-</em>

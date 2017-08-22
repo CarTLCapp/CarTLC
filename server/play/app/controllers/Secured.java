@@ -1,6 +1,6 @@
 package controllers;
 
-import models.UserInfo;
+import models.ClientInfo;
 import play.mvc.Result;
 import play.mvc.Security;
 import play.mvc.Http.Context;
@@ -10,7 +10,7 @@ import play.mvc.Http.Context;
  * getUserName() and onUnauthorized override superclass methods to restrict
  * access to the profile() page to logged in users.
  *
- * getUser(), isLoggedIn(), and getUserInfo() provide static helper methods so that controllers
+ * getUser(), isLoggedIn(), and getClientInfo() provide static helper methods so that controllers
  * can know if there is a logged in user.
  */
 public class Secured extends Security.Authenticator {
@@ -56,7 +56,7 @@ public class Secured extends Security.Authenticator {
      * True if there is the logged in user is an adminstrator, false otherwise.
      */
     public static boolean isAdmin(Context ctx) {
-        UserInfo info = getUserInfo(ctx);
+        ClientInfo info = getClientInfo(ctx);
         if (info != null) {
             return info.is_admin;
         }
@@ -64,19 +64,19 @@ public class Secured extends Security.Authenticator {
     }
 
     /**
-     * Return the UserInfo of the logged in user, or null if no user is logged in.
+     * Return the ClientInfo of the logged in user, or null if no user is logged in.
      */
-    public static UserInfo getUserInfo(Context ctx) {
+    public static ClientInfo getClientInfo(Context ctx) {
         try {
             if (isLoggedIn(ctx)) {
-                UserInfo userInfo = UserInfo.getUser(getUser(ctx));
-                if (userInfo != null) {
-                    return userInfo;
+                ClientInfo clientInfo = ClientInfo.getUser(getUser(ctx));
+                if (clientInfo != null) {
+                    return clientInfo;
                 }
             }
         } catch (Exception ex) {
         }
-        return new UserInfo();
+        return new ClientInfo();
     }
 
 }

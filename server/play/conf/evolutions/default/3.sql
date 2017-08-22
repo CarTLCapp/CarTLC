@@ -19,9 +19,9 @@ create table client_info (
 );
 
 create table client_project_association (
-    id           int auto_increment primary key,
+    id             int auto_increment primary key,
     client_info_id int,
-    project_id   int
+    project_id     int
 );
 
 alter table client rename technician;
@@ -31,6 +31,6 @@ alter table client_project_association add constraint c_cpa_project_id foreign k
 # --- !Downs
 
 drop table if exists message;
-drop table if exists client_info;
 drop table if exists client_project_association;
+drop table if exists client_info;
 alter table technician rename client;

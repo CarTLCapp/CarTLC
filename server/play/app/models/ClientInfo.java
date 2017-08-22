@@ -13,7 +13,7 @@ import play.Logger;
  * User entity managed by Ebean
  */
 @Entity 
-public class UserInfo extends com.avaje.ebean.Model {
+public class ClientInfo extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,18 +29,18 @@ public class UserInfo extends com.avaje.ebean.Model {
     @Constraints.Required
     public boolean is_admin;
 
-    public static Finder<Long,UserInfo> find = new Finder<Long,UserInfo>(UserInfo.class);
+    public static Finder<Long,ClientInfo> find = new Finder<Long,ClientInfo>(ClientInfo.class);
 
     public boolean isValid() {
         return id != 0 && name != null;
     }
 
     @Transactional
-    public static UserInfo getUser(String username) {
+    public static ClientInfo getUser(String username) {
         if (username == null) {
             return null;
         }
-        List<UserInfo> items = find.where()
+        List<ClientInfo> items = find.where()
                 .eq("name", username)
                 .findList();
         if (items.size() == 0) {
@@ -56,12 +56,12 @@ public class UserInfo extends com.avaje.ebean.Model {
      */
     public static boolean isValid(String username, String password) {
         try {
-            UserInfo userInfo = getUser(username);
-            if (userInfo != null) {
-                if (userInfo.password == null) {
+            ClientInfo clientInfo = getUser(username);
+            if (clientInfo != null) {
+                if (clientInfo.password == null) {
                     return (password == null);
                 }
-                return userInfo.password.equals(password);
+                return clientInfo.password.equals(password);
             }
         } catch (Exception ex) {
             Logger.error(ex.getMessage());
@@ -70,25 +70,25 @@ public class UserInfo extends com.avaje.ebean.Model {
     }
 
     /**
-     * Adds the specified user to the UserInfoDB.
+     * Adds the specified user to the ClientInfoDB.
      * @param name Their name.
      * @param email Their email.
      * @param password Their password.
      */
     @Transactional
-    public static void addUserInfo(String name, String password, boolean isAdmin) {
+    public static void addClientInfo(String name, String password, boolean isAdmin) {
         if (getUser(name) == null) {
-            UserInfo userInfo = new UserInfo();
-            userInfo.name = name;
-            userInfo.password = password;
-            userInfo.is_admin = isAdmin;
-            userInfo.save();
+            ClientInfo clientInfo = new ClientInfo();
+            clientInfo.name = name;
+            clientInfo.password = password;
+            clientInfo.is_admin = isAdmin;
+            clientInfo.save();
         }
     }
 
-    public static void initUserInfo() {
-        UserInfo.addUserInfo("admin", "admintlc", true);
-        UserInfo.addUserInfo("guest", "tlc", false);
+    public static void initClientInfo() {
+        ClientInfo.addClientInfo("admin", "admintlc", true);
+        ClientInfo.addClientInfo("guest", "tlc", false);
     }
 }
 
