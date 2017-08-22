@@ -1,4 +1,4 @@
-@(techForm: Form[InputClient])
+@(techForm: Form[InputClient], inputClient : InputClient)
 
 @import helper._
 
@@ -27,7 +27,7 @@
                 <tr>
                     <td>@project.name</td>
                     <td>
-                        @if(techForm.get().hasProject(project.id)) {
+                        @if(inputClient.hasProject(project.id)) {
                             <a href="@routes.ClientController.removeProjectCreate(project.id)">Delete</a>
                         } else {
                             <a href="@routes.ClientController.addProjectCreate(project.id)">Add</a>

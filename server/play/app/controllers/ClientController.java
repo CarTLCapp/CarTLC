@@ -95,7 +95,7 @@ public class ClientController extends Controller {
     public Result addProjectCreate(long project_id) {
         Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
         clientForm.get().addProject(project_id);
-        return ok(views.html.client_createForm.render(clientForm));
+        return ok(views.html.client_createForm.render(clientForm, clientForm.get()));
     }
 
     @Transactional
@@ -103,7 +103,7 @@ public class ClientController extends Controller {
     public Result removeProjectCreate(long project_id) {
         Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
         clientForm.get().removeProject(project_id);
-        return ok(views.html.client_createForm.render(clientForm));
+        return ok(views.html.client_createForm.render(clientForm, clientForm.get()));
     }
 
     /**
@@ -112,7 +112,7 @@ public class ClientController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result create() {
         Form<InputClient> clientForm = formFactory.form(InputClient.class);
-        return ok(views.html.client_createForm.render(clientForm));
+        return ok(views.html.client_createForm.render(clientForm, clientForm.get()));
     }
 
     /**
@@ -123,12 +123,12 @@ public class ClientController extends Controller {
     public Result save() {
         Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
         if (clientForm.hasErrors()) {
-            return badRequest(views.html.client_createForm.render(clientForm));
+            return badRequest(views.html.client_createForm.render(clientForm, clientForm.get()));
         }
         Client curClient = Secured.getClient(ctx());
         if (!curClient.is_admin) {
             clientForm.reject("adminstrator", "Non administrators cannot create clients.");
-            return badRequest(views.html.client_createForm.render(clientForm));
+            return badRequest(views.html.client_createForm.render(clientForm, clientForm.get()));
         }
         InputClient input = clientForm.get();
         Client newClient = new Client();
