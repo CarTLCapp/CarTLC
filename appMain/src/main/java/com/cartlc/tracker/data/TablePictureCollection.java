@@ -49,9 +49,9 @@ public class TablePictureCollection {
         }
     }
 
-    public void drop() {
-        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-    }
+//    public void drop() {
+//        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+//    }
 
     public void create() {
         StringBuilder sbuf = new StringBuilder();
@@ -111,7 +111,7 @@ public class TablePictureCollection {
     }
 
     public List<DataPicture> queryPendingPictures() {
-        final String selection = KEY_COLLECTION_ID + " =0";
+        final String selection = KEY_COLLECTION_ID + "=0";
         return query(selection, null);
     }
 

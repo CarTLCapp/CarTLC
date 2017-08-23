@@ -2,6 +2,7 @@ package com.cartlc.tracker.data;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.util.BitmapHelper;
@@ -24,7 +25,7 @@ public class DataPicture {
 
     File  unscaledFile;
     File  scaledFile;
-    int[] imgSize;
+//    int[] imgSize;
 
     public DataPicture() {
     }
@@ -98,10 +99,31 @@ public class DataPicture {
         BitmapHelper.rotate(getUnscaledFile(), -90);
     }
 
-    public int[] getImageSize() {
-        if (imgSize == null) {
-            imgSize = BitmapHelper.getImageSize(getUnscaledFile().getAbsolutePath());
+//    public int[] getImageSize() {
+//        if (imgSize == null) {
+//            imgSize = BitmapHelper.getImageSize(getUnscaledFile().getAbsolutePath());
+//        }
+//        return imgSize;
+//    }
+
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(id);
+        if (unscaledFilename != null) {
+            sbuf.append(", ");
+            sbuf.append(unscaledFilename);
         }
-        return imgSize;
+        if (scaledFilename != null) {
+            sbuf.append(", ");
+            sbuf.append(scaledFilename);
+        }
+        if (!TextUtils.isEmpty(note)) {
+            sbuf.append(", note=");
+            sbuf.append(note);
+        }
+        if (uploaded) {
+            sbuf.append(", UPLOADED");
+        }
+        return sbuf.toString();
     }
 }
