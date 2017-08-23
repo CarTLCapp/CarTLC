@@ -201,9 +201,13 @@ public class ProjectController extends Controller {
     @Security.Authenticated(Secured.class)
     @Transactional
     public Result enableProject(Long id) {
+        if (!Secured.isAdmin(ctx())) {
+            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+        }
         Project project = Project.find.byId(id);
         project.disabled = false;
         project.update();
+        Version.inc(Version.VERSION_PROJECT);
         return list();
     }
 
