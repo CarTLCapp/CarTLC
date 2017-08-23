@@ -1,6 +1,6 @@
 @(currentPage: List[Project], client : Client, disabled : Boolean)
 
-@main(Messages("project.list.header", disabled), client) {
+@main(Messages("project.list.header", if (disabled) "Disabled" else "Active"), client) {
 
     <h1 id="homeTitle">@Messages("project.list.title", currentPage.size())</h1>
 
