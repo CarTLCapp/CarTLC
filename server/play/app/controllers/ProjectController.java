@@ -159,7 +159,6 @@ public class ProjectController extends Controller {
             }
         }
         Version.inc(Version.VERSION_PROJECT);
-
         return list();
     }
 
@@ -196,6 +195,15 @@ public class ProjectController extends Controller {
             }
         }
         return ok(top);
+    }
+
+    @Security.Authenticated(Secured.class)
+    @Transactional
+    public Result enableProject(Long id) {
+        Project project = Project.find.byId(id);
+        project.disabled = false;
+        project.update();
+        return list();
     }
 
 }

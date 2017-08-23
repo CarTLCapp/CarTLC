@@ -89,5 +89,13 @@ public class Project extends Model implements Comparable<Project> {
         return Entry.countEntriesForProject(id);
     }
 
+    public static boolean isDisabled(long id) {
+        Project project = find.ref(id);
+        if (project == null) {
+            return false;
+        }
+        return project.disabled;
+    }
+
 }
 

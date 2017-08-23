@@ -24,10 +24,14 @@
     }
     
     @b3.form(routes.ProjectController.delete(id), 'class -> "topRight") {
-        @if(Entry.hasEntryForProject(id)) {
-            <input type="submit" value="Disable Project" class="btn danger">
+        @if(Project.isDisabled(id)) {
+            <a href="@routes.ProjectController.enableProject(id)" class="btn">Enable Project</a>
         } else {
-            <input type="submit" value="Delete Project" class="btn danger">
+            @if(Entry.hasEntryForProject(id)) {
+                <input type="submit" value="Disable Project" class="btn danger">
+            } else {
+                <input type="submit" value="Delete Project" class="btn danger">
+            }
         }
     }
 }

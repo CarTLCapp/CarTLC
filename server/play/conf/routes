@@ -44,6 +44,7 @@ POST    /project/:id                controllers.ProjectController.update(id:Long
 
 # Delete a project
 POST    /project/:id/delete         controllers.ProjectController.delete(id:Long)
+GET     /project/:id/enable         controllers.ProjectController.enableProject(id:Long)
 
 ### COMPANIES ###
 
