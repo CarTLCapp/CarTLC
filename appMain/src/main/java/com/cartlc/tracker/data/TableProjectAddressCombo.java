@@ -136,8 +136,13 @@ public class TableProjectAddressCombo {
             int idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID);
             DataProjectAddressCombo item;
             while (cursor.moveToNext()) {
-                item = new DataProjectAddressCombo(cursor.getLong(idxRowId), cursor.getLong(idxProjectId), cursor.getLong(idxAddressId));
-                list.add(item);
+                long projectId = cursor.getLong(idxProjectId);
+                if (!TableProjects.getInstance().isDisabled(projectId)) {
+                    long id = cursor.getLong(idxRowId);
+                    long addressId = cursor.getLong(idxAddressId);
+                    item = new DataProjectAddressCombo(id, projectId, addressId);
+                    list.add(item);
+                }
             }
             cursor.close();
         } catch (Exception ex) {

@@ -290,6 +290,14 @@ public class TableProjects {
         return null;
     }
 
+    public boolean isDisabled(long id) {
+        DataProject project = queryById(id);
+        if (project == null) {
+            return true;
+        }
+        return project.disabled;
+    }
+
     public DataProject queryByName(String name) {
         final String selection = KEY_NAME + "=?";
         final String[] selectionArgs = {name};
