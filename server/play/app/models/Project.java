@@ -81,5 +81,9 @@ public class Project extends Model implements Comparable<Project> {
         return name.equals(other.name);
     }
 
+    public static boolean hasDisabledProjects() {
+        return list(true).size() > 0;
+    }
+
 }
 

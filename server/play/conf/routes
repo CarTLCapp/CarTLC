@@ -28,6 +28,7 @@ POST    /tech/:id/delete         controllers.TechnicianController.delete(id:Long
 
 # Projects list
 GET     /project                    controllers.ProjectController.list()
+GET     /project_disabled           controllers.ProjectController.list_disabled()
 
 # Add project
 GET     /project/new                controllers.ProjectController.create()

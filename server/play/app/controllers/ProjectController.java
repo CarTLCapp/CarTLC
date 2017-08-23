@@ -40,6 +40,10 @@ public class ProjectController extends Controller {
     public Result list() {
         return list(false);
     }
+
+    public Result list_disabled() {
+        return list(true);
+    }
     /**
      * Display the list of projects.
      */
