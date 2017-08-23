@@ -11,6 +11,8 @@ create table message (
   trace         text
 );
 
+alter table client rename technician;
+
 create table client (
     id          int auto_increment primary key,
     name        varchar(128),
@@ -24,7 +26,6 @@ create table client_project_association (
     project_id     int
 );
 
-alter table client rename technician;
 alter table client_project_association add constraint c_cpa_user_info_id foreign key (client_id) references client (id) on delete restrict on update restrict;
 alter table client_project_association add constraint c_cpa_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 alter table picture_collection add note varchar(1028);
