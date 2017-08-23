@@ -3,6 +3,7 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
 
@@ -58,9 +59,9 @@ public class TableProjects {
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" integer, ");
         sbuf.append(KEY_DISABLED);
-        sbuf.append(" bit, ");
+        sbuf.append(" bit default 0, ");
         sbuf.append(KEY_IS_BOOT);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -92,15 +93,15 @@ public class TableProjects {
         }
     }
 
-    public void removeBootStrap() {
-        String where = KEY_IS_BOOT + "=1";
-        List<DataProject> list = query(where, null);
-        for (DataProject item : list) {
-            if ((TableEntry.getInstance().countProjects(item.id) == 0) && (TableProjectAddressCombo.getInstance().countProjects(item.id) == 0)) {
-                remove(item.id);
-            }
-        }
-    }
+//    public void removeBootStrap() {
+//        String where = KEY_IS_BOOT + "=1";
+//        List<DataProject> list = query(where, null);
+//        for (DataProject item : list) {
+//            if ((TableEntry.getInstance().countProjects(item.id) == 0) && (TableProjectAddressCombo.getInstance().countProjects(item.id) == 0)) {
+//                remove(item.id);
+//            }
+//        }
+//    }
 
     public void add(List<String> list) {
         mDb.beginTransaction();
@@ -109,6 +110,7 @@ public class TableProjects {
             for (String value : list) {
                 values.clear();
                 values.put(KEY_NAME, value);
+                values.put(KEY_DISABLED, 0);
                 mDb.insert(TABLE_NAME, null, values);
             }
             mDb.setTransactionSuccessful();
@@ -126,6 +128,7 @@ public class TableProjects {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, item);
             values.put(KEY_IS_BOOT, 1);
+            values.put(KEY_DISABLED, 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -144,6 +147,7 @@ public class TableProjects {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, item);
             values.put(KEY_SERVER_ID, server_id);
+            values.put(KEY_DISABLED, 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -196,16 +200,19 @@ public class TableProjects {
     public List<String> query(boolean activeOnly) {
         ArrayList<String> list = new ArrayList();
         try {
-            final String[] columns = {KEY_NAME};
+            final String[] columns = {KEY_NAME, KEY_DISABLED};
             final String orderBy = KEY_NAME + " ASC";
-            String where = null;
-            if (activeOnly) {
-                where = KEY_DISABLED + "=0";
-            }
-            Cursor cursor = mDb.query(TABLE_NAME, columns, where, null, null, null, orderBy);
+            // Warning: do not use KEY_DISABLED=0 in selection because I failed to include "default 0"
+            // for the column definition above on earlier versions. This means the value is actually NULL.
+            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, orderBy);
             int idxValue = cursor.getColumnIndex(KEY_NAME);
+            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
             while (cursor.moveToNext()) {
-                list.add(cursor.getString(idxValue));
+                String name = cursor.getString(idxValue);
+                boolean disabled = cursor.getShort(idxDisabled) == 1;
+                if (!activeOnly || !disabled) {
+                    list.add(name);
+                }
             }
             cursor.close();
         } catch (Exception ex) {
@@ -338,16 +345,14 @@ public class TableProjects {
     }
 
     public void removeOrDisable(DataProject project) {
-        if (project.isBootStrap) {
-            if ((TableEntry.getInstance().countProjects(project.id) == 0) && (TableProjectAddressCombo.getInstance().countProjects(project.id) == 0)) {
-                // No entries for this, so just remove.
-                Timber.i("remove(" + project.id + ", " + project.name + ")");
-                remove(project.id);
-            } else {
-                Timber.i("disable(" + project.id + ", " + project.name + ")");
-                project.disabled = true;
-                update(project);
-            }
+        if ((TableEntry.getInstance().countProjects(project.id) == 0) && (TableProjectAddressCombo.getInstance().countProjects(project.id) == 0)) {
+            // No entries for this, so just remove.
+            Timber.i("remove(" + project.id + ", " + project.name + ")");
+            remove(project.id);
+        } else {
+            Timber.i("disable(" + project.id + ", " + project.name + ")");
+            project.disabled = true;
+            update(project);
         }
     }
 

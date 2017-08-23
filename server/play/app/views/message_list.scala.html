@@ -55,11 +55,13 @@
                         <td>@message.log_time.format("yyyy-MM-dd kk:mm")</td>
                         <td>@message.getCodeName()</td>
                         <td>@message.message</td>
+                        <td>
                         @if(message.trace == null) {
                             <em>-</em>
                         } else {
-                            <td><a href="@routes.MessageController.view(message.id)">Trace</a></td>
+                            <a href="@routes.MessageController.view(message.id)">Trace</a>
                         }
+                        </td>
                     </tr>
                 }
 

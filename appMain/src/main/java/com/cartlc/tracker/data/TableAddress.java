@@ -131,11 +131,11 @@ public class TableAddress {
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
         sbuf.append(KEY_DISABLED);
-        sbuf.append(" bit, ");
+        sbuf.append(" bit default 0, ");
         sbuf.append(KEY_LOCAL);
-        sbuf.append(" bit, ");
+        sbuf.append(" bit default 0, ");
         sbuf.append(KEY_IS_BOOT);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -197,6 +197,8 @@ public class TableAddress {
             values.clear();
             values.put(KEY_COMPANY, company);
             values.put(KEY_LOCAL, 1);
+            values.put(KEY_DISABLED, 0);
+            values.put(KEY_IS_BOOT, 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -394,39 +396,39 @@ public class TableAddress {
         return id;
     }
 
-    public long queryAddressId(String company, String zipcode) {
-        long id = -1L;
-        try {
-            final String[] columns = {KEY_ROWID};
-            SelectionArgs args = new SelectionArgs(company, null, null, null, zipcode);
-            Cursor cursor = mDb.query(TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, null, null);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            if (cursor.moveToFirst()) {
-                id = cursor.getLong(idxRowId);
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return id;
-    }
-
-    public boolean hasCompanyName(String company) {
-        boolean has = false;
-        try {
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append(KEY_COMPANY);
-            sbuf.append(" =?");
-            final String selection = sbuf.toString();
-            final String[] selectionArgs = {company};
-            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
-            has = cursor.getCount() > 0;
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return has;
-    }
+//    public long queryAddressId(String company, String zipcode) {
+//        long id = -1L;
+//        try {
+//            final String[] columns = {KEY_ROWID};
+//            SelectionArgs args = new SelectionArgs(company, null, null, null, zipcode);
+//            Cursor cursor = mDb.query(TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, null, null);
+//            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
+//            if (cursor.moveToFirst()) {
+//                id = cursor.getLong(idxRowId);
+//            }
+//            cursor.close();
+//        } catch (Exception ex) {
+//            Timber.e(ex);
+//        }
+//        return id;
+//    }
+//
+//    public boolean hasCompanyName(String company) {
+//        boolean has = false;
+//        try {
+//            StringBuilder sbuf = new StringBuilder();
+//            sbuf.append(KEY_COMPANY);
+//            sbuf.append(" =?");
+//            final String selection = sbuf.toString();
+//            final String[] selectionArgs = {company};
+//            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
+//            has = cursor.getCount() > 0;
+//            cursor.close();
+//        } catch (Exception ex) {
+//            Timber.e(ex);
+//        }
+//        return has;
+//    }
 
     public void remove(long id) {
         try {

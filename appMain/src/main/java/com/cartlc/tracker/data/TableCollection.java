@@ -54,7 +54,7 @@ public abstract class TableCollection {
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
         sbuf.append(KEY_IS_BOOT);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 

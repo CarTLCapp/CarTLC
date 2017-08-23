@@ -66,7 +66,7 @@ public class TablePictureCollection {
         sbuf.append(KEY_UPLOADING_FILENAME);
         sbuf.append(" text, ");
         sbuf.append(KEY_UPLOADED);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 

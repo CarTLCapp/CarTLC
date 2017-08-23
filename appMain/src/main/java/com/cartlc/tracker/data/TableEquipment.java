@@ -66,13 +66,13 @@ public class TableEquipment {
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
         sbuf.append(KEY_CHECKED);
-        sbuf.append(" bit, ");
+        sbuf.append(" bit default 0, ");
         sbuf.append(KEY_LOCAL);
-        sbuf.append(" bit, ");
+        sbuf.append(" bit default 0, ");
         sbuf.append(KEY_IS_BOOT);
-        sbuf.append(" bit, ");
+        sbuf.append(" bit default 0, ");
         sbuf.append(KEY_DISABLED);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -108,6 +108,7 @@ public class TableEquipment {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, name);
             values.put(KEY_IS_BOOT, 1);
+            values.put(KEY_DISABLED, 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -126,6 +127,7 @@ public class TableEquipment {
             values.put(KEY_NAME, name);
             values.put(KEY_LOCAL, 1);
             values.put(KEY_CHECKED, 1);
+            values.put(KEY_DISABLED, 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {

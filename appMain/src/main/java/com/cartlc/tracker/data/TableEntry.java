@@ -60,15 +60,14 @@ public class TableEntry {
         this.mDb = db;
     }
 
-    public static void upgrade(SQLiteDatabase db) {
+    public static void upgrade2(SQLiteDatabase db) {
         try {
             db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_LICENSE_PLATE + " text");
         } catch (Exception ex) {
             Timber.e(ex);
         }
     }
-
-    public void clear() {
+   public void clear() {
         try {
             mDb.delete(TABLE_NAME, null, null);
         } catch (Exception ex) {

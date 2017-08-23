@@ -56,13 +56,13 @@ public class TableNote {
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
         sbuf.append(KEY_IS_BOOT);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 
-    public void drop() {
-        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-    }
+//    public void drop() {
+//        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+//    }
 
     public void clear() {
         try {

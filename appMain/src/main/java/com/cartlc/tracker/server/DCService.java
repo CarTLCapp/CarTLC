@@ -227,6 +227,10 @@ public class DCService extends IntentService {
                         project.name = name;
                         project.disabled = false;
                         TableProjects.getInstance().update(project);
+                    } else if (project.disabled) {
+                        Timber.i("Project re-enabled: " + name);
+                        project.disabled = false;
+                        TableProjects.getInstance().update(project);
                     } else {
                         Timber.i("No change: " + name);
                     }
@@ -237,8 +241,14 @@ public class DCService extends IntentService {
             for (String name : unprocessed) {
                 DataProject existing = TableProjects.getInstance().queryByName(name);
                 if (existing != null) {
+                    Timber.i("Project disable or delete: " + name);
                     TableProjects.getInstance().removeOrDisable(existing);
                 }
+            }
+            // DEBUG
+            for (String name : TableProjects.getInstance().query()) {
+                DataProject project = TableProjects.getInstance().queryByName(name);
+                Timber.i("Project " + name + " DISABLED=" + project.disabled);
             }
         } catch (Exception ex) {
             Timber.e(ex);

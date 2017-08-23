@@ -65,16 +65,19 @@ public class DatabaseManager {
             if (oldVersion == 1) {
                 if (newVersion >= 2) {
                     init(db);
-                    TableEntry.upgrade(db);
-                    if (newVersion == 3) {
+                    TableEntry.upgrade2(db);
+                    if (newVersion >= 3) {
                         TableCrash.Init(db);
                         TableCrash.getInstance().create();
                     }
                 }
             } else if (oldVersion == 2) {
-                if (newVersion == 3) {
+                if (newVersion >= 3) {
                     TableCrash.Init(db);
                     TableCrash.getInstance().create();
+                }
+            } else if (oldVersion == 3) {
+                if (newVersion >= 4) {
                 }
             }
         }

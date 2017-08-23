@@ -36,6 +36,7 @@ import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.PrefHelper;
@@ -529,6 +530,12 @@ public class MainActivity extends AppCompatActivity {
                 if (PrefHelper.getInstance().getProjectName() != null) {
                     mNext.setVisibility(View.VISIBLE);
                 }
+                // DEBUG
+                for (String name : TableProjects.getInstance().query()) {
+                    DataProject project = TableProjects.getInstance().queryByName(name);
+                    Timber.i("Check Project " + name + " DISABLED=" + project.disabled);
+                }
+                Timber.i("ACTUAL:");
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query(true));
                 break;
             case COMPANY:
