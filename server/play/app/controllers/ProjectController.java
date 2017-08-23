@@ -2,17 +2,22 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+
 import play.mvc.*;
 import play.data.*;
+
 import static play.data.Form.*;
+
 import play.Logger;
 
 import models.*;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+
 import play.db.ebean.Transactional;
 import play.libs.Json;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -32,7 +37,13 @@ public class ProjectController extends Controller {
      * Display the list of projects.
      */
     public Result list() {
-        return ok(views.html.project_list.render(Project.list(), Secured.getClient(ctx())));
+        return list(false);
+    }
+    /**
+     * Display the list of projects.
+     */
+    public Result list(boolean disabled) {
+        return ok(views.html.project_list.render(Project.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
     /**
@@ -94,7 +105,7 @@ public class ProjectController extends Controller {
      */
     public Result save() {
         Form<Project> projectForm = formFactory.form(Project.class).bindFromRequest();
-        if(projectForm.hasErrors()) {
+        if (projectForm.hasErrors()) {
             return badRequest(views.html.project_createForm.render(projectForm));
         }
         projectForm.get().save();

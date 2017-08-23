@@ -1,6 +1,6 @@
-@(currentPage: List[Project], client : Client)
+@(currentPage: List[Project], client : Client, disabled : Boolean)
 
-@main("FleetTLC - List Projects", client) {
+@main(Messages("project.list.header", disabled), client) {
 
     <h1 id="homeTitle">@Messages("project.list.title", currentPage.size())</h1>
 

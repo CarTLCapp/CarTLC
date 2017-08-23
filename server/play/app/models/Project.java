@@ -29,7 +29,15 @@ public class Project extends Model implements Comparable<Project> {
 
     public static Finder<Long,Project> find = new Finder<Long,Project>(Project.class);
 
-    public static List<Project> list() { return find.where().orderBy("name asc").findList(); }
+    public static List<Project> list() {
+        return list(false);
+    }
+
+    public static List<Project> list(boolean disabled) {
+        return find.where()
+                .eq("disabled", disabled)
+                .orderBy("name asc").findList();
+    }
 
     public static Project findByName(String name) {
         List<Project> projects = find.where()
