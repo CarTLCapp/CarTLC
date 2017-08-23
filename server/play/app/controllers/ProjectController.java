@@ -64,7 +64,7 @@ public class ProjectController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         Form<Project> projectForm = formFactory.form(Project.class).fill(Project.find.byId(id));
-        return ok(views.html.project_editForm.render(id, projectForm));
+        return ok(views.html.project_editForm.render(id, projectForm, Secured.getClient(ctx())));
     }
 
     /**
@@ -75,7 +75,7 @@ public class ProjectController extends Controller {
     public Result update(Long id) throws PersistenceException {
         Form<Project> projectForm = formFactory.form(Project.class).bindFromRequest();
         if (projectForm.hasErrors()) {
-            return badRequest(views.html.project_editForm.render(id, projectForm));
+            return badRequest(views.html.project_editForm.render(id, projectForm, Secured.getClient(ctx())));
         }
         Transaction txn = Ebean.beginTransaction();
         try {
@@ -112,6 +112,7 @@ public class ProjectController extends Controller {
      * Handle the 'new user form' submission
      */
     @Security.Authenticated(Secured.class)
+    @Transactional
     public Result save() {
         Form<Project> projectForm = formFactory.form(Project.class).bindFromRequest();
         if (projectForm.hasErrors() || !Secured.isAdmin(ctx())) {

@@ -1,10 +1,10 @@
-@(id: Long, projectForm: Form[Project])
+@(id: Long, projectForm: Form[Project], client : Client)
 
 @import helper._
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - Edit Project", home = "/project") {
+@main("FleetTLC - Edit Project", client, "/project") {
     
     <h1>Edit project</h1>
     
@@ -20,17 +20,18 @@
             <input type="submit" value="Save this project" class="btn primary"> or
             <a href="@routes.ProjectController.list()" class="btn">Cancel</a>
         </div>
-
     }
-    
-    @b3.form(routes.ProjectController.delete(id), 'class -> "topRight") {
-        @if(Project.isDisabled(id)) {
-            <a href="@routes.ProjectController.enableProject(id)" class="btn">Enable Project</a>
-        } else {
-            @if(Entry.hasEntryForProject(id)) {
-                <input type="submit" value="Disable Project" class="btn danger">
+
+    @if(client.is_admin) {
+        @b3.form(routes.ProjectController.delete(id), 'class -> "topRight") {
+            @if(Project.isDisabled(id)) {
+                <a href="@routes.ProjectController.enableProject(id)" class="btn">Enable Project</a>
             } else {
-                <input type="submit" value="Delete Project" class="btn danger">
+                @if(Entry.hasEntryForProject(id)) {
+                    <input type="submit" value="Disable Project" class="btn danger">
+                } else {
+                    <input type="submit" value="Delete Project" class="btn danger">
+                }
             }
         }
     }
