@@ -20,6 +20,7 @@ import play.libs.Json;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import play.db.ebean.Transactional;
 
 /**
@@ -41,11 +42,15 @@ public class ProjectController extends Controller {
         return list(false);
     }
 
+    /**
+     * Display the list of disabled projects.
+     */
     public Result list_disabled() {
         return list(true);
     }
+
     /**
-     * Display the list of projects.
+     * Display the list of active or disabled projects.
      */
     public Result list(boolean disabled) {
         return ok(views.html.project_list.render(Project.list(disabled), Secured.getClient(ctx()), disabled));
@@ -58,9 +63,7 @@ public class ProjectController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
-        Form<Project> projectForm = formFactory.form(Project.class).fill(
-                Project.find.byId(id)
-        );
+        Form<Project> projectForm = formFactory.form(Project.class).fill(Project.find.byId(id));
         return ok(views.html.project_editForm.render(id, projectForm));
     }
 
@@ -108,9 +111,10 @@ public class ProjectController extends Controller {
     /**
      * Handle the 'new user form' submission
      */
+    @Security.Authenticated(Secured.class)
     public Result save() {
         Form<Project> projectForm = formFactory.form(Project.class).bindFromRequest();
-        if (projectForm.hasErrors()) {
+        if (projectForm.hasErrors() || !Secured.isAdmin(ctx())) {
             return badRequest(views.html.project_createForm.render(projectForm));
         }
         projectForm.get().save();
@@ -135,9 +139,10 @@ public class ProjectController extends Controller {
      * Create many projects at once.
      */
     @Transactional
+    @Security.Authenticated(Secured.class)
     public Result saveMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class).bindFromRequest();
-        if (linesForm.hasErrors()) {
+        if (linesForm.hasErrors() || !Secured.isAdmin(ctx())) {
             return badRequest(views.html.projects_createForm.render(linesForm));
         }
         String[] lines = linesForm.get().getLines();
@@ -162,7 +167,11 @@ public class ProjectController extends Controller {
      * Handle project deletion
      */
     @Transactional
+    @Security.Authenticated(Secured.class)
     public Result delete(Long id) {
+        if (!Secured.isAdmin(ctx())) {
+            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+        }
         if (Entry.hasEntryForProject(id)) {
             Project project = Project.find.ref(id);
             project.disabled = true;

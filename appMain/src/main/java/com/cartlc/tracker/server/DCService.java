@@ -212,6 +212,7 @@ public class DCService extends IntentService {
                         DataProject existing = TableProjects.getInstance().queryByName(name);
                         existing.server_id = server_id;
                         existing.isBootStrap = false;
+                        existing.disabled = false;
                         TableProjects.getInstance().update(existing);
                         Timber.i("Commandeer local: " + name);
                     } else {
@@ -224,6 +225,7 @@ public class DCService extends IntentService {
                     if (!name.equals(project.name)) {
                         Timber.i("New name: " + name);
                         project.name = name;
+                        project.disabled = false;
                         TableProjects.getInstance().update(project);
                     } else {
                         Timber.i("No change: " + name);

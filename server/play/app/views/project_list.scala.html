@@ -1,23 +1,25 @@
 @(currentPage: List[Project], client : Client, disabled : Boolean)
 
+@header = { @Messages("project.list.title", currentPage.size()) }
+
 @main(Messages("project.list.header", if (disabled) "Disabled" else "Active"), client) {
 
     @if(Project.hasDisabledProjects()) {
         @if(disabled) {
-            <h1 id="homeTitle" class="fill">@Messages("project.list.title", currentPage.size())
+            <h1 id="homeTitle" class="fill">@header
                 <span style="float:right;font-size:16px">
                     <a href="@routes.ProjectController.list()">Show Active Projects</a>
                 </span>
             </h1>
         } else {
-            <h1 id="homeTitle" class="fill">@Messages("project.list.title", currentPage.size())
+            <h1 id="homeTitle" class="fill">@header
                 <span style="float:right;font-size:16px">
                     <a href="@routes.ProjectController.list_disabled()">Show Disabled Projects</a>
                 </span>
             </h1>
         }
     } else {
-        <h1 id="homeTitle">@Messages("project.list.title", currentPage.size())</h1>
+        <h1 id="homeTitle">@header</h1>
     }
     @if(currentPage.size() == 0) {
         

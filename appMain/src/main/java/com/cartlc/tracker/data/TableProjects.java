@@ -190,12 +190,19 @@ public class TableProjects {
     }
 
     public List<String> query() {
+        return query(false);
+    }
+
+    public List<String> query(boolean activeOnly) {
         ArrayList<String> list = new ArrayList();
         try {
             final String[] columns = {KEY_NAME};
             final String orderBy = KEY_NAME + " ASC";
-
-            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, orderBy);
+            String where = null;
+            if (activeOnly) {
+                where = KEY_DISABLED + "=0";
+            }
+            Cursor cursor = mDb.query(TABLE_NAME, columns, where, null, null, null, orderBy);
             int idxValue = cursor.getColumnIndex(KEY_NAME);
             while (cursor.moveToNext()) {
                 list.add(cursor.getString(idxValue));
@@ -286,10 +293,10 @@ public class TableProjects {
         return null;
     }
 
-    List<DataProject> query(String selection, String [] selectionArgs) {
+    List<DataProject> query(String selection, String[] selectionArgs) {
         List<DataProject> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_DISABLED, KEY_IS_BOOT, };
+            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_DISABLED, KEY_IS_BOOT,};
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_NAME);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);

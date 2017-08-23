@@ -529,7 +529,7 @@ public class MainActivity extends AppCompatActivity {
                 if (PrefHelper.getInstance().getProjectName() != null) {
                     mNext.setVisibility(View.VISIBLE);
                 }
-                setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query());
+                setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query(true));
                 break;
             case COMPANY:
                 mPrev.setVisibility(View.VISIBLE);

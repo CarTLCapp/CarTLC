@@ -28,9 +28,7 @@ public class HomeController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result index() {
         Client.initClient();
-        return ok(
-                views.html.home.render(Secured.getClient(ctx()))
-        );
+        return ok(views.html.home.render(Secured.getClient(ctx())));
     }
 
     public static Result HOME() {
