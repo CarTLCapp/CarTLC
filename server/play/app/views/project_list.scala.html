@@ -3,11 +3,19 @@
 @main(Messages("project.list.header", if (disabled) "Disabled" else "Active"), client) {
 
     @if(Project.hasDisabledProjects()) {
-        <h1 id="homeTitle" class="fill">@Messages("project.list.title", currentPage.size())
-            <span style="float:right;font-size:16px">
-                <a href="@routes.ProjectController.list_disabled()">Show Disabled Projects</a>
-            </span>
-        </h1>
+        @if(disabled) {
+            <h1 id="homeTitle" class="fill">@Messages("project.list.title", currentPage.size())
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.ProjectController.list()">Show Active Projects</a>
+                </span>
+            </h1>
+        } else {
+            <h1 id="homeTitle" class="fill">@Messages("project.list.title", currentPage.size())
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.ProjectController.list_disabled()">Show Disabled Projects</a>
+                </span>
+            </h1>
+        }
     } else {
         <h1 id="homeTitle">@Messages("project.list.title", currentPage.size())</h1>
     }
@@ -24,6 +32,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Equipment</th>
+                    <th>Entries</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -38,9 +47,8 @@
                                 @project.name
                             }
                         </td>
-                        <td>
-                            @project.getEquipmentsLine()
-                        </td>
+                        <td>@project.getEquipmentsLine()</td>
+                        <td>@project.countEntries()</td>
                         <td>
                             @if(client.is_admin) {
                                 <a href="@routes.ProjectController.edit(project.id)">Edit</a>

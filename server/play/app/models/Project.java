@@ -85,5 +85,9 @@ public class Project extends Model implements Comparable<Project> {
         return list(true).size() > 0;
     }
 
+    public int countEntries() {
+        return Entry.countEntriesForProject(id);
+    }
+
 }
 
