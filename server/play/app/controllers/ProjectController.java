@@ -20,6 +20,7 @@ import play.libs.Json;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import play.db.ebean.Transactional;
 
 /**
  * Manage a database of projects.
@@ -156,11 +157,18 @@ public class ProjectController extends Controller {
     /**
      * Handle project deletion
      */
+    @Transactional
     public Result delete(Long id) {
-        // TODO: If the client is in the database, mark it as disabled instead.
-        Project.find.ref(id).delete();
+        if (Entry.hasEntryForProject(id)) {
+            Project project = Project.find.ref(id);
+            project.disabled = true;
+            project.save();
+            flash("success", "Project has been disabled: it had entries");
+        } else {
+            Project.find.ref(id).delete();
+            flash("success", "Project has been deleted");
+        }
         Version.inc(Version.VERSION_PROJECT);
-        flash("success", "Project has been deleted");
         return list();
     }
 

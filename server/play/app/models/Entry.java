@@ -139,6 +139,12 @@ public class Entry extends com.avaje.ebean.Model {
         delete();
     }
 
+    public static boolean hasEntryForProject(long project_id) {
+        List<Entry> items = find.where()
+                .eq("project_id", project_id).findList();
+        return items.size() > 0;
+    }
+
     public static boolean hasEntryForCompany(final int tech_id, final long address_id) {
         List<Entry> items = find.where()
                     .eq("tech_id", tech_id)

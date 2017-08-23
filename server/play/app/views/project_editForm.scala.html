@@ -24,7 +24,8 @@
     }
     
     @b3.form(routes.ProjectController.delete(id), 'class -> "topRight") {
-        <input type="submit" value="Delete this project" class="btn danger">
+        <input type="submit" value="Delete/Disable Project" class="btn danger">
+        <p>If the project has entries it will be disabled, otherwise it will be deleted</p>
     }
     
 }
