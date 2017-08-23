@@ -17,6 +17,8 @@ import timber.log.Timber;
 
 public class DataPicture {
 
+    static final int MAX_NOTE_LENGTH = 1000;
+
     public long    id;
     public String  unscaledFilename;
     public String  scaledFilename;
@@ -87,6 +89,10 @@ public class DataPicture {
     }
 
     public void setNote(String note) {
+        // Safety:
+        if (note.length() > MAX_NOTE_LENGTH) {
+            note = note.substring(0, MAX_NOTE_LENGTH);
+        }
         this.note = note;
         TablePictureCollection.getInstance().update(this, null);
     }
