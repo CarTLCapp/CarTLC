@@ -15,13 +15,17 @@
         <table class="pictures zebra-striped">
             <thead>
                 <tr>
-                    <th>Pictures</th>
+                    <th>Picture</th>
+                    <th>Note</th>
                 </tr>
             </thead>
             <tbody>
 
                 @for(entry <- currentPage) {
-                    <tr><td><img src='@routes.EntryController.getImage(entry.picture)'/></td></tr>
+                    <tr>
+                        <td><img src='@routes.EntryController.getImage(entry.picture)'/></td>
+                        <td>@entry.note</td>
+                    </tr>
                 }
 
             </tbody>

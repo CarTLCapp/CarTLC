@@ -52,12 +52,16 @@
     <table class="pictures zebra-striped">
         <thead>
         <tr>
-            <th>Pictures</th>
+            <th>Picture</th>
+            <th>Note</th>
         </tr>
         </thead>
         <tbody>
             @for(item <- entry.getPictures()) {
-                <tr><td><img src='@routes.EntryController.getImage(item.picture)'/></td></tr>
+                <tr>
+                    <td><img src='@routes.EntryController.getImage(item.picture)'/></td>
+                    <td>@item.note</td>
+                </tr>
             }
         </tbody>
     </table>

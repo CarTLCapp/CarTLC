@@ -29,6 +29,9 @@ public class PictureCollection extends Model {
     @Constraints.Required
     public String picture;
 
+    @Constraints.Required
+    public String note;
+
     public static Finder<Long,PictureCollection> find = new Finder<Long,PictureCollection>(PictureCollection.class);
 
     public static List<PictureCollection> list() { return find.all(); }

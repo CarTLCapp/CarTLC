@@ -240,6 +240,7 @@ public class EntryController extends Controller {
                     collection.collection_id = (long) collection_id;
                     JsonNode subvalue = ele.findValue("note");
                     if (subvalue != null) {
+                        collection.note = subvalue.textValue();
                     }
                     subvalue = ele.findValue("filename");
                     if (subvalue == null) {
