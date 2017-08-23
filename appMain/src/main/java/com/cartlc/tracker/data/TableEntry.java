@@ -67,7 +67,8 @@ public class TableEntry {
             Timber.e(ex);
         }
     }
-   public void clear() {
+
+    public void clear() {
         try {
             mDb.delete(TABLE_NAME, null, null);
         } catch (Exception ex) {

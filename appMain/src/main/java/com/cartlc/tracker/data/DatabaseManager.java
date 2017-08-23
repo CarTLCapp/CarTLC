@@ -13,7 +13,7 @@ import timber.log.Timber;
 public class DatabaseManager {
 
     static final String DATABASE_NAME    = "cartcl.db";
-    static final int    DATABASE_VERSION = 3;
+    static final int    DATABASE_VERSION = 5; // TODO: bring this back down to 3
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -69,15 +69,19 @@ public class DatabaseManager {
                     if (newVersion >= 3) {
                         TableCrash.Init(db);
                         TableCrash.getInstance().create();
+                        TablePictureCollection.upgrade3(db);
                     }
                 }
             } else if (oldVersion == 2) {
                 if (newVersion >= 3) {
                     TableCrash.Init(db);
                     TableCrash.getInstance().create();
+                    TablePictureCollection.upgrade3(db);
                 }
+                // TODO: Debug only, get rid of this code:
             } else if (oldVersion == 3) {
                 if (newVersion >= 4) {
+                    TablePictureCollection.upgrade3(db);
                 }
             }
         }

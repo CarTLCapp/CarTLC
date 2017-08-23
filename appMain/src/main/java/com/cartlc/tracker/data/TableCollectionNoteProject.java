@@ -56,7 +56,7 @@ public class TableCollectionNoteProject extends TableCollection {
         for (Long noteId : noteIds) {
             DataNote note = TableNote.getInstance().query(noteId);
             if (note == null) {
-                Timber.e("Could not find note with ID " + noteId);
+                Timber.e("Could not find picture_note with ID " + noteId);
             } else {
                 list.add(note);
             }

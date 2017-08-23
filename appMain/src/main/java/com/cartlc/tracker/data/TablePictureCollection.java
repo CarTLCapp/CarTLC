@@ -32,6 +32,7 @@ public class TablePictureCollection {
     static final String KEY_COLLECTION_ID      = "collection_id";
     static final String KEY_PICTURE_FILENAME   = "picture_filename";
     static final String KEY_UPLOADING_FILENAME = "uploading_filename";
+    static final String KEY_NOTE               = "picture_note";
     static final String KEY_UPLOADED           = "uploaded";
 
     final SQLiteDatabase mDb;
@@ -65,9 +66,19 @@ public class TablePictureCollection {
         sbuf.append(" text, ");
         sbuf.append(KEY_UPLOADING_FILENAME);
         sbuf.append(" text, ");
+        sbuf.append(KEY_NOTE);
+        sbuf.append(" text, ");
         sbuf.append(KEY_UPLOADED);
         sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
+    }
+
+    public static void upgrade3(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_NOTE + " text");
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
     }
 
     public DataPicture add(File picture) {
@@ -107,17 +118,18 @@ public class TablePictureCollection {
     public List<DataPicture> query(String selection, String[] selectionArgs) {
         List<DataPicture> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_PICTURE_FILENAME, KEY_UPLOADING_FILENAME, KEY_UPLOADED};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxPicture = cursor.getColumnIndex(KEY_PICTURE_FILENAME);
             int idxUploading = cursor.getColumnIndex(KEY_UPLOADING_FILENAME);
             int idxUploaded = cursor.getColumnIndex(KEY_UPLOADED);
+            int idxNote = cursor.getColumnIndex(KEY_NOTE);
             while (cursor.moveToNext()) {
                 list.add(new DataPicture(
                         cursor.getLong(idxRowId),
                         cursor.getString(idxPicture),
                         cursor.getString(idxUploading),
+                        cursor.getString(idxNote),
                         cursor.getShort(idxUploaded) != 0));
             }
             cursor.close();
@@ -220,6 +232,7 @@ public class TablePictureCollection {
             ContentValues values = new ContentValues();
             values.put(KEY_PICTURE_FILENAME, item.unscaledFilename);
             values.put(KEY_UPLOADING_FILENAME, item.scaledFilename);
+            values.put(KEY_NOTE, item.note);
             values.put(KEY_UPLOADED, item.uploaded ? 1 : 0);
             if (collection_id != null) {
                 values.put(KEY_COLLECTION_ID, collection_id);

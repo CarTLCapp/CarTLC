@@ -8,15 +8,19 @@ import com.cartlc.tracker.data.DataPicture;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -65,11 +69,13 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
     }
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
-        protected @BindView(R.id.picture)              ImageView imageView;
-        protected @Nullable @BindView(R.id.remove)     ImageView removeView;
-        protected @Nullable @BindView(R.id.rotate_cw)  ImageView rotateCWView;
-        protected @Nullable @BindView(R.id.rotate_ccw) ImageView rotateCCWView;
-        protected @BindView(R.id.loading) TextView loading;
+        protected @BindView(R.id.picture)               ImageView imageView;
+        protected @Nullable @BindView(R.id.remove)      ImageView removeView;
+        protected @Nullable @BindView(R.id.rotate_cw)   ImageView rotateCWView;
+        protected @Nullable @BindView(R.id.rotate_ccw)  ImageView rotateCCWView;
+        protected @Nullable @BindView(R.id.note_dialog) ImageView noteDialogView;
+        protected @BindView(R.id.note)                  TextView  noteView;
+        protected @BindView(R.id.loading)               TextView  loading;
 
         public CustomViewHolder(View view) {
             super(view);
@@ -81,10 +87,12 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
     protected List<DataPicture> mItems = new ArrayList();
     protected Integer mDecHeight;
     protected MyHandler mHandler = new MyHandler();
-    Integer mMaxHeight;
+    Integer        mMaxHeight;
+    LayoutInflater mLayoutInflater;
 
     public PictureListAdapter(Context context) {
         mContext = context;
+        mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     protected int getItemLayout() {
@@ -174,6 +182,22 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
                     }
                 });
             }
+            if (holder.noteDialogView != null) {
+                holder.noteDialogView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showPictureNoteDialog(item);
+                    }
+                });
+            }
+            if (holder.noteView != null) {
+                if (TextUtils.isEmpty(item.note)) {
+                    holder.noteView.setVisibility(View.INVISIBLE);
+                } else {
+                    holder.noteView.setVisibility(View.VISIBLE);
+                    holder.noteView.setText(item.note);
+                }
+            }
         }
     }
 
@@ -186,5 +210,30 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
         mItems = list;
         mMaxHeight = null;
         notifyDataSetChanged();
+    }
+
+    void showPictureNoteDialog(final DataPicture item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        final View noteView = mLayoutInflater.inflate(R.layout.picture_note, null);
+        builder.setView(noteView);
+
+        final EditText edt = (EditText) noteView.findViewById(R.id.note);
+        edt.setText(item.note);
+
+        builder.setTitle(R.string.picture_note_title);
+        builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                item.setNote(edt.getText().toString().trim());
+                dialog.dismiss();
+                notifyDataSetChanged();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog b = builder.create();
+        b.show();
     }
 }

@@ -62,4 +62,7 @@
 
     <!--<string name="entry_by_address">BY ADDRESS</string>-->
 
+    <string name="picture_note_hint">Enter note for picture</string>
+    <string name="picture_note_title">Picture Note</string>
+
 </resources>

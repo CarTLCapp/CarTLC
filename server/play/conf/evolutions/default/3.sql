@@ -27,6 +27,7 @@ create table client_project_association (
 alter table client rename technician;
 alter table client_project_association add constraint c_cpa_user_info_id foreign key (client_id) references client (id) on delete restrict on update restrict;
 alter table client_project_association add constraint c_cpa_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table picture_collection add note varchar(1028);
 
 # --- !Downs
 
@@ -34,3 +35,4 @@ drop table if exists message;
 drop table if exists client_project_association;
 drop table if exists client;
 alter table technician rename client;
+alter table picture_collection drop column note;

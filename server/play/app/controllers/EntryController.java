@@ -238,13 +238,17 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     PictureCollection collection = new PictureCollection();
                     collection.collection_id = (long) collection_id;
-                    JsonNode subvalue = ele.findValue("filename");
+                    JsonNode subvalue = ele.findValue("note");
+                    if (subvalue != null) {
+                    }
+                    subvalue = ele.findValue("filename");
                     if (subvalue == null) {
                         missing.add("filename");
                     } else {
                         collection.picture = subvalue.textValue();
                         collection.save();
                     }
+
                 }
                 entry.picture_collection_id = collection_id;
             }

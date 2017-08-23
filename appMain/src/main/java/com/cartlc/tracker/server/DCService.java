@@ -3,6 +3,7 @@ package com.cartlc.tracker.server;
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.cartlc.tracker.data.DataAddress;
@@ -166,7 +167,7 @@ public class DCService extends IntentService {
                 PrefHelper.getInstance().setVersionEquipment(version_equipment);
             }
             if (PrefHelper.getInstance().getVersionNote() != version_note) {
-                Timber.i("New note version " + version_note);
+                Timber.i("New picture_note version " + version_note);
                 queryNotes();
                 PrefHelper.getInstance().setVersionNote(version_note);
             }
@@ -497,7 +498,7 @@ public class DCService extends IntentService {
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
-                            Timber.i("New note: " + name);
+                            Timber.i("New picture_note: " + name);
                             TableNote.getInstance().add(incoming);
                         }
                     } else {
@@ -537,7 +538,7 @@ public class DCService extends IntentService {
                     incoming.collection_id = project.id;
                     DataNote note = TableNote.getInstance().queryByServerId(server_note_id);
                     if (note == null) {
-                        Timber.e("Can't find note with ID " + server_note_id);
+                        Timber.e("Can't find picture_note with ID " + server_note_id);
                         continue;
                     }
                     incoming.value_id = note.id;
@@ -552,7 +553,7 @@ public class DCService extends IntentService {
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
-                            Timber.i("New note collection. " + incoming.collection_id + ", " + incoming.value_id);
+                            Timber.i("New picture_note collection. " + incoming.collection_id + ", " + incoming.value_id);
                             TableCollectionNoteProject.getInstance().add(incoming);
                         }
                     } else {
@@ -637,6 +638,9 @@ public class DCService extends IntentService {
                 for (DataPicture picture : pictures) {
                     JSONObject jobj = new JSONObject();
                     jobj.put("filename", picture.getTailname());
+                    if (!TextUtils.isEmpty(picture.note)) {
+                        jobj.put("note", picture.note);
+                    }
                     jarray.put(jobj);
                 }
                 jsonObject.put("picture", jarray);

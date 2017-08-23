@@ -53,4 +53,25 @@
         android:layout_marginLeft="10dp"
         android:src="@drawable/arrow_rotate_cclockwise"/>
 
+    <ImageView
+        android:id="@+id/note_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/rotate_ccw"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:src="@drawable/note"/>
+
+    <TextView
+        android:id="@+id/note"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignBottom="@id/picture"
+        android:layout_alignLeft="@id/picture"
+        android:layout_alignRight="@id/picture"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        style="@style/PictureNoteText"/>
+
 </RelativeLayout>

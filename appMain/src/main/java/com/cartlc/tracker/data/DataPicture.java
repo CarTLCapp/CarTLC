@@ -19,6 +19,7 @@ public class DataPicture {
     public long    id;
     public String  unscaledFilename;
     public String  scaledFilename;
+    public String  note;
     public boolean uploaded;
 
     File  unscaledFile;
@@ -28,10 +29,11 @@ public class DataPicture {
     public DataPicture() {
     }
 
-    public DataPicture(long id, String pictureFilename, String uploadingFilename, boolean uploaded) {
+    public DataPicture(long id, String pictureFilename, String uploadingFilename, String note, boolean uploaded) {
         this.id = id;
         this.unscaledFilename = pictureFilename;
         this.scaledFilename = uploadingFilename;
+        this.note = note;
         this.uploaded = uploaded;
     }
 
@@ -81,6 +83,11 @@ public class DataPicture {
             scaledFile = new File(scaledFilename);
         }
         return scaledFile;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+        TablePictureCollection.getInstance().update(this, null);
     }
 
     public void rotateCW() {

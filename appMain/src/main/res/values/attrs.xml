@@ -72,4 +72,9 @@
     <style name="NoteText">
         <item name="android:textSize">18sp</item>
     </style>
+    <style name="PictureNoteText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@color/note_background</item>
+    </style>
 </resources>
