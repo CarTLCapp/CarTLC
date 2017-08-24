@@ -411,4 +411,34 @@ public class PrefHelper extends PrefHelperBase {
         setVersionEquipment(VERSION_RESET);
         setVersionEquipment(VERSION_RESET);
     }
+
+    public String getAddress() {
+        StringBuilder sbuf = new StringBuilder();
+        String company = getCompany();
+        if (company != null) {
+            sbuf.append(company);
+        }
+        String city = getCity();
+        if (city != null) {
+            if (sbuf.length() > 0) {
+                sbuf.append("\n");
+            }
+            sbuf.append(city);
+        }
+        String state = getState();
+        if (state != null) {
+            if (sbuf.length() > 0) {
+                sbuf.append(", ");
+            }
+            sbuf.append(state);
+        }
+        String zip = getZipCode();
+        if (zip != null) {
+            if (sbuf.length() > 0) {
+                sbuf.append(" " );
+            }
+            sbuf.append(zip);
+        }
+        return sbuf.toString();
+    }
 }

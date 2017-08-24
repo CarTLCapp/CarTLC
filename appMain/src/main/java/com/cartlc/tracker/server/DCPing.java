@@ -223,11 +223,6 @@ public class DCPing extends DCPost {
                     TableProjects.getInstance().removeOrDisable(existing);
                 }
             }
-            // DEBUG
-            for (String name : TableProjects.getInstance().query()) {
-                DataProject project = TableProjects.getInstance().queryByName(name);
-                Timber.i("Project " + name + " DISABLED=" + project.disabled);
-            }
         } catch (Exception ex) {
             Timber.e(ex);
         }

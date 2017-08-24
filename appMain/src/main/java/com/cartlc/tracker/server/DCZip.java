@@ -22,7 +22,7 @@ import timber.log.Timber;
 
 public class DCZip extends DCPost {
 
-    static final String AUTHORITY = "http://maps.googleapis.com";
+    static final String AUTHORITY = "maps.googleapis.com";
 
     enum ObjectType {
         IGNORED,
@@ -68,8 +68,9 @@ public class DCZip extends DCPost {
             }
             DataZipCode data = new DataZipCode();
             JSONObject root = new JSONObject(result);
-            JSONObject results = root.getJSONObject("results");
-            JSONArray components = results.getJSONArray("address_components");
+            JSONArray results = root.getJSONArray("results");
+            JSONObject result0 = results.getJSONObject(0);
+            JSONArray components = result0.getJSONArray("address_components");
             for (int i = 0; i < components.length(); i++) {
                 JSONObject ele = components.getJSONObject(i);
                 JSONArray types = ele.getJSONArray("types");

@@ -17,8 +17,11 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.telephony.PhoneNumberUtils;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +35,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.amazonaws.util.StringUtils;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
@@ -39,6 +43,7 @@ import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
+import com.cartlc.tracker.data.DataZipCode;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntry;
@@ -47,9 +52,11 @@ import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 import com.cartlc.tracker.data.TablePictureCollection;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
+import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.event.EventPingDone;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -64,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
     static final int AUTO_RETURN_DELAY_MS = 100;
     static final int MSG_AUTO_RETURN      = 0;
     static final int MSG_REFRESH_PROJECTS = 1;
+    static final int MSG_SET_HINT         = 2;
+
+    static final String KEY_HINT = "hint";
 
     class MyHandler extends Handler {
         @Override
@@ -74,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case MSG_REFRESH_PROJECTS:
                     mProjectAdapter.onDataChanged();
+                    break;
+                case MSG_SET_HINT:
+                    mEntryHint.setText(msg.getData().getString(KEY_HINT));
+                    mEntryHint.setVisibility(View.VISIBLE);
                     break;
             }
         }
@@ -118,10 +132,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    class ZipCodeWatcher implements TextWatcher {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            String value = s.toString().trim();
+            if (isZipCode(value)) {
+                mApp.requestZipCode(value);
+            }
+        }
+    }
+
     enum Stage {
         LOGIN,
         PROJECT,
         COMPANY,
+        ZIPCODE,
         STATE,
         CITY,
         STREET,
@@ -148,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.first_name)         EditText             mFirstName;
     @BindView(R.id.last_name)          EditText             mLastName;
     @BindView(R.id.entry_simple)       EditText             mEntrySimple;
+    @BindView(R.id.entry_hint)         TextView             mEntryHint;
     @BindView(R.id.frame_login)        ViewGroup            mLoginFrame;
     @BindView(R.id.frame_new_entry)    ViewGroup            mEntryFrame;
     @BindView(R.id.main_list)          RecyclerView         mMainList;
@@ -181,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
     OnEditorActionListener     mAutoNext;
     DividerItemDecoration      mDivider;
     String                     mCompanyEditing;
+    ZipCodeWatcher             mZipCodeWatcher;
     boolean                    mWasNext;
 
     @Override
@@ -244,6 +281,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         };
+        mZipCodeWatcher = new ZipCodeWatcher();
         mLastName.setOnEditorActionListener(mAutoNext);
         mEntrySimple.setOnEditorActionListener(mAutoNext);
         PrefHelper.getInstance().setupFromCurrentProjectId();
@@ -290,6 +328,17 @@ public class MainActivity extends AppCompatActivity {
     public void onEvent(EventPingDone event) {
         if (mCurStage == Stage.CURRENT_PROJECT) {
             mHandler.sendEmptyMessage(MSG_REFRESH_PROJECTS);
+        }
+    }
+
+    public void onEvent(DataZipCode event) {
+        if (mCurStage == Stage.ZIPCODE) {
+            Message msg = new Message();
+            msg.what = MSG_SET_HINT;
+            Bundle bundle = new Bundle();
+            bundle.putString(KEY_HINT, event.getHint());
+            msg.setData(bundle);
+            mHandler.sendMessage(msg);
         }
     }
 
@@ -368,8 +417,11 @@ public class MainActivity extends AppCompatActivity {
                         TableCollectionEquipmentProject.getInstance().addLocal(name, group.projectNameId);
                     }
                 }
-//            } else if (mCurStage == Stage.ZIPCODE) {
-//                PrefHelper.getInstance().setZipCode(getEditText(mEntrySimple));
+            } else if (mCurStage == Stage.ZIPCODE) {
+                String zipCode = getEditText(mEntrySimple);
+                if (isZipCode(zipCode)) {
+                    PrefHelper.getInstance().setZipCode(zipCode);
+                }
             } else if (mCurStage == Stage.COMPANY) {
                 String newCompanyName = getEditText(mEntrySimple).trim();
                 if (isNext) {
@@ -501,6 +553,8 @@ public class MainActivity extends AppCompatActivity {
         mCenter.setText(R.string.btn_add);
         mPrev.setText(R.string.btn_prev);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        mEntrySimple.removeTextChangedListener(mZipCodeWatcher);
+        mEntryHint.setVisibility(View.GONE);
         mConfirmationFrame.setVisibility(View.GONE);
         mPictureFrame.setVisibility(View.GONE);
         mPictureList.setVisibility(View.GONE);
@@ -530,12 +584,6 @@ public class MainActivity extends AppCompatActivity {
                 if (PrefHelper.getInstance().getProjectName() != null) {
                     mNext.setVisibility(View.VISIBLE);
                 }
-                // DEBUG
-                for (String name : TableProjects.getInstance().query()) {
-                    DataProject project = TableProjects.getInstance().queryByName(name);
-                    Timber.i("Check Project " + name + " DISABLED=" + project.disabled);
-                }
-                Timber.i("ACTUAL:");
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query(true));
                 break;
             case COMPANY:
@@ -559,36 +607,49 @@ public class MainActivity extends AppCompatActivity {
                     checkEdit();
                 }
                 break;
-//            case ZIPCODE: {
-//                mPrev.setVisibility(View.VISIBLE);
-//                final String company = PrefHelper.getInstance().getCompany();
-//                List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
-//                final boolean hasZipCodes = zipcodes.size() > 0;
-//                if (!hasZipCodes) {
-//                    mCurStageEditing = true;
-//                }
-//                if (mCurStageEditing) {
-//                    mTitle.setText(R.string.title_zipcode);
-//                    mEntryFrame.setVisibility(View.VISIBLE);
-//                    mEntrySimple.setHint(R.string.title_zipcode);
-//                    mEntrySimple.setText("");
-//                    mEntrySimple.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-//                } else {
-//                    mMainListFrame.setVisibility(View.VISIBLE);
-//                    setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
-//                    mCenter.setVisibility(View.VISIBLE);
-//                    mNext.setVisibility(View.VISIBLE);
-//                }
-//                break;
-//            }
+            case ZIPCODE: {
+                mPrev.setVisibility(View.VISIBLE);
+                mNext.setVisibility(View.VISIBLE);
+                PrefHelper.getInstance().setCity(null);
+                PrefHelper.getInstance().setState(null);
+                PrefHelper.getInstance().setZipCode(null);
+                showHint();
+                final String company = PrefHelper.getInstance().getCompany();
+                List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
+                final boolean hasZipCodes = zipcodes.size() > 0;
+                if (!hasZipCodes) {
+                    mCurStageEditing = true;
+                }
+                if (mCurStageEditing) {
+                    mTitle.setText(R.string.title_zipcode);
+                    mEntryFrame.setVisibility(View.VISIBLE);
+                    mEntrySimple.setHint(R.string.title_zipcode);
+                    mEntrySimple.setText("");
+                    mEntrySimple.addTextChangedListener(mZipCodeWatcher);
+                    mEntrySimple.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                } else {
+                    mMainListFrame.setVisibility(View.VISIBLE);
+                    setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
+                    mCenter.setVisibility(View.VISIBLE);
+                    mNext.setVisibility(View.VISIBLE);
+                }
+                break;
+            }
             case STATE: {
+                showHint();
                 mMainListFrame.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 final String company = PrefHelper.getInstance().getCompany();
                 final String zipcode = PrefHelper.getInstance().getZipCode();
                 List<String> states = TableAddress.getInstance().queryStates(company, zipcode);
                 if (states.size() == 0) {
-                    mCurStageEditing = true;
+                    String state = TableZipCode.getInstance().queryState(zipcode);
+                    if (state != null) {
+                        states = new ArrayList<>();
+                        states.add(state);
+                    } else {
+                        mCurStageEditing = true;
+                    }
                 }
                 if (mCurStageEditing) {
                     states = DataStates.getUnusedStates(states);
@@ -596,7 +657,6 @@ public class MainActivity extends AppCompatActivity {
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
                     if (!TextUtils.isEmpty(zipcode) && (states.size() == 1)) {
-                        // We already know the state for the zip code.
                         PrefHelper.getInstance().setState(states.get(0));
                         skip();
                     } else {
@@ -609,13 +669,20 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case CITY: {
+                showHint();
                 mPrev.setVisibility(View.VISIBLE);
                 final String company = PrefHelper.getInstance().getCompany();
                 final String zipcode = PrefHelper.getInstance().getZipCode();
                 final String state = PrefHelper.getInstance().getState();
                 List<String> cities = TableAddress.getInstance().queryCities(company, zipcode, state);
                 if (cities.size() == 0) {
-                    mCurStageEditing = true;
+                    String city = TableZipCode.getInstance().queryCity(zipcode);
+                    if (city != null) {
+                        cities = new ArrayList<>();
+                        cities.add(city);
+                    } else {
+                        mCurStageEditing = true;
+                    }
                 }
                 if (mCurStageEditing) {
                     mEntryFrame.setVisibility(View.VISIBLE);
@@ -624,7 +691,6 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setText("");
                 } else {
                     if (!TextUtils.isEmpty(zipcode) && !TextUtils.isEmpty(state) && cities.size() == 1) {
-                        // We already know the city for the zip code.
                         PrefHelper.getInstance().setCity(cities.get(0));
                         skip();
                     } else {
@@ -639,6 +705,7 @@ public class MainActivity extends AppCompatActivity {
             }
             case STREET: {
                 mPrev.setVisibility(View.VISIBLE);
+                showHint();
                 List<String> streets = TableAddress.getInstance().queryStreets(
                         PrefHelper.getInstance().getCompany(),
                         PrefHelper.getInstance().getCity(),
@@ -914,5 +981,23 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
+    boolean isZipCode(String zipCode) {
+        return zipCode != null && zipCode.length() == 5 && zipCode.matches("^[0-9]*$");
+    }
 
+    void showHint() {
+        String hint = null;
+        switch (mCurStage) {
+            case ZIPCODE:
+            case STATE:
+            case CITY:
+            case STREET:
+                hint = PrefHelper.getInstance().getAddress();
+                break;
+        }
+        if (hint != null) {
+            mEntryHint.setText(hint);
+            mEntryHint.setVisibility(View.VISIBLE);
+        }
+    }
 }

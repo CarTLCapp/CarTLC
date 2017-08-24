@@ -76,6 +76,9 @@ public class TableZipCode {
     }
 
     public DataZipCode query(String zipCode) {
+        if (zipCode == null) {
+            return null;
+        }
         DataZipCode data = null;
         try {
             String selection = KEY_ZIPCODE + "=?";
@@ -99,5 +102,21 @@ public class TableZipCode {
             Timber.e(ex);
         }
         return data;
+    }
+
+    public String queryState(String zipCode) {
+        DataZipCode data = query(zipCode);
+        if (data != null) {
+            return data.stateLongName;
+        }
+        return null;
+    }
+
+    public String queryCity(String zipCode) {
+        DataZipCode data = query(zipCode);
+        if (data != null) {
+            return data.city;
+        }
+        return null;
     }
 }
