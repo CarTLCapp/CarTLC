@@ -34,6 +34,7 @@ public class EntryController extends Controller {
 
     private FormFactory formFactory;
     private AmazonHelper amazonHelper;
+    private EntryList mEntryList = new EntryList();
 
     @Inject
     public EntryController(FormFactory formFactory, AmazonHelper amazonHelper) {
@@ -42,7 +43,10 @@ public class EntryController extends Controller {
     }
 
     public Result list(int page, String sortBy, String order) {
-        return ok(views.html.entry_list.render(Entry.list(page, PAGE_SIZE, sortBy, order), sortBy, order));
+        mEntryList.setPage(page);
+        mEntryList.setSortBy(sortBy);
+        mEntryList.setOrder(order);
+        return ok(views.html.entry_list.render(mEntryList, sortBy, order));
     }
 
     public Result list() {

@@ -1,4 +1,4 @@
-@(currentPage: com.avaje.ebean.PagedList[Entry], currentSortBy: String, currentOrder: String)
+@(currentPage: EntryList, currentSortBy: String, currentOrder: String)
 
 @link(newPage:Int, newSortBy:String) = @{
     var sortBy = currentSortBy
@@ -43,7 +43,11 @@
                     @header("tech_id", "Name")
                     @header("entry_time", "Date")
                     @header("project_id", "Project")
-                    @header("address_id", "Address")
+                    @header("company", "Company")
+                    @header("street", "Street")
+                    @header("city", "City")
+                    @header("state", "State")
+                    @header("zipcode", "ZIP")
                     @header("truck_number", "Truck#")
                     <th>Equipment</th>
                     <th>Pictures</th>
@@ -53,12 +57,16 @@
             </thead>
             <tbody>
 
-                @for(entry <- currentPage.getList) {
+                @for(entry <- currentPage.getList()) {
                     <tr>
                         <td>@entry.getTechName()</td>
                         <td>@entry.entry_time.format("yyyy-MM-dd kk:mm")</td>
                         <td>@entry.getProjectLine()</td>
-                        <td>@entry.getAddressLine()</td>
+                        <td>@entry.getCompany()</td>
+                        <td>@entry.getStreet()</td>
+                        <td>@entry.getCity()</td>
+                        <td>@entry.getState()</td>
+                        <td>@entry.getZipCode()</td>
                         <td>@entry.getTruckLine()</td>
                         <td>@entry.getEquipmentLine()</td>
                         <td><a href="@routes.EntryController.pictures(entry.id)">Pictures</a></td>
@@ -72,9 +80,9 @@
 
         <div id="pagination" class="pagination">
             <ul>
-                @if(currentPage.hasPrev) {
+                @if(currentPage.hasPrev()) {
                 <li class="prev">
-                    <a href="@link(currentPage.getPageIndex - 1, null)">&larr; Previous</a>
+                    <a href="@link(currentPage.getPageIndex() - 1, null)">&larr; Previous</a>
                 </li>
                 } else {
                 <li class="prev disabled">
@@ -84,9 +92,9 @@
                 <li class="current">
                     <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
                 </li>
-                @if(currentPage.hasNext) {
+                @if(currentPage.hasNext()) {
                 <li class="next">
-                    <a href="@link(currentPage.getPageIndex + 1, null)">Next &rarr;</a>
+                    <a href="@link(currentPage.getPageIndex() + 1, null)">Next &rarr;</a>
                 </li>
                 } else {
                 <li class="next disabled">

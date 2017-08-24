@@ -22,8 +22,7 @@ public class Entry extends com.avaje.ebean.Model {
     public static Finder<Long,Entry> find = new Finder<Long,Entry>(Entry.class);
 
     public static PagedList<Entry> list(int page, int pageSize, String sortBy, String order) {
-        return
-                find.where()
+        return find.where()
                         .orderBy(sortBy + " " + order)
                         .findPagedList(page, pageSize);
     }
@@ -59,7 +58,7 @@ public class Entry extends com.avaje.ebean.Model {
     public String license_plate;
 
     public String getTechName() {
-        Technician tech = Technician.find.byId((long) tech_id);
+        Technician tech = Technician.find.ref((long) tech_id);
         if (tech == null) {
             return "NOT FOUND: " + tech_id;
         }
@@ -67,7 +66,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getProjectLine() {
-        Project project = Project.find.byId(project_id);
+        Project project = Project.find.ref(project_id);
         if (project == null) {
             return "NOT FOUND: " + project_id;
         }
@@ -75,11 +74,51 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getAddressLine() {
-        Company company = Company.find.byId(address_id);
+        Company company = Company.find.ref(address_id);
         if (company == null) {
             return "NOT FOUND: " + address_id;
         }
         return company.getLine();
+    }
+
+    public String getCompany() {
+        Company company = Company.find.ref(address_id);
+        if (company == null) {
+            return "NOT FOUND: " + address_id;
+        }
+        return company.name;
+    }
+
+    public String getStreet() {
+        Company company = Company.find.ref(address_id);
+        if (company == null) {
+            return "NOT FOUND: " + address_id;
+        }
+        return company.street;
+    }
+
+    public String getState() {
+        Company company = Company.find.ref(address_id);
+        if (company == null) {
+            return "NOT FOUND: " + address_id;
+        }
+        return company.state;
+    }
+
+    public String getCity() {
+        Company company = Company.find.ref(address_id);
+        if (company == null) {
+            return "NOT FOUND: " + address_id;
+        }
+        return company.city;
+    }
+
+    public String getZipCode() {
+        Company company = Company.find.ref(address_id);
+        if (company == null) {
+            return "NOT FOUND: " + address_id;
+        }
+        return company.zipcode;
     }
 
     public String getTruckLine() {
