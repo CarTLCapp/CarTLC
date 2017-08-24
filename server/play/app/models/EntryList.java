@@ -70,6 +70,8 @@ public class EntryList implements Comparator<Entry> {
         List<Integer> projectIds;
 
         Parameters() {
+            sortBy = SortBy.TIME;
+            order = Order.DESC;
         }
 
         Parameters(Parameters other) {
@@ -158,6 +160,8 @@ public class EntryList implements Comparator<Entry> {
                 Logger.error("Invalid sort by code: " + mNextParameters.sortBy.toString());
                 return;
         }
+        Logger.info("COMPUTED " + mComputed.size());
+
         if (mNextParameters.projectIds != null && mNextParameters.projectIds.size() > 0) {
             List<Entry> list = new ArrayList<Entry>();
             for (Entry entry : mComputed) {
@@ -202,7 +206,7 @@ public class EntryList implements Comparator<Entry> {
     }
 
     public boolean hasNext() {
-        return mComputed != null && ((mPage+1)*mPageSize < mComputed.size());
+        return mComputed != null && ((mPage + 1) * mPageSize < mComputed.size());
     }
 
     public int getTotalRowCount() {
@@ -217,13 +221,13 @@ public class EntryList implements Comparator<Entry> {
         int iFrom = mPage * mPageSize + 1;
         int iTo = iFrom + mPageSize - 1;
         if (iTo >= mComputed.size()) {
-            iTo = mComputed.size()-1;
+            iTo = mComputed.size() - 1;
         }
-        sbuf.append(iFrom+1);
+        sbuf.append(iFrom + 1);
         sbuf.append(to);
-        sbuf.append(iTo+1);
+        sbuf.append(iTo + 1);
         sbuf.append(of);
-        sbuf.append(mComputed.size()+1);
+        sbuf.append(mComputed.size() + 1);
         return sbuf.toString();
     }
 
