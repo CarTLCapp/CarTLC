@@ -154,7 +154,6 @@ public class EntryList implements Comparator<Entry> {
             switch (mNextParameters.sortBy) {
                 case TECH_ID:
                 case TIME:
-                case PROJECT:
                     mComputed = Entry.find.where().orderBy(getOrderBy()).findList();
                     break;
                 case COMPANY:
@@ -163,6 +162,7 @@ public class EntryList implements Comparator<Entry> {
                 case STREET:
                 case ZIPCODE:
                 case TRUCK_NUMBER:
+                case PROJECT:
                     mComputed = Entry.find.findList();
                     needsSort = true;
                     break;
@@ -255,6 +255,8 @@ public class EntryList implements Comparator<Entry> {
         int value;
         if (mNextParameters.sortBy == SortBy.TRUCK_NUMBER) {
             value = o1.getTruckLine().compareTo(o2.getTruckLine());
+        } else if (mNextParameters.sortBy == SortBy.PROJECT) {
+            value = o1.getProjectLine().compareTo(o2.getProjectLine());
         } else {
             Company c1 = getCompany(o1.address_id);
             Company c2 = getCompany(o2.address_id);
