@@ -138,7 +138,10 @@ public class EntryList implements Comparator<Entry> {
         return mNextParameters.sortBy.code + " " + mNextParameters.order.code;
     }
 
-    void compute() {
+    public void compute() {
+        if (mNextParameters.equals(mLastParameters)) {
+            return;
+        }
         mComputed = null;
         boolean needsSort = false;
         switch (mNextParameters.sortBy) {
@@ -178,9 +181,7 @@ public class EntryList implements Comparator<Entry> {
     }
 
     public List<Entry> getList() {
-        if (!mNextParameters.equals(mLastParameters)) {
-            compute();
-        }
+        compute();
         if (mComputed == null) {
             return new ArrayList<Entry>();
         }
@@ -210,6 +211,7 @@ public class EntryList implements Comparator<Entry> {
     }
 
     public int getTotalRowCount() {
+        compute();
         if (mComputed == null) {
             return 0;
         }

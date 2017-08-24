@@ -46,6 +46,7 @@ public class EntryController extends Controller {
         mEntryList.setPage(page);
         mEntryList.setSortBy(sortBy);
         mEntryList.setOrder(order);
+        mEntryList.compute();
         return ok(views.html.entry_list.render(mEntryList, sortBy, order));
     }
 
