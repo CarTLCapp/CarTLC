@@ -197,8 +197,8 @@ public class EntryList implements Comparator<Entry> {
         if (mComputed.size() > mPageSize) {
             int fromIndex = mPage * mPageSize;
             int toIndex = fromIndex + mPageSize;
-            if (toIndex > mResult.size()) {
-                toIndex = mResult.size();
+            if (toIndex > mComputed.size()) {
+                toIndex = mComputed.size();
             }
             mResult = mComputed.subList(fromIndex, toIndex);
         } else {
