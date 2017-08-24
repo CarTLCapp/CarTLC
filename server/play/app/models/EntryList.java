@@ -36,7 +36,7 @@ public class EntryList implements Comparator<Entry> {
 
         public static SortBy from(String code) {
             for (SortBy item : values()) {
-                if (item.code == code) {
+                if (item.code.equals(code)) {
                     return item;
                 }
             }
@@ -57,7 +57,7 @@ public class EntryList implements Comparator<Entry> {
 
         public static Order from(String code) {
             for (Order item : values()) {
-                if (item.code == code) {
+                if (item.code.equals(code)) {
                     return item;
                 }
             }
