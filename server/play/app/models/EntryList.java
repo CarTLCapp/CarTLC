@@ -231,14 +231,14 @@ public class EntryList implements Comparator<Entry> {
         StringBuilder sbuf = new StringBuilder();
         int iFrom = mPage * mPageSize + 1;
         int iTo = iFrom + mPageSize - 1;
-        if (iTo >= mComputed.size()) {
-            iTo = mComputed.size() - 1;
+        if (iTo > mComputed.size()) {
+            iTo = mComputed.size();
         }
-        sbuf.append(iFrom + 1);
+        sbuf.append(iFrom);
         sbuf.append(to);
-        sbuf.append(iTo + 1);
+        sbuf.append(iTo);
         sbuf.append(of);
-        sbuf.append(mComputed.size() + 1);
+        sbuf.append(mComputed.size());
         return sbuf.toString();
     }
 
