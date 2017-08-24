@@ -154,7 +154,6 @@ public class EntryList implements Comparator<Entry> {
             switch (mNextParameters.sortBy) {
                 case TECH_ID:
                 case TIME:
-                case TRUCK_NUMBER:
                 case PROJECT:
                     mComputed = Entry.find.where().orderBy(getOrderBy()).findList();
                     break;
@@ -163,6 +162,7 @@ public class EntryList implements Comparator<Entry> {
                 case CITY:
                 case STREET:
                 case ZIPCODE:
+                case TRUCK_NUMBER:
                     mComputed = Entry.find.findList();
                     needsSort = true;
                     break;
@@ -252,58 +252,62 @@ public class EntryList implements Comparator<Entry> {
     }
 
     public int compare(Entry o1, Entry o2) {
-        Company c1 = getCompany(o1.address_id);
-        Company c2 = getCompany(o2.address_id);
         int value;
-        switch (mNextParameters.sortBy) {
-            case COMPANY:
-                if (c1.name != null && c2.name != null) {
-                    value = c1.name.compareTo(c2.name);
-                } else if (c1.name != null) {
-                    value = -1;
-                } else {
-                    value = 1;
-                }
-                break;
-            case STATE:
-                if (c1.state != null && c2.state != null) {
-                    value = c1.state.compareTo(c2.state);
-                } else if (c1.state != null) {
-                    value = -1;
-                } else {
-                    value = 1;
-                }
-                break;
-            case CITY:
-                if (c1.city != null && c2.city != null) {
-                    value = c1.city.compareTo(c2.city);
-                } else if (c1.city != null) {
-                    value = -1;
-                } else {
-                    value = 1;
-                }
-                break;
-            case STREET:
-                if (c1.street != null && c2.street != null) {
-                    value = c1.street.compareTo(c2.street);
-                } else if (c1.street != null) {
-                    value = -1;
-                } else {
-                    value = 1;
-                }
-                break;
-            case ZIPCODE:
-                if (c1.zipcode != null && c2.zipcode != null) {
-                    value = c1.zipcode.compareTo(c2.zipcode);
-                } else if (c1.zipcode != null) {
-                    value = -1;
-                } else {
-                    value = 1;
-                }
-                break;
-            default:
-                value = 0;
-                break;
+        if (mNextParameters.sortBy == SortBy.TRUCK_NUMBER) {
+            value = o1.getTruckLine().compareTo(o2.getTruckLine());
+        } else {
+            Company c1 = getCompany(o1.address_id);
+            Company c2 = getCompany(o2.address_id);
+            switch (mNextParameters.sortBy) {
+                case COMPANY:
+                    if (c1.name != null && c2.name != null) {
+                        value = c1.name.compareTo(c2.name);
+                    } else if (c1.name != null) {
+                        value = -1;
+                    } else {
+                        value = 1;
+                    }
+                    break;
+                case STATE:
+                    if (c1.state != null && c2.state != null) {
+                        value = c1.state.compareTo(c2.state);
+                    } else if (c1.state != null) {
+                        value = -1;
+                    } else {
+                        value = 1;
+                    }
+                    break;
+                case CITY:
+                    if (c1.city != null && c2.city != null) {
+                        value = c1.city.compareTo(c2.city);
+                    } else if (c1.city != null) {
+                        value = -1;
+                    } else {
+                        value = 1;
+                    }
+                    break;
+                case STREET:
+                    if (c1.street != null && c2.street != null) {
+                        value = c1.street.compareTo(c2.street);
+                    } else if (c1.street != null) {
+                        value = -1;
+                    } else {
+                        value = 1;
+                    }
+                    break;
+                case ZIPCODE:
+                    if (c1.zipcode != null && c2.zipcode != null) {
+                        value = c1.zipcode.compareTo(c2.zipcode);
+                    } else if (c1.zipcode != null) {
+                        value = -1;
+                    } else {
+                        value = 1;
+                    }
+                    break;
+                default:
+                    value = 0;
+                    break;
+            }
         }
         if (mNextParameters.order == Order.DESC) {
             value *= -1;
