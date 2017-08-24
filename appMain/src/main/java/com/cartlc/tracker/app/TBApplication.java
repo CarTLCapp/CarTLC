@@ -6,16 +6,18 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.multidex.MultiDex;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.data.DatabaseManager;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.BootstrapData;
+import com.cartlc.tracker.data.TableZipCode;
+import com.cartlc.tracker.data.DataZipCode;
 import com.cartlc.tracker.server.AmazonHelper;
 import com.cartlc.tracker.server.DCService;
 import com.cartlc.tracker.server.ServerHelper;
 
+import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
 import com.cartlc.tracker.util.PermissionHelper;
@@ -63,6 +65,18 @@ public class TBApplication extends Application {
     public void ping() {
         if (ServerHelper.getInstance().hasConnection()) {
             startService(new Intent(this, DCService.class));
+        }
+    }
+
+    public void requestZipCode(String zipCode) {
+        DataZipCode data = TableZipCode.getInstance().query(zipCode);
+        if (data != null) {
+            EventBus.getDefault().post(data);
+        } else if (ServerHelper.getInstance().hasConnection()) {
+            Intent intent = new Intent(this, DCService.class);
+            intent.setAction(DCService.ACTION_ZIP_CODE);
+            intent.putExtra(DCService.DATA_ZIP_CODE, zipCode);
+            startService(intent);
         }
     }
 

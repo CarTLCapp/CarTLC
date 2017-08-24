@@ -13,7 +13,7 @@ import timber.log.Timber;
 public class DatabaseManager {
 
     static final String DATABASE_NAME    = "cartcl.db";
-    static final int    DATABASE_VERSION = 5; // TODO: bring this back down to 3
+    static final int    DATABASE_VERSION = 6; // TODO: bring this back down to 3
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -40,6 +40,7 @@ public class DatabaseManager {
                 TableProjectAddressCombo.getInstance().create();
                 TableProjects.getInstance().create();
                 TableCrash.getInstance().create();
+                TableZipCode.getInstance().create();
             } catch (Exception ex) {
                 Timber.e(ex);
             }
@@ -58,6 +59,7 @@ public class DatabaseManager {
             TableProjectAddressCombo.Init(db);
             TableProjects.Init(db);
             TableCrash.Init(db);
+            TableZipCode.Init(db);
         }
 
         @Override
@@ -67,9 +69,9 @@ public class DatabaseManager {
                     init(db);
                     TableEntry.upgrade2(db);
                     if (newVersion >= 3) {
-                        TableCrash.Init(db);
                         TableCrash.getInstance().create();
                         TablePictureCollection.upgrade3(db);
+                        TableZipCode.getInstance().create();
                     }
                 }
             } else if (oldVersion == 2) {
@@ -77,12 +79,20 @@ public class DatabaseManager {
                     TableCrash.Init(db);
                     TableCrash.getInstance().create();
                     TablePictureCollection.upgrade3(db);
+                    TableZipCode.Init(db);
+                    TableZipCode.getInstance().create();
                 }
                 // TODO: Debug only, get rid of this code:
             } else if (oldVersion == 3) {
                 if (newVersion >= 4) {
                     TablePictureCollection.upgrade3(db);
+                    TableZipCode.Init(db);
+                    TableZipCode.getInstance().create();
                 }
+                // TODO: Debug only, get rid of this code:
+            } else if (oldVersion < 6) {
+                TableZipCode.Init(db);
+                TableZipCode.getInstance().create();
             }
         }
 

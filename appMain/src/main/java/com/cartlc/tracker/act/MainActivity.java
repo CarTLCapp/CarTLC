@@ -47,7 +47,7 @@ import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 import com.cartlc.tracker.data.TablePictureCollection;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
-import com.cartlc.tracker.event.EventServerPingDone;
+import com.cartlc.tracker.event.EventPingDone;
 
 import java.io.File;
 import java.util.List;
@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
     }
 
-    public void onEvent(EventServerPingDone event) {
+    public void onEvent(EventPingDone event) {
         if (mCurStage == Stage.CURRENT_PROJECT) {
             mHandler.sendEmptyMessage(MSG_REFRESH_PROJECTS);
         }

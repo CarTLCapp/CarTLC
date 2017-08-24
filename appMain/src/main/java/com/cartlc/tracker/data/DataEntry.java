@@ -1,6 +1,6 @@
 package com.cartlc.tracker.data;
 
-import com.cartlc.tracker.event.EventServerPingDone;
+import com.cartlc.tracker.event.EventPingDone;
 
 import java.util.List;
 
@@ -79,6 +79,6 @@ public class DataEntry {
             }
         }
         TableEntry.getInstance().setUploadedAws(this, true);
-        EventBus.getDefault().post(new EventServerPingDone());
+        EventBus.getDefault().post(new EventPingDone());
     }
 }
