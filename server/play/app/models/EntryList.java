@@ -40,6 +40,7 @@ public class EntryList implements Comparator<Entry> {
                     return item;
                 }
             }
+            Logger.error("Invalid sort by : " + code);
             return null;
         }
     }
@@ -60,6 +61,7 @@ public class EntryList implements Comparator<Entry> {
                     return item;
                 }
             }
+            Logger.error("Invalid order by : " + code);
             return null;
         }
     }
@@ -110,7 +112,7 @@ public class EntryList implements Comparator<Entry> {
     List<Entry> mComputed;
     List<Entry> mResult;
     HashMap<Long, Company> mMap            = new HashMap<Long, Company>();
-    Parameters             mLastParameters = new Parameters();
+    Parameters             mLastParameters = null;
     Parameters             mNextParameters = new Parameters();
     int                    mPageSize       = PAGE_SIZE;
     int mPage;
@@ -130,6 +132,10 @@ public class EntryList implements Comparator<Entry> {
         mPage = page;
     }
 
+    public void clearCache() {
+        mLastParameters = null;
+    }
+
     public void setProjectIdFilter(List<Integer> projects) {
         mNextParameters.projectIds = projects;
     }
@@ -139,32 +145,35 @@ public class EntryList implements Comparator<Entry> {
     }
 
     public void compute() {
-        if (mNextParameters.equals(mLastParameters)) {
+        if (mLastParameters != null && mNextParameters.equals(mLastParameters)) {
             return;
         }
         mComputed = null;
         boolean needsSort = false;
-        switch (mNextParameters.sortBy) {
-            case TECH_ID:
-            case TIME:
-            case TRUCK_NUMBER:
-            case PROJECT:
-                mComputed = Entry.find.where().orderBy(getOrderBy()).findList();
-                break;
-            case COMPANY:
-            case STATE:
-            case CITY:
-            case STREET:
-            case ZIPCODE:
-                mComputed = Entry.find.findList();
-                needsSort = true;
-                break;
-            default:
-                Logger.error("Invalid sort by code: " + mNextParameters.sortBy.toString());
-                return;
+        if (mNextParameters.sortBy != null) {
+            switch (mNextParameters.sortBy) {
+                case TECH_ID:
+                case TIME:
+                case TRUCK_NUMBER:
+                case PROJECT:
+                    mComputed = Entry.find.where().orderBy(getOrderBy()).findList();
+                    break;
+                case COMPANY:
+                case STATE:
+                case CITY:
+                case STREET:
+                case ZIPCODE:
+                    mComputed = Entry.find.findList();
+                    needsSort = true;
+                    break;
+                default:
+                    Logger.error("Invalid sort by code: " + mNextParameters.sortBy.toString());
+                    return;
+            }
+        } else {
+            Logger.error("Invalid NULL sort by");
+            return;
         }
-        Logger.info("COMPUTED " + mComputed.size());
-
         if (mNextParameters.projectIds != null && mNextParameters.projectIds.size() > 0) {
             List<Entry> list = new ArrayList<Entry>();
             for (Entry entry : mComputed) {
