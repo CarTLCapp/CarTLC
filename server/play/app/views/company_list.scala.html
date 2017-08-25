@@ -45,6 +45,7 @@
                     @header("city", "City")
                     @header("state", "State")
                     @header("zipcode", "ZIP")
+                    <th>Entries</th>
                     <th>Edit</th>
                     <th>Created By</th>
                 </tr>
@@ -87,6 +88,9 @@
                             } else {
                                 @company.zipcode
                             }
+                        </td>
+                        <td>
+                            @company.countEntries();
                         </td>
                         <td>
                             <a href="@routes.CompanyController.edit(company.id)">Edit</a>

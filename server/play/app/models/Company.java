@@ -141,6 +141,10 @@ public class Company extends Model {
         return company;
     }
 
+    public int countEntries() {
+        return Entry.countEntriesForCompany(id);
+    }
+
     public String getLine() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(name);
