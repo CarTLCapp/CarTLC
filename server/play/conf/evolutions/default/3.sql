@@ -35,7 +35,7 @@ create table workorder (
     client_id      int,
     project_id     int,
     company_id     int,
-    truck_number   int,
+    truck_number   int
 );
 
 create table truck (
@@ -44,7 +44,7 @@ create table truck (
     license_plate  varchar(64)
 );
 
-alter table entry ADD truck_id int;
+alter table entry add truck_id int;
 
 # --- !Downs
 
