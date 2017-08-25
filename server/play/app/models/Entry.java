@@ -178,11 +178,7 @@ public class Entry extends com.avaje.ebean.Model {
         delete();
     }
 
-    public static boolean hasEntryForProject(long project_id) {
-        return countEntriesForProject(project_id) > 0;
-    }
-
-    public static int countEntriesForProject(long project_id) {
+   public static int countEntriesForProject(long project_id) {
         return find.where().eq("project_id", project_id).findList().size();
     }
 
@@ -190,10 +186,20 @@ public class Entry extends com.avaje.ebean.Model {
         return find.where().eq("address_id", company_id).findList().size();
     }
 
+    public static boolean hasEntryForProject(long project_id) {
+        return countEntriesForProject(project_id) > 0;
+    }
+
     public static boolean hasEntryForCompany(final int tech_id, final long address_id) {
         List<Entry> items = find.where()
                     .eq("tech_id", tech_id)
                     .eq("address_id", address_id).findList();
+        return items.size() > 0;
+    }
+
+    public static boolean hasEntryForCompany(final long address_id) {
+        List<Entry> items = find.where()
+                .eq("address_id", address_id).findList();
         return items.size() > 0;
     }
 

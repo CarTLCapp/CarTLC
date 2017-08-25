@@ -16,8 +16,9 @@ import com.avaje.ebean.*;
 public class Company extends Model {
 
     private static final long serialVersionUID = 1L;
+    private static final int PAGE_SIZE = 30;
 
-	@Id
+    @Id
     public Long id;
 
     @Constraints.Required
@@ -61,6 +62,7 @@ public class Company extends Model {
         find.ref(id).delete();
         map.remove(id);
     }
+
     /**
      * Return a paged list of companies
      *
@@ -70,12 +72,13 @@ public class Company extends Model {
      * @param order Sort order (either or asc or desc)
      * @param filter Filter applied on the name column
      */
-    public static PagedList<Company> list(int page, int pageSize, String sortBy, String order, String filter) {
+    public static PagedList<Company> list(int page, String sortBy, String order, String filter, boolean disabled) {
         return
                 find.where()
+                        .eq("disabled", disabled)
                         .ilike("name", "%" + filter + "%")
                         .orderBy(sortBy + " " + order)
-                        .findPagedList(page, pageSize);
+                        .findPagedList(page, PAGE_SIZE);
     }
 
     public static List<Company> appList(int tech_id) {
@@ -179,6 +182,14 @@ public class Company extends Model {
 
     public boolean hasAddress() {
         return (street != null && street.length() > 0) || (city != null && city.length() > 0) || (state != null && state.length() > 0);
+    }
+
+    public static boolean isDisabled(long id) {
+        Company company = get(id);
+        if (company == null) {
+            return false;
+        }
+        return company.disabled;
     }
 
 }

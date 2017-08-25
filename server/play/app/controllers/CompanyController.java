@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class CompanyController extends Controller {
 
-    private static final int PAGE_SIZE = 30;
     private FormFactory formFactory;
 
     @Inject
@@ -32,7 +31,11 @@ public class CompanyController extends Controller {
     }
 
     public Result list(int page, String sortBy, String order, String filter) {
-        return ok(views.html.company_list.render(Company.list(page, PAGE_SIZE, sortBy, order, filter), sortBy, order, filter));
+        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, false), sortBy, order, filter));
+    }
+
+    public Result list_disabled(int page, String sortBy, String order, String filter) {
+        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, true), sortBy, order, filter));
     }
 
     public Result list() {
@@ -42,13 +45,13 @@ public class CompanyController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         Form<Company> companyForm = formFactory.form(Company.class).fill(Company.get(id));
-        return ok(views.html.company_editForm.render(id, companyForm));
+        return ok(views.html.company_editForm.render(id, companyForm, Secured.getClient(ctx())));
     }
 
     public Result update(Long id) throws PersistenceException {
         Form<Company> companyForm = formFactory.form(Company.class).bindFromRequest();
         if (companyForm.hasErrors()) {
-            return badRequest(views.html.company_editForm.render(id, companyForm));
+            return badRequest(views.html.company_editForm.render(id, companyForm, Secured.getClient(ctx())));
         }
         Transaction txn = Ebean.beginTransaction();
         try {
@@ -119,15 +122,6 @@ public class CompanyController extends Controller {
         return list();
     }
 
-    @Transactional
-    public Result delete(Long id) {
-        // TODO: If the client is in the database, mark it as disabled instead.
-        Company.delete(id);
-        Version.inc(Version.VERSION_COMPANY);
-        flash("success", "Company has been deleted");
-        return list();
-    }
-
     public Result query() {
         JsonNode json = request().body().asJson();
         JsonNode value = json.findValue("tech_id");
@@ -158,6 +152,37 @@ public class CompanyController extends Controller {
             }
         }
         return ok(top);
+    }
+
+    @Transactional
+    public Result delete(Long id) {
+        if (!Secured.isAdmin(ctx())) {
+            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+        }
+        if (Entry.hasEntryForCompany(id)) {
+            Company company = Company.get(id);
+            company.disabled = true;
+            company.update();
+            flash("success", "Company has been disabled: it had entries");
+        } else {
+            Company.delete(id);
+            flash("success", "Company has been deleted");
+        }
+        Version.inc(Version.VERSION_COMPANY);
+        return list();
+    }
+
+    @Security.Authenticated(Secured.class)
+    @Transactional
+    public Result enable(Long id) {
+        if (!Secured.isAdmin(ctx())) {
+            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+        }
+        Company company = Company.get(id);
+        company.disabled = false;
+        company.update();
+        Version.inc(Version.VERSION_COMPANY);
+        return list();
     }
 }
 

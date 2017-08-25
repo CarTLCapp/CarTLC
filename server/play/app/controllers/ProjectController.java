@@ -175,7 +175,7 @@ public class ProjectController extends Controller {
         if (Entry.hasEntryForProject(id)) {
             Project project = Project.find.ref(id);
             project.disabled = true;
-            project.save();
+            project.update();
             flash("success", "Project has been disabled: it had entries");
         } else {
             Project.find.ref(id).delete();
@@ -200,7 +200,7 @@ public class ProjectController extends Controller {
 
     @Security.Authenticated(Secured.class)
     @Transactional
-    public Result enableProject(Long id) {
+    public Result enable(Long id) {
         if (!Secured.isAdmin(ctx())) {
             return badRequest(views.html.home.render(Secured.getClient(ctx())));
         }

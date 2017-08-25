@@ -44,12 +44,13 @@ POST    /project/:id                controllers.ProjectController.update(id:Long
 
 # Delete a project
 POST    /project/:id/delete         controllers.ProjectController.delete(id:Long)
-GET     /project/:id/enable         controllers.ProjectController.enableProject(id:Long)
+GET     /project/:id/enable         controllers.ProjectController.enable(id:Long)
 
 ### COMPANIES ###
 
 # Company list
 GET     /company                    controllers.CompanyController.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET     /company_disabled           controllers.CompanyController.list_disabled(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
 
 # Add company
 GET     /company/new                controllers.CompanyController.create()
@@ -65,6 +66,7 @@ POST    /company/:id                controllers.CompanyController.update(id:Long
 
 # Delete a company
 POST    /company/:id/delete         controllers.CompanyController.delete(id:Long)
+GET     /company/:id/enable         controllers.CompanyController.enable(id:Long)
 
 ### EQUIPMENTS ###
 
