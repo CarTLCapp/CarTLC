@@ -45,13 +45,13 @@ public class Entry extends com.avaje.ebean.Model {
     public long note_collection_id;
 
     @Constraints.Required
-    public long truck_id;
-
-    @Constraints.Required
     private int truck_number;
 
     @Constraints.Required
     private String license_plate;
+
+    @Constraints.Required
+    public long truck_id;
 
     public static Finder<Long,Entry> find = new Finder<Long,Entry>(Entry.class);
 
