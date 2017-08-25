@@ -74,7 +74,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getAddressLine() {
-        Company company = Company.find.ref(address_id);
+        Company company = Company.get(address_id);
         if (company == null) {
             return "NOT FOUND: " + address_id;
         }
@@ -82,7 +82,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getCompany() {
-        Company company = Company.find.ref(address_id);
+        Company company = Company.get(address_id);
         if (company == null) {
             return "NOT FOUND: " + address_id;
         }
@@ -90,7 +90,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getStreet() {
-        Company company = Company.find.ref(address_id);
+        Company company = Company.get(address_id);
         if (company == null) {
             return "NOT FOUND: " + address_id;
         }
@@ -98,7 +98,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getState() {
-        Company company = Company.find.ref(address_id);
+        Company company = Company.get(address_id);
         if (company == null) {
             return "NOT FOUND: " + address_id;
         }
@@ -106,7 +106,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getCity() {
-        Company company = Company.find.ref(address_id);
+        Company company = Company.get(address_id);
         if (company == null) {
             return "NOT FOUND: " + address_id;
         }
@@ -114,7 +114,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getZipCode() {
-        Company company = Company.find.ref(address_id);
+        Company company = Company.get(address_id);
         if (company == null) {
             return "NOT FOUND: " + address_id;
         }

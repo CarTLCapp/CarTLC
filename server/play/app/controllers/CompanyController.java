@@ -41,7 +41,7 @@ public class CompanyController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
-        Form<Company> companyForm = formFactory.form(Company.class).fill(Company.find.byId(id));
+        Form<Company> companyForm = formFactory.form(Company.class).fill(Company.get(id));
         return ok(views.html.company_editForm.render(id, companyForm));
     }
 
@@ -52,7 +52,7 @@ public class CompanyController extends Controller {
         }
         Transaction txn = Ebean.beginTransaction();
         try {
-            Company savedCompany = Company.find.byId(id);
+            Company savedCompany = Company.get(id);
             if (savedCompany != null) {
                 Company newCompanyData = companyForm.get();
                 savedCompany.name = newCompanyData.name;
@@ -63,7 +63,6 @@ public class CompanyController extends Controller {
                 savedCompany.update();
                 flash("success", "Company " + companyForm.get().name + " has been updated");
                 txn.commit();
-
                 Version.inc(Version.VERSION_COMPANY);
             }
         } finally {
@@ -123,7 +122,7 @@ public class CompanyController extends Controller {
     @Transactional
     public Result delete(Long id) {
         // TODO: If the client is in the database, mark it as disabled instead.
-        Company.find.ref(id).delete();
+        Company.delete(id);
         Version.inc(Version.VERSION_COMPANY);
         flash("success", "Company has been deleted");
         return list();

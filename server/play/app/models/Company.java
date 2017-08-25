@@ -44,8 +44,23 @@ public class Company extends Model {
     /**
      * Generic query helper for entity Computer with id Long
      */
-    public static Finder<Long,Company> find = new Finder<Long,Company>(Company.class);
+    private static Finder<Long,Company> find = new Finder<Long,Company>(Company.class);
 
+    static HashMap<Long, Company> map = new HashMap<Long, Company>();
+
+    public static Company get(long id) {
+        if (map.containsKey(id)) {
+            return map.get(id);
+        }
+        Company company = find.byId(id);
+        map.put(id, company);
+        return company;
+    }
+
+    public static void delete(long id) {
+        find.ref(id).delete();
+        map.remove(id);
+    }
     /**
      * Return a paged list of companies
      *

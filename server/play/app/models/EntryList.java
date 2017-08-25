@@ -111,7 +111,6 @@ public class EntryList implements Comparator<Entry> {
 
     List<Entry> mComputed;
     List<Entry> mResult;
-    HashMap<Long, Company> mMap            = new HashMap<Long, Company>();
     Parameters             mLastParameters = null;
     Parameters             mNextParameters = new Parameters();
     int                    mPageSize       = PAGE_SIZE;
@@ -259,15 +258,6 @@ public class EntryList implements Comparator<Entry> {
         return sbuf.toString();
     }
 
-    Company getCompany(long id) {
-        if (mMap.containsKey(id)) {
-            return mMap.get(id);
-        }
-        Company company = Company.find.byId(id);
-        mMap.put(id, company);
-        return company;
-    }
-
     public int compare(Entry o1, Entry o2) {
         int value;
         if (mNextParameters.sortBy == SortBy.TRUCK_NUMBER) {
@@ -275,8 +265,8 @@ public class EntryList implements Comparator<Entry> {
         } else if (mNextParameters.sortBy == SortBy.PROJECT) {
             value = o1.getProjectLine().compareTo(o2.getProjectLine());
         } else {
-            Company c1 = getCompany(o1.address_id);
-            Company c2 = getCompany(o2.address_id);
+            Company c1 = Company.get(o1.address_id);
+            Company c2 = Company.get(o2.address_id);
             switch (mNextParameters.sortBy) {
                 case COMPANY:
                     if (c1.name != null && c2.name != null) {
