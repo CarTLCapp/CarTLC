@@ -69,7 +69,7 @@ public class EntryList implements Comparator<Entry> {
     class Parameters {
         SortBy        sortBy;
         Order         order;
-        List<Integer> projectIds;
+        List<Long> projectIds;
 
         Parameters() {
             sortBy = SortBy.TIME;
@@ -80,7 +80,7 @@ public class EntryList implements Comparator<Entry> {
             sortBy = other.sortBy;
             order = other.order;
             if (other.projectIds != null) {
-                projectIds = new ArrayList<Integer>();
+                projectIds = new ArrayList<Long>();
                 for (int i = 0; i < other.projectIds.size(); i++) {
                     projectIds.add(other.projectIds.get(i));
                 }
@@ -136,8 +136,25 @@ public class EntryList implements Comparator<Entry> {
         mLastParameters = null;
     }
 
-    public void setProjectIdFilter(List<Integer> projects) {
+    public void setProjectIdFilter(List<Long> projects) {
         mNextParameters.projectIds = projects;
+    }
+
+    public void setProjects(Client client) {
+        if (client == null || client.is_admin) {
+            setProjectIdFilter(null);
+        } else {
+            List<Project> projects = client.getProjects();
+            if (projects != null && projects.size() > 0) {
+                ArrayList<Long> list = new ArrayList<Long>();
+                for (Project project : projects) {
+                    list.add(project.id);
+                }
+                setProjectIdFilter(list);
+            } else {
+                setProjectIdFilter(null);
+            }
+        }
     }
 
     String getOrderBy() {

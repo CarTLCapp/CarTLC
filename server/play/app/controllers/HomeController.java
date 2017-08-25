@@ -78,6 +78,5 @@ public class HomeController extends Controller {
         session().clear();
         return login();
     }
-
 }
             
