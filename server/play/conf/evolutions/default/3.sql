@@ -58,9 +58,9 @@ create table entry (
   truck_id                 int
 );
 
-alter table entry add constraint c_e_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
-alter table entry add constraint c_e_entry_address_id foreign key (company_id) references company (id) on delete restrict on update restrict;
-alter table entry add constraint c_e_tech_id foreign key (tech_id) references technician (id) on delete restrict on update restrict;
+alter table entry add constraint c2_e_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table entry add constraint c2_e_entry_address_id foreign key (company_id) references company (id) on delete restrict on update restrict;
+alter table entry add constraint c2_e_tech_id foreign key (tech_id) references technician (id) on delete restrict on update restrict;
 
 # --- !Downs
 
