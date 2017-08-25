@@ -193,7 +193,7 @@ public class EntryController extends Controller {
                             company.save();
                             Version.inc(Version.VERSION_COMPANY);
                         }
-                        entry.address_id = company.id;
+                        entry.company_id = company.id;
                     } catch (Exception ex) {
                         return badRequest2("address: " + ex.getMessage());
                     }
@@ -202,7 +202,7 @@ public class EntryController extends Controller {
                 }
             }
         } else {
-            entry.address_id = value.longValue();
+            entry.company_id = value.longValue();
         }
         value = json.findValue("equipment");
         if (value != null) {

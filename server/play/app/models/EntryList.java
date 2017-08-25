@@ -265,8 +265,8 @@ public class EntryList implements Comparator<Entry> {
         } else if (mNextParameters.sortBy == SortBy.PROJECT) {
             value = o1.getProjectLine().compareTo(o2.getProjectLine());
         } else {
-            Company c1 = Company.get(o1.address_id);
-            Company c2 = Company.get(o2.address_id);
+            Company c1 = Company.get(o1.company_id);
+            Company c2 = Company.get(o2.company_id);
             switch (mNextParameters.sortBy) {
                 case COMPANY:
                     if (c1.name != null && c2.name != null) {

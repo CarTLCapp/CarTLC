@@ -33,7 +33,7 @@ public class Entry extends com.avaje.ebean.Model {
     public long project_id;
 
     @Constraints.Required
-    public long address_id;
+    public long company_id;
 
     @Constraints.Required
     public long equipment_collection_id;
@@ -45,12 +45,6 @@ public class Entry extends com.avaje.ebean.Model {
     public long note_collection_id;
 
     @Constraints.Required
-    private int truck_number;
-
-    @Constraints.Required
-    private String license_plate;
-
-    @Constraints.Required
     public long truck_id;
 
     public static Finder<Long,Entry> find = new Finder<Long,Entry>(Entry.class);
@@ -59,35 +53,6 @@ public class Entry extends com.avaje.ebean.Model {
         return find.where()
                 .orderBy(sortBy + " " + order)
                 .findPagedList(page, pageSize);
-    }
-
-    // TODO: Once data has been transfered, this code can be removed
-    // and the database can be cleaned up by removing the truck_number and license_plate columns.
-    public static void convertTruckEntries() {
-        List<Entry> list;
-        list = find.where().ne("truck_number", 0).findList();
-        if (list.size() > 0) {
-            transferTruckValues(list);
-        }
-        list = find.where().ne("license_plate", null).findList();
-        if (list.size() > 0) {
-            transferTruckValues(list);
-        }
-    }
-
-    static void transferTruckValues(List<Entry> list) {
-        Truck truck;
-        for (Entry entry : list) {
-            if (entry.truck_number == 0 || entry.license_plate == null) {
-                Logger.error("Invalid: entry has already been transfer. Should not have arrived here.");
-                continue;
-            }
-            truck = Truck.add(entry.truck_number, entry.license_plate);
-            entry.license_plate = null;
-            entry.truck_number = 0;
-            entry.truck_id = truck.id;
-            entry.update();
-        }
     }
 
     public String getTechName() {
@@ -107,49 +72,49 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getAddressLine() {
-        Company company = Company.get(address_id);
+        Company company = Company.get(company_id);
         if (company == null) {
-            return "NOT FOUND: " + address_id;
+            return "NOT FOUND: " + company_id;
         }
         return company.getLine();
     }
 
     public String getCompany() {
-        Company company = Company.get(address_id);
+        Company company = Company.get(company_id);
         if (company == null) {
-            return "NOT FOUND: " + address_id;
+            return "NOT FOUND: " + company_id;
         }
         return company.name;
     }
 
     public String getStreet() {
-        Company company = Company.get(address_id);
+        Company company = Company.get(company_id);
         if (company == null) {
-            return "NOT FOUND: " + address_id;
+            return "NOT FOUND: " + company_id;
         }
         return company.street;
     }
 
     public String getState() {
-        Company company = Company.get(address_id);
+        Company company = Company.get(company_id);
         if (company == null) {
-            return "NOT FOUND: " + address_id;
+            return "NOT FOUND: " + company_id;
         }
         return company.state;
     }
 
     public String getCity() {
-        Company company = Company.get(address_id);
+        Company company = Company.get(company_id);
         if (company == null) {
-            return "NOT FOUND: " + address_id;
+            return "NOT FOUND: " + company_id;
         }
         return company.city;
     }
 
     public String getZipCode() {
-        Company company = Company.get(address_id);
+        Company company = Company.get(company_id);
         if (company == null) {
-            return "NOT FOUND: " + address_id;
+            return "NOT FOUND: " + company_id;
         }
         return company.zipcode;
     }
@@ -220,23 +185,23 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static int countEntriesForCompany(long company_id) {
-        return find.where().eq("address_id", company_id).findList().size();
+        return find.where().eq("company_id", company_id).findList().size();
     }
 
     public static boolean hasEntryForProject(long project_id) {
         return countEntriesForProject(project_id) > 0;
     }
 
-    public static boolean hasEntryForCompany(final int tech_id, final long address_id) {
+    public static boolean hasEntryForCompany(final int tech_id, final long company_id) {
         List<Entry> items = find.where()
                     .eq("tech_id", tech_id)
-                    .eq("address_id", address_id).findList();
+                    .eq("company_id", company_id).findList();
         return items.size() > 0;
     }
 
-    public static boolean hasEntryForCompany(final long address_id) {
+    public static boolean hasEntryForCompany(final long company_id) {
         List<Entry> items = find.where()
-                .eq("address_id", address_id).findList();
+                .eq("company_id", company_id).findList();
         return items.size() > 0;
     }
 

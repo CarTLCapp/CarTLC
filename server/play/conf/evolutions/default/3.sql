@@ -44,7 +44,23 @@ create table truck (
     license_plate  varchar(64)
 );
 
-alter table entry add truck_id int;
+alter table entry rename entry_v2;
+
+create table entry (
+  id                       int auto_increment primary key,
+  tech_id                  int,
+  entry_time               datetime,
+  project_id               int,
+  company_id               int,
+  equipment_collection_id  int,
+  note_collection_id       int,
+  picture_collection_id    int,
+  truck_id                 int
+);
+
+alter table entry add constraint c_e_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
+alter table entry add constraint c_e_entry_address_id foreign key (company_id) references company (id) on delete restrict on update restrict;
+alter table entry add constraint c_e_tech_id foreign key (tech_id) references technician (id) on delete restrict on update restrict;
 
 # --- !Downs
 
@@ -53,6 +69,7 @@ drop table if exists client_project_association;
 drop table if exists client;
 alter table technician rename client;
 alter table picture_collection drop column note;
-drop table workorder;
-drop table truck;
-alter table entry drop column truck_id;
+drop table if exists workorder;
+drop table if exists truck;
+drop table if exists entry;
+alter table entry_v2 rename entry;
