@@ -148,17 +148,26 @@ public class EntryController extends Controller {
         } else {
             entry.entry_time = new Date(value.longValue());
         }
+        int truck_number;
+        String license_plate;
         value = json.findValue("truck_number");
         if (value != null) {
-            entry.truck_number = value.intValue();
+            truck_number = value.intValue();
+        } else {
+            truck_number = 0;
         }
         value = json.findValue("license_plate");
         if (value != null) {
-            entry.license_plate = value.textValue();
+            license_plate = value.textValue();
+        } else {
+            license_plate = null;
         }
-        if (entry.truck_number == 0 && entry.license_plate == null) {
+        if (truck_number == 0 && license_plate == null) {
             missing.add("truck_number");
             missing.add("license_plate");
+        } else {
+            Truck truck = Truck.add(truck_number, license_plate);
+            entry.truck_id = truck.id;
         }
         value = json.findValue("project_id");
         if (value == null) {

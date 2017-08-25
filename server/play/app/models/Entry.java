@@ -10,6 +10,7 @@ import play.data.format.*;
 
 import com.avaje.ebean.*;
 import modules.AmazonHelper;
+import play.Logger;
 
 /**
  * Entry entity managed by Ebean
@@ -18,14 +19,6 @@ import modules.AmazonHelper;
 public class Entry extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
-
-    public static Finder<Long,Entry> find = new Finder<Long,Entry>(Entry.class);
-
-    public static PagedList<Entry> list(int page, int pageSize, String sortBy, String order) {
-        return find.where()
-                        .orderBy(sortBy + " " + order)
-                        .findPagedList(page, pageSize);
-    }
 
     @Id
     public Long id;
@@ -52,10 +45,50 @@ public class Entry extends com.avaje.ebean.Model {
     public long note_collection_id;
 
     @Constraints.Required
-    public int truck_number;
+    public long truck_id;
 
     @Constraints.Required
-    public String license_plate;
+    private int truck_number;
+
+    @Constraints.Required
+    private String license_plate;
+
+    public static Finder<Long,Entry> find = new Finder<Long,Entry>(Entry.class);
+
+    public static PagedList<Entry> list(int page, int pageSize, String sortBy, String order) {
+        return find.where()
+                .orderBy(sortBy + " " + order)
+                .findPagedList(page, pageSize);
+    }
+
+    // TODO: Once data has been transfered, this code can be removed
+    // and the database can be cleaned up by removing the truck_number and license_plate columns.
+    public static void convertTruckEntries() {
+        List<Entry> list;
+        list = find.where().ne("truck_number", 0).findList();
+        if (list.size() > 0) {
+            transferTruckValues(list);
+        }
+        list = find.where().ne("license_plate", null).findList();
+        if (list.size() > 0) {
+            transferTruckValues(list);
+        }
+    }
+
+    static void transferTruckValues(List<Entry> list) {
+        Truck truck;
+        for (Entry entry : list) {
+            if (entry.truck_number == 0 || entry.license_plate == null) {
+                Logger.error("Invalid: entry has already been transfer. Should not have arrived here.");
+                continue;
+            }
+            truck = Truck.add(entry.truck_number, entry.license_plate);
+            entry.license_plate = null;
+            entry.truck_number = 0;
+            entry.truck_id = truck.id;
+            entry.update();
+        }
+    }
 
     public String getTechName() {
         Technician tech = Technician.find.ref((long) tech_id);
@@ -122,10 +155,14 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getTruckLine() {
-        if (license_plate != null) {
-            return license_plate;
+        Truck truck = Truck.find.ref(truck_id);
+        if (truck == null) {
+            return null;
         }
-        return Integer.toString(truck_number);
+        if (truck.license_plate != null) {
+            return truck.license_plate;
+        }
+        return Integer.toString(truck.truck_number);
     }
 
     public String getEquipmentLine() {
