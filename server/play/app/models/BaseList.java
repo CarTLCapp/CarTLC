@@ -18,7 +18,8 @@ public abstract class BaseList<T> {
     protected static final int PAGE_SIZE = 100;
 
     public enum SortBy {
-        TECH_ID("tech_id"),
+        CLIENT("client_id"),
+        TECH("tech_id"),
         TIME("entry_time"),
         PROJECT("project_id"),
         TRUCK_NUMBER("truck_number"),
@@ -176,7 +177,7 @@ public abstract class BaseList<T> {
         boolean needsSort = false;
         if (mNextParameters.sortBy != null) {
             switch (mNextParameters.sortBy) {
-                case TECH_ID:
+                case TECH:
                 case TIME:
                     mComputed = getOrderedList();
                     break;
@@ -187,6 +188,7 @@ public abstract class BaseList<T> {
                 case ZIPCODE:
                 case TRUCK_NUMBER:
                 case PROJECT:
+                case CLIENT:
                     mComputed = getRawList();
                     needsSort = true;
                     break;

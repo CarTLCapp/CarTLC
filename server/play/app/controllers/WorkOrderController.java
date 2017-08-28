@@ -4,6 +4,8 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import java.util.List;
 import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 import play.mvc.*;
 import play.data.*;
@@ -47,12 +49,21 @@ public class WorkOrderController extends Controller {
     public Result upload() {
         Logger.debug("IMPORT");
         MultipartFormData<File> body = request().body().asMultipartFormData();
-        FilePart<File> picture = body.getFile("name");
-        if (picture != null) {
-            String fileName = picture.getFilename();
-            String contentType = picture.getContentType();
-            Logger.debug("FILE=" + fileName);
-            File file = picture.getFile();
+        FilePart<File> importname = body.getFile("name");
+        if (importname != null) {
+            String fileName = importname.getFilename();
+            String contentType = importname.getContentType();
+            File file = importname.getFile();
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    Logger.info("READ LINE: " + line);
+                }
+                br.close();
+            } catch (Exception ex) {
+                Logger.error(ex.getMessage());
+            }
             return ok("File uploaded");
         } else {
             flash("error", "Missing file");

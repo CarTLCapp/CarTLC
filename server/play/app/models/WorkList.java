@@ -45,6 +45,18 @@ public class WorkList extends BaseList<WorkOrder> implements Comparator<WorkOrde
             value = o1.getTruckLine().compareTo(o2.getTruckLine());
         } else if (mNextParameters.sortBy == SortBy.PROJECT) {
             value = o1.getProjectLine().compareTo(o2.getProjectLine());
+        } else if (mNextParameters.sortBy == SortBy.CLIENT) {
+            Client l1 = Client.find.ref(o1.client_id);
+            Client l2 = Client.find.ref(o2.client_id);
+            if (l1 != null && l2 != null && l1.name != null && l2.name != null) {
+                value = l1.name.compareTo(l2.name);
+            } else if (l1 != null && l1.name != null) {
+                value = -1;
+            } else if (l2 != null && l2.name != null) {
+                value = 1;
+            } else {
+                value = 0;
+            }
         } else {
             Company c1 = Company.get(o1.company_id);
             Company c2 = Company.get(o2.company_id);
