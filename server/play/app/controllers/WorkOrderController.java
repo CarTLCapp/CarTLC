@@ -21,6 +21,8 @@ import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import modules.AmazonHelper;
 
+import play.Logger;
+
 public class WorkOrderController extends Controller {
 
     private AmazonHelper amazonHelper;
@@ -42,12 +44,14 @@ public class WorkOrderController extends Controller {
         return ok(views.html.work_order_list.render(workList, sortBy, order));
     }
 
-    public Result importWorkOrders() {
+    public Result upload() {
+        Logger.debug("IMPORT");
         MultipartFormData<File> body = request().body().asMultipartFormData();
-        FilePart<File> picture = body.getFile("workorder");
+        FilePart<File> picture = body.getFile("name");
         if (picture != null) {
             String fileName = picture.getFilename();
             String contentType = picture.getContentType();
+            Logger.debug("FILE=" + fileName);
             File file = picture.getFile();
             return ok("File uploaded");
         } else {

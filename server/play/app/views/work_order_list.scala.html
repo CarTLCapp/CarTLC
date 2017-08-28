@@ -105,11 +105,9 @@
         </div>
     }
 
-    @form(action = routes.WorkOrderController.importWorkOrders, 'enctype -> "multipart/form-data") {
-        <input type="file" name="workorder">
-        <p>
-            <input type="submit">
-        </p>
+    @form(action = routes.WorkOrderController.upload, 'enctype -> "multipart/form-data") {
+        <input type="file" name="name">
+        <input type="Submit">
     }
 
     <p>Work orders must be a .csv file with very specific column headers:</p>
