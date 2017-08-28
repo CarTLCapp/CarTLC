@@ -9,6 +9,7 @@ entry.list.title={0,choice,0#No entries|1#One Entry|1<{0,number,integer} entries
 picture.list.title={0,choice,0#No pictures|1#One Picture|1<{0,number,integer} pictures} found
 message.list.title={0,choice,0#No error messages|1#One Message|1<{0,number,integer} messages} found
 clients.list.title={0,choice,0#No clients|1#One client|1<{0,number,integer} clients} found
+workorder.list.title={0,choice,0#No work orders|1#One Work Order|1<{0,number,integer} work orders} found
 
 project.list.header=Show {0} Projects
 

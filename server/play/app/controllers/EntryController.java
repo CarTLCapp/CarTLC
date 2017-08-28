@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import java.util.Date;
 import java.util.Iterator;
 import modules.AmazonHelper;
-import modules.AmazonHelper.OnDownloadComplete;
 import java.io.File;
 import play.db.ebean.Transactional;
 import play.libs.Json;
@@ -32,24 +31,22 @@ public class EntryController extends Controller {
 
     private static final int PAGE_SIZE = 100;
 
-    private FormFactory formFactory;
     private AmazonHelper amazonHelper;
-    private EntryList mEntryList = new EntryList();
+    private EntryList entryList = new EntryList();
 
     @Inject
-    public EntryController(FormFactory formFactory, AmazonHelper amazonHelper) {
-        this.formFactory = formFactory;
+    public EntryController(AmazonHelper amazonHelper) {
         this.amazonHelper = amazonHelper;
     }
 
     public Result list(int page, String sortBy, String order) {
-        mEntryList.setPage(page);
-        mEntryList.setSortBy(sortBy);
-        mEntryList.setOrder(order);
-        mEntryList.clearCache();
-        mEntryList.setProjects(Secured.getClient(ctx()));
-        mEntryList.compute();
-        return ok(views.html.entry_list.render(mEntryList, sortBy, order));
+        entryList.setPage(page);
+        entryList.setSortBy(sortBy);
+        entryList.setOrder(order);
+        entryList.clearCache();
+        entryList.setProjects(Secured.getClient(ctx()));
+        entryList.compute();
+        return ok(views.html.entry_list.render(entryList, sortBy, order));
     }
 
     public Result list() {
@@ -70,21 +67,7 @@ public class EntryController extends Controller {
     }
 
     void loadPictures(Entry entry) {
-        List<PictureCollection> pictures = entry.getPictures();
-        for (PictureCollection picture : pictures) {
-            File localFile = amazonHelper.getLocalFile(picture.picture);
-            if (!localFile.exists()) {
-                try {
-                    amazonHelper.download(request().host(), picture.picture, new OnDownloadComplete() {
-                        public void onDownloadComplete(File file) {
-                            Logger.info("COMPLETED: " + file.getAbsolutePath());
-                        }
-                    });
-                } catch (Exception ex) {
-                    Logger.error(ex.getMessage());
-                }
-            }
-        }
+        entry.loadPictures(request().host(), amazonHelper);
     }
 
     public Result getImage(String picture) {

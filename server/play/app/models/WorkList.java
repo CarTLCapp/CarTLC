@@ -13,33 +13,33 @@ import play.Logger;
  * proper ordering and so on, well I can get them joined. But I can't
  * insert new entries with the company_id field being filled in.
  */
-public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
+public class WorkList extends BaseList<WorkOrder> implements Comparator<WorkOrder> {
 
-    public EntryList() {
+    public WorkList() {
         super();
     }
 
     @Override
-    protected List<Entry> getOrderedList() {
-        return Entry.find.where().orderBy(getOrderBy()).findList();
+    protected List<WorkOrder> getOrderedList() {
+        return WorkOrder.find.where().orderBy(getOrderBy()).findList();
     }
 
     @Override
-    protected List<Entry> getRawList() {
-        return Entry.find.findList();
+    protected List<WorkOrder> getRawList() {
+        return WorkOrder.find.findList();
     }
 
     @Override
-    protected void sort(List<Entry> list) {
+    protected void sort(List<WorkOrder> list) {
         list.sort(this);
     }
 
     @Override
-    protected long getProjectId(Entry entry) {
+    protected long getProjectId(WorkOrder entry) {
         return entry.project_id;
     }
 
-    public int compare(Entry o1, Entry o2) {
+    public int compare(WorkOrder o1, WorkOrder o2) {
         int value;
         if (mNextParameters.sortBy == SortBy.TRUCK_NUMBER) {
             value = o1.getTruckLine().compareTo(o2.getTruckLine());

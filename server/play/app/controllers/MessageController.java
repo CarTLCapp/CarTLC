@@ -27,8 +27,6 @@ public class MessageController extends Controller {
 
     private static final int PAGE_SIZE = 100;
 
-    private FormFactory formFactory;
-
     public Result list(int page, String sortBy, String order) {
         return ok(views.html.message_list.render(Message.list(page, PAGE_SIZE, sortBy, order), sortBy, order));
     }

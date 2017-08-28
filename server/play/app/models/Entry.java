@@ -1,6 +1,9 @@
 package models;
 
 import java.util.*;
+import java.text.SimpleDateFormat;
+import java.io.File;
+
 import javax.persistence.*;
 
 import play.db.ebean.*;
@@ -9,13 +12,15 @@ import play.db.ebean.Transactional;
 import play.data.format.*;
 
 import com.avaje.ebean.*;
+
 import modules.AmazonHelper;
+import modules.AmazonHelper.OnDownloadComplete;
 import play.Logger;
 
 /**
  * Entry entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Entry extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
@@ -26,7 +31,7 @@ public class Entry extends com.avaje.ebean.Model {
     @Constraints.Required
     public int tech_id;
 
-    @Formats.DateTime(pattern="yyyy-MM-dd kk:mm")
+    @Formats.DateTime(pattern = "yyyy-MM-dd kk:mm")
     public Date entry_time;
 
     @Constraints.Required
@@ -47,7 +52,7 @@ public class Entry extends com.avaje.ebean.Model {
     @Constraints.Required
     public long truck_id;
 
-    public static Finder<Long,Entry> find = new Finder<Long,Entry>(Entry.class);
+    public static Finder<Long, Entry> find = new Finder<Long, Entry>(Entry.class);
 
     public static PagedList<Entry> list(int page, int pageSize, String sortBy, String order) {
         return find.where()
@@ -119,6 +124,10 @@ public class Entry extends com.avaje.ebean.Model {
         return company.zipcode;
     }
 
+    public String getDate() {
+        return new SimpleDateFormat("yyyy-MM-dd kk:mm").format(entry_time);
+    }
+
     public String getTruckLine() {
         Truck truck = Truck.find.ref(truck_id);
         if (truck == null) {
@@ -180,7 +189,7 @@ public class Entry extends com.avaje.ebean.Model {
         delete();
     }
 
-   public static int countEntriesForProject(long project_id) {
+    public static int countEntriesForProject(long project_id) {
         return find.where().eq("project_id", project_id).findList().size();
     }
 
@@ -194,8 +203,8 @@ public class Entry extends com.avaje.ebean.Model {
 
     public static boolean hasEntryForCompany(final int tech_id, final long company_id) {
         List<Entry> items = find.where()
-                    .eq("tech_id", tech_id)
-                    .eq("company_id", company_id).findList();
+                .eq("tech_id", tech_id)
+                .eq("company_id", company_id).findList();
         return items.size() > 0;
     }
 
@@ -233,6 +242,33 @@ public class Entry extends com.avaje.ebean.Model {
             }
         }
         return false;
+    }
+
+    public static List<Entry> getFulfilledBy(WorkOrder order) {
+        return find.where()
+                .eq("company_id", order.company_id)
+                .eq("project_id", order.project_id)
+                .eq("truck_id", order.truck_id)
+                .findList();
+    }
+
+
+    public void loadPictures(String host, AmazonHelper amazonHelper) {
+        List<PictureCollection> pictures = getPictures();
+        for (PictureCollection picture : pictures) {
+            File localFile = amazonHelper.getLocalFile(picture.picture);
+            if (!localFile.exists()) {
+                try {
+                    amazonHelper.download(host, picture.picture, new OnDownloadComplete() {
+                        public void onDownloadComplete(File file) {
+                            Logger.info("COMPLETED: " + file.getAbsolutePath());
+                        }
+                    });
+                } catch (Exception ex) {
+                    Logger.error(ex.getMessage());
+                }
+            }
+        }
     }
 }
 
