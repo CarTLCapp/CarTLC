@@ -71,36 +71,36 @@ public class WorkOrderController extends Controller {
         } else {
             Logger.info("DOES NOT EXIST");
         }
-        return INDEX();
-    }
-
-    public Result upload2() {
+        String projectName = importForm.get().project;
         MultipartFormData<File> body = request().body().asMultipartFormData();
-        FilePart<File> importname = body.getFile("name");
-        if (importname != null) {
-            String fileName = importname.getFilename();
-            if (fileName.trim().length() > 0) {
-                File file = importname.getFile();
-                if (file.exists()) {
-                    Logger.info("DOES EXIST");
-                    importOrders(file);
+        if (body != null) {
+            FilePart<File> importname = body.getFile("filename");
+            if (importname != null) {
+                String fileName = importname.getFilename();
+                if (fileName.trim().length() > 0) {
+                    File file = importname.getFile();
+                    if (file.exists()) {
+                        Logger.info("DOES EXIST");
+                        importOrders(file, projectName);
+                    } else {
+                        Logger.info("DOES NOT EXIST");
+                    }
                 } else {
-                    Logger.info("DOES NOT EXIST");
+                    return badRequest("No filename entered");
                 }
             } else {
-                return badRequest("No filename entered");
+                return badRequest("No file name entered");
             }
-        } else {
-            flash("error", "Missing file");
-            return badRequest("No file name entered");
         }
         return INDEX();
     }
 
     @Transactional
-    void importOrders(File file) {
+    void importOrders(File file, String projectName) {
+        Project project = Project.findByName(projectName);
         Client client = Secured.getClient(ctx());
-        WorkOrderReader reader = new WorkOrderReader(client, null);
+        Logger.info("CLIENT ID=" + (client == null ? "NULL" : client.id) + ", PROJECT ID=" + (project == null ? "NULL" : project.id));
+        WorkOrderReader reader = new WorkOrderReader(client, project);
         try {
             reader.load(file);
         } catch (Exception ex) {

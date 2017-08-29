@@ -19,10 +19,11 @@
         <li>License Plate</li>
     </ul>
     
-    @helper.form(routes.WorkOrderController.upload()) {
+    @helper.form(routes.WorkOrderController.upload(), 'enctype -> "multipart/form-data") {
         
         <fieldset>
 
+            <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>
             @helper.inputFile(importForm("filename"), '_label -> "Filename:", 'size -> 30)
             @helper.select(importForm("project"), options = options(Project.listNames()), args = '_label -> "Project:")
 
@@ -33,11 +34,6 @@
             <a href="@routes.WorkOrderController.list()" class="btn">Cancel</a>
         </div>
 
-    }
-
-    @form(action = routes.WorkOrderController.upload2, 'enctype -> "multipart/form-data") {
-        <input type="file" name="name">
-        <p><input type="submit"></p>
     }
     
 }

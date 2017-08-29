@@ -57,6 +57,9 @@ public class Project extends Model implements Comparable<Project> {
     }
 
     public static Project findByName(String name) {
+        if (name == null) {
+            return null;
+        }
         List<Project> projects = find.where()
                 .eq("name", name)
                 .findList();

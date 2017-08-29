@@ -46,8 +46,8 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
         } else if (mNextParameters.sortBy == SortBy.PROJECT) {
             value = o1.getProjectLine().compareTo(o2.getProjectLine());
         } else if (mNextParameters.sortBy == SortBy.CLIENT) {
-            Client l1 = Client.find.ref(o1.client_id);
-            Client l2 = Client.find.ref(o2.client_id);
+            Client l1 = Client.get(o1.client_id);
+            Client l2 = Client.get(o2.client_id);
             if (l1 != null && l2 != null && l1.name != null && l2.name != null) {
                 value = l1.name.compareTo(l2.name);
             } else if (l1 != null && l1.name != null) {
