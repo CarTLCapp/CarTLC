@@ -63,6 +63,8 @@ alter table entry add constraint c2_e_entry_project_id foreign key (project_id) 
 alter table entry add constraint c2_e_entry_address_id foreign key (company_id) references company (id) on delete restrict on update restrict;
 alter table entry add constraint c2_e_tech_id foreign key (tech_id) references technician (id) on delete restrict on update restrict;
 
+alter table company add created_by_client bit default 0;
+
 # --- !Downs
 
 drop table if exists message;
@@ -74,3 +76,4 @@ drop table if exists work_order;
 drop table if exists truck;
 drop table if exists entry;
 alter table entry_v2 rename entry;
+alter table company drop column created_by_client;

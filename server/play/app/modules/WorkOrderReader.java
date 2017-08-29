@@ -135,6 +135,8 @@ public class WorkOrderReader {
                     company.name = getFieldValue(values, Field.COMPANY);
                     Company existing = Company.has(company);
                     if (existing == null) {
+                        company.created_by = (int) client_id;
+                        company.created_by_client = true;
                         company.save();
                         order.company_id = company.id;
                         companyNewCount++;

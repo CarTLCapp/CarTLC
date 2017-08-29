@@ -42,6 +42,9 @@ public class Company extends Model {
     @Constraints.Required
     public boolean disabled;
 
+    @Constraints.Required
+    public boolean created_by_client;
+
     /**
      * Generic query helper for entity Computer with id Long
      */
@@ -81,7 +84,7 @@ public class Company extends Model {
         List<Company> items = find.where().eq("disabled", false).findList();
         List<Company> result = new ArrayList<Company>();
         for (Company item : items) {
-            if (item.created_by == 0 || item.created_by == tech_id) {
+            if (item.created_by == 0 || item.created_by == tech_id || item.created_by_client) {
                 result.add(item);
             } else if (Entry.hasEntryForCompany(tech_id, item.id)) {
                 result.add(item);
@@ -168,9 +171,16 @@ public class Company extends Model {
 
     public String getCreatedBy() {
         if (created_by != 0) {
-            Technician tech = Technician.find.byId((long) created_by);
-            if (tech != null) {
-                return tech.fullName();
+            if (created_by_client) {
+                Client client = Client.find.byId((long) created_by);
+                if (client != null) {
+                    return client.name;
+                }
+            } else {
+                Technician tech = Technician.find.byId((long) created_by);
+                if (tech != null) {
+                    return tech.fullName();
+                }
             }
         }
         return "";
