@@ -48,14 +48,16 @@ public class WorkOrderController extends Controller {
         return list(0, "client_id", "desc", msg);
     }
 
+    @Security.Authenticated(Secured.class)
     public Result list(int page, String sortBy, String order, String message) {
+        workList.setClient(Secured.getClient(ctx()));
         workList.setPage(page);
         workList.setSortBy(sortBy);
         workList.setOrder(order);
         workList.clearCache();
-        workList.setProjects(Secured.getClient(ctx()));
+        workList.setProjects();
         workList.compute();
-        return ok(views.html.work_order_list.render(workList, sortBy, order, message.replaceAll("\n", "<br/>")));
+        return ok(views.html.work_order_list.render(workList, sortBy, order, Secured.getClient(ctx()), message));
     }
 
     public Result uploadForm() {
@@ -65,7 +67,7 @@ public class WorkOrderController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result uploadForm(String errors) {
         Form<WorkImport> importForm = formFactory.form(WorkImport.class);
-        return ok(views.html.work_order_upload.render(importForm, errors.replaceAll("\n", "<br/>")));
+        return ok(views.html.work_order_upload.render(importForm, errors));
     }
 
     @Security.Authenticated(Secured.class)
@@ -128,8 +130,9 @@ public class WorkOrderController extends Controller {
         return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result deleteLastUploaded() {
-        int count = WorkOrder.deleteLastUploaded();
+        int count = WorkOrder.deleteLastUploaded(Secured.getClient(ctx()));
         return INDEX(count + " work orders deleted");
     }
 

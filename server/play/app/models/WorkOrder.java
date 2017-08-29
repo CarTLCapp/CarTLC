@@ -147,15 +147,24 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return list != null && list.size() > 1;
     }
 
-    static List<WorkOrder> findByUploadId(long upload_id) {
-        return find.where().eq("upload_id", upload_id).findList();
+    static List<WorkOrder> findByUploadId(long upload_id, Client client) {
+        if (client == null || client.is_admin) {
+            return find.where()
+                    .eq("upload_id", upload_id)
+                    .findList();
+        } else {
+            return find.where()
+                    .eq("upload_id", upload_id)
+                    .eq("client_id", client.id)
+                    .findList();
+        }
     }
 
-    public static List<WorkOrder> getLastUploaded() {
-        int upload_id = Version.get(Version.NEXT_UPLOAD_ID) - 1;
+    public static List<WorkOrder> getLastUploaded(Client client) {
+        int upload_id = Version.get(Version.NEXT_UPLOAD_ID);
         List<WorkOrder> list;
         for (; upload_id > 0; upload_id--) {
-            list = findByUploadId(upload_id);
+            list = findByUploadId(upload_id, client);
             if (list.size() > 0) {
                 return list;
             }
@@ -163,8 +172,8 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return null;
     }
 
-    public static int deleteLastUploaded() {
-        List<WorkOrder> list = getLastUploaded();
+    public static int deleteLastUploaded(Client client) {
+        List<WorkOrder> list = getLastUploaded(client);
         if (list != null) {
             for (WorkOrder order : list) {
                 order.delete();
@@ -173,8 +182,8 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return list.size();
     }
 
-    public static int lastUploadCount() {
-        List<WorkOrder> list = getLastUploaded();
+    public static int lastUploadCount(Client client) {
+        List<WorkOrder> list = getLastUploaded(client);
         if (list == null) {
             return 0;
         }

@@ -1,4 +1,4 @@
-@(currentPage: WorkOrderList, currentSortBy: String, currentOrder: String, message : String)
+@(currentPage: WorkOrderList, currentSortBy: String, currentOrder: String, client : Client, message : String)
 
 @import helper._
 
@@ -29,13 +29,13 @@
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - List Work Orders") {
+@main("FleetTLC - List Work Orders", client) {
 
     <h1 id="homeTitle">@Messages("workorder.list.title", currentPage.getTotalRowCount())</h1>
 
     @if(message.length() > 0) {
         <div class="message">
-            <em>@message</em>
+            <em>@Html(HtmlFormat.escape(message).toString.replace("\n", "<br />"))</em>
         </div>
     }
 

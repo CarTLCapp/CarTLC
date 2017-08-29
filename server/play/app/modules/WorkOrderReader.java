@@ -161,7 +161,10 @@ public class WorkOrderReader {
         } catch (Exception ex) {
             errors.add(ex.getMessage());
         }
-        warnings.add("Added " + companyNewCount + " new companies and " + orderCount + " new orders");
+        if (companyNewCount > 0) {
+            warnings.add("Added " + companyNewCount + " new companies");
+        }
+        warnings.add("Added " + orderCount + " new orders");
         return errors.size() == 0;
     }
 

@@ -15,27 +15,39 @@ import play.Logger;
  */
 public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<WorkOrder> {
 
-    int lastUploadCount;
+    int lastUploadCount = -1;
+    Client client;
 
     public WorkOrderList() {
         super();
-        lastUploadCount = WorkOrder.lastUploadCount();
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     @Override
     public void clearCache() {
         super.clearCache();
-        lastUploadCount = WorkOrder.lastUploadCount();
+        lastUploadCount = -1;
     }
 
     @Override
     protected List<WorkOrder> getOrderedList() {
-        return WorkOrder.find.where().orderBy(getOrderBy()).findList();
+        if (client == null || client.is_admin) {
+            return WorkOrder.find.where().orderBy(getOrderBy()).findList();
+        } else {
+            return WorkOrder.find.where().eq("client_id", client.id).orderBy(getOrderBy()).findList();
+        }
     }
 
     @Override
     protected List<WorkOrder> getRawList() {
-        return WorkOrder.find.findList();
+        if (client == null || client.is_admin) {
+            return WorkOrder.find.findList();
+        } else {
+            return WorkOrder.find.where().eq("client_id", client.id).findList();
+        }
     }
 
     @Override
@@ -46,6 +58,10 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
     @Override
     protected long getProjectId(WorkOrder entry) {
         return entry.project_id;
+    }
+
+    public void setProjects() {
+        super.setProjects(client);
     }
 
     public int compare(WorkOrder o1, WorkOrder o2) {
@@ -127,6 +143,9 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
     }
 
     public int getLastUploadCount() {
+        if (lastUploadCount < 0) {
+            lastUploadCount = WorkOrder.lastUploadCount(client);
+        }
         return lastUploadCount;
     }
 }

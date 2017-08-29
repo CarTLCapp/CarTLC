@@ -35,6 +35,8 @@
 
     }
 
-    <p style="color:red">@message</p>
+    <p style="color:red">
+        <em>@Html(HtmlFormat.escape(message).toString.replace("\n", "<br />"))</em>
+    </p>
 
 }
