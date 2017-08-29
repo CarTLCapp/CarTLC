@@ -46,6 +46,17 @@ public class Truck extends com.avaje.ebean.Model {
         return list;
     }
 
+    public static Truck findFirst(int truck_number, String license_plate) {
+        List<Truck> trucks = findBy(truck_number, license_plate);
+        if (trucks == null || trucks.size() == 0) {
+            return null;
+        }
+        if (trucks.size() > 1) {
+            Logger.error("Found too many trucks with " + truck_number + ", " + license_plate);
+        }
+        return trucks.get(0);
+    }
+
     public static Truck add(int truck_number, String license_plate) {
         List<Truck> list = findBy(truck_number, license_plate);
         Truck truck = null;

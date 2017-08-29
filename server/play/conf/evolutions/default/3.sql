@@ -30,12 +30,12 @@ alter table client_project_association add constraint c_cpa_user_info_id foreign
 alter table client_project_association add constraint c_cpa_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 alter table picture_collection add note varchar(1028);
 
-create table workorder (
+create table work_order (
     id             int auto_increment primary key,
     client_id      int,
     project_id     int,
     company_id     int,
-    truck_number   int
+    truck_id       int
 );
 
 create table truck (
@@ -69,7 +69,7 @@ drop table if exists client_project_association;
 drop table if exists client;
 alter table technician rename client;
 alter table picture_collection drop column note;
-drop table if exists workorder;
+drop table if exists work_order;
 drop table if exists truck;
 drop table if exists entry;
 alter table entry_v2 rename entry;

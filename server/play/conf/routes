@@ -134,6 +134,7 @@ POST    /client/:id/delete     controllers.ClientController.delete(id:Long)
 
 ### WORK ORDERS
 
+POST    /work/upload_form      controllers.WorkOrderController.uploadForm()
 POST    /work/upload           controllers.WorkOrderController.upload()
 GET     /work/list             controllers.WorkOrderController.list(p:Int ?= 0, s ?= "client_id", o ?= "desc")
 GET     /work/:id/view         controllers.WorkOrderController.view(id:Long)

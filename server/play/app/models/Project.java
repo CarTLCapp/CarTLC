@@ -39,6 +39,14 @@ public class Project extends Model implements Comparable<Project> {
                 .orderBy("name asc").findList();
     }
 
+    public static List<String> listNames() {
+        ArrayList<String> names = new ArrayList<String>();
+        for (Project project : list()) {
+            names.add(project.name);
+        }
+        return names;
+    }
+
     public static Project findByName(String name) {
         List<Project> projects = find.where()
                 .eq("name", name)

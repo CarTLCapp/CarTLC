@@ -13,9 +13,9 @@ import play.Logger;
  * proper ordering and so on, well I can get them joined. But I can't
  * insert new entries with the company_id field being filled in.
  */
-public class WorkList extends BaseList<WorkOrder> implements Comparator<WorkOrder> {
+public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<WorkOrder> {
 
-    public WorkList() {
+    public WorkOrderList() {
         super();
     }
 

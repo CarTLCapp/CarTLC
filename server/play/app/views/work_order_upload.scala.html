@@ -1,0 +1,38 @@
+@(importForm: Form[WorkImport])
+
+@import helper._
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - Import Work Orders", home = "/work/list") {
+    
+    <h1>Import Work Orders</h1>
+
+    <p>Work orders must be a .csv file with very specific column headers, case does not matter:</p>
+    <ul>
+        <li>Company</li>
+        <li>Address 1</li>
+        <li>City</li>
+        <li>State</li>
+        <li>Zip</li>
+        <li>Unit #</li>
+        <li>License Plate</li>
+    </ul>
+    
+    @helper.form(routes.WorkOrderController.upload()) {
+        
+        <fieldset>
+
+            @helper.inputFile(field = importForm("filename"), args = 'size -> 30)
+            @helper.select(field = importForm("project"), options = options(Project.listNames()))
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Import" class="btn primary"> or
+            <a href="@routes.WorkOrderController.list()" class="btn">Cancel</a>
+        </div>
+
+    }
+    
+}

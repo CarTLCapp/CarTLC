@@ -2,10 +2,10 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+
 import java.util.List;
 import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
+
 
 import play.mvc.*;
 import play.data.*;
@@ -21,19 +21,27 @@ import models.*;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+
 import modules.AmazonHelper;
+import play.db.ebean.Transactional;
 
 import play.Logger;
 
 public class WorkOrderController extends Controller {
 
+    private FormFactory formFactory;
     private AmazonHelper amazonHelper;
-    private WorkList workList = new WorkList();
+    private WorkOrderList workList = new WorkOrderList();
 
     @Inject
-    public WorkOrderController(AmazonHelper amazonHelper) {
+    public WorkOrderController(FormFactory formFactory, AmazonHelper amazonHelper) {
         super();
         this.amazonHelper = amazonHelper;
+        this.formFactory = formFactory;
+    }
+
+    public Result INDEX() {
+        return list(0, "client_id", "desc");
     }
 
     public Result list(int page, String sortBy, String order) {
@@ -46,28 +54,43 @@ public class WorkOrderController extends Controller {
         return ok(views.html.work_order_list.render(workList, sortBy, order));
     }
 
+    @Security.Authenticated(Secured.class)
+    public Result uploadForm() {
+        Form<WorkImport> importForm = formFactory.form(WorkImport.class);
+        return ok(views.html.work_order_upload.render(importForm));
+    }
+
+    @Security.Authenticated(Secured.class)
     public Result upload() {
-        Logger.debug("IMPORT");
-        MultipartFormData<File> body = request().body().asMultipartFormData();
-        FilePart<File> importname = body.getFile("name");
-        if (importname != null) {
-            String fileName = importname.getFilename();
-            String contentType = importname.getContentType();
-            File file = importname.getFile();
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    Logger.info("READ LINE: " + line);
-                }
-                br.close();
-            } catch (Exception ex) {
-                Logger.error(ex.getMessage());
-            }
-            return ok("File uploaded");
-        } else {
-            flash("error", "Missing file");
-            return badRequest();
+        Form<WorkImport> importForm = formFactory.form(WorkImport.class).bindFromRequest();
+        Logger.info("FILENAME=" + importForm.get().filename);
+        Logger.info("PROJECT=" + importForm.get().project);
+
+//        MultipartFormData<File> body = request().body().asMultipartFormData();
+//        FilePart<File> importname = body.getFile("name");
+//        if (importname != null) {
+//            String fileName = importname.getFilename();
+//            if (fileName.trim().length() > 0) {
+//                File file = importname.getFile();
+//                importOrders(file);
+//            } else {
+//                return badRequest("No filename entered");
+//            }
+//        } else {
+//            flash("error", "Missing file");
+//            return badRequest("No file name entered");
+//        }
+        return INDEX();
+    }
+
+    @Transactional
+    void importOrders(File file) {
+        Client client = Secured.getClient(ctx());
+        WorkOrderReader reader = new WorkOrderReader(client, null);
+        try {
+            reader.load(file);
+        } catch (Exception ex) {
+            flash("error", ex.getMessage());
         }
     }
 

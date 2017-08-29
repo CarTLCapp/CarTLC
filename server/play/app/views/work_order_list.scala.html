@@ -1,4 +1,4 @@
-@(currentPage: WorkList, currentSortBy: String, currentOrder: String)
+@(currentPage: WorkOrderList, currentSortBy: String, currentOrder: String)
 
 @import helper._
 
@@ -26,6 +26,8 @@
         <a href="@link(0, key)">@title</a>
     </th>
 }
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
 @main("FleetTLC - List Work Orders") {
 
@@ -105,21 +107,8 @@
         </div>
     }
 
-    @form(action = routes.WorkOrderController.upload, 'enctype -> "multipart/form-data") {
-        <input type="file" name="name">
-        <input type="Submit">
-    }
+    <a class="btn success" id="add" href="@routes.WorkOrderController.upload()">Import Work Orders</a>
 
-    <p>Work orders must be a .csv file with very specific column headers:</p>
-    <ul>
-        <li>LOC.</li>
-        <li>Address Line 1</li>
-        <li>City</li>
-        <li>State</li>
-        <li>Zip</li>
-        <li>UNIT #</li>
-        <li>LICENSE NUMBER</li>
-    </ul>
 }
 
             
