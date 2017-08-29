@@ -23,8 +23,8 @@
         
         <fieldset>
 
-            @helper.inputFile(field = importForm("filename"), args = 'size -> 30)
-            @helper.select(field = importForm("project"), options = options(Project.listNames()))
+            @helper.inputFile(importForm("filename"), '_label -> "Filename:", 'size -> 30)
+            @helper.select(importForm("project"), options = options(Project.listNames()), args = '_label -> "Project:")
 
         </fieldset>
 

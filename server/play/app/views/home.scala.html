@@ -7,13 +7,11 @@
 *@
 @main("FleetTLC", client) {
 
+    <h2>Data</h2>
+
     <h3><a href="@routes.EntryController.list()">Entries</a></h3>
 
     <p>Display the list of uploaded entries from the technicians.</p>
-
-    <h3><a href="@routes.TechnicianController.list">Technicians</a></h3>
-
-    <p>Manage the technicians that are sending data up from the tablets using the APP.</p>
 
     <h3><a href="@routes.ProjectController.list">Projects</a></h3>
 
@@ -31,6 +29,12 @@
 
     <p>Manage the list of notes and their association with projects.</p>
 
+    <h2>Administration</h2>
+
+    <h3><a href="@routes.TechnicianController.list">Technicians</a></h3>
+
+    <p>Manage the technicians that are sending data up from the tablets using the APP.</p>
+
     <h3><a href="@routes.WorkOrderController.list()">Work Orders</a></h3>
 
     <p>Show imported work orders</p>
@@ -40,6 +44,8 @@
         <h3><a href="@routes.ClientController.list()">Clients</a></h3>
 
         <p>Display list of clients that are able to login to this website and manage their projects.</p>
+
+        <h2>Development</h2>
 
         <h3><a href="@routes.MessageController.list()">Errors</a></h3>
 
