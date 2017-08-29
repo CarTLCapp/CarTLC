@@ -65,8 +65,8 @@ public class WorkOrderController extends Controller {
         Form<WorkImport> importForm = formFactory.form(WorkImport.class).bindFromRequest();
         Logger.info("FILENAME=" + importForm.get().filename);
         Logger.info("PROJECT=" + importForm.get().project);
-        File file = new File(importForm.get().filename);
-        if (file.exists()) {
+        File file2 = new File(importForm.get().filename);
+        if (file2.exists()) {
             Logger.info("DOES EXIST");
         } else {
             Logger.info("DOES NOT EXIST");
