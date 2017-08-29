@@ -14,7 +14,7 @@
             <h1 class="fill"><a href=@home>@header</a>
                 @if(client!=null) {
                     <span style="float:right;font-size:15px">
-                        @if(client != null && client.isValid()){
+                        @if(client.isValid()){
                             @client.name: <a href="@routes.HomeController.logout()">logout</a>
                         } else {
                             <a href="@routes.HomeController.login()">Login</a>

@@ -95,7 +95,13 @@ public class EquipmentController extends Controller {
         if (equipmentForm.hasErrors()) {
             return badRequest(views.html.equipment_createForm.render(equipmentForm));
         }
-        equipmentForm.get().save();
+        Client client = Secured.getClient(ctx());
+        Equipment equip = equipmentForm.get();
+        if (client != null && client.id > 0) {
+            equip.created_by = Long.valueOf(client.id).intValue();
+            equip.created_by_client = true;
+        }
+        equip.save();
         flash("success", "Equipment " + equipmentForm.get().name + " has been created");
         return list();
     }

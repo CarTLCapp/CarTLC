@@ -34,7 +34,7 @@ public class Client extends com.avaje.ebean.Model {
     public static Finder<Long, Client> find = new Finder<Long, Client>(Client.class);
 
     public boolean isValid() {
-        return id != 0 && name != null;
+        return id != null && id != 0 && name != null;
     }
 
     public static Client get(long id) {

@@ -35,7 +35,7 @@
 
     <p>Manage the technicians that are sending data up from the tablets using the APP.</p>
 
-    @if(client != null && client.is_admin) {
+    @if(client.is_admin) {
         <h3><a href="@routes.ClientController.list()">Clients</a></h3>
 
         <p>Display list of clients that are able to login to this website and manage their projects.</p>
@@ -45,7 +45,7 @@
 
     <p>Show imported work orders</p>
 
-    @if(client != null && client.is_admin) {
+    @if(client.is_admin) {
 
         <h2>Development</h2>
 

@@ -97,7 +97,13 @@ public class NoteController extends Controller {
         if (noteForm.hasErrors()) {
             return badRequest(views.html.note_createForm.render(noteForm));
         }
-        noteForm.get().save();
+        Client client = Secured.getClient(ctx());
+        Note note = noteForm.get();
+        if (client != null && client.id > 0) {
+            note.created_by = Long.valueOf(client.id).intValue();
+            note.created_by_client = true;
+        }
+        note.save();
         flash("success", "Note " + noteForm.get().name + " has been created");
         return list();
     }
