@@ -69,6 +69,8 @@ public class WorkOrderController extends Controller {
         File file = new File(importForm.get().filename);
         if (file.exists()) {
             Logger.info("DOES EXIST");
+        } else {
+            Logger.info("DOES NOT EXIST");
         }
 
 //        MultipartFormData<File> body = request().body().asMultipartFormData();
