@@ -30,6 +30,13 @@ public class Truck extends com.avaje.ebean.Model {
 
     public static Finder<Long, Truck> find = new Finder<Long, Truck>(Truck.class);
 
+    public static Truck get(long id) {
+        if (id > 0) {
+            return find.ref(id);
+        }
+        return null;
+    }
+
     public static List<Truck> list() {
         return find.all();
     }

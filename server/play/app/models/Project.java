@@ -1,9 +1,11 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import com.avaje.ebean.Model;
+
 import play.data.format.*;
 import play.data.validation.*;
 import play.Logger;
@@ -13,21 +15,28 @@ import com.avaje.ebean.*;
 /**
  * Project entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Project extends Model implements Comparable<Project> {
 
     private static final long serialVersionUID = 1L;
 
-	@Id
+    @Id
     public Long id;
-    
+
     @Constraints.Required
     public String name;
 
     @Constraints.Required
     public boolean disabled;
 
-    public static Finder<Long,Project> find = new Finder<Long,Project>(Project.class);
+    public static Finder<Long, Project> find = new Finder<Long, Project>(Project.class);
+
+    public static Project get(long id) {
+        if (id > 0) {
+            return find.ref(id);
+        }
+        return null;
+    }
 
     public static List<Project> list() {
         return list(false);

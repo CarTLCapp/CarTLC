@@ -48,7 +48,11 @@ public class Company extends Model {
     private static Finder<Long,Company> find = new Finder<Long,Company>(Company.class);
 
     public static Company get(long id) {
-        return find.byId(id);
+        if (id > 0) {
+            return find.byId(id);
+        } else {
+            return null;
+        }
     }
 
     public static void delete(long id) {

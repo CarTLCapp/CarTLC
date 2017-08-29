@@ -12,6 +12,7 @@ import play.data.format.*;
 import play.Logger;
 
 import com.avaje.ebean.*;
+
 /**
  * User entity managed by Ebean
  */
@@ -62,7 +63,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
     }
 
     public String getClientName() {
-        Client client = Client.find.ref(client_id);
+        Client client = Client.get(client_id);
         if (client == null) {
             return "";
         }
@@ -70,13 +71,12 @@ public class WorkOrder extends com.avaje.ebean.Model {
     }
 
     public String getProjectLine() {
-        Project project = Project.find.ref(project_id);
+        Project project = Project.get(project_id);
         if (project == null) {
             return "";
         }
         return project.name;
     }
-
 
     public String getCompany() {
         Company company = Company.get(company_id);
@@ -119,7 +119,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
     }
 
     public String getTruckLine() {
-        Truck truck = Truck.find.ref(truck_id);
+        Truck truck = Truck.get(truck_id);
         if (truck == null) {
             return null;
         }

@@ -37,6 +37,13 @@ public class Client extends com.avaje.ebean.Model {
         return id != 0 && name != null;
     }
 
+    public static Client get(long id) {
+        if (id > 0) {
+            return find.ref(id);
+        }
+        return null;
+    }
+
     public static List<Client> list() {
         return find.all();
     }
