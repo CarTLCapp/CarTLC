@@ -244,6 +244,12 @@ public class Entry extends com.avaje.ebean.Model {
         return false;
     }
 
+    public static boolean hasEntryForTruck(final long truck_id) {
+        List<Entry> items = find.where()
+                .eq("truck_id", truck_id).findList();
+        return items.size() > 0;
+    }
+
     public static List<Entry> getFulfilledBy(WorkOrder order) {
         return find.where()
                 .eq("company_id", order.company_id)

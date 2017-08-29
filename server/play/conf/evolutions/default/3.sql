@@ -66,6 +66,8 @@ alter table entry add constraint c2_e_tech_id foreign key (tech_id) references t
 
 alter table company add created_by_client bit default 0;
 alter table company add upload_id int default 0;
+alter table equipment add created_by_client bit default 0;
+alter table note add created_by_client bit default 0;
 
 # --- !Downs
 
@@ -80,3 +82,5 @@ drop table if exists entry;
 alter table entry_v2 rename entry;
 alter table company drop column created_by_client;
 alter table company drop column upload_id;
+alter table equipment drop column created_by_client;
+alter table note drop column created_by_client;

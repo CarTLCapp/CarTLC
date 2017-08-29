@@ -185,11 +185,15 @@ public class WorkOrder extends com.avaje.ebean.Model {
             if (upload_id > 0) {
                 List<Company> clist = Company.findByUploadId(upload_id);
                 for (Company company : clist) {
-                    company.delete();
+                    if (!Entry.hasEntryForCompany(company.id)) {
+                        company.delete();
+                    }
                 }
                 List<Truck> tlist = Truck.findByUploadId(upload_id);
                 for (Truck truck : tlist) {
-                    truck.delete();
+                    if (!Entry.hasEntryForTruck(truck.id)) {
+                        truck.delete();
+                    }
                 }
             }
         }

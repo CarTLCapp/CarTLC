@@ -35,8 +35,9 @@ public class NoteController extends Controller {
     /**
      * Display the list of notes.
      */
+    @Security.Authenticated(Secured.class)
     public Result list() {
-        return ok(views.html.note_list.render(Note.list()));
+        return ok(views.html.note_list.render(Note.list(), Secured.getClient(ctx())));
     }
 
     /**

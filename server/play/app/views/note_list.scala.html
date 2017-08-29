@@ -1,6 +1,6 @@
-@(currentPage: List[Note])
+@(currentPage: List[Note], client : Client)
 
-@main("FleetTLC - List Notes") {
+@main("FleetTLC - List Notes", client) {
 
     <h1 id="homeTitle">@Messages("note.list.title", currentPage.size())</h1>
 
@@ -19,6 +19,7 @@
                     <th>Projects</th>
                     <th>Type</th>
                     <th>Edit</th>
+                    <th>Created By</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,6 +42,9 @@
                         <td>
                             <a href="@routes.NoteController.edit(note.id)">Edit</a>
                         </td>
+                        <td>
+                            @note.getCreatedBy()
+                        </td>
                     </tr>
                 }
 
@@ -50,7 +54,10 @@
     }
 
     <a class="btn success" id="add" href="@routes.NoteController.create()">Add a new note item</a>
-    <a class="btn success" id="addMany" href="@routes.NoteController.createMany()">Add many note items</a>
+
+    @if(client.is_admin) {
+        <a class="btn success" id="addMany" href="@routes.NoteController.createMany()">Add many note items</a>
+    }
 
 }
 

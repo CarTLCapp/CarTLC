@@ -1,6 +1,6 @@
-@(currentPage: List[Equipment])
+@(currentPage: List[Equipment], client : Client)
 
-@main("FleetTLC - List Equipments") {
+@main("FleetTLC - List Equipments", client) {
 
     <h1 id="homeTitle">@Messages("equipment.list.title", currentPage.size())</h1>
 
@@ -50,7 +50,10 @@
     }
 
     <a class="btn success" id="add" href="@routes.EquipmentController.create()">Add a new equipment item</a>
-    <a class="btn success" id="addMany" href="@routes.EquipmentController.createMany()">Add many equipment items</a>
+
+    @if(client.is_admin) {
+        <a class="btn success" id="addMany" href="@routes.EquipmentController.createMany()">Add many equipment items</a>
+    }
 
 }
 

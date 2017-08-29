@@ -71,6 +71,9 @@ public class Note extends Model implements Comparable<Note> {
 
     @Constraints.Required
     public boolean disabled;
+
+    @Constraints.Required
+    public boolean created_by_client;
     /**
      * Generic query helper for entity Computer with id Long
      */
@@ -151,6 +154,23 @@ public class Note extends Model implements Comparable<Note> {
             options.put(t.toString(), t.display);
         }
         return options;
+    }
+
+    public String getCreatedBy() {
+        if (created_by != 0) {
+            if (created_by_client) {
+                Client client = Client.find.byId((long) created_by);
+                if (client != null) {
+                    return client.name;
+                }
+            } else {
+                Technician tech = Technician.find.byId((long) created_by);
+                if (tech != null) {
+                    return tech.fullName();
+                }
+            }
+        }
+        return "";
     }
 
     @Override

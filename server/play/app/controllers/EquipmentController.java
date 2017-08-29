@@ -33,8 +33,9 @@ public class EquipmentController extends Controller {
     /**
      * Display the list of equipments.
      */
+    @Security.Authenticated(Secured.class)
     public Result list() {
-        return ok(views.html.equipment_list.render(Equipment.list()));
+        return ok(views.html.equipment_list.render(Equipment.list(), Secured.getClient(ctx())));
     }
 
     /**
