@@ -65,28 +65,35 @@ public class WorkOrderController extends Controller {
         Form<WorkImport> importForm = formFactory.form(WorkImport.class).bindFromRequest();
         Logger.info("FILENAME=" + importForm.get().filename);
         Logger.info("PROJECT=" + importForm.get().project);
-
         File file = new File(importForm.get().filename);
         if (file.exists()) {
             Logger.info("DOES EXIST");
         } else {
             Logger.info("DOES NOT EXIST");
         }
+        return INDEX();
+    }
 
-//        MultipartFormData<File> body = request().body().asMultipartFormData();
-//        FilePart<File> importname = body.getFile("name");
-//        if (importname != null) {
-//            String fileName = importname.getFilename();
-//            if (fileName.trim().length() > 0) {
-//                File file = importname.getFile();
-//                importOrders(file);
-//            } else {
-//                return badRequest("No filename entered");
-//            }
-//        } else {
-//            flash("error", "Missing file");
-//            return badRequest("No file name entered");
-//        }
+    public Result upload2() {
+        MultipartFormData<File> body = request().body().asMultipartFormData();
+        FilePart<File> importname = body.getFile("name");
+        if (importname != null) {
+            String fileName = importname.getFilename();
+            if (fileName.trim().length() > 0) {
+                File file = importname.getFile();
+                if (file.exists()) {
+                    Logger.info("DOES EXIST");
+                    importOrders(file);
+                } else {
+                    Logger.info("DOES NOT EXIST");
+                }
+            } else {
+                return badRequest("No filename entered");
+            }
+        } else {
+            flash("error", "Missing file");
+            return badRequest("No file name entered");
+        }
         return INDEX();
     }
 

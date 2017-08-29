@@ -34,5 +34,10 @@
         </div>
 
     }
+
+    @form(action = routes.WorkOrderController.upload2, 'enctype -> "multipart/form-data") {
+        <input type="file" name="name">
+        <p><input type="submit"></p>
+    }
     
 }
