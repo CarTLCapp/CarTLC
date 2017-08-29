@@ -114,7 +114,10 @@
     }
 
     <a class="btn success" id="add" href="@routes.WorkOrderController.uploadForm()">Import Work Orders</a>
-    <a class="btn danger" id="delete" href="@routes.WorkOrderController.deleteLastUploaded()">Delete last @WorkOrder.lastUploadCount() Work Orders Uploaded</a>
+
+    @if(currentPage.getLastUploadCount() > 0) {
+        <a class="btn danger" id="delete" href="@routes.WorkOrderController.deleteLastUploaded()">Delete last @currentPage.getLastUploadCount() Work Orders Uploaded</a>
+    }
 
 }
 

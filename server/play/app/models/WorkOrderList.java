@@ -15,8 +15,17 @@ import play.Logger;
  */
 public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<WorkOrder> {
 
+    int lastUploadCount;
+
     public WorkOrderList() {
         super();
+        lastUploadCount = WorkOrder.lastUploadCount();
+    }
+
+    @Override
+    public void clearCache() {
+        super.clearCache();
+        lastUploadCount = WorkOrder.lastUploadCount();
     }
 
     @Override
@@ -115,5 +124,9 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
             value *= -1;
         }
         return value;
+    }
+
+    public int getLastUploadCount() {
+        return lastUploadCount;
     }
 }

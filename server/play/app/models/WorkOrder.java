@@ -175,6 +175,9 @@ public class WorkOrder extends com.avaje.ebean.Model {
 
     public static int lastUploadCount() {
         List<WorkOrder> list = getLastUploaded();
+        if (list == null) {
+            return 0;
+        }
         return list.size();
     }
 }
