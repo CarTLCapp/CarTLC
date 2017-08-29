@@ -55,7 +55,7 @@ public class WorkOrderController extends Controller {
         workList.clearCache();
         workList.setProjects(Secured.getClient(ctx()));
         workList.compute();
-        return ok(views.html.work_order_list.render(workList, sortBy, order, message));
+        return ok(views.html.work_order_list.render(workList, sortBy, order, message.replaceAll("\n", "<br/>")));
     }
 
     public Result uploadForm() {
@@ -65,7 +65,7 @@ public class WorkOrderController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result uploadForm(String errors) {
         Form<WorkImport> importForm = formFactory.form(WorkImport.class);
-        return ok(views.html.work_order_upload.render(importForm, errors));
+        return ok(views.html.work_order_upload.render(importForm, errors.replaceAll("\n", "<br/>")));
     }
 
     @Security.Authenticated(Secured.class)
