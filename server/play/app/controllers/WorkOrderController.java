@@ -67,7 +67,7 @@ public class WorkOrderController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result uploadForm(String errors) {
         Form<WorkImport> importForm = formFactory.form(WorkImport.class);
-        return ok(views.html.work_order_upload.render(importForm, errors));
+        return ok(views.html.work_order_upload.render(importForm, Secured.getClient(ctx()), errors));
     }
 
     @Security.Authenticated(Secured.class)

@@ -52,6 +52,15 @@ public class ClientProjectAssociation extends Model {
         return list;
     }
 
+    public static List<String> findProjectNames(long client_id) {
+        List<Project> projects = findProjects(client_id);
+        ArrayList<String> names = new ArrayList<String>();
+        for (Project project : projects) {
+            names.add(project.name);
+        }
+        return names;
+    }
+
     public static boolean hasProject(long client_id, long project_id) {
         List<ClientProjectAssociation> items = find.where()
                 .eq("client_id", client_id)

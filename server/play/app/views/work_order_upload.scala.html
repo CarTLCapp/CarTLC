@@ -1,10 +1,10 @@
-@(importForm: Form[WorkImport], message : String = "")
+@(importForm: Form[WorkImport], client : Client, message : String = "")
 
 @import helper._
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - Import Work Orders", home = "/work/list") {
+@main("FleetTLC - Import Work Orders", client, "/work/list") {
     
     <h1>Import Work Orders</h1>
 
@@ -24,7 +24,7 @@
         <fieldset>
 
             <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>
-            @helper.select(importForm("project"), options = options(Project.listNames()), args = '_label -> "Project:")
+            @helper.select(importForm("project"), options = options(ClientProjectAssociation.findProjectNames(client.id)), args = '_label -> "Project:")
 
         </fieldset>
 
