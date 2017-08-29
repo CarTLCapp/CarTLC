@@ -41,36 +41,37 @@ public class WorkOrderController extends Controller {
     }
 
     public Result INDEX() {
-        return list(0, "client_id", "desc");
+        return list(0, "client_id", "desc", "");
     }
 
-    public Result list(int page, String sortBy, String order) {
+    public Result INDEX(String msg) {
+        return list(0, "client_id", "desc", msg);
+    }
+
+    public Result list(int page, String sortBy, String order, String message) {
         workList.setPage(page);
         workList.setSortBy(sortBy);
         workList.setOrder(order);
         workList.clearCache();
         workList.setProjects(Secured.getClient(ctx()));
         workList.compute();
-        return ok(views.html.work_order_list.render(workList, sortBy, order));
+        return ok(views.html.work_order_list.render(workList, sortBy, order, message));
+    }
+
+    public Result uploadForm() {
+        return uploadForm("");
     }
 
     @Security.Authenticated(Secured.class)
-    public Result uploadForm() {
+    public Result uploadForm(String errors) {
         Form<WorkImport> importForm = formFactory.form(WorkImport.class);
-        return ok(views.html.work_order_upload.render(importForm));
+        return ok(views.html.work_order_upload.render(importForm, errors));
     }
 
     @Security.Authenticated(Secured.class)
     public Result upload() {
         Form<WorkImport> importForm = formFactory.form(WorkImport.class).bindFromRequest();
-        Logger.info("FILENAME=" + importForm.get().filename);
-        Logger.info("PROJECT=" + importForm.get().project);
-        File file2 = new File(importForm.get().filename);
-        if (file2.exists()) {
-            Logger.info("DOES EXIST");
-        } else {
-            Logger.info("DOES NOT EXIST");
-        }
+        StringBuilder sbuf = new StringBuilder();
         String projectName = importForm.get().project;
         MultipartFormData<File> body = request().body().asMultipartFormData();
         if (body != null) {
@@ -80,31 +81,36 @@ public class WorkOrderController extends Controller {
                 if (fileName.trim().length() > 0) {
                     File file = importname.getFile();
                     if (file.exists()) {
-                        Logger.info("DOES EXIST");
-                        importOrders(file, projectName);
+                        Project project = Project.findByName(projectName);
+                        Client client = Secured.getClient(ctx());
+                        WorkOrderReader reader = new WorkOrderReader(client, project);
+                        if (!reader.load(file)) {
+                            sbuf.append("Errors:\n");
+                            sbuf.append(reader.getErrors());
+                            String warnings = reader.getWarnings();
+                            if (warnings.length() > 0) {
+                                sbuf.append("\nWarnings:\n");
+                                sbuf.append(warnings);
+                            }
+                        } else {
+                            return INDEX(reader.getWarnings());
+                        }
                     } else {
-                        Logger.info("DOES NOT EXIST");
+                        sbuf.append("File does not exist: " + fileName);
                     }
                 } else {
-                    return badRequest("No filename entered");
+                    sbuf.append("No filename entered");
                 }
             } else {
-                return badRequest("No file name entered");
+                sbuf.append("No filename entered");
             }
+        } else {
+            sbuf.append("Invalid call");
         }
-        return INDEX();
-    }
-
-    @Transactional
-    void importOrders(File file, String projectName) {
-        Project project = Project.findByName(projectName);
-        Client client = Secured.getClient(ctx());
-        Logger.info("CLIENT ID=" + (client == null ? "NULL" : client.id) + ", PROJECT ID=" + (project == null ? "NULL" : project.id));
-        WorkOrderReader reader = new WorkOrderReader(client, project);
-        try {
-            reader.load(file);
-        } catch (Exception ex) {
-            flash("error", ex.getMessage());
+        if (sbuf.length() == 0) {
+            return INDEX();
+        } else {
+            return uploadForm(sbuf.toString());
         }
     }
 
@@ -120,6 +126,11 @@ public class WorkOrderController extends Controller {
         Entry entry = list.get(0);
         entry.loadPictures(request().host(), amazonHelper);
         return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
+    }
+
+    public Result deleteLastUploaded() {
+        int count = WorkOrder.deleteLastUploaded();
+        return INDEX(count + " work orders deleted");
     }
 
 }

@@ -11,6 +11,7 @@ import java.lang.StringBuilder;
 import java.lang.Integer;
 
 import models.WorkOrder;
+import models.Version;
 import play.db.ebean.Transactional;
 import play.Logger;
 
@@ -64,8 +65,11 @@ public class WorkOrderReader {
     }
 
     HashMap<Integer,Integer> fieldPos = new HashMap<Integer,Integer>();
+    ArrayList<String> errors = new ArrayList<String>();
+    ArrayList<String> warnings = new ArrayList<String>();
     long client_id;
     long project_id;
+    long upload_id;
 
     public WorkOrderReader(Client client, Project project) {
         if (client == null || client.is_admin) {
@@ -76,14 +80,14 @@ public class WorkOrderReader {
         if (project != null) {
             project_id = project.id;
         }
+        upload_id = Version.inc(Version.NEXT_UPLOAD_ID);
     }
 
-    @Transactional
-    public void load(File file) throws Exception {
+    public boolean load(File file) {
         int companyNewCount = 0;
         int orderCount = 0;
-        String errorMessage = null;
         fieldPos.clear();
+        errors.clear();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
@@ -101,7 +105,7 @@ public class WorkOrderReader {
                         Field field = Field.find(name);
                         if (field != null) {
                             if (fieldPos.containsKey(field.ordinal())) {
-                                errorMessage = "This field exists more than once: " + fieldPos.toString();
+                                errors.add("This field exists more than once: " + fieldPos.toString());
                                 break;
                             } else {
                                 fieldPos.put(field.ordinal(), pos);
@@ -111,17 +115,18 @@ public class WorkOrderReader {
                     fieldCount = names.size();
                 } else {
                     if (fieldPos.size() < 5) {
-                        errorMessage = "Not enough valid columns detected: " + fieldPos.size();
-                        break;
+                        warnings.add(Integer.toString(lineCount) + ": Not enough valid columns detected: " + fieldPos.size());
+                        continue;
                     }
                     List<String> values = Arrays.asList(line.split(","));
                     if (values.size() != fieldCount) {
-                        errorMessage = Integer.toString(lineCount) + ": incorrect number of fields on line: " + line;
-                        break;
+                        warnings.add(Integer.toString(lineCount) + ": incorrect number of fields on line: " + line);
+                        continue;
                     }
                     WorkOrder order = new WorkOrder();
                     order.client_id = client_id;
                     order.project_id = project_id;
+                    order.upload_id = upload_id;
                     Company company = new Company();
                     company.street = getFieldValue(values, Field.STREET);
                     company.city = getFieldValue(values, Field.CITY);
@@ -154,13 +159,29 @@ public class WorkOrderReader {
             }
             br.close();
         } catch (Exception ex) {
-            errorMessage = ex.getMessage();
+            errors.add(ex.getMessage());
         }
-        if (errorMessage != null) {
-            Logger.error(errorMessage);
-            throw new Exception(errorMessage);
+        warnings.add("Added " + companyNewCount + " new companies and " + orderCount + " new orders");
+        return errors.size() == 0;
+    }
+
+    public String getErrors() {
+        return getMessages(errors);
+    }
+
+    public String getWarnings() {
+        return getMessages(warnings);
+    }
+
+    String getMessages(List<String> msgs) {
+        StringBuilder sbuf = new StringBuilder();
+        for (String msg : msgs) {
+            if (sbuf.length() > 0) {
+                sbuf.append("\n");
+            }
+            sbuf.append(msg);
         }
-        Logger.info("Added " + companyNewCount + " new companies and " + orderCount + " new orders");
+        return sbuf.toString();
     }
 
     String getFieldValue(List<String> values, Field field) {

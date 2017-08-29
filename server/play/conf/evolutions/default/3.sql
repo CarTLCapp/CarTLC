@@ -32,6 +32,7 @@ alter table picture_collection add note varchar(1028);
 
 create table work_order (
     id             int auto_increment primary key,
+    upload_id      int,
     client_id      int,
     project_id     int,
     company_id     int,

@@ -1,4 +1,4 @@
-@(currentPage: WorkOrderList, currentSortBy: String, currentOrder: String)
+@(currentPage: WorkOrderList, currentSortBy: String, currentOrder: String, message : String)
 
 @import helper._
 
@@ -32,6 +32,12 @@
 @main("FleetTLC - List Work Orders") {
 
     <h1 id="homeTitle">@Messages("workorder.list.title", currentPage.getTotalRowCount())</h1>
+
+    @if(message.length() > 0) {
+        <div class="message">
+            <em>@message</em>
+        </div>
+    }
 
     @if(currentPage.getTotalRowCount() == 0) {
 
@@ -108,6 +114,7 @@
     }
 
     <a class="btn success" id="add" href="@routes.WorkOrderController.uploadForm()">Import Work Orders</a>
+    <a class="btn danger" id="delete" href="@routes.WorkOrderController.deleteLastUploaded()">Delete last @WorkOrder.lastUploadCount() Work Orders Uploaded</a>
 
 }
 

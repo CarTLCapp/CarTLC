@@ -27,6 +27,9 @@ public class WorkOrder extends com.avaje.ebean.Model {
     public Long id;
 
     @Constraints.Required
+    public long upload_id;
+
+    @Constraints.Required
     public long client_id;
 
     @Constraints.Required
@@ -142,6 +145,37 @@ public class WorkOrder extends com.avaje.ebean.Model {
     public boolean isFulfilled() {
         List<Entry> list = Entry.getFulfilledBy(this);
         return list != null && list.size() > 1;
+    }
+
+    static List<WorkOrder> findByUploadId(long upload_id) {
+        return find.where().eq("upload_id", upload_id).findList();
+    }
+
+    public static List<WorkOrder> getLastUploaded() {
+        int upload_id = Version.get(Version.NEXT_UPLOAD_ID) - 1;
+        List<WorkOrder> list;
+        for (; upload_id > 0; upload_id--) {
+            list = findByUploadId(upload_id);
+            if (list.size() > 0) {
+                return list;
+            }
+        }
+        return null;
+    }
+
+    public static int deleteLastUploaded() {
+        List<WorkOrder> list = getLastUploaded();
+        if (list != null) {
+            for (WorkOrder order : list) {
+                order.delete();
+            }
+        }
+        return list.size();
+    }
+
+    public static int lastUploadCount() {
+        List<WorkOrder> list = getLastUploaded();
+        return list.size();
     }
 }
 

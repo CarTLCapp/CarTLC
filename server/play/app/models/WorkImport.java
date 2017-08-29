@@ -13,8 +13,6 @@ public class WorkImport extends Model {
 
     private static final long serialVersionUID = 1L;
 
-    public String filename;
-
     public String project;
 }
 

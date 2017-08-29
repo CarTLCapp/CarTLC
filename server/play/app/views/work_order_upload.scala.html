@@ -1,4 +1,4 @@
-@(importForm: Form[WorkImport])
+@(importForm: Form[WorkImport], message : String = "")
 
 @import helper._
 
@@ -24,7 +24,7 @@
         <fieldset>
 
             <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>
-            @helper.inputFile(importForm("filename"), '_label -> "Filename:", 'size -> 30)
+            // @helper.inputFile(importForm("filename"), '_label -> "Filename:", 'size -> 30)
             @helper.select(importForm("project"), options = options(Project.listNames()), args = '_label -> "Project:")
 
         </fieldset>
@@ -35,5 +35,7 @@
         </div>
 
     }
-    
+
+    <p style="color:red">@message</p>
+
 }
