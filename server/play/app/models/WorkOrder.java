@@ -27,7 +27,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
     public Long id;
 
     @Constraints.Required
-    public long upload_id;
+    public int upload_id;
 
     @Constraints.Required
     public long client_id;
@@ -174,9 +174,23 @@ public class WorkOrder extends com.avaje.ebean.Model {
 
     public static int deleteLastUploaded(Client client) {
         List<WorkOrder> list = getLastUploaded(client);
-        if (list != null) {
+        if (list == null) {
+            return 0;
+        }
+        if (list.size() > 0) {
+            int upload_id = list.get(0).upload_id;
             for (WorkOrder order : list) {
                 order.delete();
+            }
+            if (upload_id > 0) {
+                List<Company> clist = Company.findByUploadId(upload_id);
+                for (Company company : clist) {
+                    company.delete();
+                }
+                List<Truck> tlist = Truck.findByUploadId(upload_id);
+                for (Truck truck : tlist) {
+                    truck.delete();
+                }
             }
         }
         return list.size();

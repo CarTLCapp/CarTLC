@@ -28,6 +28,9 @@ public class Truck extends com.avaje.ebean.Model {
     @Constraints.Required
     public String license_plate;
 
+    @Constraints.Required
+    public int upload_id;
+
     public static Finder<Long, Truck> find = new Finder<Long, Truck>(Truck.class);
 
     public static Truck get(long id) {
@@ -39,6 +42,10 @@ public class Truck extends com.avaje.ebean.Model {
 
     public static List<Truck> list() {
         return find.all();
+    }
+
+    public static List<Truck> findByUploadId(int upload_id) {
+        return find.where().eq("upload_id", upload_id).findList();
     }
 
     public static List<Truck> findBy(int truck_number, String license_plate) {

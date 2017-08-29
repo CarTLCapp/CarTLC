@@ -40,6 +40,9 @@ public class Company extends Model {
     public int created_by;
 
     @Constraints.Required
+    public int upload_id;
+
+    @Constraints.Required
     public boolean disabled;
 
     @Constraints.Required
@@ -62,6 +65,9 @@ public class Company extends Model {
         find.ref(id).delete();
     }
 
+    public static List<Company> findByUploadId(int upload_id) {
+        return find.where().eq("upload_id", upload_id).findList();
+    }
     /**
      * Return a paged list of companies
      *
@@ -174,6 +180,9 @@ public class Company extends Model {
             if (created_by_client) {
                 Client client = Client.find.byId((long) created_by);
                 if (client != null) {
+                    if (upload_id > 0) {
+                        return client.name + " Upload";
+                    }
                     return client.name;
                 }
             } else {
@@ -182,6 +191,11 @@ public class Company extends Model {
                     return tech.fullName();
                 }
             }
+        } else if (created_by_client) {
+            if (upload_id > 0) {
+                return "Admin Upload";
+            }
+            return "Admin";
         }
         return "";
     }

@@ -69,7 +69,7 @@ public class WorkOrderReader {
     ArrayList<String> warnings = new ArrayList<String>();
     long client_id;
     long project_id;
-    long upload_id;
+    int upload_id;
 
     public WorkOrderReader(Client client, Project project) {
         if (client == null || client.is_admin) {
@@ -85,6 +85,7 @@ public class WorkOrderReader {
 
     public boolean load(File file) {
         int companyNewCount = 0;
+        int truckNewCount = 0;
         int orderCount = 0;
         fieldPos.clear();
         errors.clear();
@@ -137,6 +138,7 @@ public class WorkOrderReader {
                     if (existing == null) {
                         company.created_by = (int) client_id;
                         company.created_by_client = true;
+                        company.upload_id = upload_id;
                         company.save();
                         order.company_id = company.id;
                         companyNewCount++;
@@ -148,8 +150,10 @@ public class WorkOrderReader {
                     truck.license_plate = getFieldValue(values, Field.LICENSE);
                     Truck etruck = Truck.findFirst(truck.truck_number, truck.license_plate);
                     if (etruck == null) {
+                        truck.upload_id = upload_id;
                         truck.save();
                         order.truck_id = truck.id;
+                        truckNewCount++;
                     } else {
                         order.truck_id = etruck.id;
                     }
@@ -165,6 +169,9 @@ public class WorkOrderReader {
         }
         if (companyNewCount > 0) {
             warnings.add("Added " + companyNewCount + " new companies");
+        }
+        if (truckNewCount > 0) {
+            warnings.add("Added " + truckNewCount + " new trucks");
         }
         warnings.add("Added " + orderCount + " new orders");
         return errors.size() == 0;

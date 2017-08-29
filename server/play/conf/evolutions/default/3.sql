@@ -42,7 +42,8 @@ create table work_order (
 create table truck (
     id             int auto_increment primary key,
     truck_number   int,
-    license_plate  varchar(64)
+    license_plate  varchar(64),
+    upload_id      int
 );
 
 alter table entry rename entry_v2;
@@ -64,6 +65,7 @@ alter table entry add constraint c2_e_entry_address_id foreign key (company_id) 
 alter table entry add constraint c2_e_tech_id foreign key (tech_id) references technician (id) on delete restrict on update restrict;
 
 alter table company add created_by_client bit default 0;
+alter table company add upload_id int default 0;
 
 # --- !Downs
 
@@ -77,3 +79,4 @@ drop table if exists truck;
 drop table if exists entry;
 alter table entry_v2 rename entry;
 alter table company drop column created_by_client;
+alter table company drop column upload_id;
