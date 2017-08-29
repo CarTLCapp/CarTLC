@@ -1,4 +1,4 @@
-@(currentPage: com.avaje.ebean.PagedList[Company], currentSortBy: String, currentOrder: String, currentFilter: String)
+@(currentPage: com.avaje.ebean.PagedList[Company], currentSortBy: String, currentOrder: String, currentFilter: String, client : Client)
 
 @link(newPage:Int, newSortBy:String) = @{
     var sortBy = currentSortBy
@@ -25,7 +25,7 @@
     </th>
 }
 
-@main("FleetTLC - List Companies") {
+@main("FleetTLC - List Companies", client) {
 
     <h1 id="homeTitle">@Messages("company.list.title", currentPage.getTotalRowCount)</h1>
 
@@ -132,7 +132,10 @@
     }
 
     <a class="btn success" id="add" href="@routes.CompanyController.create()">Add a new company</a>
-    <a class="btn success" id="addMany" href="@routes.CompanyController.createMany()">Add many companies</a>
+
+    @if(client.is_admin) {
+        <a class="btn success" id="addMany" href="@routes.CompanyController.createMany()">Add many companies</a>
+    }
 
 }
 

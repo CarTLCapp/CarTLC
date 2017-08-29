@@ -30,12 +30,14 @@ public class CompanyController extends Controller {
         this.formFactory = formFactory;
     }
 
+    @Security.Authenticated(Secured.class)
     public Result list(int page, String sortBy, String order, String filter) {
-        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, false), sortBy, order, filter));
+        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, false), sortBy, order, filter, Secured.getClient(ctx())));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result list_disabled(int page, String sortBy, String order, String filter) {
-        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, true), sortBy, order, filter));
+        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, true), sortBy, order, filter, Secured.getClient(ctx())));
     }
 
     public Result list() {
@@ -80,12 +82,19 @@ public class CompanyController extends Controller {
         return ok(views.html.company_createForm.render(companyForm));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result save() {
         Form<Company> companyForm = formFactory.form(Company.class).bindFromRequest();
         if(companyForm.hasErrors()) {
             return badRequest(views.html.company_createForm.render(companyForm));
         }
-        companyForm.get().save();
+        Client client = Secured.getClient(ctx());
+        Company company = companyForm.get();
+        if (client != null && client.id > 0) {
+            company.created_by = Long.valueOf(client.id).intValue();
+            company.created_by_client = true;
+        }
+        company.save();
         flash("success", "Company " + companyForm.get().name + " has been created");
         return list();
     }
