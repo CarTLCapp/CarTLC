@@ -3,17 +3,22 @@ package controllers;
 import javax.inject.*;
 import play.*;
 import play.mvc.*;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.libs.Json;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import play.db.ebean.Transactional;
 import models.Technician;
 import models.Version;
+import models.Truck;
 import java.lang.System;
 import java.util.Date;
+import java.util.List;
+
+import play.libs.Json;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Singleton
 public class PostController extends Controller
@@ -98,6 +103,7 @@ public class PostController extends Controller
 		result.put(Version.VERSION_COMPANY, Version.get(Version.VERSION_COMPANY));
 		result.put(Version.VERSION_EQUIPMENT, Version.get(Version.VERSION_EQUIPMENT));
 		result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
+		result.put(Version.VERSION_TRUCK, Version.get(Version.VERSION_TRUCK));
 
 		Technician tech = Technician.find.byId((long) tech_id);
 		if (tech != null) {
@@ -125,5 +131,19 @@ public class PostController extends Controller
 		}
 		sbuf.append("\n");
 		return badRequest(sbuf.toString());
+	}
+
+	public Result queryTrucks() {
+		JsonNode json = request().body().asJson();
+		ObjectNode top = Json.newObject();
+		ArrayNode array = top.putArray("trucks");
+		List<Truck> trucks = Truck.list();
+		for (Truck item : trucks) {
+			ObjectNode node = array.addObject();
+			node.put("id", item.id);
+			node.put("truck_number", item.truck_number);
+			node.put("license_plate", item.license_plate);
+		}
+		return ok(top);
 	}
 }

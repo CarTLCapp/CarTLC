@@ -172,6 +172,7 @@ public class WorkOrderReader {
         }
         if (truckNewCount > 0) {
             warnings.add("Added " + truckNewCount + " new trucks");
+            Version.inc(Version.VERSION_TRUCK);
         }
         warnings.add("Added " + orderCount + " new orders");
         return errors.size() == 0;

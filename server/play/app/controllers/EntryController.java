@@ -149,6 +149,8 @@ public class EntryController extends Controller {
             missing.add("truck_number");
             missing.add("license_plate");
         } else {
+            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
+            // The reason is that other techs don't need to know about a local techs truck updates.
             Truck truck = Truck.add(truck_number, license_plate);
             entry.truck_id = truck.id;
         }
