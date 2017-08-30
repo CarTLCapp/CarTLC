@@ -18,7 +18,7 @@ import play.Logger;
 public class WorkOrderReader {
 
     enum Field {
-        COMPANY("company", "loc."),
+        COMPANY("company"),
         STREET("address line 1", "address 1", "street"),
         CITY("city"),
         STATE("state"),
@@ -108,7 +108,6 @@ public class WorkOrderReader {
                         if (field != null) {
                             if (fieldPos.containsKey(field.ordinal())) {
                                 error("This field exists more than once: " + field.toString());
-                                break;
                             } else {
                                 fieldPos.put(field.ordinal(), pos);
                             }
