@@ -169,6 +169,10 @@ public class ClientController extends Controller {
                 company.delete();
             }
         }
+        List<WorkOrder> workorders = WorkOrder.findByClientId(id);
+        for (WorkOrder order : workorders) {
+            order.delete();
+        }
         ClientProjectAssociation.deleteEntries(id);
         if (disable) {
             Client client = Client.find.byId(id);

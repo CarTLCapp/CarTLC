@@ -53,6 +53,10 @@ public class WorkOrder extends com.avaje.ebean.Model {
                 .findPagedList(page, PAGE_SIZE);
     }
 
+    public static List<WorkOrder> findByClientId(long client_id) {
+        return find.where().eq("client_id", client_id).findList();
+    }
+
     public static WorkOrder has(WorkOrder order) {
         List<WorkOrder> list = find.where()
                 .eq("client_id", order.client_id)
