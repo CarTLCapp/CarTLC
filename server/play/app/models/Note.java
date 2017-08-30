@@ -99,17 +99,8 @@ public class Note extends Model implements Comparable<Note> {
         return find.where().eq("name", name).findList();
     }
 
-    public static List<Note> appList(int tech_id) {
-        List<Note> items = find.where().eq("disabled", false).findList();
-        List<Note> result = new ArrayList<Note>();
-        for (Note item : items) {
-            if (item.created_by == 0 || item.created_by == tech_id) {
-                result.add(item);
-            } else if (Entry.hasEntryForNote(tech_id, item.id)) {
-                result.add(item);
-            }
-        }
-        return result;
+    public static List<Note> appList() {
+        return find.where().eq("disabled", false).findList();
     }
 
     public static List<Note> getCreatedByClient(int client_id) {
@@ -147,6 +138,10 @@ public class Note extends Model implements Comparable<Note> {
         return "";
     }
 
+    public String getNumEntries() {
+        return Integer.toString(Entry.countEntriesForNote(id));
+    }
+
     public static boolean hasProject(long note_id, long project_id) {
         Note note = find.byId(note_id);
         if (note != null) {
@@ -162,6 +157,14 @@ public class Note extends Model implements Comparable<Note> {
             }
         }
         return false;
+    }
+
+    public static boolean isDisabled(Long id) {
+        Note note = find.ref(id);
+        if (note == null) {
+            return false;
+        }
+        return note.disabled;
     }
 
     public static boolean hasNoteWithName(String name, long ignoreId) {
@@ -181,20 +184,24 @@ public class Note extends Model implements Comparable<Note> {
     }
 
     public String getCreatedBy() {
+        StringBuilder sbuf = new StringBuilder();
         if (created_by != 0) {
             if (created_by_client) {
                 Client client = Client.find.byId((long) created_by);
                 if (client != null) {
-                    return client.name;
+                    sbuf.append(client.name);
                 }
             } else {
                 Technician tech = Technician.find.byId((long) created_by);
                 if (tech != null) {
-                    return tech.fullName();
+                    sbuf.append(tech.fullName());
                 }
             }
         }
-        return "";
+        if (disabled) {
+            sbuf.append(" [DISABLED]");
+        }
+        return sbuf.toString();
     }
 
     @Override

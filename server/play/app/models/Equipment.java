@@ -1,19 +1,23 @@
 package models;
 
 import java.util.*;
+import java.lang.StringBuilder;
+
 import javax.persistence.*;
 
 import com.avaje.ebean.Model;
+
 import play.data.format.*;
 import play.data.validation.*;
 
 import com.avaje.ebean.*;
+
 import play.Logger;
 
 /**
  * Equipment entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Equipment extends Model implements Comparable<Equipment> {
 
     public static class MalformedFieldException extends Exception {
@@ -24,7 +28,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
 
     private static final long serialVersionUID = 1L;
 
-	@Id
+    @Id
     public Long id;
 
     @Constraints.Required
@@ -41,21 +45,25 @@ public class Equipment extends Model implements Comparable<Equipment> {
     /**
      * Generic query helper for entity Computer with id Long
      */
-    public static Finder<Long,Equipment> find = new Finder<Long,Equipment>(Equipment.class);
+    public static Finder<Long, Equipment> find = new Finder<Long, Equipment>(Equipment.class);
 
-    public static List<Equipment> list() { return list("name", "asc"); }
+    public static List<Equipment> list() {
+        return list("name", "asc");
+    }
 
     public static List<Equipment> list(String sortBy, String order) {
         return find.where()
-                        .orderBy(sortBy + " " + order)
-                        .findList();
+                .orderBy(sortBy + " " + order)
+                .findList();
     }
 
     public static List<Equipment> appList(int tech_id) {
         List<Equipment> items = find.where().eq("disabled", false).findList();
         List<Equipment> result = new ArrayList<Equipment>();
         for (Equipment item : items) {
-            if (item.created_by == 0 || item.created_by == tech_id) {
+            if (item.created_by_client) {
+                result.add(item);
+            } else if (item.created_by == 0 || item.created_by == tech_id) {
                 result.add(item);
             } else if (Entry.hasEntryForEquipment(tech_id, item.id)) {
                 result.add(item);
@@ -72,7 +80,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
     }
 
     public static List<Equipment> findByName(String name) {
-       return find.where().eq("name", name).findList();
+        return find.where().eq("name", name).findList();
     }
 
     public List<Project> getProjects() {
@@ -102,21 +110,29 @@ public class Equipment extends Model implements Comparable<Equipment> {
         return sbuf.toString();
     }
 
+    public String getNumEntries() {
+        return Integer.toString(Entry.countEntriesForEquipment(id));
+    }
+
     public String getCreatedBy() {
+        StringBuilder sbuf = new StringBuilder();
         if (created_by != 0) {
             if (created_by_client) {
                 Client client = Client.find.byId((long) created_by);
                 if (client != null) {
-                    return client.name;
+                    sbuf.append(client.name);
                 }
             } else {
                 Technician tech = Technician.find.byId((long) created_by);
                 if (tech != null) {
-                    return tech.fullName();
+                    sbuf.append(tech.fullName());
                 }
             }
         }
-        return "";
+        if (disabled) {
+            sbuf.append(" [DISABLED]");
+        }
+        return sbuf.toString();
     }
 
     public static boolean hasProject(long equipment_id, long project_id) {
@@ -142,6 +158,14 @@ public class Equipment extends Model implements Comparable<Equipment> {
                 .ne("id", ignoreId)
                 .findList();
         return items.size() > 0;
+    }
+
+    public static boolean isDisabled(Long id) {
+        Equipment equipment = find.ref(id);
+        if (equipment == null) {
+            return false;
+        }
+        return equipment.disabled;
     }
 
     @Override

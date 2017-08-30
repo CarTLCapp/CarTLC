@@ -67,24 +67,14 @@ public class NoteController extends Controller {
         if (noteForm.hasErrors()) {
             return badRequest(views.html.note_editForm.render(id, noteForm));
         }
-        Transaction txn = Ebean.beginTransaction();
-        try {
-            Note newNoteData = noteForm.get();
-            if (Note.hasNoteWithName(newNoteData.name, id)) {
-                return badRequest("Already a note named: " + newNoteData.name);
-            }
-            Note savedNote = Note.find.byId(id);
-            if (savedNote != null) {
-                savedNote.name = newNoteData.name;
-                savedNote.type = newNoteData.type;
-                savedNote.update();
-                flash("success", "Note " + newNoteData.name + " has been updated");
-                txn.commit();
-                Version.inc(Version.VERSION_NOTE);
-            }
-        } finally {
-            txn.end();
+        Note newNoteData = noteForm.get();
+        if (Note.hasNoteWithName(newNoteData.name, id)) {
+            return badRequest("Already a note named: " + newNoteData.name);
         }
+        newNoteData.id = id;
+        newNoteData.update();
+        Logger.info("Note " + newNoteData.name + " has been updated");
+        Version.inc(Version.VERSION_NOTE);
         return list();
     }
 
@@ -199,11 +189,28 @@ public class NoteController extends Controller {
     /**
      * Handle note deletion
      */
+    @Security.Authenticated(Secured.class)
     public Result delete(Long id) {
-        // TODO: If the client is in the database, mark it as disabled instead.
-        Note.find.ref(id).delete();
+        Note note = Note.find.byId(id);
+        if (Entry.hasEntryForNote(id)) {
+            note.disabled = true;
+            note.update();
+            Logger.info("Note has been disabled: it had entries: " + note.name);
+        } else {
+            Logger.info("Note has been deleted: " + note.name);
+            note.delete();
+        }
         Version.inc(Version.VERSION_NOTE);
-        flash("success", "Note has been deleted");
+        return list();
+    }
+
+    @Security.Authenticated(Secured.class)
+    @Transactional
+    public Result enable(Long id) {
+        Note note = Note.find.byId(id);
+        note.disabled = false;
+        note.update();
+        Version.inc(Version.VERSION_NOTE);
         return list();
     }
 
@@ -242,15 +249,13 @@ public class NoteController extends Controller {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("notes");
         ArrayList<Long> noteIds = new ArrayList<Long>();
-        List<Note> notes = Note.appList(tech_id);
+        List<Note> notes = Note.appList();
         for (Note item : notes) {
             ObjectNode node = array.addObject();
             node.put("id", item.id);
             node.put("name", item.name);
             node.put("type", item.type.toString());
-            if (item.created_by != 0) {
-                node.put("is_local", true);
-            }
+            node.put("num_digits", item.num_digits);
             noteIds.add(item.id);
         }
         array = top.putArray("project_note");

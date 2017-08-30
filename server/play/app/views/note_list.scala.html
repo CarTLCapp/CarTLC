@@ -19,6 +19,7 @@
                     <th>Projects</th>
                     <th>Type</th>
                     <th>Num Digits</th>
+                    <th>Num Entries</th>
                     <th>Edit</th>
                     <th>Created By</th>
                 </tr>
@@ -37,6 +38,7 @@
                         <td>@note.getProjectsLine()</td>
                         <td>@note.getTypeString()</td>
                         <td>@note.getNumDigits()</td>
+                        <td>@note.getNumEntries()</td>
                         <td><a href="@routes.NoteController.edit(note.id)">Edit</a></td>
                         <td>@note.getCreatedBy()</td>
                     </tr>

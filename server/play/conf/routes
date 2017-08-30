@@ -14,122 +14,72 @@ GET     /logout                   controllers.HomeController.logout()
 
 ### TECHNICIANS ###
 
-# Users list
 GET     /tech                      controllers.TechnicianController.list()
-
-# Edit existing technician
 GET     /tech/:id                controllers.TechnicianController.edit(id:Long)
 POST    /tech/:id                controllers.TechnicianController.update(id:Long)
-
-# Delete a technician
 POST    /tech/:id/delete         controllers.TechnicianController.delete(id:Long)
 
 ### PROJECTS ###
 
-# Projects list
 GET     /project                    controllers.ProjectController.list()
 GET     /project_disabled           controllers.ProjectController.list_disabled()
-
-# Add project
 GET     /project/new                controllers.ProjectController.create()
 POST    /project                    controllers.ProjectController.save()
-
-# Add many projects
 GET     /project/new/many           controllers.ProjectController.createMany()
 POST    /project/many               controllers.ProjectController.saveMany()
-
-# Edit existing project
 GET     /project/:id                controllers.ProjectController.edit(id:Long)
 POST    /project/:id                controllers.ProjectController.update(id:Long)
-
-# Delete a project
 POST    /project/:id/delete         controllers.ProjectController.delete(id:Long)
 GET     /project/:id/enable         controllers.ProjectController.enable(id:Long)
 
 ### COMPANIES ###
 
-# Company list
 GET     /company                    controllers.CompanyController.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
 GET     /company_disabled           controllers.CompanyController.list_disabled(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
-
-# Add company
 GET     /company/new                controllers.CompanyController.create()
 POST    /company                    controllers.CompanyController.save()
-
-# Add many companies
 GET     /company/new/many           controllers.CompanyController.createMany()
 POST    /company/many               controllers.CompanyController.saveMany()
-
-# Edit existing company
 GET     /company/:id                controllers.CompanyController.edit(id:Long)
 POST    /company/:id                controllers.CompanyController.update(id:Long)
-
-# Delete a company
 POST    /company/:id/delete         controllers.CompanyController.delete(id:Long)
 GET     /company/:id/enable         controllers.CompanyController.enable(id:Long)
 
 ### EQUIPMENTS ###
 
-# Equipment list
 GET     /equipment                  controllers.EquipmentController.list()
-
-# Add equipment
 GET     /equipment/new              controllers.EquipmentController.create()
 POST    /equipment                  controllers.EquipmentController.save()
-
-# Add many equipments
 GET     /equipment/new/many         controllers.EquipmentController.createMany()
 POST    /equipment/many             controllers.EquipmentController.saveMany()
-
-# Edit existing equipment
 GET     /equipment/:id              controllers.EquipmentController.edit(id:Long)
 POST    /equipment/:id              controllers.EquipmentController.update(id:Long)
-
-# Add/Remove project from equipment
-GET    /equipment/:id/project/:projectId/add       controllers.EquipmentController.addProject(id:Long, projectId:Long)
-GET    /equipment/:id/project/:projectId/remove    controllers.EquipmentController.removeProject(id:Long, projectId:Long)
-
-# Delete an equipment
+GET     /equipment/:id/project/:projectId/add       controllers.EquipmentController.addProject(id:Long, projectId:Long)
+GET     /equipment/:id/project/:projectId/remove    controllers.EquipmentController.removeProject(id:Long, projectId:Long)
 POST    /equipment/:id/delete       controllers.EquipmentController.delete(id:Long)
+GET     /equipment/:id/enable       controllers.EquipmentController.enable(id:Long)
 
 ### NOTES ###
 
-# Note list
 GET     /note                  controllers.NoteController.list()
-
-# Add Note
 GET     /note/new              controllers.NoteController.create()
 POST    /note                  controllers.NoteController.save()
-
-# Add many note
 GET     /note/new/many         controllers.NoteController.createMany()
 POST    /note/many             controllers.NoteController.saveMany()
-
-# Edit existing note
 GET     /note/:id              controllers.NoteController.edit(id:Long)
 POST    /note/:id              controllers.NoteController.update(id:Long)
-
-# Add/Remove project from note
-GET    /note/:id/project/:projectId/add       controllers.NoteController.addProject(id:Long, projectId:Long)
-GET    /note/:id/project/:projectId/remove    controllers.NoteController.removeProject(id:Long, projectId:Long)
-
-# Delete an note
+GET     /note/:id/project/:projectId/add       controllers.NoteController.addProject(id:Long, projectId:Long)
+GET     /note/:id/project/:projectId/remove    controllers.NoteController.removeProject(id:Long, projectId:Long)
 POST    /note/:id/delete       controllers.NoteController.delete(id:Long)
+GET     /note/:id/enable       controllers.NoteController.enable(id:Long)
 
 ### CLIENTS ###
 
-# Users list
 GET     /client                controllers.ClientController.list()
-
-# Add Client
 GET     /client/new            controllers.ClientController.create()
 POST    /client                controllers.ClientController.save()
-
-# Edit existing client
 GET     /client/:id            controllers.ClientController.edit(id:Long)
 POST    /client/:id            controllers.ClientController.update(id:Long)
-
-# Delete a client
 POST    /client/:id/delete     controllers.ClientController.delete(id:Long)
 
 ### WORK ORDERS

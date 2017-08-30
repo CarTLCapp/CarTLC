@@ -178,10 +178,26 @@ public class EquipmentController extends Controller {
      * Handle equipment deletion
      */
     public Result delete(Long id) {
-        // TODO: If the client is in the database, mark it as disabled instead.
-        Equipment.find.ref(id).delete();
+        Equipment equipment = Equipment.find.byId(id);
+        if (Entry.hasEntryForEquipment(id)) {
+            equipment.disabled = true;
+            equipment.update();
+            Logger.info("Equipment has been disabled: it had entries: " + equipment.name);
+        } else {
+            Logger.info("Equipment has been deleted: " + equipment.name);
+            equipment.delete();
+        }
         Version.inc(Version.VERSION_EQUIPMENT);
-        flash("success", "Equipment has been deleted");
+        return list();
+    }
+
+    @Security.Authenticated(Secured.class)
+    @Transactional
+    public Result enable(Long id) {
+        Equipment equipment = Equipment.find.byId(id);
+        equipment.disabled = false;
+        equipment.update();
+        Version.inc(Version.VERSION_EQUIPMENT);
         return list();
     }
 

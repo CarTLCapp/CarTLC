@@ -197,6 +197,34 @@ public class Entry extends com.avaje.ebean.Model {
         return find.where().eq("company_id", company_id).findList().size();
     }
 
+    public static int countEntriesForNote(long note_id) {
+        int count = 0;
+        List<Entry> items = find.where().findList();
+        for (Entry entry : items) {
+            List<EntryNoteCollection> collection = EntryNoteCollection.findByCollectionId(entry.note_collection_id);
+            for (EntryNoteCollection note : collection) {
+                if (note.id == note_id) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public static int countEntriesForEquipment(long equipment_id) {
+        List<Entry> items = find.where().findList();
+        int count = 0;
+        for (Entry entry : items) {
+            List<Equipment> collection = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
+            for (Equipment equip : collection) {
+                if (equip.id == equipment_id) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     public static boolean hasEntryForProject(long project_id) {
         return countEntriesForProject(project_id) > 0;
     }

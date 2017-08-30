@@ -17,6 +17,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Projects</th>
+                    <th>Num Entries</th>
                     <th>Edit</th>
                     <th>Created By</th>
                 </tr>
@@ -32,15 +33,10 @@
                                 @equipment.name
                             }
                         </td>
-                        <td>
-                            @equipment.getProjectsLine()
-                        </td>
-                        <td>
-                            <a href="@routes.EquipmentController.edit(equipment.id)">Edit</a>
-                        </td>
-                        <td>
-                            @equipment.getCreatedBy()
-                        </td>
+                        <td>@equipment.getProjectsLine()</td>
+                        <td>@equipment.getNumEntries()</td>
+                        <td><a href="@routes.EquipmentController.edit(equipment.id)">Edit</a></td>
+                        <td>@equipment.getCreatedBy()</td>
                     </tr>
                 }
 

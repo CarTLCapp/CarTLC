@@ -53,9 +53,17 @@
         </div>
 
     }
-    
+
     @b3.form(routes.NoteController.delete(id), 'class -> "topRight") {
-        <input type="submit" value="Delete this note" class="btn danger">
+        @if(Note.isDisabled(id)) {
+            <a href="@routes.NoteController.enable(id)" class="btn">Enable Note</a>
+        } else {
+            @if(Entry.hasEntryForNote(id)) {
+                <input type="submit" value="Disable note" class="btn danger">
+            } else {
+                <input type="submit" value="Delete note" class="btn danger">
+            }
+        }
     }
     
 }

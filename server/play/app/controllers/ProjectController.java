@@ -177,13 +177,13 @@ public class ProjectController extends Controller {
             return badRequest(views.html.home.render(Secured.getClient(ctx())));
         }
         if (Entry.hasEntryForProject(id)) {
-            Project project = Project.find.ref(id);
+            Project project = Project.find.byId(id);
             project.disabled = true;
             project.update();
-            flash("success", "Project has been disabled: it had entries");
+            Logger.info("Project has been disabled: it had entries: " + project.name);
         } else {
             Project.find.ref(id).delete();
-            flash("success", "Project has been deleted");
+            Logger.info("Project has been deleted");
         }
         Version.inc(Version.VERSION_PROJECT);
         return list();
