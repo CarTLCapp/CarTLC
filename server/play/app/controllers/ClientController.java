@@ -161,15 +161,24 @@ public class ClientController extends Controller {
                 note.delete();
             }
         }
+        List<Company> companies = Company.getCreatedByClient(id.intValue());
+        for (Company company : companies) {
+            if (Entry.hasEntryForCompany(company.id)) {
+                disable = true;
+            } else {
+                company.delete();
+            }
+        }
+        ClientProjectAssociation.deleteEntries(id);
         if (disable) {
             Client client = Client.find.byId(id);
             client.disabled = true;
             client.update();
+            flash("success", "Client has been disabled");
         } else {
             Client.find.ref(id).delete();
+            flash("success", "Client has been deleted");
         }
-        ClientProjectAssociation.deleteEntries(id);
-        flash("success", "Client has been deleted");
         return list();
     }
 

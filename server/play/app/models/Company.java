@@ -113,6 +113,13 @@ public class Company extends Model {
         return null;
     }
 
+    public static List<Company> getCreatedByClient(int client_id) {
+        return find.where()
+                .eq("created_by", client_id)
+                .eq("created_by_client", true)
+                .findList();
+    }
+
     public static Company parse(String line) throws DataErrorException {
         String [] fields = line.split(",");
         Company company = new Company();
