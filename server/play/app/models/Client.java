@@ -65,6 +65,14 @@ public class Client extends com.avaje.ebean.Model {
         return items.get(0);
     }
 
+    public static boolean hasClientWithName(String username, int ignoreId) {
+        List<Client> items = find.where()
+                .eq("name", username)
+                .ne("id", ignoreId)
+                .findList();
+        return items.size() > 0;
+    }
+
     /**
      * Returns true if username and password are valid credentials.
      */

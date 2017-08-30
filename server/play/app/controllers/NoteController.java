@@ -2,20 +2,26 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+
 import play.mvc.*;
 import play.data.*;
+
 import static play.data.Form.*;
+
 import play.Logger;
 
 import models.*;
 
 import java.util.List;
 import java.util.ArrayList;
+
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+
 import play.db.ebean.Transactional;
 
 import play.libs.Json;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -63,15 +69,17 @@ public class NoteController extends Controller {
         }
         Transaction txn = Ebean.beginTransaction();
         try {
+            Note newNoteData = noteForm.get();
+            if (Note.hasNoteWithName(newNoteData.name, id)) {
+                return badRequest("Already a note named: " + newNoteData.name);
+            }
             Note savedNote = Note.find.byId(id);
             if (savedNote != null) {
-                Note newNoteData = noteForm.get();
                 savedNote.name = newNoteData.name;
                 savedNote.type = newNoteData.type;
                 savedNote.update();
-                flash("success", "Note " + noteForm.get().name + " has been updated");
+                flash("success", "Note " + newNoteData.name + " has been updated");
                 txn.commit();
-
                 Version.inc(Version.VERSION_NOTE);
             }
         } finally {
@@ -90,7 +98,7 @@ public class NoteController extends Controller {
     }
 
     /**
-     * Handle the 'new user form' submission
+     * Handle the 'new note form' submission
      */
     public Result save() {
         Form<Note> noteForm = formFactory.form(Note.class).bindFromRequest();
@@ -103,8 +111,12 @@ public class NoteController extends Controller {
             note.created_by = Long.valueOf(client.id).intValue();
             note.created_by_client = true;
         }
+        List<Note> notes = Note.findByName(note.name);
+        if (notes != null && notes.size() > 0) {
+            return badRequest("There is already a note named: " + note.name);
+        }
         note.save();
-        flash("success", "Note " + noteForm.get().name + " has been created");
+        flash("success", "Note " + note.name + " has been created");
         return list();
     }
 
@@ -145,12 +157,13 @@ public class NoteController extends Controller {
                 Note.Type type = null;
                 int pos = name.indexOf(':');
                 if (pos >= 0) {
-                    String typeStr = name.substring(pos+1).trim();
+                    String typeStr = name.substring(pos + 1).trim();
                     name = name.substring(0, pos).trim();
                     type = Note.Type.from(typeStr);
                 }
-                Note note = Note.findByName(name);
-                if (note == null) {
+                List<Note> notes = Note.findByName(name);
+                Note note;
+                if (notes == null | notes.size() == 0) {
                     if (type == null) {
                         type = Note.Type.TEXT;
                     }
@@ -158,9 +171,15 @@ public class NoteController extends Controller {
                     note.name = name;
                     note.type = type;
                     note.save();
-                } else if (type != null) {
-                    note.type = type;
-                    note.save();
+                } else {
+                    if (notes.size() > 1) {
+                        Logger.error("Found too many notes with name: " + name);
+                    }
+                    note = notes.get(0);
+                    if (type != null) {
+                        note.type = type;
+                        note.update();
+                    }
                 }
                 if (activeProject != null) {
                     ProjectNoteCollection collection = new ProjectNoteCollection();
@@ -174,7 +193,6 @@ public class NoteController extends Controller {
             }
         }
         Version.inc(Version.VERSION_NOTE);
-
         return list();
     }
 

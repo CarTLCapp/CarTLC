@@ -57,7 +57,7 @@ public class ClientController extends Controller {
     /**
      * Handle the 'edit form' submission
      *
-     * @param id Id of the user to edit
+     * @param id Id of the client to edit
      */
     @Transactional
     @Security.Authenticated(Secured.class)
@@ -71,9 +71,17 @@ public class ClientController extends Controller {
             clientForm.reject("adminstrator", "Non administrators cannot change clients.");
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
-        clientForm.get().update();
+        Client updateClient = clientForm.get();
+        if (Client.hasClientWithName(updateClient.name, id.intValue())) {
+            return badRequest("Already a client with name: " + updateClient.name);
+        }
+        Client client = Client.find.byId(id);
+        client.name = updateClient.name;
+        client.password = updateClient.password;
+        client.update();
+
         ClientProjectAssociation.addNew(id, getCheckedProjects(clientForm));
-        flash("success", "Client " + clientForm.get().name + " has been updated");
+        flash("success", "Client " + client.name + " has been updated");
 
         return list();
     }
@@ -103,6 +111,9 @@ public class ClientController extends Controller {
             return badRequest(views.html.client_createForm.render(clientForm));
         }
         Client newClient = clientForm.get();
+        if (Client.getUser(newClient.name) != null) {
+            return badRequest("Already have a client named: " + newClient.name);
+        }
         newClient.save();
         ClientProjectAssociation.addNew(newClient.id, getCheckedProjects(clientForm));
         flash("success", "Client " + newClient.name + " has been created");
@@ -135,6 +146,7 @@ public class ClientController extends Controller {
         }
         // TODO: If the client is in the database, mark it as disabled instead.
         Client.find.ref(id).delete();
+        ClientProjectAssociation.deleteEntries(id);
         flash("success", "Client has been deleted");
         return list();
     }

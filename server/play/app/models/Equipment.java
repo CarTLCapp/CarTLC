@@ -64,16 +64,8 @@ public class Equipment extends Model implements Comparable<Equipment> {
         return result;
     }
 
-    public static Equipment findByName(String name) {
-        List<Equipment> items = find.where()
-                .eq("name", name)
-                .findList();
-        if (items.size() == 1) {
-            return items.get(0);
-        } else if (items.size() > 1) {
-            Logger.error("Too many equipments named: " + name);
-        }
-        return null;
+    public static List<Equipment> findByName(String name) {
+       return find.where().eq("name", name).findList();
     }
 
     public List<Project> getProjects() {
@@ -135,6 +127,14 @@ public class Equipment extends Model implements Comparable<Equipment> {
             }
         }
         return false;
+    }
+
+    public static boolean hasEquipmentWithName(String name, long ignoreId) {
+        List<Equipment> items = find.where()
+                .eq("name", name)
+                .ne("id", ignoreId)
+                .findList();
+        return items.size() > 0;
     }
 
     @Override

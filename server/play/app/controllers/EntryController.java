@@ -207,13 +207,19 @@ public class EntryController extends Controller {
                             missing.add("equipment_name");
                         } else {
                             String name = subvalue.textValue();
-                            Equipment equipment = Equipment.findByName(name);
-                            if (equipment == null) {
+                            List<Equipment> equipments = Equipment.findByName(name);
+                            Equipment equipment;
+                            if (equipments.size() == 0) {
                                 equipment = new Equipment();
                                 equipment.name = name;
                                 equipment.created_by = entry.tech_id;
                                 equipment.save();
                                 Version.inc(Version.VERSION_EQUIPMENT);
+                            } else {
+                                if (equipments.size() > 1) {
+                                    Logger.error("Too many equipments found with name: " + name);
+                                }
+                                equipment = equipments.get(0);
                             }
                             collection.equipment_id = equipment.id;
                             newEquipmentCreated = true;
@@ -271,12 +277,14 @@ public class EntryController extends Controller {
                             missing.add("note:id, note:name");
                         } else {
                             String name = subvalue.textValue();
-                            Note note = Note.findByName(name);
-                            if (note == null) {
-                                // No ability to create notes in version 1.
+                            List<Note> notes = Note.findByName(name);
+                            if (notes == null || notes.size() == 0) {
+                                missing.add("note:" + name);
+                            } else if (notes.size() > 1) {
+                                Logger.error("Too many notes with name: " + name);
                                 missing.add("note:" + name);
                             } else {
-                                collection.note_id = note.id;
+                                collection.note_id = notes.get(0).id;
                             }
                         }
                     } else {

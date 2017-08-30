@@ -87,16 +87,8 @@ public class Note extends Model implements Comparable<Note> {
                 .findList();
     }
 
-    public static Note findByName(String name) {
-        List<Note> items = find.where()
-                .eq("name", name)
-                .findList();
-        if (items.size() == 1) {
-            return items.get(0);
-        } else if (items.size() > 1) {
-            Logger.error("Too many notes named: " + name);
-        }
-        return null;
+    public static List<Note> findByName(String name) {
+        return find.where().eq("name", name).findList();
     }
 
     public static List<Note> appList(int tech_id) {
@@ -146,6 +138,14 @@ public class Note extends Model implements Comparable<Note> {
             }
         }
         return false;
+    }
+
+    public static boolean hasNoteWithName(String name, long ignoreId) {
+        List<Note> notes = find.where()
+                .eq("name", name)
+                .ne("id", ignoreId)
+                .findList();
+        return notes.size() > 0;
     }
 
     public static Map<String,String> options() {

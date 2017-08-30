@@ -61,12 +61,15 @@ public class EquipmentController extends Controller {
         }
         Transaction txn = Ebean.beginTransaction();
         try {
+            Equipment newEquipmentData = equipmentForm.get();
+            if (Equipment.hasEquipmentWithName(newEquipmentData.name, id)) {
+                return badRequest("Already have an equipment named: " + newEquipmentData.name);
+            }
             Equipment savedEquipment = Equipment.find.byId(id);
             if (savedEquipment != null) {
-                Equipment newEquipmentData = equipmentForm.get();
                 savedEquipment.name = newEquipmentData.name;
                 savedEquipment.update();
-                flash("success", "Equipment " + equipmentForm.get().name + " has been updated");
+                flash("success", "Equipment " + newEquipmentData.name + " has been updated");
                 txn.commit();
 
                 Version.inc(Version.VERSION_EQUIPMENT);
@@ -87,7 +90,7 @@ public class EquipmentController extends Controller {
     }
 
     /**
-     * Handle the 'new user form' submission
+     * Handle the 'new equipment form' submission
      */
     @Security.Authenticated(Secured.class)
     public Result save() {
@@ -100,6 +103,10 @@ public class EquipmentController extends Controller {
         if (client != null && client.id > 0) {
             equip.created_by = Long.valueOf(client.id).intValue();
             equip.created_by_client = true;
+        }
+        List<Equipment> equipments = Equipment.findByName(equip.name);
+        if (equipments.size() > 0) {
+            return badRequest("An equipment already exists with name: " + equip.name);
         }
         equip.save();
         flash("success", "Equipment " + equipmentForm.get().name + " has been created");
@@ -140,11 +147,17 @@ public class EquipmentController extends Controller {
                 if (activeProject == null) {
                     return badRequest("First line must indicate valid project");
                 }
-                Equipment equipment = Equipment.findByName(name);
-                if (equipment == null) {
+                List<Equipment> equipments = Equipment.findByName(name);
+                Equipment equipment;
+                if (equipments.size() == 0) {
                     equipment = new Equipment();
                     equipment.name = name;
                     equipment.save();
+                } else {
+                    if (equipments.size() > 1) {
+                        Logger.error("Too many equipments with name: " + name);
+                    }
+                    equipment = equipments.get(0);
                 }
                 if (activeProject != null) {
                     ProjectEquipmentCollection collection = new ProjectEquipmentCollection();

@@ -118,7 +118,11 @@ public class ProjectController extends Controller {
         if (projectForm.hasErrors() || !Secured.isAdmin(ctx())) {
             return badRequest(views.html.project_createForm.render(projectForm));
         }
-        projectForm.get().save();
+        Project project = projectForm.get();
+        if (Project.findByName(project.name) != null) {
+            return badRequest("Already a project named: " + project.name);
+        }
+        project.save();
         flash("success", "Project " + projectForm.get().name + " has been created");
         return list();
     }
