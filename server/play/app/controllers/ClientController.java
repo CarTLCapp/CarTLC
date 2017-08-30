@@ -144,6 +144,10 @@ public class ClientController extends Controller {
             clientForm.reject("adminstrator", "Non administrators cannot delete clients.");
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
+        Client client = Client.find.byId(id);
+        if (client.is_admin) {
+            return badRequest("You cannot delete an adminstrator");
+        }
         boolean disable = false;
         List<Equipment> equipments = Equipment.getCreatedByClient(id.intValue());
         for (Equipment equipment : equipments) {
@@ -175,7 +179,6 @@ public class ClientController extends Controller {
         }
         ClientProjectAssociation.deleteEntries(id);
         if (disable) {
-            Client client = Client.find.byId(id);
             client.disabled = true;
             client.update();
             flash("success", "Client has been disabled");
