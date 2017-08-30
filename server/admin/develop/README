@@ -19,6 +19,7 @@ testProd
 
 Deployment:
 
+Inc version in server/play/build.sbt
 sbt -mem 2048
 dist
 r-wrap-server -d
