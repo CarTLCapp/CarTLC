@@ -1,19 +1,22 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import com.avaje.ebean.Model;
+
 import play.data.format.*;
 import play.data.validation.*;
 
 import com.avaje.ebean.*;
+
 import play.Logger;
 
 /**
  * Note entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Note extends Model implements Comparable<Note> {
 
     public enum Type {
@@ -57,7 +60,7 @@ public class Note extends Model implements Comparable<Note> {
 
     private static final long serialVersionUID = 1L;
 
-	@Id
+    @Id
     public Long id;
 
     @Constraints.Required
@@ -74,12 +77,17 @@ public class Note extends Model implements Comparable<Note> {
 
     @Constraints.Required
     public boolean created_by_client;
+
+    @Constraints.Required
+    public short num_digits;
     /**
      * Generic query helper for entity Computer with id Long
      */
-    public static Finder<Long,Note> find = new Finder<Long,Note>(Note.class);
+    public static Finder<Long, Note> find = new Finder<Long, Note>(Note.class);
 
-    public static List<Note> list() { return list("name", "asc"); }
+    public static List<Note> list() {
+        return list("name", "asc");
+    }
 
     public static List<Note> list(String sortBy, String order) {
         return find.where()
@@ -128,7 +136,16 @@ public class Note extends Model implements Comparable<Note> {
         return sbuf.toString();
     }
 
-    public String getTypeString() { return type.display; }
+    public String getTypeString() {
+        return type.display;
+    }
+
+    public String getNumDigits() {
+        if (num_digits > 0) {
+            return Integer.toString(num_digits);
+        }
+        return "";
+    }
 
     public static boolean hasProject(long note_id, long project_id) {
         Note note = find.byId(note_id);
@@ -155,9 +172,9 @@ public class Note extends Model implements Comparable<Note> {
         return notes.size() > 0;
     }
 
-    public static Map<String,String> options() {
-        LinkedHashMap<String,String> options = new LinkedHashMap<String,String>();
-        for(Type t: Type.values()) {
+    public static Map<String, String> options() {
+        LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
+        for (Type t : Type.values()) {
             options.put(t.toString(), t.display);
         }
         return options;

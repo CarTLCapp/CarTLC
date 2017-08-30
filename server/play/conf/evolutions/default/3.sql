@@ -69,7 +69,7 @@ alter table company add created_by_client bit default 0;
 alter table company add upload_id int default 0;
 alter table equipment add created_by_client bit default 0;
 alter table note add created_by_client bit default 0;
-
+alter table note add num_digits smallint default 0;
 # --- !Downs
 
 drop table if exists message;
@@ -85,3 +85,4 @@ alter table company drop column created_by_client;
 alter table company drop column upload_id;
 alter table equipment drop column created_by_client;
 alter table note drop column created_by_client;
+alter table note drop column num_digits;

@@ -13,6 +13,7 @@
         <fieldset>
         
             @b3.text(noteForm("name"), '_label -> "Name", '_help -> "")
+            @b3.number(noteForm("num_digits"), '_label -> "Num Digits", '_help -> "")
             @b3.select(
                 noteForm("type"),
                 options(Note.options),
