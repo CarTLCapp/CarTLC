@@ -11,12 +11,12 @@
     <p>Work orders must be a .csv file with very specific column headers, case does not matter:</p>
     <ul>
         <li>Company</li>
-        <li>Address 1</li>
+        <li>Street or Address 1</li>
         <li>City</li>
         <li>State</li>
         <li>Zip</li>
-        <li>Unit #</li>
-        <li>License Plate</li>
+        <li>Truck # or Unit #</li>
+        <li>License Plate or License Number</li>
     </ul>
     
     @helper.form(routes.WorkOrderController.upload(), 'enctype -> "multipart/form-data") {

@@ -70,6 +70,7 @@ public class WorkOrderReader {
     long client_id;
     long project_id;
     int upload_id;
+    int lineCount;
 
     public WorkOrderReader(Client client, Project project) {
         if (client == null || client.is_admin) {
@@ -93,7 +94,7 @@ public class WorkOrderReader {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
             int fieldCount = 0;
-            int lineCount = 0;
+            lineCount = 0;
             while ((line = br.readLine()) != null) {
                 lineCount++;
                 if (line.trim().length() == 0) {
@@ -106,7 +107,7 @@ public class WorkOrderReader {
                         Field field = Field.find(name);
                         if (field != null) {
                             if (fieldPos.containsKey(field.ordinal())) {
-                                errors.add("This field exists more than once: " + fieldPos.toString());
+                                error("This field exists more than once: " + field.toString());
                                 break;
                             } else {
                                 fieldPos.put(field.ordinal(), pos);
@@ -116,12 +117,12 @@ public class WorkOrderReader {
                     fieldCount = names.size();
                 } else {
                     if (fieldPos.size() < 5) {
-                        warnings.add(Integer.toString(lineCount) + ": Not enough valid columns detected: " + fieldPos.size());
+                        warning("Not enough valid columns detected: " + fieldPos.size(), line);
                         continue;
                     }
                     List<String> values = Arrays.asList(line.split(","));
                     if (values.size() != fieldCount) {
-                        warnings.add(Integer.toString(lineCount) + ": incorrect number of fields on line: " + line);
+                        warning("Incorrect number of fields on line", line);
                         continue;
                     }
                     WorkOrder order = new WorkOrder();
@@ -165,7 +166,7 @@ public class WorkOrderReader {
             }
             br.close();
         } catch (Exception ex) {
-            errors.add(ex.getMessage());
+            error(ex.getMessage());
         }
         if (companyNewCount > 0) {
             warnings.add("Added " + companyNewCount + " new companies");
@@ -175,6 +176,29 @@ public class WorkOrderReader {
         }
         warnings.add("Added " + orderCount + " new orders");
         return errors.size() == 0;
+    }
+
+    void error(String msg) {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("Line ");
+        sbuf.append(lineCount);
+        sbuf.append(": ");
+        sbuf.append(msg);
+        warnings.add(sbuf.toString());
+    }
+
+    void warning(String msg, String line) {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("Line ");
+        sbuf.append(lineCount);
+        sbuf.append(": ");
+        sbuf.append(msg);
+        if (line != null) {
+            sbuf.append(" {");
+            sbuf.append(line);
+            sbuf.append("}");
+        }
+        warnings.add(sbuf.toString());
     }
 
     public String getErrors() {
