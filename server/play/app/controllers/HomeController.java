@@ -62,7 +62,6 @@ public class HomeController extends Controller {
             flash("error", "Login credentials not valid.");
             return badRequest(views.html.login.render("Login", formData));
         } else {
-            // email/password OK, so now we set the session variable and only go to authenticated pages.
             session().clear();
             session("username", formData.get().username);
             return index();

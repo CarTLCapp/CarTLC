@@ -31,6 +31,9 @@ public class Client extends com.avaje.ebean.Model {
     @Constraints.Required
     public boolean is_admin;
 
+    @Constraints.Required
+    public boolean disabled;
+
     public static Finder<Long, Client> find = new Finder<Long, Client>(Client.class);
 
     public boolean isValid() {
@@ -79,7 +82,7 @@ public class Client extends com.avaje.ebean.Model {
     public static boolean isValid(String username, String password) {
         try {
             Client clientInfo = getUser(username);
-            if (clientInfo != null) {
+            if (clientInfo != null && !clientInfo.disabled) {
                 if (clientInfo.password == null) {
                     return (password == null);
                 }

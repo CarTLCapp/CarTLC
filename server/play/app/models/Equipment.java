@@ -64,6 +64,13 @@ public class Equipment extends Model implements Comparable<Equipment> {
         return result;
     }
 
+    public static List<Equipment> getCreatedByClient(int client_id) {
+        return find.where()
+                .eq("created_by", client_id)
+                .eq("created_by_client", true)
+                .findList();
+    }
+
     public static List<Equipment> findByName(String name) {
        return find.where().eq("name", name).findList();
     }

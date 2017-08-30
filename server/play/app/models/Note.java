@@ -104,6 +104,13 @@ public class Note extends Model implements Comparable<Note> {
         return result;
     }
 
+    public static List<Note> getCreatedByClient(int client_id) {
+        return find.where()
+                .eq("created_by", client_id)
+                .eq("created_by_client", true)
+                .findList();
+    }
+
     public List<Project> getProjects() {
         return ProjectNoteCollection.findProjects(id);
     }

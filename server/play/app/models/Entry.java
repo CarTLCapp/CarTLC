@@ -229,10 +229,36 @@ public class Entry extends com.avaje.ebean.Model {
         return false;
     }
 
+    public static boolean hasEntryForEquipment(final long equipment_id) {
+        List<Entry> items = find.where().findList();
+        for (Entry entry : items) {
+            List<Equipment> collection = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
+            for (Equipment equip : collection) {
+                if (equip.id == equipment_id) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static boolean hasEntryForNote(final int tech_id, final long note_id) {
         List<Entry> items = find.where()
                 .eq("tech_id", tech_id)
                 .findList();
+        for (Entry entry : items) {
+            List<EntryNoteCollection> collection = EntryNoteCollection.findByCollectionId(entry.note_collection_id);
+            for (EntryNoteCollection note : collection) {
+                if (note.id == note_id) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasEntryForNote(final long note_id) {
+        List<Entry> items = find.where().findList();
         for (Entry entry : items) {
             List<EntryNoteCollection> collection = EntryNoteCollection.findByCollectionId(entry.note_collection_id);
             for (EntryNoteCollection note : collection) {

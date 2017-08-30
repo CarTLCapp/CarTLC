@@ -17,7 +17,8 @@ create table client (
     id          int auto_increment primary key,
     name        varchar(128),
     password    varchar(128),
-    is_admin    bit default 0
+    is_admin    bit default 0,
+    disabled    bit default 0
 );
 
 create table client_project_association (

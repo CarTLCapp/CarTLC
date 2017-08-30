@@ -144,8 +144,30 @@ public class ClientController extends Controller {
             clientForm.reject("adminstrator", "Non administrators cannot delete clients.");
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
-        // TODO: If the client is in the database, mark it as disabled instead.
-        Client.find.ref(id).delete();
+        boolean disable = false;
+        List<Equipment> equipments = Equipment.getCreatedByClient(id.intValue());
+        for (Equipment equipment : equipments) {
+            if (Entry.hasEntryForEquipment(equipment.id)) {
+                disable = true;
+            } else {
+                equipment.delete();
+            }
+        }
+        List<Note> notes = Note.getCreatedByClient(id.intValue());
+        for (Note note : notes) {
+            if (Entry.hasEntryForNote(note.id)) {
+                disable = true;
+            } else {
+                note.delete();
+            }
+        }
+        if (disable) {
+            Client client = Client.find.byId(id);
+            client.disabled = true;
+            client.update();
+        } else {
+            Client.find.ref(id).delete();
+        }
         ClientProjectAssociation.deleteEntries(id);
         flash("success", "Client has been deleted");
         return list();
