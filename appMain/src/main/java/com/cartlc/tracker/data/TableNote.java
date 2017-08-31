@@ -16,12 +16,13 @@ import timber.log.Timber;
 public class TableNote {
     static final String TABLE_NAME = "list_notes";
 
-    static final String KEY_ROWID     = "_id";
-    static final String KEY_NAME      = "name";
-    static final String KEY_VALUE     = "value";
-    static final String KEY_TYPE      = "type";
-    static final String KEY_SERVER_ID = "server_id";
-    static final String KEY_IS_BOOT   = "is_boot_strap";
+    static final String KEY_ROWID      = "_id";
+    static final String KEY_NAME       = "name";
+    static final String KEY_VALUE      = "value";
+    static final String KEY_TYPE       = "type";
+    static final String KEY_NUM_DIGITS = "num_digits";
+    static final String KEY_SERVER_ID  = "server_id";
+    static final String KEY_IS_BOOT    = "is_boot_strap";
 
     static TableNote sInstance;
 
@@ -53,6 +54,8 @@ public class TableNote {
         sbuf.append(" text, ");
         sbuf.append(KEY_TYPE);
         sbuf.append(" int, ");
+        sbuf.append(KEY_NUM_DIGITS);
+        sbuf.append(" smallint default 0, ");
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
         sbuf.append(KEY_IS_BOOT);
@@ -60,9 +63,13 @@ public class TableNote {
         mDb.execSQL(sbuf.toString());
     }
 
-//    public void drop() {
-//        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-//    }
+    public static void upgrade3(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_NUM_DIGITS + " smallint default 0");
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
 
     public void clear() {
         try {
@@ -93,6 +100,7 @@ public class TableNote {
                 values.put(KEY_NAME, value.name);
                 values.put(KEY_TYPE, value.type.ordinal());
                 values.put(KEY_VALUE, value.value);
+                values.put(KEY_NUM_DIGITS, value.num_digits);
                 values.put(KEY_SERVER_ID, value.server_id);
                 values.put(KEY_IS_BOOT, value.isBootStrap ? 1 : 0);
                 mDb.insert(TABLE_NAME, null, values);
@@ -113,6 +121,7 @@ public class TableNote {
             values.put(KEY_NAME, item.name);
             values.put(KEY_TYPE, item.type.ordinal());
             values.put(KEY_VALUE, item.value);
+            values.put(KEY_NUM_DIGITS, item.num_digits);
             values.put(KEY_SERVER_ID, item.server_id);
             values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
             item.id = mDb.insert(TABLE_NAME, null, values);
@@ -184,12 +193,12 @@ public class TableNote {
     public List<DataNote> query(String selection, String[] selectionArgs) {
         List<DataNote> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_VALUE, KEY_TYPE, KEY_SERVER_ID, KEY_IS_BOOT};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxName = cursor.getColumnIndex(KEY_NAME);
             int idxValue = cursor.getColumnIndex(KEY_VALUE);
             int idxType = cursor.getColumnIndex(KEY_TYPE);
+            int idxNumDigits = cursor.getColumnIndex(KEY_NUM_DIGITS);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxTest = cursor.getColumnIndex(KEY_IS_BOOT);
             while (cursor.moveToNext()) {
@@ -198,6 +207,7 @@ public class TableNote {
                 item.name = cursor.getString(idxName);
                 item.value = cursor.getString(idxValue);
                 item.type = DataNote.Type.from(cursor.getInt(idxType));
+                item.num_digits = cursor.getShort(idxNumDigits);
                 item.server_id = cursor.getInt(idxServerId);
                 item.isBootStrap = cursor.getShort(idxTest) != 0;
                 list.add(item);
@@ -236,6 +246,7 @@ public class TableNote {
             values.put(KEY_TYPE, item.type.ordinal());
             values.put(KEY_VALUE, item.value);
             values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_NUM_DIGITS, item.num_digits);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(item.id)};
             mDb.update(TABLE_NAME, values, where, whereArgs);

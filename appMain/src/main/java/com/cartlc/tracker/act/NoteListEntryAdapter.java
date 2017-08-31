@@ -7,6 +7,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Created by dug on 5/12/17.
@@ -41,11 +43,19 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         }
     }
 
-    final protected Context                    mContext;
-    protected       List<DataNote>             mItems;
+    public interface EntryListener {
+        void textEntered(DataNote note);
 
-    public NoteListEntryAdapter(Context context) {
+        void textFocused(DataNote note);
+    }
+
+    final protected Context        mContext;
+    final protected EntryListener  mListener;
+    protected       List<DataNote> mItems;
+
+    public NoteListEntryAdapter(Context context, EntryListener listener) {
         mContext = context;
+        mListener = listener;
     }
 
     @Override
@@ -74,6 +84,15 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
             public void afterTextChanged(Editable s) {
                 item.value = s.toString();
                 TableNote.getInstance().updateValue(item);
+                mListener.textEntered(item);
+            }
+        });
+        holder.entry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    mListener.textFocused(item);
+                }
             }
         });
         if (item.type == DataNote.Type.ALPHANUMERIC) {
@@ -109,14 +128,30 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
     }
 
     public boolean hasNotesEntered() {
-        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        if (curGroup != null) {
-            for (DataNote note : TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId)) {
+        if (mItems != null) {
+            for (DataNote note : mItems) {
                 if (!TextUtils.isEmpty(note.value)) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public boolean isNotesComplete() {
+        if (mItems != null) {
+            for (DataNote note : mItems) {
+                if (!TextUtils.isEmpty(note.value)) {
+                    if (note.num_digits > 0 && (note.value.length() != note.num_digits)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public List<DataNote> getNotes() {
+        return mItems;
     }
 }

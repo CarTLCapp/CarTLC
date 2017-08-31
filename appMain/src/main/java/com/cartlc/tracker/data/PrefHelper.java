@@ -30,24 +30,24 @@ public class PrefHelper extends PrefHelperBase {
         new PrefHelper(ctx);
     }
 
-    static public final String KEY_PROJECT                  = "project";
-    static public final String KEY_COMPANY                  = "company";
-    static public final String KEY_STREET                   = "street";
-    static public final String KEY_STATE                    = "state";
-    static public final String KEY_CITY                     = "city";
-    static public final String KEY_ZIPCODE                  = "zipcode";
-    static final        String KEY_CURRENT_PROJECT_GROUP_ID = "current_project_group_id";
-    static final        String KEY_SAVED_PROJECT_GROUP_ID   = "saved_project_group_id";
-    static final        String KEY_FIRST_NAME               = "first_name";
-    static final        String KEY_LAST_NAME                = "last_name";
-    static final        String KEY_TRUCK_NUMBER             = "truck_number";
-    static final        String KEY_LICENSE_PLATE            = "license_plate";
-    static final String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
-    static final String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
-    static final String KEY_NEXT_NOTE_COLLECTION_ID      = "next_note_collection_id";
-    static final String KEY_TECH_ID                      = "tech_id";
-    static final String KEY_REGISTRATION_CHANGED         = "registration_changed";
-    static final String KEY_IS_DEVELOPMENT               = "is_development";
+    static public final String KEY_PROJECT                      = "project";
+    static public final String KEY_COMPANY                      = "company";
+    static public final String KEY_STREET                       = "street";
+    static public final String KEY_STATE                        = "state";
+    static public final String KEY_CITY                         = "city";
+    static public final String KEY_ZIPCODE                      = "zipcode";
+    static final        String KEY_CURRENT_PROJECT_GROUP_ID     = "current_project_group_id";
+    static final        String KEY_SAVED_PROJECT_GROUP_ID       = "saved_project_group_id";
+    static final        String KEY_FIRST_NAME                   = "first_name";
+    static final        String KEY_LAST_NAME                    = "last_name";
+    static final        String KEY_TRUCK_NUMBER                 = "truck_number";
+    static final        String KEY_LICENSE_PLATE                = "license_plate";
+    static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
+    static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
+    static final        String KEY_NEXT_NOTE_COLLECTION_ID      = "next_note_collection_id";
+    static final        String KEY_TECH_ID                      = "tech_id";
+    static final        String KEY_REGISTRATION_CHANGED         = "registration_changed";
+    static final        String KEY_IS_DEVELOPMENT               = "is_development";
 
     public static final String VERSION_PROJECT   = "version_project";
     public static final String VERSION_COMPANY   = "version_company";
@@ -55,7 +55,7 @@ public class PrefHelper extends PrefHelperBase {
     public static final String VERSION_NOTE      = "version_note";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss";
-    static final int VERSION_RESET = -1;
+    static final int    VERSION_RESET       = -1;
 
     PrefHelper(Context ctx) {
         super(ctx);
@@ -208,6 +208,13 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setVersionCompany(int value) {
         setInt(VERSION_COMPANY, value);
+    }
+
+    public void reloadFromServer() {
+        setVersionEquipment(VERSION_RESET);
+        setVersionProject(VERSION_RESET);
+        setVersionNote(VERSION_RESET);
+        setVersionCompany(VERSION_RESET);
     }
 
     public boolean hasRegistrationChanged() {
@@ -435,7 +442,7 @@ public class PrefHelper extends PrefHelperBase {
         String zip = getZipCode();
         if (zip != null) {
             if (sbuf.length() > 0) {
-                sbuf.append(" " );
+                sbuf.append(" ");
             }
             sbuf.append(zip);
         }

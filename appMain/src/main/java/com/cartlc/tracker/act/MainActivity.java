@@ -40,12 +40,14 @@ import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.DataZipCode;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
+import com.cartlc.tracker.data.TableCollectionNoteProject;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
@@ -184,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.last_name)          EditText             mLastName;
     @BindView(R.id.entry_simple)       EditText             mEntrySimple;
     @BindView(R.id.entry_hint)         TextView             mEntryHint;
+    @BindView(R.id.list_entry_hint)    TextView             mListEntryHint;
     @BindView(R.id.frame_login)        ViewGroup            mLoginFrame;
     @BindView(R.id.frame_new_entry)    ViewGroup            mEntryFrame;
     @BindView(R.id.main_list)          RecyclerView         mMainList;
@@ -205,7 +208,6 @@ public class MainActivity extends AppCompatActivity {
     MyHandler          mHandler            = new MyHandler();
     SoftKeyboardDetect mSoftKeyboardDetect = new SoftKeyboardDetect();
     TBApplication              mApp;
-    boolean                    mCurStageEditing;
     SimpleListAdapter          mSimpleAdapter;
     ProjectListAdapter         mProjectAdapter;
     EquipmentSelectListAdapter mEquipmentAdapter;
@@ -219,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
     String                     mCompanyEditing;
     ZipCodeWatcher             mZipCodeWatcher;
     boolean                    mWasNext;
+    boolean                    mCurStageEditing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -272,7 +275,40 @@ public class MainActivity extends AppCompatActivity {
         linearLayoutManager.setAutoMeasureEnabled(true);
         mPictureList.setLayoutManager(linearLayoutManager);
         mPictureList.setAdapter(mPictureAdapter);
-        mNoteAdapter = new NoteListEntryAdapter(this);
+        mNoteAdapter = new NoteListEntryAdapter(this, new NoteListEntryAdapter.EntryListener() {
+
+            DataNote currentFocus;
+
+            @Override
+            public void textEntered(DataNote note) {
+                if (currentFocus == note) {
+                    display(note);
+                }
+            }
+
+            @Override
+            public void textFocused(DataNote note) {
+                currentFocus = note;
+                display(note);
+            }
+
+            void display(DataNote note) {
+                if (note.num_digits > 0) {
+                    if (note.value.length() > 0) {
+                        StringBuilder sbuf = new StringBuilder();
+                        sbuf.append(note.value.length());
+                        sbuf.append("/");
+                        sbuf.append(note.num_digits);
+                        mListEntryHint.setText(sbuf.toString());
+                    } else {
+                        mListEntryHint.setText("");
+                    }
+                    mListEntryHint.setVisibility(View.VISIBLE);
+                } else {
+                    mListEntryHint.setVisibility(View.GONE);
+                }
+            }
+        });
         mConfirmationFrame = new ConfirmationFrame(mConfirmationFrameView);
         mAutoNext = new TextView.OnEditorActionListener() {
             @Override
@@ -307,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
                 setStage(Stage.LOGIN);
                 break;
             case R.id.upload:
+                PrefHelper.getInstance().reloadFromServer();
                 mApp.ping();
                 break;
         }
@@ -381,7 +418,7 @@ public class MainActivity extends AppCompatActivity {
 //            }
         if (inEntry) {
             boolean hasTruckNumber = !TextUtils.isEmpty(getTruckValue());
-            boolean hasNotes = mNoteAdapter.hasNotesEntered();
+            boolean hasNotes = mNoteAdapter.hasNotesEntered() && mNoteAdapter.isNotesComplete();
             boolean hasEquip = mEquipmentAdapter.hasChecked();
             boolean hasPictures = TablePictureCollection.getInstance().countPendingPictures() > 0;
 
@@ -478,6 +515,12 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             }
+        } else if (mCurStage == Stage.NOTES) {
+            if (isNext) {
+                if (detectNoteError()) {
+                    return false;
+                }
+            }
         }
         mCurStageEditing = false;
         mSoftKeyboardDetect.clear();
@@ -560,6 +603,7 @@ public class MainActivity extends AppCompatActivity {
         mPictureList.setVisibility(View.GONE);
         mEmptyView.setVisibility(View.GONE);
         mMainList.setVisibility(View.VISIBLE);
+        mListEntryHint.setVisibility(View.GONE);
         mCompanyEditing = null;
 
         switch (mCurStage) {
@@ -932,6 +976,45 @@ public class MainActivity extends AppCompatActivity {
                 if (mCurStage == Stage.PICTURE) {
                     setStage(Stage.CONFIRM);
                 }
+            }
+        });
+        builder.create().show();
+    }
+
+    boolean detectNoteError() {
+        if (!mNoteAdapter.isNotesComplete()) {
+            showNoteError(mNoteAdapter.getNotes());
+            return true;
+        }
+        return false;
+    }
+
+    void showNoteError(List<DataNote> notes) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.title_notes);
+        StringBuilder sbuf = new StringBuilder();
+        for (DataNote note : notes) {
+            if (note.num_digits > 0 && note.value.length() > 0 && (note.value.length() != note.num_digits)) {
+                sbuf.append("    ");
+                sbuf.append(note.name);
+                sbuf.append(": ");
+                sbuf.append(getString(R.string.error_incorrect_note_count, note.num_digits, note.value.length()));
+                sbuf.append("\n");
+            }
+        }
+        String msg = getString(R.string.error_incorrect_digit_count, sbuf.toString());
+        builder.setMessage(msg);
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                doNext_();
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
             }
         });
         builder.create().show();

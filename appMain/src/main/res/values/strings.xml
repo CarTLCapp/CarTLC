@@ -55,7 +55,8 @@
     <string name="error_need_new_company">Enter in a new company name</string>
     <string name="error_empty">No elements</string>
     <string name="error_need_note_fields">These fields still need entries:</string>
-
+    <string name="error_incorrect_digit_count">Incorrect digit count for these fields:\n%s\nDo you want to continue?</string>
+    <string name="error_incorrect_note_count">Expected %1$d digits, found %2$d.</string>
     <!--<string name="perm_read_phone_state">Need to be able to tell if you have a MOBILE connection.</string>-->
 
     <string name="loading">LOADING...</string>

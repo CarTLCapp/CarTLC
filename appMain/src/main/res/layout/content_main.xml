@@ -99,6 +99,16 @@
 
     </FrameLayout>
 
+    <TextView
+        android:id="@+id/list_entry_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/main_list_frame"
+        android:layout_alignRight="@id/main_list_frame"
+        android:text="0/17"
+        android:visibility="gone"
+        />
+
     <RelativeLayout
         android:id="@+id/frame_pictures"
         android:layout_width="wrap_content"

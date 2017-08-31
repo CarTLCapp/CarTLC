@@ -37,6 +37,7 @@ public class DataNote {
     public String  name;
     public String  value;
     public Type    type;
+    public short   num_digits;
     public int     server_id;
     public boolean isBootStrap;
 
@@ -53,9 +54,10 @@ public class DataNote {
         this.isBootStrap = true;
     }
 
-    public DataNote(String name, Type type, int server_id) {
+    public DataNote(String name, Type type, short num_digits, int server_id) {
         this.name = name;
         this.type = type;
+        this.num_digits = num_digits;
         this.server_id = server_id;
     }
 
@@ -69,6 +71,8 @@ public class DataNote {
         sbuf.append(value);
         sbuf.append(", TYPE=");
         sbuf.append(type.toString());
+        sbuf.append(", #=");
+        sbuf.append(num_digits);
         return sbuf.toString();
     }
 
@@ -81,7 +85,9 @@ public class DataNote {
     }
 
     public boolean equals(DataNote item) {
-        return name.equals(item.name);
+        return name.equals(item.name)
+                && type.ordinal() == item.type.ordinal()
+                && num_digits == item.num_digits;
     }
 
 }
