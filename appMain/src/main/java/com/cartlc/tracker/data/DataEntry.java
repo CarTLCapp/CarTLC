@@ -17,8 +17,7 @@ public class DataEntry {
     public DataCollectionEquipmentEntry equipmentCollection;
     public DataPictureCollection        pictureCollection;
     public long                         noteCollectionId;
-    public long                         truckNumber;
-    public String                       licensePlateNumber;
+    public long                         truckId;
     public boolean                      uploadedMaster;
     public boolean                      uploadedAws;
 
@@ -80,5 +79,9 @@ public class DataEntry {
         }
         TableEntry.getInstance().setUploadedAws(this, true);
         EventBus.getDefault().post(new EventPingDone());
+    }
+
+    public DataTruck getTruck() {
+        return TableTruck.getInstance().query(truckId);
     }
 }

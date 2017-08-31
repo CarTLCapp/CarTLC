@@ -10,6 +10,7 @@ import com.cartlc.tracker.data.DataEquipment;
 import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.DataProject;
+import com.cartlc.tracker.data.DataTruck;
 import com.cartlc.tracker.data.DatabaseManager;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
@@ -21,6 +22,7 @@ import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TablePictureCollection;
 import com.cartlc.tracker.data.TableProjects;
+import com.cartlc.tracker.data.TableTruck;
 import com.cartlc.tracker.event.EventPingDone;
 
 import org.json.JSONArray;
@@ -59,6 +61,7 @@ public class DCPing extends DCPost {
     final String COMPANIES;
     final String EQUIPMENTS;
     final String NOTES;
+    final String TRUCKS;
     final String MESSAGE;
 
     public DCPing() {
@@ -75,6 +78,7 @@ public class DCPing extends DCPost {
         EQUIPMENTS = SERVER_URL + "equipments";
         NOTES = SERVER_URL + "notes";
         MESSAGE = SERVER_URL + "message";
+        TRUCKS = SERVER_URL + "trucks";
     }
 
     public void sendRegistration() {
@@ -127,7 +131,7 @@ public class DCPing extends DCPost {
             int version_equipment = object.getInt(PrefHelper.VERSION_EQUIPMENT);
             int version_note = object.getInt(PrefHelper.VERSION_NOTE);
             int version_company = object.getInt(PrefHelper.VERSION_COMPANY);
-
+            int version_truck = object.getInt(PrefHelper.VERSION_TRUCK);
             if (PrefHelper.getInstance().getVersionProject() != version_project) {
                 Timber.i("New project version " + version_project);
                 queryProjects();
@@ -147,6 +151,11 @@ public class DCPing extends DCPost {
                 Timber.i("New note version " + version_note);
                 queryNotes();
                 PrefHelper.getInstance().setVersionNote(version_note);
+            }
+            if (PrefHelper.getInstance().getVersionTruck() != version_truck) {
+                Timber.i("New truck version " + version_truck);
+                queryTrucks();
+                PrefHelper.getInstance().setVersionTruck(version_truck);
             }
             List<DataEntry> entries = TableEntry.getInstance().queryPendingDataToUploadToMaster();
             int count = 0;
@@ -548,6 +557,69 @@ public class DCPing extends DCPost {
         }
     }
 
+    void queryTrucks() {
+        Timber.i("queryTrucks()");
+        try {
+            String response = post(TRUCKS);
+            if (response == null) {
+                Timber.e("queryTrucks(): Unexpected NULL response from server");
+                return;
+            }
+            JSONObject object = parseResult(response);
+            {
+                List<DataTruck> unprocessed = TableTruck.getInstance().query();
+                JSONArray array = object.getJSONArray("trucks");
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject ele = array.getJSONObject(i);
+                    DataTruck incoming = new DataTruck();
+                    incoming.serverId = ele.getInt("id");
+                    incoming.truckNumber = ele.getInt("truck_number");
+                    incoming.licensePlateNumber = ele.getString("license_plate");
+                    DataTruck item = TableTruck.getInstance().queryByServerId(incoming.serverId);
+                    if (item == null) {
+                        DataTruck match = get(unprocessed, incoming);
+                        if (match != null) {
+                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            match.serverId = incoming.serverId;
+                            TableTruck.getInstance().save(match);
+                            Timber.i("Commandeer local: " + match.toString());
+                            unprocessed.remove(match);
+                        } else {
+                            // Otherwise just add the new entry.
+                            Timber.i("New truck: " + incoming.toString());
+                            TableTruck.getInstance().save(incoming);
+                        }
+                    } else {
+                        // Change of data
+                        if (!incoming.equals(item)) {
+                            Timber.i("Change: " + incoming.toString());
+                            incoming.id = item.id;
+                            TableTruck.getInstance().save(incoming);
+                        } else {
+                            Timber.i("No change: " + item.toString());
+                        }
+                        unprocessed.remove(item);
+                    }
+                }
+                // Remove or disable unprocessed elements
+                for (DataTruck truck : unprocessed) {
+                    TableTruck.getInstance().removeIfUnused(truck);
+                }
+            }
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
+    DataTruck get(List<DataTruck> items, DataTruck match) {
+        for (DataTruck item : items) {
+            if (item.equals(match)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
     int sendEntries(List<DataEntry> list) {
         int count = 0;
         for (DataEntry entry : list) {
@@ -565,11 +637,12 @@ public class DCPing extends DCPost {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
             jsonObject.accumulate("date", entry.date);
-            if (entry.truckNumber > 0) {
-                jsonObject.accumulate("truck_number", entry.truckNumber);
+            DataTruck truck = entry.getTruck();
+            if (truck.truckNumber > 0) {
+                jsonObject.accumulate("truck_number", truck.truckNumber);
             }
-            if (entry.licensePlateNumber != null) {
-                jsonObject.accumulate("license_plate", entry.licensePlateNumber);
+            if (truck.licensePlateNumber != null) {
+                jsonObject.accumulate("license_plate", truck.licensePlateNumber);
             }
             DataProject project = entry.getProject();
             if (project == null) {

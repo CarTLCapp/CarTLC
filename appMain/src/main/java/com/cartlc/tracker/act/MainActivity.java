@@ -17,7 +17,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -32,22 +31,20 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-import com.amazonaws.util.StringUtils;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataNote;
-import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.DataZipCode;
 import com.cartlc.tracker.data.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
-import com.cartlc.tracker.data.TableCollectionNoteProject;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
@@ -163,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         CITY,
         STREET,
         CURRENT_PROJECT,
-        TRUCK_NUMBER,
+        TRUCK,
         EQUIPMENT,
         NOTES,
         PICTURE,
@@ -417,7 +414,7 @@ public class MainActivity extends AppCompatActivity {
 //                }
 //            }
         if (inEntry) {
-            boolean hasTruckNumber = !TextUtils.isEmpty(getTruckValue());
+            boolean hasTruckNumber = !TextUtils.isEmpty(PrefHelper.getInstance().getTruckValue());
             boolean hasNotes = mNoteAdapter.hasNotesEntered() && mNoteAdapter.isNotesComplete();
             boolean hasEquip = mEquipmentAdapter.hasChecked();
             boolean hasPictures = TablePictureCollection.getInstance().countPendingPictures() > 0;
@@ -425,7 +422,7 @@ public class MainActivity extends AppCompatActivity {
             if (!hasTruckNumber && !hasNotes && !hasEquip && !hasPictures) {
                 mCurStage = Stage.CURRENT_PROJECT;
             } else if (!hasTruckNumber) {
-                mCurStage = Stage.TRUCK_NUMBER;
+                mCurStage = Stage.TRUCK;
             } else if (!hasEquip) {
                 mCurStage = Stage.EQUIPMENT;
             } else if (!hasNotes) {
@@ -487,7 +484,7 @@ public class MainActivity extends AppCompatActivity {
             }
             PrefHelper.getInstance().setRegistrationChanged(true);
             mApp.ping();
-        } else if (mCurStage == Stage.TRUCK_NUMBER) {
+        } else if (mCurStage == Stage.TRUCK) {
             String value = mEntrySimple.getText().toString();
             if (TextUtils.isEmpty(value)) {
                 if (isNext) {
@@ -602,7 +599,6 @@ public class MainActivity extends AppCompatActivity {
         mPictureFrame.setVisibility(View.GONE);
         mPictureList.setVisibility(View.GONE);
         mEmptyView.setVisibility(View.GONE);
-        mMainList.setVisibility(View.VISIBLE);
         mListEntryHint.setVisibility(View.GONE);
         mCompanyEditing = null;
 
@@ -624,7 +620,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case PROJECT:
                 mPrev.setVisibility(View.VISIBLE);
-                mMainListFrame.setVisibility(View.VISIBLE);
+                showMainListFrame();
                 if (PrefHelper.getInstance().getProjectName() != null) {
                     mNext.setVisibility(View.VISIBLE);
                 }
@@ -644,7 +640,7 @@ public class MainActivity extends AppCompatActivity {
                         mEntrySimple.setText("");
                     }
                 } else {
-                    mMainListFrame.setVisibility(View.VISIBLE);
+                    showMainListFrame();
                     mCenter.setVisibility(View.VISIBLE);
                     List<String> companies = TableAddress.getInstance().queryCompanies();
                     setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
@@ -672,7 +668,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.addTextChangedListener(mZipCodeWatcher);
                     mEntrySimple.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 } else {
-                    mMainListFrame.setVisibility(View.VISIBLE);
+                    showMainListFrame();
                     setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
                     mCenter.setVisibility(View.VISIBLE);
                     mNext.setVisibility(View.VISIBLE);
@@ -681,7 +677,7 @@ public class MainActivity extends AppCompatActivity {
             }
             case STATE: {
                 showHint();
-                mMainListFrame.setVisibility(View.VISIBLE);
+                showMainListFrame();
                 mPrev.setVisibility(View.VISIBLE);
                 final String company = PrefHelper.getInstance().getCompany();
                 final String zipcode = PrefHelper.getInstance().getZipCode();
@@ -738,7 +734,7 @@ public class MainActivity extends AppCompatActivity {
                         PrefHelper.getInstance().setCity(cities.get(0));
                         skip();
                     } else {
-                        mMainListFrame.setVisibility(View.VISIBLE);
+                        showMainListFrame();
                         mCenter.setVisibility(View.VISIBLE);
                         if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
                             mNext.setVisibility(View.VISIBLE);
@@ -766,7 +762,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 } else {
                     mCenter.setVisibility(View.VISIBLE);
-                    mMainListFrame.setVisibility(View.VISIBLE);
+                    showMainListFrame();
                     if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
                         mNext.setVisibility(View.VISIBLE);
                     }
@@ -781,7 +777,7 @@ public class MainActivity extends AppCompatActivity {
                     fillStage();
                 } else {
                     PrefHelper.getInstance().saveProjectAndAddressCombo();
-                    mMainListFrame.setVisibility(View.VISIBLE);
+                    showMainListFrame();
                     mCenter.setVisibility(View.VISIBLE);
                     if (TableProjectAddressCombo.getInstance().count() > 0) {
                         mAdd.setVisibility(View.VISIBLE);
@@ -793,14 +789,16 @@ public class MainActivity extends AppCompatActivity {
                     mProjectAdapter.onDataChanged();
                 }
                 break;
-            case TRUCK_NUMBER:
+            case TRUCK:
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 mEntryFrame.setVisibility(View.VISIBLE);
-                mTitle.setText(R.string.title_truck_number);
-                mEntrySimple.setHint(R.string.title_truck_number);
-                mEntrySimple.setText(getTruckValue());
+                mTitle.setText(R.string.title_truck);
+                mEntrySimple.setHint(R.string.title_truck);
+                mEntrySimple.setText(PrefHelper.getInstance().getTruckValue());
                 mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+                showMainListFrame(mEntryFrame);
+                setList(R.string.title_truck, PrefHelper.KEY_TRUCK, TableProjects.getInstance().query(true));
                 break;
             case EQUIPMENT:
                 mNext.setVisibility(View.VISIBLE);
@@ -817,7 +815,7 @@ public class MainActivity extends AppCompatActivity {
                     mTitle.setText(R.string.title_equipment_installed);
                     mMainList.setAdapter(mEquipmentAdapter);
                     mEquipmentAdapter.onDataChanged();
-                    mMainListFrame.setVisibility(View.VISIBLE);
+                    showMainListFrame();
                     mCenter.setVisibility(View.VISIBLE);
                 }
                 break;
@@ -826,13 +824,12 @@ public class MainActivity extends AppCompatActivity {
                 mPrev.setVisibility(View.VISIBLE);
                 mNoteAdapter.onDataChanged();
                 mTitle.setText(R.string.title_notes);
-                mMainListFrame.setVisibility(View.VISIBLE);
+                showMainListFrame();
                 if (mNoteAdapter.getItemCount() == 0) {
                     mMainList.setVisibility(View.GONE);
                     mEmptyView.setVisibility(View.VISIBLE);
                 } else {
                     mMainList.setAdapter(mNoteAdapter);
-                    mMainList.setVisibility(View.VISIBLE);
                     mEmptyView.setVisibility(View.GONE);
                 }
                 break;
@@ -889,31 +886,18 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    String getTruckValue() {
-        String value = PrefHelper.getInstance().getLicensePlate();
-        if (value != null) {
-            return value;
-        }
-        long id = PrefHelper.getInstance().getTruckNumber();
-        if (id == 0) {
-            return "";
-        }
-        return Long.toString(id);
-    }
-
     // Return false if NoneSelected situation has occured.
     boolean setList(int textId, String key, List<String> list) {
         boolean hasSelection = true;
         mCurKey = key;
         String text = getString(textId);
         mTitle.setText(text);
-
         if (list.size() == 0) {
             doBtnCenter();
         } else {
             mSimpleAdapter.setList(list);
             mMainList.setAdapter(mSimpleAdapter);
-            String curValue = PrefHelper.getInstance().getString(key, null);
+            String curValue = PrefHelper.getInstance().getKeyValue(key);
             if (curValue == null) {
                 mSimpleAdapter.setNoneSelected();
                 hasSelection = false;
@@ -929,8 +913,8 @@ public class MainActivity extends AppCompatActivity {
 
     void onSelected(String text) {
         if (mCurKey != null) {
-            PrefHelper.getInstance().setString(mCurKey, text);
-            if (mCurStage == Stage.PROJECT || mCurStage == Stage.CITY || mCurStage == Stage.STATE || mCurStage == Stage.STREET/* || mCurStage == Stage.ZIPCODE*/) {
+            PrefHelper.getInstance().setKeyValue(mCurKey, text);
+            if (mCurStage == Stage.PROJECT || mCurStage == Stage.CITY || mCurStage == Stage.STATE || mCurStage == Stage.STREET) {
                 mNext.setVisibility(View.VISIBLE);
             } else if (mCurStage == Stage.COMPANY) {
                 checkEdit();
@@ -1082,5 +1066,20 @@ public class MainActivity extends AppCompatActivity {
             mEntryHint.setText(hint);
             mEntryHint.setVisibility(View.VISIBLE);
         }
+    }
+
+    void showMainListFrame() {
+        showMainListFrame(null);
+    }
+
+    void showMainListFrame(View below) {
+        if (below == null) {
+            below = mTitle;
+        }
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mMainListFrame.getLayoutParams();
+        params.removeRule(RelativeLayout.BELOW);
+        params.addRule(RelativeLayout.BELOW, below.getId());
+        mMainListFrame.setVisibility(View.VISIBLE);
+        mMainList.setVisibility(View.VISIBLE);
     }
 }

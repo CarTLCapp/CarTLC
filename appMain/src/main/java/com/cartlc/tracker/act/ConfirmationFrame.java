@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataTruck;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -64,16 +65,17 @@ public class ConfirmationFrame {
             mAddressValue.setText(address);
         }
         mNoteAdapter.setItems(entry.getNotes());
-        if (entry.licensePlateNumber == null) {
-            if (entry.truckNumber == 0) {
+        DataTruck truck = entry.getTruck();
+        if (truck.licensePlateNumber == null) {
+            if (truck.truckNumber == 0) {
                 mTruckNumberValue.setVisibility(View.GONE);
             } else {
                 mTruckNumberValue.setVisibility(View.VISIBLE);
-                mTruckNumberValue.setText(Long.toString(entry.truckNumber));
+                mTruckNumberValue.setText(Long.toString(truck.truckNumber));
             }
         } else {
             mTruckNumberValue.setVisibility(View.VISIBLE);
-            mTruckNumberValue.setText(entry.licensePlateNumber);
+            mTruckNumberValue.setText(truck.licensePlateNumber);
         }
         mSimpleAdapter.setList(entry.getEquipmentNames());
         mPictureAdapter.setList(entry.getPictures());

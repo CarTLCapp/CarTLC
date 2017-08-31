@@ -13,7 +13,7 @@ import timber.log.Timber;
 public class DatabaseManager {
 
     static final String DATABASE_NAME    = "cartcl.db";
-    static final int    DATABASE_VERSION = 7; // MYDEBUG TODO: bring this back down to 3
+    static final int    DATABASE_VERSION = 8; // MYDEBUG TODO: bring this back down to 3
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -41,6 +41,7 @@ public class DatabaseManager {
                 TableProjects.getInstance().create();
                 TableCrash.getInstance().create();
                 TableZipCode.getInstance().create();
+                TableTruck.getInstance().create();
             } catch (Exception ex) {
                 Timber.e(ex);
             }
@@ -60,6 +61,7 @@ public class DatabaseManager {
             TableProjects.Init(db);
             TableCrash.Init(db);
             TableZipCode.Init(db);
+            TableTruck.Init(db);
         }
 
         @Override
@@ -67,12 +69,12 @@ public class DatabaseManager {
             if (oldVersion == 1) {
                 if (newVersion >= 2) {
                     init(db);
-                    TableEntry.upgrade2(db);
                     if (newVersion >= 3) {
                         TableCrash.getInstance().create();
                         TablePictureCollection.upgrade3(db);
                         TableZipCode.getInstance().create();
-                        TableNote.getInstance().upgrade3(db);
+                        TableNote.upgrade3(db);
+                        TableEntry.getInstance().upgrade3();
                     }
                 }
             } else if (oldVersion == 2) {
@@ -83,23 +85,29 @@ public class DatabaseManager {
                     TableZipCode.Init(db);
                     TableZipCode.getInstance().create();
                     TableNote.getInstance().upgrade3(db);
+                    TableEntry.getInstance().upgrade3();
                 }
-                // MYDEBUG TODO: Debug only, get rid of this code:
             } else if (oldVersion == 3) {
                 if (newVersion >= 4) {
                     TablePictureCollection.upgrade3(db);
                     TableZipCode.Init(db);
                     TableZipCode.getInstance().create();
                     TableNote.getInstance().upgrade3(db);
+                    TableEntry.getInstance().upgrade3();
                 }
                 // MYDEBUG TODO: Debug only, get rid of this code:
             } else if (oldVersion < 6) {
                 TableZipCode.Init(db);
                 TableZipCode.getInstance().create();
                 TableNote.getInstance().upgrade3(db);
+                TableEntry.getInstance().upgrade3();
                 // MYDEBUG TODO: Debug only, get rid of this code:
             } else if (oldVersion < 7) {
                 TableNote.getInstance().upgrade3(db);
+                TableEntry.getInstance().upgrade3();
+                // MYDEBUG TODO: Debug only, get rid of this code:
+            } else if (oldVersion < 8) {
+                TableEntry.getInstance().upgrade3();
             }
         }
 

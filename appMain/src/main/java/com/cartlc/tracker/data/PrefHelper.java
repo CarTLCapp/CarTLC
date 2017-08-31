@@ -36,6 +36,7 @@ public class PrefHelper extends PrefHelperBase {
     static public final String KEY_STATE                        = "state";
     static public final String KEY_CITY                         = "city";
     static public final String KEY_ZIPCODE                      = "zipcode";
+    static public final String KEY_TRUCK                        = "truck";
     static final        String KEY_CURRENT_PROJECT_GROUP_ID     = "current_project_group_id";
     static final        String KEY_SAVED_PROJECT_GROUP_ID       = "saved_project_group_id";
     static final        String KEY_FIRST_NAME                   = "first_name";
@@ -53,6 +54,7 @@ public class PrefHelper extends PrefHelperBase {
     public static final String VERSION_COMPANY   = "version_company";
     public static final String VERSION_EQUIPMENT = "version_equipment";
     public static final String VERSION_NOTE      = "version_note";
+    public static final String VERSION_TRUCK     = "version_truck";
 
     static final String PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss";
     static final int    VERSION_RESET       = -1;
@@ -208,6 +210,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setVersionCompany(int value) {
         setInt(VERSION_COMPANY, value);
+    }
+
+    public int getVersionTruck() {
+        return getInt(VERSION_TRUCK, VERSION_RESET);
+    }
+
+    public void setVersionTruck(int value) {
+        setInt(VERSION_TRUCK, value);
     }
 
     public void reloadFromServer() {
@@ -386,8 +396,7 @@ public class PrefHelper extends PrefHelperBase {
         entry.equipmentCollection = new DataCollectionEquipmentEntry(getNextEquipmentCollectionID());
         entry.equipmentCollection.addChecked();
         entry.pictureCollection = TablePictureCollection.getInstance().createCollectionFromPending();
-        entry.truckNumber = getTruckNumber();
-        entry.licensePlateNumber = getLicensePlate();
+        entry.truckId = TableTruck.getInstance().save(getTruckNumber(), getLicensePlate());
         entry.saveNotes(getNextNoteCollectionID());
         entry.date = System.currentTimeMillis();
         return entry;
@@ -448,4 +457,36 @@ public class PrefHelper extends PrefHelperBase {
         }
         return sbuf.toString();
     }
+
+    public String getTruckValue() {
+        String value = getLicensePlate();
+        if (value != null) {
+            return value;
+        }
+        long id = getTruckNumber();
+        if (id == 0) {
+            return "";
+        }
+        return Long.toString(id);
+    }
+
+    public String getKeyValue(String key) {
+        if (key.equals(KEY_TRUCK)) {
+            return getTruckValue();
+        }
+        return getString(key, null);
+    }
+
+    public void setKeyValue(String key, String value) {
+        if (key.equals(KEY_TRUCK)) {
+            if (TextUtils.isDigitsOnly(key)) {
+                setTruckNumber(Integer.parseInt(value));
+            } else {
+                setLicensePlate(value);
+            }
+        } else {
+            setKeyValue(key, value);
+        }
+    }
+
 }
