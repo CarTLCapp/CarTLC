@@ -11,6 +11,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="@integer/note_label_width"
+        android:lines="1"
+        android:ellipsize="marquee"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="5dp"/>
 

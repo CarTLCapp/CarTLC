@@ -479,13 +479,28 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setKeyValue(String key, String value) {
         if (key.equals(KEY_TRUCK)) {
-            if (TextUtils.isDigitsOnly(key)) {
+            if (value.contains(":")) {
+                String [] ele = value.split(":");
+                if (ele.length >= 2) {
+                    setTruckNumber(Integer.parseInt(ele[0].trim()));
+                    setLicensePlate(ele[1].trim());
+                } else if (ele.length == 1) {
+                    if (TextUtils.isDigitsOnly(ele[0])) {
+                        setTruckNumber(Integer.parseInt(ele[0].trim()));
+                    } else {
+                        setLicensePlate(ele[0].trim());
+                    }
+                } else {
+                    setTruckNumber(0);
+                    setLicensePlate(null);
+                }
+            } else if (TextUtils.isDigitsOnly(key)) {
                 setTruckNumber(Integer.parseInt(value));
             } else {
                 setLicensePlate(value);
             }
         } else {
-            setKeyValue(key, value);
+            setString(key, value);
         }
     }
 

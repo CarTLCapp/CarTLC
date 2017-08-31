@@ -64,7 +64,7 @@ public class TableEntry {
         final String KEY_TRUCK_NUMBER = "truck_number";
         final String KEY_LICENSE_PLATE = "license_plate";
         try {
-            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " RENAME " + TABLE_NAME2);
+            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " RENAME TO " + TABLE_NAME2);
             create();
             Cursor cursor = mDb.query(TABLE_NAME2, null, null, null, null, null, null, null);
             int idxRow = cursor.getColumnIndex(KEY_ROWID);
@@ -79,16 +79,14 @@ public class TableEntry {
             int idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS);
             int truckNumber;
             String licensePlateNumber;
+            ContentValues values = new ContentValues();
             while (cursor.moveToNext()) {
                 DataEntry entry = new DataEntry();
                 entry.id = cursor.getLong(idxRow);
                 entry.date = cursor.getLong(idxDate);
                 long projectAddressComboId = cursor.getLong(idxProjectAddressCombo);
-                entry.projectAddressCombo = TableProjectAddressCombo.getInstance().query(projectAddressComboId);
                 long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
-                entry.equipmentCollection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
                 long pictureCollectionId = cursor.getLong(idxPictureCollectionId);
-                entry.pictureCollection = TablePictureCollection.getInstance().query(pictureCollectionId);
                 entry.noteCollectionId = cursor.getLong(idxNotetCollectionId);
                 truckNumber = cursor.getInt(idxTruckNumber);
                 if (idxLicensePlate >= 0) {
@@ -99,7 +97,17 @@ public class TableEntry {
                 entry.truckId = TableTruck.getInstance().save(truckNumber, licensePlateNumber);
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
                 entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
-                add(entry);
+
+                values.clear();
+                values.put(KEY_DATE, entry.date);
+                values.put(KEY_PROJECT_ADDRESS_COMBO_ID, projectAddressComboId);
+                values.put(KEY_EQUIPMENT_COLLECTION_ID, equipmentCollectionId);
+                values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
+                values.put(KEY_PICTURE_COLLECTION_ID, pictureCollectionId);
+                values.put(KEY_TRUCK_ID, entry.truckId);
+                values.put(KEY_UPLOADED_AWS, entry.uploadedAws);
+                values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster);
+                entry.id = mDb.insert(TABLE_NAME, null, values);
             }
             cursor.close();
             mDb.delete(TABLE_NAME2, null, null);

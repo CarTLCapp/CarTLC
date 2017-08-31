@@ -13,7 +13,7 @@ import timber.log.Timber;
 public class DatabaseManager {
 
     static final String DATABASE_NAME    = "cartcl.db";
-    static final int    DATABASE_VERSION = 8; // MYDEBUG TODO: bring this back down to 3
+    static final int    DATABASE_VERSION = 10; // MYDEBUG TODO: bring this back down to 3
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -66,38 +66,37 @@ public class DatabaseManager {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            init(db);
             if (oldVersion == 1) {
                 if (newVersion >= 2) {
-                    init(db);
                     if (newVersion >= 3) {
                         TableCrash.getInstance().create();
                         TablePictureCollection.upgrade3(db);
                         TableZipCode.getInstance().create();
                         TableNote.upgrade3(db);
+                        TableTruck.getInstance().create();
                         TableEntry.getInstance().upgrade3();
                     }
                 }
             } else if (oldVersion == 2) {
                 if (newVersion >= 3) {
-                    TableCrash.Init(db);
                     TableCrash.getInstance().create();
                     TablePictureCollection.upgrade3(db);
-                    TableZipCode.Init(db);
                     TableZipCode.getInstance().create();
                     TableNote.getInstance().upgrade3(db);
+                    TableTruck.getInstance().create();
                     TableEntry.getInstance().upgrade3();
                 }
             } else if (oldVersion == 3) {
                 if (newVersion >= 4) {
                     TablePictureCollection.upgrade3(db);
-                    TableZipCode.Init(db);
                     TableZipCode.getInstance().create();
+                    TableTruck.getInstance().create();
                     TableNote.getInstance().upgrade3(db);
                     TableEntry.getInstance().upgrade3();
                 }
                 // MYDEBUG TODO: Debug only, get rid of this code:
             } else if (oldVersion < 6) {
-                TableZipCode.Init(db);
                 TableZipCode.getInstance().create();
                 TableNote.getInstance().upgrade3(db);
                 TableEntry.getInstance().upgrade3();
@@ -107,6 +106,10 @@ public class DatabaseManager {
                 TableEntry.getInstance().upgrade3();
                 // MYDEBUG TODO: Debug only, get rid of this code:
             } else if (oldVersion < 8) {
+                TableTruck.getInstance().create();
+                TableEntry.getInstance().upgrade3();
+                // MYDEBUG TODO: Debug only, get rid of this code:
+            } else if (oldVersion < 10) {
                 TableEntry.getInstance().upgrade3();
             }
         }

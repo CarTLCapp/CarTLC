@@ -123,7 +123,23 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
         if (curGroup != null) {
             mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId);
+            pushToBottom("Other");
+            pushToBottom("Others");
             notifyDataSetChanged();
+        }
+    }
+
+    void pushToBottom(String name) {
+        DataNote other = null;
+        for (DataNote item : mItems) {
+            if (item.name.equals(name)) {
+                other = item;
+                break;
+            }
+        }
+        if (other != null) {
+            mItems.remove(other);
+            mItems.add(other);
         }
     }
 

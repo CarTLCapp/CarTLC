@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import timber.log.Timber;
@@ -175,6 +176,16 @@ public class TableTruck {
             truck.licensePlateNumber = cursor.getString(idxLicensePlate);
             truck.serverId = cursor.getLong(idxServerId);
             list.add(truck);
+        }
+        return list;
+    }
+
+    public List<String> queryStrings() {
+        ArrayList<String> list = new ArrayList();
+        List<DataTruck> trucks = query();
+        Collections.sort(trucks);
+        for (DataTruck truck : trucks) {
+            list.add(truck.toString());
         }
         return list;
     }

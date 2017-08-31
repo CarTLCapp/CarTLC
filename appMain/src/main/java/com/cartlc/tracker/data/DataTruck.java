@@ -1,10 +1,13 @@
 package com.cartlc.tracker.data;
 
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
+
 /**
  * Created by dug on 8/31/17.
  */
 
-public class DataTruck {
+public class DataTruck implements Comparable<DataTruck> {
 
     public long   id;
     public long   serverId;
@@ -35,11 +38,32 @@ public class DataTruck {
 
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append(id);
-        sbuf.append(":#");
-        sbuf.append(truckNumber);
-        sbuf.append(",");
-        sbuf.append(licensePlateNumber);
+        if (truckNumber > 0) {
+            sbuf.append(truckNumber);
+        }
+        if (!TextUtils.isEmpty(licensePlateNumber)) {
+            if (sbuf.length() > 0) {
+                sbuf.append(" : ");
+            }
+            sbuf.append(licensePlateNumber);
+        }
         return sbuf.toString();
+    }
+
+    @Override
+    public int compareTo(@NonNull DataTruck o) {
+        if (truckNumber > 0 && o.truckNumber > 0) {
+            return truckNumber - o.truckNumber;
+        } else {
+            if (licensePlateNumber == null) {
+                if (o.licensePlateNumber == null) {
+                    return 0;
+                }
+                return -1;
+            } else if (o.licensePlateNumber == null) {
+                return -1;
+            }
+            return licensePlateNumber.compareTo(o.licensePlateNumber);
+        }
     }
 }

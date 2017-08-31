@@ -4,11 +4,8 @@
              android:id="@+id/frame_entry"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
-             android:layout_above="@id/buttons"
              android:layout_below="@id/setup_title"
              android:layout_centerHorizontal="true"
-             android:layout_centerVertical="true"
-             android:layout_marginBottom="20dp"
              android:layout_marginTop="20dp">
 
     <android.support.constraint.ConstraintLayout
@@ -45,7 +42,7 @@
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/frame_new_entry"
+        android:id="@+id/frame_simple_entry"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
