@@ -151,7 +151,7 @@ public class EntryController extends Controller {
         } else {
             // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
             // The reason is that other techs don't need to know about a local techs truck updates.
-            Truck truck = Truck.add(truck_number, license_plate);
+            Truck truck = Truck.add(truck_number, license_plate, entry.tech_id);
             entry.truck_id = truck.id;
         }
         value = json.findValue("project_id");

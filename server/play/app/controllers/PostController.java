@@ -104,7 +104,6 @@ public class PostController extends Controller
 		result.put(Version.VERSION_EQUIPMENT, Version.get(Version.VERSION_EQUIPMENT));
 		result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
 		result.put(Version.VERSION_TRUCK, Version.get(Version.VERSION_TRUCK));
-
 		Technician tech = Technician.find.byId((long) tech_id);
 		if (tech != null) {
 			if (tech.reset_upload) {
@@ -135,14 +134,21 @@ public class PostController extends Controller
 
 	public Result queryTrucks() {
 		JsonNode json = request().body().asJson();
+		JsonNode value = json.findValue("tech_id");
+		if (value == null) {
+			return badRequest("missing field: tech_id");
+		}
+		int tech_id = value.intValue();
 		ObjectNode top = Json.newObject();
 		ArrayNode array = top.putArray("trucks");
 		List<Truck> trucks = Truck.list();
 		for (Truck item : trucks) {
-			ObjectNode node = array.addObject();
-			node.put("id", item.id);
-			node.put("truck_number", item.truck_number);
-			node.put("license_plate", item.license_plate);
+			if (item.created_by_client || item.created_by == tech_id) {
+				ObjectNode node = array.addObject();
+				node.put("id", item.id);
+				node.put("truck_number", item.truck_number);
+				node.put("license_plate", item.license_plate);
+			}
 		}
 		return ok(top);
 	}

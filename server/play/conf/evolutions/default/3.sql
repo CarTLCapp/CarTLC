@@ -44,7 +44,9 @@ create table truck (
     id             int auto_increment primary key,
     truck_number   int,
     license_plate  varchar(64),
-    upload_id      int
+    upload_id      int,
+    created_by        int default 0,
+    created_by_client bit default 0
 );
 
 alter table entry rename entry_v2;

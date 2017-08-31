@@ -151,6 +151,8 @@ public class WorkOrderReader {
                     Truck etruck = Truck.findFirst(truck.truck_number, truck.license_plate);
                     if (etruck == null) {
                         truck.upload_id = upload_id;
+                        truck.created_by = (int) client_id;
+                        truck.created_by_client = true;
                         truck.save();
                         order.truck_id = truck.id;
                         truckNewCount++;
