@@ -9,8 +9,8 @@ import android.support.v4.content.FileProvider;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.data.DatabaseManager;
-import com.cartlc.tracker.data.PrefHelper;
-import com.cartlc.tracker.data.BootstrapData;
+import com.cartlc.tracker.etc.PrefHelper;
+import com.cartlc.tracker.etc.BootstrapData;
 import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.data.DataZipCode;
 import com.cartlc.tracker.server.AmazonHelper;

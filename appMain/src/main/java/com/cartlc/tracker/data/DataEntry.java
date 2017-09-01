@@ -1,5 +1,7 @@
 package com.cartlc.tracker.data;
 
+import com.cartlc.tracker.etc.EntryStatus;
+import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventPingDone;
 
 import java.util.List;
@@ -18,6 +20,7 @@ public class DataEntry {
     public DataPictureCollection        pictureCollection;
     public long                         noteCollectionId;
     public long                         truckId;
+    public TruckStatus                  status;
     public boolean                      uploadedMaster;
     public boolean                      uploadedAws;
 
@@ -84,4 +87,9 @@ public class DataEntry {
     public DataTruck getTruck() {
         return TableTruck.getInstance().query(truckId);
     }
+
+    public EntryStatus computeStatus() {
+        return new EntryStatus(this);
+    }
+
 }

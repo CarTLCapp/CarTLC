@@ -1,10 +1,22 @@
-package com.cartlc.tracker.data;
+package com.cartlc.tracker.etc;
 
 import android.content.Context;
 import android.os.Environment;
 import android.text.TextUtils;
 
 import com.cartlc.tracker.app.TBApplication;
+import com.cartlc.tracker.data.DataAddress;
+import com.cartlc.tracker.data.DataCollectionEquipmentEntry;
+import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataProjectAddressCombo;
+import com.cartlc.tracker.data.DataTruck;
+import com.cartlc.tracker.data.TableAddress;
+import com.cartlc.tracker.data.TableEquipment;
+import com.cartlc.tracker.data.TableNote;
+import com.cartlc.tracker.data.TablePictureCollection;
+import com.cartlc.tracker.data.TableProjectAddressCombo;
+import com.cartlc.tracker.data.TableProjects;
+import com.cartlc.tracker.data.TableTruck;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -221,6 +233,26 @@ public class PrefHelper extends PrefHelperBase {
         setInt(VERSION_TRUCK, value);
     }
 
+    public String getKeyValue(String key) {
+        return getString(key, null);
+    }
+
+    public void setKeyValue(String key, String value) {
+        setString(key, value);
+    }
+
+    public void setStatus(TruckStatus status) {
+        if (status == null) {
+            setInt(KEY_STATUS, TruckStatus.OKAY.ordinal());
+        } else {
+            setInt(KEY_STATUS, status.ordinal());
+        }
+    }
+
+    public TruckStatus getStatus() {
+        return TruckStatus.from(getInt(KEY_STATUS, TruckStatus.OKAY.ordinal()));
+    }
+
     public void reloadFromServer() {
         setVersionEquipment(VERSION_RESET);
         setVersionProject(VERSION_RESET);
@@ -288,6 +320,7 @@ public class PrefHelper extends PrefHelperBase {
     public void clearLastEntry() {
         setTruckNumber(0);
         setLicensePlate(null);
+        setStatus(null);
         TablePictureCollection.getInstance().clearPendingPictures();
         TableNote.getInstance().clearValues();
         TableEquipment.getInstance().clearChecked();
@@ -398,6 +431,7 @@ public class PrefHelper extends PrefHelperBase {
         entry.equipmentCollection.addChecked();
         entry.pictureCollection = TablePictureCollection.getInstance().createCollectionFromPending();
         entry.truckId = TableTruck.getInstance().save(getTruckNumber(), getLicensePlate());
+        entry.status = getStatus();
         entry.saveNotes(getNextNoteCollectionID());
         entry.date = System.currentTimeMillis();
         return entry;
@@ -500,14 +534,6 @@ public class PrefHelper extends PrefHelperBase {
         } else {
             setLicensePlate(value);
         }
-    }
-
-    public String getKeyValue(String key) {
-        return getString(key, null);
-    }
-
-    public void setKeyValue(String key, String value) {
-        setString(key, value);
     }
 
 }

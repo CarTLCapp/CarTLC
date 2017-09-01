@@ -67,5 +67,8 @@
     <string name="status_okay">Okay</string>
     <string name="status_needs_repair">Needs Repair</string>
     <string name="status_missing_truck">Missing Truck</string>
-
+    <string name="status_complete">Complete</string>
+    <string name="status_partial_install">Partial Install</string>
+    <string name="status_partial_install_equipments">%1$d of %2$d equipments checked.</string>
+    <string name="status_partial_install_pictures">%1$d of %2$d pictures taken.</string>
 </resources>

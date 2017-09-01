@@ -12,7 +12,7 @@ import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.DataTruck;
 import com.cartlc.tracker.data.DatabaseManager;
-import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 import com.cartlc.tracker.data.TableCollectionNoteProject;
@@ -23,6 +23,7 @@ import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TablePictureCollection;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.data.TableTruck;
+import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventPingDone;
 
 import org.json.JSONArray;
@@ -663,6 +664,9 @@ public class DCPing extends DCPost {
                 jsonObject.accumulate("address_id", address.server_id);
             } else {
                 jsonObject.accumulate("address", address.getLine());
+            }
+            if (entry.status != null && entry.status != TruckStatus.OKAY) {
+                jsonObject.accumulate("status", entry.status.toString());
             }
             List<DataEquipment> equipments = entry.getEquipment();
             if (equipments.size() > 0) {

@@ -1,4 +1,4 @@
-package com.cartlc.tracker.data;
+package com.cartlc.tracker.etc;
 
 import android.content.Context;
 import android.content.SharedPreferences;

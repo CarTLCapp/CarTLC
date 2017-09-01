@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.cartlc.tracker.etc.PrefHelper;
+
 import timber.log.Timber;
 
 /**
@@ -87,30 +89,6 @@ public class DatabaseManager {
                     TableTruck.getInstance().create();
                     TableEntry.getInstance().upgrade3();
                 }
-            } else if (oldVersion == 3) {
-                if (newVersion >= 4) {
-                    TablePictureCollection.upgrade3(db);
-                    TableZipCode.getInstance().create();
-                    TableTruck.getInstance().create();
-                    TableNote.getInstance().upgrade3(db);
-                    TableEntry.getInstance().upgrade3();
-                }
-                // MYDEBUG TODO: Debug only, get rid of this code:
-            } else if (oldVersion < 6) {
-                TableZipCode.getInstance().create();
-                TableNote.getInstance().upgrade3(db);
-                TableEntry.getInstance().upgrade3();
-                // MYDEBUG TODO: Debug only, get rid of this code:
-            } else if (oldVersion < 7) {
-                TableNote.getInstance().upgrade3(db);
-                TableEntry.getInstance().upgrade3();
-                // MYDEBUG TODO: Debug only, get rid of this code:
-            } else if (oldVersion < 8) {
-                TableTruck.getInstance().create();
-                TableEntry.getInstance().upgrade3();
-                // MYDEBUG TODO: Debug only, get rid of this code:
-            } else if (oldVersion < 10) {
-                TableEntry.getInstance().upgrade3();
             }
         }
 

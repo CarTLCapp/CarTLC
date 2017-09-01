@@ -45,7 +45,8 @@ import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.DataZipCode;
-import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.etc.EntryStatus;
+import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
@@ -55,6 +56,7 @@ import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.data.TableTruck;
 import com.cartlc.tracker.data.TableZipCode;
+import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventPingDone;
 
 import java.io.File;
@@ -183,28 +185,31 @@ public class MainActivity extends AppCompatActivity {
 
     final static String KEY_STAGE = "stage";
 
-    @BindView(R.id.first_name)         EditText             mFirstName;
-    @BindView(R.id.last_name)          EditText             mLastName;
-    @BindView(R.id.entry_simple)       EditText             mEntrySimple;
-    @BindView(R.id.entry_hint)         TextView             mEntryHint;
-    @BindView(R.id.list_entry_hint)    TextView             mListEntryHint;
-    @BindView(R.id.frame_login)        ViewGroup            mLoginFrame;
-    @BindView(R.id.frame_entry)        ViewGroup            mEntryFrame;
-    @BindView(R.id.frame_simple_entry) ViewGroup            mEntrySimpleFrame;
-    @BindView(R.id.main_list)          RecyclerView         mMainList;
-    @BindView(R.id.main_list_frame)    FrameLayout          mMainListFrame;
-    @BindView(R.id.next)               Button               mNext;
-    @BindView(R.id.prev)               Button               mPrev;
-    @BindView(R.id.new_entry)          Button               mCenter;
-    @BindView(R.id.setup_title)        TextView             mTitle;
-    @BindView(R.id.fab_add)            FloatingActionButton mAdd;
-    @BindView(R.id.frame_confirmation) FrameLayout          mConfirmationFrameView;
-    @BindView(R.id.frame_pictures)     ViewGroup            mPictureFrame;
-    @BindView(R.id.list_pictures)      RecyclerView         mPictureList;
-    @BindView(R.id.empty)              TextView             mEmptyView;
-    @BindView(R.id.root)               ViewGroup            mRoot;
-    @BindView(R.id.buttons)            ViewGroup            mButtons;
-    @BindView(R.id.status_select)      RadioGroup           mStatusSelect;
+    @BindView(R.id.first_name)           EditText             mFirstName;
+    @BindView(R.id.last_name)            EditText             mLastName;
+    @BindView(R.id.entry_simple)         EditText             mEntrySimple;
+    @BindView(R.id.entry_hint)           TextView             mEntryHint;
+    @BindView(R.id.list_entry_hint)      TextView             mListEntryHint;
+    @BindView(R.id.frame_login)          ViewGroup            mLoginFrame;
+    @BindView(R.id.frame_entry)          ViewGroup            mEntryFrame;
+    @BindView(R.id.frame_simple_entry)   ViewGroup            mEntrySimpleFrame;
+    @BindView(R.id.main_list)            RecyclerView         mMainList;
+    @BindView(R.id.main_list_frame)      FrameLayout          mMainListFrame;
+    @BindView(R.id.next)                 Button               mNext;
+    @BindView(R.id.prev)                 Button               mPrev;
+    @BindView(R.id.new_entry)            Button               mCenter;
+    @BindView(R.id.setup_title)          TextView             mTitle;
+    @BindView(R.id.fab_add)              FloatingActionButton mAdd;
+    @BindView(R.id.frame_confirmation)   FrameLayout          mConfirmationFrameView;
+    @BindView(R.id.frame_pictures)       ViewGroup            mPictureFrame;
+    @BindView(R.id.list_pictures)        RecyclerView         mPictureList;
+    @BindView(R.id.empty)                TextView             mEmptyView;
+    @BindView(R.id.root)                 ViewGroup            mRoot;
+    @BindView(R.id.buttons)              ViewGroup            mButtons;
+    @BindView(R.id.status_select)        RadioGroup           mStatusSelect;
+    @BindView(R.id.status_missing_truck) RadioButton          mStatusMissingTruck;
+    @BindView(R.id.status_needs_repair)  RadioButton          mStatusNeedsRepair;
+    @BindView(R.id.status_okay)          RadioButton          mStatusOkay;
 
     Stage              mCurStage           = Stage.LOGIN;
     String             mCurKey             = PrefHelper.KEY_STATE;
@@ -582,6 +587,7 @@ public class MainActivity extends AppCompatActivity {
         mPictureList.setVisibility(View.GONE);
         mEmptyView.setVisibility(View.GONE);
         mListEntryHint.setVisibility(View.GONE);
+        mStatusSelect.setVisibility(View.GONE);
         mCompanyEditing = null;
 
         switch (mCurStage) {
@@ -842,13 +848,18 @@ public class MainActivity extends AppCompatActivity {
             case STATUS:
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
+                mStatusSelect.setVisibility(View.VISIBLE);
+                mTitle.setText(R.string.title_status);
+                setStatusButton();
+                mCurEntry = PrefHelper.getInstance().createEntry(); // Doing this twice. Oh well.
+                showHint();
                 break;
             case CONFIRM:
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
                 mNext.setText(R.string.btn_confirm);
                 mConfirmationFrame.setVisibility(View.VISIBLE);
-                mCurEntry = PrefHelper.getInstance().createEntry();
+                mCurEntry = PrefHelper.getInstance().createEntry(); // Doing this twice. Oh well. I could instead just set the status here.
                 mConfirmationFrame.fill(mCurEntry);
                 mTitle.setText(R.string.title_confirmation);
                 break;
@@ -1048,6 +1059,9 @@ public class MainActivity extends AppCompatActivity {
             case STREET:
                 hint = PrefHelper.getInstance().getAddress();
                 break;
+            case STATUS:
+                hint = mCurEntry.computeStatus().getLongString(this);
+                break;
         }
         if (hint != null) {
             mEntryHint.setText(hint);
@@ -1071,13 +1085,32 @@ public class MainActivity extends AppCompatActivity {
 
     public void onStatusButtonClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
-        switch (view.getId()) {
-            case R.id.status_okay:
-                break;
-            case R.id.status_missing_truck:
-                break;
-            case R.id.status_needs_repair:
-                break;
+        if (checked) {
+            switch (view.getId()) {
+                case R.id.status_okay:
+                    PrefHelper.getInstance().setStatus(TruckStatus.OKAY);
+                    break;
+                case R.id.status_missing_truck:
+                    PrefHelper.getInstance().setStatus(TruckStatus.MISSING_TRUCK);
+                    break;
+                case R.id.status_needs_repair:
+                    PrefHelper.getInstance().setStatus(TruckStatus.NEEDS_REPAIR);
+                    break;
+            }
         }
+    }
+
+    void setStatusButton() {
+        TruckStatus status = PrefHelper.getInstance().getStatus();
+        if (status != null) {
+            if (status == TruckStatus.MISSING_TRUCK) {
+                mStatusMissingTruck.setChecked(true);
+                return;
+            } else if (status == TruckStatus.NEEDS_REPAIR) {
+                mStatusNeedsRepair.setChecked(true);
+                return;
+            }
+        }
+        mStatusOkay.setChecked(true);
     }
 }

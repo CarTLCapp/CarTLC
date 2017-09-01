@@ -1,6 +1,12 @@
-package com.cartlc.tracker.data;
+package com.cartlc.tracker.etc;
 
 import com.cartlc.tracker.app.TBApplication;
+import com.cartlc.tracker.data.DataAddress;
+import com.cartlc.tracker.data.DataNote;
+import com.cartlc.tracker.data.TableAddress;
+import com.cartlc.tracker.data.TableCollectionEquipmentProject;
+import com.cartlc.tracker.data.TableCollectionNoteProject;
+import com.cartlc.tracker.data.TableProjects;
 
 import java.util.Arrays;
 

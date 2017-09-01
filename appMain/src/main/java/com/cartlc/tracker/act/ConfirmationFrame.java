@@ -25,6 +25,7 @@ public class ConfirmationFrame {
     @BindView(R.id.project_name_value)    TextView                    mProjectNameValue;
     @BindView(R.id.truck_number_value)    TextView                    mTruckNumberValue;
     @BindView(R.id.project_address_value) TextView                    mAddressValue;
+    @BindView(R.id.status_value)          TextView                    mStatusValue;
     @BindView(R.id.equipment_grid)        RecyclerView                mEquipmentGrid;
     @BindView(R.id.notes_list)            RecyclerView                mNoteList;
     @BindView(R.id.confirm_pictures_list) RecyclerView                mPictureList;
@@ -32,20 +33,21 @@ public class ConfirmationFrame {
     final                                 SimpleListAdapter           mSimpleAdapter;
     final                                 NoteListAdapter             mNoteAdapter;
     final                                 PictureThumbnailListAdapter mPictureAdapter;
+    final                                 Context                     mCtx;
 
     public ConfirmationFrame(FrameLayout top) {
-        final Context ctx = top.getContext();
+        mCtx = top.getContext();
         mTop = top;
         ButterKnife.bind(this, top);
-        mSimpleAdapter = new SimpleListAdapter(ctx, R.layout.entry_item_confirm);
+        mSimpleAdapter = new SimpleListAdapter(mCtx, R.layout.entry_item_confirm);
         mEquipmentGrid.setAdapter(mSimpleAdapter);
-        GridLayoutManager gridLayout = new GridLayoutManager(ctx, 2);
+        GridLayoutManager gridLayout = new GridLayoutManager(mCtx, 2);
         mEquipmentGrid.setLayoutManager(gridLayout);
-        mNoteAdapter = new NoteListAdapter(ctx);
+        mNoteAdapter = new NoteListAdapter(mCtx);
         mNoteList.setAdapter(mNoteAdapter);
-        mNoteList.setLayoutManager(new LinearLayoutManager(ctx));
-        mPictureAdapter = new PictureThumbnailListAdapter(ctx);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false);
+        mNoteList.setLayoutManager(new LinearLayoutManager(mCtx));
+        mPictureAdapter = new PictureThumbnailListAdapter(mCtx);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mCtx, LinearLayoutManager.HORIZONTAL, false);
         layoutManager.setAutoMeasureEnabled(true);
         mPictureList.setLayoutManager(layoutManager);
         mPictureList.setAdapter(mPictureAdapter);
@@ -79,5 +81,6 @@ public class ConfirmationFrame {
         }
         mSimpleAdapter.setList(entry.getEquipmentNames());
         mPictureAdapter.setList(entry.getPictures());
+        mStatusValue.setText(entry.computeStatus().getString(mCtx));
     }
 }

@@ -12,7 +12,7 @@ import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEquipment;
 import com.cartlc.tracker.data.DataCollectionEquipmentProject;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
-import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 
@@ -21,7 +21,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 /**
  * Created by dug on 5/12/17.

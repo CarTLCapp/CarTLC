@@ -70,6 +70,22 @@
                 android:layout_marginTop="@dimen/confirm_gap_height"
                 android:paddingLeft="@dimen/confirm_gap_left"/>
 
+            <TextView
+                android:id="@+id/status_label"
+                style="@style/ConfirmTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/confirm_gap_height"
+                android:text="@string/title_status"/>
+
+            <TextView
+                android:id="@+id/status_value"
+                style="@style/ConfirmText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_marginTop="@dimen/confirm_gap_height"
+                android:paddingLeft="@dimen/confirm_gap_left"/>
         </GridLayout>
 
         <TextView

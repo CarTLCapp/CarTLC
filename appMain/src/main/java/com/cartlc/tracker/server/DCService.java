@@ -4,7 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 
-import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.etc.PrefHelper;
 
 import timber.log.Timber;
 

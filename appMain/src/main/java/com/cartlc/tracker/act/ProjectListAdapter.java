@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
-import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 
@@ -18,7 +18,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 /**
  * Created by dug on 5/10/17.
