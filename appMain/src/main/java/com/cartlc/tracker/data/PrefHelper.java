@@ -459,49 +459,54 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public String getTruckValue() {
-        String value = getLicensePlate();
-        if (value != null) {
-            return value;
+        String value;
+        String license = getLicensePlate();
+        long number = getTruckNumber();
+        if (TextUtils.isEmpty(license)) {
+            if (number > 0) {
+                value = Long.toString(number);
+            } else {
+                value = "";
+            }
+        } else {
+            if (number > 0) {
+                value = DataTruck.toString(number, license);
+            } else {
+                value = license;
+            }
         }
-        long id = getTruckNumber();
-        if (id == 0) {
-            return "";
+        return value;
+    }
+
+    public void parseTruckValue(String value) {
+        if (value.contains(":")) {
+            String[] ele = value.split(":");
+            if (ele.length >= 2) {
+                setTruckNumber(Integer.parseInt(ele[0].trim()));
+                setLicensePlate(ele[1].trim());
+            } else if (ele.length == 1) {
+                if (TextUtils.isDigitsOnly(ele[0])) {
+                    setTruckNumber(Integer.parseInt(ele[0].trim()));
+                } else {
+                    setLicensePlate(ele[0].trim());
+                }
+            } else {
+                setTruckNumber(0);
+                setLicensePlate(null);
+            }
+        } else if (TextUtils.isDigitsOnly(value)) {
+            setTruckNumber(Long.parseLong(value));
+        } else {
+            setLicensePlate(value);
         }
-        return Long.toString(id);
     }
 
     public String getKeyValue(String key) {
-        if (key.equals(KEY_TRUCK)) {
-            return getTruckValue();
-        }
         return getString(key, null);
     }
 
     public void setKeyValue(String key, String value) {
-        if (key.equals(KEY_TRUCK)) {
-            if (value.contains(":")) {
-                String [] ele = value.split(":");
-                if (ele.length >= 2) {
-                    setTruckNumber(Integer.parseInt(ele[0].trim()));
-                    setLicensePlate(ele[1].trim());
-                } else if (ele.length == 1) {
-                    if (TextUtils.isDigitsOnly(ele[0])) {
-                        setTruckNumber(Integer.parseInt(ele[0].trim()));
-                    } else {
-                        setLicensePlate(ele[0].trim());
-                    }
-                } else {
-                    setTruckNumber(0);
-                    setLicensePlate(null);
-                }
-            } else if (TextUtils.isDigitsOnly(key)) {
-                setTruckNumber(Integer.parseInt(value));
-            } else {
-                setLicensePlate(value);
-            }
-        } else {
-            setString(key, value);
-        }
+        setString(key, value);
     }
 
 }

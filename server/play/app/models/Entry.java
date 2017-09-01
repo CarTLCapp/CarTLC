@@ -25,6 +25,32 @@ public class Entry extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
+    public enum Status {
+        COMPLETE,
+        PARTIAL,
+        MISSING,
+        NEEDS_REPAIR,
+        INVALID;
+
+        public static Status from(int ord) {
+            for (Status value : values()) {
+                if (value.ordinal() == ord) {
+                    return value;
+                }
+            }
+            return Status.INVALID;
+        }
+
+        public static Status from(String match) {
+            for (Status value : values()) {
+                if (value.toString().equals(match)) {
+                    return value;
+                }
+            }
+            return Status.INVALID;
+        }
+    }
+
     @Id
     public Long id;
 
@@ -51,6 +77,9 @@ public class Entry extends com.avaje.ebean.Model {
 
     @Constraints.Required
     public long truck_id;
+
+    @Constraints.Required
+    public Status status;
 
     public static Finder<Long, Entry> find = new Finder<Long, Entry>(Entry.class);
 
@@ -122,6 +151,41 @@ public class Entry extends com.avaje.ebean.Model {
             return "NOT FOUND: " + company_id;
         }
         return company.zipcode;
+    }
+
+    public String getStatus() {
+        String result = getStatus_();
+        if (result == null) {
+            computeStatus();
+        }
+        return getStatus_();
+    }
+
+    String getStatus_() {
+        if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                    return "Complete";
+                case PARTIAL:
+                    return "Partial Install";
+                case MISSING:
+                    return "Missing Truck";
+                case NEEDS_REPAIR:
+                    return "Needs Repair";
+            }
+        }
+        return null;
+    }
+
+    void computeStatus() {
+        List<Equipment> equipments = EntryEquipmentCollection.findEquipments(equipment_collection_id);
+        List<Equipment> equipsExpected = ProjectEquipmentCollection.findEquipments(project_id);
+        List<PictureCollection> pictures = getPictures();
+        if ((equipments.size() >= equipsExpected.size()) && (pictures.size() >= equipsExpected.size())){
+            status = Status.COMPLETE;
+        } else {
+            status = Status.PARTIAL;
+        }
     }
 
     public String getDate() {

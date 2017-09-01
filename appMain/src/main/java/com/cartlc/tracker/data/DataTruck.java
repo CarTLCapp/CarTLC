@@ -37,6 +37,10 @@ public class DataTruck implements Comparable<DataTruck> {
     }
 
     public String toString() {
+        return toString(truckNumber, licensePlateNumber);
+    }
+
+    public static String toString(long truckNumber, String licensePlateNumber) {
         StringBuilder sbuf = new StringBuilder();
         if (truckNumber > 0) {
             sbuf.append(truckNumber);

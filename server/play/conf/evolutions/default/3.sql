@@ -60,7 +60,8 @@ create table entry (
   equipment_collection_id  int,
   note_collection_id       int,
   picture_collection_id    int,
-  truck_id                 int
+  truck_id                 int,
+  status                   smallint
 );
 
 alter table entry add constraint c2_e_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;

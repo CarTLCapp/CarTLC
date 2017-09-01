@@ -92,6 +92,7 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     mListener.textFocused(item);
+                    holder.label.setSelected(true);
                 }
             }
         });

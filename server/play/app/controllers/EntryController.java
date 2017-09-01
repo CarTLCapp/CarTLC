@@ -160,6 +160,10 @@ public class EntryController extends Controller {
         } else {
             entry.project_id = value.longValue();
         }
+        value = json.findValue("status");
+        if (value != null) {
+            entry.status = Entry.Status.from(value.textValue());
+        }
         value = json.findValue("address_id");
         if (value == null) {
             value = json.findValue("address");
@@ -307,7 +311,7 @@ public class EntryController extends Controller {
             return missingRequest(missing);
         }
         entry.save();
-        return ok(Integer.toString(0));
+        return ok(Integer.toString(entry.id));
     }
 
     Result missingRequest(ArrayList<String> missing) {

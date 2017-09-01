@@ -416,14 +416,14 @@ public class MainActivity extends AppCompatActivity {
 //                }
 //            }
         if (inEntry) {
-            boolean hasTruckNumber = !TextUtils.isEmpty(PrefHelper.getInstance().getTruckValue());
+            boolean hasTruck = !TextUtils.isEmpty(PrefHelper.getInstance().getTruckValue());
             boolean hasNotes = mNoteAdapter.hasNotesEntered() && mNoteAdapter.isNotesComplete();
             boolean hasEquip = mEquipmentAdapter.hasChecked();
             boolean hasPictures = TablePictureCollection.getInstance().countPendingPictures() > 0;
 
-            if (!hasTruckNumber && !hasNotes && !hasEquip && !hasPictures) {
+            if (!hasTruck && !hasNotes && !hasEquip && !hasPictures) {
                 mCurStage = Stage.CURRENT_PROJECT;
-            } else if (!hasTruckNumber) {
+            } else if (!hasTruck) {
                 mCurStage = Stage.TRUCK;
             } else if (!hasEquip) {
                 mCurStage = Stage.EQUIPMENT;
@@ -494,11 +494,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return false;
             } else {
-                if (TextUtils.isDigitsOnly(value)) {
-                    PrefHelper.getInstance().setTruckNumber(Long.parseLong(value));
-                } else {
-                    PrefHelper.getInstance().setLicensePlate(value);
-                }
+                PrefHelper.getInstance().parseTruckValue(value);
             }
         } else if (mCurStage == Stage.EQUIPMENT) {
             if (isNext) {
@@ -920,7 +916,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (mCurStage == Stage.COMPANY) {
                 checkEdit();
             } else if (mCurStage == Stage.TRUCK) {
-                mEntrySimple.setText(PrefHelper.getInstance().getTruckValue());
+                mEntrySimple.setText(text);
             }
         }
     }
