@@ -53,6 +53,7 @@
                     <th>Pictures</th>
                     <th>Notes</th>
                     <th>View</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -72,6 +73,7 @@
                         <td><a href="@routes.EntryController.pictures(entry.id)">Pictures</a></td>
                         <td><a href="@routes.EntryController.notes(entry.id)">Notes</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
+                        <td>@entry.getStatusShort()</td>
                     </tr>
                 }
 

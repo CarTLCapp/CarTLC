@@ -58,6 +58,9 @@ public class ClientProjectAssociation extends Model {
         for (Project project : projects) {
             names.add(project.name);
         }
+        if (names.size() == 0) {
+            return Project.listNames();
+        }
         return names;
     }
 

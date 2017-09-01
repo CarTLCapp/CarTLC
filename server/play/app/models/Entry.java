@@ -15,6 +15,7 @@ import com.avaje.ebean.*;
 
 import modules.AmazonHelper;
 import modules.AmazonHelper.OnDownloadComplete;
+import modules.EntryStatus;
 import play.Logger;
 
 /**
@@ -153,39 +154,14 @@ public class Entry extends com.avaje.ebean.Model {
         return company.zipcode;
     }
 
-    public String getStatus() {
-        String result = getStatus_();
-        if (result == null) {
-            computeStatus();
-        }
-        return getStatus_();
+    public String getStatusShort() {
+        EntryStatus status = new EntryStatus(this);
+        return new EntryStatus(this).getShortLine();
     }
 
-    String getStatus_() {
-        if (status != null) {
-            switch (status) {
-                case COMPLETE:
-                    return "Complete";
-                case PARTIAL:
-                    return "Partial Install";
-                case MISSING:
-                    return "Missing Truck";
-                case NEEDS_REPAIR:
-                    return "Needs Repair";
-            }
-        }
-        return null;
-    }
-
-    void computeStatus() {
-        List<Equipment> equipments = EntryEquipmentCollection.findEquipments(equipment_collection_id);
-        List<Equipment> equipsExpected = ProjectEquipmentCollection.findEquipments(project_id);
-        List<PictureCollection> pictures = getPictures();
-        if ((equipments.size() >= equipsExpected.size()) && (pictures.size() >= equipsExpected.size())){
-            status = Status.COMPLETE;
-        } else {
-            status = Status.PARTIAL;
-        }
+    public String getStatusLong() {
+        EntryStatus status = new EntryStatus(this);
+        return new EntryStatus(this).getLongLine();
     }
 
     public String getDate() {

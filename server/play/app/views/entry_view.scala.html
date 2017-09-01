@@ -47,6 +47,10 @@
         </tbody>
     </table>
 
+    <h1 id="statusTitle">Status</h1>
+
+    <p>@Html(HtmlFormat.escape(entry.getStatusLong()).toString.replace("\n", "<br />"))</p>
+
     <h1 id="pictureTitle">Pictures</h1>
 
     <table class="pictures zebra-striped">
