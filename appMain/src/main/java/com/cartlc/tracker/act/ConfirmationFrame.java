@@ -59,7 +59,7 @@ public class ConfirmationFrame {
 
     public void fill(DataEntry entry) {
         mProjectNameValue.setText(entry.getProjectName());
-        String address = entry.getAddressText();
+        String address = entry.getAddressBlock();
         if (TextUtils.isEmpty(address)) {
             mAddressValue.setVisibility(View.GONE);
         } else {

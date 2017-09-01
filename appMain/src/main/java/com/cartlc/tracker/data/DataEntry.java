@@ -1,5 +1,7 @@
 package com.cartlc.tracker.data;
 
+import android.text.TextUtils;
+
 import com.cartlc.tracker.etc.EntryStatus;
 import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventPingDone;
@@ -40,7 +42,7 @@ public class DataEntry {
         return projectAddressCombo.getAddress();
     }
 
-    public String getAddressText() {
+    public String getAddressBlock() {
         DataAddress address = getAddress();
         if (address != null) {
             return address.getBlock();
@@ -48,8 +50,29 @@ public class DataEntry {
         return null;
     }
 
+    public String getAddressLine() {
+        DataAddress address = getAddress();
+        if (address != null) {
+            return address.getLine();
+        }
+        return "Invalid";
+    }
+
     public List<DataNote> getNotes() {
         return TableCollectionNoteEntry.getInstance().query(noteCollectionId);
+    }
+
+    public String getNotesLine() {
+        StringBuilder sbuf = new StringBuilder();
+        for (DataNote note : getNotes()) {
+            if (!TextUtils.isEmpty(note.value)) {
+                if (sbuf.length() > 0) {
+                    sbuf.append(", ");
+                }
+                sbuf.append(note.value);
+            }
+        }
+        return sbuf.toString();
     }
 
     public List<String> getEquipmentNames() {

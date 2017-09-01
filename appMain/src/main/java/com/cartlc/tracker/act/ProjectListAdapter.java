@@ -99,7 +99,6 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         });
     }
 
-
     public void setSelected(DataProjectAddressCombo group) {
         mCurProjectGroupId = group.id;
         PrefHelper.getInstance().setCurrentProjectGroup(group);

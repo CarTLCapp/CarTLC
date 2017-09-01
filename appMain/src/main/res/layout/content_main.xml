@@ -111,15 +111,6 @@
         android:layout_alignRight="@id/main_list_frame"
         android:visibility="gone"/>
 
-    <Button android:id="@+id/view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/main_list_frame"
-            android:layout_alignRight="@id/main_list_frame"
-            android:layout_marginBottom="10dp"
-            android:text="@string/btn_view"
-            android:visibility="gone"/>
-
     <RelativeLayout
         android:id="@+id/frame_pictures"
         android:layout_width="wrap_content"

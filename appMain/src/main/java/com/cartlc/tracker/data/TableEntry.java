@@ -172,6 +172,12 @@ public class TableEntry {
         return query(where, null);
     }
 
+    public List<DataEntry> queryForProjectAddressCombo(long id) {
+        String where = KEY_PROJECT_ADDRESS_COMBO_ID + "=?";
+        String[] whereArgs = new String[]{Long.toString(id)};
+        return query(where, whereArgs);
+    }
+
     List<DataEntry> query(String where, String[] whereArgs) {
         ArrayList<DataEntry> list = new ArrayList();
         try {

@@ -34,6 +34,16 @@
         <item name="android:paddingTop">2dp</item>
         <item name="android:paddingBottom">2dp</item>
     </style>
+    <style name="ProjectFullTextTitle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
+    <style name="ProjectFullTextSub">
+        <item name="android:textSize">17sp</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
     <style name="MessageLine">
         <item name="android:textSize">25sp</item>
         <item name="android:textAllCaps">false</item>

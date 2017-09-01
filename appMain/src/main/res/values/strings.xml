@@ -46,6 +46,7 @@
     <string name="title_picture">Photo</string>
     <string name="title_pictures_">Pictures:</string>
     <string name="title_status">Status</string>
+    <string name="title_activity_list_entries">Project Entries</string>
 
     <string name="error_enter_your_name">Please enter your name</string>
     <string name="error_need_a_truck_number">Need a truck number</string>
@@ -72,4 +73,7 @@
     <string name="status_partial_install">Partial Install</string>
     <string name="status_partial_install_equipments">%1$d of %2$d equipments checked.</string>
     <string name="status_partial_install_pictures">%1$d of %2$d pictures taken.</string>
+    <string name="status_partial_install_equipments2">%1$d of %2$d equipments.</string>
+    <string name="status_partial_install_pictures2">%1$d of %2$d pictures.</string>
+    <string name="status_partial_install_equipment_needed">Needed: </string>
 </resources>

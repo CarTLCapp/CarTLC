@@ -2,6 +2,8 @@ package com.cartlc.tracker.data;
 
 import android.support.annotation.NonNull;
 
+import java.util.List;
+
 import timber.log.Timber;
 
 /**
@@ -9,10 +11,10 @@ import timber.log.Timber;
  */
 
 public class DataProjectAddressCombo implements Comparable<DataProjectAddressCombo> {
-    public long id;
+    public       long id;
     public final long projectNameId;
     public final long addressId;
-    String mProjectName;
+    String      mProjectName;
     DataAddress mAddress;
 
     public DataProjectAddressCombo(long projectNameId, long addressId) {
@@ -51,6 +53,10 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
         return mAddress;
     }
 
+    public List<DataEntry> getEntries() {
+        return TableEntry.getInstance().queryForProjectAddressCombo(id);
+    }
+
     @Override
     public int compareTo(@NonNull DataProjectAddressCombo o) {
         String name = getProjectName();
@@ -69,7 +75,7 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("ID=");
         sbuf.append(projectNameId);
-        sbuf.append(" [" );
+        sbuf.append(" [");
         sbuf.append(getProjectName());
         sbuf.append("] ADDRESS=");
         sbuf.append(addressId);

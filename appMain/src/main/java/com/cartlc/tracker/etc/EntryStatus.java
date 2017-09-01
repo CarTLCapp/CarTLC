@@ -20,21 +20,21 @@ public class EntryStatus {
 
     final DataEntry mEntry;
 
-    boolean isComplete;
-    boolean isCompleteEquip;
-    boolean isCompletePicture;
-    int     countAllEquipment;
-    int     countCheckedEquipment;
-    int     countPictures;
+    boolean             isComplete;
+    boolean             isCompleteEquip;
+    boolean             isCompletePicture;
+    List<DataEquipment> allEquipment;
+    List<DataEquipment> checkedEquipment;
+    int                 countPictures;
 
     public EntryStatus(DataEntry entry) {
         mEntry = entry;
         DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(mEntry.projectAddressCombo.projectNameId);
-        countAllEquipment = removeOther(collection.getEquipment()).size();
-        countCheckedEquipment = removeOther(mEntry.getEquipment()).size();
+        allEquipment = removeOther(collection.getEquipment());
+        checkedEquipment = removeOther(mEntry.getEquipment());
         countPictures = mEntry.getPictures().size();
-        isCompletePicture = countPictures >= countAllEquipment;
-        isCompleteEquip = countCheckedEquipment >= countAllEquipment;
+        isCompletePicture = countPictures >= allEquipment.size();
+        isCompleteEquip = checkedEquipment.size() >= allEquipment.size();
         isComplete = isCompleteEquip && isCompletePicture;
     }
 
@@ -61,11 +61,47 @@ public class EntryStatus {
             sbuf.append(":");
             if (!isCompleteEquip) {
                 sbuf.append("\n");
-                sbuf.append(ctx.getString(R.string.status_partial_install_equipments, countCheckedEquipment, countAllEquipment));
+                sbuf.append(ctx.getString(R.string.status_partial_install_equipments, checkedEquipment.size(), allEquipment.size()));
             }
             if (!isCompletePicture) {
                 sbuf.append("\n");
-                sbuf.append(ctx.getString(R.string.status_partial_install_pictures, countPictures, countAllEquipment));
+                sbuf.append(ctx.getString(R.string.status_partial_install_pictures, countPictures, allEquipment.size()));
+            }
+        }
+        return sbuf.toString();
+    }
+
+    public String getLine(Context ctx) {
+        StringBuilder sbuf = new StringBuilder();
+        if (isComplete) {
+            sbuf.append(ctx.getString(R.string.status_complete));
+        } else {
+            sbuf.append(ctx.getString(R.string.status_partial_install));
+            sbuf.append(": ");
+            if (!isCompleteEquip) {
+                sbuf.append(ctx.getString(R.string.status_partial_install_equipments2, checkedEquipment.size(), allEquipment.size()));
+            }
+            if (!isCompletePicture) {
+                sbuf.append(" ");
+                sbuf.append(ctx.getString(R.string.status_partial_install_pictures2, countPictures, allEquipment.size()));
+            }
+        }
+        return sbuf.toString();
+    }
+
+    public String getEquipmentNeeded() {
+        StringBuilder sbuf = new StringBuilder();
+        if (!isCompleteEquip) {
+            boolean comma = false;
+            for (DataEquipment equipment : allEquipment) {
+                if (!checkedEquipment.contains(equipment)) {
+                    if (comma) {
+                        sbuf.append(", ");
+                    } else {
+                        comma = true;
+                    }
+                    sbuf.append(equipment.name);
+                }
             }
         }
         return sbuf.toString();

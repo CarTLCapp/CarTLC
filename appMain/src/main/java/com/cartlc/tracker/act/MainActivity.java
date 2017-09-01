@@ -99,9 +99,6 @@ public class MainActivity extends AppCompatActivity {
 
         int mInitialHeight;
 
-        void SoftKeyboardDetect() {
-        }
-
         public void clear() {
             mButtons.setVisibility(View.VISIBLE);
         }
@@ -196,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.main_list_frame)      FrameLayout          mMainListFrame;
     @BindView(R.id.next)                 Button               mNext;
     @BindView(R.id.prev)                 Button               mPrev;
-    @BindView(R.id.view)                 Button               mView;
     @BindView(R.id.new_entry)            Button               mCenter;
     @BindView(R.id.main_title)           TextView             mTitle;
     @BindView(R.id.fab_add)              FloatingActionButton mAdd;
@@ -239,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//        mByAddress = getString(R.string.entry_by_address);
         mRoot.getViewTreeObserver().addOnGlobalLayoutListener(mSoftKeyboardDetect);
         mInputMM = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mNext.setOnClickListener(new View.OnClickListener() {
@@ -264,12 +259,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 doBtnNext();
-            }
-        });
-        mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                doBtnView();
             }
         });
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -552,16 +541,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void doPrev_() {
-        mWasNext = false;
-        if (mCurStage == Stage.PROJECT) {
-            PrefHelper.getInstance().recoverProject();
-            mCurStage = Stage.CURRENT_PROJECT;
-        } else if (mCurStage == Stage.STATE) {
-            mCurStage = Stage.COMPANY;
+        if (mCurStage == Stage.CURRENT_PROJECT) {
+            doViewProject();
         } else {
-            mCurStage = Stage.from(mCurStage.ordinal() - 1);
+            mWasNext = false;
+            if (mCurStage == Stage.PROJECT) {
+                PrefHelper.getInstance().recoverProject();
+                mCurStage = Stage.CURRENT_PROJECT;
+            } else if (mCurStage == Stage.STATE) {
+                mCurStage = Stage.COMPANY;
+            } else {
+                mCurStage = Stage.from(mCurStage.ordinal() - 1);
+            }
+            fillStage();
         }
-        fillStage();
     }
 
     void doBtnCenter() {
@@ -569,8 +562,9 @@ public class MainActivity extends AppCompatActivity {
         fillStage();
     }
 
-    void doBtnView() {
-
+    void doViewProject() {
+        Intent intent = new Intent(this, ListEntriesActivity.class);
+        startActivity(intent);
     }
 
     void setStage(Stage stage) {
@@ -591,7 +585,6 @@ public class MainActivity extends AppCompatActivity {
         mCenter.setVisibility(View.INVISIBLE);
         mCenter.setText(R.string.btn_add);
         mPrev.setText(R.string.btn_prev);
-        mView.setVisibility(View.GONE);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         mEntrySimple.removeTextChangedListener(mZipCodeWatcher);
         mConfirmationFrame.setVisibility(View.GONE);
@@ -778,7 +771,8 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().saveProjectAndAddressCombo();
                     showMainListFrame();
                     mCenter.setVisibility(View.VISIBLE);
-                    mView.setVisibility(View.VISIBLE);
+                    mPrev.setVisibility(View.VISIBLE);
+                    mPrev.setText(R.string.btn_view);
                     if (TableProjectAddressCombo.getInstance().count() > 0) {
                         mAdd.setVisibility(View.VISIBLE);
                     }
