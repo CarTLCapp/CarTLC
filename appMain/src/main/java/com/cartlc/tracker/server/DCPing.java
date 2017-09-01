@@ -714,16 +714,13 @@ public class DCPing extends DCPost {
             }
             Timber.i("SENDING " + jsonObject.toString());
             String result = post(ENTER, jsonObject);
-            try {
-                int code = Integer.parseInt(result);
-                if (code == 0) {
-                    TableEntry.getInstance().setUploadedMaster(entry, true);
-                    success = true;
-                    Timber.i("SUCCESS");
-                } else {
-                    Timber.e("While trying to send entry " + entry.id + ": " + code);
-                }
-            } catch (Exception ex) {
+            if (TextUtils.isDigitsOnly(result)) {
+                entry.uploadedMaster = true;
+                entry.server_id = Integer.parseInt(result);
+                TableEntry.getInstance().save(entry);
+                success = true;
+                Timber.i("SUCCESS");
+            } else {
                 Timber.e("While trying to send entry " + entry.id + ": " + result);
             }
         } catch (Exception ex) {

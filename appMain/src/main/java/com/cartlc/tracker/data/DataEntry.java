@@ -21,6 +21,7 @@ public class DataEntry {
     public long                         noteCollectionId;
     public long                         truckId;
     public TruckStatus                  status;
+    public int                          server_id;
     public boolean                      uploadedMaster;
     public boolean                      uploadedAws;
 
@@ -80,7 +81,8 @@ public class DataEntry {
                 return;
             }
         }
-        TableEntry.getInstance().setUploadedAws(this, true);
+        uploadedAws = true;
+        TableEntry.getInstance().save(this);
         EventBus.getDefault().post(new EventPingDone());
     }
 

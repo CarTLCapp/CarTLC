@@ -43,6 +43,7 @@ public class TableEntry {
     static final String KEY_NOTE_COLLECTION_ID       = "note_collection_id";
     static final String KEY_TRUCK_ID                 = "truck_id";
     static final String KEY_STATUS                   = "status";
+    static final String KEY_SERVER_ID                = "server_id";
     static final String KEY_UPLOADED_MASTER          = "uploaded_master";
     static final String KEY_UPLOADED_AWS             = "uploaded_aws";
 
@@ -152,6 +153,8 @@ public class TableEntry {
         sbuf.append(" long, ");
         sbuf.append(KEY_STATUS);
         sbuf.append(" tinyint, ");
+        sbuf.append(KEY_SERVER_ID);
+        sbuf.append(" int, ");
         sbuf.append(KEY_UPLOADED_MASTER);
         sbuf.append(" bit default 0, ");
         sbuf.append(KEY_UPLOADED_AWS);
@@ -182,6 +185,7 @@ public class TableEntry {
             int idxNotetCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
             int idxTruckId = cursor.getColumnIndex(KEY_TRUCK_ID);
             int idxStatus = cursor.getColumnIndex(KEY_STATUS);
+            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER);
             int idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS);
             DataEntry entry;
@@ -200,6 +204,7 @@ public class TableEntry {
                 if (!cursor.isNull(idxStatus)) {
                     entry.status = TruckStatus.from(cursor.getInt(idxStatus));
                 }
+                entry.server_id = cursor.getInt(idxServerId);
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
                 entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
                 list.add(entry);
@@ -355,6 +360,7 @@ public class TableEntry {
             values.put(KEY_TRUCK_ID, entry.truckId);
             values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
             values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollection.id);
+            values.put(KEY_SERVER_ID, entry.server_id);
             if (entry.status != null) {
                 values.put(KEY_STATUS, entry.status.ordinal());
             }
@@ -367,21 +373,15 @@ public class TableEntry {
         }
     }
 
-    public void setUploadedMaster(DataEntry entry, boolean flag) {
-        entry.uploadedMaster = flag;
-        setUploaded(entry, KEY_UPLOADED_MASTER, flag);
-    }
-
-    public void setUploadedAws(DataEntry entry, boolean flag) {
-        entry.uploadedAws = flag;
-        setUploaded(entry, KEY_UPLOADED_AWS, flag);
-    }
-
-    void setUploaded(DataEntry entry, String key, boolean flag) {
+    // Right now only used to update a few fields.
+    // Later this will be extended to save everything.
+    public void save(DataEntry entry) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(key, flag ? 1 : 0);
+            values.put(KEY_SERVER_ID, entry.server_id);
+            values.put(KEY_UPLOADED_AWS, entry.uploadedAws ? 1 : 0);
+            values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster ? 1 : 0);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(entry.id)};
             if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {
