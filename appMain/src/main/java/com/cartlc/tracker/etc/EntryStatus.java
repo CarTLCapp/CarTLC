@@ -3,11 +3,13 @@ package com.cartlc.tracker.etc;
 import android.content.Context;
 
 import com.cartlc.tracker.R;
+import com.cartlc.tracker.act.EquipmentSelectListAdapter;
 import com.cartlc.tracker.data.DataCollectionEquipmentProject;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataEquipment;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,8 +30,8 @@ public class EntryStatus {
     public EntryStatus(DataEntry entry) {
         mEntry = entry;
         DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(mEntry.projectAddressCombo.projectNameId);
-        countAllEquipment = collection.getEquipment().size();
-        countCheckedEquipment = mEntry.getEquipment().size();
+        countAllEquipment = removeOther(collection.getEquipment()).size();
+        countCheckedEquipment = removeOther(mEntry.getEquipment()).size();
         countPictures = mEntry.getPictures().size();
         isCompletePicture = countPictures >= countAllEquipment;
         isCompleteEquip = countCheckedEquipment >= countAllEquipment;
@@ -67,5 +69,18 @@ public class EntryStatus {
             }
         }
         return sbuf.toString();
+    }
+
+    List<DataEquipment> removeOther(List<DataEquipment> list) {
+        ArrayList<DataEquipment> revised = new ArrayList();
+        for (DataEquipment equipment : list) {
+            if (!equipment.isOther()) {
+                revised.add(equipment);
+            }
+        }
+        if (revised.size() != list.size()) {
+            return revised;
+        }
+        return list;
     }
 }

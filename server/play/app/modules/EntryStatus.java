@@ -26,8 +26,8 @@ public class EntryStatus {
 
     public EntryStatus(Entry entry) {
         this.entry = entry;
-        checkedEquipments = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
-        allEquipments = ProjectEquipmentCollection.findEquipments(entry.project_id);
+        checkedEquipments = removeOther(EntryEquipmentCollection.findEquipments(entry.equipment_collection_id));
+        allEquipments = removeOther(ProjectEquipmentCollection.findEquipments(entry.project_id));
         countPictures = entry.getPictures().size();
         completeEquipments = checkedEquipments.size() >= allEquipments.size();
         completePictures = countPictures >= allEquipments.size();
@@ -104,5 +104,18 @@ public class EntryStatus {
         sbuf.append(allEquipments.size());
         sbuf.append(" pictures taken");
         return sbuf.toString();
+    }
+
+    List<Equipment> removeOther(List<Equipment> list) {
+        ArrayList<Equipment> revised = new ArrayList<Equipment>();
+        for (Equipment equipment : list) {
+            if (!equipment.isOther()) {
+                revised.add(equipment);
+            }
+        }
+        if (revised.size() != list.size()) {
+            return revised;
+        }
+        return list;
     }
 }

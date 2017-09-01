@@ -57,4 +57,8 @@ public class DataEquipment implements Comparable<DataEquipment> {
     public boolean equals(DataEquipment item) {
         return name.equals(item.name);
     }
+
+    public boolean isOther() {
+        return name.startsWith("Other");
+    }
 }

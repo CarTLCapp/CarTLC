@@ -175,6 +175,10 @@ public class Equipment extends Model implements Comparable<Equipment> {
         return equipment.disabled;
     }
 
+    public boolean isOther() {
+        return name.startsWith("Other");
+    }
+
     @Override
     public int compareTo(Equipment item) {
         return name.compareTo(item.name);
