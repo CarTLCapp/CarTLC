@@ -17,8 +17,8 @@ import play.Logger;
 public class EntryStatus {
 
     Entry   entry;
-    int     countCheckedEquipments;
-    int     countAllEquipments;
+    List<Equipment> checkedEquipments;
+    List<Equipment> allEquipments;
     int     countPictures;
     boolean complete;
     boolean completePictures;
@@ -26,11 +26,11 @@ public class EntryStatus {
 
     public EntryStatus(Entry entry) {
         this.entry = entry;
-        countCheckedEquipments = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id).size();
-        countAllEquipments = ProjectEquipmentCollection.findEquipments(entry.project_id).size();
+        checkedEquipments = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
+        allEquipments = ProjectEquipmentCollection.findEquipments(entry.project_id);
         countPictures = entry.getPictures().size();
-        completeEquipments = countCheckedEquipments >= countAllEquipments;
-        completePictures = countPictures >= countAllEquipments;
+        completeEquipments = checkedEquipments.size() >= allEquipments.size();
+        completePictures = countPictures >= allEquipments.size();
         complete = completeEquipments && completePictures;
     }
 
@@ -66,14 +66,42 @@ public class EntryStatus {
             sbuf.append("Partial Install");
         }
         sbuf.append("\n");
-        sbuf.append(countCheckedEquipments);
+        sbuf.append(checkedEquipments.size());
         sbuf.append(" of ");
-        sbuf.append(countAllEquipments);
+        sbuf.append(allEquipments.size());
         sbuf.append(" equipments checked.");
+
+        if (!completeEquipments) {
+            sbuf.append("\nEquipments Checked: ");
+            ArrayList<Equipment> unprocessed = new ArrayList<Equipment>();
+            for (Equipment equipment : allEquipments) {
+                unprocessed.add(equipment);
+            }
+            boolean comma = false;
+            for (Equipment equipment : checkedEquipments) {
+                if (comma) {
+                    sbuf.append(", ");
+                } else {
+                    comma = true;
+                }
+                sbuf.append(equipment.name);
+                unprocessed.remove(equipment);
+            }
+            sbuf.append("\nEquipments Still Needed: " );
+            comma = false;
+            for (Equipment equipment : unprocessed) {
+                if (comma) {
+                    sbuf.append(", ");
+                } else {
+                    comma = true;
+                }
+                sbuf.append(equipment.name);
+            }
+        }
         sbuf.append("\n");
         sbuf.append(countPictures);
         sbuf.append(" of ");
-        sbuf.append(countAllEquipments);
+        sbuf.append(allEquipments.size());
         sbuf.append(" pictures taken");
         return sbuf.toString();
     }
