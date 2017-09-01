@@ -79,6 +79,13 @@ public class Equipment extends Model implements Comparable<Equipment> {
                 .findList();
     }
 
+    public static Equipment get(long id) {
+        if (id > 0) {
+            return find.ref(id);
+        }
+        return null;
+    }
+
     public static List<Equipment> findByName(String name) {
         return find.where().eq("name", name).findList();
     }

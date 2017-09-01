@@ -311,7 +311,7 @@ public class EntryController extends Controller {
             return missingRequest(missing);
         }
         entry.save();
-        return ok(Integer.toString(entry.id));
+        return ok(Long.toString(entry.id));
     }
 
     Result missingRequest(ArrayList<String> missing) {

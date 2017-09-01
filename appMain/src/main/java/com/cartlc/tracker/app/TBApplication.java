@@ -60,6 +60,8 @@ public class TBApplication extends Application {
         PermissionHelper.Init();
         AmazonHelper.Init(this);
         BootstrapData.Init();
+
+        PrefHelper.getInstance().detectSpecialUpdateCheck();
     }
 
     public void ping() {

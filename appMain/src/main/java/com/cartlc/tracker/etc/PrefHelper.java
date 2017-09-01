@@ -62,6 +62,7 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_TECH_ID                      = "tech_id";
     static final        String KEY_REGISTRATION_CHANGED         = "registration_changed";
     static final        String KEY_IS_DEVELOPMENT               = "is_development";
+    static final        String KEY_SPECIAL_UPDATE_CHECK         = "special_update_check";
 
     public static final String VERSION_PROJECT   = "version_project";
     public static final String VERSION_COMPANY   = "version_company";
@@ -258,6 +259,14 @@ public class PrefHelper extends PrefHelperBase {
         setVersionProject(VERSION_RESET);
         setVersionNote(VERSION_RESET);
         setVersionCompany(VERSION_RESET);
+    }
+
+    public void detectSpecialUpdateCheck() {
+        int value = getInt(KEY_SPECIAL_UPDATE_CHECK, 0);
+        if (value < 1) {
+            reloadFromServer();
+            setInt(KEY_SPECIAL_UPDATE_CHECK, 1);
+        }
     }
 
     public boolean hasRegistrationChanged() {

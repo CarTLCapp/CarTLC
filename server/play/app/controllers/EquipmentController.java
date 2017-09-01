@@ -238,21 +238,27 @@ public class EquipmentController extends Controller {
         List<Equipment> equipments = Equipment.appList(tech_id);
         List<Long> equipmentIds = new ArrayList<Long>();
         for (Equipment item : equipments) {
-            ObjectNode node = array.addObject();
-            node.put("id", item.id);
-            node.put("name", item.name);
-            if (item.created_by != 0) {
-                node.put("is_local", true);
+            if (!item.disabled) {
+                ObjectNode node = array.addObject();
+                node.put("id", item.id);
+                node.put("name", item.name);
+                if (item.created_by != 0) {
+                    node.put("is_local", true);
+                }
+                equipmentIds.add(item.id);
             }
-            equipmentIds.add(item.id);
         }
         array = top.putArray("project_equipment");
         for (ProjectEquipmentCollection item : ProjectEquipmentCollection.find.all()) {
             if (equipmentIds.contains(item.equipment_id)) {
-                ObjectNode node = array.addObject();
-                node.put("id", item.id);
-                node.put("project_id", item.project_id);
-                node.put("equipment_id", item.equipment_id);
+                Project project = Project.get(item.project_id);
+                Equipment equipment = Equipment.get(item.equipment_id);
+                if (project != null && !project.disabled && equipment != null && !equipment.disabled) {
+                    ObjectNode node = array.addObject();
+                    node.put("id", item.id);
+                    node.put("project_id", item.project_id);
+                    node.put("equipment_id", item.equipment_id);
+                }
             }
         }
         return ok(top);

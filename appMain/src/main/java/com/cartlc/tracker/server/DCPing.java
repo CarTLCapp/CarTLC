@@ -139,23 +139,23 @@ public class DCPing extends DCPost {
                 PrefHelper.getInstance().setVersionProject(version_project);
             }
             if (PrefHelper.getInstance().getVersionCompany() != version_company) {
-                Timber.i("New company version " + version_company);
                 queryCompanies();
+                Timber.i("New company version " + version_company);
                 PrefHelper.getInstance().setVersionCompany(version_company);
             }
             if (PrefHelper.getInstance().getVersionEquipment() != version_equipment) {
-                Timber.i("New equipment version " + version_equipment);
                 queryEquipments();
+                Timber.i("New equipment version " + version_equipment);
                 PrefHelper.getInstance().setVersionEquipment(version_equipment);
             }
             if (PrefHelper.getInstance().getVersionNote() != version_note) {
-                Timber.i("New note version " + version_note);
                 queryNotes();
+                Timber.i("New note version " + version_note);
                 PrefHelper.getInstance().setVersionNote(version_note);
             }
             if (PrefHelper.getInstance().getVersionTruck() != version_truck) {
-                Timber.i("New truck version " + version_truck);
                 queryTrucks();
+                Timber.i("New truck version " + version_truck);
                 PrefHelper.getInstance().setVersionTruck(version_truck);
             }
             List<DataEntry> entries = TableEntry.getInstance().queryPendingDataToUploadToMaster();
@@ -386,16 +386,18 @@ public class DCPing extends DCPost {
                     incoming.server_id = server_id;
                     // Note: project ID is from the perspective of the server, not the APP.
                     DataProject project = TableProjects.getInstance().queryByServerId(server_project_id);
-                    if (project == null) {
-                        Timber.e("Can't find project with ID " + server_project_id);
+                    DataEquipment equipment = TableEquipment.getInstance().queryByServerId(server_equipment_id);
+                    if (project == null || equipment == null) {
+                        if (project == null && equipment == null) {
+                            Timber.e("Can't find any project with server ID " + server_project_id + " nor equipment ID " + server_equipment_id);
+                        } else if (project == null) {
+                            Timber.e("Can't find any project with server ID " + server_project_id + " for equipment " + equipment.name);
+                        } else {
+                            Timber.e("Can't find any equipment with server ID " + server_equipment_id + " for project " + project.name);
+                        }
                         continue;
                     }
                     incoming.collection_id = project.id;
-                    DataEquipment equipment = TableEquipment.getInstance().queryByServerId(server_equipment_id);
-                    if (equipment == null) {
-                        Timber.e("Can't find equipment with ID " + server_equipment_id);
-                        continue;
-                    }
                     incoming.value_id = equipment.id;
                     DataCollectionItem item = TableCollectionEquipmentProject.getInstance().queryByServerId(server_id);
                     if (item == null) {
