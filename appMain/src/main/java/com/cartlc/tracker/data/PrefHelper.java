@@ -37,6 +37,7 @@ public class PrefHelper extends PrefHelperBase {
     static public final String KEY_CITY                         = "city";
     static public final String KEY_ZIPCODE                      = "zipcode";
     static public final String KEY_TRUCK                        = "truck";
+    static public final String KEY_STATUS                       = "status";
     static final        String KEY_CURRENT_PROJECT_GROUP_ID     = "current_project_group_id";
     static final        String KEY_SAVED_PROJECT_GROUP_ID       = "saved_project_group_id";
     static final        String KEY_FIRST_NAME                   = "first_name";

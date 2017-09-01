@@ -31,6 +31,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -165,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
         EQUIPMENT,
         NOTES,
         PICTURE,
+        STATUS,
         CONFIRM,
         ADD_ELEMENT;
 
@@ -201,6 +204,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.empty)              TextView             mEmptyView;
     @BindView(R.id.root)               ViewGroup            mRoot;
     @BindView(R.id.buttons)            ViewGroup            mButtons;
+    @BindView(R.id.status_select)      RadioGroup           mStatusSelect;
 
     Stage              mCurStage           = Stage.LOGIN;
     String             mCurKey             = PrefHelper.KEY_STATE;
@@ -395,26 +399,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             inEntry = true;
         }
-//            if (TextUtils.isEmpty(PrefHelper.getInstance().getZipCode()) &&
-//                    TextUtils.isEmpty(PrefHelper.getInstance().getState()) &&
-//                    TextUtils.isEmpty(PrefHelper.getInstance().getCity()) &&
-//                    TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
-//                mCurStage = Stage.ZIPCODE;
-//            } else {
-//                if (TextUtils.isEmpty(PrefHelper.getInstance().getZipCode())) {
-//                    if (TextUtils.isEmpty(PrefHelper.getInstance().getState())) {
-//                        mCurStage = Stage.STATE;
-//                    } else if (TextUtils.isEmpty(PrefHelper.getInstance().getCity())) {
-//                        mCurStage = Stage.CITY;
-//                    } else if (TextUtils.isEmpty(PrefHelper.getInstance().getStreet())) {
-//                        mCurStage = Stage.STREET;
-//                    } else {
-//                        inEntry = true;
-//                    }
-//                } else {
-//                    inEntry = true;
-//                }
-//            }
         if (inEntry) {
             boolean hasTruck = !TextUtils.isEmpty(PrefHelper.getInstance().getTruckValue());
             boolean hasNotes = mNoteAdapter.hasNotesEntered() && mNoteAdapter.isNotesComplete();
@@ -855,6 +839,10 @@ public class MainActivity extends AppCompatActivity {
                                     TablePictureCollection.getInstance().queryPendingPictures()));
                 }
                 break;
+            case STATUS:
+                mPrev.setVisibility(View.VISIBLE);
+                mNext.setVisibility(View.VISIBLE);
+                break;
             case CONFIRM:
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
@@ -1079,5 +1067,17 @@ public class MainActivity extends AppCompatActivity {
         params.addRule(RelativeLayout.BELOW, below.getId());
         mMainListFrame.setVisibility(View.VISIBLE);
         mMainList.setVisibility(View.VISIBLE);
+    }
+
+    public void onStatusButtonClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+        switch (view.getId()) {
+            case R.id.status_okay:
+                break;
+            case R.id.status_missing_truck:
+                break;
+            case R.id.status_needs_repair:
+                break;
+        }
     }
 }

@@ -13,7 +13,7 @@ import timber.log.Timber;
 public class DatabaseManager {
 
     static final String DATABASE_NAME    = "cartcl.db";
-    static final int    DATABASE_VERSION = 10; // MYDEBUG TODO: bring this back down to 3
+    static final int    DATABASE_VERSION = 3;
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
