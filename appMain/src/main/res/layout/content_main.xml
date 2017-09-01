@@ -19,7 +19,7 @@
         android:src="@drawable/logo"/>
 
     <TextView
-        android:id="@+id/setup_title"
+        android:id="@+id/main_title"
         style="@style/SetupTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -66,7 +66,11 @@
             android:textAllCaps="false"/>
     </LinearLayout>
 
+    <include layout="@layout/frame_login"/>
+
     <include layout="@layout/frame_entry"/>
+
+    <include layout="@layout/frame_status"/>
 
     <include layout="@layout/frame_confirmation"/>
 
@@ -75,7 +79,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/buttons"
-        android:layout_below="@id/setup_title"
+        android:layout_below="@id/main_title"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:layout_marginTop="20dp"
@@ -114,7 +118,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/buttons"
-        android:layout_below="@id/setup_title"
+        android:layout_below="@id/main_title"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:layout_marginLeft="10dp"

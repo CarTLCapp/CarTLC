@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:app="http://schemas.android.com/apk/res-auto"
-             android:id="@+id/frame_entry"
+             android:id="@+id/frame_login"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
              android:layout_below="@id/main_title"
@@ -11,30 +11,32 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="@dimen/setup_frame_width"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_centerHorizontal="true">
 
         <EditText
-            android:id="@+id/entry_simple"
+            android:id="@+id/first_name"
             style="@style/EntryText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:hint="@string/entry_hint_first_name"
             android:inputType="textCapWords"
             android:maxLines="1"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
-        <TextView
-            android:id="@+id/entry_hint"
-            style="@style/HintText"
+        <EditText
+            android:id="@+id/last_name"
+            style="@style/EntryText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:hint="@string/entry_hint_last_name"
+            android:inputType="textCapWords"
+            android:maxLines="1"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/entry_simple"/>
+            app:layout_constraintTop_toBottomOf="@+id/first_name"/>
 
     </android.support.constraint.ConstraintLayout>
 

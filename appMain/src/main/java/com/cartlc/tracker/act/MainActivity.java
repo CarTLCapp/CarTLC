@@ -45,7 +45,6 @@ import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.DataZipCode;
-import com.cartlc.tracker.etc.EntryStatus;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntry;
@@ -91,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case MSG_SET_HINT:
                     mEntryHint.setText(msg.getData().getString(KEY_HINT));
-                    mEntryHint.setVisibility(View.VISIBLE);
                     break;
             }
         }
@@ -190,15 +188,16 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.entry_simple)         EditText             mEntrySimple;
     @BindView(R.id.entry_hint)           TextView             mEntryHint;
     @BindView(R.id.list_entry_hint)      TextView             mListEntryHint;
+    @BindView(R.id.status_hint)          TextView             mStatusHint;
     @BindView(R.id.frame_login)          ViewGroup            mLoginFrame;
     @BindView(R.id.frame_entry)          ViewGroup            mEntryFrame;
-    @BindView(R.id.frame_simple_entry)   ViewGroup            mEntrySimpleFrame;
+    @BindView(R.id.frame_status)         ViewGroup            mStatusFrame;
     @BindView(R.id.main_list)            RecyclerView         mMainList;
     @BindView(R.id.main_list_frame)      FrameLayout          mMainListFrame;
     @BindView(R.id.next)                 Button               mNext;
     @BindView(R.id.prev)                 Button               mPrev;
     @BindView(R.id.new_entry)            Button               mCenter;
-    @BindView(R.id.setup_title)          TextView             mTitle;
+    @BindView(R.id.main_title)           TextView             mTitle;
     @BindView(R.id.fab_add)              FloatingActionButton mAdd;
     @BindView(R.id.frame_confirmation)   FrameLayout          mConfirmationFrameView;
     @BindView(R.id.frame_pictures)       ViewGroup            mPictureFrame;
@@ -284,7 +283,6 @@ public class MainActivity extends AppCompatActivity {
         mPictureList.setLayoutManager(linearLayoutManager);
         mPictureList.setAdapter(mPictureAdapter);
         mNoteAdapter = new NoteListEntryAdapter(this, new NoteListEntryAdapter.EntryListener() {
-
             DataNote currentFocus;
 
             @Override
@@ -570,7 +568,8 @@ public class MainActivity extends AppCompatActivity {
 
     void fillStage() {
         mLoginFrame.setVisibility(View.GONE);
-        mEntrySimpleFrame.setVisibility(View.GONE);
+        mEntryFrame.setVisibility(View.GONE);
+        mStatusFrame.setVisibility(View.GONE);
         mMainListFrame.setVisibility(View.GONE);
         mAdd.setVisibility(View.GONE);
         mNext.setVisibility(View.INVISIBLE);
@@ -581,13 +580,11 @@ public class MainActivity extends AppCompatActivity {
         mPrev.setText(R.string.btn_prev);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         mEntrySimple.removeTextChangedListener(mZipCodeWatcher);
-        mEntryHint.setVisibility(View.GONE);
         mConfirmationFrame.setVisibility(View.GONE);
         mPictureFrame.setVisibility(View.GONE);
         mPictureList.setVisibility(View.GONE);
         mEmptyView.setVisibility(View.GONE);
         mListEntryHint.setVisibility(View.GONE);
-        mStatusSelect.setVisibility(View.GONE);
         mCompanyEditing = null;
 
         switch (mCurStage) {
@@ -619,7 +616,7 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
                     mTitle.setText(R.string.title_company);
-                    mEntrySimpleFrame.setVisibility(View.VISIBLE);
+                    mEntryFrame.setVisibility(View.VISIBLE);
                     mEntrySimple.setHint(R.string.title_company);
                     if (isLocalCompany()) {
                         mCompanyEditing = PrefHelper.getInstance().getCompany();
@@ -641,7 +638,7 @@ public class MainActivity extends AppCompatActivity {
                 PrefHelper.getInstance().setCity(null);
                 PrefHelper.getInstance().setState(null);
                 PrefHelper.getInstance().setZipCode(null);
-                showHint();
+                showEntryHint();
                 final String company = PrefHelper.getInstance().getCompany();
                 List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
                 final boolean hasZipCodes = zipcodes.size() > 0;
@@ -650,7 +647,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (mCurStageEditing) {
                     mTitle.setText(R.string.title_zipcode);
-                    mEntrySimpleFrame.setVisibility(View.VISIBLE);
+                    mEntryFrame.setVisibility(View.VISIBLE);
                     mEntrySimple.setHint(R.string.title_zipcode);
                     mEntrySimple.setText("");
                     mEntrySimple.addTextChangedListener(mZipCodeWatcher);
@@ -664,7 +661,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case STATE: {
-                showHint();
+                showEntryHint();
                 showMainListFrame();
                 mPrev.setVisibility(View.VISIBLE);
                 final String company = PrefHelper.getInstance().getCompany();
@@ -697,7 +694,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case CITY: {
-                showHint();
+                showEntryHint();
                 mPrev.setVisibility(View.VISIBLE);
                 final String company = PrefHelper.getInstance().getCompany();
                 final String zipcode = PrefHelper.getInstance().getZipCode();
@@ -713,7 +710,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 if (mCurStageEditing) {
-                    mEntrySimpleFrame.setVisibility(View.VISIBLE);
+                    mEntryFrame.setVisibility(View.VISIBLE);
                     mTitle.setText(R.string.title_city);
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
@@ -733,7 +730,7 @@ public class MainActivity extends AppCompatActivity {
             }
             case STREET: {
                 mPrev.setVisibility(View.VISIBLE);
-                showHint();
+                showEntryHint();
                 List<String> streets = TableAddress.getInstance().queryStreets(
                         PrefHelper.getInstance().getCompany(),
                         PrefHelper.getInstance().getCity(),
@@ -744,7 +741,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (mCurStageEditing) {
                     mTitle.setText(R.string.title_street);
-                    mEntrySimpleFrame.setVisibility(View.VISIBLE);
+                    mEntryFrame.setVisibility(View.VISIBLE);
                     mEntrySimple.setHint(R.string.title_street);
                     mEntrySimple.setText("");
                     mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
@@ -780,7 +777,7 @@ public class MainActivity extends AppCompatActivity {
             case TRUCK:
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
-                mEntrySimpleFrame.setVisibility(View.VISIBLE);
+                mEntryFrame.setVisibility(View.VISIBLE);
                 mEntrySimple.setHint(R.string.title_truck);
                 mEntrySimple.setText(PrefHelper.getInstance().getTruckValue());
                 mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
@@ -791,7 +788,7 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
-                    mEntrySimpleFrame.setVisibility(View.VISIBLE);
+                    mEntryFrame.setVisibility(View.VISIBLE);
                     mTitle.setText(R.string.title_equipment);
                     mEntrySimple.setHint(R.string.title_equipment);
                     mEntrySimple.setText("");
@@ -835,7 +832,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     mNext.setVisibility(View.VISIBLE);
-                    mNext.setText(R.string.btn_done);
                     mCenter.setVisibility(View.VISIBLE);
                     mCenter.setText(R.string.btn_another);
                     mPictureFrame.setVisibility(View.VISIBLE);
@@ -848,11 +844,12 @@ public class MainActivity extends AppCompatActivity {
             case STATUS:
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
-                mStatusSelect.setVisibility(View.VISIBLE);
+                mNext.setText(R.string.btn_done);
+                mStatusFrame.setVisibility(View.VISIBLE);
                 mTitle.setText(R.string.title_status);
                 setStatusButton();
                 mCurEntry = PrefHelper.getInstance().createEntry(); // Doing this twice. Oh well.
-                showHint();
+                showStatusHint();
                 break;
             case CONFIRM:
                 mPrev.setVisibility(View.VISIBLE);
@@ -1050,7 +1047,7 @@ public class MainActivity extends AppCompatActivity {
         return zipCode != null && zipCode.length() == 5 && zipCode.matches("^[0-9]*$");
     }
 
-    void showHint() {
+    void showEntryHint() {
         String hint = null;
         switch (mCurStage) {
             case ZIPCODE:
@@ -1065,7 +1062,18 @@ public class MainActivity extends AppCompatActivity {
         }
         if (hint != null) {
             mEntryHint.setText(hint);
-            mEntryHint.setVisibility(View.VISIBLE);
+        }
+    }
+
+    void showStatusHint() {
+        String hint = null;
+        switch (mCurStage) {
+            case STATUS:
+                hint = mCurEntry.computeStatus().getLongString(this);
+                break;
+        }
+        if (hint != null) {
+            mStatusHint.setText(hint);
         }
     }
 

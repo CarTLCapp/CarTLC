@@ -5,7 +5,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@id/buttons"
-            android:layout_below="@id/setup_title"
+            android:layout_below="@id/main_title"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:visibility="gone">

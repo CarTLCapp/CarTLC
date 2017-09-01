@@ -75,6 +75,7 @@ public class TableCollectionNoteEntry {
         List<DataNote> notes = TableCollectionNoteProject.getInstance().getNotes(projectNameId);
         mDb.beginTransaction();
         try {
+            removeCollection(collectionId);
             ContentValues values = new ContentValues();
             for (DataNote note : notes) {
                 if (!TextUtils.isEmpty(note.value)) {
@@ -116,6 +117,12 @@ public class TableCollectionNoteEntry {
             Timber.e(ex);
         }
         return list;
+    }
+
+    void removeCollection(long collection_id) {
+        String where = KEY_COLLECTION_ID + "=?";
+        String[] whereArgs = {Long.toString(collection_id)};
+        mDb.delete(TABLE_NAME, where, whereArgs);
     }
 
 }
