@@ -8,6 +8,7 @@ import play.data.format.*;
 import play.data.validation.*;
 
 import com.avaje.ebean.*;
+import modules.DataErrorException;
 
 /**
  * Company entity managed by Ebean

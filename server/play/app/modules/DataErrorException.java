@@ -1,4 +1,4 @@
-package models;
+package modules;
 
 import java.util.*;
 import javax.persistence.*;
