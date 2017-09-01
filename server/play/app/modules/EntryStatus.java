@@ -63,7 +63,7 @@ public class EntryStatus {
         if (complete) {
             sbuf.append("Complete");
         } else {
-            sbuf.append("Partial Install");
+            sbuf.append("Partial Install:");
         }
         sbuf.append("\n");
         sbuf.append(checkedEquipments.size());

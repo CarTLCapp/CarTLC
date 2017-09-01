@@ -12,6 +12,7 @@
     <string name="btn_new_project">New Project</string>
     <string name="btn_confirm">Confirm</string>
     <string name="btn_reject">Reject</string>
+    <string name="btn_view">View</string>
 
     <string name="entry_hint_last_name">Last Name</string>
     <string name="entry_hint_first_name">First Name</string>

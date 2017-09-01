@@ -196,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.main_list_frame)      FrameLayout          mMainListFrame;
     @BindView(R.id.next)                 Button               mNext;
     @BindView(R.id.prev)                 Button               mPrev;
+    @BindView(R.id.view)                 Button               mView;
     @BindView(R.id.new_entry)            Button               mCenter;
     @BindView(R.id.main_title)           TextView             mTitle;
     @BindView(R.id.fab_add)              FloatingActionButton mAdd;
@@ -265,6 +266,12 @@ public class MainActivity extends AppCompatActivity {
                 doBtnNext();
             }
         });
+        mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doBtnView();
+            }
+        });
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mMainList.setLayoutManager(linearLayoutManager);
         mDivider = new DividerItemDecoration(mMainList.getContext(), linearLayoutManager.getOrientation());
@@ -299,19 +306,21 @@ public class MainActivity extends AppCompatActivity {
             }
 
             void display(DataNote note) {
-                if (note.num_digits > 0) {
-                    if (note.value.length() > 0) {
-                        StringBuilder sbuf = new StringBuilder();
-                        sbuf.append(note.value.length());
-                        sbuf.append("/");
-                        sbuf.append(note.num_digits);
-                        mListEntryHint.setText(sbuf.toString());
+                if (mCurStage == Stage.NOTES) {
+                    if (note.num_digits > 0) {
+                        if (note.value.length() > 0) {
+                            StringBuilder sbuf = new StringBuilder();
+                            sbuf.append(note.value.length());
+                            sbuf.append("/");
+                            sbuf.append(note.num_digits);
+                            mListEntryHint.setText(sbuf.toString());
+                        } else {
+                            mListEntryHint.setText("");
+                        }
+                        mListEntryHint.setVisibility(View.VISIBLE);
                     } else {
-                        mListEntryHint.setText("");
+                        mListEntryHint.setVisibility(View.GONE);
                     }
-                    mListEntryHint.setVisibility(View.VISIBLE);
-                } else {
-                    mListEntryHint.setVisibility(View.GONE);
                 }
             }
         });
@@ -560,6 +569,10 @@ public class MainActivity extends AppCompatActivity {
         fillStage();
     }
 
+    void doBtnView() {
+
+    }
+
     void setStage(Stage stage) {
         save(false);
         mCurStage = stage;
@@ -578,6 +591,7 @@ public class MainActivity extends AppCompatActivity {
         mCenter.setVisibility(View.INVISIBLE);
         mCenter.setText(R.string.btn_add);
         mPrev.setText(R.string.btn_prev);
+        mView.setVisibility(View.GONE);
         mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         mEntrySimple.removeTextChangedListener(mZipCodeWatcher);
         mConfirmationFrame.setVisibility(View.GONE);
@@ -764,6 +778,7 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().saveProjectAndAddressCombo();
                     showMainListFrame();
                     mCenter.setVisibility(View.VISIBLE);
+                    mView.setVisibility(View.VISIBLE);
                     if (TableProjectAddressCombo.getInstance().count() > 0) {
                         mAdd.setVisibility(View.VISIBLE);
                     }
