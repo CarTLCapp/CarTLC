@@ -98,6 +98,7 @@ public class TableCollectionNoteEntry {
         TableNote.getInstance().clearValues();
         List<DataNote> notes = query(collectionId);
         for (DataNote note : notes) {
+            Timber.i("MYDEBUG: NOTE VALUE UPDATE FOR " + note.toString());
             TableNote.getInstance().updateValue(note);
         }
     }

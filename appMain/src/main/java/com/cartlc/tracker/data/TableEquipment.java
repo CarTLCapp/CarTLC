@@ -270,7 +270,7 @@ public class TableEquipment {
                 ContentValues values = new ContentValues();
                 String where = KEY_ROWID + "=?";
                 String[] whereArgs = {Long.toString(id)};
-                values.put(KEY_CHECKED, 0);
+                values.put(KEY_CHECKED, 1);
                 mDb.update(TABLE_NAME, values, where, whereArgs);
             }
             mDb.setTransactionSuccessful();

@@ -25,9 +25,8 @@ public class DataPicture {
     public String  note;
     public boolean uploaded;
 
-    File  unscaledFile;
-    File  scaledFile;
-//    int[] imgSize;
+    File unscaledFile;
+    File scaledFile;
 
     public DataPicture() {
     }
@@ -59,11 +58,8 @@ public class DataPicture {
         return getUnscaledFile().exists();
     }
 
-    public Uri getUnscaledUri(Context ctx) {
-        if (!existsUnscaled()) {
-            return null;
-        }
-        return TBApplication.getUri(ctx, getUnscaledFile());
+    public boolean existsScaled() {
+        return getScaledFile().exists();
     }
 
     public void remove() {
@@ -73,6 +69,7 @@ public class DataPicture {
         }
     }
 
+    // Warning: will create the scaled file if it does not yet exist.
     public File getScaledFile() {
         if (scaledFilename == null) {
             scaledFilename = BitmapHelper.createScaled(getUnscaledFile());

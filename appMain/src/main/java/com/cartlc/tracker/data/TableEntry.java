@@ -369,10 +369,11 @@ public class TableEntry {
             TableCollectionEquipmentEntry.getInstance().add(entry.equipmentCollection);
             TablePictureCollection.getInstance().add(entry.pictureCollection);
 
-            PrefHelper.getInstance().incNextEquipmentCollectionID();
-            PrefHelper.getInstance().incNextPictureCollectionID();
-            PrefHelper.getInstance().incNextNoteCollectionID();
-
+            if (entry.id == 0) {
+                PrefHelper.getInstance().incNextEquipmentCollectionID();
+                PrefHelper.getInstance().incNextPictureCollectionID();
+                PrefHelper.getInstance().incNextNoteCollectionID();
+            }
             ContentValues values = new ContentValues();
             values.clear();
             values.put(KEY_DATE, entry.date);
@@ -385,7 +386,17 @@ public class TableEntry {
             if (entry.status != null) {
                 values.put(KEY_STATUS, entry.status.ordinal());
             }
-            mDb.insert(TABLE_NAME, null, values);
+            boolean insert = true;
+            if (entry.id > 0) {
+                String where = KEY_ROWID + "=?";
+                String[] whereArgs = {Long.toString(entry.id)};
+                if (mDb.update(TABLE_NAME, values, where, whereArgs) != 0) {
+                    insert = false;
+                }
+            }
+            if (insert) {
+                mDb.insert(TABLE_NAME, null, values);
+            }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
             Timber.e(ex);

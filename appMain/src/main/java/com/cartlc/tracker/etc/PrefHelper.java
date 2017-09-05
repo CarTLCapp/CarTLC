@@ -43,28 +43,29 @@ public class PrefHelper extends PrefHelperBase {
         new PrefHelper(ctx);
     }
 
-    static public final String KEY_PROJECT                      = "project";
-    static public final String KEY_COMPANY                      = "company";
-    static public final String KEY_STREET                       = "street";
-    static public final String KEY_STATE                        = "state";
-    static public final String KEY_CITY                         = "city";
-    static public final String KEY_ZIPCODE                      = "zipcode";
-    static public final String KEY_TRUCK                        = "truck";
-    static public final String KEY_STATUS                       = "status";
-    static final        String KEY_CURRENT_PROJECT_GROUP_ID     = "current_project_group_id";
-    static final        String KEY_SAVED_PROJECT_GROUP_ID       = "saved_project_group_id";
-    static final        String KEY_FIRST_NAME                   = "first_name";
-    static final        String KEY_LAST_NAME                    = "last_name";
-    static final        String KEY_TRUCK_NUMBER                 = "truck_number";
-    static final        String KEY_LICENSE_PLATE                = "license_plate";
-    static final        String KEY_EDIT_ENTRY_ID                = "edit_id";
-    static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
-    static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
-    static final        String KEY_NEXT_NOTE_COLLECTION_ID      = "next_note_collection_id";
-    static final        String KEY_TECH_ID                      = "tech_id";
-    static final        String KEY_REGISTRATION_CHANGED         = "registration_changed";
-    static final        String KEY_IS_DEVELOPMENT               = "is_development";
-    static final        String KEY_SPECIAL_UPDATE_CHECK         = "special_update_check";
+    static public final String KEY_PROJECT                       = "project";
+    static public final String KEY_COMPANY                       = "company";
+    static public final String KEY_STREET                        = "street";
+    static public final String KEY_STATE                         = "state";
+    static public final String KEY_CITY                          = "city";
+    static public final String KEY_ZIPCODE                       = "zipcode";
+    static public final String KEY_TRUCK                         = "truck";
+    static public final String KEY_STATUS                        = "status";
+    static final        String KEY_CURRENT_PROJECT_GROUP_ID      = "current_project_group_id";
+    static final        String KEY_SAVED_PROJECT_GROUP_ID        = "saved_project_group_id";
+    static final        String KEY_FIRST_NAME                    = "first_name";
+    static final        String KEY_LAST_NAME                     = "last_name";
+    static final        String KEY_TRUCK_NUMBER                  = "truck_number";
+    static final        String KEY_LICENSE_PLATE                 = "license_plate";
+    static final        String KEY_EDIT_ENTRY_ID                 = "edit_id";
+    static final        String KEY_NEXT_PICTURE_COLLECTION_ID    = "next_picture_collection_id";
+    static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID  = "next_equipment_collection_id";
+    static final        String KEY_NEXT_NOTE_COLLECTION_ID       = "next_note_collection_id";
+    static final        String KEY_CURRENT_PICTURE_COLLECTION_ID = "picture_collection_id";
+    static final        String KEY_TECH_ID                       = "tech_id";
+    static final        String KEY_REGISTRATION_CHANGED          = "registration_changed";
+    static final        String KEY_IS_DEVELOPMENT                = "is_development";
+    static final        String KEY_SPECIAL_UPDATE_CHECK          = "special_update_check";
 
     public static final String VERSION_PROJECT   = "version_project";
     public static final String VERSION_COMPANY   = "version_company";
@@ -158,6 +159,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setSavedProjectGroupId(long id) {
         setLong(KEY_SAVED_PROJECT_GROUP_ID, id);
+    }
+
+    public void setCurrentPictureCollectionId(long id) {
+        setLong(KEY_CURRENT_PICTURE_COLLECTION_ID, id);
+    }
+
+    public long getCurrentPictureCollectionId() {
+        return getLong(KEY_CURRENT_PICTURE_COLLECTION_ID, 0);
     }
 
     public void setFirstName(String name) {
@@ -256,6 +265,14 @@ public class PrefHelper extends PrefHelperBase {
         return TruckStatus.from(getInt(KEY_STATUS, TruckStatus.OKAY.ordinal()));
     }
 
+    public void setCurrentEditEntryId(long id) {
+        setLong(KEY_EDIT_ENTRY_ID, id);
+    }
+
+    public long getCurrentEditEntryId() {
+        return getLong(KEY_EDIT_ENTRY_ID, 0);
+    }
+
     public void reloadFromServer() {
         setVersionEquipment(VERSION_RESET);
         setVersionProject(VERSION_RESET);
@@ -332,22 +349,24 @@ public class PrefHelper extends PrefHelperBase {
         setTruckNumber(0);
         setLicensePlate(null);
         setStatus(null);
+        setCurrentEditEntryId(0);
+        setCurrentPictureCollectionId(0);
         TablePictureCollection.getInstance().clearPendingPictures();
         TableNote.getInstance().clearValues();
         TableEquipment.getInstance().clearChecked();
     }
 
-    public boolean hasCurProject() {
-        long projectGroupId = getCurrentProjectGroupId();
-        if (projectGroupId < 0) {
-            return false;
-        }
-        DataProjectAddressCombo projectGroup = TableProjectAddressCombo.getInstance().query(projectGroupId);
-        if (projectGroup == null) {
-            return false;
-        }
-        return true;
-    }
+//    public boolean hasCurProject() {
+//        long projectGroupId = getCurrentProjectGroupId();
+//        if (projectGroupId < 0) {
+//            return false;
+//        }
+//        DataProjectAddressCombo projectGroup = TableProjectAddressCombo.getInstance().query(projectGroupId);
+//        if (projectGroup == null) {
+//            return false;
+//        }
+//        return true;
+//    }
 
     public boolean saveProjectAndAddressCombo() {
         String project = getProjectName();
@@ -449,8 +468,9 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public void setFromEntry(DataEntry entry) {
-        setLong(KEY_EDIT_ENTRY_ID, entry.id);
+        setCurrentEditEntryId(entry.id);
         setCurrentProjectGroupId(entry.projectAddressCombo.id);
+        setCurrentPictureCollectionId(entry.pictureCollection.id);
         entry.equipmentCollection.setChecked();
         DataTruck truck = entry.getTruck();
         if (truck != null) {
@@ -461,17 +481,20 @@ public class PrefHelper extends PrefHelperBase {
         entry.fillNotes();
     }
 
-    public void saveEntry() {
-        DataEntry entry = TableEntry.getInstance().query(getLong(KEY_EDIT_ENTRY_ID, 0));
-        if (entry != null) {
-            entry.equipmentCollection.addChecked();
-            DataTruck truck = entry.getTruck();
-            truck.truckNumber = (int) getTruckNumber();
-            truck.licensePlateNumber = getLicensePlate();
-            TableTruck.getInstance().save(truck);
-            entry.status = getStatus();
-            entry.saveNotes();
+    public DataEntry saveEntry() {
+        DataEntry entry = TableEntry.getInstance().query(getCurrentEditEntryId());
+        if (entry == null) {
+            return createEntry();
         }
+        entry.equipmentCollection.addChecked();
+        DataTruck truck = entry.getTruck();
+        truck.truckNumber = (int) getTruckNumber();
+        truck.licensePlateNumber = getLicensePlate();
+        TableTruck.getInstance().save(truck);
+        entry.status = getStatus();
+        entry.uploadedMaster = false;
+        entry.saveNotes();
+        return entry;
     }
 
     public String genPictureFilename() {

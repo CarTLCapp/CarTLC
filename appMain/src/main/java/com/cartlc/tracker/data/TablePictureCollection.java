@@ -83,10 +83,10 @@ public class TablePictureCollection {
         }
     }
 
-    public DataPicture add(File picture) {
+    public DataPicture add(File picture, Long collection_id) {
         DataPicture item = new DataPicture();
         item.unscaledFilename = picture.getAbsolutePath();
-        update(item, null);
+        update(item, collection_id);
         return item;
     }
 
@@ -112,9 +112,10 @@ public class TablePictureCollection {
         return collection;
     }
 
-    public List<DataPicture> queryPendingPictures() {
-        final String selection = KEY_COLLECTION_ID + "=0";
-        return query(selection, null);
+    public List<DataPicture> queryPictures(long collection_id) {
+        final String selection = KEY_COLLECTION_ID + "=?";
+        final String[] selectionArgs = {Long.toString(collection_id)};
+        return query(selection, selectionArgs);
     }
 
     public List<DataPicture> query(String selection, String[] selectionArgs) {
@@ -138,15 +139,20 @@ public class TablePictureCollection {
         } catch (Exception ex) {
             Timber.e(ex);
         }
+        for (DataPicture picture : list) {
+            Timber.d("MYDEBUG: STORED PICTURE " + picture.toString());
+        }
         return list;
     }
 
     public List<DataPicture> removeNonExistant(List<DataPicture> list) {
         List<DataPicture> filtered = new ArrayList();
         for (DataPicture item : list) {
-            if (item.existsUnscaled()) {
+            if (item.existsUnscaled() || item.existsScaled()) {
+                Timber.d("MYDEBUG: keeping file" + item.toString());
                 filtered.add(item);
             } else {
+                Timber.d("MYDEBUG: ignoring non existent file: " + item.toString());
                 remove(item);
             }
         }
@@ -164,21 +170,38 @@ public class TablePictureCollection {
         }
     }
 
-    public int countPendingPictures() {
+    public int countPictures(long collection_id) {
         int count = 0;
         try {
-            final String[] columns = {KEY_ROWID, KEY_PICTURE_FILENAME};
-            final String selection = KEY_COLLECTION_ID + " =0";
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, null, null, null, null, null);
+            final String[] columns = {KEY_ROWID, KEY_PICTURE_FILENAME, KEY_UPLOADING_FILENAME};
+            final String selection = KEY_COLLECTION_ID + "=?";
+            final String[] selectionArgs = {Long.toString(collection_id)};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
             int idxPicture = cursor.getColumnIndex(KEY_PICTURE_FILENAME);
+            int idxUploading = cursor.getColumnIndex(KEY_UPLOADING_FILENAME);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             ArrayList<Long> delete = new ArrayList();
+            Timber.d("MYDEBUG: COUNT FOR " + collection_id + " RAW=" + cursor.getCount());
             while (cursor.moveToNext()) {
-                String filename = cursor.getString(idxPicture);
-                File file = new File(filename);
-                if (file.exists()) {
-                    count++;
+                String unscaled = cursor.getString(idxPicture);
+                String uploading = cursor.getString(idxUploading);
+                File unscaledFile;
+                File uploadingFile;
+                if (unscaled != null) {
+                    unscaledFile = new File(unscaled);
                 } else {
+                    unscaledFile = null;
+                }
+                if (uploading != null) {
+                    uploadingFile = new File(uploading);
+                } else {
+                    uploadingFile = null;
+                }
+                if ((unscaledFile != null && unscaledFile.exists()) || (uploadingFile != null && uploadingFile.exists())) {
+                    count++;
+                    Timber.d("MYDEBUG: count now " + count);
+                } else {
+                    Timber.d("MYDEBUG: deleting during count");
                     delete.add(cursor.getLong(idxRowId));
                 }
             }
@@ -198,7 +221,7 @@ public class TablePictureCollection {
     public DataPictureCollection createCollectionFromPending() {
         DataPictureCollection collection = new DataPictureCollection(
                 PrefHelper.getInstance().getNextPictureCollectionID());
-        collection.pictures = removeNonExistant(queryPendingPictures());
+        collection.pictures = removeNonExistant(queryPictures(0));
         return collection;
     }
 
@@ -237,6 +260,7 @@ public class TablePictureCollection {
             values.put(KEY_UPLOADED, item.uploaded ? 1 : 0);
             if (collection_id != null) {
                 values.put(KEY_COLLECTION_ID, collection_id);
+                Timber.i("MYDEBUG: updated " + item.toString() + " on " + collection_id);
             }
             if (item.id > 0) {
                 String where = KEY_ROWID + "=?";

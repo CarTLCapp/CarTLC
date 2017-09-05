@@ -127,6 +127,7 @@ public abstract class TableCollection {
 
     public void add(long collectionId, long valueId) {
         mDb.beginTransaction();
+        removeByCollectionId(collectionId);
         try {
             ContentValues values = new ContentValues();
             values.clear();
@@ -266,6 +267,15 @@ public abstract class TableCollection {
         }
     }
 
+    public void removeByCollectionId(long id) {
+        try {
+            String where = KEY_COLLECTION_ID + "=?";
+            String[] whereArgs = new String[]{Long.toString(id)};
+            mDb.delete(mTableName, where, whereArgs);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
 
     public void clearUploaded() {
         mDb.beginTransaction();

@@ -47,11 +47,11 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
         void onSelected(DataEntry entry);
     }
 
-    final Context mContext;
+    final Context                mContext;
     final OnItemSelectedListener mListener;
     List<DataEntry> mItems;
     HashMap<Long, EntryStatus> mStatusMap = new HashMap();
-    DataEntry mSelected;
+    int mSelectedPos;
 
     public EntryListAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;
@@ -73,7 +73,6 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
         holder.status.setText(getStatus(item).getLine(mContext));
         holder.notes.setText(item.getNotesLine());
         holder.equipments.setText(getEquipmentNeeded(item));
-
         if (TextUtils.isEmpty(holder.notes.getText().toString().trim())) {
             holder.notes.setVisibility(View.GONE);
         } else {
@@ -82,12 +81,19 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSelected = item;
+                mSelectedPos = position;
                 if (mListener != null) {
                     mListener.onSelected(item);
                 }
+                notifyDataSetChanged();
             }
         });
+        if (mSelectedPos == position) {
+            mSelectedPos = position;
+            holder.itemView.setBackgroundResource(R.color.project_highlight);
+        } else {
+            holder.itemView.setBackgroundResource(R.color.project_normal);
+        }
     }
 
     EntryStatus getStatus(DataEntry item) {

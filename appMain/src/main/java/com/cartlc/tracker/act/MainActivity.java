@@ -70,6 +70,7 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_EDIT_ENTRY    = 2;
 
     static final int AUTO_RETURN_DELAY_MS = 100;
     static final int MSG_AUTO_RETURN      = 0;
@@ -258,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
         mAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                doBtnNext();
+                doBtnAdd();
             }
         });
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -404,8 +405,7 @@ public class MainActivity extends AppCompatActivity {
             boolean hasTruck = !TextUtils.isEmpty(PrefHelper.getInstance().getTruckValue());
             boolean hasNotes = mNoteAdapter.hasNotesEntered() && mNoteAdapter.isNotesComplete();
             boolean hasEquip = mEquipmentAdapter.hasChecked();
-            boolean hasPictures = TablePictureCollection.getInstance().countPendingPictures() > 0;
-
+            boolean hasPictures = TablePictureCollection.getInstance().countPictures(PrefHelper.getInstance().getCurrentPictureCollectionId()) > 0;
             if (!hasTruck && !hasNotes && !hasEquip && !hasPictures) {
                 mCurStage = Stage.CURRENT_PROJECT;
             } else if (!hasTruck) {
@@ -523,6 +523,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void doBtnAdd() {
+        if (PrefHelper.getInstance().getCurrentEditEntryId() != 0) {
+            PrefHelper.getInstance().clearLastEntry();
+        }
+        doBtnNext();
+    }
+
     void doBtnNext() {
         if (save(true)) {
             doNext_();
@@ -564,7 +571,7 @@ public class MainActivity extends AppCompatActivity {
 
     void doViewProject() {
         Intent intent = new Intent(this, ListEntriesActivity.class);
-        startActivityForResult(intent, 0);
+        startActivityForResult(intent, REQUEST_EDIT_ENTRY);
     }
 
     void setStage(Stage stage) {
@@ -592,6 +599,7 @@ public class MainActivity extends AppCompatActivity {
         mPictureList.setVisibility(View.GONE);
         mEmptyView.setVisibility(View.GONE);
         mListEntryHint.setVisibility(View.GONE);
+        mEntryHint.setVisibility(View.GONE);
         mCompanyEditing = null;
 
         switch (mCurStage) {
@@ -827,7 +835,9 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case PICTURE:
-                int numberTaken = TablePictureCollection.getInstance().countPendingPictures();
+                long picture_collection_id = PrefHelper.getInstance().getCurrentPictureCollectionId();
+                Timber.i("MYDEBUG: CURRENT PICTURE COLLECTION ID=" + picture_collection_id);
+                int numberTaken = TablePictureCollection.getInstance().countPictures(picture_collection_id);
                 StringBuilder sbuf = new StringBuilder();
                 sbuf.append(getString(R.string.title_picture));
                 sbuf.append(" ");
@@ -847,7 +857,7 @@ public class MainActivity extends AppCompatActivity {
                     mPictureList.setVisibility(View.VISIBLE);
                     mPictureAdapter.setList(
                             TablePictureCollection.getInstance().removeNonExistant(
-                                    TablePictureCollection.getInstance().queryPendingPictures()));
+                                    TablePictureCollection.getInstance().queryPictures(picture_collection_id)));
                 }
                 break;
             case STATUS:
@@ -857,7 +867,8 @@ public class MainActivity extends AppCompatActivity {
                 mStatusFrame.setVisibility(View.VISIBLE);
                 mTitle.setText(R.string.title_status);
                 setStatusButton();
-                mCurEntry = PrefHelper.getInstance().createEntry(); // Doing this twice. Oh well.
+                // Doing this twice. Oh well. (Once here and in confirm). But need to compute the status from something real.
+                mCurEntry = PrefHelper.getInstance().saveEntry();
                 showStatusHint();
                 break;
             case CONFIRM:
@@ -865,7 +876,7 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 mNext.setText(R.string.btn_confirm);
                 mConfirmationFrame.setVisibility(View.VISIBLE);
-                mCurEntry = PrefHelper.getInstance().createEntry(); // Doing this twice. Oh well. I could instead just set the status here.
+                mCurEntry = PrefHelper.getInstance().saveEntry();
                 mConfirmationFrame.fill(mCurEntry);
                 mTitle.setText(R.string.title_confirmation);
                 break;
@@ -930,7 +941,8 @@ public class MainActivity extends AppCompatActivity {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File pictureFile = PrefHelper.getInstance().genFullPictureFile();
-            TablePictureCollection.getInstance().add(pictureFile);
+            TablePictureCollection.getInstance().add(pictureFile, PrefHelper.getInstance().getCurrentPictureCollectionId());
+            Timber.i("MYDEBUG: DISPATCH =" + PrefHelper.getInstance().getCurrentPictureCollectionId() + " FILE=" + pictureFile.toString());
             Uri pictureUri = TBApplication.getUri(this, pictureFile);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
             // Grant permissions
@@ -948,8 +960,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            fillStage();
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                fillStage();
+            } else if (requestCode == REQUEST_EDIT_ENTRY) {
+                mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() + 1);
+                fillStage();
+            }
         }
     }
 
@@ -1071,6 +1088,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (hint != null) {
             mEntryHint.setText(hint);
+            mEntryHint.setVisibility(View.VISIBLE);
         }
     }
 

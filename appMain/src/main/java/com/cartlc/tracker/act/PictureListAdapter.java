@@ -1,9 +1,11 @@
 package com.cartlc.tracker.act;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.cartlc.tracker.R;
+import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataPicture;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
@@ -137,7 +139,15 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
                 mHandler.sendEmptyMessageDelayed(MSG_DECREASE_SIZE, DELAY_DECREASE_SIZE);
             }
         });
-        if (!item.existsUnscaled()) {
+        File pictureFile;
+        if (item.existsUnscaled()) {
+            pictureFile = item.getUnscaledFile();
+        } else if (item.existsScaled()) {
+            pictureFile = item.getScaledFile();
+        } else {
+            pictureFile = null;
+        }
+        if (pictureFile == null || !pictureFile.exists()) {
             Message msg = new Message();
             msg.what = MSG_REMOVE_ITEM;
             msg.obj = item;
@@ -146,7 +156,7 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
             holder.loading.setText(R.string.error_picture_removed);
         } else {
             builder.build()
-                    .load(item.getUnscaledUri(mContext))
+                    .load(getUri(pictureFile))
                     .placeholder(R.drawable.loading)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .centerInside()
@@ -200,6 +210,11 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
             }
         }
     }
+
+    public Uri getUri(File file) {
+        return TBApplication.getUri(mContext, file);
+    }
+
 
     @Override
     public int getItemCount() {

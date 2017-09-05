@@ -177,8 +177,6 @@ public class DCPing extends DCPost {
             entries = TableEntry.getInstance().queryServerIds();
             if (entries.size() > 0) {
                 sendEntries(entries);
-            } else {
-                Timber.i("ALL ENTRIES APPARENTLY HAVE SERVER ID's");
             }
         } catch (Exception ex) {
             Timber.e(ex);

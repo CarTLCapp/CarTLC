@@ -14,6 +14,7 @@ import com.cartlc.tracker.etc.PrefHelper;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class ListEntriesActivity extends AppCompatActivity {
 
@@ -49,6 +50,7 @@ public class ListEntriesActivity extends AppCompatActivity {
         super.onResume();
         mEntryListAdapter.onDataChanged();
         setTitle(PrefHelper.getInstance().getProjectName());
+        setResult(RESULT_CANCELED);
     }
 
     @Override
@@ -63,14 +65,19 @@ public class ListEntriesActivity extends AppCompatActivity {
         if (itemId == android.R.id.home) {
             finish();
         } else if (itemId == R.id.edit) {
+            PrefHelper.getInstance().setFromEntry(mSelected);
+            setResult(RESULT_OK);
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.getItem(R.id.edit);
-        item.setEnabled(mSelected.serverId > 0);
+        MenuItem item = menu.findItem(R.id.edit);
+        if (item != null) {
+            item.setEnabled(mSelected != null && mSelected.serverId > 0);
+        }
         return super.onPrepareOptionsMenu(menu);
     }
 }

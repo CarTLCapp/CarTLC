@@ -197,7 +197,6 @@ public class EntryController extends Controller {
                         Company existing = Company.has(company);
                         if (existing != null) {
                             company = existing;
-                            Logger.debug("MYDEBUG Reusing existing address: " + existing.getLine());
                         } else {
                             company.created_by = entry.tech_id;
                             company.save();
@@ -223,7 +222,6 @@ public class EntryController extends Controller {
                 if (entry.equipment_collection_id > 0) {
                     collection_id = (int) entry.equipment_collection_id;
                     EntryEquipmentCollection.deleteByCollectionId(entry.equipment_collection_id);
-                    Logger.debug("MYDEBUG Deleted existing equipment collections: " + collection_id);
                 } else {
                     collection_id = Version.inc(Version.NEXT_EQUIPMENT_COLLECTION_ID);
                 }
@@ -308,7 +306,6 @@ public class EntryController extends Controller {
                 if (entry.note_collection_id > 0) {
                     collection_id = (int) entry.note_collection_id;
                     EntryNoteCollection.deleteByCollectionId(entry.note_collection_id);
-                    Logger.debug("MYDEBUG Deleted existing note collections: " + collection_id);
                 } else {
                     collection_id = Version.inc(Version.NEXT_NOTE_COLLECTION_ID);
                 }
@@ -353,10 +350,10 @@ public class EntryController extends Controller {
         }
         if (entry.id != null && entry.id > 0) {
             entry.update();
-            Logger.debug("MYDEBUG Updated entry " + entry.id);
+            Logger.debug("Updated entry " + entry.id);
         } else {
             entry.save();
-            Logger.debug("MYDEBUG Created new entry " + entry.id);
+            Logger.debug("Created new entry " + entry.id);
         }
         long ret_id;
         if (resend != null) {
