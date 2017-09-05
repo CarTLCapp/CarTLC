@@ -173,11 +173,13 @@ public class DCPing extends DCPost {
             TablePictureCollection.getInstance().clearUploadedUnscaledPhotos();
             List<TableCrash.CrashLine> lines = TableCrash.getInstance().queryNeedsUploading();
             sendCrashLines(lines);
+            // If any entries do not yet have server-id's, try to get them.
             entries = TableEntry.getInstance().queryServerIds();
             if (entries.size() > 0) {
                 sendEntries(entries);
+            } else {
+                Timber.i("ALL ENTRIES APPARENTLY HAVE SERVER ID's");
             }
-            // If any entries do not yet have server-id's, try to get them.
         } catch (Exception ex) {
             Timber.e(ex);
         }

@@ -135,9 +135,10 @@ public class EntryController extends Controller {
         if (value != null) {
             entry.id = value.longValue();
         }
+        Boolean resend = null;
         value = json.findValue("resend");
         if (value != null) {
-            boolean resend = value.booleanValue();
+            resend = value.booleanValue();
             if (resend) {
                 Entry existing;
                 if (entry.id > 0) {
@@ -350,14 +351,20 @@ public class EntryController extends Controller {
         if (missing.size() > 0) {
             return missingRequest(missing);
         }
-        if (entry.id > 0) {
+        if (entry.id != null && entry.id > 0) {
             entry.update();
             Logger.debug("MYDEBUG Updated entry " + entry.id);
         } else {
             entry.save();
             Logger.debug("MYDEBUG Created new entry " + entry.id);
         }
-        return ok(Long.toString(entry.id));
+        long ret_id;
+        if (resend != null) {
+            ret_id = entry.id;
+        } else {
+            ret_id = 0;
+        }
+        return ok(Long.toString(ret_id));
     }
 
     Result missingRequest(ArrayList<String> missing) {

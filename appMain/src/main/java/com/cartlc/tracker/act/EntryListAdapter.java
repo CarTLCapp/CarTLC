@@ -1,6 +1,7 @@
 package com.cartlc.tracker.act;
 
 import android.content.Context;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -42,13 +43,19 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
         }
     }
 
+    public interface OnItemSelectedListener {
+        void onSelected(DataEntry entry);
+    }
+
     final Context mContext;
+    final OnItemSelectedListener mListener;
     List<DataEntry> mItems;
     HashMap<Long, EntryStatus> mStatusMap = new HashMap();
     DataEntry mSelected;
 
-    public EntryListAdapter(Context context) {
+    public EntryListAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;
+        mListener = listener;
     }
 
     @Override
@@ -75,7 +82,10 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onSelected(item);
+                mSelected = item;
+                if (mListener != null) {
+                    mListener.onSelected(item);
+                }
             }
         });
     }
@@ -107,9 +117,5 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
         } else {
             mItems = combo.getEntries();
         }
-    }
-
-    void onSelected(DataEntry item) {
-        mSelected = item;
     }
 }

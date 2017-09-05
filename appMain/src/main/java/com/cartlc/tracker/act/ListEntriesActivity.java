@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cartlc.tracker.R;
+import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.etc.PrefHelper;
 
 import butterknife.BindView;
@@ -20,13 +21,21 @@ public class ListEntriesActivity extends AppCompatActivity {
     @BindView(R.id.toolbar)      Toolbar      mToolbar;
 
     EntryListAdapter mEntryListAdapter;
+    DataEntry mSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_entries);
         ButterKnife.bind(this);
-        mEntryListAdapter = new EntryListAdapter(this);
+        mEntryListAdapter = new EntryListAdapter(this, new EntryListAdapter.OnItemSelectedListener() {
+            @Override
+            public void onSelected(DataEntry entry) {
+                mSelected = entry;
+                invalidateOptionsMenu();
+
+            }
+        });
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setAutoMeasureEnabled(true);
         mEntriesList.setLayoutManager(linearLayoutManager);
@@ -47,6 +56,7 @@ public class ListEntriesActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.list_entries, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
@@ -60,7 +70,7 @@ public class ListEntriesActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.getItem(R.id.edit);
-        item.setVisible(true);
+        item.setEnabled(mSelected.serverId > 0);
         return super.onPrepareOptionsMenu(menu);
     }
 }
