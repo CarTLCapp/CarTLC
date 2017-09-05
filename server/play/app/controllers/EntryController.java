@@ -131,6 +131,25 @@ public class EntryController extends Controller {
         } else {
             entry.entry_time = new Date(value.longValue());
         }
+        value = json.findValue("server_id");
+        if (value != null) {
+            entry.id = value.longValue();
+        }
+        value = json.findValue("resend");
+        if (value != null) {
+            boolean resend = value.booleanValue();
+            if (resend) {
+                Entry existing;
+                if (entry.id > 0) {
+                    existing = Entry.find.byId(entry.id);
+                } else {
+                    existing = Entry.findByDate(entry.tech_id, entry.entry_time);
+                }
+                if (existing != null) {
+                    entry = existing;
+                }
+            }
+        }
         int truck_number;
         String license_plate;
         value = json.findValue("truck_number");
@@ -177,6 +196,7 @@ public class EntryController extends Controller {
                         Company existing = Company.has(company);
                         if (existing != null) {
                             company = existing;
+                            Logger.debug("MYDEBUG Reusing existing address: " + existing.getLine());
                         } else {
                             company.created_by = entry.tech_id;
                             company.save();
@@ -196,9 +216,16 @@ public class EntryController extends Controller {
         value = json.findValue("equipment");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                return badRequest2("Expected array for element 'equipment'");
+                Logger.error("Expected array for element 'equipment'");
             } else {
-                int collection_id = Version.inc(Version.NEXT_EQUIPMENT_COLLECTION_ID);
+                int collection_id;
+                if (entry.equipment_collection_id > 0) {
+                    collection_id = (int) entry.equipment_collection_id;
+                    EntryEquipmentCollection.deleteByCollectionId(entry.equipment_collection_id);
+                    Logger.debug("MYDEBUG Deleted existing equipment collections: " + collection_id);
+                } else {
+                    collection_id = Version.inc(Version.NEXT_EQUIPMENT_COLLECTION_ID);
+                }
                 boolean newEquipmentCreated = false;
                 Iterator<JsonNode> iterator = value.elements();
                 while (iterator.hasNext()) {
@@ -241,9 +268,16 @@ public class EntryController extends Controller {
         value = json.findValue("picture");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                return badRequest2("Expected array for element 'picture'");
+                Logger.error("Expected array for element 'picture'");
             } else {
-                int collection_id = Version.inc(Version.NEXT_PICTURE_COLLECTION_ID);
+                int collection_id;
+                if (entry.picture_collection_id > 0) {
+                    collection_id = (int) entry.picture_collection_id;
+                    PictureCollection.deleteByCollectionId(entry.picture_collection_id, null);
+                    Logger.debug("MYDEBUG Deleted existing picture collections: " + collection_id);
+                } else {
+                    collection_id = Version.inc(Version.NEXT_PICTURE_COLLECTION_ID);
+                }
                 Iterator<JsonNode> iterator = value.elements();
                 while (iterator.hasNext()) {
                     JsonNode ele = iterator.next();
@@ -260,7 +294,6 @@ public class EntryController extends Controller {
                         collection.picture = subvalue.textValue();
                         collection.save();
                     }
-
                 }
                 entry.picture_collection_id = collection_id;
             }
@@ -268,9 +301,16 @@ public class EntryController extends Controller {
         value = json.findValue("notes");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                return badRequest2("Expected array for element 'notes'");
+                Logger.error("Expected array for element 'notes'");
             } else {
-                int collection_id = Version.inc(Version.NEXT_NOTE_COLLECTION_ID);
+                int collection_id;
+                if (entry.note_collection_id > 0) {
+                    collection_id = (int) entry.note_collection_id;
+                    EntryNoteCollection.deleteByCollectionId(entry.note_collection_id);
+                    Logger.debug("MYDEBUG Deleted existing note collections: " + collection_id);
+                } else {
+                    collection_id = Version.inc(Version.NEXT_NOTE_COLLECTION_ID);
+                }
                 Iterator<JsonNode> iterator = value.elements();
                 while (iterator.hasNext()) {
                     JsonNode ele = iterator.next();
@@ -310,7 +350,13 @@ public class EntryController extends Controller {
         if (missing.size() > 0) {
             return missingRequest(missing);
         }
-        entry.save();
+        if (entry.id > 0) {
+            entry.update();
+            Logger.debug("MYDEBUG Updated entry " + entry.id);
+        } else {
+            entry.save();
+            Logger.debug("MYDEBUG Created new entry " + entry.id);
+        }
         return ok(Long.toString(entry.id));
     }
 

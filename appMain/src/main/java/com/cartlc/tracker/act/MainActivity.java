@@ -564,7 +564,7 @@ public class MainActivity extends AppCompatActivity {
 
     void doViewProject() {
         Intent intent = new Intent(this, ListEntriesActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, 0);
     }
 
     void setStage(Stage stage) {

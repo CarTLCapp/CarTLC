@@ -9,7 +9,7 @@ import android.support.annotation.NonNull;
 public class DataEquipment implements Comparable<DataEquipment> {
     public       long    id;
     public final String  name;
-    public       long    server_id;
+    public       long    serverId;
     public       boolean isChecked;
     public       boolean isLocal;
     public       boolean isBootStrap;
@@ -24,7 +24,7 @@ public class DataEquipment implements Comparable<DataEquipment> {
 
     public DataEquipment(String name, int server_id) {
         this.name = name;
-        this.server_id = server_id;
+        this.serverId = server_id;
     }
 
     public String toString() {

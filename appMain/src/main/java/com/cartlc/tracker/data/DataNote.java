@@ -38,7 +38,7 @@ public class DataNote {
     public String  value;
     public Type    type;
     public short   num_digits;
-    public int     server_id;
+    public int     serverId;
     public boolean isBootStrap;
 
     public DataNote() {
@@ -58,7 +58,7 @@ public class DataNote {
         this.name = name;
         this.type = type;
         this.num_digits = num_digits;
-        this.server_id = server_id;
+        this.serverId = server_id;
     }
 
     public String toString() {

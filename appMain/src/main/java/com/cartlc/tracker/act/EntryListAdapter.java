@@ -45,6 +45,7 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
     final Context mContext;
     List<DataEntry> mItems;
     HashMap<Long, EntryStatus> mStatusMap = new HashMap();
+    DataEntry mSelected;
 
     public EntryListAdapter(Context context) {
         mContext = context;
@@ -71,6 +72,12 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
         } else {
             holder.notes.setVisibility(View.VISIBLE);
         }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSelected(item);
+            }
+        });
     }
 
     EntryStatus getStatus(DataEntry item) {
@@ -100,5 +107,9 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
         } else {
             mItems = combo.getEntries();
         }
+    }
+
+    void onSelected(DataEntry item) {
+        mSelected = item;
     }
 }

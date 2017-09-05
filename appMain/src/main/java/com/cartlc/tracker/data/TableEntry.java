@@ -154,7 +154,7 @@ public class TableEntry {
         sbuf.append(KEY_STATUS);
         sbuf.append(" tinyint, ");
         sbuf.append(KEY_SERVER_ID);
-        sbuf.append(" int, ");
+        sbuf.append(" long default 0, ");
         sbuf.append(KEY_UPLOADED_MASTER);
         sbuf.append(" bit default 0, ");
         sbuf.append(KEY_UPLOADED_AWS);
@@ -176,6 +176,21 @@ public class TableEntry {
         String where = KEY_PROJECT_ADDRESS_COMBO_ID + "=?";
         String[] whereArgs = new String[]{Long.toString(id)};
         return query(where, whereArgs);
+    }
+
+    public List<DataEntry> queryServerIds() {
+        String where = KEY_SERVER_ID + "=0";
+        return query(where, null);
+    }
+
+    public DataEntry query(long id) {
+        String where = KEY_ROWID + "=?";
+        String[] whereArgs = new String[]{Long.toString(id)};
+        List<DataEntry> list = query(where, whereArgs);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
     }
 
     List<DataEntry> query(String where, String[] whereArgs) {
@@ -210,7 +225,7 @@ public class TableEntry {
                 if (!cursor.isNull(idxStatus)) {
                     entry.status = TruckStatus.from(cursor.getInt(idxStatus));
                 }
-                entry.server_id = cursor.getInt(idxServerId);
+                entry.serverId = cursor.getInt(idxServerId);
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
                 entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
                 list.add(entry);
@@ -366,7 +381,7 @@ public class TableEntry {
             values.put(KEY_TRUCK_ID, entry.truckId);
             values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
             values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollection.id);
-            values.put(KEY_SERVER_ID, entry.server_id);
+            values.put(KEY_SERVER_ID, entry.serverId);
             if (entry.status != null) {
                 values.put(KEY_STATUS, entry.status.ordinal());
             }
@@ -385,7 +400,7 @@ public class TableEntry {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(KEY_SERVER_ID, entry.server_id);
+            values.put(KEY_SERVER_ID, entry.serverId);
             values.put(KEY_UPLOADED_AWS, entry.uploadedAws ? 1 : 0);
             values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster ? 1 : 0);
             String where = KEY_ROWID + "=?";

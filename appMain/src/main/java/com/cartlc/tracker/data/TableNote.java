@@ -101,7 +101,7 @@ public class TableNote {
                 values.put(KEY_TYPE, value.type.ordinal());
                 values.put(KEY_VALUE, value.value);
                 values.put(KEY_NUM_DIGITS, value.num_digits);
-                values.put(KEY_SERVER_ID, value.server_id);
+                values.put(KEY_SERVER_ID, value.serverId);
                 values.put(KEY_IS_BOOT, value.isBootStrap ? 1 : 0);
                 mDb.insert(TABLE_NAME, null, values);
             }
@@ -122,7 +122,7 @@ public class TableNote {
             values.put(KEY_TYPE, item.type.ordinal());
             values.put(KEY_VALUE, item.value);
             values.put(KEY_NUM_DIGITS, item.num_digits);
-            values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_SERVER_ID, item.serverId);
             values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
             item.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
@@ -208,7 +208,7 @@ public class TableNote {
                 item.value = cursor.getString(idxValue);
                 item.type = DataNote.Type.from(cursor.getInt(idxType));
                 item.num_digits = cursor.getShort(idxNumDigits);
-                item.server_id = cursor.getInt(idxServerId);
+                item.serverId = cursor.getInt(idxServerId);
                 item.isBootStrap = cursor.getShort(idxTest) != 0;
                 list.add(item);
             }
@@ -245,7 +245,7 @@ public class TableNote {
             values.put(KEY_NAME, item.name);
             values.put(KEY_TYPE, item.type.ordinal());
             values.put(KEY_VALUE, item.value);
-            values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_SERVER_ID, item.serverId);
             values.put(KEY_NUM_DIGITS, item.num_digits);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(item.id)};

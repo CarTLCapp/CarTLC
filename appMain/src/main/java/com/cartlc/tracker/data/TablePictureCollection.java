@@ -141,7 +141,6 @@ public class TablePictureCollection {
         return list;
     }
 
-
     public List<DataPicture> removeNonExistant(List<DataPicture> list) {
         List<DataPicture> filtered = new ArrayList();
         for (DataPicture item : list) {

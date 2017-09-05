@@ -11,6 +11,7 @@ import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataTruck;
 import com.cartlc.tracker.data.TableAddress;
+import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TablePictureCollection;
@@ -56,6 +57,7 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_LAST_NAME                    = "last_name";
     static final        String KEY_TRUCK_NUMBER                 = "truck_number";
     static final        String KEY_LICENSE_PLATE                = "license_plate";
+    static final        String KEY_EDIT_ENTRY_ID                = "edit_id";
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID   = "next_picture_collection_id";
     static final        String KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id";
     static final        String KEY_NEXT_NOTE_COLLECTION_ID      = "next_note_collection_id";
@@ -444,6 +446,32 @@ public class PrefHelper extends PrefHelperBase {
         entry.saveNotes(getNextNoteCollectionID());
         entry.date = System.currentTimeMillis();
         return entry;
+    }
+
+    public void setFromEntry(DataEntry entry) {
+        setLong(KEY_EDIT_ENTRY_ID, entry.id);
+        setCurrentProjectGroupId(entry.projectAddressCombo.id);
+        entry.equipmentCollection.setChecked();
+        DataTruck truck = entry.getTruck();
+        if (truck != null) {
+            setTruckNumber(truck.truckNumber);
+            setLicensePlate(truck.licensePlateNumber);
+        }
+        setStatus(entry.status);
+        entry.fillNotes();
+    }
+
+    public void saveEntry() {
+        DataEntry entry = TableEntry.getInstance().query(getLong(KEY_EDIT_ENTRY_ID, 0));
+        if (entry != null) {
+            entry.equipmentCollection.addChecked();
+            DataTruck truck = entry.getTruck();
+            truck.truckNumber = (int) getTruckNumber();
+            truck.licensePlateNumber = getLicensePlate();
+            TableTruck.getInstance().save(truck);
+            entry.status = getStatus();
+            entry.saveNotes();
+        }
     }
 
     public String genPictureFilename() {

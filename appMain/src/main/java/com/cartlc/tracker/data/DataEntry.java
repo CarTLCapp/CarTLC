@@ -23,7 +23,7 @@ public class DataEntry {
     public long                         noteCollectionId;
     public long                         truckId;
     public TruckStatus                  status;
-    public int                          server_id;
+    public int                          serverId;
     public boolean                      uploadedMaster;
     public boolean                      uploadedAws;
 
@@ -95,7 +95,15 @@ public class DataEntry {
 
     public void saveNotes(long collectionId) {
         noteCollectionId = collectionId;
-        TableCollectionNoteEntry.getInstance().store(projectAddressCombo.projectNameId, noteCollectionId);
+        TableCollectionNoteEntry.getInstance().save(projectAddressCombo.projectNameId, noteCollectionId);
+    }
+
+    public void saveNotes() {
+        TableCollectionNoteEntry.getInstance().save(projectAddressCombo.projectNameId, noteCollectionId);
+    }
+
+    public void fillNotes() {
+        TableCollectionNoteEntry.getInstance().fillNotes(noteCollectionId);
     }
 
     public void checkPictureUploadComplete() {

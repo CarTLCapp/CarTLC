@@ -203,6 +203,17 @@ public class Entry extends com.avaje.ebean.Model {
         return find.where().eq("project_id", project_id).findList();
     }
 
+    public static Entry findByDate(int tech_id, Date date) {
+        List<Entry> list = find.where()
+                .eq("tech_id", tech_id)
+                .eq("entry_time", date)
+                .findList();
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
     public static boolean hasEquipment(long project_id, long equipment_id) {
         for (Entry entry : findByProjectId(project_id)) {
             if (entry.hasEquipment(equipment_id)) {
@@ -223,7 +234,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public void remove(AmazonHelper amazonHelper) {
-        EntryEquipmentCollection.deleteEntries(equipment_collection_id);
+        EntryEquipmentCollection.deleteByCollectionId(equipment_collection_id);
         PictureCollection.deleteByCollectionId(picture_collection_id, amazonHelper);
         EntryNoteCollection.deleteByCollectionId(note_collection_id);
         delete();

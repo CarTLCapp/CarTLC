@@ -164,7 +164,7 @@ public class TableProjects {
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, project.name);
-            values.put(KEY_SERVER_ID, project.server_id);
+            values.put(KEY_SERVER_ID, project.serverId);
             values.put(KEY_DISABLED, project.disabled ? 1 : 0);
             values.put(KEY_IS_BOOT, project.isBootStrap ? 1 : 0);
             String where = KEY_ROWID + "=?";
@@ -323,7 +323,7 @@ public class TableProjects {
                 project.name = cursor.getString(idxValue);
                 project.disabled = cursor.getShort(idxDisabled) != 0;
                 project.isBootStrap = cursor.getShort(idxTest) != 0;
-                project.server_id = cursor.getShort(idxServerId);
+                project.serverId = cursor.getShort(idxServerId);
                 project.id = cursor.getLong(idxRowId);
                 list.add(project);
             }

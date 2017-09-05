@@ -150,7 +150,7 @@ public class TableAddress {
                 values.put(KEY_CITY, address.city);
                 values.put(KEY_STATE, address.state);
                 values.put(KEY_ZIPCODE, address.zipcode);
-                values.put(KEY_SERVER_ID, address.server_id);
+                values.put(KEY_SERVER_ID, address.serverId);
                 values.put(KEY_DISABLED, address.disabled ? 1 : 0);
                 values.put(KEY_LOCAL, address.isLocal ? 1 : 0);
                 values.put(KEY_IS_BOOT, address.isBootStrap ? 1 : 0);
@@ -175,7 +175,7 @@ public class TableAddress {
             values.put(KEY_CITY, address.city);
             values.put(KEY_STATE, address.state);
             values.put(KEY_ZIPCODE, address.zipcode);
-            values.put(KEY_SERVER_ID, address.server_id);
+            values.put(KEY_SERVER_ID, address.serverId);
             values.put(KEY_DISABLED, address.disabled ? 1 : 0);
             values.put(KEY_LOCAL, address.isLocal ? 1 : 0);
             values.put(KEY_IS_BOOT, address.isBootStrap ? 1 : 0);
@@ -219,7 +219,7 @@ public class TableAddress {
             values.put(KEY_CITY, address.city);
             values.put(KEY_STATE, address.state);
             values.put(KEY_ZIPCODE, address.zipcode);
-            values.put(KEY_SERVER_ID, address.server_id);
+            values.put(KEY_SERVER_ID, address.serverId);
             values.put(KEY_DISABLED, address.disabled ? 1 : 0);
             values.put(KEY_LOCAL, address.isLocal ? 1 : 0);
             values.put(KEY_IS_BOOT, address.isBootStrap ? 1 : 0);

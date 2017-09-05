@@ -173,6 +173,11 @@ public class DCPing extends DCPost {
             TablePictureCollection.getInstance().clearUploadedUnscaledPhotos();
             List<TableCrash.CrashLine> lines = TableCrash.getInstance().queryNeedsUploading();
             sendCrashLines(lines);
+            entries = TableEntry.getInstance().queryServerIds();
+            if (entries.size() > 0) {
+                sendEntries(entries);
+            }
+            // If any entries do not yet have server-id's, try to get them.
         } catch (Exception ex) {
             Timber.e(ex);
         }
@@ -198,7 +203,7 @@ public class DCPing extends DCPost {
                     if (unprocessed.contains(name)) {
                         // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
                         DataProject existing = TableProjects.getInstance().queryByName(name);
-                        existing.server_id = server_id;
+                        existing.serverId = server_id;
                         existing.isBootStrap = false;
                         existing.disabled = false;
                         TableProjects.getInstance().update(existing);
@@ -280,7 +285,7 @@ public class DCPing extends DCPost {
                     DataAddress match = get(unprocessed, incoming);
                     if (match != null) {
                         // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
-                        match.server_id = server_id;
+                        match.serverId = server_id;
                         match.isLocal = false;
                         match.isBootStrap = false;
                         TableAddress.getInstance().update(match);
@@ -295,7 +300,7 @@ public class DCPing extends DCPost {
                     // Change of name, street, city or state?
                     if (!incoming.equals(item) || (incoming.isLocal != item.isLocal)) {
                         incoming.id = item.id;
-                        incoming.server_id = item.server_id;
+                        incoming.serverId = item.serverId;
                         incoming.isLocal = false;
                         Timber.i("Change: " + incoming.toString());
                         TableAddress.getInstance().update(incoming);
@@ -344,7 +349,7 @@ public class DCPing extends DCPost {
                         DataEquipment match = get(unprocessed, incoming);
                         if (match != null) {
                             // If this name already exists, convert the existing one by simply giving it the server_id.
-                            match.server_id = server_id;
+                            match.serverId = server_id;
                             match.isBootStrap = false;
                             match.isLocal = false;
                             TableEquipment.getInstance().update(match);
@@ -360,7 +365,7 @@ public class DCPing extends DCPost {
                         if (!incoming.equals(item)) {
                             Timber.i("Change: " + name);
                             incoming.id = item.id;
-                            incoming.server_id = item.server_id;
+                            incoming.serverId = item.serverId;
                             incoming.isLocal = false;
                             TableEquipment.getInstance().update(incoming);
                         } else {
@@ -476,7 +481,7 @@ public class DCPing extends DCPost {
                         DataNote match = get(unprocessed, incoming);
                         if (match != null) {
                             // If this name already exists, convert the existing one by simply giving it the server_id.
-                            match.server_id = server_id;
+                            match.serverId = server_id;
                             match.num_digits = num_digits;
                             TableNote.getInstance().update(match);
                             Timber.i("Commandeer local: " + name);
@@ -491,7 +496,7 @@ public class DCPing extends DCPost {
                         if (!incoming.equals(item)) {
                             Timber.i("Change: " + name);
                             incoming.id = item.id;
-                            incoming.server_id = item.server_id;
+                            incoming.serverId = item.serverId;
                             TableNote.getInstance().update(incoming);
                         } else {
                             Timber.i("No change: " + item.toString());
@@ -640,6 +645,8 @@ public class DCPing extends DCPost {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
             jsonObject.accumulate("date", entry.date);
+            jsonObject.accumulate("server_id", entry.serverId);
+            jsonObject.accumulate("resend", entry.uploadedMaster);
             DataTruck truck = entry.getTruck();
             if (truck.truckNumber > 0) {
                 jsonObject.accumulate("truck_number", truck.truckNumber);
@@ -652,8 +659,8 @@ public class DCPing extends DCPost {
                 Timber.e("No project name for entry -- abort");
                 return false;
             }
-            if (project.server_id > 0) {
-                jsonObject.accumulate("project_id", project.server_id);
+            if (project.serverId > 0) {
+                jsonObject.accumulate("project_id", project.serverId);
             } else {
                 jsonObject.accumulate("project_name", project.name);
             }
@@ -662,8 +669,8 @@ public class DCPing extends DCPost {
                 Timber.e("No address for entry -- abort");
                 return false;
             }
-            if (address.server_id > 0) {
-                jsonObject.accumulate("address_id", address.server_id);
+            if (address.serverId > 0) {
+                jsonObject.accumulate("address_id", address.serverId);
             } else {
                 jsonObject.accumulate("address", address.getLine());
             }
@@ -675,8 +682,8 @@ public class DCPing extends DCPost {
                 JSONArray jarray = new JSONArray();
                 for (DataEquipment equipment : equipments) {
                     JSONObject jobj = new JSONObject();
-                    if (equipment.server_id > 0) {
-                        jobj.accumulate("equipment_id", equipment.server_id);
+                    if (equipment.serverId > 0) {
+                        jobj.accumulate("equipment_id", equipment.serverId);
                     } else {
                         jobj.accumulate("equipment_name", equipment.name);
                     }
@@ -702,8 +709,8 @@ public class DCPing extends DCPost {
                 JSONArray jarray = new JSONArray();
                 for (DataNote note : notes) {
                     JSONObject jobj = new JSONObject();
-                    if (note.server_id > 0) {
-                        jobj.put("id", note.server_id);
+                    if (note.serverId > 0) {
+                        jobj.put("id", note.serverId);
                     } else {
                         jobj.put("name", note.name);
                     }
@@ -716,10 +723,10 @@ public class DCPing extends DCPost {
             String result = post(ENTER, jsonObject);
             if (TextUtils.isDigitsOnly(result)) {
                 entry.uploadedMaster = true;
-                entry.server_id = Integer.parseInt(result);
+                entry.serverId = Integer.parseInt(result);
                 TableEntry.getInstance().save(entry);
                 success = true;
-                Timber.i("SUCCESS");
+                Timber.i("SUCCESS, ENTRY SERVER ID is " + entry.serverId);
             } else {
                 Timber.e("While trying to send entry " + entry.id + ": " + result);
             }

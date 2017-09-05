@@ -71,7 +71,7 @@ public class TableCollectionNoteEntry {
         return count;
     }
 
-    public void store(long projectNameId, long collectionId) {
+    public void save(long projectNameId, long collectionId) {
         List<DataNote> notes = TableCollectionNoteProject.getInstance().getNotes(projectNameId);
         mDb.beginTransaction();
         try {
@@ -91,6 +91,14 @@ public class TableCollectionNoteEntry {
             Timber.e(ex);
         } finally {
             mDb.endTransaction();
+        }
+    }
+
+    public void fillNotes(long collectionId) {
+        TableNote.getInstance().clearValues();
+        List<DataNote> notes = query(collectionId);
+        for (DataNote note : notes) {
+            TableNote.getInstance().updateValue(note);
         }
     }
 

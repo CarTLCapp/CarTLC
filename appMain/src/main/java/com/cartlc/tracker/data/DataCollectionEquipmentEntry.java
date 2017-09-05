@@ -15,4 +15,8 @@ public class DataCollectionEquipmentEntry extends DataCollectionEquipment {
     public void addChecked() {
         equipmentListIds = TableEquipment.getInstance().queryChecked();
     }
+
+    public void setChecked() {
+        TableEquipment.getInstance().setChecked(equipmentListIds);
+    }
 }

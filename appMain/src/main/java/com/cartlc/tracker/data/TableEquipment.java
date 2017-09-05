@@ -147,7 +147,7 @@ public class TableEquipment {
                 values.put(KEY_NAME, value.name);
                 values.put(KEY_CHECKED, value.isChecked ? 1 : 0);
                 values.put(KEY_LOCAL, value.isLocal ? 1 : 0);
-                values.put(KEY_SERVER_ID, value.server_id);
+                values.put(KEY_SERVER_ID, value.serverId);
                 values.put(KEY_IS_BOOT, value.isBootStrap ? 1 : 0);
                 values.put(KEY_DISABLED, value.disabled ? 1 : 0);
                 value.id = mDb.insert(TABLE_NAME, null, values);
@@ -168,7 +168,7 @@ public class TableEquipment {
             values.put(KEY_NAME, item.name);
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
             values.put(KEY_LOCAL, item.isLocal ? 1 : 0);
-            values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_SERVER_ID, item.serverId);
             values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
             values.put(KEY_DISABLED, item.disabled ? 1 : 0);
             item.id = mDb.insert(TABLE_NAME, null, values);
@@ -222,7 +222,7 @@ public class TableEquipment {
                     cursor.getString(idxName),
                     cursor.getShort(idxChecked) != 0,
                     cursor.getShort(idxLocal) != 0);
-            item.server_id = cursor.getInt(idxServerId);
+            item.serverId = cursor.getInt(idxServerId);
             item.isBootStrap = cursor.getShort(idxTest) != 0;
             item.disabled = cursor.getShort(idxDisabled) != 0;
             list.add(item);
@@ -260,6 +260,25 @@ public class TableEquipment {
         }
         cursor.close();
         return id;
+    }
+
+    public void setChecked(List<Long> ids) {
+        clearChecked();
+        mDb.beginTransaction();
+        try {
+            for (long id : ids) {
+                ContentValues values = new ContentValues();
+                String where = KEY_ROWID + "=?";
+                String[] whereArgs = {Long.toString(id)};
+                values.put(KEY_CHECKED, 0);
+                mDb.update(TABLE_NAME, values, where, whereArgs);
+            }
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
     }
 
     public void setChecked(DataEquipment item, boolean flag) {
@@ -302,7 +321,7 @@ public class TableEquipment {
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
             values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
             values.put(KEY_DISABLED, item.disabled ? 1 : 0);
-            values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_SERVER_ID, item.serverId);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(item.id)};
             mDb.update(TABLE_NAME, values, where, whereArgs);
