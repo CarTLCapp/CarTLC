@@ -121,10 +121,6 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
             mItems = new ArrayList();
         } else {
             mItems = combo.getEntries();
-
-            for (DataEntry item : mItems) {
-                Timber.d("MYDEBUG: ITEM " + item.toString());
-            }
         }
     }
 

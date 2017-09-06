@@ -6,6 +6,7 @@ import com.cartlc.tracker.etc.EntryStatus;
 import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventPingDone;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -60,27 +61,33 @@ public class DataEntry {
     }
 
     // Return all the notes, with values overlaid.
+    // Place these values into TableNote as well so they are persisted forward.
     public List<DataNote> getNotesAllWithValuesOverlaid() {
         // These are all the notes.
         List<DataNote> allNotes = getNotesByProject();
         // Get value overrides
-        List<DataNote> result = getNotesWithValuesOnly();
+        List<DataNote> valueNotes = getNotesWithValuesOnly();
+        List<DataNote> result = new ArrayList<>();
         // Add to result notes without values.
         for (DataNote note : allNotes) {
-            if (!contains(result, note)) {
+            DataNote valueNote = getNoteFrom(valueNotes, note);
+            if (valueNote != null) {
+                TableNote.getInstance().update(valueNote);
+                result.add(valueNote);
+            } else {
                 result.add(note);
             }
         }
         return result;
     }
 
-    boolean contains(List<DataNote> list, DataNote check) {
+    DataNote getNoteFrom(List<DataNote> list, DataNote check) {
         for (DataNote note : list) {
             if (note.id == check.id) {
-                return true;
+                return note;
             }
         }
-        return false;
+        return null;
     }
 
     // Get all the notes as indicated by the project.

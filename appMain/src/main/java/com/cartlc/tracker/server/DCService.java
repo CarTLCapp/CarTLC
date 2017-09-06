@@ -25,6 +25,7 @@ public class DCService extends IntentService {
         super(SERVER_NAME);
         mPing = new DCPing();
         mZip = new DCZip();
+        Timber.tag(DCService.class.getSimpleName());
     }
 
     @Override

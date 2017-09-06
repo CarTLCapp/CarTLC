@@ -92,4 +92,11 @@ public class DataNote {
                 && num_digits == item.num_digits;
     }
 
+    public int valueLength() {
+        if (value == null) {
+            return 0;
+        }
+        return value.length();
+    }
+
 }

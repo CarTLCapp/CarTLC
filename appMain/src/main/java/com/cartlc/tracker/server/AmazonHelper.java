@@ -77,16 +77,21 @@ public class AmazonHelper {
 
     public void sendPictures(List<DataEntry> list) {
         for (DataEntry entry : list) {
-            sendPictures(entry);
+            if (sendPictures(entry) == 0) {
+                entry.checkPictureUploadComplete();
+            }
         }
     }
 
-    void sendPictures(DataEntry entry) {
+    int sendPictures(DataEntry entry) {
+        int count = 0;
         for (DataPicture item : entry.pictureCollection.pictures) {
             if (!item.uploaded) {
                 sendPicture(entry, item);
+                count++;
             }
         }
+        return count;
     }
 
     void sendPicture(final DataEntry entry, final DataPicture item) {

@@ -997,11 +997,11 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle(R.string.title_notes);
         StringBuilder sbuf = new StringBuilder();
         for (DataNote note : notes) {
-            if (note.num_digits > 0 && note.value.length() > 0 && (note.value.length() != note.num_digits)) {
+            if (note.num_digits > 0 && note.valueLength() > 0 && (note.valueLength() != note.num_digits)) {
                 sbuf.append("    ");
                 sbuf.append(note.name);
                 sbuf.append(": ");
-                sbuf.append(getString(R.string.error_incorrect_note_count, note.value.length(), note.num_digits));
+                sbuf.append(getString(R.string.error_incorrect_note_count, note.valueLength(), note.num_digits));
                 sbuf.append("\n");
             }
         }
