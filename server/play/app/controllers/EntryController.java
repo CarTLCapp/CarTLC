@@ -273,7 +273,6 @@ public class EntryController extends Controller {
                 if (entry.picture_collection_id > 0) {
                     collection_id = (int) entry.picture_collection_id;
                     PictureCollection.deleteByCollectionId(entry.picture_collection_id, null);
-                    Logger.debug("MYDEBUG Deleted existing picture collections: " + collection_id);
                 } else {
                     collection_id = Version.inc(Version.NEXT_PICTURE_COLLECTION_ID);
                 }

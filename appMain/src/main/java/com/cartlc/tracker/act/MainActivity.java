@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
             void display(DataNote note) {
                 if (mCurStage == Stage.NOTES) {
                     if (note.num_digits > 0) {
-                        if (note.value.length() > 0) {
+                        if (note.value != null && note.value.length() > 0) {
                             StringBuilder sbuf = new StringBuilder();
                             sbuf.append(note.value.length());
                             sbuf.append("/");
@@ -570,7 +570,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void doViewProject() {
-        Intent intent = new Intent(this, ListEntriesActivity.class);
+        Intent intent = new Intent(this, ListEntryActivity.class);
         startActivityForResult(intent, REQUEST_EDIT_ENTRY);
     }
 
@@ -836,7 +836,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case PICTURE:
                 long picture_collection_id = PrefHelper.getInstance().getCurrentPictureCollectionId();
-                Timber.i("MYDEBUG: CURRENT PICTURE COLLECTION ID=" + picture_collection_id);
                 int numberTaken = TablePictureCollection.getInstance().countPictures(picture_collection_id);
                 StringBuilder sbuf = new StringBuilder();
                 sbuf.append(getString(R.string.title_picture));
@@ -942,7 +941,6 @@ public class MainActivity extends AppCompatActivity {
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File pictureFile = PrefHelper.getInstance().genFullPictureFile();
             TablePictureCollection.getInstance().add(pictureFile, PrefHelper.getInstance().getCurrentPictureCollectionId());
-            Timber.i("MYDEBUG: DISPATCH =" + PrefHelper.getInstance().getCurrentPictureCollectionId() + " FILE=" + pictureFile.toString());
             Uri pictureUri = TBApplication.getUri(this, pictureFile);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
             // Grant permissions

@@ -64,6 +64,26 @@ public class TableCollectionNoteProject extends TableCollection {
         return list;
     }
 
+    public List<DataNote> getNotes(long projectNameId, DataEntry entry) {
+        List<DataNote> projectNotes = getNotes(projectNameId);
+        List<DataNote> resultNotes = entry.getNotes();
+        for (DataNote note : projectNotes) {
+            if (!contains(resultNotes, note)) {
+                resultNotes.add(note);
+            }
+        }
+        return resultNotes;
+    }
+
+    boolean contains(List<DataNote> list, DataNote check) {
+        for (DataNote note : list) {
+            if (note.id == check.id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void removeIfGone(DataCollectionItem item) {
         if (item.isBootStrap) {
             if (TableNote.getInstance().query(item.value_id) == null) {

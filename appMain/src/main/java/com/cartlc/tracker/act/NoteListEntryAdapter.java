@@ -13,16 +13,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cartlc.tracker.R;
+import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
+import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TableCollectionNoteProject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Created by dug on 5/12/17.
@@ -69,19 +73,19 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         holder.entry.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                item.value = s.toString();
-                TableNote.getInstance().updateValue(item);
-                mListener.textEntered(item);
+                if (holder.label.isSelected()) {
+                    item.value = s.toString();
+                    TableNote.getInstance().updateValue(item);
+                    mListener.textEntered(item);
+                }
             }
         });
         holder.entry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -90,6 +94,8 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
                 if (hasFocus) {
                     mListener.textFocused(item);
                     holder.label.setSelected(true);
+                } else {
+                    holder.label.setSelected(false);
                 }
             }
         });
@@ -118,26 +124,26 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
     }
 
     public void onDataChanged() {
+        DataEntry entry = PrefHelper.getInstance().getCurrentEditEntry();
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
         if (curGroup != null) {
-            mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId);
+            mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId, entry);
             pushToBottom("Other");
-            pushToBottom("Others");
             notifyDataSetChanged();
         }
     }
 
     void pushToBottom(String name) {
-        DataNote other = null;
+        List<DataNote> others = new ArrayList<>();
         for (DataNote item : mItems) {
-            if (item.name.equals(name)) {
-                other = item;
+            if (item.name.startsWith(name)) {
+                others.add(item);
                 break;
             }
         }
-        if (other != null) {
-            mItems.remove(other);
-            mItems.add(other);
+        for (DataNote item : others) {
+            mItems.remove(item);
+            mItems.add(item);
         }
     }
 

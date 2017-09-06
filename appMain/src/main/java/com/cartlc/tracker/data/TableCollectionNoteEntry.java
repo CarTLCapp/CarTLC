@@ -61,7 +61,7 @@ public class TableCollectionNoteEntry {
         int count = 0;
         try {
             String where = KEY_NOTE_ID + "=?";
-            String [] whereArgs = new String [] { Long.toString(noteId) };
+            String[] whereArgs = new String[]{Long.toString(noteId)};
             Cursor cursor = mDb.query(TABLE_NAME, null, where, whereArgs, null, null, null);
             count = cursor.getCount();
             cursor.close();
@@ -71,6 +71,8 @@ public class TableCollectionNoteEntry {
         return count;
     }
 
+    // There are TWO note tables. One is TableCollectionnNoteProject which stores the
+    // defined notes for each project. The other is this one which stores the values.
     public void save(long projectNameId, long collectionId) {
         List<DataNote> notes = TableCollectionNoteProject.getInstance().getNotes(projectNameId);
         mDb.beginTransaction();
@@ -94,32 +96,24 @@ public class TableCollectionNoteEntry {
         }
     }
 
-    public void fillNotes(long collectionId) {
-        TableNote.getInstance().clearValues();
-        List<DataNote> notes = query(collectionId);
-        for (DataNote note : notes) {
-            Timber.i("MYDEBUG: NOTE VALUE UPDATE FOR " + note.toString());
-            TableNote.getInstance().updateValue(note);
-        }
-    }
-
     public List<DataNote> query(long collectionId) {
         List<DataNote> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_NOTE_ID, KEY_VALUE};
+            final String[] columns = {KEY_NOTE_ID, KEY_VALUE};
             final String selection = KEY_COLLECTION_ID + " =?";
             final String[] selectionArgs = {Long.toString(collectionId)};
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxNoteId = cursor.getColumnIndex(KEY_NOTE_ID);
             int idxValueId = cursor.getColumnIndex(KEY_VALUE);
             DataNote note;
             while (cursor.moveToNext()) {
-                note = new DataNote();
-                note.id = cursor.getLong(idxRowId);
-                note.value = cursor.getString(idxValueId);
-                note.name = TableNote.getInstance().getName(cursor.getLong(idxNoteId));
-                list.add(note);
+                note = TableNote.getInstance().query(cursor.getLong(idxNoteId));
+                if (note != null) {
+                    note.value = cursor.getString(idxValueId);
+                    list.add(note);
+                } else {
+                    Timber.e("Unexpected bad note ID of " + cursor.getLong(idxNoteId));
+                }
             }
             cursor.close();
         } catch (Exception ex) {

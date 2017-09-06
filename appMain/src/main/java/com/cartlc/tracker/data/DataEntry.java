@@ -9,6 +9,7 @@ import com.cartlc.tracker.event.EventPingDone;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
+import timber.log.Timber;
 
 /**
  * Created by dug on 5/13/17.
@@ -102,10 +103,6 @@ public class DataEntry {
         TableCollectionNoteEntry.getInstance().save(projectAddressCombo.projectNameId, noteCollectionId);
     }
 
-    public void fillNotes() {
-        TableCollectionNoteEntry.getInstance().fillNotes(noteCollectionId);
-    }
-
     public void checkPictureUploadComplete() {
         for (DataPicture item : pictureCollection.pictures) {
             if (!item.uploaded) {
@@ -125,4 +122,20 @@ public class DataEntry {
         return new EntryStatus(this);
     }
 
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("ID=");
+        sbuf.append(id);
+        sbuf.append(", ADDRESS=");
+        sbuf.append(projectAddressCombo == null ? "NULL" : projectAddressCombo.id);
+        sbuf.append(", EQUIPID=");
+        sbuf.append(equipmentCollection == null ? "NULL" : equipmentCollection.id);
+        sbuf.append(", NOTEID=");
+        sbuf.append(noteCollectionId);
+        sbuf.append(", TRUCKID=");
+        sbuf.append(truckId);
+        sbuf.append(", SERVERID=");
+        sbuf.append(serverId);
+        return sbuf.toString();
+    }
 }

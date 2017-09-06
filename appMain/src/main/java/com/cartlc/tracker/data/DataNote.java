@@ -69,9 +69,11 @@ public class DataNote {
         sbuf.append(name);
         sbuf.append(", VALUE=");
         sbuf.append(value);
-        sbuf.append(", TYPE=");
-        sbuf.append(type.toString());
-        sbuf.append(", #=");
+        if (type != null) {
+            sbuf.append(", TYPE=");
+            sbuf.append(type.toString());
+        }
+        sbuf.append(", #DIGITS=");
         sbuf.append(num_digits);
         return sbuf.toString();
     }

@@ -8,6 +8,7 @@ import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataCollectionEquipmentEntry;
 import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataTruck;
 import com.cartlc.tracker.data.TableAddress;
@@ -273,6 +274,10 @@ public class PrefHelper extends PrefHelperBase {
         return getLong(KEY_EDIT_ENTRY_ID, 0);
     }
 
+    public DataEntry getCurrentEditEntry() {
+        return TableEntry.getInstance().query(getCurrentEditEntryId());
+    }
+
     public void reloadFromServer() {
         setVersionEquipment(VERSION_RESET);
         setVersionProject(VERSION_RESET);
@@ -478,11 +483,11 @@ public class PrefHelper extends PrefHelperBase {
             setLicensePlate(truck.licensePlateNumber);
         }
         setStatus(entry.status);
-        entry.fillNotes();
+        TableNote.getInstance().clearValues();
     }
 
     public DataEntry saveEntry() {
-        DataEntry entry = TableEntry.getInstance().query(getCurrentEditEntryId());
+        DataEntry entry = getCurrentEditEntry();
         if (entry == null) {
             return createEntry();
         }

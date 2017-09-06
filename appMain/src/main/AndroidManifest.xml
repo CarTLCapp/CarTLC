@@ -33,7 +33,7 @@
         </activity>
 
         <activity
-            android:name=".act.ListEntriesActivity"
+            android:name=".act.ListEntryActivity"
             android:label="@string/title_activity_list_entries"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"

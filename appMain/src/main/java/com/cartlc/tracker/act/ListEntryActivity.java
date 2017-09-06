@@ -1,5 +1,6 @@
 package com.cartlc.tracker.act;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,27 +15,25 @@ import com.cartlc.tracker.etc.PrefHelper;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
-public class ListEntriesActivity extends AppCompatActivity {
+public class ListEntryActivity extends AppCompatActivity {
 
     @BindView(R.id.list_entries) RecyclerView mEntriesList;
     @BindView(R.id.toolbar)      Toolbar      mToolbar;
 
-    EntryListAdapter mEntryListAdapter;
-    DataEntry mSelected;
+    ListEntryAdapter mEntryListAdapter;
+    DataEntry        mSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_entries);
         ButterKnife.bind(this);
-        mEntryListAdapter = new EntryListAdapter(this, new EntryListAdapter.OnItemSelectedListener() {
+        mEntryListAdapter = new ListEntryAdapter(this, new ListEntryAdapter.OnItemSelectedListener() {
             @Override
             public void onSelected(DataEntry entry) {
                 mSelected = entry;
                 invalidateOptionsMenu();
-
             }
         });
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -65,9 +64,11 @@ public class ListEntriesActivity extends AppCompatActivity {
         if (itemId == android.R.id.home) {
             finish();
         } else if (itemId == R.id.edit) {
-            PrefHelper.getInstance().setFromEntry(mSelected);
-            setResult(RESULT_OK);
-            finish();
+            if (mSelected != null) {
+                PrefHelper.getInstance().setFromEntry(mSelected);
+                setResult(RESULT_OK);
+                finish();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -79,5 +80,17 @@ public class ListEntriesActivity extends AppCompatActivity {
             item.setEnabled(mSelected != null && mSelected.serverId > 0);
         }
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    void clear() {
+        mEntryListAdapter.clear();
+        mSelected = null;
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        clear();
+        super.onNewIntent(intent);
     }
 }

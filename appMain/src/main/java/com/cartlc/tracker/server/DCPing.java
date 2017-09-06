@@ -91,10 +91,14 @@ public class DCPing extends DCPost {
             jsonObject.accumulate("last_name", PrefHelper.getInstance().getLastName());
             jsonObject.accumulate("device_id", deviceId);
             String result = post(REGISTER, jsonObject);
-            int tech_id = Integer.parseInt(result);
-            PrefHelper.getInstance().setTechID(tech_id);
-            PrefHelper.getInstance().setRegistrationChanged(false);
-            Timber.i("TECH ID=" + tech_id);
+            if (TextUtils.isDigitsOnly(result)) {
+                int tech_id = Integer.parseInt(result);
+                PrefHelper.getInstance().setTechID(tech_id);
+                PrefHelper.getInstance().setRegistrationChanged(false);
+                Timber.i("TECH ID=" + tech_id);
+            } else {
+                Timber.i("sendRegistration() failed");
+            }
         } catch (Exception ex) {
             Timber.e(ex);
         }

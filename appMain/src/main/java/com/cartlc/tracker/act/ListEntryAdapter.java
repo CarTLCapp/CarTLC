@@ -1,7 +1,6 @@
 package com.cartlc.tracker.act;
 
 import android.content.Context;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEntry;
-import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.etc.EntryStatus;
 import com.cartlc.tracker.etc.PrefHelper;
@@ -22,12 +20,13 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Created by dug on 5/12/17.
  */
 
-public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.CustomViewHolder> {
+public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.CustomViewHolder> {
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.project_name)    TextView projectName;
@@ -51,9 +50,9 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
     final OnItemSelectedListener mListener;
     List<DataEntry> mItems;
     HashMap<Long, EntryStatus> mStatusMap = new HashMap();
-    int mSelectedPos;
+    Integer mSelectedPos;
 
-    public EntryListAdapter(Context context, OnItemSelectedListener listener) {
+    public ListEntryAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;
         mListener = listener;
     }
@@ -88,7 +87,7 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
                 notifyDataSetChanged();
             }
         });
-        if (mSelectedPos == position) {
+        if (mSelectedPos != null && mSelectedPos == position) {
             mSelectedPos = position;
             holder.itemView.setBackgroundResource(R.color.project_highlight);
         } else {
@@ -123,5 +122,9 @@ public class EntryListAdapter extends RecyclerView.Adapter<EntryListAdapter.Cust
         } else {
             mItems = combo.getEntries();
         }
+    }
+
+    public void clear() {
+        mSelectedPos = null;
     }
 }

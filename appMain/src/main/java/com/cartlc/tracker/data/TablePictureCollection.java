@@ -139,9 +139,6 @@ public class TablePictureCollection {
         } catch (Exception ex) {
             Timber.e(ex);
         }
-        for (DataPicture picture : list) {
-            Timber.d("MYDEBUG: STORED PICTURE " + picture.toString());
-        }
         return list;
     }
 
@@ -149,10 +146,8 @@ public class TablePictureCollection {
         List<DataPicture> filtered = new ArrayList();
         for (DataPicture item : list) {
             if (item.existsUnscaled() || item.existsScaled()) {
-                Timber.d("MYDEBUG: keeping file" + item.toString());
                 filtered.add(item);
             } else {
-                Timber.d("MYDEBUG: ignoring non existent file: " + item.toString());
                 remove(item);
             }
         }
@@ -181,7 +176,6 @@ public class TablePictureCollection {
             int idxUploading = cursor.getColumnIndex(KEY_UPLOADING_FILENAME);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             ArrayList<Long> delete = new ArrayList();
-            Timber.d("MYDEBUG: COUNT FOR " + collection_id + " RAW=" + cursor.getCount());
             while (cursor.moveToNext()) {
                 String unscaled = cursor.getString(idxPicture);
                 String uploading = cursor.getString(idxUploading);
@@ -199,14 +193,11 @@ public class TablePictureCollection {
                 }
                 if ((unscaledFile != null && unscaledFile.exists()) || (uploadingFile != null && uploadingFile.exists())) {
                     count++;
-                    Timber.d("MYDEBUG: count now " + count);
                 } else {
-                    Timber.d("MYDEBUG: deleting during count");
                     delete.add(cursor.getLong(idxRowId));
                 }
             }
             cursor.close();
-
             String where = KEY_ROWID + "=?";
             for (Long id : delete) {
                 String[] whereArgs = {Long.toString(id)};
@@ -260,7 +251,6 @@ public class TablePictureCollection {
             values.put(KEY_UPLOADED, item.uploaded ? 1 : 0);
             if (collection_id != null) {
                 values.put(KEY_COLLECTION_ID, collection_id);
-                Timber.i("MYDEBUG: updated " + item.toString() + " on " + collection_id);
             }
             if (item.id > 0) {
                 String where = KEY_ROWID + "=?";
