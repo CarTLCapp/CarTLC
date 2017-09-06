@@ -498,6 +498,7 @@ public class PrefHelper extends PrefHelperBase {
         TableTruck.getInstance().save(truck);
         entry.status = getStatus();
         entry.uploadedMaster = false;
+        entry.uploadedAws = false;
         entry.saveNotes();
         return entry;
     }

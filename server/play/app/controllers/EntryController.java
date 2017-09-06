@@ -246,7 +246,6 @@ public class EntryController extends Controller {
                                 equipment.name = name;
                                 equipment.created_by = entry.tech_id;
                                 equipment.save();
-                                Version.inc(Version.VERSION_EQUIPMENT);
                             } else {
                                 if (equipments.size() > 1) {
                                     Logger.error("Too many equipments found with name: " + name);
@@ -262,6 +261,9 @@ public class EntryController extends Controller {
                     collection.save();
                 }
                 entry.equipment_collection_id = collection_id;
+                if (newEquipmentCreated) {
+                    Version.inc(Version.VERSION_EQUIPMENT);
+                }
             }
         }
         value = json.findValue("picture");

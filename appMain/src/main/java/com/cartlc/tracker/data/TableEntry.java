@@ -383,6 +383,8 @@ public class TableEntry {
             values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
             values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollection.id);
             values.put(KEY_SERVER_ID, entry.serverId);
+            values.put(KEY_UPLOADED_AWS, entry.uploadedAws ? 1 : 0);
+            values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster ? 1 : 0);
             if (entry.status != null) {
                 values.put(KEY_STATUS, entry.status.ordinal());
             }
