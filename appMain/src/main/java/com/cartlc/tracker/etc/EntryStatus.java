@@ -3,11 +3,13 @@ package com.cartlc.tracker.etc;
 import android.content.Context;
 
 import com.cartlc.tracker.R;
-import com.cartlc.tracker.act.EquipmentSelectListAdapter;
 import com.cartlc.tracker.data.DataCollectionEquipmentProject;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataEquipment;
+import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
+import com.cartlc.tracker.data.TableEquipment;
+import com.cartlc.tracker.data.TablePictureCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,31 +20,51 @@ import java.util.List;
 
 public class EntryStatus {
 
-    final DataEntry mEntry;
-
-    boolean             isComplete;
-    boolean             isCompleteEquip;
-    boolean             isCompletePicture;
-    List<DataEquipment> allEquipment;
-    List<DataEquipment> checkedEquipment;
-    int                 countPictures;
+    final List<DataEquipment> allEquipment;
+    final List<DataEquipment> checkedEquipment;
+    final TruckStatus         status;
+    final int                 countPictures;
+    boolean isComplete;
+    boolean isCompleteEquip;
+    boolean isCompletePicture;
 
     public EntryStatus(DataEntry entry) {
-        mEntry = entry;
-        DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(mEntry.projectAddressCombo.projectNameId);
-        allEquipment = removeOther(collection.getEquipment());
-        checkedEquipment = removeOther(mEntry.getEquipment());
-        countPictures = mEntry.getPictures().size();
+        this.allEquipment = removeOther(TableCollectionEquipmentProject.getInstance().queryForProject(entry.projectAddressCombo.projectNameId).getEquipment());
+        this.checkedEquipment = removeOther(entry.getEquipment());
+        this.status = entry.status;
+        countPictures = entry.getPictures().size();
         isCompletePicture = countPictures >= allEquipment.size();
         isCompleteEquip = checkedEquipment.size() >= allEquipment.size();
         isComplete = isCompleteEquip && isCompletePicture;
     }
 
+    public int getNumPicturesTaken() {
+        return countPictures;
+    }
+
+    public int getNumPicturesNeeded() {
+        return allEquipment.size();
+    }
+
+    public EntryStatus() {
+        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
+        if (curGroup != null) {
+            DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
+            allEquipment = removeOther(collection.getEquipment());
+        } else {
+            allEquipment = new ArrayList<>();
+        }
+        checkedEquipment = TableEquipment.getInstance().queryChecked();
+        long picture_collection_id = PrefHelper.getInstance().getCurrentPictureCollectionId();
+        countPictures = TablePictureCollection.getInstance().countPictures(picture_collection_id);
+        status = PrefHelper.getInstance().getStatus();
+    }
+
     public String getString(Context ctx) {
-        if (mEntry.status != null) {
-            if (mEntry.status == TruckStatus.MISSING_TRUCK) {
+        if (status != null) {
+            if (status == TruckStatus.MISSING_TRUCK) {
                 return ctx.getString(R.string.status_missing_truck);
-            } else if (mEntry.status == TruckStatus.NEEDS_REPAIR) {
+            } else if (status == TruckStatus.NEEDS_REPAIR) {
                 return ctx.getString(R.string.status_needs_repair);
             }
         }

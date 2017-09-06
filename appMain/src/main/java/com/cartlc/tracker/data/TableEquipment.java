@@ -231,7 +231,12 @@ public class TableEquipment {
         return list;
     }
 
-    public List<Long> queryChecked() {
+    public List<DataEquipment> queryChecked() {
+        final String selection = KEY_CHECKED + "=1";
+        return query(selection, null);
+    }
+
+    public List<Long> queryIdsChecked() {
         ArrayList<Long> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID};
@@ -335,7 +340,7 @@ public class TableEquipment {
 
     void remove(long id) {
         String where = KEY_ROWID + "=?";
-        String [] whereArgs = { Long.toString(id) };
+        String[] whereArgs = {Long.toString(id)};
         mDb.delete(TABLE_NAME, where, whereArgs);
     }
 

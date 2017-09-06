@@ -45,6 +45,7 @@ import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.DataZipCode;
+import com.cartlc.tracker.etc.EntryStatus;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntry;
@@ -835,15 +836,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case PICTURE:
-                long picture_collection_id = PrefHelper.getInstance().getCurrentPictureCollectionId();
-                int numberTaken = TablePictureCollection.getInstance().countPictures(picture_collection_id);
-                StringBuilder sbuf = new StringBuilder();
-                sbuf.append(getString(R.string.title_picture));
-                sbuf.append(" ");
-                sbuf.append(numberTaken);
-                mTitle.setText(sbuf.toString());
+                EntryStatus status = new EntryStatus();
+                mTitle.setText(getString(R.string.title_picture, status.getNumPicturesTaken(), status.getNumPicturesNeeded()));
                 mPrev.setVisibility(View.VISIBLE);
-                if (mCurStageEditing || numberTaken == 0) {
+                if (mCurStageEditing || status.getNumPicturesTaken() == 0) {
                     mCurStageEditing = false;
                     if (!dispatchPictureRequest()) {
                         showError(getString(R.string.error_cannot_take_picture));
@@ -856,7 +852,8 @@ public class MainActivity extends AppCompatActivity {
                     mPictureList.setVisibility(View.VISIBLE);
                     mPictureAdapter.setList(
                             TablePictureCollection.getInstance().removeNonExistant(
-                                    TablePictureCollection.getInstance().queryPictures(picture_collection_id)));
+                                    TablePictureCollection.getInstance().queryPictures(PrefHelper.getInstance().getCurrentPictureCollectionId()
+                                    )));
                 }
                 break;
             case STATUS:
@@ -866,8 +863,7 @@ public class MainActivity extends AppCompatActivity {
                 mStatusFrame.setVisibility(View.VISIBLE);
                 mTitle.setText(R.string.title_status);
                 setStatusButton();
-                // Doing this twice. Oh well. (Once here and in confirm). But need to compute the status from something real.
-                mCurEntry = PrefHelper.getInstance().saveEntry();
+                mCurEntry = null;
                 showStatusHint();
                 break;
             case CONFIRM:
@@ -1094,7 +1090,12 @@ public class MainActivity extends AppCompatActivity {
         String hint = null;
         switch (mCurStage) {
             case STATUS:
-                hint = mCurEntry.computeStatus().getLongString(this);
+                if (mCurEntry == null) {
+                    EntryStatus status = new EntryStatus();
+                    hint = status.getLongString(this);
+                } else {
+                    hint = mCurEntry.computeStatus().getLongString(this);
+                }
                 break;
         }
         if (hint != null) {

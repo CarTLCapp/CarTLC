@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
-import timber.log.Timber;
 
 /**
  * Created by dug on 5/13/17.
