@@ -260,7 +260,6 @@ public class TableNote {
 
     public void updateValue(DataNote item) {
         mDb.beginTransaction();
-        Timber.d("MYDEBUG: TableNote.updateValue(): " + item.toString());
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_VALUE, item.value);

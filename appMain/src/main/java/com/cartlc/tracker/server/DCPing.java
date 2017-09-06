@@ -650,7 +650,6 @@ public class DCPing extends DCPost {
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
             jsonObject.accumulate("date", entry.date);
             jsonObject.accumulate("server_id", entry.serverId);
-            jsonObject.accumulate("resend", entry.uploadedMaster);
             DataTruck truck = entry.getTruck();
             if (truck.truckNumber > 0) {
                 jsonObject.accumulate("truck_number", truck.truckNumber);
@@ -708,7 +707,7 @@ public class DCPing extends DCPost {
                 }
                 jsonObject.put("picture", jarray);
             }
-            List<DataNote> notes = entry.getNotes();
+            List<DataNote> notes = entry.getNotesWithValuesOnly();
             if (notes.size() > 0) {
                 JSONArray jarray = new JSONArray();
                 for (DataNote note : notes) {

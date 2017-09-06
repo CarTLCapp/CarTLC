@@ -66,7 +66,7 @@ public class ConfirmationFrame {
             mAddressValue.setVisibility(View.VISIBLE);
             mAddressValue.setText(address);
         }
-        mNoteAdapter.setItems(entry.getNotes());
+        mNoteAdapter.setItems(entry.getNotesAllWithValuesOverlaid());
         DataTruck truck = entry.getTruck();
         if (truck.licensePlateNumber == null) {
             if (truck.truckNumber == 0) {

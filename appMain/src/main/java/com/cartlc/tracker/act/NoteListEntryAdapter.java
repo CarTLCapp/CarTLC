@@ -125,12 +125,19 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
 
     public void onDataChanged() {
         DataEntry entry = PrefHelper.getInstance().getCurrentEditEntry();
-        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        if (curGroup != null) {
-            mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId, entry);
-            pushToBottom("Other");
-            notifyDataSetChanged();
+        if (entry != null) {
+            mItems = entry.getNotesAllWithValuesOverlaid();
+        } else {
+            DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
+            if (curGroup != null) {
+                mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId);
+            } else {
+                mItems = new ArrayList<>();
+            }
         }
+        pushToBottom("Other");
+        notifyDataSetChanged();
+
     }
 
     void pushToBottom(String name) {

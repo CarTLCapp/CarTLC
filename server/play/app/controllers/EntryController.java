@@ -131,24 +131,19 @@ public class EntryController extends Controller {
         } else {
             entry.entry_time = new Date(value.longValue());
         }
+        boolean retServerId = false;
         value = json.findValue("server_id");
         if (value != null) {
             entry.id = value.longValue();
-        }
-        Boolean resend = null;
-        value = json.findValue("resend");
-        if (value != null) {
-            resend = value.booleanValue();
-            if (resend) {
-                Entry existing;
-                if (entry.id > 0) {
-                    existing = Entry.find.byId(entry.id);
-                } else {
-                    existing = Entry.findByDate(entry.tech_id, entry.entry_time);
-                }
-                if (existing != null) {
-                    entry = existing;
-                }
+            retServerId = true;
+            Entry existing;
+            if (entry.id > 0) {
+                existing = Entry.find.byId(entry.id);
+            } else {
+                existing = Entry.findByDate(entry.tech_id, entry.entry_time);
+            }
+            if (existing != null) {
+                entry = existing;
             }
         }
         int truck_number;
@@ -357,7 +352,7 @@ public class EntryController extends Controller {
             Logger.debug("Created new entry " + entry.id);
         }
         long ret_id;
-        if (resend != null) {
+        if (retServerId) {
             ret_id = entry.id;
         } else {
             ret_id = 0;

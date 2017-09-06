@@ -59,13 +59,44 @@ public class DataEntry {
         return "Invalid";
     }
 
-    public List<DataNote> getNotes() {
+    // Return all the notes, with values overlaid.
+    public List<DataNote> getNotesAllWithValuesOverlaid() {
+        // These are all the notes.
+        List<DataNote> allNotes = getNotesByProject();
+        // Get value overrides
+        List<DataNote> result = getNotesWithValuesOnly();
+        // Add to result notes without values.
+        for (DataNote note : allNotes) {
+            if (!contains(result, note)) {
+                result.add(note);
+            }
+        }
+        return result;
+    }
+
+    boolean contains(List<DataNote> list, DataNote check) {
+        for (DataNote note : list) {
+            if (note.id == check.id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Get all the notes as indicated by the project.
+    // This will also include any current edits in place as well.
+    public List<DataNote> getNotesByProject() {
+        return TableCollectionNoteProject.getInstance().getNotes(projectAddressCombo.projectNameId);
+    }
+
+    // Return only the notes with values.
+    public List<DataNote> getNotesWithValuesOnly() {
         return TableCollectionNoteEntry.getInstance().query(noteCollectionId);
     }
 
     public String getNotesLine() {
         StringBuilder sbuf = new StringBuilder();
-        for (DataNote note : getNotes()) {
+        for (DataNote note : getNotesWithValuesOnly()) {
             if (!TextUtils.isEmpty(note.value)) {
                 if (sbuf.length() > 0) {
                     sbuf.append(", ");
@@ -96,11 +127,11 @@ public class DataEntry {
 
     public void saveNotes(long collectionId) {
         noteCollectionId = collectionId;
-        TableCollectionNoteEntry.getInstance().save(projectAddressCombo.projectNameId, noteCollectionId);
+        TableCollectionNoteEntry.getInstance().save(noteCollectionId, getNotesByProject());
     }
 
     public void saveNotes() {
-        TableCollectionNoteEntry.getInstance().save(projectAddressCombo.projectNameId, noteCollectionId);
+        TableCollectionNoteEntry.getInstance().save(noteCollectionId, getNotesByProject());
     }
 
     public void checkPictureUploadComplete() {

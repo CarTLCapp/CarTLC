@@ -366,7 +366,7 @@ public class TableEntry {
     public void add(DataEntry entry) {
         mDb.beginTransaction();
         try {
-            TableCollectionEquipmentEntry.getInstance().add(entry.equipmentCollection);
+            TableCollectionEquipmentEntry.getInstance().save(entry.equipmentCollection);
             TablePictureCollection.getInstance().add(entry.pictureCollection);
 
             if (entry.id == 0) {

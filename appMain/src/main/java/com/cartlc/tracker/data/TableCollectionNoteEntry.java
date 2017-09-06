@@ -73,8 +73,10 @@ public class TableCollectionNoteEntry {
 
     // There are TWO note tables. One is TableCollectionnNoteProject which stores the
     // defined notes for each project. The other is this one which stores the values.
-    public void save(long projectNameId, long collectionId) {
-        List<DataNote> notes = TableCollectionNoteProject.getInstance().getNotes(projectNameId);
+    //
+    // The values are stored right now in the TableNote table which is represented by the incoming
+    // notes. We want them to also be stored now into this table.
+    public void save(long collectionId, List<DataNote> notes) {
         mDb.beginTransaction();
         try {
             removeCollection(collectionId);
@@ -96,6 +98,7 @@ public class TableCollectionNoteEntry {
         }
     }
 
+    // Get list of notes the associated collection id in this table and their values.
     public List<DataNote> query(long collectionId) {
         List<DataNote> list = new ArrayList();
         try {
@@ -107,13 +110,9 @@ public class TableCollectionNoteEntry {
             int idxValueId = cursor.getColumnIndex(KEY_VALUE);
             DataNote note;
             while (cursor.moveToNext()) {
-                note = TableNote.getInstance().query(cursor.getLong(idxNoteId));
-                if (note != null) {
-                    note.value = cursor.getString(idxValueId);
-                    list.add(note);
-                } else {
-                    Timber.e("Unexpected bad note ID of " + cursor.getLong(idxNoteId));
-                }
+                note = TableNote.getInstance().query(cursor.getLong(idxNoteId)); // Fill out with original values.
+                note.value = cursor.getString(idxValueId); // override
+                list.add(note);
             }
             cursor.close();
         } catch (Exception ex) {

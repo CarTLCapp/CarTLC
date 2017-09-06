@@ -444,7 +444,7 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public long getNextNoteCollectionID() {
-        return getLong(KEY_NEXT_NOTE_COLLECTION_ID, 0L);
+        return getLong(KEY_NEXT_NOTE_COLLECTION_ID, 1L);
     }
 
     public void incNextNoteCollectionID() {

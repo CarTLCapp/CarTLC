@@ -84,11 +84,12 @@ public abstract class TableCollection {
         return count;
     }
 
-    public void add(DataCollectionEquipment collection) {
-        add(collection.id, collection.equipmentListIds);
+    public void save(DataCollectionEquipment collection) {
+        save(collection.id, collection.equipmentListIds);
     }
 
-    public void add(long collectionId, List<Long> ids) {
+    public void save(long collectionId, List<Long> ids) {
+        removeByCollectionId(collectionId);
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
