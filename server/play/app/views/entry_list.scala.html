@@ -37,7 +37,7 @@
 
     } else {
 
-        <table class="entries zebra-striped">
+        <table>
             <thead>
                 <tr>
                     @header("tech_id", "Name")
@@ -57,7 +57,7 @@
                 </tr>
             </thead>
             <tbody>
-
+            
                 @for(entry <- currentPage.getList()) {
                     <tr>
                         <td>@entry.getTechName()</td>

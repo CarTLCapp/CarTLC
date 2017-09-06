@@ -48,6 +48,16 @@ public class EntryStatus {
         return "Partial Install";
     }
 
+    public Entry.Status getStatus() {
+        if (entry.status != null) {
+            return entry.status;
+        }
+        if (complete) {
+            return Entry.Status.COMPLETE;
+        }
+        return Entry.Status.PARTIAL;
+    }
+
     public String getLongLine() {
         StringBuilder sbuf = new StringBuilder();
         if (entry.status != null) {

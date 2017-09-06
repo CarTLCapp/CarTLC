@@ -61,7 +61,7 @@ public class Entry extends com.avaje.ebean.Model {
             } else if (this == NEEDS_REPAIR) {
                 return "#ff0000";
             }
-            return "#ff000000";
+            return "";
         }
     }
 
@@ -189,10 +189,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getCellColor() {
-        if (status != null) {
-            return status.getCellColor();
-        }
-        return "#ff000000";
+        return getEntryStatus().getStatus().getCellColor();
     }
 
     public String getDate() {
