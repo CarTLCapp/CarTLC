@@ -16,13 +16,13 @@ import play.Logger;
 
 public class EntryStatus {
 
-    Entry   entry;
+    Entry           entry;
     List<Equipment> checkedEquipments;
     List<Equipment> allEquipments;
-    int     countPictures;
-    boolean complete;
-    boolean completePictures;
-    boolean completeEquipments;
+    int             countPictures;
+    boolean         complete;
+    boolean         completePictures;
+    boolean         completeEquipments;
 
     public EntryStatus(Entry entry) {
         this.entry = entry;
@@ -87,7 +87,7 @@ public class EntryStatus {
                 sbuf.append(equipment.name);
                 unprocessed.remove(equipment);
             }
-            sbuf.append("\nEquipments Still Needed: " );
+            sbuf.append("\nEquipments Still Needed: ");
             comma = false;
             for (Equipment equipment : unprocessed) {
                 if (comma) {

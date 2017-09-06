@@ -39,6 +39,14 @@ public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
         return entry.project_id;
     }
 
+    @Override
+    public void compute() {
+        super.compute();
+        for (Entry entry : mComputed) {
+            entry.clearEntryStatus();
+        }
+    }
+
     public int compare(Entry o1, Entry o2) {
         int value;
         if (mNextParameters.sortBy == SortBy.TRUCK_NUMBER) {

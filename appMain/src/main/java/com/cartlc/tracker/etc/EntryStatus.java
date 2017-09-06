@@ -24,9 +24,9 @@ public class EntryStatus {
     final List<DataEquipment> checkedEquipment;
     final TruckStatus         status;
     final int                 countPictures;
-    boolean isComplete;
-    boolean isCompleteEquip;
-    boolean isCompletePicture;
+    final boolean             isComplete;
+    final boolean             isCompleteEquip;
+    final boolean             isCompletePicture;
 
     public EntryStatus(DataEntry entry) {
         this.allEquipment = removeOther(TableCollectionEquipmentProject.getInstance().queryForProject(entry.projectAddressCombo.projectNameId).getEquipment());
@@ -38,14 +38,6 @@ public class EntryStatus {
         isComplete = isCompleteEquip && isCompletePicture;
     }
 
-    public int getNumPicturesTaken() {
-        return countPictures;
-    }
-
-    public int getNumPicturesNeeded() {
-        return allEquipment.size();
-    }
-
     public EntryStatus() {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
         if (curGroup != null) {
@@ -54,10 +46,21 @@ public class EntryStatus {
         } else {
             allEquipment = new ArrayList<>();
         }
-        checkedEquipment = TableEquipment.getInstance().queryChecked();
+        checkedEquipment = removeOther(TableEquipment.getInstance().queryChecked());
         long picture_collection_id = PrefHelper.getInstance().getCurrentPictureCollectionId();
         countPictures = TablePictureCollection.getInstance().countPictures(picture_collection_id);
         status = PrefHelper.getInstance().getStatus();
+        isCompletePicture = countPictures >= allEquipment.size();
+        isCompleteEquip = checkedEquipment.size() >= allEquipment.size();
+        isComplete = isCompleteEquip && isCompletePicture;
+    }
+
+    public int getNumPicturesTaken() {
+        return countPictures;
+    }
+
+    public int getNumPicturesNeeded() {
+        return allEquipment.size();
     }
 
     public String getString(Context ctx) {

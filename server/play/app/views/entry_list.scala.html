@@ -73,7 +73,7 @@
                         <td><a href="@routes.EntryController.pictures(entry.id)">Pictures</a></td>
                         <td><a href="@routes.EntryController.notes(entry.id)">Notes</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
-                        <td>@entry.getStatusShort()</td>
+                        <td bgcolor="@entry.getCellColor()">@entry.getStatusShort()</td>
                     </tr>
                 }
 

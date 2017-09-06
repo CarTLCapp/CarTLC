@@ -50,6 +50,19 @@ public class Entry extends com.avaje.ebean.Model {
             }
             return Status.INVALID;
         }
+
+        public String getCellColor() {
+            if (this == COMPLETE) {
+                return "#00ff00";
+            } else if (this == PARTIAL) {
+                return "#00ffff";
+            } else if (this == MISSING) {
+                return "#00fffa";
+            } else if (this == NEEDS_REPAIR) {
+                return "#ff0000";
+            }
+            return "#ff000000";
+        }
     }
 
     @Id
@@ -81,6 +94,8 @@ public class Entry extends com.avaje.ebean.Model {
 
     @Constraints.Required
     public Status status;
+
+    EntryStatus entryStatus = null;
 
     public static Finder<Long, Entry> find = new Finder<Long, Entry>(Entry.class);
 
@@ -154,14 +169,30 @@ public class Entry extends com.avaje.ebean.Model {
         return company.zipcode;
     }
 
+    EntryStatus getEntryStatus() {
+        if (entryStatus == null) {
+            entryStatus = new EntryStatus(this);
+        }
+        return entryStatus;
+    }
+
+    public void clearEntryStatus() {
+        entryStatus = null;
+    }
+
     public String getStatusShort() {
-        EntryStatus status = new EntryStatus(this);
-        return new EntryStatus(this).getShortLine();
+        return getEntryStatus().getShortLine();
     }
 
     public String getStatusLong() {
-        EntryStatus status = new EntryStatus(this);
-        return new EntryStatus(this).getLongLine();
+        return getEntryStatus().getLongLine();
+    }
+
+    public String getCellColor() {
+        if (status != null) {
+            return status.getCellColor();
+        }
+        return "#ff000000";
     }
 
     public String getDate() {
@@ -381,5 +412,6 @@ public class Entry extends com.avaje.ebean.Model {
             }
         }
     }
+
 }
 
