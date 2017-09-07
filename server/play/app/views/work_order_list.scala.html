@@ -61,6 +61,7 @@
                     @header("zipcode", "ZIP")
                     @header("truck_line", "Truck")
                     <th>Fulfilled</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,6 +83,7 @@
                                 <em>-</em>
                             }
                         </td>
+                        <td bgcolor="@order.getCellColor()">@order.getStatus()</td>
                     </tr>
                 }
 

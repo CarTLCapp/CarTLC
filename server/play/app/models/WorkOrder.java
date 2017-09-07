@@ -159,6 +159,22 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return Entry.getFulfilledBy(this) != null;
     }
 
+    public String getStatus() {
+        Entry entry  = Entry.getFulfilledBy(this);
+        if (entry == null) {
+            return "";
+        }
+        return entry.getStatusShort();
+    }
+
+    public String getCellColor() {
+        Entry entry  = Entry.getFulfilledBy(this);
+        if (entry == null) {
+            return "";
+        }
+        return entry.getCellColor();
+    }
+
     static List<WorkOrder> findByUploadId(long upload_id, Client client) {
         if (client == null || client.is_admin) {
             return find.where()
