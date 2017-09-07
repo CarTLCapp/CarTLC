@@ -23,6 +23,7 @@ public abstract class BaseList<T> {
         TIME("entry_time"),
         PROJECT("project_id"),
         TRUCK_NUMBER("truck_number"),
+        TRUCK_LINE("truck_line"),
         COMPANY("company"),
         STATE("state"),
         CITY("city"),
@@ -199,6 +200,7 @@ public abstract class BaseList<T> {
                 case STREET:
                 case ZIPCODE:
                 case TRUCK_NUMBER:
+                case TRUCK_LINE:
                 case PROJECT:
                 case CLIENT:
                     mComputed = getRawList();

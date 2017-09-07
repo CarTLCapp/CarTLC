@@ -45,11 +45,14 @@ public class ProgressGrid extends WorkOrderList {
 
     public String getCellString(int row, int col) {
         WorkOrder order = getWorkOrder(row, col);
-        Truck truck = Truck.get(order.truck_id);
-        if (truck == null) {
+        if (order == null) {
             return "";
         }
-        return Integer.toString(truck.truck_number);
+        int truck_number = order.getTruckNumber();
+        if (truck_number == 0) {
+            return "";
+        }
+        return Integer.toString(truck_number);
     }
 
     public String getCellColor(int row, int col) {

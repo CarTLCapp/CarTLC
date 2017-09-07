@@ -67,6 +67,8 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
     public int compare(WorkOrder o1, WorkOrder o2) {
         int value;
         if (mNextParameters.sortBy == SortBy.TRUCK_NUMBER) {
+            value = o1.getTruckNumber() - o2.getTruckNumber();
+        } else if (mNextParameters.sortBy == SortBy.TRUCK_LINE) {
             value = o1.getTruckLine().compareTo(o2.getTruckLine());
         } else if (mNextParameters.sortBy == SortBy.PROJECT) {
             value = o1.getProjectLine().compareTo(o2.getProjectLine());
