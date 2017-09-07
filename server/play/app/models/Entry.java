@@ -33,7 +33,7 @@ public class Entry extends com.avaje.ebean.Model {
         NEEDS_REPAIR("Needs Repair"),
         INVALID("Invalid");
 
-        String name;
+        final String name;
 
         Status(String name) {
             this.name = name;
@@ -50,7 +50,7 @@ public class Entry extends com.avaje.ebean.Model {
 
         public static Status from(String match) {
             for (Status value : values()) {
-                if (value.toString().compareToIgnoreCase(match)) {
+                if (value.toString().compareToIgnoreCase(match) == 0) {
                     return value;
                 }
             }
