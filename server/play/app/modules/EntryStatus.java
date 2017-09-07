@@ -35,17 +35,7 @@ public class EntryStatus {
     }
 
     public String getShortLine() {
-        if (entry.status != null) {
-            if (entry.status == Entry.Status.MISSING) {
-                return "Missing Truck";
-            } else if (entry.status == Entry.Status.NEEDS_REPAIR) {
-                return "Needs Repair";
-            }
-        }
-        if (complete) {
-            return "Complete";
-        }
-        return "Partial Install";
+        return getStatus().getName();
     }
 
     public Entry.Status getStatus() {
@@ -61,19 +51,15 @@ public class EntryStatus {
     public String getLongLine() {
         StringBuilder sbuf = new StringBuilder();
         if (entry.status != null) {
-            if (entry.status == Entry.Status.MISSING) {
-                sbuf.append("Missing Truck");
-            } else if (entry.status == Entry.Status.NEEDS_REPAIR) {
-                sbuf.append("Needs Repair");
-            }
+            sbuf.append(entry.status.getName());
         }
         if (sbuf.length() > 0) {
             sbuf.append("\n");
         }
         if (complete) {
-            sbuf.append("Complete");
+            sbuf.append(Entry.Status.COMPLETE.getName());
         } else {
-            sbuf.append("Partial Install:");
+            sbuf.append(Entry.Status.PARTIAL.getName());
         }
         sbuf.append("\n");
         sbuf.append(checkedEquipments.size());

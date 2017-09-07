@@ -74,4 +74,21 @@ public class ProgressGrid extends WorkOrderList {
     public int getNumCols() {
         return mNumCols;
     }
+
+    public static String getKeyColor(String name) {
+        Entry.Status status = Entry.Status.from(name);
+        if (status != null) {
+            return status.getCellColor();
+        }
+        return "";
+    }
+
+    public static String getKeyName(String name) {
+        Entry.Status status = Entry.Status.from(name);
+        if (status != null) {
+            return status.getName();
+        }
+        return "";
+    }
+
 }

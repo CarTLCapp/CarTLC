@@ -5,13 +5,22 @@
     <h1 id="homeTitle">Progress Grid</h1>
 
     <table>
-            @for(row <- 0 to data.getNumRows()) {
+            @for(row <- 0 to data.getNumRows()-1) {
                 <tr>
-                    @for(col <- 0 to data.getNumCols()) {
+                    @for(col <- 0 to data.getNumCols()-1) {
                         <td bgcolor="@data.getCellColor(row, col)">@data.getCellString(row, col)</td>
                     }
                 </tr>
             }
+    </table>
+
+    <h3>Key</h3>
+
+    <table>
+      <tr><td bgcolor="@ProgressGrid.getKeyColor(""""complete"""")">@ProgressGrid.getKeyColor("complete")</td></tr>
+      <tr><td bgcolor="@ProgressGrid.getKeyColor(""""partial"""")">@ProgressGrid.getKeyColor("partial")</td></tr>
+      <tr><td bgcolor="@ProgressGrid.getKeyColor(""""missing"""")">@ProgressGrid.getKeyColor("missing")</td></tr>
+      <tr><td bgcolor="@ProgressGrid.getKeyColor(""""needs_repair"""")">@ProgressGrid.getKeyColor("needs_repair")</td></tr>
     </table>
 
 }

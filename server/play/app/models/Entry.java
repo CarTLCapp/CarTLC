@@ -27,11 +27,17 @@ public class Entry extends com.avaje.ebean.Model {
     private static final long serialVersionUID = 1L;
 
     public enum Status {
-        COMPLETE,
-        PARTIAL,
-        MISSING,
-        NEEDS_REPAIR,
-        INVALID;
+        COMPLETE("Complete"),
+        PARTIAL("Partial Install"),
+        MISSING("Missing Truck"),
+        NEEDS_REPAIR("Needs Repair"),
+        INVALID("Invalid");
+
+        String name;
+
+        Status(String name) {
+            this.name = name;
+        }
 
         public static Status from(int ord) {
             for (Status value : values()) {
@@ -44,7 +50,7 @@ public class Entry extends com.avaje.ebean.Model {
 
         public static Status from(String match) {
             for (Status value : values()) {
-                if (value.toString().equals(match)) {
+                if (value.getName().equals(match)) {
                     return value;
                 }
             }
@@ -62,6 +68,10 @@ public class Entry extends com.avaje.ebean.Model {
                 return "#ff01ff";
             }
             return "";
+        }
+
+        public String getName() {
+            return name;
         }
     }
 
