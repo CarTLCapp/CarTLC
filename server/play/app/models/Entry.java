@@ -29,7 +29,7 @@ public class Entry extends com.avaje.ebean.Model {
     public enum Status {
         COMPLETE("Complete"),
         PARTIAL("Partial Install"),
-        MISSING("Missing Truck"),
+        MISSING_TRUCK("Missing Truck"),
         NEEDS_REPAIR("Needs Repair"),
         INVALID("Invalid");
 
@@ -62,7 +62,7 @@ public class Entry extends com.avaje.ebean.Model {
                 return "#00ff00";
             } else if (this == PARTIAL) {
                 return "#ff6b4b";
-            } else if (this == MISSING) {
+            } else if (this == MISSING_TRUCK) {
                 return "#00fffa";
             } else if (this == NEEDS_REPAIR) {
                 return "#ff01ff";
