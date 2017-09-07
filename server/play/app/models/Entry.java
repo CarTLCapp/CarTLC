@@ -50,7 +50,7 @@ public class Entry extends com.avaje.ebean.Model {
 
         public static Status from(String match) {
             for (Status value : values()) {
-                if (value.getName().equals(match)) {
+                if (value.toString().compareToIgnoreCase(match)) {
                     return value;
                 }
             }

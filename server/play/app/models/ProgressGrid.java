@@ -76,6 +76,7 @@ public class ProgressGrid extends WorkOrderList {
     }
 
     public static String getKeyColor(String name) {
+        Logger.debug("GET KEY COLOR FOR " + name);
         Entry.Status status = Entry.Status.from(name);
         if (status != null) {
             return status.getCellColor();
@@ -84,6 +85,7 @@ public class ProgressGrid extends WorkOrderList {
     }
 
     public static String getKeyName(String name) {
+        Logger.debug("GET KEY NAME FOR " + name);
         Entry.Status status = Entry.Status.from(name);
         if (status != null) {
             return status.getName();
