@@ -55,11 +55,11 @@ public class Entry extends com.avaje.ebean.Model {
             if (this == COMPLETE) {
                 return "#00ff00";
             } else if (this == PARTIAL) {
-                return "#00ffff";
+                return "#ff6b4b";
             } else if (this == MISSING) {
                 return "#00fffa";
             } else if (this == NEEDS_REPAIR) {
-                return "#ff0000";
+                return "#ff01ff";
             }
             return "";
         }
@@ -169,7 +169,7 @@ public class Entry extends com.avaje.ebean.Model {
         return company.zipcode;
     }
 
-    EntryStatus getEntryStatus() {
+    public EntryStatus getEntryStatus() {
         if (entryStatus == null) {
             entryStatus = new EntryStatus(this);
         }
@@ -383,14 +383,26 @@ public class Entry extends com.avaje.ebean.Model {
         return items.size() > 0;
     }
 
-    public static List<Entry> getFulfilledBy(WorkOrder order) {
-        return find.where()
+    public static Entry getFulfilledBy(WorkOrder order) {
+        List<Entry> list = find.where()
                 .eq("company_id", order.company_id)
                 .eq("project_id", order.project_id)
                 .eq("truck_id", order.truck_id)
                 .findList();
+        if (list.size() == 0) {
+            return null;
+        }
+        if (list.size() > 1) {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append("More than entries found to fulfill workorder");
+            for (Entry entry : list) {
+                sbuf.append("\n");
+                sbuf.append(entry.toString());
+            }
+            Logger.error(sbuf.toString());
+        }
+        return list.get(0);
     }
-
 
     public void loadPictures(String host, AmazonHelper amazonHelper) {
         List<PictureCollection> pictures = getPictures();
@@ -408,6 +420,20 @@ public class Entry extends com.avaje.ebean.Model {
                 }
             }
         }
+    }
+
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(id);
+        sbuf.append(":");
+        sbuf.append(getDate());
+        sbuf.append(",");
+        sbuf.append(getAddressLine());
+        sbuf.append(",");
+        sbuf.append(getTruckLine());
+        sbuf.append(",");
+        sbuf.append(getTechName());
+        return sbuf.toString();
     }
 
 }

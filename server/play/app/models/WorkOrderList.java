@@ -15,8 +15,8 @@ import play.Logger;
  */
 public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<WorkOrder> {
 
-    int lastUploadCount = -1;
-    Client client;
+    protected int lastUploadCount = -1;
+    protected Client client;
 
     public WorkOrderList() {
         super();

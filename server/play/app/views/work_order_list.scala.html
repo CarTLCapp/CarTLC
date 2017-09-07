@@ -31,7 +31,9 @@
 
 @main("FleetTLC - List Work Orders", client) {
 
-    <h1 id="homeTitle">@Messages("workorder.list.title", currentPage.getTotalRowCount())</h1>
+    <h1 id="homeTitle" class="fill">@Messages("workorder.list.title", currentPage.getTotalRowCount())
+        <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.viewProgressGrid()">Progress Grid</a></span>
+    </h1>
 
     @if(message.length() > 0) {
         <div class="message">

@@ -120,6 +120,10 @@ public abstract class BaseList<T> {
     public BaseList() {
     }
 
+    public void setSortBy(SortBy sortBy) {
+        mNextParameters.sortBy = sortBy;
+    }
+
     public void setSortBy(String sortBy) {
         mNextParameters.sortBy = SortBy.from(sortBy);
     }
@@ -128,8 +132,16 @@ public abstract class BaseList<T> {
         mNextParameters.order = Order.from(order);
     }
 
+    public void setOrder(Order order) {
+        mNextParameters.order = order;
+    }
+
     public void setPage(int page) {
         mPage = page;
+    }
+
+    public void setPageSize(int pageSize) {
+        mPageSize = pageSize;
     }
 
     public void clearCache() {

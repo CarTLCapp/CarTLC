@@ -130,25 +130,25 @@ public class WorkOrder extends com.avaje.ebean.Model {
         if (truck == null) {
             return null;
         }
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(truck.truck_number);
         if (truck.license_plate != null) {
-            return truck.license_plate;
+            sbuf.append(":");
+            sbuf.append(truck.license_plate);
         }
-        return Integer.toString(truck.truck_number);
+        return sbuf.toString();
     }
 
     public String getFulfilledDate() {
-        List<Entry> list = Entry.getFulfilledBy(this);
-        if (list == null || list.size() <= 0) {
+        Entry entry  = Entry.getFulfilledBy(this);
+        if (entry == null) {
             return "";
         }
-        Entry entry = list.get(0);
-
         return entry.getDate();
     }
 
     public boolean isFulfilled() {
-        List<Entry> list = Entry.getFulfilledBy(this);
-        return list != null && list.size() > 1;
+        return Entry.getFulfilledBy(this) != null;
     }
 
     static List<WorkOrder> findByUploadId(long upload_id, Client client) {

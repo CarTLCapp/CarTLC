@@ -89,6 +89,7 @@ POST    /work/upload           controllers.WorkOrderController.upload()
 GET     /work/list             controllers.WorkOrderController.list(p:Int ?= 0, s ?= "client_id", o ?= "desc", message ?= "")
 GET     /work/:id/view         controllers.WorkOrderController.view(id:Long)
 GET     /work/delete_last      controllers.WorkOrderController.deleteLastUploaded()
+GET     /work/progress_grid    controllers.WorkOrderController.viewProgressGrid()
 
 ### ENTRIES ###
 

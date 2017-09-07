@@ -32,6 +32,7 @@ public class WorkOrderController extends Controller {
     private FormFactory formFactory;
     private AmazonHelper amazonHelper;
     private WorkOrderList workList = new WorkOrderList();
+    private ProgressGrid progressGrid = new ProgressGrid();
 
     @Inject
     public WorkOrderController(FormFactory formFactory, AmazonHelper amazonHelper) {
@@ -58,6 +59,15 @@ public class WorkOrderController extends Controller {
         workList.setProjects();
         workList.compute();
         return ok(views.html.work_order_list.render(workList, sortBy, order, Secured.getClient(ctx()), message));
+    }
+
+
+    @Security.Authenticated(Secured.class)
+    public Result viewProgressGrid() {
+        progressGrid.setClient(Secured.getClient(ctx()));
+        progressGrid.setProjects();
+        progressGrid.compute();
+        return ok(views.html.progress_grid.render(progressGrid, Secured.getClient(ctx())));
     }
 
     public Result uploadForm() {
@@ -121,11 +131,10 @@ public class WorkOrderController extends Controller {
         if (order == null) {
             return badRequest("Could not find work order ID " + work_order_id);
         }
-        List<Entry> list = Entry.getFulfilledBy(order);
-        if (list == null || list.size() <= 0) {
+        Entry entry = Entry.getFulfilledBy(order);
+        if (entry == null) {
             return badRequest("No fulfilled entry for this work order");
         }
-        Entry entry = list.get(0);
         entry.loadPictures(request().host(), amazonHelper);
         return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
     }
