@@ -132,6 +132,10 @@ public class EntryStatus {
         return sbuf.toString();
     }
 
+    public boolean isCompleteEquipment() {
+        return isCompleteEquip;
+    }
+
     List<DataEquipment> removeOther(List<DataEquipment> list) {
         ArrayList<DataEquipment> revised = new ArrayList();
         for (DataEquipment equipment : list) {

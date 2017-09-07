@@ -71,7 +71,12 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
         holder.projectAddress.setText(item.getAddressLine());
         holder.status.setText(getStatus(item).getLine(mContext));
         holder.notes.setText(item.getNotesLine());
-        holder.equipments.setText(getEquipmentNeeded(item));
+        if (getStatus(item).isCompleteEquipment()) {
+            holder.equipments.setVisibility(View.GONE);
+        } else {
+            holder.equipments.setText(getEquipmentNeeded(item));
+            holder.equipments.setVisibility(View.VISIBLE);
+        }
         if (TextUtils.isEmpty(holder.notes.getText().toString().trim())) {
             holder.notes.setVisibility(View.GONE);
         } else {
