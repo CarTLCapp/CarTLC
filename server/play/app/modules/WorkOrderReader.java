@@ -14,55 +14,9 @@ import models.WorkOrder;
 import models.Version;
 import play.db.ebean.Transactional;
 import play.Logger;
+import modules.WorkOrderField;
 
 public class WorkOrderReader {
-
-    enum Field {
-        COMPANY("company"),
-        STREET("address line 1", "address 1", "street"),
-        CITY("city"),
-        STATE("state"),
-        ZIP("zip", "zip code"),
-        TRUCK_NUMBER("UNIT #", "Truck #"),
-        LICENSE("License Plate", "License Number");
-
-        static Field find(String name) {
-            for (Field field : values()) {
-                if (field.match(name)) {
-                    return field;
-                }
-            }
-            return null;
-        }
-
-        ArrayList<String> matches = new ArrayList<String>();
-
-        Field(String ... values) {
-            for (int i = 0; i < values.length; i++) {
-                matches.add(values[i]);
-            }
-        }
-
-        boolean match(String name) {
-            for (String match : matches) {
-                if (match.compareToIgnoreCase(name.trim()) == 0) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public String toString() {
-            StringBuilder sbuf = new StringBuilder();
-            for (String name : matches) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(",");
-                }
-                sbuf.append(name);
-            }
-            return sbuf.toString();
-        }
-    }
 
     HashMap<Integer,Integer> fieldPos = new HashMap<Integer,Integer>();
     ArrayList<String> errors = new ArrayList<String>();
@@ -104,7 +58,7 @@ public class WorkOrderReader {
                     List<String> names = Arrays.asList(line.split(","));
                     for (int pos = 0; pos < names.size(); pos++) {
                         String name = names.get(pos).trim();
-                        Field field = Field.find(name);
+                        WorkOrderField field = WorkOrderField.find(name);
                         if (field != null) {
                             if (fieldPos.containsKey(field.ordinal())) {
                                 error("This field exists more than once: " + field.toString());
@@ -125,8 +79,8 @@ public class WorkOrderReader {
                         continue;
                     }
                     Truck truck = new Truck();
-                    truck.truck_number = getFieldValueInt(values, Field.TRUCK_NUMBER);
-                    truck.license_plate = getFieldValue(values, Field.LICENSE);
+                    truck.truck_number = getFieldValueInt(values, WorkOrderField.TRUCK_NUMBER);
+                    truck.license_plate = getFieldValue(values, WorkOrderField.LICENSE);
                     Truck etruck = Truck.findFirst(truck.truck_number, truck.license_plate);
                     long truck_id;
                     if (etruck == null) {
@@ -149,11 +103,11 @@ public class WorkOrderReader {
                     order.upload_id = upload_id;
                     order.truck_id = truck_id;
                     Company company = new Company();
-                    company.street = getFieldValue(values, Field.STREET);
-                    company.city = getFieldValue(values, Field.CITY);
-                    company.state = getFieldValue(values, Field.STATE);
-                    company.zipcode = getFieldValue(values, Field.ZIP);
-                    company.name = getFieldValue(values, Field.COMPANY);
+                    company.street = getFieldValue(values, WorkOrderField.STREET);
+                    company.city = getFieldValue(values, WorkOrderField.CITY);
+                    company.state = getFieldValue(values, WorkOrderField.STATE);
+                    company.zipcode = getFieldValue(values, WorkOrderField.ZIP);
+                    company.name = getFieldValue(values, WorkOrderField.COMPANY);
                     Company existing = Company.has(company);
                     if (existing == null) {
                         company.created_by = (int) client_id;
@@ -228,7 +182,7 @@ public class WorkOrderReader {
         return sbuf.toString();
     }
 
-    String getFieldValue(List<String> values, Field field) {
+    String getFieldValue(List<String> values, WorkOrderField field) {
         if (fieldPos.containsKey(field.ordinal())) {
             int pos = fieldPos.get(field.ordinal());
             if (pos < values.size()) {
@@ -238,7 +192,7 @@ public class WorkOrderReader {
         return null;
     }
 
-    int getFieldValueInt(List<String> values, Field field) {
+    int getFieldValueInt(List<String> values, WorkOrderField field) {
         String value = getFieldValue(values, field);
         if (value == null) {
             return 0;

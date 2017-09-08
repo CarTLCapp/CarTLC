@@ -104,7 +104,11 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return project.name;
     }
 
-    public String getCompany() {
+    public Company getCompany() {
+        return Company.get(company_id);
+    }
+
+    public String getCompanyName() {
         Company company = Company.get(company_id);
         if (company == null) {
             return "";
@@ -142,6 +146,10 @@ public class WorkOrder extends com.avaje.ebean.Model {
             return "";
         }
         return company.zipcode;
+    }
+
+    public Truck getTruck() {
+        return Truck.get(truck_id);
     }
 
     public String getTruckLine() {

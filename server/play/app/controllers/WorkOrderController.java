@@ -70,18 +70,18 @@ public class WorkOrderController extends Controller {
         return ok(views.html.progress_grid.render(progressGrid, Secured.getClient(ctx())));
     }
 
-    public Result uploadForm() {
-        return uploadForm("");
+    public Result importWorkOrdersForm() {
+        return importWorkOrdersForm("");
     }
 
     @Security.Authenticated(Secured.class)
-    public Result uploadForm(String errors) {
+    public Result importWorkOrdersForm(String errors) {
         Form<WorkImport> importForm = formFactory.form(WorkImport.class);
-        return ok(views.html.work_order_upload.render(importForm, Secured.getClient(ctx()), errors));
+        return ok(views.html.work_order_import.render(importForm, Secured.getClient(ctx()), errors));
     }
 
     @Security.Authenticated(Secured.class)
-    public Result upload() {
+    public Result importWorkOrders() {
         Form<WorkImport> importForm = formFactory.form(WorkImport.class).bindFromRequest();
         StringBuilder sbuf = new StringBuilder();
         String projectName = importForm.get().project;
@@ -122,7 +122,50 @@ public class WorkOrderController extends Controller {
         if (sbuf.length() == 0) {
             return INDEX();
         } else {
-            return uploadForm(sbuf.toString());
+            return importWorkOrdersForm(sbuf.toString());
+        }
+    }
+
+    public Result exportWorkOrdersForm() {
+        return exportWorkOrdersForm("");
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result exportWorkOrdersForm(String errors) {
+        return ok(views.html.work_order_export.render(Secured.getClient(ctx()), errors));
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result exportWorkOrders() {
+        StringBuilder sbuf = new StringBuilder();
+        MultipartFormData<File> body = request().body().asMultipartFormData();
+        if (body != null) {
+            FilePart<File> exportname = body.getFile("filename");
+            if (exportname != null) {
+                String fileName = exportname.getFilename();
+                if (fileName.trim().length() > 0) {
+                    File file = exportname.getFile();
+                    Client client = Secured.getClient(ctx());
+                    WorkOrderWriter writer = new WorkOrderWriter(client);
+                    if (!writer.save(file)) {
+                        sbuf.append("Errors:\n");
+                        sbuf.append(writer.getError());
+                    } else {
+                        return INDEX();
+                    }
+                } else {
+                    sbuf.append("No filename entered");
+                }
+            } else {
+                sbuf.append("No filename entered");
+            }
+        } else {
+            sbuf.append("Invalid call");
+        }
+        if (sbuf.length() == 0) {
+            return INDEX();
+        } else {
+            return exportWorkOrdersForm(sbuf.toString());
         }
     }
 
