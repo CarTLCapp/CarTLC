@@ -28,9 +28,9 @@
                 <a href="@routes.ProjectController.enable(id)" class="btn">Enable Project</a>
             } else {
                 @if(Entry.hasEntryForProject(id)) {
-                    <input type="submit" value="Disable Project" class="btn danger">
+                    <input type="submit" value="Disable Project" class="btn danger" onclick="return alert('The project, since it has entries, will be moved to the disabled list.');">
                 } else {
-                    <input type="submit" value="Delete Project" class="btn danger">
+                    <input type="submit" value="Delete Project" class="btn danger" onclick="return confirm('Are you sure you wish to delete this project?');">
                 }
             }
         }

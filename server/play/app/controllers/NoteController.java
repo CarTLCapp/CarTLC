@@ -43,7 +43,17 @@ public class NoteController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result list() {
-        return ok(views.html.note_list.render(Note.list(), Secured.getClient(ctx())));
+        return list(false);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result list_disabled() {
+        return list(true);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result list(boolean disabled) {
+        return ok(views.html.note_list.render(Note.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
     /**

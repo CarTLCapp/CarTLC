@@ -47,15 +47,14 @@
 
     }
 
-
     @b3.form(routes.EquipmentController.delete(id), 'class -> "topRight") {
         @if(Equipment.isDisabled(id)) {
             <a href="@routes.EquipmentController.enable(id)" class="btn">Enable Equipment</a>
         } else {
             @if(Entry.hasEntryForEquipment(id)) {
-                <input type="submit" value="Disable equipment" class="btn danger">
+                <input type="submit" value="Disable equipment" class="btn danger" onclick="return alert('The equipment, since it has entries, will be moved to the disabled list.');">
             } else {
-                <input type="submit" value="Delete equipment" class="btn danger">
+                <input type="submit" value="Delete equipment" class="btn danger" onclick="return confirm('Are you sure you wish to delete this equipment?');">
             }
         }
     }

@@ -1,4 +1,4 @@
-@(currentPage: com.avaje.ebean.PagedList[Company], currentSortBy: String, currentOrder: String, currentFilter: String, client : Client)
+@(currentPage: com.avaje.ebean.PagedList[Company], currentSortBy: String, currentOrder: String, currentFilter: String, client : Client, disabled : Boolean)
 
 @link(newPage:Int, newSortBy:String) = @{
     var sortBy = currentSortBy
@@ -16,7 +16,7 @@
         }
     }
     // Generate the link
-    routes.CompanyController.list(newPage, sortBy, order, currentFilter)
+    routes.CompanyController.list(newPage, sortBy, order, currentFilter, disabled)
 }
 
 @header(key:String, title:String) = {
@@ -25,9 +25,27 @@
     </th>
 }
 
+@title = { @Messages("company.list.title", currentPage.getTotalRowCount) }
+
 @main("FleetTLC - List Companies", client) {
 
-    <h1 id="homeTitle">@Messages("company.list.title", currentPage.getTotalRowCount)</h1>
+    @if(Company.hasDisabled()) {
+        @if(disabled) {
+            <h1 id="homeTitle" class="fill">@title
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.CompanyController.list()">Show Active Companies</a>
+                </span>
+            </h1>
+        } else {
+            <h1 id="homeTitle" class="fill">@title
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.CompanyController.list(disabled=true)">Show Disabled Companies</a>
+                </span>
+            </h1>
+        }
+    } else {
+        <h1 id="homeTitle">@title</h1>
+    }
 
     @if(currentPage.getTotalRowCount == 0) {
 
@@ -131,10 +149,12 @@
         </div>
     }
 
-    <a class="btn success" id="add" href="@routes.CompanyController.create()">Add a new company</a>
+    @if(!disabled) {
+        <a class="btn success" id="add" href="@routes.CompanyController.create()">Add a new company</a>
 
-    @if(client.is_admin) {
-        <a class="btn success" id="addMany" href="@routes.CompanyController.createMany()">Add many companies</a>
+        @if(client.is_admin) {
+            <a class="btn success" id="addMany" href="@routes.CompanyController.createMany()">Add many companies</a>
+        }
     }
 
 }

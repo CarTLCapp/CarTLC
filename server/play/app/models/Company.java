@@ -220,5 +220,9 @@ public class Company extends Model {
         return company.disabled;
     }
 
+    public static boolean hasDisabled() {
+        return find.where().eq("disabled", true).findList().size() > 0;
+    }
+
 }
 

@@ -32,17 +32,12 @@ public class CompanyController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result list(int page, String sortBy, String order, String filter) {
-        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, false), sortBy, order, filter, Secured.getClient(ctx())));
-    }
-
-    @Security.Authenticated(Secured.class)
-    public Result list_disabled(int page, String sortBy, String order, String filter) {
-        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, true), sortBy, order, filter, Secured.getClient(ctx())));
+    public Result list(int page, String sortBy, String order, String filter, boolean disabled) {
+        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, disabled), sortBy, order, filter, Secured.getClient(ctx()), disabled));
     }
 
     public Result list() {
-        return list(0, "name", "asc", "");
+        return list(0, "name", "asc", "", false);
     }
 
     @Security.Authenticated(Secured.class)

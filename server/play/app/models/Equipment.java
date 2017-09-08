@@ -47,12 +47,13 @@ public class Equipment extends Model implements Comparable<Equipment> {
      */
     public static Finder<Long, Equipment> find = new Finder<Long, Equipment>(Equipment.class);
 
-    public static List<Equipment> list() {
-        return list("name", "asc");
+    public static List<Equipment> list(boolean disabled) {
+        return list("name", "asc", disabled);
     }
 
-    public static List<Equipment> list(String sortBy, String order) {
+    public static List<Equipment> list(String sortBy, String order, boolean disabled) {
         return find.where()
+                .eq("disabled", disabled)
                 .orderBy(sortBy + " " + order)
                 .findList();
     }
@@ -173,6 +174,10 @@ public class Equipment extends Model implements Comparable<Equipment> {
             return false;
         }
         return equipment.disabled;
+    }
+
+    public static boolean hasDisabled() {
+        return find.where().eq("disabled", true).findList().size() > 0;
     }
 
     public boolean isOther() {

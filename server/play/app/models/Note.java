@@ -85,12 +85,13 @@ public class Note extends Model implements Comparable<Note> {
      */
     public static Finder<Long, Note> find = new Finder<Long, Note>(Note.class);
 
-    public static List<Note> list() {
-        return list("name", "asc");
+    public static List<Note> list(boolean disabled) {
+        return list("name", "asc", disabled);
     }
 
-    public static List<Note> list(String sortBy, String order) {
+    public static List<Note> list(String sortBy, String order, boolean disabled) {
         return find.where()
+                .eq("disabled", disabled)
                 .orderBy(sortBy + " " + order)
                 .findList();
     }
@@ -165,6 +166,10 @@ public class Note extends Model implements Comparable<Note> {
             return false;
         }
         return note.disabled;
+    }
+
+    public static boolean hasDisabled() {
+        return find.where().eq("disabled", true).findList().size() > 0;
     }
 
     public static boolean hasNoteWithName(String name, long ignoreId) {

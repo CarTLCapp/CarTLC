@@ -22,7 +22,7 @@ POST    /tech/:id/delete         controllers.TechnicianController.delete(id:Long
 ### PROJECTS ###
 
 GET     /project                    controllers.ProjectController.list()
-GET     /project_disabled           controllers.ProjectController.list_disabled()
+GET     /project/disabled           controllers.ProjectController.list_disabled()
 GET     /project/new                controllers.ProjectController.create()
 POST    /project                    controllers.ProjectController.save()
 GET     /project/new/many           controllers.ProjectController.createMany()
@@ -34,8 +34,7 @@ GET     /project/:id/enable         controllers.ProjectController.enable(id:Long
 
 ### COMPANIES ###
 
-GET     /company                    controllers.CompanyController.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
-GET     /company_disabled           controllers.CompanyController.list_disabled(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET     /company                    controllers.CompanyController.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "", disabled:Boolean ?= false)
 GET     /company/new                controllers.CompanyController.create()
 POST    /company                    controllers.CompanyController.save()
 GET     /company/new/many           controllers.CompanyController.createMany()
@@ -48,6 +47,7 @@ GET     /company/:id/enable         controllers.CompanyController.enable(id:Long
 ### EQUIPMENTS ###
 
 GET     /equipment                  controllers.EquipmentController.list()
+GET     /equipment/disabled         controllers.EquipmentController.list_disabled()
 GET     /equipment/new              controllers.EquipmentController.create()
 POST    /equipment                  controllers.EquipmentController.save()
 GET     /equipment/new/many         controllers.EquipmentController.createMany()
@@ -62,6 +62,7 @@ GET     /equipment/:id/enable       controllers.EquipmentController.enable(id:Lo
 ### NOTES ###
 
 GET     /note                  controllers.NoteController.list()
+GET     /note/disabled         controllers.NoteController.list_disabled()
 GET     /note/new              controllers.NoteController.create()
 POST    /note                  controllers.NoteController.save()
 GET     /note/new/many         controllers.NoteController.createMany()

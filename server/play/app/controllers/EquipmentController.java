@@ -35,7 +35,17 @@ public class EquipmentController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result list() {
-        return ok(views.html.equipment_list.render(Equipment.list(), Secured.getClient(ctx())));
+        return list(false);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result list_disabled() {
+        return list(true);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result list(boolean disabled) {
+        return ok(views.html.equipment_list.render(Equipment.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
     /**

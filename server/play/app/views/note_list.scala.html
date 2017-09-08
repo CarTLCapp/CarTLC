@@ -1,8 +1,26 @@
-@(currentPage: List[Note], client : Client)
+@(currentPage: List[Note], client : Client, disabled : Boolean)
+
+@header = { @Messages("note.list.title", currentPage.size()) }
 
 @main("FleetTLC - List Notes", client) {
 
-    <h1 id="homeTitle">@Messages("note.list.title", currentPage.size())</h1>
+    @if(Note.hasDisabled()) {
+        @if(disabled) {
+            <h1 id="homeTitle" class="fill">@header
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.NoteController.list()">Show Active Notes</a>
+                </span>
+            </h1>
+        } else {
+            <h1 id="homeTitle" class="fill">@header
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.NoteController.list_disabled()">Show Disabled Notes</a>
+                </span>
+            </h1>
+        }
+    } else {
+        <h1 id="homeTitle">@header</h1>
+    }
 
     @if(currentPage.size() == 0) {
         
@@ -49,10 +67,11 @@
         
     }
 
-    <a class="btn success" id="add" href="@routes.NoteController.create()">Add a new note item</a>
-
-    @if(client.is_admin) {
-        <a class="btn success" id="addMany" href="@routes.NoteController.createMany()">Add many note items</a>
+    @if(!disabled) {
+        <a class="btn success" id="add" href="@routes.NoteController.create()">Add a new note item</a>
+        @if(client.is_admin) {
+            <a class="btn success" id="addMany" href="@routes.NoteController.createMany()">Add many note items</a>
+        }
     }
 
 }

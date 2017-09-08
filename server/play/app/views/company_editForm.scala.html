@@ -26,19 +26,16 @@
         </div>
 
     }
-    
-    @b3.form(routes.CompanyController.delete(id), 'class -> "topRight") {
-    }
 
     @if(client.is_admin) {
         @b3.form(routes.CompanyController.delete(id), 'class -> "topRight") {
             @if(Company.isDisabled(id)) {
-                <a href="@routes.CompanyController.enable(id)" class="btn">Enable Project</a>
+                <a href="@routes.CompanyController.enable(id)" class="btn">Enable Company Address</a>
             } else {
                 @if(Entry.hasEntryForCompany(id)) {
-                    <input type="submit" value="Disable Company" class="btn danger">
+                    <input type="submit" value="Disable Company" class="btn danger" onclick="return alert('This company address, since it has entries, will be moved to the disabled list.');">
                 } else {
-                    <input type="submit" value="Delete Company" class="btn danger">
+                    <input type="submit" value="Delete Company" class="btn danger" onclick="return confirm('Are you sure you wish to delete this company address?');">
                 }
             }
         }
