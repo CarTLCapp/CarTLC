@@ -379,7 +379,7 @@ public class Entry extends com.avaje.ebean.Model {
         for (Entry entry : items) {
             List<EntryNoteCollection> collection = EntryNoteCollection.findByCollectionId(entry.note_collection_id);
             for (EntryNoteCollection note : collection) {
-                if (note.id == note_id) {
+                if (note.note_id == note_id) {
                     return true;
                 }
             }
