@@ -31,11 +31,12 @@
 
     <h2>Administration</h2>
 
-    <h3><a href="@routes.TechnicianController.list">Technicians</a></h3>
-
-    <p>Manage the technicians that are sending data up from the tablets using the APP.</p>
-
     @if(client.is_admin) {
+
+        <h3><a href="@routes.TechnicianController.list">Technicians</a></h3>
+
+        <p>Manage the technicians that are sending data up from the tablets using the APP.</p>
+
         <h3><a href="@routes.ClientController.list()">Clients</a></h3>
 
         <p>Display list of clients that are able to login to this website and manage their projects.</p>
