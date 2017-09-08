@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import play.db.ebean.*;
@@ -12,12 +13,12 @@ import modules.DataErrorException;
 /**
  * User entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Technician extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
-    public static Finder<Long,Technician> find = new Finder<Long,Technician>(Technician.class);
+    public static Finder<Long, Technician> find = new Finder<Long, Technician>(Technician.class);
 
     public static List<Technician> list() {
         return find.all();
@@ -61,7 +62,7 @@ public class Technician extends com.avaje.ebean.Model {
 
     @Id
     public Long id;
-    
+
     @Constraints.Required
     public String first_name;
 
@@ -71,7 +72,7 @@ public class Technician extends com.avaje.ebean.Model {
     @Constraints.Required
     public String device_id;
 
-    @Formats.DateTime(pattern="yyyy-MM-dd kk:mm")
+    @Formats.DateTime(pattern = "yyyy-MM-dd kk:mm")
     public Date last_ping;
 
     @Constraints.Required
@@ -83,9 +84,13 @@ public class Technician extends com.avaje.ebean.Model {
     public String fullName() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(first_name);
-        sbuf.append(" " );
+        sbuf.append(" ");
         sbuf.append(last_name);
         return sbuf.toString();
+    }
+
+    public int countEntries() {
+        return Entry.countEntriesForNote(id);
     }
 
     public static boolean canDelete(long id) {

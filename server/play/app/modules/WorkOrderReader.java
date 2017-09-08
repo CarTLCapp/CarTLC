@@ -124,10 +124,30 @@ public class WorkOrderReader {
                         warning("Incorrect number of fields on line", line);
                         continue;
                     }
-                    WorkOrder order = new WorkOrder();
+                    Truck truck = new Truck();
+                    truck.truck_number = getFieldValueInt(values, Field.TRUCK_NUMBER);
+                    truck.license_plate = getFieldValue(values, Field.LICENSE);
+                    Truck etruck = Truck.findFirst(truck.truck_number, truck.license_plate);
+                    long truck_id;
+                    if (etruck == null) {
+                        truck.upload_id = upload_id;
+                        truck.created_by = (int) client_id;
+                        truck.created_by_client = true;
+                        truck.save();
+                        truck_id = truck.id;
+                        truckNewCount++;
+                    } else {
+                        truck_id = etruck.id;
+                    }
+                    WorkOrder order;
+                    order = WorkOrder.findFirstByTruckId(truck_id);
+                    if (order == null) {
+                        order = new WorkOrder();
+                    }
                     order.client_id = client_id;
                     order.project_id = project_id;
                     order.upload_id = upload_id;
+                    order.truck_id = truck_id;
                     Company company = new Company();
                     company.street = getFieldValue(values, Field.STREET);
                     company.city = getFieldValue(values, Field.CITY);
@@ -144,20 +164,6 @@ public class WorkOrderReader {
                         companyNewCount++;
                     } else {
                         order.company_id = existing.id;
-                    }
-                    Truck truck = new Truck();
-                    truck.truck_number = getFieldValueInt(values, Field.TRUCK_NUMBER);
-                    truck.license_plate = getFieldValue(values, Field.LICENSE);
-                    Truck etruck = Truck.findFirst(truck.truck_number, truck.license_plate);
-                    if (etruck == null) {
-                        truck.upload_id = upload_id;
-                        truck.created_by = (int) client_id;
-                        truck.created_by_client = true;
-                        truck.save();
-                        order.truck_id = truck.id;
-                        truckNewCount++;
-                    } else {
-                        order.truck_id = etruck.id;
                     }
                     if (WorkOrder.has(order) == null) {
                         order.save();

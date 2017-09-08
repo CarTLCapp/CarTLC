@@ -19,6 +19,7 @@
                     <th>Last Name</th>
                     <th>Tech ID</th>
                     <th>Device ID</th>
+                    <th>Entries</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -40,12 +41,9 @@
                                 @tech.last_name
                             }
                         </td>
-                        <td>
-                            @tech.id
-                        </td>
-                        <td>
-                            @tech.device_id
-                        </td>
+                        <td>@tech.id</td>
+                        <td>@tech.device_id</td>
+                        <td>@tech.countEntries()</td>
                         <td>
                             @if(client.is_admin) {
                                 <a href="@routes.TechnicianController.edit(tech.id)">Edit</a>

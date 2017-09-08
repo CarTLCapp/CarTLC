@@ -57,6 +57,25 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return find.where().eq("client_id", client_id).findList();
     }
 
+    public static WorkOrder findFirstByTruckId(long truck_id) {
+        List<WorkOrder> list = find.where().eq("truck_id", truck_id).findList();
+        if (list.size() == 0) {
+            return null;
+        }
+        if (list.size() > 1) {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append("Found too many work orders with the same truck id ");
+            sbuf.append(truck_id);
+            Truck truck = Truck.find.byId(truck_id);
+            if (truck != null) {
+                sbuf.append("=");
+                sbuf.append(truck.toString());
+            }
+            Logger.error(sbuf.toString());
+        }
+        return list.get(0);
+    }
+
     public static WorkOrder has(WorkOrder order) {
         List<WorkOrder> list = find.where()
                 .eq("client_id", order.client_id)
