@@ -23,9 +23,11 @@
         </div>
 
     }
-    
-    @b3.form(routes.TechnicianController.delete(id), 'class -> "topRight") {
-        <input type="submit" value="Delete this technician" class="btn danger">
+
+    @if(Technician.canDelete(id)) {
+        @b3.form(routes.TechnicianController.delete(id), 'class -> "topRight") {
+            <input type="submit" value="Delete this technician" class="btn danger">
+        }
     }
     
 }

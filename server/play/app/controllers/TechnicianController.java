@@ -65,7 +65,6 @@ public class TechnicianController extends Controller {
                 savedTechnician.first_name = newTechnicianData.first_name;
                 savedTechnician.last_name = newTechnicianData.last_name;
                 savedTechnician.update();
-                flash("success", "Technician " + technicianForm.get().fullName() + " has been updated");
                 txn.commit();
             }
         } finally {
@@ -79,10 +78,14 @@ public class TechnicianController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result delete(Long id) {
-        // TODO: If the client is in the database, mark it as disabled instead.
-        Technician.find.ref(id).delete();
-        flash("success", "Technician has been deleted");
-        return list();
+        if (Technician.canDelete(id)) {
+            Technician.find.byId(id).delete();
+            return list();
+        } else {
+            String message = "Cannot delete this technician, it is being used.";
+            flash(message);
+            return ok(message);
+        }
     }
 
 }

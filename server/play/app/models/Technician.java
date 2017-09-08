@@ -87,5 +87,36 @@ public class Technician extends com.avaje.ebean.Model {
         sbuf.append(last_name);
         return sbuf.toString();
     }
+
+    public static boolean canDelete(long id) {
+        if (Company.find.where()
+                .eq("created_by", id)
+                .eq("created_by_client", false).findList().size() > 0) {
+            return false;
+        }
+        if (Entry.find.where().eq("tech_id", id).findList().size() > 0) {
+            return false;
+        }
+        if (Equipment.find.where()
+                .eq("created_by", id)
+                .eq("created_by_client", false).findList().size() > 0) {
+            return false;
+        }
+        if (Message.find.where().eq("tech_id", id).findList().size() > 0) {
+            return false;
+        }
+        if (Note.find.where()
+                .eq("created_by", id)
+                .eq("created_by_client", false).findList().size() > 0) {
+            return false;
+        }
+        if (Truck.find.where()
+                .eq("created_by", id)
+                .eq("created_by_client", false).findList().size() > 0) {
+            return false;
+        }
+        return true;
+    }
+
 }
 

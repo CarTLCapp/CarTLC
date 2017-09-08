@@ -52,7 +52,7 @@ public class Company extends Model {
     /**
      * Generic query helper for entity Computer with id Long
      */
-    private static Finder<Long,Company> find = new Finder<Long,Company>(Company.class);
+    public static Finder<Long,Company> find = new Finder<Long,Company>(Company.class);
 
     public static Company get(long id) {
         if (id > 0) {
