@@ -84,5 +84,14 @@ public class ProjectEquipmentCollection extends Model {
         return null;
     }
 
+    public static void deleteByEquipmentId(long equipment_id) {
+        List<ProjectEquipmentCollection> items = find.where()
+                .eq("equipment_id", equipment_id)
+                .findList();
+        for (ProjectEquipmentCollection item : items) {
+            item.delete();
+        }
+    }
+
 }
 

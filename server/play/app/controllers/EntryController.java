@@ -104,7 +104,7 @@ public class EntryController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result delete(Long entry_id) {
-        Entry entry = Entry.find.ref(entry_id);
+        Entry entry = Entry.find.byId(entry_id);
         if (entry != null) {
             entry.remove(amazonHelper);
             flash("success", "Entry has been deleted");

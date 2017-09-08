@@ -199,5 +199,10 @@ public class Equipment extends Model implements Comparable<Equipment> {
         }
         return super.equals(other);
     }
+
+    public void remove() {
+        ProjectEquipmentCollection.deleteByEquipmentId(id);
+        delete();
+    }
 }
 

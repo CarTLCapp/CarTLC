@@ -194,8 +194,8 @@ public class EquipmentController extends Controller {
             equipment.update();
             Logger.info("Equipment has been disabled: it had entries: " + equipment.name);
         } else {
+            equipment.remove();
             Logger.info("Equipment has been deleted: " + equipment.name);
-            equipment.delete();
         }
         Version.inc(Version.VERSION_EQUIPMENT);
         return list();
