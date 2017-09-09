@@ -142,7 +142,7 @@ public class WorkOrderController extends Controller {
         String fileName = exportForm.get().word;
         StringBuilder sbuf = new StringBuilder();
         if (fileName.trim().length() > 0) {
-            File file = exportname.getFile();
+            File file = new File(fileName);
             Client client = Secured.getClient(ctx());
             WorkOrderWriter writer = new WorkOrderWriter(client);
             if (!writer.save(file)) {
