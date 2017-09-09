@@ -1,4 +1,4 @@
-@(client : Client, message : String = "")
+@(exportForm: Form[InputWord], client : Client, message : String = "")
 
 @import helper._
 
@@ -12,7 +12,7 @@
         
         <fieldset>
 
-            <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>
+            @b3.text(exportForm("word"), '_label -> "Project:")
 
         </fieldset>
 
