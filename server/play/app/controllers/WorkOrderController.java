@@ -34,6 +34,8 @@ public class WorkOrderController extends Controller {
     private WorkOrderList workList = new WorkOrderList();
     private ProgressGrid progressGrid = new ProgressGrid();
 
+    private static final String EXPORT_FILENAME = "export.csv";
+
     @Inject
     public WorkOrderController(FormFactory formFactory, AmazonHelper amazonHelper) {
         super();
@@ -126,38 +128,21 @@ public class WorkOrderController extends Controller {
         }
     }
 
+    @Security.Authenticated(Secured.class)
     public Result exportWorkOrdersForm() {
-        return exportWorkOrdersForm("");
-    }
-
-    @Security.Authenticated(Secured.class)
-    public Result exportWorkOrdersForm(String errors) {
         Form<InputWord> exportForm = formFactory.form(InputWord.class);
-        return ok(views.html.work_order_export.render(exportForm, Secured.getClient(ctx()), errors));
+        exportToFile(EXPORT_FILENAME);
+        return ok(views.html.work_order_export.render(exportForm, Secured.getClient(ctx()), EXPORT_FILENAME));
     }
 
-    @Security.Authenticated(Secured.class)
-    public Result exportWorkOrders() {
-        Form<InputWord> exportForm = formFactory.form(InputWord.class).bindFromRequest();
-        String fileName = exportForm.get().word;
-        StringBuilder sbuf = new StringBuilder();
-        if (fileName.trim().length() > 0) {
-            File file = new File(fileName);
-            Client client = Secured.getClient(ctx());
-            WorkOrderWriter writer = new WorkOrderWriter(client);
-            if (!writer.save(file)) {
-                sbuf.append("Errors:\n");
-                sbuf.append(writer.getError());
-            } else {
-                return INDEX();
-            }
-        } else {
-            sbuf.append("No filename entered");
-        }
-        if (sbuf.length() == 0) {
-            return INDEX();
-        } else {
-            return exportWorkOrdersForm(sbuf.toString());
+    void exportToFile(String fileName) {
+//        Form<InputWord> exportForm = formFactory.form(InputWord.class).bindFromRequest();
+//        String fileName = exportForm.get().word;
+        File file = new File(fileName);
+        Client client = Secured.getClient(ctx());
+        WorkOrderWriter writer = new WorkOrderWriter(client);
+        if (!writer.save(file)) {
+            Logger.error("Errors: " + writer.getError());
         }
     }
 

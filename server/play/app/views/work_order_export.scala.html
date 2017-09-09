@@ -1,4 +1,4 @@
-@(exportForm: Form[InputWord], client : Client, message : String = "")
+@(exportForm: Form[InputWord], client : Client, filename : String)
 
 @import helper._
 
@@ -7,24 +7,6 @@
 @main("FleetTLC - Export Work Orders", client, "/work/list") {
     
     <h1>Export Work Orders</h1>
-    
-    @helper.form(routes.WorkOrderController.exportWorkOrders(), 'enctype -> "multipart/form-data") {
-        
-        <fieldset>
 
-            @b3.text(exportForm("word"), '_label -> "Project:")
-
-        </fieldset>
-
-        <div class="actions">
-            <input type="submit" value="Export" class="btn primary"> or
-            <a href="@routes.WorkOrderController.list()" class="btn">Cancel</a>
-        </div>
-
-    }
-
-    <p style="color:red">
-        <em>@Html(HtmlFormat.escape(message).toString.replace("\n", "<br />"))</em>
-    </p>
-
+    <a class="btn success" href="@filename">Export</a>
 }
