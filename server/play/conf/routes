@@ -87,7 +87,7 @@ POST    /client/:id/delete     controllers.ClientController.delete(id:Long)
 
 GET     /work/import/form      controllers.WorkOrderController.importWorkOrdersForm()
 POST    /work/import           controllers.WorkOrderController.importWorkOrders()
-GET     /work/export/form      controllers.WorkOrderController.exportWorkOrdersForm()
+GET     /work/export           controllers.WorkOrderController.exportWorkOrders()
 GET     /work/list             controllers.WorkOrderController.list(p:Int ?= 0, s ?= "client_id", o ?= "desc", message ?= "")
 GET     /work/:id/view         controllers.WorkOrderController.view(id:Long)
 GET     /work/delete_last      controllers.WorkOrderController.deleteLastUploaded()

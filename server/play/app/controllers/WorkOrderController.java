@@ -129,7 +129,7 @@ public class WorkOrderController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result exportWorkOrdersForm() {
+    public Result exportWorkOrders() {
         Form<InputWord> exportForm = formFactory.form(InputWord.class);
         File file = new File(EXPORT_FILENAME);
         Client client = Secured.getClient(ctx());
@@ -138,8 +138,6 @@ public class WorkOrderController extends Controller {
             INDEX("Errors: " + writer.getError());
         }
         return ok(file);
-//        return ok(new jafva.io.File(EXPORT_FILENAME))
-//        return ok(views.html.work_order_export.render(exportForm, Secured.getClient(ctx()), EXPORT_FILENAME));
     }
 
     public Result view(Long work_order_id) {
