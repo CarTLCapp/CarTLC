@@ -131,19 +131,15 @@ public class WorkOrderController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result exportWorkOrdersForm() {
         Form<InputWord> exportForm = formFactory.form(InputWord.class);
-        exportToFile(EXPORT_FILENAME);
-        return ok(views.html.work_order_export.render(exportForm, Secured.getClient(ctx()), EXPORT_FILENAME));
-    }
-
-    void exportToFile(String fileName) {
-//        Form<InputWord> exportForm = formFactory.form(InputWord.class).bindFromRequest();
-//        String fileName = exportForm.get().word;
-        File file = new File(fileName);
+        File file = new File(EXPORT_FILENAME);
         Client client = Secured.getClient(ctx());
         WorkOrderWriter writer = new WorkOrderWriter(client);
         if (!writer.save(file)) {
-            Logger.error("Errors: " + writer.getError());
+            INDEX("Errors: " + writer.getError());
         }
+        return ok(file);
+//        return ok(new jafva.io.File(EXPORT_FILENAME))
+//        return ok(views.html.work_order_export.render(exportForm, Secured.getClient(ctx()), EXPORT_FILENAME));
     }
 
     public Result view(Long work_order_id) {
