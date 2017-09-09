@@ -131,8 +131,8 @@ public class WorkOrderController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result exportWorkOrders() {
         Form<InputWord> exportForm = formFactory.form(InputWord.class);
-        File file = new File(EXPORT_FILENAME);
         Client client = Secured.getClient(ctx());
+        File file = new File(EXPORT_FILENAME);
         WorkOrderWriter writer = new WorkOrderWriter(client);
         if (!writer.save(file)) {
             INDEX("Errors: " + writer.getError());
