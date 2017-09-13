@@ -179,7 +179,7 @@ public class Entry extends com.avaje.ebean.Model {
 
     public String getStatus() {
         if (status == null) {
-            return Status.UNKNOWN.getName();
+            return "";
         }
         return status.getName();
     }
