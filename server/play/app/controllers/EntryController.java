@@ -119,19 +119,8 @@ public class EntryController extends Controller {
         ArrayList<String> missing = new ArrayList<String>();
         JsonNode json = request().body().asJson();
         Logger.debug("GOT: " + json.toString());
-        JsonNode value = json.findValue("tech_id");
-        if (value == null) {
-            missing.add("tech_id");
-        } else {
-            entry.tech_id = value.intValue();
-        }
-        value = json.findValue("date");
-        if (value == null) {
-            missing.add("date");
-        } else {
-            entry.entry_time = new Date(value.longValue());
-        }
         boolean retServerId = false;
+        JsonNode value;
         value = json.findValue("server_id");
         if (value != null) {
             entry.id = value.longValue();
@@ -145,6 +134,18 @@ public class EntryController extends Controller {
             if (existing != null) {
                 entry = existing;
             }
+        }
+        value = json.findValue("tech_id");
+        if (value == null) {
+            missing.add("tech_id");
+        } else {
+            entry.tech_id = value.intValue();
+        }
+        value = json.findValue("date");
+        if (value == null) {
+            missing.add("date");
+        } else {
+            entry.entry_time = new Date(value.longValue());
         }
         int truck_number;
         String license_plate;
