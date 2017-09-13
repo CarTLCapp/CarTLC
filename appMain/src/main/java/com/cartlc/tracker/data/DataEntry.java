@@ -1,8 +1,8 @@
 package com.cartlc.tracker.data;
 
+import android.content.Context;
 import android.text.TextUtils;
 
-import com.cartlc.tracker.etc.EntryStatus;
 import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventPingDone;
 
@@ -57,6 +57,13 @@ public class DataEntry {
             return address.getLine();
         }
         return "Invalid";
+    }
+
+    public String getStatus(Context ctx) {
+        if (status != null) {
+            return status.getString(ctx);
+        }
+        return TruckStatus.UNKNOWN.getString(ctx);
     }
 
     // Return all the notes, with values overlaid.
@@ -155,10 +162,6 @@ public class DataEntry {
         return TableTruck.getInstance().query(truckId);
     }
 
-    public EntryStatus computeStatus() {
-        return new EntryStatus(this);
-    }
-
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("ID=");
@@ -173,6 +176,8 @@ public class DataEntry {
         sbuf.append(truckId);
         sbuf.append(", SERVERID=");
         sbuf.append(serverId);
+        sbuf.append(", STATUS=");
+        sbuf.append(status == null ? "NULL" : status.toString());
         return sbuf.toString();
     }
 }

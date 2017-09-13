@@ -677,7 +677,7 @@ public class DCPing extends DCPost {
             } else {
                 jsonObject.accumulate("address", address.getLine());
             }
-            if (entry.status != null && entry.status != TruckStatus.OKAY) {
+            if (entry.status != null && entry.status != TruckStatus.UNKNOWN) {
                 jsonObject.accumulate("status", entry.status.toString());
             }
             List<DataEquipment> equipments = entry.getEquipment();

@@ -24,12 +24,20 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <RadioButton
-                android:id="@+id/status_okay"
+                android:id="@+id/status_complete"
                 style="@style/StatusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="onStatusButtonClicked"
-                android:text="@string/status_okay"/>
+                android:text="@string/status_complete"/>
+
+            <RadioButton
+                android:id="@+id/status_partial"
+                style="@style/StatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onStatusButtonClicked"
+                android:text="@string/status_partial_install"/>
 
             <RadioButton
                 android:id="@+id/status_missing_truck"

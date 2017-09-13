@@ -8,9 +8,17 @@ import com.cartlc.tracker.R;
  * Created by dug on 9/1/17.
  */
 public enum TruckStatus {
-    OKAY,
-    MISSING_TRUCK,
-    NEEDS_REPAIR;
+    COMPLETE(R.string.status_complete),
+    PARTIAL(R.string.status_partial_install),
+    MISSING_TRUCK(R.string.status_missing_truck),
+    NEEDS_REPAIR(R.string.status_needs_repair),
+    UNKNOWN(R.string.status_unknown);
+
+    int displayResId;
+
+    TruckStatus(int res) {
+        displayResId = res;
+    }
 
     public static TruckStatus from(Integer ord) {
         if (ord != null) {
@@ -20,7 +28,11 @@ public enum TruckStatus {
                 }
             }
         }
-        return OKAY;
+        return UNKNOWN;
+    }
+
+    public String getString(Context ctx) {
+        return ctx.getString(displayResId);
     }
 
 }

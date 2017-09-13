@@ -7,11 +7,13 @@ import android.text.TextUtils;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataCollectionEquipmentEntry;
+import com.cartlc.tracker.data.DataCollectionEquipmentProject;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataTruck;
 import com.cartlc.tracker.data.TableAddress;
+import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableNote;
@@ -256,14 +258,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setStatus(TruckStatus status) {
         if (status == null) {
-            setInt(KEY_STATUS, TruckStatus.OKAY.ordinal());
+            setInt(KEY_STATUS, TruckStatus.UNKNOWN.ordinal());
         } else {
             setInt(KEY_STATUS, status.ordinal());
         }
     }
 
     public TruckStatus getStatus() {
-        return TruckStatus.from(getInt(KEY_STATUS, TruckStatus.OKAY.ordinal()));
+        return TruckStatus.from(getInt(KEY_STATUS, TruckStatus.UNKNOWN.ordinal()));
     }
 
     public void setCurrentEditEntryId(long id) {
@@ -600,6 +602,17 @@ public class PrefHelper extends PrefHelperBase {
         } else {
             setLicensePlate(value);
         }
+    }
+
+    public int getNumPicturesTaken() {
+        long picture_collection_id = getCurrentPictureCollectionId();
+        return TablePictureCollection.getInstance().countPictures(picture_collection_id);
+    }
+
+    public int getNumEquipPossible() {
+        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
+        DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
+        return collection.getEquipment().size();
     }
 
 }

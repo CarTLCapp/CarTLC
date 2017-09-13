@@ -43,7 +43,7 @@
     <string name="title_entries_">Entries:</string>
     <string name="title_uploaded_">Uploaded:</string>
     <string name="title_uploaded_done">Uploaded ALL</string>
-    <string name="title_picture">Photos %1$d of %2$d</string>
+    <string name="title_picture">Photos %d</string>
     <string name="title_pictures_">Pictures:</string>
     <string name="title_status">Status</string>
     <string name="title_activity_list_entries">Project Entries</string>
@@ -66,14 +66,12 @@
     <string name="picture_note_hint">Enter note for picture</string>
     <string name="picture_note_title">Picture Note</string>
 
-    <string name="status_okay">Okay</string>
+    <string name="status_unknown">Unknown</string>
     <string name="status_needs_repair">Needs Repair</string>
     <string name="status_missing_truck">Missing Truck</string>
     <string name="status_complete">Complete</string>
     <string name="status_partial_install">Partial Install</string>
-    <string name="status_partial_install_equipments">%1$d of %2$d equipments checked.</string>
-    <string name="status_partial_install_pictures">%1$d of %2$d pictures taken.</string>
-    <string name="status_partial_install_equipments2">%1$d of %2$d equipments.</string>
-    <string name="status_partial_install_pictures2">%1$d of %2$d pictures.</string>
-    <string name="status_partial_install_equipment_needed">Needed: </string>
+    <string name="status_installed_equipments">%1$d of %2$d equipments checked.</string>
+    <string name="status_installed_pictures">%1$d pictures taken.</string>
+    <string name="status_no_equipment">No equipment checked</string>
 </resources>

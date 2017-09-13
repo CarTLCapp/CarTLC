@@ -14,7 +14,7 @@ import com.avaje.ebean.*;
 import models.*;
 import play.Logger;
 
-public class EntryStatus {
+class EntryStatus {
 
     Entry           entry;
     List<Equipment> checkedEquipments;

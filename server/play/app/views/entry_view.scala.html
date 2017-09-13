@@ -4,7 +4,7 @@
 
     <h1 id="homeTitle">Elements</h1>
 
-    <table class="elements zebra-striped">
+    <table>
         <thead>
             <tr>
                 <th>Name</th>
@@ -13,6 +13,7 @@
                 <th>Address</th>
                 <th>Truck</th>
                 <th>Equipment</th>
+                <th>Status</th>
 
             </tr>
         </thead>
@@ -24,6 +25,7 @@
                 <td>@entry.getAddressLine()</td>
                 <td>@entry.getTruckLine()</td>
                 <td>@entry.getEquipmentLine()</td>
+                <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
             </tr>
         </tbody>
     </table>
@@ -46,10 +48,6 @@
         }
         </tbody>
     </table>
-
-    <h1 id="statusTitle">Status</h1>
-
-    <p>@Html(HtmlFormat.escape(entry.getStatusLong()).toString.replace("\n", "<br />"))</p>
 
     <h1 id="pictureTitle">Pictures</h1>
 

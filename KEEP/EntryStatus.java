@@ -18,7 +18,7 @@ import java.util.List;
  * Created by dug on 9/1/17.
  */
 
-public class EntryStatus {
+class EntryStatus {
 
     final List<DataEquipment> allEquipment;
     final List<DataEquipment> checkedEquipment;

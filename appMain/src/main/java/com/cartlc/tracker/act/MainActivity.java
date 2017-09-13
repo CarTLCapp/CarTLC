@@ -45,7 +45,6 @@ import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.DataZipCode;
-import com.cartlc.tracker.etc.EntryStatus;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntry;
@@ -207,7 +206,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.status_select)        RadioGroup           mStatusSelect;
     @BindView(R.id.status_missing_truck) RadioButton          mStatusMissingTruck;
     @BindView(R.id.status_needs_repair)  RadioButton          mStatusNeedsRepair;
-    @BindView(R.id.status_okay)          RadioButton          mStatusOkay;
+    @BindView(R.id.status_complete)      RadioButton          mStatusComplete;
+    @BindView(R.id.status_partial)       RadioButton          mStatusPartial;
 
     Stage              mCurStage           = Stage.LOGIN;
     String             mCurKey             = PrefHelper.KEY_STATE;
@@ -836,10 +836,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case PICTURE:
-                EntryStatus status = new EntryStatus();
-                mTitle.setText(getString(R.string.title_picture, status.getNumPicturesTaken(), status.getNumPicturesNeeded()));
+                int pictureCount = PrefHelper.getInstance().getNumPicturesTaken();
+                mTitle.setText(getString(R.string.title_picture, pictureCount));
                 mPrev.setVisibility(View.VISIBLE);
-                if (mCurStageEditing || status.getNumPicturesTaken() == 0) {
+                if (mCurStageEditing || pictureCount == 0) {
                     mCurStageEditing = false;
                     if (!dispatchPictureRequest()) {
                         showError(getString(R.string.error_cannot_take_picture));
@@ -1077,28 +1077,34 @@ public class MainActivity extends AppCompatActivity {
                 hint = PrefHelper.getInstance().getAddress();
                 break;
             case STATUS:
-                hint = mCurEntry.computeStatus().getLongString(this);
+                hint = getStatusHint();
                 break;
         }
-        if (hint != null) {
+        if (hint != null && hint.length() > 0) {
             mEntryHint.setText(hint);
             mEntryHint.setVisibility(View.VISIBLE);
         }
+    }
+
+    public String getStatusHint() {
+        StringBuilder sbuf = new StringBuilder();
+        int countPictures = PrefHelper.getInstance().getNumPicturesTaken();
+        int maxEquip = PrefHelper.getInstance().getNumEquipPossible();
+        int checkedEquipment = TableEquipment.getInstance().queryChecked().size();
+        sbuf.append(getString(R.string.status_installed_equipments, checkedEquipment, maxEquip));
+        sbuf.append("\n");
+        sbuf.append(getString(R.string.status_installed_pictures, countPictures));
+        return sbuf.toString();
     }
 
     void showStatusHint() {
         String hint = null;
         switch (mCurStage) {
             case STATUS:
-                if (mCurEntry == null) {
-                    EntryStatus status = new EntryStatus();
-                    hint = status.getLongString(this);
-                } else {
-                    hint = mCurEntry.computeStatus().getLongString(this);
-                }
+                hint = getStatusHint();
                 break;
         }
-        if (hint != null) {
+        if (hint != null && hint.length() > 0) {
             mStatusHint.setText(hint);
         }
     }
@@ -1121,8 +1127,11 @@ public class MainActivity extends AppCompatActivity {
         boolean checked = ((RadioButton) view).isChecked();
         if (checked) {
             switch (view.getId()) {
-                case R.id.status_okay:
-                    PrefHelper.getInstance().setStatus(TruckStatus.OKAY);
+                case R.id.status_complete:
+                    PrefHelper.getInstance().setStatus(TruckStatus.COMPLETE);
+                    break;
+                case R.id.status_partial:
+                    PrefHelper.getInstance().setStatus(TruckStatus.PARTIAL);
                     break;
                 case R.id.status_missing_truck:
                     PrefHelper.getInstance().setStatus(TruckStatus.MISSING_TRUCK);
@@ -1139,12 +1148,13 @@ public class MainActivity extends AppCompatActivity {
         if (status != null) {
             if (status == TruckStatus.MISSING_TRUCK) {
                 mStatusMissingTruck.setChecked(true);
-                return;
             } else if (status == TruckStatus.NEEDS_REPAIR) {
                 mStatusNeedsRepair.setChecked(true);
-                return;
+            } else if (status == TruckStatus.COMPLETE) {
+                mStatusComplete.setChecked(true);
+            } else if (status == TruckStatus.PARTIAL) {
+                mStatusPartial.setChecked(true);
             }
         }
-        mStatusOkay.setChecked(true);
     }
 }

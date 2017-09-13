@@ -8,13 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.amazonaws.util.StringUtils;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
-import com.cartlc.tracker.etc.EntryStatus;
 import com.cartlc.tracker.etc.PrefHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,8 +50,7 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
     final Context                mContext;
     final OnItemSelectedListener mListener;
     List<DataEntry> mItems;
-    HashMap<Long, EntryStatus> mStatusMap = new HashMap();
-    Integer mSelectedPos;
+    Integer         mSelectedPos;
 
     public ListEntryAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;
@@ -69,14 +69,10 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
         holder.projectName.setText(item.getProjectName());
         holder.truckValue.setText(item.getTruck().toString());
         holder.projectAddress.setText(item.getAddressLine());
-        holder.status.setText(getStatus(item).getLine(mContext));
+        holder.status.setText(item.getStatus(mContext));
         holder.notes.setText(item.getNotesLine());
-        if (getStatus(item).isCompleteEquipment()) {
-            holder.equipments.setVisibility(View.GONE);
-        } else {
-            holder.equipments.setText(getEquipmentNeeded(item));
-            holder.equipments.setVisibility(View.VISIBLE);
-        }
+        holder.equipments.setText(getEquipment(item));
+
         if (TextUtils.isEmpty(holder.notes.getText().toString().trim())) {
             holder.notes.setVisibility(View.GONE);
         } else {
@@ -100,27 +96,12 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
         }
     }
 
-    EntryStatus getStatus(DataEntry item) {
-        if (!mStatusMap.containsKey(item.id)) {
-            mStatusMap.put(item.id, item.computeStatus());
-        }
-        return mStatusMap.get(item.id);
-    }
-
-    String getEquipmentNeeded(DataEntry item) {
-        StringBuilder sbuf = new StringBuilder();
-        sbuf.append(mContext.getString(R.string.status_partial_install_equipment_needed));
-        sbuf.append(getStatus(item).getEquipmentNeeded());
-        return sbuf.toString();
-    }
-
     @Override
     public int getItemCount() {
         return mItems.size();
     }
 
     public void onDataChanged() {
-        mStatusMap.clear();
         DataProjectAddressCombo combo = PrefHelper.getInstance().getCurrentProjectGroup();
         if (combo == null) {
             mItems = new ArrayList();
@@ -131,5 +112,19 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
 
     public void clear() {
         mSelectedPos = null;
+    }
+
+    String getEquipment(DataEntry item) {
+        StringBuilder sbuf = new StringBuilder();
+        for (String name : item.getEquipmentNames()) {
+            if (sbuf.length() > 0) {
+                sbuf.append(", ");
+            }
+            sbuf.append(name);
+        }
+        if (sbuf.length() == 0) {
+            sbuf.append(mContext.getString(R.string.status_no_equipment));
+        }
+        return sbuf.toString();
     }
 }

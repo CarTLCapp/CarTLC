@@ -15,7 +15,9 @@ import timber.log.Timber;
 public class DatabaseManager {
 
     static final String DATABASE_NAME    = "cartcl.db";
-    static final int    DATABASE_VERSION = 3;
+    // Note: Jumping from 2 to 9 to get around the allowBackup bug.
+    // Could now drop it down to 3, but who cares.
+    static final int    DATABASE_VERSION = 9;
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -69,26 +71,13 @@ public class DatabaseManager {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             init(db);
-            if (oldVersion == 1) {
-                if (newVersion >= 2) {
-                    if (newVersion >= 3) {
-                        TableCrash.getInstance().create();
-                        TablePictureCollection.upgrade3(db);
-                        TableZipCode.getInstance().create();
-                        TableNote.upgrade3(db);
-                        TableTruck.getInstance().create();
-                        TableEntry.getInstance().upgrade3();
-                    }
-                }
-            } else if (oldVersion == 2) {
-                if (newVersion >= 3) {
-                    TableCrash.getInstance().create();
-                    TablePictureCollection.upgrade3(db);
-                    TableZipCode.getInstance().create();
-                    TableNote.getInstance().upgrade3(db);
-                    TableTruck.getInstance().create();
-                    TableEntry.getInstance().upgrade3();
-                }
+            if (oldVersion == 1 || oldVersion == 2) {
+                TableCrash.getInstance().create();
+                TablePictureCollection.upgrade3(db);
+                TableZipCode.getInstance().create();
+                TableNote.upgrade3(db);
+                TableTruck.getInstance().create();
+                TableEntry.getInstance().upgrade3();
             }
         }
 

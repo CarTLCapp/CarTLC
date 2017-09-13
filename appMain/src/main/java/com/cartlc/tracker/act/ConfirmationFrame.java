@@ -81,6 +81,6 @@ public class ConfirmationFrame {
         }
         mSimpleAdapter.setList(entry.getEquipmentNames());
         mPictureAdapter.setList(entry.getPictures());
-        mStatusValue.setText(entry.computeStatus().getString(mCtx));
+        mStatusValue.setText(entry.getStatus(mCtx));
     }
 }

@@ -191,7 +191,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
         if (entry == null) {
             return "";
         }
-        return entry.getStatusShort();
+        return entry.getStatus();
     }
 
     public String getCellColor() {

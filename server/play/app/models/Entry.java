@@ -15,7 +15,6 @@ import com.avaje.ebean.*;
 
 import modules.AmazonHelper;
 import modules.AmazonHelper.OnDownloadComplete;
-import modules.EntryStatus;
 import play.Logger;
 
 /**
@@ -27,11 +26,12 @@ public class Entry extends com.avaje.ebean.Model {
     private static final long serialVersionUID = 1L;
 
     public enum Status {
+        // Warning: this string version must match the APP side.
         COMPLETE("Complete"),
         PARTIAL("Partial Install"),
         MISSING_TRUCK("Missing Truck"),
         NEEDS_REPAIR("Needs Repair"),
-        INVALID("Invalid");
+        UNKNOWN("Unknown");
 
         final String name;
 
@@ -45,7 +45,7 @@ public class Entry extends com.avaje.ebean.Model {
                     return value;
                 }
             }
-            return Status.INVALID;
+            return Status.UNKNOWN;
         }
 
         public static Status from(String match) {
@@ -54,7 +54,7 @@ public class Entry extends com.avaje.ebean.Model {
                     return value;
                 }
             }
-            return Status.INVALID;
+            return Status.UNKNOWN;
         }
 
         public String getCellColor() {
@@ -104,8 +104,6 @@ public class Entry extends com.avaje.ebean.Model {
 
     @Constraints.Required
     public Status status;
-
-    EntryStatus entryStatus = null;
 
     public static Finder<Long, Entry> find = new Finder<Long, Entry>(Entry.class);
 
@@ -179,27 +177,18 @@ public class Entry extends com.avaje.ebean.Model {
         return company.zipcode;
     }
 
-    public EntryStatus getEntryStatus() {
-        if (entryStatus == null) {
-            entryStatus = new EntryStatus(this);
+    public String getStatus() {
+        if (status == null) {
+            return Status.UNKNOWN.getName();
         }
-        return entryStatus;
-    }
-
-    public void clearEntryStatus() {
-        entryStatus = null;
-    }
-
-    public String getStatusShort() {
-        return getEntryStatus().getShortLine();
-    }
-
-    public String getStatusLong() {
-        return getEntryStatus().getLongLine();
+        return status.getName();
     }
 
     public String getCellColor() {
-        return getEntryStatus().getStatus().getCellColor();
+        if (status == null) {
+            return "";
+        }
+        return status.getCellColor();
     }
 
     public String getDate() {
