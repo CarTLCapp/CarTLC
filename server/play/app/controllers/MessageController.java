@@ -28,7 +28,7 @@ public class MessageController extends Controller {
     private static final int PAGE_SIZE = 100;
 
     public Result list(int page, String sortBy, String order) {
-        return ok(views.html.message_list.render(Message.list(page, PAGE_SIZE, sortBy, order), sortBy, order));
+        return ok(views.html.message_list.render(Message.list(page, PAGE_SIZE, sortBy, order), sortBy, order, Secured.getClient(ctx())));
     }
 
     public Result list() {
@@ -52,6 +52,14 @@ public class MessageController extends Controller {
         if (message != null) {
             message.delete();
             flash("success", "Message has been deleted");
+        }
+        return list();
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result deleteAll() {
+        for (Message message : Message.find.findList()) {
+            message.delete();
         }
         return list();
     }

@@ -108,6 +108,7 @@ GET     /entry/:id/delete           controllers.EntryController.delete(id:Long)
 GET     /messages              controllers.MessageController.list(p:Int ?= 0, s ?= "log_time", o ?= "desc")
 GET     /messages/:id/view     controllers.MessageController.view(id:Long)
 GET     /messages/:id/delete   controllers.MessageController.delete(id:Long)
+GET     /messages/delete_all   controllers.MessageController.deleteAll()
 
 ### EXTERNAL: APP REQUESTS & ENTRIES ###
 
