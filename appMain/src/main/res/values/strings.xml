@@ -11,7 +11,6 @@
     <string name="btn_another">Another</string>
     <string name="btn_new_project">New Project</string>
     <string name="btn_confirm">Confirm</string>
-    <string name="btn_reject">Reject</string>
     <string name="btn_view">View</string>
 
     <string name="entry_hint_last_name">Last Name</string>
@@ -43,7 +42,7 @@
     <string name="title_entries_">Entries:</string>
     <string name="title_uploaded_">Uploaded:</string>
     <string name="title_uploaded_done">Uploaded ALL</string>
-    <string name="title_picture">Photos %d</string>
+    <string name="title_picture">Photo %d</string>
     <string name="title_pictures_">Pictures:</string>
     <string name="title_status">Status</string>
     <string name="title_activity_list_entries">Project Entries</string>
@@ -57,7 +56,6 @@
     <string name="error_need_company">Need to select a company</string>
     <string name="error_need_new_company">Enter in a new company name</string>
     <string name="error_empty">No elements</string>
-    <string name="error_need_note_fields">These fields still need entries:</string>
     <string name="error_incorrect_digit_count">Incorrect digit count for these fields:\n%s\nDo you want to continue?</string>
     <string name="error_incorrect_note_count">%1$d of %2$d digits found</string>
 
