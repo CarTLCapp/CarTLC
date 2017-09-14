@@ -116,7 +116,9 @@ public class ClientController extends Controller {
         }
         newClient.save();
         ClientProjectAssociation.addNew(newClient.id, getCheckedProjects(clientForm));
-        flash("success", "Client " + newClient.name + " has been created");
+        Logger.info("Client " + newClient.name + " has been created");
+        String value = clientForm.field("company").value();
+        Logger.info("Company value was " + value);
         return list();
     }
 
