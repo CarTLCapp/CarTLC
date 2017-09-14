@@ -98,8 +98,6 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
                     holder.label.setSelected(true);
                 } else {
                     holder.label.setSelected(false);
-                    TBApplication.hideKeyboard(mContext, v);
-                    Timber.i("MYDEBUG: HIDE!");
                 }
             }
         });
