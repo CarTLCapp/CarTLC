@@ -50,9 +50,11 @@ public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
             Company c2 = Company.get(o2.company_id);
             switch (mNextParameters.sortBy) {
                 case COMPANY:
-                    if (c1.name != null && c2.name != null) {
-                        value = c1.name.compareTo(c2.name);
-                    } else if (c1.name != null) {
+                    String c1name = c1.getName();
+                    String c2name = c2.getName();
+                    if (c1name != null && c2name != null) {
+                        value = c1name.compareTo(c2name);
+                    } else if (c1name != null) {
                         value = -1;
                     } else {
                         value = 1;

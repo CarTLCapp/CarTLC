@@ -139,7 +139,7 @@ public class Entry extends com.avaje.ebean.Model {
         if (company == null) {
             return "NOT FOUND: " + company_id;
         }
-        return company.name;
+        return company.getName();
     }
 
     public String getStreet() {

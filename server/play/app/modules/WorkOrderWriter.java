@@ -57,7 +57,7 @@ public class WorkOrderWriter {
                 br.write(truck.license_plate);
                 br.write(",");
                 company = order.getCompany();
-                br.write(company.name);
+                br.write(company.getName());
                 br.write(",");
                 br.write(company.street);
                 br.write(",");

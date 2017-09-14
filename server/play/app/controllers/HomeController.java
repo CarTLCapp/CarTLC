@@ -29,6 +29,7 @@ public class HomeController extends Controller {
     public Result index() {
         Client.initClient();
         EntryV2.transfer();
+        CompanyV2.transfer();
         return ok(views.html.home.render(Secured.getClient(ctx())));
     }
 

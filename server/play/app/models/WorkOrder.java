@@ -113,7 +113,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
         if (company == null) {
             return "";
         }
-        return company.name;
+        return company.getName();
     }
 
     public String getStreet() {

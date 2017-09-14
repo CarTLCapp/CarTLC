@@ -27,9 +27,24 @@ create table client_project_association (
     project_id     int
 );
 
-alter table client_project_association add constraint c_cpa_user_info_id foreign key (client_id) references client (id) on delete restrict on update restrict;
+alter table client_project_association add constraint c_cpa_client_id foreign key (client_id) references client (id) on delete restrict on update restrict;
 alter table client_project_association add constraint c_cpa_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 alter table picture_collection add note varchar(1028);
+
+create table company_name {
+    id             int auto_increment primary key,
+    name           varchar(255),
+    disabled       bit default 0
+};
+
+create table client_company_name_association (
+    id              int auto_increment primary key,
+    client_id       int,
+    company_name_id int
+);
+
+alter table client_company_name_association add constraint c_ccna_client_id foreign key (client_id) references client (id) on delete restrict on update restrict;
+alter table client_company_name_association add constraint c_ccna_company_name_id foreign key (company_name_id) references company_name (id) on delete restrict on update restrict;
 
 create table work_order (
     id             int auto_increment primary key,
@@ -65,27 +80,41 @@ create table entry (
 );
 
 alter table entry add constraint c2_e_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
-alter table entry add constraint c2_e_entry_address_id foreign key (company_id) references company (id) on delete restrict on update restrict;
+alter table entry add constraint c2_e_entry_company_id foreign key (company_id) references company (id) on delete restrict on update restrict;
 alter table entry add constraint c2_e_tech_id foreign key (tech_id) references technician (id) on delete restrict on update restrict;
 
-alter table company add created_by_client bit default 0;
-alter table company add upload_id int default 0;
+alter table company rename company_v2;
+
+create table company (
+  id                int auto_increment primary key,
+  name_id           int default 0,
+  street            varchar(255),
+  city              varchar(128),
+  state             varchar(64),
+  zipcode           varchar(64),
+  created_by        int default 0,
+  disabled          bit default 0
+);
+
 alter table equipment add created_by_client bit default 0;
 alter table note add created_by_client bit default 0;
 alter table note add num_digits smallint default 0;
+
 # --- !Downs
 
 drop table if exists message;
 drop table if exists client_project_association;
+drop table if exists client_company_name_association;
 drop table if exists client;
 alter table technician rename client;
 alter table picture_collection drop column note;
 drop table if exists work_order;
 drop table if exists truck;
 drop table if exists entry;
+drop table if exists company;
+drop table if exists company_name;
 alter table entry_v2 rename entry;
-alter table company drop column created_by_client;
-alter table company drop column upload_id;
+alter table company_v2 rename company;
 alter table equipment drop column created_by_client;
 alter table note drop column created_by_client;
 alter table note drop column num_digits;

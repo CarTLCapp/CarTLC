@@ -87,6 +87,7 @@ public class WorkOrderController extends Controller {
         Form<ImportWorkOrder> importForm = formFactory.form(ImportWorkOrder.class).bindFromRequest();
         StringBuilder sbuf = new StringBuilder();
         String projectName = importForm.get().project;
+        String companyName = importForm.get().company;
         MultipartFormData<File> body = request().body().asMultipartFormData();
         if (body != null) {
             FilePart<File> importname = body.getFile("filename");
@@ -97,7 +98,7 @@ public class WorkOrderController extends Controller {
                     if (file.exists()) {
                         Project project = Project.findByName(projectName);
                         Client client = Secured.getClient(ctx());
-                        WorkOrderReader reader = new WorkOrderReader(client, project);
+                        WorkOrderReader reader = new WorkOrderReader(client, project, companyName);
                         if (!reader.load(file)) {
                             sbuf.append("Errors:\n");
                             sbuf.append(reader.getErrors());

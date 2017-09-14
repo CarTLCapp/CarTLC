@@ -26,7 +26,7 @@ public class Company extends Model {
     public Long id;
 
     @Constraints.Required
-    public String name;
+    public int name_id;
 
     @Constraints.Required
     public String street;
@@ -106,7 +106,7 @@ public class Company extends Model {
 
     public static Company has(Company company) {
         List<Company> items = find.where()
-                .eq("name", company.name)
+                .eq("name_id", company.name_id)
                 .eq("street", company.street)
                 .eq("city", company.city)
                 .eq("state", company.state)
@@ -125,29 +125,15 @@ public class Company extends Model {
                 .findList();
     }
 
-    public static List<String> getCompanyNames() {
-        List<Company> list;
-        list = find.where()
-                .eq("disabled", false)
-                .orderBy("name asc")
-                .findList();
-        ArrayList<String> names = new ArrayList<String>();
-        for (Company company : list) {
-            if (!names.contains(company.name)) {
-                names.add(company.name);
-            }
-        }
-        return names;
-    }
-
     public static Company parse(String line) throws DataErrorException {
         String[] fields = line.split(",");
         Company company = new Company();
         if (fields.length > 0) {
-            company.name = fields[0].trim();
-            if (company.name.isEmpty()) {
+            String name = fields[0].trim();
+            if (name.isEmpty()) {
                 throw new DataErrorException("No company name entered as first field: '" + line + "'");
             }
+            company.name_id = (int) CompanyName.save(name);
             if (fields.length > 1) {
                 company.street = fields[1].trim();
                 if (company.street.isEmpty()) {
@@ -180,9 +166,13 @@ public class Company extends Model {
         return Entry.countEntriesForCompany(id);
     }
 
+    public String getName() {
+        return CompanyName.get(name_id);
+    }
+
     public String getLine() {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append(name);
+        sbuf.append(getName());
         sbuf.append(", ");
         if (street != null) {
             sbuf.append(street);

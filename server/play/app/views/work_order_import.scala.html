@@ -8,9 +8,8 @@
     
     <h1>Import Work Orders</h1>
 
-    <p>Work orders must be a .csv file with very specific column headers, case does not matter:</p>
+    <p>Work orders must be a .csv file with very specific column headers, case and order does not matter:</p>
     <ul>
-        <li>Company</li>
         <li>Street or Address 1</li>
         <li>City</li>
         <li>State</li>
@@ -25,7 +24,7 @@
 
             <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>
             @helper.select(importForm("project"), options = options(ClientProjectAssociation.findProjectNames(client.id)), args = '_label -> "Project:")
-            @helper.select(importForm("company"), options = options(Company.getCompanyNames()), args = '_label -> "Company:")
+            @helper.select(importForm("company"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
 
         </fieldset>
 

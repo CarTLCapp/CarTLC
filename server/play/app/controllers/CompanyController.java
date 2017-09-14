@@ -42,12 +42,12 @@ public class CompanyController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
-        Form<Company> companyForm = formFactory.form(Company.class).fill(Company.get(id));
+        Form<InputCompany> companyForm = formFactory.form(InputCompany.class).fill(new InputCompany(id));
         return ok(views.html.company_editForm.render(id, companyForm, Secured.getClient(ctx())));
     }
 
     public Result update(Long id) throws PersistenceException {
-        Form<Company> companyForm = formFactory.form(Company.class).bindFromRequest();
+        Form<InputCompany> companyForm = formFactory.form(InputCompany.class).bindFromRequest();
         if (companyForm.hasErrors()) {
             return badRequest(views.html.company_editForm.render(id, companyForm, Secured.getClient(ctx())));
         }
@@ -55,8 +55,8 @@ public class CompanyController extends Controller {
         try {
             Company savedCompany = Company.get(id);
             if (savedCompany != null) {
-                Company newCompanyData = companyForm.get();
-                savedCompany.name = newCompanyData.name;
+                InputCompany newCompanyData = companyForm.get();
+                savedCompany.name_id = (int) CompanyName.save(newCompanyData.name);
                 savedCompany.street = newCompanyData.street;
                 savedCompany.state = newCompanyData.state;
                 savedCompany.city = newCompanyData.city;
@@ -74,23 +74,29 @@ public class CompanyController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result create() {
-        Form<Company> companyForm = formFactory.form(Company.class);
+        Form<InputCompany> companyForm = formFactory.form(InputCompany.class);
         return ok(views.html.company_createForm.render(companyForm));
     }
 
     @Security.Authenticated(Secured.class)
     public Result save() {
-        Form<Company> companyForm = formFactory.form(Company.class).bindFromRequest();
+        Form<InputCompany> companyForm = formFactory.form(InputCompany.class).bindFromRequest();
         if(companyForm.hasErrors()) {
             return badRequest(views.html.company_createForm.render(companyForm));
         }
         Client client = Secured.getClient(ctx());
-        Company company = companyForm.get();
+        InputCompany company = companyForm.get();
+        Company savedCompany = new Company();
         if (client != null && client.id > 0) {
-            company.created_by = Long.valueOf(client.id).intValue();
-            company.created_by_client = true;
+            savedCompany.created_by = Long.valueOf(client.id).intValue();
+            savedCompany.created_by_client = true;
         }
-        company.save();
+        savedCompany.name_id = (int) CompanyName.save(company.name);
+        savedCompany.street = company.street;
+        savedCompany.state = company.state;
+        savedCompany.city = company.city;
+        savedCompany.zipcode = company.zipcode;
+        savedCompany.save();
         flash("success", "Company " + companyForm.get().name + " has been created");
         return list();
     }
@@ -139,7 +145,7 @@ public class CompanyController extends Controller {
         for (Company item : Company.appList(tech_id)) {
             ObjectNode node = array.addObject();
             node.put("id", item.id);
-            node.put("name", item.name);
+            node.put("name", item.getName());
             if (item.street != null && !item.street.isEmpty()) {
                 node.put("street", item.street);
             }

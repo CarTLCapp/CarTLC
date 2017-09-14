@@ -23,10 +23,12 @@ public class WorkOrderReader {
     ArrayList<String> warnings = new ArrayList<String>();
     long client_id;
     long project_id;
+    long company_name_id;
+    String company_name;
     int upload_id;
     int lineCount;
 
-    public WorkOrderReader(Client client, Project project) {
+    public WorkOrderReader(Client client, Project project, String companyName) {
         if (client == null || client.is_admin) {
             client_id = 0;
         } else {
@@ -35,6 +37,8 @@ public class WorkOrderReader {
         if (project != null) {
             project_id = project.id;
         }
+        company_name = companyName;
+        company_name_id = CompanyName.save(companyName);
         upload_id = Version.inc(Version.NEXT_UPLOAD_ID);
     }
 
@@ -103,11 +107,11 @@ public class WorkOrderReader {
                     order.upload_id = upload_id;
                     order.truck_id = truck_id;
                     Company company = new Company();
+                    company.name_id = (int) CompanyName.save(getFieldValue(values, WorkOrderField.COMPANY, company_name));
                     company.street = getFieldValue(values, WorkOrderField.STREET);
                     company.city = getFieldValue(values, WorkOrderField.CITY);
                     company.state = getFieldValue(values, WorkOrderField.STATE);
                     company.zipcode = getFieldValue(values, WorkOrderField.ZIP);
-                    company.name = getFieldValue(values, WorkOrderField.COMPANY);
                     Company existing = Company.has(company);
                     if (existing == null) {
                         company.created_by = (int) client_id;
@@ -183,13 +187,17 @@ public class WorkOrderReader {
     }
 
     String getFieldValue(List<String> values, WorkOrderField field) {
+        return getFieldValue(values, field, null);
+    }
+
+    String getFieldValue(List<String> values, WorkOrderField field, String defaultValue) {
         if (fieldPos.containsKey(field.ordinal())) {
             int pos = fieldPos.get(field.ordinal());
             if (pos < values.size()) {
                 return values.get(pos);
             }
         }
-        return null;
+        return defaultValue;
     }
 
     int getFieldValueInt(List<String> values, WorkOrderField field) {

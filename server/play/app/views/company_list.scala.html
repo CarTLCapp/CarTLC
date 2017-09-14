@@ -73,10 +73,10 @@
                 @for(company <- currentPage.getList) {
                     <tr>
                         <td>
-                            @if(company.name == null) {
+                            @if(company.getName() == null) {
                                 <em>-</em>
                             } else {
-                                @company.name
+                                @company.getName()
                             }
                         </td>
                         <td>
