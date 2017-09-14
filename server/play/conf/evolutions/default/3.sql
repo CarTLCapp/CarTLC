@@ -31,11 +31,11 @@ alter table client_project_association add constraint c_cpa_client_id foreign ke
 alter table client_project_association add constraint c_cpa_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 alter table picture_collection add note varchar(1028);
 
-create table company_name {
+create table company_name (
     id             int auto_increment primary key,
     name           varchar(255),
     disabled       bit default 0
-};
+);
 
 create table client_company_name_association (
     id              int auto_increment primary key,
@@ -120,3 +120,6 @@ alter table note drop column created_by_client;
 alter table note drop column num_digits;
 alter table company drop column created_by_client;
 alter table company drop column upload_id;
+alter table company drop column name_id;
+alter table company add name varchar(255);
+
