@@ -81,7 +81,10 @@ public class ClientController extends Controller {
         client.update();
 
         ClientProjectAssociation.addNew(id, getCheckedProjects(clientForm));
-        flash("success", "Client " + client.name + " has been updated");
+        Logger.info("Client " + client.name + " has been updated");
+
+        String value = clientForm.field("company").value();
+        Logger.info("Company value was " + value);
 
         return list();
     }
