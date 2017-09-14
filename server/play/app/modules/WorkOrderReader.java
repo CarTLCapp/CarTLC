@@ -195,7 +195,11 @@ public class WorkOrderReader {
         if (fieldPos.containsKey(field.ordinal())) {
             int pos = fieldPos.get(field.ordinal());
             if (pos < values.size()) {
-                return values.get(pos);
+                String result = values.get(pos);
+                if (result.trim().isEmpty() && defaultValue != null) {
+                    return defaultValue;
+                }
+                return result;
             }
         }
         return defaultValue;
