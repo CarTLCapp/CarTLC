@@ -92,7 +92,9 @@ create table company (
   city              varchar(128),
   state             varchar(64),
   zipcode           varchar(64),
+  upload_id         int default 0,
   created_by        int default 0,
+  created_by_client bit default 0,
   disabled          bit default 0
 );
 
@@ -111,10 +113,10 @@ alter table picture_collection drop column note;
 drop table if exists work_order;
 drop table if exists truck;
 drop table if exists entry;
-drop table if exists company;
 drop table if exists company_name;
 alter table entry_v2 rename entry;
-alter table company_v2 rename company;
 alter table equipment drop column created_by_client;
 alter table note drop column created_by_client;
 alter table note drop column num_digits;
+alter table company drop column created_by_client;
+alter table company drop column upload_id;
