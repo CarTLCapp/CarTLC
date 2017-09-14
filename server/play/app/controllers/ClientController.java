@@ -83,11 +83,10 @@ public class ClientController extends Controller {
         ClientProjectAssociation.addNew(id, getCheckedProjects(clientForm));
         Logger.info("Client " + client.name + " has been updated");
 
-        String value = clientForm.field("company").value();
-        Logger.info("Company value was " + value);
+        Logger.info("Company value was " + updateClient.company);
 
-        if (!value.trim().isEmpty()) {
-            ClientCompanyNameAssociation.save(id, value);
+        if (updateClient.company != null && !updateClient.company.trim().isEmpty()) {
+            ClientCompanyNameAssociation.save(id, updateClient.company);
         }
         return list();
     }
@@ -126,8 +125,10 @@ public class ClientController extends Controller {
         newClient.save();
         ClientProjectAssociation.addNew(newClient.id, getCheckedProjects(clientForm));
         Logger.info("Client " + newClient.name + " has been created");
-        String value = clientForm.field("company").value();
-        Logger.info("Company value was " + value);
+        Logger.info("Company value was " + inputClient.company);
+        if (inputClient.company != null && !inputClient.company.trim().isEmpty()) {
+            ClientCompanyNameAssociation.save(newClient.id, inputClient.company);
+        }
         return list();
     }
 
