@@ -50,6 +50,20 @@ public class ClientCompanyNameAssociation extends Model {
         return companyName;
     }
 
+    public static String getCompanyLine(long client_id) {
+        List<ClientCompanyNameAssociation> items = find.where()
+                .eq("client_id", client_id)
+                .findList();
+        StringBuilder sbuf = new StringBuilder();
+        for (ClientCompanyNameAssociation item : items) {
+            if (sbuf.length() > 0) {
+                sbuf.append(", ");
+            }
+            sbuf.append(CompanyName.get(item.company_name_id));
+        }
+        return sbuf.toString();
+    }
+
     public static void deleteEntries(long client_id) {
         List<ClientCompanyNameAssociation> items = find.where()
                 .eq("client_id", client_id)

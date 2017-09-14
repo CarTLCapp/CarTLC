@@ -124,6 +124,7 @@ public class Client extends com.avaje.ebean.Model {
     public List<Project> getProjects() {
         return ClientProjectAssociation.findProjects(id);
     }
+
     public String getProjects(String split) {
         StringBuilder sbuf = new StringBuilder();
         List<Project> projects = getProjects();
@@ -146,6 +147,10 @@ public class Client extends com.avaje.ebean.Model {
 
     public boolean hasProject(long project_id) {
         return ClientProjectAssociation.hasProject(id, project_id);
+    }
+
+    public String getCompanyName() {
+        return ClientCompanyNameAssociation.getCompanyLine(id);
     }
 
 }

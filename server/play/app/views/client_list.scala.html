@@ -18,6 +18,7 @@
                     <th>Login Name</th>
                     <th>Password</th>
                     <th>Projects</th>
+                    <th>Company</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -31,6 +32,7 @@
                             <td>***</td>
                         }
                         <td>@client.getProjectsLine()</td>
+                        <td>@client.getCompanyName()</td>
                         <td>
                             @if(client.is_admin) {
                                 <em>Admin</em>
