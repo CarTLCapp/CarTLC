@@ -26,7 +26,7 @@ public class Company extends Model {
     public Long id;
 
     @Constraints.Required
-    public int name_id;
+    public String name;
 
     @Constraints.Required
     public String street;
@@ -73,6 +73,12 @@ public class Company extends Model {
         return find.where().eq("upload_id", upload_id).findList();
     }
 
+    public static void saveNames() {
+        for (Company company : find.where().findList()) {
+            CompanyName.save(company.name);
+        }
+    }
+
     /**
      * Return a paged list of companies
      *
@@ -83,12 +89,11 @@ public class Company extends Model {
      * @param filter   Filter applied on the name column
      */
     public static PagedList<Company> list(int page, String sortBy, String order, String filter, boolean disabled) {
-        return
-                find.where()
-                        .eq("disabled", disabled)
-                        .ilike("name", "%" + filter + "%")
-                        .orderBy(sortBy + " " + order)
-                        .findPagedList(page, PAGE_SIZE);
+        return find.where()
+                .eq("disabled", disabled)
+                .ilike("name", "%" + filter + "%")
+                .orderBy(sortBy + " " + order)
+                .findPagedList(page, PAGE_SIZE);
     }
 
     public static List<Company> appList(int tech_id) {
@@ -106,7 +111,7 @@ public class Company extends Model {
 
     public static Company has(Company company) {
         List<Company> items = find.where()
-                .eq("name_id", company.name_id)
+                .eq("name", company.name)
                 .eq("street", company.street)
                 .eq("city", company.city)
                 .eq("state", company.state)
@@ -129,11 +134,10 @@ public class Company extends Model {
         String[] fields = line.split(",");
         Company company = new Company();
         if (fields.length > 0) {
-            String name = fields[0].trim();
-            if (name.isEmpty()) {
+            company.name = fields[0].trim();
+            if (company.name.isEmpty()) {
                 throw new DataErrorException("No company name entered as first field: '" + line + "'");
             }
-            company.name_id = (int) CompanyName.save(name);
             if (fields.length > 1) {
                 company.street = fields[1].trim();
                 if (company.street.isEmpty()) {
@@ -159,6 +163,7 @@ public class Company extends Model {
         } else {
             throw new DataErrorException("Must at least enter a company name");
         }
+        CompanyName.save(company.name);
         return company;
     }
 
@@ -167,7 +172,7 @@ public class Company extends Model {
     }
 
     public String getName() {
-        return CompanyName.get(name_id);
+        return name;
     }
 
     public String getLine() {

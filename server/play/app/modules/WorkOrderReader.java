@@ -107,7 +107,7 @@ public class WorkOrderReader {
                     order.upload_id = upload_id;
                     order.truck_id = truck_id;
                     Company company = new Company();
-                    company.name_id = (int) CompanyName.save(getFieldValue(values, WorkOrderField.COMPANY, company_name));
+                    company.name = getFieldValue(values, WorkOrderField.COMPANY, company_name);
                     company.street = getFieldValue(values, WorkOrderField.STREET);
                     company.city = getFieldValue(values, WorkOrderField.CITY);
                     company.state = getFieldValue(values, WorkOrderField.STATE);
@@ -127,6 +127,7 @@ public class WorkOrderReader {
                         order.save();
                         orderCount++;
                     }
+                    CompanyName.save(company.name);
                 }
             }
             br.close();
