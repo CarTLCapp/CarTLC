@@ -50,6 +50,8 @@ public class CompanyV2 extends Model {
      */
     public static Finder<Long, CompanyV2> find = new Finder<Long, CompanyV2>(CompanyV2.class);
 
+    public static HashMap<Long, Long> transferMap = new HashMap<Long,Long>();
+
     // TODO: Once data has been transfered, this code can be removed
     // and the database can be cleaned up by removing this table.
     public static void transfer() {
@@ -64,8 +66,34 @@ public class CompanyV2 extends Model {
             company.created_by = c2.created_by;
             company.disabled = c2.disabled;
             company.save();
+            transferMap.put(c2.id, company.id);
+        }
+    }
+
+    public static void cleanup() {
+        List<CompanyV2> list = find.findList();
+        for (CompanyV2 c2 : list) {
             c2.delete();
         }
+    }
+
+    public static long transfer(long address_id) {
+        if (transferMap.containsKey(address_id)) {
+            return transferMap.get(address_id);
+        }
+        CompanyV2 company = find.ref(address_id);
+        if (company != null) {
+            List<Company> list = Company.find.where()
+                    .eq("street", company.street)
+                    .eq("city", company.city)
+                    .eq("state", company.state)
+                    .eq("zipcode", company.zipcode)
+                    .findList();
+            if (list.size() > 0) {
+                return list.get(0).id;
+            }
+        }
+        return 0;
     }
 
 }

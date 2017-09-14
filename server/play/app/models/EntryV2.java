@@ -61,7 +61,7 @@ public class EntryV2 extends com.avaje.ebean.Model {
             entry.tech_id = entry2.tech_id;
             entry.entry_time = entry2.entry_time;
             entry.project_id = entry2.project_id;
-            entry.company_id = entry2.address_id;
+            entry.company_id = CompanyV2.transfer(entry2.address_id);
             entry.equipment_collection_id = entry2.equipment_collection_id;
             entry.picture_collection_id = entry2.picture_collection_id;
             entry.note_collection_id = entry2.note_collection_id;

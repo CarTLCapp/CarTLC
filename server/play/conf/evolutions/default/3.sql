@@ -64,6 +64,21 @@ create table truck (
     created_by_client bit default 0
 );
 
+alter table company rename company_v2;
+
+create table company (
+  id                int auto_increment primary key,
+  name_id           int default 0,
+  street            varchar(255),
+  city              varchar(128),
+  state             varchar(64),
+  zipcode           varchar(64),
+  upload_id         int default 0,
+  created_by        int default 0,
+  created_by_client bit default 0,
+  disabled          bit default 0
+);
+
 alter table entry rename entry_v2;
 
 create table entry (
@@ -82,21 +97,6 @@ create table entry (
 alter table entry add constraint c2_e_entry_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 alter table entry add constraint c2_e_entry_company_id foreign key (company_id) references company (id) on delete restrict on update restrict;
 alter table entry add constraint c2_e_tech_id foreign key (tech_id) references technician (id) on delete restrict on update restrict;
-
-alter table company rename company_v2;
-
-create table company (
-  id                int auto_increment primary key,
-  name_id           int default 0,
-  street            varchar(255),
-  city              varchar(128),
-  state             varchar(64),
-  zipcode           varchar(64),
-  upload_id         int default 0,
-  created_by        int default 0,
-  created_by_client bit default 0,
-  disabled          bit default 0
-);
 
 alter table equipment add created_by_client bit default 0;
 alter table note add created_by_client bit default 0;

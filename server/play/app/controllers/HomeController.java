@@ -28,8 +28,9 @@ public class HomeController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result index() {
         Client.initClient();
-        EntryV2.transfer();
         CompanyV2.transfer();
+        EntryV2.transfer();
+        CompanyV2.cleanup();
         return ok(views.html.home.render(Secured.getClient(ctx())));
     }
 
