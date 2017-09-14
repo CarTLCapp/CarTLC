@@ -29,7 +29,6 @@ public class Entry extends com.avaje.ebean.Model {
         // Warning: this string version must match the APP side.
         COMPLETE("Complete"),
         PARTIAL("Partial Install"),
-        MISSING_TRUCK("Missing Truck"),
         NEEDS_REPAIR("Needs Repair"),
         UNKNOWN("Unknown");
 
@@ -62,8 +61,6 @@ public class Entry extends com.avaje.ebean.Model {
                 return "#00ff00";
             } else if (this == PARTIAL) {
                 return "#ff6b4b";
-            } else if (this == MISSING_TRUCK) {
-                return "#00fffa";
             } else if (this == NEEDS_REPAIR) {
                 return "#ff01ff";
             }
@@ -215,6 +212,32 @@ public class Entry extends com.avaje.ebean.Model {
             }
             sbuf.append(equipment.name);
         }
+        return sbuf.toString();
+    }
+
+    public String getPictureAddendum() {
+        List<PictureCollection> pictures = getPictures();
+        int num_pictures = pictures.size();
+        int num_notes = 0;
+        for (PictureCollection c : pictures) {
+            if (c.hasNote()) {
+                num_notes++;
+            }
+        }
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("P");
+        sbuf.append(num_pictures);
+        if (num_notes > 0) {
+            sbuf.append(" N");
+            sbuf.append(num_notes);
+        }
+        return sbuf.toString();
+    }
+
+    public String getNoteAddendum() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("N");
+        sbuf.append(getNotes().size());
         return sbuf.toString();
     }
 

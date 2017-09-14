@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.multidex.MultiDex;
 import android.support.v4.content.FileProvider;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.data.DatabaseManager;
@@ -83,14 +85,18 @@ public class TBApplication extends Application {
     }
 
     @Override
-    protected void attachBaseContext(Context base)
-    {
+    protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
     }
 
     public static Uri getUri(Context ctx, File file) {
         return FileProvider.getUriForFile(ctx, "com.cartcl.tracker.fileprovider", file);
+    }
+
+    public static void hideKeyboard(Context ctx, View v) {
+        InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(),0);
     }
 
 //    public void checkPermissions(Activity act, PermissionListener listener) {

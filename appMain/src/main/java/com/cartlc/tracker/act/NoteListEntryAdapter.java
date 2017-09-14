@@ -9,10 +9,12 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cartlc.tracker.R;
+import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
@@ -96,6 +98,8 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
                     holder.label.setSelected(true);
                 } else {
                     holder.label.setSelected(false);
+                    TBApplication.hideKeyboard(mContext, v);
+                    Timber.i("MYDEBUG: HIDE!");
                 }
             }
         });

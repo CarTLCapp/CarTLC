@@ -5,12 +5,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -181,33 +183,31 @@ public class MainActivity extends AppCompatActivity {
 
     final static String KEY_STAGE = "stage";
 
-    @BindView(R.id.first_name)           EditText             mFirstName;
-    @BindView(R.id.last_name)            EditText             mLastName;
-    @BindView(R.id.entry_simple)         EditText             mEntrySimple;
-    @BindView(R.id.entry_hint)           TextView             mEntryHint;
-    @BindView(R.id.list_entry_hint)      TextView             mListEntryHint;
-    @BindView(R.id.status_hint)          TextView             mStatusHint;
-    @BindView(R.id.frame_login)          ViewGroup            mLoginFrame;
-    @BindView(R.id.frame_entry)          ViewGroup            mEntryFrame;
-    @BindView(R.id.frame_status)         ViewGroup            mStatusFrame;
-    @BindView(R.id.main_list)            RecyclerView         mMainList;
-    @BindView(R.id.main_list_frame)      FrameLayout          mMainListFrame;
-    @BindView(R.id.next)                 Button               mNext;
-    @BindView(R.id.prev)                 Button               mPrev;
-    @BindView(R.id.new_entry)            Button               mCenter;
-    @BindView(R.id.main_title)           TextView             mTitle;
-    @BindView(R.id.fab_add)              FloatingActionButton mAdd;
-    @BindView(R.id.frame_confirmation)   FrameLayout          mConfirmationFrameView;
-    @BindView(R.id.frame_pictures)       ViewGroup            mPictureFrame;
-    @BindView(R.id.list_pictures)        RecyclerView         mPictureList;
-    @BindView(R.id.empty)                TextView             mEmptyView;
-    @BindView(R.id.root)                 ViewGroup            mRoot;
-    @BindView(R.id.buttons)              ViewGroup            mButtons;
-    @BindView(R.id.status_select)        RadioGroup           mStatusSelect;
-    @BindView(R.id.status_missing_truck) RadioButton          mStatusMissingTruck;
-    @BindView(R.id.status_needs_repair)  RadioButton          mStatusNeedsRepair;
-    @BindView(R.id.status_complete)      RadioButton          mStatusComplete;
-    @BindView(R.id.status_partial)       RadioButton          mStatusPartial;
+    @BindView(R.id.first_name)          EditText             mFirstName;
+    @BindView(R.id.last_name)           EditText             mLastName;
+    @BindView(R.id.entry_simple)        EditText             mEntrySimple;
+    @BindView(R.id.entry_hint)          TextView             mEntryHint;
+    @BindView(R.id.list_entry_hint)     TextView             mListEntryHint;
+    @BindView(R.id.frame_login)         ViewGroup            mLoginFrame;
+    @BindView(R.id.frame_entry)         ViewGroup            mEntryFrame;
+    @BindView(R.id.frame_status)        ViewGroup            mStatusFrame;
+    @BindView(R.id.main_list)           RecyclerView         mMainList;
+    @BindView(R.id.main_list_frame)     FrameLayout          mMainListFrame;
+    @BindView(R.id.next)                Button               mNext;
+    @BindView(R.id.prev)                Button               mPrev;
+    @BindView(R.id.new_entry)           Button               mCenter;
+    @BindView(R.id.main_title)          TextView             mTitle;
+    @BindView(R.id.fab_add)             FloatingActionButton mAdd;
+    @BindView(R.id.frame_confirmation)  FrameLayout          mConfirmationFrameView;
+    @BindView(R.id.frame_pictures)      ViewGroup            mPictureFrame;
+    @BindView(R.id.list_pictures)       RecyclerView         mPictureList;
+    @BindView(R.id.empty)               TextView             mEmptyView;
+    @BindView(R.id.root)                ViewGroup            mRoot;
+    @BindView(R.id.buttons)             ViewGroup            mButtons;
+    @BindView(R.id.status_select)       RadioGroup           mStatusSelect;
+    @BindView(R.id.status_needs_repair) RadioButton          mStatusNeedsRepair;
+    @BindView(R.id.status_complete)     RadioButton          mStatusComplete;
+    @BindView(R.id.status_partial)      RadioButton          mStatusPartial;
 
     Stage              mCurStage           = Stage.LOGIN;
     String             mCurKey             = PrefHelper.KEY_STATE;
@@ -243,12 +243,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 doBtnNext();
+                TBApplication.hideKeyboard(MainActivity.this, v);
             }
         });
         mPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 doBtnPrev();
+                TBApplication.hideKeyboard(MainActivity.this, v);
             }
         });
         mCenter.setOnClickListener(new View.OnClickListener() {
@@ -301,10 +303,16 @@ public class MainActivity extends AppCompatActivity {
                     if (note.num_digits > 0) {
                         if (note.value != null && note.value.length() > 0) {
                             StringBuilder sbuf = new StringBuilder();
-                            sbuf.append(note.value.length());
+                            int count = note.value.length();
+                            sbuf.append(count);
                             sbuf.append("/");
                             sbuf.append(note.num_digits);
                             mListEntryHint.setText(sbuf.toString());
+                            if (count > note.num_digits) {
+                                mListEntryHint.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.entry_error_color));
+                            } else {
+                                mListEntryHint.setTextColor(ContextCompat.getColor(MainActivity.this, android.R.color.white));
+                            }
                         } else {
                             mListEntryHint.setText("");
                         }
@@ -864,7 +872,6 @@ public class MainActivity extends AppCompatActivity {
                 mTitle.setText(R.string.title_status);
                 setStatusButton();
                 mCurEntry = null;
-                showStatusHint();
                 break;
             case CONFIRM:
                 mPrev.setVisibility(View.VISIBLE);
@@ -1097,18 +1104,6 @@ public class MainActivity extends AppCompatActivity {
         return sbuf.toString();
     }
 
-    void showStatusHint() {
-        String hint = null;
-        switch (mCurStage) {
-            case STATUS:
-                hint = getStatusHint();
-                break;
-        }
-        if (hint != null && hint.length() > 0) {
-            mStatusHint.setText(hint);
-        }
-    }
-
     void showMainListFrame() {
         showMainListFrame(null);
     }
@@ -1133,9 +1128,6 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.status_partial:
                     PrefHelper.getInstance().setStatus(TruckStatus.PARTIAL);
                     break;
-                case R.id.status_missing_truck:
-                    PrefHelper.getInstance().setStatus(TruckStatus.MISSING_TRUCK);
-                    break;
                 case R.id.status_needs_repair:
                     PrefHelper.getInstance().setStatus(TruckStatus.NEEDS_REPAIR);
                     break;
@@ -1146,9 +1138,7 @@ public class MainActivity extends AppCompatActivity {
     void setStatusButton() {
         TruckStatus status = PrefHelper.getInstance().getStatus();
         if (status != null) {
-            if (status == TruckStatus.MISSING_TRUCK) {
-                mStatusMissingTruck.setChecked(true);
-            } else if (status == TruckStatus.NEEDS_REPAIR) {
+            if (status == TruckStatus.NEEDS_REPAIR) {
                 mStatusNeedsRepair.setChecked(true);
             } else if (status == TruckStatus.COMPLETE) {
                 mStatusComplete.setChecked(true);

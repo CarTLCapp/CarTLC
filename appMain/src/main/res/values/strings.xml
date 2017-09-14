@@ -66,7 +66,6 @@
 
     <string name="status_unknown">Unknown</string>
     <string name="status_needs_repair">Needs Repair</string>
-    <string name="status_missing_truck">Missing Truck</string>
     <string name="status_complete">Complete</string>
     <string name="status_partial_install">Partial Install</string>
     <string name="status_installed_equipments">%1$d of %2$d equipments checked.</string>

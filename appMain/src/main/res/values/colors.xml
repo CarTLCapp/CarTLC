@@ -12,6 +12,7 @@
     <color name="list_item_selected">#5e8f8a</color>
     <color name="list_background">#5b3737</color>
     <color name="entry_hint_color">#b1b1b1</color>
+    <color name="entry_error_color">#fcc9c9</color>
     <color name="hint_color">#e1e1e1</color>
     <color name="confirm_color">#667307</color>
     <color name="note_background">#333333</color>

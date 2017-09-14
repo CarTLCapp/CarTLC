@@ -44,7 +44,7 @@
                     @header("entry_time", "Date")
                     @header("project_id", "Project")
                     @header("company", "Company")
-                    @header("street", "Street")
+                    @header("street", "Street / Plant Name")
                     @header("city", "City")
                     @header("state", "State")
                     @header("zipcode", "ZIP")
@@ -70,8 +70,8 @@
                         <td>@entry.getZipCode()</td>
                         <td>@entry.getTruckLine()</td>
                         <td>@entry.getEquipmentLine()</td>
-                        <td><a href="@routes.EntryController.pictures(entry.id)">Pictures</a></td>
-                        <td><a href="@routes.EntryController.notes(entry.id)">Notes</a></td>
+                        <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
+                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum()</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
                         <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
                     </tr>

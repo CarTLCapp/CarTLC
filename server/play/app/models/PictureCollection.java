@@ -60,5 +60,9 @@ public class PictureCollection extends Model {
         }
     }
 
+    public boolean hasNote() {
+        return note != null && !note.isEmpty();
+    }
+
 }
 

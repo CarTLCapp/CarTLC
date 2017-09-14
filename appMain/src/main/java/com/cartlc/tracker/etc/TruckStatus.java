@@ -10,7 +10,6 @@ import com.cartlc.tracker.R;
 public enum TruckStatus {
     COMPLETE(R.string.status_complete),
     PARTIAL(R.string.status_partial_install),
-    MISSING_TRUCK(R.string.status_missing_truck),
     NEEDS_REPAIR(R.string.status_needs_repair),
     UNKNOWN(R.string.status_unknown);
 
