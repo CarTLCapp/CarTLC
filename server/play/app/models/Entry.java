@@ -225,20 +225,33 @@ public class Entry extends com.avaje.ebean.Model {
             }
         }
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("P");
-        sbuf.append(num_pictures);
-        if (num_notes > 0) {
-            sbuf.append(" N");
-            sbuf.append(num_notes);
+        if (num_pictures > 0) {
+            sbuf.append("P#");
+            sbuf.append(num_pictures);
+            if (num_notes > 0) {
+                sbuf.append(" N#");
+                sbuf.append(num_notes);
+            }
         }
         return sbuf.toString();
     }
 
     public String getNoteAddendum() {
+        int num_notes = getNotes().size();
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("N");
-        sbuf.append(getNotes().size());
+        if (num_notes > 0) {
+            sbuf.append("N#");
+            sbuf.append(num_notes);
+        }
         return sbuf.toString();
+    }
+
+    public boolean hasPictures() {
+        return getPictures().size() > 0;
+    }
+
+    public boolean hasNotes() {
+        return getNotes().size() > 0;
     }
 
     public List<PictureCollection> getPictures() {
