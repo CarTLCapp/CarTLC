@@ -1,13 +1,16 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import com.avaje.ebean.Model;
+
 import play.data.format.*;
 import play.data.validation.*;
 
 import com.avaje.ebean.*;
+
 import modules.DataErrorException;
 
 /**
@@ -17,7 +20,7 @@ import modules.DataErrorException;
 public class Company extends Model {
 
     private static final long serialVersionUID = 1L;
-    private static final int PAGE_SIZE = 30;
+    private static final int  PAGE_SIZE        = 30;
 
     @Id
     public Long id;
@@ -52,7 +55,7 @@ public class Company extends Model {
     /**
      * Generic query helper for entity Computer with id Long
      */
-    public static Finder<Long,Company> find = new Finder<Long,Company>(Company.class);
+    public static Finder<Long, Company> find = new Finder<Long, Company>(Company.class);
 
     public static Company get(long id) {
         if (id > 0) {
@@ -69,14 +72,15 @@ public class Company extends Model {
     public static List<Company> findByUploadId(int upload_id) {
         return find.where().eq("upload_id", upload_id).findList();
     }
+
     /**
      * Return a paged list of companies
      *
-     * @param page Page to display
+     * @param page     Page to display
      * @param pageSize Number of companies per page
-     * @param sortBy Property used for sorting
-     * @param order Sort order (either or asc or desc)
-     * @param filter Filter applied on the name column
+     * @param sortBy   Property used for sorting
+     * @param order    Sort order (either or asc or desc)
+     * @param filter   Filter applied on the name column
      */
     public static PagedList<Company> list(int page, String sortBy, String order, String filter, boolean disabled) {
         return
@@ -121,8 +125,23 @@ public class Company extends Model {
                 .findList();
     }
 
+    public static List<String> getCompanyNames() {
+        List<Company> list;
+        list = find.where()
+                .eq("disabled", false)
+                .orderBy("name asc")
+                .findList();
+        ArrayList<String> names = new ArrayList<String>();
+        for (Company company : list) {
+            if (!names.contains(company.name)) {
+                names.add(company.name);
+            }
+        }
+        return names;
+    }
+
     public static Company parse(String line) throws DataErrorException {
-        String [] fields = line.split(",");
+        String[] fields = line.split(",");
         Company company = new Company();
         if (fields.length > 0) {
             company.name = fields[0].trim();
@@ -223,6 +242,7 @@ public class Company extends Model {
     public static boolean hasDisabled() {
         return find.where().eq("disabled", true).findList().size() > 0;
     }
+
 
 }
 

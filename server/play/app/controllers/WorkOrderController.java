@@ -78,15 +78,15 @@ public class WorkOrderController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result importWorkOrdersForm(String errors) {
-        Form<InputWord> importForm = formFactory.form(InputWord.class);
+        Form<ImportWorkOrder> importForm = formFactory.form(ImportWorkOrder.class);
         return ok(views.html.work_order_import.render(importForm, Secured.getClient(ctx()), errors));
     }
 
     @Security.Authenticated(Secured.class)
     public Result importWorkOrders() {
-        Form<InputWord> importForm = formFactory.form(InputWord.class).bindFromRequest();
+        Form<ImportWorkOrder> importForm = formFactory.form(ImportWorkOrder.class).bindFromRequest();
         StringBuilder sbuf = new StringBuilder();
-        String projectName = importForm.get().word;
+        String projectName = importForm.get().project;
         MultipartFormData<File> body = request().body().asMultipartFormData();
         if (body != null) {
             FilePart<File> importname = body.getFile("filename");
@@ -130,7 +130,6 @@ public class WorkOrderController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result exportWorkOrders() {
-        Form<InputWord> exportForm = formFactory.form(InputWord.class);
         Client client = Secured.getClient(ctx());
         File file = new File(EXPORT_FILENAME);
         WorkOrderWriter writer = new WorkOrderWriter(client);

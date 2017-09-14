@@ -1,4 +1,4 @@
-@(importForm: Form[InputWord], client : Client, message : String = "")
+@(importForm: Form[ImportWorkOrder], client : Client, message : String = "")
 
 @import helper._
 
@@ -24,7 +24,8 @@
         <fieldset>
 
             <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>
-            @helper.select(importForm("word"), options = options(ClientProjectAssociation.findProjectNames(client.id)), args = '_label -> "Project:")
+            @helper.select(importForm("project"), options = options(ClientProjectAssociation.findProjectNames(client.id)), args = '_label -> "Project:")
+            @helper.select(importForm("company"), options = options(Company.getCompanyNames()), args = '_label -> "Company:")
 
         </fieldset>
 

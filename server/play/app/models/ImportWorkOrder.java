@@ -9,8 +9,9 @@ import play.data.validation.*;
 
 import com.avaje.ebean.*;
 
-public class InputWord extends Model {
+public class ImportWorkOrder extends Model {
     private static final long serialVersionUID = 1L;
-    public String word;
+    public String project;
+    public String company;
 }
 
