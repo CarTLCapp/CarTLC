@@ -121,20 +121,6 @@ public class EntryController extends Controller {
         Logger.debug("GOT: " + json.toString());
         boolean retServerId = false;
         JsonNode value;
-        value = json.findValue("server_id");
-        if (value != null) {
-            entry.id = value.longValue();
-            retServerId = true;
-            Entry existing;
-            if (entry.id > 0) {
-                existing = Entry.find.byId(entry.id);
-            } else {
-                existing = Entry.findByDate(entry.tech_id, entry.entry_time);
-            }
-            if (existing != null) {
-                entry = existing;
-            }
-        }
         value = json.findValue("tech_id");
         if (value == null) {
             missing.add("tech_id");
@@ -146,6 +132,22 @@ public class EntryController extends Controller {
             missing.add("date");
         } else {
             entry.entry_time = new Date(value.longValue());
+        }
+        value = json.findValue("server_id");
+        if (value != null) {
+            entry.id = value.longValue();
+            retServerId = true;
+            Entry existing;
+            if (entry.id > 0) {
+                existing = Entry.find.byId(entry.id);
+                existing.entry_time = entry.entry_time;
+                existing.tech_id = entry.tech_id;
+            } else {
+                existing = Entry.findByDate(entry.tech_id, entry.entry_time);
+            }
+            if (existing != null) {
+                entry = existing;
+            }
         }
         int truck_number;
         String license_plate;
