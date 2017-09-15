@@ -1,6 +1,9 @@
 package models;
 
 import java.util.*;
+import java.text.SimpleDateFormat;
+import java.io.File;
+
 import javax.persistence.*;
 
 import play.db.ebean.*;
@@ -9,23 +12,64 @@ import play.db.ebean.Transactional;
 import play.data.format.*;
 
 import com.avaje.ebean.*;
+
 import modules.AmazonHelper;
+import modules.AmazonHelper.OnDownloadComplete;
+import play.Logger;
 
 /**
  * Entry entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Entry extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
-    public static Finder<Long,Entry> find = new Finder<Long,Entry>(Entry.class);
+    public enum Status {
+        // Warning: this string version must match the APP side.
+        COMPLETE("Complete"),
+        PARTIAL("Partial Install"),
+        NEEDS_REPAIR("Needs Repair"),
+        UNKNOWN("Unknown");
 
-    public static PagedList<Entry> list(int page, int pageSize, String sortBy, String order) {
-        return
-                find.where()
-                        .orderBy(sortBy + " " + order)
-                        .findPagedList(page, pageSize);
+        final String name;
+
+        Status(String name) {
+            this.name = name;
+        }
+
+        public static Status from(int ord) {
+            for (Status value : values()) {
+                if (value.ordinal() == ord) {
+                    return value;
+                }
+            }
+            return Status.UNKNOWN;
+        }
+
+        public static Status from(String match) {
+            for (Status value : values()) {
+                if (value.toString().compareToIgnoreCase(match) == 0) {
+                    return value;
+                }
+            }
+            return Status.UNKNOWN;
+        }
+
+        public String getCellColor() {
+            if (this == COMPLETE) {
+                return "#00ff00";
+            } else if (this == PARTIAL) {
+                return "#ff6b4b";
+            } else if (this == NEEDS_REPAIR) {
+                return "#ff01ff";
+            }
+            return "";
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
     @Id
@@ -34,14 +78,14 @@ public class Entry extends com.avaje.ebean.Model {
     @Constraints.Required
     public int tech_id;
 
-    @Formats.DateTime(pattern="yyyy-MM-dd kk:mm")
+    @Formats.DateTime(pattern = "yyyy-MM-dd kk:mm")
     public Date entry_time;
 
     @Constraints.Required
     public long project_id;
 
     @Constraints.Required
-    public long address_id;
+    public long company_id;
 
     @Constraints.Required
     public long equipment_collection_id;
@@ -53,21 +97,29 @@ public class Entry extends com.avaje.ebean.Model {
     public long note_collection_id;
 
     @Constraints.Required
-    public int truck_number;
+    public long truck_id;
 
     @Constraints.Required
-    public String license_plate;
+    public Status status;
+
+    public static Finder<Long, Entry> find = new Finder<Long, Entry>(Entry.class);
+
+    public static PagedList<Entry> list(int page, int pageSize, String sortBy, String order) {
+        return find.where()
+                .orderBy(sortBy + " " + order)
+                .findPagedList(page, pageSize);
+    }
 
     public String getTechName() {
-        Client client = Client.find.byId((long) tech_id);
-        if (client == null) {
+        Technician tech = Technician.find.ref((long) tech_id);
+        if (tech == null) {
             return "NOT FOUND: " + tech_id;
         }
-        return client.fullName();
+        return tech.fullName();
     }
 
     public String getProjectLine() {
-        Project project = Project.find.byId(project_id);
+        Project project = Project.find.ref(project_id);
         if (project == null) {
             return "NOT FOUND: " + project_id;
         }
@@ -75,18 +127,109 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getAddressLine() {
-        Company company = Company.find.byId(address_id);
+        Company company = Company.get(company_id);
         if (company == null) {
-            return "NOT FOUND: " + address_id;
+            return "NOT FOUND: " + company_id;
         }
         return company.getLine();
     }
 
-    public String getTruckLine() {
-        if (license_plate != null) {
-            return license_plate;
+    public String getCompany() {
+        Company company = Company.get(company_id);
+        if (company == null) {
+            return "NOT FOUND: " + company_id;
         }
-        return Integer.toString(truck_number);
+        return company.getName();
+    }
+
+    public String getStreet() {
+        Company company = Company.get(company_id);
+        if (company == null) {
+            return "NOT FOUND: " + company_id;
+        }
+        return company.street;
+    }
+
+    public String getState() {
+        Company company = Company.get(company_id);
+        if (company == null) {
+            return "NOT FOUND: " + company_id;
+        }
+        return company.state;
+    }
+
+    public String getCity() {
+        Company company = Company.get(company_id);
+        if (company == null) {
+            return "NOT FOUND: " + company_id;
+        }
+        return company.city;
+    }
+
+    public String getZipCode() {
+        Company company = Company.get(company_id);
+        if (company == null) {
+            return "NOT FOUND: " + company_id;
+        }
+        return company.zipcode;
+    }
+
+    public String getStatus() {
+        if (status == null) {
+            return "";
+        }
+        return status.getName();
+    }
+
+    public String getCellColor() {
+        if (status == null) {
+            return "";
+        }
+        return status.getCellColor();
+    }
+
+    public String getDate() {
+        return new SimpleDateFormat("yyyy-MM-dd kk:mm").format(entry_time);
+    }
+
+    public String getTruckLine() {
+        Truck truck = Truck.find.ref(truck_id);
+        if (truck == null) {
+            return null;
+        }
+        StringBuilder sbuf = new StringBuilder();
+        if (truck.truck_number > 0) {
+            sbuf.append(truck.truck_number);
+        }
+        if (truck.license_plate != null && !truck.license_plate.isEmpty()) {
+            if (sbuf.length() > 0) {
+                sbuf.append(" : ");
+            }
+            sbuf.append(truck.license_plate);
+        }
+        return sbuf.toString();
+    }
+
+    public int truckCompareTo(Entry other) {
+        Truck truck = Truck.find.ref(truck_id);
+        Truck otruck = Truck.find.ref(other.truck_id);
+        if (truck == null || otruck == null) {
+            return 0;
+        }
+        if (truck.truck_number > 0 && otruck.truck_number > 0) {
+            return truck.truck_number - otruck.truck_number;
+        } else if (truck.truck_number > 0) {
+            return -1;
+        } else if (otruck.truck_number > 0) {
+            return 1;
+        }
+        if (truck.license_plate != null) {
+            return truck.license_plate.compareTo(otruck.license_plate);
+        }
+        if (otruck.license_plate == null) {
+            return 0;
+        }
+        return -1;
     }
 
     public String getEquipmentLine() {
@@ -101,6 +244,45 @@ public class Entry extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
+    public String getPictureAddendum() {
+        List<PictureCollection> pictures = getPictures();
+        int num_pictures = pictures.size();
+        int num_notes = 0;
+        for (PictureCollection c : pictures) {
+            if (c.hasNote()) {
+                num_notes++;
+            }
+        }
+        StringBuilder sbuf = new StringBuilder();
+        if (num_pictures > 0) {
+            sbuf.append("P#");
+            sbuf.append(num_pictures);
+            if (num_notes > 0) {
+                sbuf.append(" N#");
+                sbuf.append(num_notes);
+            }
+        }
+        return sbuf.toString();
+    }
+
+    public String getNoteAddendum() {
+        int num_notes = getNotes().size();
+        StringBuilder sbuf = new StringBuilder();
+        if (num_notes > 0) {
+            sbuf.append("N#");
+            sbuf.append(num_notes);
+        }
+        return sbuf.toString();
+    }
+
+    public boolean hasPictures() {
+        return getPictures().size() > 0;
+    }
+
+    public boolean hasNotes() {
+        return getNotes().size() > 0;
+    }
+
     public List<PictureCollection> getPictures() {
         return PictureCollection.findByCollectionId(picture_collection_id);
     }
@@ -111,6 +293,17 @@ public class Entry extends com.avaje.ebean.Model {
 
     static List<Entry> findByProjectId(long project_id) {
         return find.where().eq("project_id", project_id).findList();
+    }
+
+    public static Entry findByDate(int tech_id, Date date) {
+        List<Entry> list = find.where()
+                .eq("tech_id", tech_id)
+                .eq("entry_time", date)
+                .findList();
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
     }
 
     public static boolean hasEquipment(long project_id, long equipment_id) {
@@ -133,16 +326,66 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public void remove(AmazonHelper amazonHelper) {
-        EntryEquipmentCollection.deleteEntries(equipment_collection_id);
+        EntryEquipmentCollection.deleteByCollectionId(equipment_collection_id);
         PictureCollection.deleteByCollectionId(picture_collection_id, amazonHelper);
         EntryNoteCollection.deleteByCollectionId(note_collection_id);
         delete();
     }
 
-    public static boolean hasEntryForCompany(final int tech_id, final long address_id) {
+    public static int countEntriesForProject(long project_id) {
+        return find.where().eq("project_id", project_id).findList().size();
+    }
+
+    public static int countEntriesForCompany(long company_id) {
+        return find.where().eq("company_id", company_id).findList().size();
+    }
+
+    public static int countEntriesForTechnician(long tech_id) {
+        return find.where().eq("tech_id", tech_id).findList().size();
+    }
+
+    public static int countEntriesForNote(long note_id) {
+        int count = 0;
+        List<Entry> items = find.where().findList();
+        for (Entry entry : items) {
+            List<EntryNoteCollection> collection = EntryNoteCollection.findByCollectionId(entry.note_collection_id);
+            for (EntryNoteCollection note : collection) {
+                if (note.note_id == note_id) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public static int countEntriesForEquipment(long equipment_id) {
+        List<Entry> items = find.where().findList();
+        int count = 0;
+        for (Entry entry : items) {
+            List<Equipment> collection = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
+            for (Equipment equip : collection) {
+                if (equip.id == equipment_id) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public static boolean hasEntryForProject(long project_id) {
+        return countEntriesForProject(project_id) > 0;
+    }
+
+    public static boolean hasEntryForCompany(final int tech_id, final long company_id) {
         List<Entry> items = find.where()
-                    .eq("tech_id", tech_id)
-                    .eq("address_id", address_id).findList();
+                .eq("tech_id", tech_id)
+                .eq("company_id", company_id).findList();
+        return items.size() > 0;
+    }
+
+    public static boolean hasEntryForCompany(final long company_id) {
+        List<Entry> items = find.where()
+                .eq("company_id", company_id).findList();
         return items.size() > 0;
     }
 
@@ -150,6 +393,19 @@ public class Entry extends com.avaje.ebean.Model {
         List<Entry> items = find.where()
                 .eq("tech_id", tech_id)
                 .findList();
+        for (Entry entry : items) {
+            List<Equipment> collection = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
+            for (Equipment equip : collection) {
+                if (equip.id == equipment_id) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasEntryForEquipment(final long equipment_id) {
+        List<Entry> items = find.where().findList();
         for (Entry entry : items) {
             List<Equipment> collection = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
             for (Equipment equip : collection) {
@@ -175,5 +431,78 @@ public class Entry extends com.avaje.ebean.Model {
         }
         return false;
     }
+
+    public static boolean hasEntryForNote(final long note_id) {
+        List<Entry> items = find.where().findList();
+        for (Entry entry : items) {
+            List<EntryNoteCollection> collection = EntryNoteCollection.findByCollectionId(entry.note_collection_id);
+            for (EntryNoteCollection note : collection) {
+                if (note.note_id == note_id) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasEntryForTruck(final long truck_id) {
+        List<Entry> items = find.where()
+                .eq("truck_id", truck_id).findList();
+        return items.size() > 0;
+    }
+
+    public static Entry getFulfilledBy(WorkOrder order) {
+        List<Entry> list = find.where()
+                .eq("company_id", order.company_id)
+                .eq("project_id", order.project_id)
+                .eq("truck_id", order.truck_id)
+                .findList();
+        if (list.size() == 0) {
+            return null;
+        }
+        if (list.size() > 1) {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append("More than one entry found to fulfill workorder");
+            for (Entry entry : list) {
+                sbuf.append("\n");
+                sbuf.append(entry.toString());
+            }
+            Logger.error(sbuf.toString());
+        }
+        return list.get(0);
+    }
+
+    public void loadPictures(String host, AmazonHelper amazonHelper) {
+        List<PictureCollection> pictures = getPictures();
+        for (PictureCollection picture : pictures) {
+            File localFile = amazonHelper.getLocalFile(picture.picture);
+            if (!localFile.exists()) {
+                try {
+                    amazonHelper.download(host, picture.picture, new OnDownloadComplete() {
+                        public void onDownloadComplete(File file) {
+                            Logger.info("COMPLETED: " + file.getAbsolutePath());
+                        }
+                    });
+                } catch (Exception ex) {
+                    Logger.error(ex.getMessage());
+                }
+            }
+        }
+    }
+
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(id);
+        sbuf.append(":");
+        sbuf.append(getDate());
+        sbuf.append(",");
+        sbuf.append(getAddressLine());
+        sbuf.append(",");
+        sbuf.append(getTruckLine());
+        sbuf.append(",");
+        sbuf.append(getTechName());
+        return sbuf.toString();
+    }
+
 }
 

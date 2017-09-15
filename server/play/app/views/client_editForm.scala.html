@@ -1,31 +1,46 @@
-@(id: Long, clientForm: Form[Client])
+@(id: Long, techForm: Form[InputClient])
 
 @import helper._
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - Edit User") {
+@main("FleetTLC - Edit Client", home = "/client") {
     
-    <h1>Edit user</h1>
+    <h1>Edit client</h1>
     
     @b3.form(routes.ClientController.update(id)) {
         
         <fieldset>
-        
-            @b3.text(clientForm("first_name"), '_label -> "First Name", '_help -> "")
-            @b3.text(clientForm("last_name"), '_label -> "Last Name", '_help -> "")
+
+            @b3.text(techForm("name"), '_label -> "Logon name", '_help -> "")
+            @b3.text(techForm("password"), '_label -> "Password", '_help -> "")
+
+            <h3>Projects</h3>
+
+            @for(project <- Project.list()) {
+                @if(Client.hasProject(id, project.id)) {
+                    @b3.checkbox(techForm(project.name), '_label -> project.name, 'checked -> true)
+                } else {
+                    @b3.checkbox(techForm(project.name), '_label -> project.name)
+                }
+                <p><br></p>
+            }
+
+            <h3>Company</h3>
+
+            @b3.select(techForm("company"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
 
         </fieldset>
 
         <div class="actions">
-            <input type="submit" value="Save this user" class="btn primary"> or
+            <input type="submit" value="Save this client" class="btn primary"> or
             <a href="@routes.ClientController.list()" class="btn">Cancel</a>
         </div>
 
     }
     
     @b3.form(routes.ClientController.delete(id), 'class -> "topRight") {
-        <input type="submit" value="Delete this user" class="btn danger">
+        <input type="submit" value="Delete this client" class="btn danger">
     }
     
 }

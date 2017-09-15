@@ -4,7 +4,7 @@
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - Edit Note") {
+@main("FleetTLC - Edit Note", home = "/note") {
     
     <h1>Edit note</h1>
     
@@ -13,6 +13,7 @@
         <fieldset>
         
             @b3.text(noteForm("name"), '_label -> "Name", '_help -> "")
+            @b3.number(noteForm("num_digits"), '_label -> "Num Digits", '_help -> "")
             @b3.select(
                 noteForm("type"),
                 options(Note.options),
@@ -52,9 +53,17 @@
         </div>
 
     }
-    
+
     @b3.form(routes.NoteController.delete(id), 'class -> "topRight") {
-        <input type="submit" value="Delete this note" class="btn danger">
+        @if(Note.isDisabled(id)) {
+            <a href="@routes.NoteController.enable(id)" class="btn">Enable Note</a>
+        } else {
+            @if(Entry.hasEntryForNote(id)) {
+                <input type="submit" value="Disable note" class="btn danger" onclick="return alert('The note, since it has entries, will be moved to the disabled list.');">
+            } else {
+                <input type="submit" value="Delete note" class="btn danger" onclick="return confirm('Are you sure you wish to delete this note?');">
+            }
+        }
     }
     
 }

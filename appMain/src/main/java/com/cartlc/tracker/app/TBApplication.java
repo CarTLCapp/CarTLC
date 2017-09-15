@@ -6,15 +6,20 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.multidex.MultiDex;
 import android.support.v4.content.FileProvider;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.data.DatabaseManager;
-import com.cartlc.tracker.data.PrefHelper;
-import com.cartlc.tracker.data.BootstrapData;
+import com.cartlc.tracker.etc.PrefHelper;
+import com.cartlc.tracker.etc.BootstrapData;
+import com.cartlc.tracker.data.TableZipCode;
+import com.cartlc.tracker.data.DataZipCode;
 import com.cartlc.tracker.server.AmazonHelper;
 import com.cartlc.tracker.server.DCService;
 import com.cartlc.tracker.server.ServerHelper;
 
+import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
 import com.cartlc.tracker.util.PermissionHelper;
@@ -46,16 +51,19 @@ public class TBApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if (BuildConfig.DEBUG) {
+        if (false && BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
+        } else {
+            Timber.plant(new CrashReportingTree());
         }
         DatabaseManager.Init(this);
         PrefHelper.Init(this);
         ServerHelper.Init(this);
         PermissionHelper.Init();
         AmazonHelper.Init(this);
-
         BootstrapData.Init();
+
+        PrefHelper.getInstance().detectSpecialUpdateCheck();
     }
 
     public void ping() {
@@ -64,15 +72,31 @@ public class TBApplication extends Application {
         }
     }
 
+    public void requestZipCode(String zipCode) {
+        DataZipCode data = TableZipCode.getInstance().query(zipCode);
+        if (data != null) {
+            EventBus.getDefault().post(data);
+        } else if (ServerHelper.getInstance().hasConnection()) {
+            Intent intent = new Intent(this, DCService.class);
+            intent.setAction(DCService.ACTION_ZIP_CODE);
+            intent.putExtra(DCService.DATA_ZIP_CODE, zipCode);
+            startService(intent);
+        }
+    }
+
     @Override
-    protected void attachBaseContext(Context base)
-    {
+    protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
     }
 
     public static Uri getUri(Context ctx, File file) {
         return FileProvider.getUriForFile(ctx, "com.cartcl.tracker.fileprovider", file);
+    }
+
+    public static void hideKeyboard(Context ctx, View v) {
+        InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(),0);
     }
 
 //    public void checkPermissions(Activity act, PermissionListener listener) {

@@ -50,6 +50,7 @@ public class TableCollectionNoteProject extends TableCollection {
         addTest(projectNameId, list);
     }
 
+    // Get the list of notes associated with the project.
     public List<DataNote> getNotes(long projectNameId) {
         List<Long> noteIds = query(projectNameId);
         List<DataNote> list = new ArrayList();

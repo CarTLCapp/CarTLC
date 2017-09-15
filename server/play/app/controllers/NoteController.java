@@ -2,20 +2,26 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+
 import play.mvc.*;
 import play.data.*;
+
 import static play.data.Form.*;
+
 import play.Logger;
 
 import models.*;
 
 import java.util.List;
 import java.util.ArrayList;
+
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+
 import play.db.ebean.Transactional;
 
 import play.libs.Json;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,8 +41,19 @@ public class NoteController extends Controller {
     /**
      * Display the list of notes.
      */
+    @Security.Authenticated(Secured.class)
     public Result list() {
-        return ok(views.html.note_list.render(Note.list()));
+        return list(false);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result list_disabled() {
+        return list(true);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result list(boolean disabled) {
+        return ok(views.html.note_list.render(Note.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
     /**
@@ -44,11 +61,10 @@ public class NoteController extends Controller {
      *
      * @param id Id of the note to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         Form<Note> noteForm = formFactory.form(Note.class).fill(Note.find.byId(id));
-        return ok(
-            views.html.note_editForm.render(id, noteForm)
-        );
+        return ok(views.html.note_editForm.render(id, noteForm));
     }
 
     /**
@@ -61,56 +77,56 @@ public class NoteController extends Controller {
         if (noteForm.hasErrors()) {
             return badRequest(views.html.note_editForm.render(id, noteForm));
         }
-        Transaction txn = Ebean.beginTransaction();
-        try {
-            Note savedNote = Note.find.byId(id);
-            if (savedNote != null) {
-                Note newNoteData = noteForm.get();
-                savedNote.name = newNoteData.name;
-                savedNote.type = newNoteData.type;
-                savedNote.update();
-                flash("success", "Note " + noteForm.get().name + " has been updated");
-                txn.commit();
-
-                Version.inc(Version.VERSION_NOTE);
-            }
-        } finally {
-            txn.end();
+        Note newNoteData = noteForm.get();
+        if (Note.hasNoteWithName(newNoteData.name, id)) {
+            return badRequest("Already a note named: " + newNoteData.name);
         }
+        newNoteData.id = id;
+        newNoteData.update();
+        Logger.info("Note " + newNoteData.name + " has been updated");
+        Version.inc(Version.VERSION_NOTE);
         return list();
     }
 
     /**
      * Display the 'new note form'.
      */
+    @Security.Authenticated(Secured.class)
     public Result create() {
         Form<Note> noteForm = formFactory.form(Note.class);
-        return ok(
-                views.html.note_createForm.render(noteForm)
-        );
+        return ok(views.html.note_createForm.render(noteForm));
     }
 
     /**
-     * Handle the 'new user form' submission
+     * Handle the 'new note form' submission
      */
     public Result save() {
         Form<Note> noteForm = formFactory.form(Note.class).bindFromRequest();
         if (noteForm.hasErrors()) {
             return badRequest(views.html.note_createForm.render(noteForm));
         }
-        noteForm.get().save();
-        flash("success", "Note " + noteForm.get().name + " has been created");
+        Client client = Secured.getClient(ctx());
+        Note note = noteForm.get();
+        if (client != null && client.id > 0) {
+            note.created_by = Long.valueOf(client.id).intValue();
+            note.created_by_client = true;
+        }
+        List<Note> notes = Note.findByName(note.name);
+        if (notes != null && notes.size() > 0) {
+            return badRequest("There is already a note named: " + note.name);
+        }
+        note.save();
+        flash("success", "Note " + note.name + " has been created");
         return list();
     }
 
     /**
      * Display a form to enter in many notes at once.
      */
+    @Security.Authenticated(Secured.class)
     public Result createMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class);
-        return ok(
-                views.html.notes_createForm.render(linesForm)
-        );
+        return ok(views.html.notes_createForm.render(linesForm));
     }
 
     /**
@@ -141,12 +157,13 @@ public class NoteController extends Controller {
                 Note.Type type = null;
                 int pos = name.indexOf(':');
                 if (pos >= 0) {
-                    String typeStr = name.substring(pos+1).trim();
+                    String typeStr = name.substring(pos + 1).trim();
                     name = name.substring(0, pos).trim();
                     type = Note.Type.from(typeStr);
                 }
-                Note note = Note.findByName(name);
-                if (note == null) {
+                List<Note> notes = Note.findByName(name);
+                Note note;
+                if (notes == null | notes.size() == 0) {
                     if (type == null) {
                         type = Note.Type.TEXT;
                     }
@@ -154,9 +171,15 @@ public class NoteController extends Controller {
                     note.name = name;
                     note.type = type;
                     note.save();
-                } else if (type != null) {
-                    note.type = type;
-                    note.save();
+                } else {
+                    if (notes.size() > 1) {
+                        Logger.error("Found too many notes with name: " + name);
+                    }
+                    note = notes.get(0);
+                    if (type != null) {
+                        note.type = type;
+                        note.update();
+                    }
                 }
                 if (activeProject != null) {
                     ProjectNoteCollection collection = new ProjectNoteCollection();
@@ -170,18 +193,34 @@ public class NoteController extends Controller {
             }
         }
         Version.inc(Version.VERSION_NOTE);
-
         return list();
     }
 
     /**
      * Handle note deletion
      */
+    @Security.Authenticated(Secured.class)
     public Result delete(Long id) {
-        // TODO: If the client is in the database, mark it as disabled instead.
-        Note.find.ref(id).delete();
+        Note note = Note.find.byId(id);
+        if (Entry.hasEntryForNote(id)) {
+            note.disabled = true;
+            note.update();
+            Logger.info("Note has been disabled: it had entries: " + note.name);
+        } else {
+            Logger.info("Note has been deleted: " + note.name);
+            note.delete();
+        }
         Version.inc(Version.VERSION_NOTE);
-        flash("success", "Note has been deleted");
+        return list();
+    }
+
+    @Security.Authenticated(Secured.class)
+    @Transactional
+    public Result enable(Long id) {
+        Note note = Note.find.byId(id);
+        note.disabled = false;
+        note.update();
+        Version.inc(Version.VERSION_NOTE);
         return list();
     }
 
@@ -220,15 +259,13 @@ public class NoteController extends Controller {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("notes");
         ArrayList<Long> noteIds = new ArrayList<Long>();
-        List<Note> notes = Note.appList(tech_id);
+        List<Note> notes = Note.appList();
         for (Note item : notes) {
             ObjectNode node = array.addObject();
             node.put("id", item.id);
             node.put("name", item.name);
             node.put("type", item.type.toString());
-            if (item.created_by != 0) {
-                node.put("is_local", true);
-            }
+            node.put("num_digits", item.num_digits);
             noteIds.add(item.id);
         }
         array = top.putArray("project_note");

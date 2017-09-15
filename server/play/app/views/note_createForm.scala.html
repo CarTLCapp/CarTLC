@@ -4,7 +4,7 @@
 
 @import b3.vertical.fieldConstructor
 
-@main("Fleet TLC - New Note") {
+@main("Fleet TLC - New Note", home = "/note") {
     
     <h1>Add a note</h1>
     
@@ -12,6 +12,7 @@
         
         <fieldset>
             @b3.text(noteForm("name"), '_label -> "Name", '_help -> "")
+            @b3.number(noteForm("num_digits"), '_label -> "Num Digits", '_help -> "")
             @b3.select(
                 noteForm("type"),
                 options(Note.options),

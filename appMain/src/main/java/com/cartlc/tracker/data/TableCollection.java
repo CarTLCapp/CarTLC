@@ -54,7 +54,7 @@ public abstract class TableCollection {
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
         sbuf.append(KEY_IS_BOOT);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -84,11 +84,12 @@ public abstract class TableCollection {
         return count;
     }
 
-    public void add(DataCollectionEquipment collection) {
-        add(collection.id, collection.equipmentListIds);
+    public void save(DataCollectionEquipment collection) {
+        save(collection.id, collection.equipmentListIds);
     }
 
-    public void add(long collectionId, List<Long> ids) {
+    public void save(long collectionId, List<Long> ids) {
+        removeByCollectionId(collectionId);
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
@@ -127,6 +128,7 @@ public abstract class TableCollection {
 
     public void add(long collectionId, long valueId) {
         mDb.beginTransaction();
+        removeByCollectionId(collectionId);
         try {
             ContentValues values = new ContentValues();
             values.clear();
@@ -266,6 +268,15 @@ public abstract class TableCollection {
         }
     }
 
+    public void removeByCollectionId(long id) {
+        try {
+            String where = KEY_COLLECTION_ID + "=?";
+            String[] whereArgs = new String[]{Long.toString(id)};
+            mDb.delete(mTableName, where, whereArgs);
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
 
     public void clearUploaded() {
         mDb.beginTransaction();

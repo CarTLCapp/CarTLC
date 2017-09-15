@@ -61,7 +61,7 @@ public class TableCollectionNoteEntry {
         int count = 0;
         try {
             String where = KEY_NOTE_ID + "=?";
-            String [] whereArgs = new String [] { Long.toString(noteId) };
+            String[] whereArgs = new String[]{Long.toString(noteId)};
             Cursor cursor = mDb.query(TABLE_NAME, null, where, whereArgs, null, null, null);
             count = cursor.getCount();
             cursor.close();
@@ -71,10 +71,15 @@ public class TableCollectionNoteEntry {
         return count;
     }
 
-    public void store(long projectNameId, long collectionId) {
-        List<DataNote> notes = TableCollectionNoteProject.getInstance().getNotes(projectNameId);
+    // There are TWO note tables. One is TableCollectionnNoteProject which stores the
+    // defined notes for each project. The other is this one which stores the values.
+    //
+    // The values are stored right now in the TableNote table which is represented by the incoming
+    // notes. We want them to also be stored now into this table.
+    public void save(long collectionId, List<DataNote> notes) {
         mDb.beginTransaction();
         try {
+            removeCollection(collectionId);
             ContentValues values = new ContentValues();
             for (DataNote note : notes) {
                 if (!TextUtils.isEmpty(note.value)) {
@@ -93,22 +98,20 @@ public class TableCollectionNoteEntry {
         }
     }
 
+    // Get list of notes the associated collection id in this table and their values.
     public List<DataNote> query(long collectionId) {
         List<DataNote> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_NOTE_ID, KEY_VALUE};
+            final String[] columns = {KEY_NOTE_ID, KEY_VALUE};
             final String selection = KEY_COLLECTION_ID + " =?";
             final String[] selectionArgs = {Long.toString(collectionId)};
             Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxNoteId = cursor.getColumnIndex(KEY_NOTE_ID);
             int idxValueId = cursor.getColumnIndex(KEY_VALUE);
             DataNote note;
             while (cursor.moveToNext()) {
-                note = new DataNote();
-                note.id = cursor.getLong(idxRowId);
-                note.value = cursor.getString(idxValueId);
-                note.name = TableNote.getInstance().getName(cursor.getLong(idxNoteId));
+                note = TableNote.getInstance().query(cursor.getLong(idxNoteId)); // Fill out with original values.
+                note.value = cursor.getString(idxValueId); // override
                 list.add(note);
             }
             cursor.close();
@@ -116,6 +119,12 @@ public class TableCollectionNoteEntry {
             Timber.e(ex);
         }
         return list;
+    }
+
+    void removeCollection(long collection_id) {
+        String where = KEY_COLLECTION_ID + "=?";
+        String[] whereArgs = {Long.toString(collection_id)};
+        mDb.delete(TABLE_NAME, where, whereArgs);
     }
 
 }

@@ -2,19 +2,26 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+
 import play.mvc.*;
 import play.data.*;
+
 import static play.data.Form.*;
+
 import play.Logger;
 
 import models.*;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+
 import play.db.ebean.Transactional;
 import play.libs.Json;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import play.db.ebean.Transactional;
 
 /**
  * Manage a database of projects.
@@ -32,9 +39,21 @@ public class ProjectController extends Controller {
      * Display the list of projects.
      */
     public Result list() {
-        return ok(
-                views.html.project_list.render(Project.list())
-        );
+        return list(false);
+    }
+
+    /**
+     * Display the list of disabled projects.
+     */
+    public Result list_disabled() {
+        return list(true);
+    }
+
+    /**
+     * Display the list of active or disabled projects.
+     */
+    public Result list(boolean disabled) {
+        return ok(views.html.project_list.render(Project.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
     /**
@@ -42,13 +61,10 @@ public class ProjectController extends Controller {
      *
      * @param id Id of the project to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
-        Form<Project> projectForm = formFactory.form(Project.class).fill(
-                Project.find.byId(id)
-        );
-        return ok(
-            views.html.project_editForm.render(id, projectForm)
-        );
+        Form<Project> projectForm = formFactory.form(Project.class).fill(Project.find.byId(id));
+        return ok(views.html.project_editForm.render(id, projectForm, Secured.getClient(ctx())));
     }
 
     /**
@@ -59,7 +75,7 @@ public class ProjectController extends Controller {
     public Result update(Long id) throws PersistenceException {
         Form<Project> projectForm = formFactory.form(Project.class).bindFromRequest();
         if (projectForm.hasErrors()) {
-            return badRequest(views.html.project_editForm.render(id, projectForm));
+            return badRequest(views.html.project_editForm.render(id, projectForm, Secured.getClient(ctx())));
         }
         Transaction txn = Ebean.beginTransaction();
         try {
@@ -82,22 +98,31 @@ public class ProjectController extends Controller {
     /**
      * Display the 'new project form'.
      */
+    @Security.Authenticated(Secured.class)
     public Result create() {
-        Form<Project> projectForm = formFactory.form(Project.class);
-        return ok(
-                views.html.project_createForm.render(projectForm)
-        );
+        if (Secured.isAdmin(ctx())) {
+            Form<Project> projectForm = formFactory.form(Project.class);
+            return ok(views.html.project_createForm.render(projectForm));
+        } else {
+            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+        }
     }
 
     /**
      * Handle the 'new user form' submission
      */
+    @Security.Authenticated(Secured.class)
+    @Transactional
     public Result save() {
         Form<Project> projectForm = formFactory.form(Project.class).bindFromRequest();
-        if(projectForm.hasErrors()) {
+        if (projectForm.hasErrors() || !Secured.isAdmin(ctx())) {
             return badRequest(views.html.project_createForm.render(projectForm));
         }
-        projectForm.get().save();
+        Project project = projectForm.get();
+        if (Project.findByName(project.name) != null) {
+            return badRequest("Already a project named: " + project.name);
+        }
+        project.save();
         flash("success", "Project " + projectForm.get().name + " has been created");
         return list();
     }
@@ -105,20 +130,24 @@ public class ProjectController extends Controller {
     /**
      * Display a form to enter in many projects at once.
      */
+    @Security.Authenticated(Secured.class)
     public Result createMany() {
-        Form<InputLines> linesForm = formFactory.form(InputLines.class);
-        return ok(
-                views.html.projects_createForm.render(linesForm)
-        );
+        if (Secured.isAdmin(ctx())) {
+            Form<InputLines> linesForm = formFactory.form(InputLines.class);
+            return ok(views.html.projects_createForm.render(linesForm));
+        } else {
+            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+        }
     }
 
     /**
      * Create many projects at once.
      */
     @Transactional
+    @Security.Authenticated(Secured.class)
     public Result saveMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class).bindFromRequest();
-        if (linesForm.hasErrors()) {
+        if (linesForm.hasErrors() || !Secured.isAdmin(ctx())) {
             return badRequest(views.html.projects_createForm.render(linesForm));
         }
         String[] lines = linesForm.get().getLines();
@@ -135,18 +164,28 @@ public class ProjectController extends Controller {
             }
         }
         Version.inc(Version.VERSION_PROJECT);
-
         return list();
     }
 
     /**
      * Handle project deletion
      */
+    @Transactional
+    @Security.Authenticated(Secured.class)
     public Result delete(Long id) {
-        // TODO: If the client is in the database, mark it as disabled instead.
-        Project.find.ref(id).delete();
+        if (!Secured.isAdmin(ctx())) {
+            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+        }
+        if (Entry.hasEntryForProject(id)) {
+            Project project = Project.find.byId(id);
+            project.disabled = true;
+            project.update();
+            Logger.info("Project has been disabled: it had entries: " + project.name);
+        } else {
+            Project.find.ref(id).delete();
+            Logger.info("Project has been deleted");
+        }
         Version.inc(Version.VERSION_PROJECT);
-        flash("success", "Project has been deleted");
         return list();
     }
 
@@ -161,6 +200,19 @@ public class ProjectController extends Controller {
             }
         }
         return ok(top);
+    }
+
+    @Security.Authenticated(Secured.class)
+    @Transactional
+    public Result enable(Long id) {
+        if (!Secured.isAdmin(ctx())) {
+            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+        }
+        Project project = Project.find.byId(id);
+        project.disabled = false;
+        project.update();
+        Version.inc(Version.VERSION_PROJECT);
+        return list();
     }
 
 }

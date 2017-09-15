@@ -10,10 +10,9 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataPicture;
-import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TablePictureCollection;
 
 import java.io.File;
@@ -78,16 +77,21 @@ public class AmazonHelper {
 
     public void sendPictures(List<DataEntry> list) {
         for (DataEntry entry : list) {
-            sendPictures(entry);
+            if (sendPictures(entry) == 0) {
+                entry.checkPictureUploadComplete();
+            }
         }
     }
 
-    void sendPictures(DataEntry entry) {
+    int sendPictures(DataEntry entry) {
+        int count = 0;
         for (DataPicture item : entry.pictureCollection.pictures) {
             if (!item.uploaded) {
                 sendPicture(entry, item);
+                count++;
             }
         }
+        return count;
     }
 
     void sendPicture(final DataEntry entry, final DataPicture item) {

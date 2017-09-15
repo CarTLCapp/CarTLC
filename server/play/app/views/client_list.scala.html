@@ -1,8 +1,8 @@
-@(currentPage: List[Client])
+@(currentPage: List[Client], curClient : Client)
 
-@main("FleetTLC - List Users") {
+@main("FleetTLC - List Clients", curClient) {
 
-    <h1 id="homeTitle">@Messages("users.list.title", currentPage.size())</h1>
+    <h1 id="homeTitle">@Messages("clients.list.title", currentPage.size())</h1>
 
     @if(currentPage.size() == 0) {
         
@@ -15,49 +15,44 @@
         <table class="clients zebra-striped">
             <thead>
                 <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Tech ID</th>
-                    <th>Device ID</th>
+                    <th>Login Name</th>
+                    <th>Password</th>
+                    <th>Projects</th>
+                    <th>Company</th>
                     <th>Edit</th>
                 </tr>
             </thead>
             <tbody>
-
                 @for(client <- currentPage) {
                     <tr>
+                        <td>@client.name</td>
+                        @if(curClient.is_admin || client.id == curClient.id) {
+                            <td>@client.password</td>
+                        } else {
+                            <td>***</td>
+                        }
+                        <td>@client.getProjectsLine()</td>
+                        <td>@client.getCompanyName()</td>
                         <td>
-                            @if(client.first_name == null) {
-                                <em>-</em>
+                            @if(client.is_admin) {
+                                <em>Admin</em>
                             } else {
-                                @client.first_name
+                                @if(curClient.is_admin){
+                                    <a href="@routes.ClientController.edit(client.id)">Edit</a>
+                                } else {
+                                    <em>-</em>
+                                }
                             }
-                        </td>
-                        <td>
-                            @if(client.last_name == null) {
-                                <em>-</em>
-                            } else {
-                                @client.last_name
-                            }
-                        </td>
-                        <td>
-                            @client.id
-                        </td>
-                        <td>
-                            @client.device_id
-                        </td>
-                        <td>
-                            <a href="@routes.ClientController.edit(client.id)">Edit</a>
                         </td>
                     </tr>
                 }
-
             </tbody>
         </table>
-        
     }
 
-    <!--<a class="btn success" id="add" href="@routes.ClientController.create()">Add a new user</a>-->
+    @if(curClient.is_admin) {
+        <a class="btn success" id="add" href="@routes.ClientController.create()">Add a new client</a>
+    }
 }
 
             

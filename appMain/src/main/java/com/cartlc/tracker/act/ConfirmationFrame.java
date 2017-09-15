@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.data.DataTruck;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,6 +25,7 @@ public class ConfirmationFrame {
     @BindView(R.id.project_name_value)    TextView                    mProjectNameValue;
     @BindView(R.id.truck_number_value)    TextView                    mTruckNumberValue;
     @BindView(R.id.project_address_value) TextView                    mAddressValue;
+    @BindView(R.id.status_value)          TextView                    mStatusValue;
     @BindView(R.id.equipment_grid)        RecyclerView                mEquipmentGrid;
     @BindView(R.id.notes_list)            RecyclerView                mNoteList;
     @BindView(R.id.confirm_pictures_list) RecyclerView                mPictureList;
@@ -31,20 +33,21 @@ public class ConfirmationFrame {
     final                                 SimpleListAdapter           mSimpleAdapter;
     final                                 NoteListAdapter             mNoteAdapter;
     final                                 PictureThumbnailListAdapter mPictureAdapter;
+    final                                 Context                     mCtx;
 
     public ConfirmationFrame(FrameLayout top) {
-        final Context ctx = top.getContext();
+        mCtx = top.getContext();
         mTop = top;
         ButterKnife.bind(this, top);
-        mSimpleAdapter = new SimpleListAdapter(ctx, R.layout.entry_item_confirm);
+        mSimpleAdapter = new SimpleListAdapter(mCtx, R.layout.entry_item_confirm);
         mEquipmentGrid.setAdapter(mSimpleAdapter);
-        GridLayoutManager gridLayout = new GridLayoutManager(ctx, 2);
+        GridLayoutManager gridLayout = new GridLayoutManager(mCtx, 2);
         mEquipmentGrid.setLayoutManager(gridLayout);
-        mNoteAdapter = new NoteListAdapter(ctx);
+        mNoteAdapter = new NoteListAdapter(mCtx);
         mNoteList.setAdapter(mNoteAdapter);
-        mNoteList.setLayoutManager(new LinearLayoutManager(ctx));
-        mPictureAdapter = new PictureThumbnailListAdapter(ctx);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false);
+        mNoteList.setLayoutManager(new LinearLayoutManager(mCtx));
+        mPictureAdapter = new PictureThumbnailListAdapter(mCtx);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mCtx, LinearLayoutManager.HORIZONTAL, false);
         layoutManager.setAutoMeasureEnabled(true);
         mPictureList.setLayoutManager(layoutManager);
         mPictureList.setAdapter(mPictureAdapter);
@@ -56,26 +59,28 @@ public class ConfirmationFrame {
 
     public void fill(DataEntry entry) {
         mProjectNameValue.setText(entry.getProjectName());
-        String address = entry.getAddressText();
+        String address = entry.getAddressBlock();
         if (TextUtils.isEmpty(address)) {
             mAddressValue.setVisibility(View.GONE);
         } else {
             mAddressValue.setVisibility(View.VISIBLE);
             mAddressValue.setText(address);
         }
-        mNoteAdapter.setItems(entry.getNotes());
-        if (entry.licensePlateNumber == null) {
-            if (entry.truckNumber == 0) {
+        mNoteAdapter.setItems(entry.getNotesWithValuesOnly());
+        DataTruck truck = entry.getTruck();
+        if (truck.licensePlateNumber == null) {
+            if (truck.truckNumber == 0) {
                 mTruckNumberValue.setVisibility(View.GONE);
             } else {
                 mTruckNumberValue.setVisibility(View.VISIBLE);
-                mTruckNumberValue.setText(Long.toString(entry.truckNumber));
+                mTruckNumberValue.setText(Long.toString(truck.truckNumber));
             }
         } else {
             mTruckNumberValue.setVisibility(View.VISIBLE);
-            mTruckNumberValue.setText(entry.licensePlateNumber);
+            mTruckNumberValue.setText(truck.licensePlateNumber);
         }
         mSimpleAdapter.setList(entry.getEquipmentNames());
         mPictureAdapter.setList(entry.getPictures());
+        mStatusValue.setText(entry.getStatus(mCtx));
     }
 }

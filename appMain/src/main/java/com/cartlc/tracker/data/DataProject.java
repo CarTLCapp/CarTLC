@@ -7,7 +7,7 @@ package com.cartlc.tracker.data;
 public class DataProject {
 
     public long    id;
-    public int     server_id;
+    public int     serverId;
     public String  name;
     public boolean disabled;
     public boolean isBootStrap;

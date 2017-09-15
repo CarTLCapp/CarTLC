@@ -11,7 +11,7 @@
     <string name="btn_another">Another</string>
     <string name="btn_new_project">New Project</string>
     <string name="btn_confirm">Confirm</string>
-    <string name="btn_reject">Reject</string>
+    <string name="btn_view">View</string>
 
     <string name="entry_hint_last_name">Last Name</string>
     <string name="entry_hint_first_name">First Name</string>
@@ -30,7 +30,7 @@
     <string name="title_address_">Address:</string>
     <string name="title_zipcode">ZIP</string>
     <string name="title_current_project">Current Project</string>
-    <string name="title_truck_number">Truck Number</string>
+    <string name="title_truck">Truck Number</string>
     <string name="title_truck_number_">Truck Number:</string>
     <string name="title_equipment_installed">Equipment Installed</string>
     <string name="title_equipment_installed_">Equipment Installed:</string>
@@ -42,8 +42,10 @@
     <string name="title_entries_">Entries:</string>
     <string name="title_uploaded_">Uploaded:</string>
     <string name="title_uploaded_done">Uploaded ALL</string>
-    <string name="title_picture">Photo</string>
+    <string name="title_picture">Photo %d</string>
     <string name="title_pictures_">Pictures:</string>
+    <string name="title_status">Status</string>
+    <string name="title_activity_list_entries">Project Entries</string>
 
     <string name="error_enter_your_name">Please enter your name</string>
     <string name="error_need_a_truck_number">Need a truck number</string>
@@ -54,12 +56,19 @@
     <string name="error_need_company">Need to select a company</string>
     <string name="error_need_new_company">Enter in a new company name</string>
     <string name="error_empty">No elements</string>
-    <string name="error_need_note_fields">These fields still need entries:</string>
-
-    <!--<string name="perm_read_phone_state">Need to be able to tell if you have a MOBILE connection.</string>-->
+    <string name="error_incorrect_digit_count">Incorrect digit count for these fields:\n%s\nDo you want to continue?</string>
+    <string name="error_incorrect_note_count">%1$d of %2$d digits found</string>
 
     <string name="loading">LOADING...</string>
 
-    <!--<string name="entry_by_address">BY ADDRESS</string>-->
+    <string name="picture_note_hint">Enter note for picture</string>
+    <string name="picture_note_title">Picture Note</string>
 
+    <string name="status_unknown">Unknown</string>
+    <string name="status_needs_repair">Needs Repair</string>
+    <string name="status_complete">Complete</string>
+    <string name="status_partial_install">Partial Install</string>
+    <string name="status_installed_equipments">%1$d of %2$d equipments checked.</string>
+    <string name="status_installed_pictures">%1$d pictures taken.</string>
+    <string name="status_no_equipment">No equipment checked</string>
 </resources>

@@ -1,8 +1,26 @@
-@(currentPage: List[Note])
+@(currentPage: List[Note], client : Client, disabled : Boolean)
 
-@main("FleetTLC - List Notes") {
+@header = { @Messages("note.list.title", currentPage.size()) }
 
-    <h1 id="homeTitle">@Messages("note.list.title", currentPage.size())</h1>
+@main("FleetTLC - List Notes", client) {
+
+    @if(Note.hasDisabled()) {
+        @if(disabled) {
+            <h1 id="homeTitle" class="fill">@header
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.NoteController.list()">Show Active Notes</a>
+                </span>
+            </h1>
+        } else {
+            <h1 id="homeTitle" class="fill">@header
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.NoteController.list_disabled()">Show Disabled Notes</a>
+                </span>
+            </h1>
+        }
+    } else {
+        <h1 id="homeTitle">@header</h1>
+    }
 
     @if(currentPage.size() == 0) {
         
@@ -18,7 +36,10 @@
                     <th>Name</th>
                     <th>Projects</th>
                     <th>Type</th>
+                    <th>Num Digits</th>
+                    <th>Num Entries</th>
                     <th>Edit</th>
+                    <th>Created By</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,15 +53,12 @@
                                 @note.name
                             }
                         </td>
-                        <td>
-                            @note.getProjectsLine()
-                        </td>
-                        <td>
-                            @note.getTypeString()
-                        </td>
-                        <td>
-                            <a href="@routes.NoteController.edit(note.id)">Edit</a>
-                        </td>
+                        <td>@note.getProjectsLine()</td>
+                        <td>@note.getTypeString()</td>
+                        <td>@note.getNumDigits()</td>
+                        <td>@note.getNumEntries()</td>
+                        <td><a href="@routes.NoteController.edit(note.id)">Edit</a></td>
+                        <td>@note.getCreatedBy()</td>
                     </tr>
                 }
 
@@ -49,8 +67,12 @@
         
     }
 
-    <a class="btn success" id="add" href="@routes.NoteController.create()">Add a new note item</a>
-    <a class="btn success" id="addMany" href="@routes.NoteController.createMany()">Add many note items</a>
+    @if(!disabled) {
+        <a class="btn success" id="add" href="@routes.NoteController.create()">Add a new note item</a>
+        @if(client.is_admin) {
+            <a class="btn success" id="addMany" href="@routes.NoteController.createMany()">Add many note items</a>
+        }
+    }
 
 }
 

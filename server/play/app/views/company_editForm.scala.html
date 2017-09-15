@@ -1,10 +1,10 @@
-@(id: Long, companyForm: Form[Company])
+@(id: Long, companyForm: Form[Company], client : Client)
 
 @import helper._
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - Edit Company") {
+@main("FleetTLC - Edit Company", client, "/company") {
     
     <h1>Edit company</h1>
     
@@ -26,9 +26,18 @@
         </div>
 
     }
-    
-    @b3.form(routes.CompanyController.delete(id), 'class -> "topRight") {
-        <input type="submit" value="Delete this company" class="btn danger">
+
+    @if(client.is_admin) {
+        @b3.form(routes.CompanyController.delete(id), 'class -> "topRight") {
+            @if(Company.isDisabled(id)) {
+                <a href="@routes.CompanyController.enable(id)" class="btn">Enable Company Address</a>
+            } else {
+                @if(Entry.hasEntryForCompany(id)) {
+                    <input type="submit" value="Disable Company" class="btn danger" onclick="return alert('This company address, since it has entries, will be moved to the disabled list.');">
+                } else {
+                    <input type="submit" value="Delete Company" class="btn danger" onclick="return confirm('Are you sure you wish to delete this company address?');">
+                }
+            }
+        }
     }
-    
 }

@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.etc.PrefHelper;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ public class TablePictureCollection {
     static final String KEY_COLLECTION_ID      = "collection_id";
     static final String KEY_PICTURE_FILENAME   = "picture_filename";
     static final String KEY_UPLOADING_FILENAME = "uploading_filename";
+    static final String KEY_NOTE               = "picture_note";
     static final String KEY_UPLOADED           = "uploaded";
 
     final SQLiteDatabase mDb;
@@ -48,9 +51,9 @@ public class TablePictureCollection {
         }
     }
 
-    public void drop() {
-        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-    }
+//    public void drop() {
+//        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+//    }
 
     public void create() {
         StringBuilder sbuf = new StringBuilder();
@@ -65,15 +68,25 @@ public class TablePictureCollection {
         sbuf.append(" text, ");
         sbuf.append(KEY_UPLOADING_FILENAME);
         sbuf.append(" text, ");
+        sbuf.append(KEY_NOTE);
+        sbuf.append(" text, ");
         sbuf.append(KEY_UPLOADED);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 
-    public DataPicture add(File picture) {
+    public static void upgrade3(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_NOTE + " text");
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+    }
+
+    public DataPicture add(File picture, Long collection_id) {
         DataPicture item = new DataPicture();
         item.unscaledFilename = picture.getAbsolutePath();
-        update(item, null);
+        update(item, collection_id);
         return item;
     }
 
@@ -99,25 +112,27 @@ public class TablePictureCollection {
         return collection;
     }
 
-    public List<DataPicture> queryPendingPictures() {
-        final String selection = KEY_COLLECTION_ID + " =0";
-        return query(selection, null);
+    public List<DataPicture> queryPictures(long collection_id) {
+        final String selection = KEY_COLLECTION_ID + "=?";
+        final String[] selectionArgs = {Long.toString(collection_id)};
+        return query(selection, selectionArgs);
     }
 
     public List<DataPicture> query(String selection, String[] selectionArgs) {
         List<DataPicture> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_PICTURE_FILENAME, KEY_UPLOADING_FILENAME, KEY_UPLOADED};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxPicture = cursor.getColumnIndex(KEY_PICTURE_FILENAME);
             int idxUploading = cursor.getColumnIndex(KEY_UPLOADING_FILENAME);
             int idxUploaded = cursor.getColumnIndex(KEY_UPLOADED);
+            int idxNote = cursor.getColumnIndex(KEY_NOTE);
             while (cursor.moveToNext()) {
                 list.add(new DataPicture(
                         cursor.getLong(idxRowId),
                         cursor.getString(idxPicture),
                         cursor.getString(idxUploading),
+                        cursor.getString(idxNote),
                         cursor.getShort(idxUploaded) != 0));
             }
             cursor.close();
@@ -127,11 +142,10 @@ public class TablePictureCollection {
         return list;
     }
 
-
     public List<DataPicture> removeNonExistant(List<DataPicture> list) {
         List<DataPicture> filtered = new ArrayList();
         for (DataPicture item : list) {
-            if (item.existsUnscaled()) {
+            if (item.existsUnscaled() || item.existsScaled()) {
                 filtered.add(item);
             } else {
                 remove(item);
@@ -151,26 +165,39 @@ public class TablePictureCollection {
         }
     }
 
-    public int countPendingPictures() {
+    public int countPictures(long collection_id) {
         int count = 0;
         try {
-            final String[] columns = {KEY_ROWID, KEY_PICTURE_FILENAME};
-            final String selection = KEY_COLLECTION_ID + " =0";
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, null, null, null, null, null);
+            final String[] columns = {KEY_ROWID, KEY_PICTURE_FILENAME, KEY_UPLOADING_FILENAME};
+            final String selection = KEY_COLLECTION_ID + "=?";
+            final String[] selectionArgs = {Long.toString(collection_id)};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
             int idxPicture = cursor.getColumnIndex(KEY_PICTURE_FILENAME);
+            int idxUploading = cursor.getColumnIndex(KEY_UPLOADING_FILENAME);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             ArrayList<Long> delete = new ArrayList();
             while (cursor.moveToNext()) {
-                String filename = cursor.getString(idxPicture);
-                File file = new File(filename);
-                if (file.exists()) {
+                String unscaled = cursor.getString(idxPicture);
+                String uploading = cursor.getString(idxUploading);
+                File unscaledFile;
+                File uploadingFile;
+                if (unscaled != null) {
+                    unscaledFile = new File(unscaled);
+                } else {
+                    unscaledFile = null;
+                }
+                if (uploading != null) {
+                    uploadingFile = new File(uploading);
+                } else {
+                    uploadingFile = null;
+                }
+                if ((unscaledFile != null && unscaledFile.exists()) || (uploadingFile != null && uploadingFile.exists())) {
                     count++;
                 } else {
                     delete.add(cursor.getLong(idxRowId));
                 }
             }
             cursor.close();
-
             String where = KEY_ROWID + "=?";
             for (Long id : delete) {
                 String[] whereArgs = {Long.toString(id)};
@@ -185,7 +212,7 @@ public class TablePictureCollection {
     public DataPictureCollection createCollectionFromPending() {
         DataPictureCollection collection = new DataPictureCollection(
                 PrefHelper.getInstance().getNextPictureCollectionID());
-        collection.pictures = removeNonExistant(queryPendingPictures());
+        collection.pictures = removeNonExistant(queryPictures(0));
         return collection;
     }
 
@@ -220,6 +247,7 @@ public class TablePictureCollection {
             ContentValues values = new ContentValues();
             values.put(KEY_PICTURE_FILENAME, item.unscaledFilename);
             values.put(KEY_UPLOADING_FILENAME, item.scaledFilename);
+            values.put(KEY_NOTE, item.note);
             values.put(KEY_UPLOADED, item.uploaded ? 1 : 0);
             if (collection_id != null) {
                 values.put(KEY_COLLECTION_ID, collection_id);

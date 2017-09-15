@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import java.util.Date;
 import java.util.Iterator;
 import modules.AmazonHelper;
-import modules.AmazonHelper.OnDownloadComplete;
 import java.io.File;
 import play.db.ebean.Transactional;
 import play.libs.Json;
@@ -32,17 +31,22 @@ public class EntryController extends Controller {
 
     private static final int PAGE_SIZE = 100;
 
-    private FormFactory formFactory;
     private AmazonHelper amazonHelper;
+    private EntryList entryList = new EntryList();
 
     @Inject
-    public EntryController(FormFactory formFactory, AmazonHelper amazonHelper) {
-        this.formFactory = formFactory;
+    public EntryController(AmazonHelper amazonHelper) {
         this.amazonHelper = amazonHelper;
     }
 
     public Result list(int page, String sortBy, String order) {
-        return ok(views.html.entry_list.render(Entry.list(page, PAGE_SIZE, sortBy, order), sortBy, order));
+        entryList.setPage(page);
+        entryList.setSortBy(sortBy);
+        entryList.setOrder(order);
+        entryList.clearCache();
+        entryList.computeFilters(Secured.getClient(ctx()));
+        entryList.compute();
+        return ok(views.html.entry_list.render(entryList, sortBy, order));
     }
 
     public Result list() {
@@ -63,21 +67,7 @@ public class EntryController extends Controller {
     }
 
     void loadPictures(Entry entry) {
-        List<PictureCollection> pictures = entry.getPictures();
-        for (PictureCollection picture : pictures) {
-            File localFile = amazonHelper.getLocalFile(picture.picture);
-            if (!localFile.exists()) {
-                try {
-                    amazonHelper.download(request().host(), picture.picture, new OnDownloadComplete() {
-                        public void onDownloadComplete(File file) {
-                            Logger.info("COMPLETED: " + file.getAbsolutePath());
-                        }
-                    });
-                } catch (Exception ex) {
-                    Logger.error(ex.getMessage());
-                }
-            }
-        }
+        entry.loadPictures(request().host(), amazonHelper);
     }
 
     public Result getImage(String picture) {
@@ -109,14 +99,15 @@ public class EntryController extends Controller {
             return badRequest2("Could not find entry ID " + entry_id);
         }
         loadPictures(entry);
-        return ok(views.html.entry_view.render(entry));
+        return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result delete(Long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry != null) {
             entry.remove(amazonHelper);
-            flash("success", "Entry has been deleted");
+            Logger.info("Entry has been deleted");
         }
         return list();
     }
@@ -128,7 +119,9 @@ public class EntryController extends Controller {
         ArrayList<String> missing = new ArrayList<String>();
         JsonNode json = request().body().asJson();
         Logger.debug("GOT: " + json.toString());
-        JsonNode value = json.findValue("tech_id");
+        boolean retServerId = false;
+        JsonNode value;
+        value = json.findValue("tech_id");
         if (value == null) {
             missing.add("tech_id");
         } else {
@@ -140,23 +133,54 @@ public class EntryController extends Controller {
         } else {
             entry.entry_time = new Date(value.longValue());
         }
+        value = json.findValue("server_id");
+        if (value != null) {
+            entry.id = value.longValue();
+            retServerId = true;
+            Entry existing;
+            if (entry.id > 0) {
+                existing = Entry.find.byId(entry.id);
+                existing.entry_time = entry.entry_time;
+                existing.tech_id = entry.tech_id;
+            } else {
+                existing = Entry.findByDate(entry.tech_id, entry.entry_time);
+            }
+            if (existing != null) {
+                entry = existing;
+            }
+        }
+        int truck_number;
+        String license_plate;
         value = json.findValue("truck_number");
         if (value != null) {
-            entry.truck_number = value.intValue();
+            truck_number = value.intValue();
+        } else {
+            truck_number = 0;
         }
         value = json.findValue("license_plate");
         if (value != null) {
-            entry.license_plate = value.textValue();
+            license_plate = value.textValue();
+        } else {
+            license_plate = null;
         }
-        if (entry.truck_number == 0 && entry.license_plate == null) {
+        if (truck_number == 0 && license_plate == null) {
             missing.add("truck_number");
             missing.add("license_plate");
+        } else {
+            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
+            // The reason is that other techs don't need to know about a local techs truck updates.
+            Truck truck = Truck.add(truck_number, license_plate, entry.tech_id);
+            entry.truck_id = truck.id;
         }
         value = json.findValue("project_id");
         if (value == null) {
             missing.add("project_id");
         } else {
             entry.project_id = value.longValue();
+        }
+        value = json.findValue("status");
+        if (value != null) {
+            entry.status = Entry.Status.from(value.textValue());
         }
         value = json.findValue("address_id");
         if (value == null) {
@@ -176,7 +200,7 @@ public class EntryController extends Controller {
                             company.save();
                             Version.inc(Version.VERSION_COMPANY);
                         }
-                        entry.address_id = company.id;
+                        entry.company_id = company.id;
                     } catch (Exception ex) {
                         return badRequest2("address: " + ex.getMessage());
                     }
@@ -185,14 +209,20 @@ public class EntryController extends Controller {
                 }
             }
         } else {
-            entry.address_id = value.longValue();
+            entry.company_id = value.longValue();
         }
         value = json.findValue("equipment");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                return badRequest2("Expected array for element 'equipment'");
+                Logger.error("Expected array for element 'equipment'");
             } else {
-                int collection_id = Version.inc(Version.NEXT_EQUIPMENT_COLLECTION_ID);
+                int collection_id;
+                if (entry.equipment_collection_id > 0) {
+                    collection_id = (int) entry.equipment_collection_id;
+                    EntryEquipmentCollection.deleteByCollectionId(entry.equipment_collection_id);
+                } else {
+                    collection_id = Version.inc(Version.NEXT_EQUIPMENT_COLLECTION_ID);
+                }
                 boolean newEquipmentCreated = false;
                 Iterator<JsonNode> iterator = value.elements();
                 while (iterator.hasNext()) {
@@ -207,13 +237,18 @@ public class EntryController extends Controller {
                             missing.add("equipment_name");
                         } else {
                             String name = subvalue.textValue();
-                            Equipment equipment = Equipment.findByName(name);
-                            if (equipment == null) {
+                            List<Equipment> equipments = Equipment.findByName(name);
+                            Equipment equipment;
+                            if (equipments.size() == 0) {
                                 equipment = new Equipment();
                                 equipment.name = name;
                                 equipment.created_by = entry.tech_id;
                                 equipment.save();
-                                Version.inc(Version.VERSION_EQUIPMENT);
+                            } else {
+                                if (equipments.size() > 1) {
+                                    Logger.error("Too many equipments found with name: " + name);
+                                }
+                                equipment = equipments.get(0);
                             }
                             collection.equipment_id = equipment.id;
                             newEquipmentCreated = true;
@@ -224,20 +259,33 @@ public class EntryController extends Controller {
                     collection.save();
                 }
                 entry.equipment_collection_id = collection_id;
+                if (newEquipmentCreated) {
+                    Version.inc(Version.VERSION_EQUIPMENT);
+                }
             }
         }
         value = json.findValue("picture");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                return badRequest2("Expected array for element 'picture'");
+                Logger.error("Expected array for element 'picture'");
             } else {
-                int collection_id = Version.inc(Version.NEXT_PICTURE_COLLECTION_ID);
+                int collection_id;
+                if (entry.picture_collection_id > 0) {
+                    collection_id = (int) entry.picture_collection_id;
+                    PictureCollection.deleteByCollectionId(entry.picture_collection_id, null);
+                } else {
+                    collection_id = Version.inc(Version.NEXT_PICTURE_COLLECTION_ID);
+                }
                 Iterator<JsonNode> iterator = value.elements();
                 while (iterator.hasNext()) {
                     JsonNode ele = iterator.next();
                     PictureCollection collection = new PictureCollection();
                     collection.collection_id = (long) collection_id;
-                    JsonNode subvalue = ele.findValue("filename");
+                    JsonNode subvalue = ele.findValue("note");
+                    if (subvalue != null) {
+                        collection.note = subvalue.textValue();
+                    }
+                    subvalue = ele.findValue("filename");
                     if (subvalue == null) {
                         missing.add("filename");
                     } else {
@@ -251,9 +299,15 @@ public class EntryController extends Controller {
         value = json.findValue("notes");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                return badRequest2("Expected array for element 'notes'");
+                Logger.error("Expected array for element 'notes'");
             } else {
-                int collection_id = Version.inc(Version.NEXT_NOTE_COLLECTION_ID);
+                int collection_id;
+                if (entry.note_collection_id > 0) {
+                    collection_id = (int) entry.note_collection_id;
+                    EntryNoteCollection.deleteByCollectionId(entry.note_collection_id);
+                } else {
+                    collection_id = Version.inc(Version.NEXT_NOTE_COLLECTION_ID);
+                }
                 Iterator<JsonNode> iterator = value.elements();
                 while (iterator.hasNext()) {
                     JsonNode ele = iterator.next();
@@ -266,12 +320,14 @@ public class EntryController extends Controller {
                             missing.add("note:id, note:name");
                         } else {
                             String name = subvalue.textValue();
-                            Note note = Note.findByName(name);
-                            if (note == null) {
-                                // No ability to create notes in version 1.
+                            List<Note> notes = Note.findByName(name);
+                            if (notes == null || notes.size() == 0) {
+                                missing.add("note:" + name);
+                            } else if (notes.size() > 1) {
+                                Logger.error("Too many notes with name: " + name);
                                 missing.add("note:" + name);
                             } else {
-                                collection.note_id = note.id;
+                                collection.note_id = notes.get(0).id;
                             }
                         }
                     } else {
@@ -291,8 +347,20 @@ public class EntryController extends Controller {
         if (missing.size() > 0) {
             return missingRequest(missing);
         }
-        entry.save();
-        return ok(Integer.toString(0));
+        if (entry.id != null && entry.id > 0) {
+            entry.update();
+            Logger.debug("Updated entry " + entry.id);
+        } else {
+            entry.save();
+            Logger.debug("Created new entry " + entry.id);
+        }
+        long ret_id;
+        if (retServerId) {
+            ret_id = entry.id;
+        } else {
+            ret_id = 0;
+        }
+        return ok(Long.toString(ret_id));
     }
 
     Result missingRequest(ArrayList<String> missing) {

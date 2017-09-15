@@ -1,0 +1,131 @@
+@(currentPage: WorkOrderList, currentSortBy: String, currentOrder: String, client : Client, message : String)
+
+@import helper._
+
+@link(newPage:Int, newSortBy:String) = @{
+    var sortBy = currentSortBy
+    var order = currentOrder
+    if(newSortBy != null) {
+        sortBy = newSortBy
+        if(currentSortBy == newSortBy) {
+            if(currentOrder == "asc") {
+                order = "desc"
+            } else {
+                order = "asc"
+            }
+        } else {
+            order = "asc"
+        }
+    }
+    // Generate the link
+    routes.WorkOrderController.list(newPage, sortBy, order)
+}
+
+@header(key:String, title:String) = {
+    <th class="@key header @if(currentSortBy == key) @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
+        <a href="@link(0, key)">@title</a>
+    </th>
+}
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - List Work Orders", client) {
+
+    <style>
+        span {padding-left:50px}
+    </style>
+    <h1 id="homeTitle" class="fill">@Messages("workorder.list.title", currentPage.getTotalRowCount())
+        <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.viewProgressGrid()">Progress Grid</a></span>
+        <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.exportWorkOrders()">Export Work Orders</a></span>
+        <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.importWorkOrdersForm()">Import Work Orders</a></span>
+    </h1>
+
+    @if(message.length() > 0) {
+        <div class="message">
+            <em>@Html(HtmlFormat.escape(message).toString.replace("\n", "<br />"))</em>
+        </div>
+    }
+
+    @if(currentPage.getTotalRowCount() == 0) {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+    } else {
+
+        <table>
+            <thead>
+                <tr>
+                    @header("client_id", "Client")
+                    @header("project_id", "Project")
+                    @header("company", "Company")
+                    @header("street", "Street / Plant Name")
+                    @header("city", "City")
+                    @header("state", "State")
+                    @header("zipcode", "ZIP")
+                    @header("truck_line", "Truck")
+                    <th>Fulfilled</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(order <- currentPage.getList()) {
+                    <tr>
+                        <td>@order.getClientName()</td>
+                        <td>@order.getProjectLine()</td>
+                        <td>@order.getCompanyName()</td>
+                        <td>@order.getStreet()</td>
+                        <td>@order.getCity()</td>
+                        <td>@order.getState()</td>
+                        <td>@order.getZipCode()</td>
+                        <td>@order.getTruckLine()</td>
+                        <td>
+                            @if(order.isFulfilled()) {
+                                <a href="@routes.WorkOrderController.view(order.id)">@order.getFulfilledDate()</a>
+                            } else {
+                                <em>-</em>
+                            }
+                        </td>
+                        <td bgcolor="@order.getCellColor()">@order.getStatus()</td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+        <div id="pagination" class="pagination">
+            <ul>
+                @if(currentPage.hasPrev()) {
+                <li class="prev">
+                    <a href="@link(currentPage.getPageIndex() - 1, null)">&larr; Previous</a>
+                </li>
+                } else {
+                <li class="prev disabled">
+                    <a>&larr; Previous</a>
+                </li>
+                }
+                <li class="current">
+                    <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
+                </li>
+                @if(currentPage.hasNext()) {
+                <li class="next">
+                    <a href="@link(currentPage.getPageIndex() + 1, null)">Next &rarr;</a>
+                </li>
+                } else {
+                <li class="next disabled">
+                    <a>Next &rarr;</a>
+                </li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if(currentPage.getLastUploadCount() > 0) {
+        <a class="btn danger" id="delete" href="@routes.WorkOrderController.deleteLastUploaded()">Delete last @currentPage.getLastUploadCount() Work Orders Uploaded</a>
+    }
+
+}
+
+            

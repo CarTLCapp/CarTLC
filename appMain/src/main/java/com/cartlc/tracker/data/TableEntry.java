@@ -4,6 +4,9 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.etc.PrefHelper;
+import com.cartlc.tracker.etc.TruckStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +41,9 @@ public class TableEntry {
     static final String KEY_EQUIPMENT_COLLECTION_ID  = "equipment_collection_id";
     static final String KEY_PICTURE_COLLECTION_ID    = "picture_collection_id";
     static final String KEY_NOTE_COLLECTION_ID       = "note_collection_id";
-    static final String KEY_TRUCK_NUMBER             = "truck_number";
-    static final String KEY_LICENSE_PLATE            = "license_plate";
+    static final String KEY_TRUCK_ID                 = "truck_id";
+    static final String KEY_STATUS                   = "status";
+    static final String KEY_SERVER_ID                = "server_id";
     static final String KEY_UPLOADED_MASTER          = "uploaded_master";
     static final String KEY_UPLOADED_AWS             = "uploaded_aws";
 
@@ -60,9 +64,62 @@ public class TableEntry {
         this.mDb = db;
     }
 
-    public static void upgrade(SQLiteDatabase db) {
+    public void upgrade3() {
+        final String TABLE_NAME2 = TABLE_NAME + "_v2";
+        final String KEY_TRUCK_NUMBER = "truck_number";
+        final String KEY_LICENSE_PLATE = "license_plate";
         try {
-            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_LICENSE_PLATE + " text");
+            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " RENAME TO " + TABLE_NAME2);
+            create();
+            Cursor cursor = mDb.query(TABLE_NAME2, null, null, null, null, null, null, null);
+            int idxRow = cursor.getColumnIndex(KEY_ROWID);
+            int idxProjectAddressCombo = cursor.getColumnIndex(KEY_PROJECT_ADDRESS_COMBO_ID);
+            int idxDate = cursor.getColumnIndex(KEY_DATE);
+            int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
+            int idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID);
+            int idxNotetCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
+            int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
+            int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
+            int idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER);
+            int idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS);
+            int truckNumber;
+            String licensePlateNumber;
+            ContentValues values = new ContentValues();
+            while (cursor.moveToNext()) {
+                DataEntry entry = new DataEntry();
+                entry.id = cursor.getLong(idxRow);
+                entry.date = cursor.getLong(idxDate);
+                long projectAddressComboId = cursor.getLong(idxProjectAddressCombo);
+                long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
+                long pictureCollectionId = cursor.getLong(idxPictureCollectionId);
+                entry.noteCollectionId = cursor.getLong(idxNotetCollectionId);
+                truckNumber = cursor.getInt(idxTruckNumber);
+                if (idxLicensePlate >= 0) {
+                    licensePlateNumber = cursor.getString(idxLicensePlate);
+                } else {
+                    licensePlateNumber = null;
+                }
+                entry.truckId = TableTruck.getInstance().save(truckNumber, licensePlateNumber);
+                entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
+                entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
+
+                values.clear();
+                values.put(KEY_DATE, entry.date);
+                values.put(KEY_PROJECT_ADDRESS_COMBO_ID, projectAddressComboId);
+                values.put(KEY_EQUIPMENT_COLLECTION_ID, equipmentCollectionId);
+                values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
+                values.put(KEY_PICTURE_COLLECTION_ID, pictureCollectionId);
+                values.put(KEY_TRUCK_ID, entry.truckId);
+                values.put(KEY_UPLOADED_AWS, entry.uploadedAws);
+                values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster);
+                mDb.insert(TABLE_NAME, null, values);
+
+                // Doing this one at a time for safety reasons
+                String where = KEY_ROWID + "=?";
+                String[] whereArgs = new String[]{Long.toString(entry.id)};
+                mDb.delete(TABLE_NAME2, where, whereArgs);
+            }
+            cursor.close();
         } catch (Exception ex) {
             Timber.e(ex);
         }
@@ -73,10 +130,6 @@ public class TableEntry {
             mDb.delete(TABLE_NAME, null, null);
         } catch (Exception ex) {
         }
-    }
-
-    public void drop() {
-        mDb.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
     }
 
     public void create() {
@@ -96,10 +149,12 @@ public class TableEntry {
         sbuf.append(" long, ");
         sbuf.append(KEY_NOTE_COLLECTION_ID);
         sbuf.append(" long, ");
-        sbuf.append(KEY_TRUCK_NUMBER);
-        sbuf.append(" int, ");
-        sbuf.append(KEY_LICENSE_PLATE);
-        sbuf.append(" text, ");
+        sbuf.append(KEY_TRUCK_ID);
+        sbuf.append(" long, ");
+        sbuf.append(KEY_STATUS);
+        sbuf.append(" tinyint, ");
+        sbuf.append(KEY_SERVER_ID);
+        sbuf.append(" long default 0, ");
         sbuf.append(KEY_UPLOADED_MASTER);
         sbuf.append(" bit default 0, ");
         sbuf.append(KEY_UPLOADED_AWS);
@@ -112,28 +167,46 @@ public class TableEntry {
         return query(where, null);
     }
 
-
     public List<DataEntry> queryPendingPicturesToUpload() {
         String where = KEY_UPLOADED_AWS + "=0";
         return query(where, null);
     }
 
+    public List<DataEntry> queryForProjectAddressCombo(long id) {
+        String where = KEY_PROJECT_ADDRESS_COMBO_ID + "=?";
+        String[] whereArgs = new String[]{Long.toString(id)};
+        return query(where, whereArgs);
+    }
+
+    public List<DataEntry> queryServerIds() {
+        String where = KEY_SERVER_ID + "=0";
+        return query(where, null);
+    }
+
+    public DataEntry query(long id) {
+        String where = KEY_ROWID + "=?";
+        String[] whereArgs = new String[]{Long.toString(id)};
+        List<DataEntry> list = query(where, whereArgs);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
     List<DataEntry> query(String where, String[] whereArgs) {
         ArrayList<DataEntry> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID,
-                    KEY_DATE, KEY_PROJECT_ADDRESS_COMBO_ID, KEY_EQUIPMENT_COLLECTION_ID,
-                    KEY_PICTURE_COLLECTION_ID, KEY_NOTE_COLLECTION_ID, KEY_TRUCK_NUMBER, KEY_LICENSE_PLATE, KEY_UPLOADED_MASTER, KEY_UPLOADED_AWS};
             final String orderBy = KEY_DATE + " DESC";
-            Cursor cursor = mDb.query(TABLE_NAME, columns, where, whereArgs, null, null, orderBy, null);
+            Cursor cursor = mDb.query(TABLE_NAME, null, where, whereArgs, null, null, orderBy, null);
             int idxRow = cursor.getColumnIndex(KEY_ROWID);
             int idxProjectAddressCombo = cursor.getColumnIndex(KEY_PROJECT_ADDRESS_COMBO_ID);
             int idxDate = cursor.getColumnIndex(KEY_DATE);
             int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
             int idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID);
             int idxNotetCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
-            int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
-            int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
+            int idxTruckId = cursor.getColumnIndex(KEY_TRUCK_ID);
+            int idxStatus = cursor.getColumnIndex(KEY_STATUS);
+            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             int idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER);
             int idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS);
             DataEntry entry;
@@ -148,8 +221,11 @@ public class TableEntry {
                 long pictureCollectionId = cursor.getLong(idxPictureCollectionId);
                 entry.pictureCollection = TablePictureCollection.getInstance().query(pictureCollectionId);
                 entry.noteCollectionId = cursor.getLong(idxNotetCollectionId);
-                entry.truckNumber = cursor.getInt(idxTruckNumber);
-                entry.licensePlateNumber = cursor.getString(idxLicensePlate);
+                entry.truckId = cursor.getInt(idxTruckId);
+                if (!cursor.isNull(idxStatus)) {
+                    entry.status = TruckStatus.from(cursor.getInt(idxStatus));
+                }
+                entry.serverId = cursor.getInt(idxServerId);
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
                 entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
                 list.add(entry);
@@ -207,44 +283,58 @@ public class TableEntry {
         return count;
     }
 
-    public int countEquipments(final long equipmentId) {
+//    public int countEquipments(final long equipmentId) {
+//        int count = 0;
+//        try {
+//            final String[] columns = {KEY_EQUIPMENT_COLLECTION_ID};
+//            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
+//            int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
+//            while (cursor.moveToNext()) {
+//                long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
+//                DataCollectionEquipmentEntry collection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
+//                for (long equipId : collection.equipmentListIds) {
+//                    if (equipId == equipmentId) {
+//                        count++;
+//                    }
+//                }
+//            }
+//            cursor.close();
+//        } catch (Exception ex) {
+//            Timber.e(ex);
+//        }
+//        return count;
+//    }
+//
+//    public int countNotes(final long noteId) {
+//        int count = 0;
+//        try {
+//            final String[] columns = {KEY_NOTE_COLLECTION_ID};
+//            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
+//            int idxNoteCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
+//            while (cursor.moveToNext()) {
+//                long noteCollectionId = cursor.getLong(idxNoteCollectionId);
+//                List<DataNote> notes = TableCollectionNoteEntry.getInstance().query(noteCollectionId);
+//                for (DataNote note : notes) {
+//                    if (noteId == note.id) {
+//                        count++;
+//                    }
+//                }
+//            }
+//            cursor.close();
+//        } catch (Exception ex) {
+//            Timber.e(ex);
+//        }
+//        return count;
+//    }
+
+    public int countTrucks(final long truckId) {
         int count = 0;
         try {
-            final String[] columns = {KEY_EQUIPMENT_COLLECTION_ID};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
-            int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
-            while (cursor.moveToNext()) {
-                long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
-                DataCollectionEquipmentEntry collection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
-                for (long equipId : collection.equipmentListIds) {
-                    if (equipId == equipmentId) {
-                        count++;
-                    }
-                }
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return count;
-    }
-
-
-    public int countNotes(final long noteId) {
-        int count = 0;
-        try {
-            final String[] columns = {KEY_NOTE_COLLECTION_ID};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
-            int idxNoteCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
-            while (cursor.moveToNext()) {
-                long noteCollectionId = cursor.getLong(idxNoteCollectionId);
-                List<DataNote> notes = TableCollectionNoteEntry.getInstance().query(noteCollectionId);
-                for (DataNote note : notes) {
-                    if (noteId == note.id) {
-                        count++;
-                    }
-                }
-            }
+            final String[] columns = {KEY_TRUCK_ID};
+            final String selection = KEY_TRUCK_ID + "=?";
+            final String[] selectionArgs = new String[]{Long.toString(truckId)};
+            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+            count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
             Timber.e(ex);
@@ -273,27 +363,42 @@ public class TableEntry {
         return count;
     }
 
-
     public void add(DataEntry entry) {
         mDb.beginTransaction();
         try {
-            TableCollectionEquipmentEntry.getInstance().add(entry.equipmentCollection);
+            TableCollectionEquipmentEntry.getInstance().save(entry.equipmentCollection);
             TablePictureCollection.getInstance().add(entry.pictureCollection);
 
-            PrefHelper.getInstance().incNextEquipmentCollectionID();
-            PrefHelper.getInstance().incNextPictureCollectionID();
-            PrefHelper.getInstance().incNextNoteCollectionID();
-
+            if (entry.id == 0) {
+                PrefHelper.getInstance().incNextEquipmentCollectionID();
+                PrefHelper.getInstance().incNextPictureCollectionID();
+                PrefHelper.getInstance().incNextNoteCollectionID();
+            }
             ContentValues values = new ContentValues();
             values.clear();
             values.put(KEY_DATE, entry.date);
             values.put(KEY_PROJECT_ADDRESS_COMBO_ID, entry.projectAddressCombo.id);
             values.put(KEY_EQUIPMENT_COLLECTION_ID, entry.equipmentCollection.id);
-            values.put(KEY_TRUCK_NUMBER, entry.truckNumber);
-            values.put(KEY_LICENSE_PLATE, entry.licensePlateNumber);
+            values.put(KEY_TRUCK_ID, entry.truckId);
             values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
             values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollection.id);
-            mDb.insert(TABLE_NAME, null, values);
+            values.put(KEY_SERVER_ID, entry.serverId);
+            values.put(KEY_UPLOADED_AWS, entry.uploadedAws ? 1 : 0);
+            values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster ? 1 : 0);
+            if (entry.status != null) {
+                values.put(KEY_STATUS, entry.status.ordinal());
+            }
+            boolean insert = true;
+            if (entry.id > 0) {
+                String where = KEY_ROWID + "=?";
+                String[] whereArgs = {Long.toString(entry.id)};
+                if (mDb.update(TABLE_NAME, values, where, whereArgs) != 0) {
+                    insert = false;
+                }
+            }
+            if (insert) {
+                mDb.insert(TABLE_NAME, null, values);
+            }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
             Timber.e(ex);
@@ -302,22 +407,15 @@ public class TableEntry {
         }
     }
 
-    public void setUploadedMaster(DataEntry entry, boolean flag) {
-        entry.uploadedMaster = flag;
-        setUploaded(entry, KEY_UPLOADED_MASTER, flag);
-    }
-
-
-    public void setUploadedAws(DataEntry entry, boolean flag) {
-        entry.uploadedAws = flag;
-        setUploaded(entry, KEY_UPLOADED_AWS, flag);
-    }
-
-    void setUploaded(DataEntry entry, String key, boolean flag) {
+    // Right now only used to update a few fields.
+    // Later this will be extended to save everything.
+    public void save(DataEntry entry) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(key, flag ? 1 : 0);
+            values.put(KEY_SERVER_ID, entry.serverId);
+            values.put(KEY_UPLOADED_AWS, entry.uploadedAws ? 1 : 0);
+            values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster ? 1 : 0);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(entry.id)};
             if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {

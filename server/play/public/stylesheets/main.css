@@ -22,21 +22,8 @@ section#main .topRight {
     top: 70px;
 }
 
-table.computers em {
-    color: #aaa;
-}
-
-table.computers .introduced, table.computers .discontinued {
-    width: 10%;
-    min-width: 100px;
-}
-
-table.computers .company_name {
-    width: 30%;
-    min-width: 300px;
-}
-
-table.computers .header a {
+table.progress {
+    width: 200px;
 }
 
 #actions {

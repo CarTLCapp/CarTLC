@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import play.db.ebean.*;
@@ -8,83 +9,149 @@ import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
 
+import play.Logger;
+
 /**
  * User entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Client extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
-    public static Finder<Long,Client> find = new Finder<Long,Client>(Client.class);
+    @Id
+    public Long id;
+
+    @Constraints.Required
+    public String name;
+
+    @Constraints.Required
+    public String password;
+
+    @Constraints.Required
+    public boolean is_admin;
+
+    @Constraints.Required
+    public boolean disabled;
+
+    public static Finder<Long, Client> find = new Finder<Long, Client>(Client.class);
+
+    public boolean isValid() {
+        return id != null && id != 0 && name != null;
+    }
+
+    public static Client get(long id) {
+        if (id > 0) {
+            return find.ref(id);
+        }
+        return null;
+    }
 
     public static List<Client> list() {
         return find.all();
     }
 
-    public static Client findByDeviceId(String device_id) throws DataErrorException {
-        List<Client> items = find.where()
-                .eq("device_id", device_id)
-                .findList();
-        if (items.size() == 1) {
-            return items.get(0);
-        } else if (items.size() > 1) {
-            // THEN enhance this function to scan for disabled.
-            new DataErrorException("Too many clients with: " + device_id);
-        }
-        return null;
-    }
-
     @Transactional
-    public static Client findByName(String first_name, String last_name) throws DataErrorException {
+    public static Client getUser(String username) {
+        if (username == null) {
+            return null;
+        }
         List<Client> items = find.where()
-                .eq("first_name", first_name)
-                .eq("last_name", last_name)
+                .eq("name", username)
                 .findList();
         if (items.size() == 0) {
             return null;
         }
         if (items.size() > 1) {
-            // Get rid of others.
-            // TODO: ONLY REMOVE IF IT IS SAFE TO DO SO.
-            // THAT IS, there are NO ENTRIES of this TECH-ID.
-            // INSTEAD, set the DISABLED flag.
-
-            // THEN enhance this function to scan for disabled.
-            for (int i = 1; i < items.size(); i++) {
-                items.get(i).delete();
-            }
+            Logger.error("Found more than one user with name: " + username);
         }
         return items.get(0);
     }
 
-    @Id
-    public Long id;
-    
-    @Constraints.Required
-    public String first_name;
+    public static boolean hasClientWithName(String username, int ignoreId) {
+        List<Client> items = find.where()
+                .eq("name", username)
+                .ne("id", ignoreId)
+                .findList();
+        return items.size() > 0;
+    }
 
-    @Constraints.Required
-    public String last_name;
+    /**
+     * Returns true if username and password are valid credentials.
+     */
+    public static boolean isValid(String username, String password) {
+        try {
+            Client clientInfo = getUser(username);
+            if (clientInfo != null && !clientInfo.disabled) {
+                if (clientInfo.password == null) {
+                    return (password == null);
+                }
+                return clientInfo.password.equals(password);
+            }
+        } catch (Exception ex) {
+            Logger.error(ex.getMessage());
+        }
+        return false;
+    }
 
-    @Constraints.Required
-    public String device_id;
+    /**
+     * Adds the specified user to the DB.
+     *
+     * @param name     Their name.
+     * @param email    Their email.
+     * @param password Their password.
+     */
+    @Transactional
+    public static void addClient(String name, String password, boolean isAdmin) {
+        if (getUser(name) == null) {
+            Client client = new Client();
+            client.name = name;
+            client.password = password;
+            client.is_admin = isAdmin;
+            client.save();
+        }
+    }
 
-    @Formats.DateTime(pattern="yyyy-MM-dd kk:mm")
-    public Date last_ping;
+    public static void initClient() {
+        Client.addClient("admin", "admintlc", true);
+        Client.addClient("guest", "tlc", false);
+    }
 
-    @Constraints.Required
-    public boolean disabled;
+    public String getProjectsLine() {
+        return getProjects(", ");
+    }
 
-    @Constraints.Required
-    public boolean reset_upload;
+    public List<Project> getProjects() {
+        return ClientProjectAssociation.findProjects(id);
+    }
 
-    public String fullName() {
+    public String getProjects(String split) {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append(first_name);
-        sbuf.append(" " );
-        sbuf.append(last_name);
+        List<Project> projects = getProjects();
+        for (Project project : projects) {
+            if (sbuf.length() > 0) {
+                sbuf.append(split);
+            }
+            sbuf.append(project.name);
+        }
         return sbuf.toString();
     }
+
+    public static boolean hasProject(long client_id, long project_id) {
+        Client client = find.byId(client_id);
+        if (client != null) {
+            return client.hasProject(project_id);
+        }
+        return false;
+    }
+
+    public boolean hasProject(long project_id) {
+        return ClientProjectAssociation.hasProject(id, project_id);
+    }
+
+    public String getCompanyName() {
+        return ClientCompanyNameAssociation.getCompanyLine(id);
+    }
+
 }
 

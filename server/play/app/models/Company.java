@@ -1,13 +1,17 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import com.avaje.ebean.Model;
+
 import play.data.format.*;
 import play.data.validation.*;
 
 import com.avaje.ebean.*;
+
+import modules.DataErrorException;
 
 /**
  * Company entity managed by Ebean
@@ -16,8 +20,9 @@ import com.avaje.ebean.*;
 public class Company extends Model {
 
     private static final long serialVersionUID = 1L;
+    private static final int  PAGE_SIZE        = 30;
 
-	@Id
+    @Id
     public Long id;
 
     @Constraints.Required
@@ -39,35 +44,63 @@ public class Company extends Model {
     public int created_by;
 
     @Constraints.Required
+    public int upload_id;
+
+    @Constraints.Required
     public boolean disabled;
+
+    @Constraints.Required
+    public boolean created_by_client;
 
     /**
      * Generic query helper for entity Computer with id Long
      */
-    public static Finder<Long,Company> find = new Finder<Long,Company>(Company.class);
+    public static Finder<Long, Company> find = new Finder<Long, Company>(Company.class);
+
+    public static Company get(long id) {
+        if (id > 0) {
+            return find.byId(id);
+        } else {
+            return null;
+        }
+    }
+
+    public static void delete(long id) {
+        find.ref(id).delete();
+    }
+
+    public static List<Company> findByUploadId(int upload_id) {
+        return find.where().eq("upload_id", upload_id).findList();
+    }
+
+    public static void saveNames() {
+        for (Company company : find.where().findList()) {
+            CompanyName.save(company.name);
+        }
+    }
 
     /**
      * Return a paged list of companies
      *
-     * @param page Page to display
+     * @param page     Page to display
      * @param pageSize Number of companies per page
-     * @param sortBy Property used for sorting
-     * @param order Sort order (either or asc or desc)
-     * @param filter Filter applied on the name column
+     * @param sortBy   Property used for sorting
+     * @param order    Sort order (either or asc or desc)
+     * @param filter   Filter applied on the name column
      */
-    public static PagedList<Company> list(int page, int pageSize, String sortBy, String order, String filter) {
-        return
-                find.where()
-                        .ilike("name", "%" + filter + "%")
-                        .orderBy(sortBy + " " + order)
-                        .findPagedList(page, pageSize);
+    public static PagedList<Company> list(int page, String sortBy, String order, String filter, boolean disabled) {
+        return find.where()
+                .eq("disabled", disabled)
+                .ilike("name", "%" + filter + "%")
+                .orderBy(sortBy + " " + order)
+                .findPagedList(page, PAGE_SIZE);
     }
 
     public static List<Company> appList(int tech_id) {
         List<Company> items = find.where().eq("disabled", false).findList();
         List<Company> result = new ArrayList<Company>();
         for (Company item : items) {
-            if (item.created_by == 0 || item.created_by == tech_id) {
+            if (item.created_by == 0 || item.created_by == tech_id || item.created_by_client) {
                 result.add(item);
             } else if (Entry.hasEntryForCompany(tech_id, item.id)) {
                 result.add(item);
@@ -90,8 +123,15 @@ public class Company extends Model {
         return null;
     }
 
+    public static List<Company> getCreatedByClient(int client_id) {
+        return find.where()
+                .eq("created_by", client_id)
+                .eq("created_by_client", true)
+                .findList();
+    }
+
     public static Company parse(String line) throws DataErrorException {
-        String [] fields = line.split(",");
+        String[] fields = line.split(",");
         Company company = new Company();
         if (fields.length > 0) {
             company.name = fields[0].trim();
@@ -123,12 +163,21 @@ public class Company extends Model {
         } else {
             throw new DataErrorException("Must at least enter a company name");
         }
+        CompanyName.save(company.name);
         return company;
+    }
+
+    public int countEntries() {
+        return Entry.countEntriesForCompany(id);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getLine() {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append(name);
+        sbuf.append(getName());
         sbuf.append(", ");
         if (street != null) {
             sbuf.append(street);
@@ -150,10 +199,25 @@ public class Company extends Model {
 
     public String getCreatedBy() {
         if (created_by != 0) {
-            Client client = Client.find.byId((long) created_by);
-            if (client != null) {
-                return client.fullName();
+            if (created_by_client) {
+                Client client = Client.find.byId((long) created_by);
+                if (client != null) {
+                    if (upload_id > 0) {
+                        return client.name + " Upload";
+                    }
+                    return client.name;
+                }
+            } else {
+                Technician tech = Technician.find.byId((long) created_by);
+                if (tech != null) {
+                    return tech.fullName();
+                }
             }
+        } else if (created_by_client) {
+            if (upload_id > 0) {
+                return "Admin Upload";
+            }
+            return "Admin";
         }
         return "";
     }
@@ -161,6 +225,19 @@ public class Company extends Model {
     public boolean hasAddress() {
         return (street != null && street.length() > 0) || (city != null && city.length() > 0) || (state != null && state.length() > 0);
     }
+
+    public static boolean isDisabled(long id) {
+        Company company = get(id);
+        if (company == null) {
+            return false;
+        }
+        return company.disabled;
+    }
+
+    public static boolean hasDisabled() {
+        return find.where().eq("disabled", true).findList().size() > 0;
+    }
+
 
 }
 

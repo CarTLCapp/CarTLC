@@ -1,8 +1,28 @@
-@(currentPage: List[Equipment])
+@(currentPage: List[Equipment], client : Client, disabled : Boolean)
 
-@main("FleetTLC - List Equipments") {
+@header = { @Messages("equipment.list.title", currentPage.size()) }
 
-    <h1 id="homeTitle">@Messages("equipment.list.title", currentPage.size())</h1>
+@main("FleetTLC - List Equipments", client) {
+
+    @if(Equipment.hasDisabled()) {
+        @if(disabled) {
+            <h1 id="homeTitle" class="fill">@header
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.EquipmentController.list()">Show Active Equipments</a>
+                </span>
+            </h1>
+        } else {
+            <h1 id="homeTitle" class="fill">@header
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.EquipmentController.list_disabled()">Show Disabled Equipments</a>
+                </span>
+            </h1>
+        }
+    } else {
+        <h1 id="homeTitle">@header</h1>
+    }
+
+    <h1 id="homeTitle"></h1>
 
     @if(currentPage.size() == 0) {
         
@@ -17,6 +37,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Projects</th>
+                    <th>Num Entries</th>
                     <th>Edit</th>
                     <th>Created By</th>
                 </tr>
@@ -32,15 +53,10 @@
                                 @equipment.name
                             }
                         </td>
-                        <td>
-                            @equipment.getProjectsLine()
-                        </td>
-                        <td>
-                            <a href="@routes.EquipmentController.edit(equipment.id)">Edit</a>
-                        </td>
-                        <td>
-                            @equipment.getCreatedBy()
-                        </td>
+                        <td>@equipment.getProjectsLine()</td>
+                        <td>@equipment.getNumEntries()</td>
+                        <td><a href="@routes.EquipmentController.edit(equipment.id)">Edit</a></td>
+                        <td>@equipment.getCreatedBy()</td>
                     </tr>
                 }
 
@@ -49,8 +65,13 @@
         
     }
 
-    <a class="btn success" id="add" href="@routes.EquipmentController.create()">Add a new equipment item</a>
-    <a class="btn success" id="addMany" href="@routes.EquipmentController.createMany()">Add many equipment items</a>
+    @if(!disabled) {
+        <a class="btn success" id="add" href="@routes.EquipmentController.create()">Add a new equipment item</a>
+
+        @if(client.is_admin) {
+            <a class="btn success" id="addMany" href="@routes.EquipmentController.createMany()">Add many equipment items</a>
+        }
+    }
 
 }
 

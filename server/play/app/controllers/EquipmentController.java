@@ -33,8 +33,19 @@ public class EquipmentController extends Controller {
     /**
      * Display the list of equipments.
      */
+    @Security.Authenticated(Secured.class)
     public Result list() {
-        return ok(views.html.equipment_list.render(Equipment.list()));
+        return list(false);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result list_disabled() {
+        return list(true);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result list(boolean disabled) {
+        return ok(views.html.equipment_list.render(Equipment.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
     /**
@@ -42,11 +53,10 @@ public class EquipmentController extends Controller {
      *
      * @param id Id of the equipment to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
         Form<Equipment> equipmentForm = formFactory.form(Equipment.class).fill(Equipment.find.byId(id));
-        return ok(
-            views.html.equipment_editForm.render(id, equipmentForm)
-        );
+        return ok(views.html.equipment_editForm.render(id, equipmentForm));
     }
 
     /**
@@ -61,12 +71,15 @@ public class EquipmentController extends Controller {
         }
         Transaction txn = Ebean.beginTransaction();
         try {
+            Equipment newEquipmentData = equipmentForm.get();
+            if (Equipment.hasEquipmentWithName(newEquipmentData.name, id)) {
+                return badRequest("Already have an equipment named: " + newEquipmentData.name);
+            }
             Equipment savedEquipment = Equipment.find.byId(id);
             if (savedEquipment != null) {
-                Equipment newEquipmentData = equipmentForm.get();
                 savedEquipment.name = newEquipmentData.name;
                 savedEquipment.update();
-                flash("success", "Equipment " + equipmentForm.get().name + " has been updated");
+                flash("success", "Equipment " + newEquipmentData.name + " has been updated");
                 txn.commit();
 
                 Version.inc(Version.VERSION_EQUIPMENT);
@@ -80,22 +93,32 @@ public class EquipmentController extends Controller {
     /**
      * Display the 'new equipment form'.
      */
+    @Security.Authenticated(Secured.class)
     public Result create() {
         Form<Equipment> equipmentForm = formFactory.form(Equipment.class);
-        return ok(
-                views.html.equipment_createForm.render(equipmentForm)
-        );
+        return ok(views.html.equipment_createForm.render(equipmentForm));
     }
 
     /**
-     * Handle the 'new user form' submission
+     * Handle the 'new equipment form' submission
      */
+    @Security.Authenticated(Secured.class)
     public Result save() {
         Form<Equipment> equipmentForm = formFactory.form(Equipment.class).bindFromRequest();
         if (equipmentForm.hasErrors()) {
             return badRequest(views.html.equipment_createForm.render(equipmentForm));
         }
-        equipmentForm.get().save();
+        Client client = Secured.getClient(ctx());
+        Equipment equip = equipmentForm.get();
+        if (client != null && client.id > 0) {
+            equip.created_by = Long.valueOf(client.id).intValue();
+            equip.created_by_client = true;
+        }
+        List<Equipment> equipments = Equipment.findByName(equip.name);
+        if (equipments.size() > 0) {
+            return badRequest("An equipment already exists with name: " + equip.name);
+        }
+        equip.save();
         flash("success", "Equipment " + equipmentForm.get().name + " has been created");
         return list();
     }
@@ -103,11 +126,10 @@ public class EquipmentController extends Controller {
     /**
      * Display a form to enter in many equipments at once.
      */
+    @Security.Authenticated(Secured.class)
     public Result createMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class);
-        return ok(
-                views.html.equipments_createForm.render(linesForm)
-        );
+        return ok(views.html.equipments_createForm.render(linesForm));
     }
 
     /**
@@ -135,11 +157,17 @@ public class EquipmentController extends Controller {
                 if (activeProject == null) {
                     return badRequest("First line must indicate valid project");
                 }
-                Equipment equipment = Equipment.findByName(name);
-                if (equipment == null) {
+                List<Equipment> equipments = Equipment.findByName(name);
+                Equipment equipment;
+                if (equipments.size() == 0) {
                     equipment = new Equipment();
                     equipment.name = name;
                     equipment.save();
+                } else {
+                    if (equipments.size() > 1) {
+                        Logger.error("Too many equipments with name: " + name);
+                    }
+                    equipment = equipments.get(0);
                 }
                 if (activeProject != null) {
                     ProjectEquipmentCollection collection = new ProjectEquipmentCollection();
@@ -160,10 +188,26 @@ public class EquipmentController extends Controller {
      * Handle equipment deletion
      */
     public Result delete(Long id) {
-        // TODO: If the client is in the database, mark it as disabled instead.
-        Equipment.find.ref(id).delete();
+        Equipment equipment = Equipment.find.byId(id);
+        if (Entry.hasEntryForEquipment(id)) {
+            equipment.disabled = true;
+            equipment.update();
+            Logger.info("Equipment has been disabled: it had entries: " + equipment.name);
+        } else {
+            equipment.remove();
+            Logger.info("Equipment has been deleted: " + equipment.name);
+        }
         Version.inc(Version.VERSION_EQUIPMENT);
-        flash("success", "Equipment has been deleted");
+        return list();
+    }
+
+    @Security.Authenticated(Secured.class)
+    @Transactional
+    public Result enable(Long id) {
+        Equipment equipment = Equipment.find.byId(id);
+        equipment.disabled = false;
+        equipment.update();
+        Version.inc(Version.VERSION_EQUIPMENT);
         return list();
     }
 
@@ -204,21 +248,27 @@ public class EquipmentController extends Controller {
         List<Equipment> equipments = Equipment.appList(tech_id);
         List<Long> equipmentIds = new ArrayList<Long>();
         for (Equipment item : equipments) {
-            ObjectNode node = array.addObject();
-            node.put("id", item.id);
-            node.put("name", item.name);
-            if (item.created_by != 0) {
-                node.put("is_local", true);
+            if (!item.disabled) {
+                ObjectNode node = array.addObject();
+                node.put("id", item.id);
+                node.put("name", item.name);
+                if (item.created_by != 0) {
+                    node.put("is_local", true);
+                }
+                equipmentIds.add(item.id);
             }
-            equipmentIds.add(item.id);
         }
         array = top.putArray("project_equipment");
         for (ProjectEquipmentCollection item : ProjectEquipmentCollection.find.all()) {
             if (equipmentIds.contains(item.equipment_id)) {
-                ObjectNode node = array.addObject();
-                node.put("id", item.id);
-                node.put("project_id", item.project_id);
-                node.put("equipment_id", item.equipment_id);
+                Project project = Project.get(item.project_id);
+                Equipment equipment = Equipment.get(item.equipment_id);
+                if (project != null && !project.disabled && equipment != null && !equipment.disabled) {
+                    ObjectNode node = array.addObject();
+                    node.put("id", item.id);
+                    node.put("project_id", item.project_id);
+                    node.put("equipment_id", item.equipment_id);
+                }
             }
         }
         return ok(top);

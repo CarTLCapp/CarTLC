@@ -56,7 +56,7 @@ public class EntryEquipmentCollection extends Model {
         return items.size() > 0;
     }
 
-    public static void deleteEntries(long collection_id) {
+    public static void deleteByCollectionId(long collection_id) {
         List<EntryEquipmentCollection> items = find.where()
                 .eq("collection_id", collection_id)
                 .findList();

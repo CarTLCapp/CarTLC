@@ -1,7 +1,5 @@
 package com.cartlc.tracker.data;
 
-import timber.log.Timber;
-
 /**
  * Created by dug on 5/10/17.
  */
@@ -13,6 +11,10 @@ public class DataCollectionEquipmentEntry extends DataCollectionEquipment {
     }
 
     public void addChecked() {
-        equipmentListIds = TableEquipment.getInstance().queryChecked();
+        equipmentListIds = TableEquipment.getInstance().queryIdsChecked();
+    }
+
+    public void setChecked() {
+        TableEquipment.getInstance().setChecked(equipmentListIds);
     }
 }

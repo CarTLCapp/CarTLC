@@ -5,15 +5,15 @@
 
     <TextView
         android:id="@+id/loading"
+        style="@style/LoadingText"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/image_thumbnail_max_height"
         android:layout_centerInParent="true"
-        android:gravity="center"
-        android:textAllCaps="true"
-        style="@style/LoadingText"
         android:adjustViewBounds="true"
-        android:textSize="16sp"
-        android:text="@string/loading"/>
+        android:gravity="center"
+        android:text="@string/loading"
+        android:textAllCaps="true"
+        android:textSize="16sp"/>
 
     <ImageView
         android:id="@+id/picture"
@@ -21,10 +21,23 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop='true'
         android:layout_centerInParent="true"
-        android:paddingBottom="10dp"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingTop="10dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
         android:scaleType="fitCenter"/>
+
+    <TextView
+        android:id="@+id/note"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal|bottom"
+        android:layout_alignTop="@id/picture"
+        android:layout_alignLeft="@id/picture"
+        android:layout_alignRight="@id/picture"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        style="@style/PictureNoteText"
+        android:textSize="12sp"/>
+
+    android:textSize="12sp"/>
 
 </RelativeLayout>

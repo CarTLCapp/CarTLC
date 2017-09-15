@@ -1,0 +1,44 @@
+@(importForm: Form[ImportWorkOrder], client : Client, message : String = "")
+
+@import helper._
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - Import Work Orders", client, "/work/list") {
+    
+    <h1>Import Work Orders</h1>
+
+    <p>Work orders must be a .csv file with very specific column headers, case and order does not matter:</p>
+    <ul>
+        <li>Street or Address 1</li>
+        <li>City</li>
+        <li>State</li>
+        <li>Zip</li>
+        <li>Truck # or Unit #</li>
+        <li>License Plate or License Number</li>
+    </ul>
+    
+    @helper.form(routes.WorkOrderController.importWorkOrders(), 'enctype -> "multipart/form-data") {
+        
+        <fieldset>
+
+            <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>
+            @helper.select(importForm("project"), options = options(ClientProjectAssociation.findProjectNames(client.id)), args = '_label -> "Project:")
+            @helper.select(importForm("company"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Import" class="btn primary"> or
+            <a href="@routes.WorkOrderController.list()" class="btn">Cancel</a>
+        </div>
+
+    }
+
+    <p style="color:red">
+        <em>@Html(HtmlFormat.escape(message).toString.replace("\n", "<br />"))</em>
+    </p>
+
+    <p>Notes: When importing a work order, if there is already an entry with the same license plate number then that entry will be replaced.</p>
+
+}

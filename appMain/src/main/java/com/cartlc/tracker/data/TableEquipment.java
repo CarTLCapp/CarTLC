@@ -66,13 +66,13 @@ public class TableEquipment {
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" int, ");
         sbuf.append(KEY_CHECKED);
-        sbuf.append(" bit, ");
+        sbuf.append(" bit default 0, ");
         sbuf.append(KEY_LOCAL);
-        sbuf.append(" bit, ");
+        sbuf.append(" bit default 0, ");
         sbuf.append(KEY_IS_BOOT);
-        sbuf.append(" bit, ");
+        sbuf.append(" bit default 0, ");
         sbuf.append(KEY_DISABLED);
-        sbuf.append(" bit)");
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
 
@@ -108,6 +108,7 @@ public class TableEquipment {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, name);
             values.put(KEY_IS_BOOT, 1);
+            values.put(KEY_DISABLED, 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -126,6 +127,7 @@ public class TableEquipment {
             values.put(KEY_NAME, name);
             values.put(KEY_LOCAL, 1);
             values.put(KEY_CHECKED, 1);
+            values.put(KEY_DISABLED, 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -145,7 +147,7 @@ public class TableEquipment {
                 values.put(KEY_NAME, value.name);
                 values.put(KEY_CHECKED, value.isChecked ? 1 : 0);
                 values.put(KEY_LOCAL, value.isLocal ? 1 : 0);
-                values.put(KEY_SERVER_ID, value.server_id);
+                values.put(KEY_SERVER_ID, value.serverId);
                 values.put(KEY_IS_BOOT, value.isBootStrap ? 1 : 0);
                 values.put(KEY_DISABLED, value.disabled ? 1 : 0);
                 value.id = mDb.insert(TABLE_NAME, null, values);
@@ -166,7 +168,7 @@ public class TableEquipment {
             values.put(KEY_NAME, item.name);
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
             values.put(KEY_LOCAL, item.isLocal ? 1 : 0);
-            values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_SERVER_ID, item.serverId);
             values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
             values.put(KEY_DISABLED, item.disabled ? 1 : 0);
             item.id = mDb.insert(TABLE_NAME, null, values);
@@ -220,7 +222,7 @@ public class TableEquipment {
                     cursor.getString(idxName),
                     cursor.getShort(idxChecked) != 0,
                     cursor.getShort(idxLocal) != 0);
-            item.server_id = cursor.getInt(idxServerId);
+            item.serverId = cursor.getInt(idxServerId);
             item.isBootStrap = cursor.getShort(idxTest) != 0;
             item.disabled = cursor.getShort(idxDisabled) != 0;
             list.add(item);
@@ -229,7 +231,12 @@ public class TableEquipment {
         return list;
     }
 
-    public List<Long> queryChecked() {
+    public List<DataEquipment> queryChecked() {
+        final String selection = KEY_CHECKED + "=1";
+        return query(selection, null);
+    }
+
+    public List<Long> queryIdsChecked() {
         ArrayList<Long> list = new ArrayList();
         try {
             final String[] columns = {KEY_ROWID};
@@ -258,6 +265,25 @@ public class TableEquipment {
         }
         cursor.close();
         return id;
+    }
+
+    public void setChecked(List<Long> ids) {
+        clearChecked();
+        mDb.beginTransaction();
+        try {
+            for (long id : ids) {
+                ContentValues values = new ContentValues();
+                String where = KEY_ROWID + "=?";
+                String[] whereArgs = {Long.toString(id)};
+                values.put(KEY_CHECKED, 1);
+                mDb.update(TABLE_NAME, values, where, whereArgs);
+            }
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Timber.e(ex);
+        } finally {
+            mDb.endTransaction();
+        }
     }
 
     public void setChecked(DataEquipment item, boolean flag) {
@@ -300,7 +326,7 @@ public class TableEquipment {
             values.put(KEY_CHECKED, item.isChecked ? 1 : 0);
             values.put(KEY_IS_BOOT, item.isBootStrap ? 1 : 0);
             values.put(KEY_DISABLED, item.disabled ? 1 : 0);
-            values.put(KEY_SERVER_ID, item.server_id);
+            values.put(KEY_SERVER_ID, item.serverId);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(item.id)};
             mDb.update(TABLE_NAME, values, where, whereArgs);
@@ -314,7 +340,7 @@ public class TableEquipment {
 
     void remove(long id) {
         String where = KEY_ROWID + "=?";
-        String [] whereArgs = { Long.toString(id) };
+        String[] whereArgs = {Long.toString(id)};
         mDb.delete(TABLE_NAME, where, whereArgs);
     }
 

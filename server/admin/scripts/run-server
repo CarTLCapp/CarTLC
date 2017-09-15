@@ -6,6 +6,6 @@
 #
 H=/home/ubuntu
 ACTIVE=$H/server/active/play*SNAPSHOT/bin/play
-LOG=$H/bin/logs/run.log
-mkdir -p $H/bin/logs
+LOG=$H/logs/run-`date +%Y-%m-%d`.log
+mkdir -p $H/logs
 $ACTIVE -Dplay.evolutions.db.default.autoApply=true -Dplay.evolutions.db.default.autoApplyDowns=true -Dplay -Dplay.crypto.secret='${APPLICATION_SECRET}' >& $LOG &

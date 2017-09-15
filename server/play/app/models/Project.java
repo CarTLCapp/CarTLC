@@ -1,9 +1,11 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import com.avaje.ebean.Model;
+
 import play.data.format.*;
 import play.data.validation.*;
 import play.Logger;
@@ -13,25 +15,51 @@ import com.avaje.ebean.*;
 /**
  * Project entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Project extends Model implements Comparable<Project> {
 
     private static final long serialVersionUID = 1L;
 
-	@Id
+    @Id
     public Long id;
-    
+
     @Constraints.Required
     public String name;
 
     @Constraints.Required
     public boolean disabled;
 
-    public static Finder<Long,Project> find = new Finder<Long,Project>(Project.class);
+    public static Finder<Long, Project> find = new Finder<Long, Project>(Project.class);
 
-    public static List<Project> list() { return find.where().orderBy("name asc").findList(); }
+    public static Project get(long id) {
+        if (id > 0) {
+            return find.ref(id);
+        }
+        return null;
+    }
+
+    public static List<Project> list() {
+        return list(false);
+    }
+
+    public static List<Project> list(boolean disabled) {
+        return find.where()
+                .eq("disabled", disabled)
+                .orderBy("name asc").findList();
+    }
+
+    public static List<String> listNames() {
+        ArrayList<String> names = new ArrayList<String>();
+        for (Project project : list()) {
+            names.add(project.name);
+        }
+        return names;
+    }
 
     public static Project findByName(String name) {
+        if (name == null) {
+            return null;
+        }
         List<Project> projects = find.where()
                 .eq("name", name)
                 .findList();
@@ -71,6 +99,22 @@ public class Project extends Model implements Comparable<Project> {
 
     public boolean equals(Project other) {
         return name.equals(other.name);
+    }
+
+    public static boolean hasDisabled() {
+        return list(true).size() > 0;
+    }
+
+    public int countEntries() {
+        return Entry.countEntriesForProject(id);
+    }
+
+    public static boolean isDisabled(long id) {
+        Project project = find.ref(id);
+        if (project == null) {
+            return false;
+        }
+        return project.disabled;
     }
 
 }

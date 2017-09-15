@@ -2,6 +2,7 @@ package com.cartlc.tracker.data;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.util.BitmapHelper;
@@ -16,22 +17,25 @@ import timber.log.Timber;
 
 public class DataPicture {
 
+    static final int MAX_NOTE_LENGTH = 1000;
+
     public long    id;
     public String  unscaledFilename;
     public String  scaledFilename;
+    public String  note;
     public boolean uploaded;
 
-    File  unscaledFile;
-    File  scaledFile;
-    int[] imgSize;
+    File unscaledFile;
+    File scaledFile;
 
     public DataPicture() {
     }
 
-    public DataPicture(long id, String pictureFilename, String uploadingFilename, boolean uploaded) {
+    public DataPicture(long id, String pictureFilename, String uploadingFilename, String note, boolean uploaded) {
         this.id = id;
         this.unscaledFilename = pictureFilename;
         this.scaledFilename = uploadingFilename;
+        this.note = note;
         this.uploaded = uploaded;
     }
 
@@ -54,11 +58,8 @@ public class DataPicture {
         return getUnscaledFile().exists();
     }
 
-    public Uri getUnscaledUri(Context ctx) {
-        if (!existsUnscaled()) {
-            return null;
-        }
-        return TBApplication.getUri(ctx, getUnscaledFile());
+    public boolean existsScaled() {
+        return getScaledFile().exists();
     }
 
     public void remove() {
@@ -68,6 +69,7 @@ public class DataPicture {
         }
     }
 
+    // Warning: will create the scaled file if it does not yet exist.
     public File getScaledFile() {
         if (scaledFilename == null) {
             scaledFilename = BitmapHelper.createScaled(getUnscaledFile());
@@ -83,6 +85,15 @@ public class DataPicture {
         return scaledFile;
     }
 
+    public void setNote(String note) {
+        // Safety:
+        if (note.length() > MAX_NOTE_LENGTH) {
+            note = note.substring(0, MAX_NOTE_LENGTH);
+        }
+        this.note = note;
+        TablePictureCollection.getInstance().update(this, null);
+    }
+
     public void rotateCW() {
         BitmapHelper.rotate(getUnscaledFile(), 90);
     }
@@ -91,10 +102,31 @@ public class DataPicture {
         BitmapHelper.rotate(getUnscaledFile(), -90);
     }
 
-    public int[] getImageSize() {
-        if (imgSize == null) {
-            imgSize = BitmapHelper.getImageSize(getUnscaledFile().getAbsolutePath());
+//    public int[] getImageSize() {
+//        if (imgSize == null) {
+//            imgSize = BitmapHelper.getImageSize(getUnscaledFile().getAbsolutePath());
+//        }
+//        return imgSize;
+//    }
+
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(id);
+        if (unscaledFilename != null) {
+            sbuf.append(", ");
+            sbuf.append(unscaledFilename);
         }
-        return imgSize;
+        if (scaledFilename != null) {
+            sbuf.append(", ");
+            sbuf.append(scaledFilename);
+        }
+        if (!TextUtils.isEmpty(note)) {
+            sbuf.append(", note=");
+            sbuf.append(note);
+        }
+        if (uploaded) {
+            sbuf.append(", UPLOADED");
+        }
+        return sbuf.toString();
     }
 }

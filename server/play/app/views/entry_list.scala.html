@@ -1,4 +1,4 @@
-@(currentPage: com.avaje.ebean.PagedList[Entry], currentSortBy: String, currentOrder: String)
+@(currentPage: EntryList, currentSortBy: String, currentOrder: String)
 
 @link(newPage:Int, newSortBy:String) = @{
     var sortBy = currentSortBy
@@ -37,33 +37,43 @@
 
     } else {
 
-        <table class="entries zebra-striped">
+        <table>
             <thead>
                 <tr>
                     @header("tech_id", "Name")
                     @header("entry_time", "Date")
                     @header("project_id", "Project")
-                    @header("address_id", "Address")
-                    @header("truck_number", "Truck#")
+                    @header("company", "Company")
+                    @header("street", "Street / Plant Name")
+                    @header("city", "City")
+                    @header("state", "State")
+                    @header("zipcode", "ZIP")
+                    @header("truck_number", "Truck")
                     <th>Equipment</th>
                     <th>Pictures</th>
                     <th>Notes</th>
                     <th>View</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
-
-                @for(entry <- currentPage.getList) {
+            
+                @for(entry <- currentPage.getList()) {
                     <tr>
                         <td>@entry.getTechName()</td>
                         <td>@entry.entry_time.format("yyyy-MM-dd kk:mm")</td>
                         <td>@entry.getProjectLine()</td>
-                        <td>@entry.getAddressLine()</td>
+                        <td>@entry.getCompany()</td>
+                        <td>@entry.getStreet()</td>
+                        <td>@entry.getCity()</td>
+                        <td>@entry.getState()</td>
+                        <td>@entry.getZipCode()</td>
                         <td>@entry.getTruckLine()</td>
                         <td>@entry.getEquipmentLine()</td>
-                        <td><a href="@routes.EntryController.pictures(entry.id)">Pictures</a></td>
-                        <td><a href="@routes.EntryController.notes(entry.id)">Notes</a></td>
+                        <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
+                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum()</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
+                        <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
                     </tr>
                 }
 
@@ -72,9 +82,9 @@
 
         <div id="pagination" class="pagination">
             <ul>
-                @if(currentPage.hasPrev) {
+                @if(currentPage.hasPrev()) {
                 <li class="prev">
-                    <a href="@link(currentPage.getPageIndex - 1, null)">&larr; Previous</a>
+                    <a href="@link(currentPage.getPageIndex() - 1, null)">&larr; Previous</a>
                 </li>
                 } else {
                 <li class="prev disabled">
@@ -84,9 +94,9 @@
                 <li class="current">
                     <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
                 </li>
-                @if(currentPage.hasNext) {
+                @if(currentPage.hasNext()) {
                 <li class="next">
-                    <a href="@link(currentPage.getPageIndex + 1, null)">Next &rarr;</a>
+                    <a href="@link(currentPage.getPageIndex() + 1, null)">Next &rarr;</a>
                 </li>
                 } else {
                 <li class="next disabled">

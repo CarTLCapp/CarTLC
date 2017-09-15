@@ -1,19 +1,22 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import com.avaje.ebean.Model;
+
 import play.data.format.*;
 import play.data.validation.*;
 
 import com.avaje.ebean.*;
+
 import play.Logger;
 
 /**
  * Note entity managed by Ebean
  */
-@Entity 
+@Entity
 public class Note extends Model implements Comparable<Note> {
 
     public enum Type {
@@ -57,7 +60,7 @@ public class Note extends Model implements Comparable<Note> {
 
     private static final long serialVersionUID = 1L;
 
-	@Id
+    @Id
     public Long id;
 
     @Constraints.Required
@@ -71,42 +74,41 @@ public class Note extends Model implements Comparable<Note> {
 
     @Constraints.Required
     public boolean disabled;
+
+    @Constraints.Required
+    public boolean created_by_client;
+
+    @Constraints.Required
+    public short num_digits;
     /**
      * Generic query helper for entity Computer with id Long
      */
-    public static Finder<Long,Note> find = new Finder<Long,Note>(Note.class);
+    public static Finder<Long, Note> find = new Finder<Long, Note>(Note.class);
 
-    public static List<Note> list() { return list("name", "asc"); }
+    public static List<Note> list(boolean disabled) {
+        return list("name", "asc", disabled);
+    }
 
-    public static List<Note> list(String sortBy, String order) {
+    public static List<Note> list(String sortBy, String order, boolean disabled) {
         return find.where()
+                .eq("disabled", disabled)
                 .orderBy(sortBy + " " + order)
                 .findList();
     }
 
-    public static Note findByName(String name) {
-        List<Note> items = find.where()
-                .eq("name", name)
-                .findList();
-        if (items.size() == 1) {
-            return items.get(0);
-        } else if (items.size() > 1) {
-            Logger.error("Too many notes named: " + name);
-        }
-        return null;
+    public static List<Note> findByName(String name) {
+        return find.where().eq("name", name).findList();
     }
 
-    public static List<Note> appList(int tech_id) {
-        List<Note> items = find.where().eq("disabled", false).findList();
-        List<Note> result = new ArrayList<Note>();
-        for (Note item : items) {
-            if (item.created_by == 0 || item.created_by == tech_id) {
-                result.add(item);
-            } else if (Entry.hasEntryForNote(tech_id, item.id)) {
-                result.add(item);
-            }
-        }
-        return result;
+    public static List<Note> appList() {
+        return find.where().eq("disabled", false).findList();
+    }
+
+    public static List<Note> getCreatedByClient(int client_id) {
+        return find.where()
+                .eq("created_by", client_id)
+                .eq("created_by_client", true)
+                .findList();
     }
 
     public List<Project> getProjects() {
@@ -126,7 +128,20 @@ public class Note extends Model implements Comparable<Note> {
         return sbuf.toString();
     }
 
-    public String getTypeString() { return type.display; }
+    public String getTypeString() {
+        return type.display;
+    }
+
+    public String getNumDigits() {
+        if (num_digits > 0) {
+            return Integer.toString(num_digits);
+        }
+        return "";
+    }
+
+    public String getNumEntries() {
+        return Integer.toString(Entry.countEntriesForNote(id));
+    }
 
     public static boolean hasProject(long note_id, long project_id) {
         Note note = find.byId(note_id);
@@ -145,12 +160,53 @@ public class Note extends Model implements Comparable<Note> {
         return false;
     }
 
-    public static Map<String,String> options() {
-        LinkedHashMap<String,String> options = new LinkedHashMap<String,String>();
-        for(Type t: Type.values()) {
+    public static boolean isDisabled(Long id) {
+        Note note = find.ref(id);
+        if (note == null) {
+            return false;
+        }
+        return note.disabled;
+    }
+
+    public static boolean hasDisabled() {
+        return find.where().eq("disabled", true).findList().size() > 0;
+    }
+
+    public static boolean hasNoteWithName(String name, long ignoreId) {
+        List<Note> notes = find.where()
+                .eq("name", name)
+                .ne("id", ignoreId)
+                .findList();
+        return notes.size() > 0;
+    }
+
+    public static Map<String, String> options() {
+        LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
+        for (Type t : Type.values()) {
             options.put(t.toString(), t.display);
         }
         return options;
+    }
+
+    public String getCreatedBy() {
+        StringBuilder sbuf = new StringBuilder();
+        if (created_by != 0) {
+            if (created_by_client) {
+                Client client = Client.find.byId((long) created_by);
+                if (client != null) {
+                    sbuf.append(client.name);
+                }
+            } else {
+                Technician tech = Technician.find.byId((long) created_by);
+                if (tech != null) {
+                    sbuf.append(tech.fullName());
+                }
+            }
+        }
+        if (disabled) {
+            sbuf.append(" [DISABLED]");
+        }
+        return sbuf.toString();
     }
 
     @Override

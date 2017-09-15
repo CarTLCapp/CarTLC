@@ -9,21 +9,26 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
+import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
-import com.cartlc.tracker.data.PrefHelper;
+import com.cartlc.tracker.data.TableEntry;
+import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TableCollectionNoteProject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Created by dug on 5/12/17.
@@ -41,11 +46,19 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         }
     }
 
-    final protected Context                    mContext;
-    protected       List<DataNote>             mItems;
+    public interface EntryListener {
+        void textEntered(DataNote note);
 
-    public NoteListEntryAdapter(Context context) {
+        void textFocused(DataNote note);
+    }
+
+    final protected Context        mContext;
+    final protected EntryListener  mListener;
+    protected       List<DataNote> mItems;
+
+    public NoteListEntryAdapter(Context context, EntryListener listener) {
         mContext = context;
+        mListener = listener;
     }
 
     @Override
@@ -62,18 +75,30 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         holder.entry.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                item.value = s.toString();
-                TableNote.getInstance().updateValue(item);
+                if (holder.label.isSelected()) {
+                    item.value = s.toString();
+                    TableNote.getInstance().updateValue(item);
+                    mListener.textEntered(item);
+                }
+            }
+        });
+        holder.entry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    mListener.textFocused(item);
+                    holder.label.setSelected(true);
+                } else {
+                    holder.label.setSelected(false);
+                }
             }
         });
         if (item.type == DataNote.Type.ALPHANUMERIC) {
@@ -101,22 +126,61 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
     }
 
     public void onDataChanged() {
-        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        if (curGroup != null) {
-            mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId);
-            notifyDataSetChanged();
+        DataEntry entry = PrefHelper.getInstance().getCurrentEditEntry();
+        if (entry != null) {
+            mItems = entry.getNotesAllWithValuesOverlaid();
+        } else {
+            DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
+            if (curGroup != null) {
+                mItems = TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId);
+            } else {
+                mItems = new ArrayList<>();
+            }
+        }
+        pushToBottom("Other");
+        notifyDataSetChanged();
+
+    }
+
+    void pushToBottom(String name) {
+        List<DataNote> others = new ArrayList<>();
+        for (DataNote item : mItems) {
+            if (item.name.startsWith(name)) {
+                others.add(item);
+                break;
+            }
+        }
+        for (DataNote item : others) {
+            mItems.remove(item);
+            mItems.add(item);
         }
     }
 
     public boolean hasNotesEntered() {
-        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-        if (curGroup != null) {
-            for (DataNote note : TableCollectionNoteProject.getInstance().getNotes(curGroup.projectNameId)) {
+        if (mItems != null) {
+            for (DataNote note : mItems) {
                 if (!TextUtils.isEmpty(note.value)) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public boolean isNotesComplete() {
+        if (mItems != null) {
+            for (DataNote note : mItems) {
+                if (!TextUtils.isEmpty(note.value)) {
+                    if (note.num_digits > 0 && (note.value.length() != note.num_digits)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public List<DataNote> getNotes() {
+        return mItems;
     }
 }

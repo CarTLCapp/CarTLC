@@ -1,0 +1,27 @@
+@(data : ProgressGrid, client : Client)
+
+@main("FleetTLC - Progress Grid", client, "/work/list") {
+
+    <h1 id="homeTitle">Progress Grid</h1>
+
+    <table>
+            @for(row <- 0 to data.getNumRows()-1) {
+                <tr>
+                    @for(col <- 0 to data.getNumCols()-1) {
+                        <td bgcolor="@data.getCellColor(row, col)">@data.getCellString(row, col)</td>
+                    }
+                </tr>
+            }
+    </table>
+
+    <h3>Key</h3>
+
+    <table class="progress">
+      <tr><td bgcolor="@ProgressGrid.getKeyColor("""complete""")">@ProgressGrid.getKeyName("complete")</td></tr>
+      <tr><td bgcolor="@ProgressGrid.getKeyColor("""partial""")">@ProgressGrid.getKeyName("partial")</td></tr>
+      <tr><td bgcolor="@ProgressGrid.getKeyColor("""needs_repair""")">@ProgressGrid.getKeyName("needs_repair")</td></tr>
+    </table>
+
+}
+
+            

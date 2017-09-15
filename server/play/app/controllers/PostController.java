@@ -3,17 +3,22 @@ package controllers;
 import javax.inject.*;
 import play.*;
 import play.mvc.*;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.libs.Json;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import play.db.ebean.Transactional;
-import models.Client;
+import models.Technician;
 import models.Version;
+import models.Truck;
 import java.lang.System;
 import java.util.Date;
+import java.util.List;
+
+import play.libs.Json;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Singleton
 public class PostController extends Controller
@@ -47,20 +52,20 @@ public class PostController extends Controller
         Transaction txn = Ebean.beginTransaction();
         Result res;
 		try {
-			Client client = Client.findByDeviceId(device_id);
-			if (client == null) {
+			Technician tech = Technician.findByDeviceId(device_id);
+			if (tech == null) {
                 // Locate by pure name
-                client = Client.findByName(first_name, last_name);
-                if (client == null) {
-                    client = new Client();
+                tech = Technician.findByName(first_name, last_name);
+                if (tech == null) {
+                    tech = new Technician();
                 }
 			}
-            client.first_name = first_name;
-            client.last_name = last_name;
-            client.device_id = device_id;
-            client.save();
+            tech.first_name = first_name;
+            tech.last_name = last_name;
+            tech.device_id = device_id;
+            tech.save();
             txn.commit();
-            res = ok(Long.toString(client.id));
+            res = ok(Long.toString(tech.id));
         } catch (Exception ex) {
             res = badRequest(ex.getMessage());
         } finally {
@@ -98,15 +103,15 @@ public class PostController extends Controller
 		result.put(Version.VERSION_COMPANY, Version.get(Version.VERSION_COMPANY));
 		result.put(Version.VERSION_EQUIPMENT, Version.get(Version.VERSION_EQUIPMENT));
 		result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
-
-		Client client = Client.find.byId((long) tech_id);
-		if (client != null) {
-			if (client.reset_upload) {
+		result.put(Version.VERSION_TRUCK, Version.get(Version.VERSION_TRUCK));
+		Technician tech = Technician.find.byId((long) tech_id);
+		if (tech != null) {
+			if (tech.reset_upload) {
 				result.put("reset_upload", true);
-				client.reset_upload = false;
+				tech.reset_upload = false;
 			}
-			client.last_ping = new Date(System.currentTimeMillis());
-			client.save();
+			tech.last_ping = new Date(System.currentTimeMillis());
+			tech.save();
 		} else {
 			Logger.error("ping(): could not find technician with ID " + tech_id);
 			result.put("re-register", true);
@@ -125,5 +130,26 @@ public class PostController extends Controller
 		}
 		sbuf.append("\n");
 		return badRequest(sbuf.toString());
+	}
+
+	public Result queryTrucks() {
+		JsonNode json = request().body().asJson();
+		JsonNode value = json.findValue("tech_id");
+		if (value == null) {
+			return badRequest("missing field: tech_id");
+		}
+		int tech_id = value.intValue();
+		ObjectNode top = Json.newObject();
+		ArrayNode array = top.putArray("trucks");
+		List<Truck> trucks = Truck.list();
+		for (Truck item : trucks) {
+			if (item.created_by_client || item.created_by == tech_id) {
+				ObjectNode node = array.addObject();
+				node.put("id", item.id);
+				node.put("truck_number", item.truck_number);
+				node.put("license_plate", item.license_plate);
+			}
+		}
+		return ok(top);
 	}
 }

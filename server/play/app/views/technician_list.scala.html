@@ -1,0 +1,64 @@
+@(currentPage: List[Technician], client : Client)
+
+@main("FleetTLC - List Technicians", client) {
+
+    <h1 id="homeTitle">@Messages("technicians.list.title", currentPage.size())</h1>
+
+    @if(currentPage.size() == 0) {
+        
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+        
+    } else {
+        
+        <table class="techs zebra-striped">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Tech ID</th>
+                    <th>Device ID</th>
+                    <th>Entries</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(tech <- currentPage) {
+                    <tr>
+                        <td>
+                            @if(tech.first_name == null) {
+                                <em>-</em>
+                            } else {
+                                @tech.first_name
+                            }
+                        </td>
+                        <td>
+                            @if(tech.last_name == null) {
+                                <em>-</em>
+                            } else {
+                                @tech.last_name
+                            }
+                        </td>
+                        <td>@tech.id</td>
+                        <td>@tech.device_id</td>
+                        <td>@tech.countEntries()</td>
+                        <td>
+                            @if(client.is_admin) {
+                                <a href="@routes.TechnicianController.edit(tech.id)">Edit</a>
+                            } else {
+                                <em>-</em>
+                            }
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        
+    }
+
+}
+
+            

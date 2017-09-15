@@ -1,4 +1,4 @@
-@(currentPage: com.avaje.ebean.PagedList[Company], currentSortBy: String, currentOrder: String, currentFilter: String)
+@(currentPage: com.avaje.ebean.PagedList[Company], currentSortBy: String, currentOrder: String, currentFilter: String, client : Client, disabled : Boolean)
 
 @link(newPage:Int, newSortBy:String) = @{
     var sortBy = currentSortBy
@@ -16,7 +16,7 @@
         }
     }
     // Generate the link
-    routes.CompanyController.list(newPage, sortBy, order, currentFilter)
+    routes.CompanyController.list(newPage, sortBy, order, currentFilter, disabled)
 }
 
 @header(key:String, title:String) = {
@@ -25,9 +25,27 @@
     </th>
 }
 
-@main("FleetTLC - List Companies") {
+@title = { @Messages("company.list.title", currentPage.getTotalRowCount) }
 
-    <h1 id="homeTitle">@Messages("company.list.title", currentPage.getTotalRowCount)</h1>
+@main("FleetTLC - List Companies", client) {
+
+    @if(Company.hasDisabled()) {
+        @if(disabled) {
+            <h1 id="homeTitle" class="fill">@title
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.CompanyController.list()">Show Active Companies</a>
+                </span>
+            </h1>
+        } else {
+            <h1 id="homeTitle" class="fill">@title
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.CompanyController.list(disabled=true)">Show Disabled Companies</a>
+                </span>
+            </h1>
+        }
+    } else {
+        <h1 id="homeTitle">@title</h1>
+    }
 
     @if(currentPage.getTotalRowCount == 0) {
 
@@ -41,10 +59,11 @@
             <thead>
                 <tr>
                     @header("name", "Name")
-                    @header("street", "Street")
+                    @header("street", "Street / Plant Name")
                     @header("city", "City")
                     @header("state", "State")
                     @header("zipcode", "ZIP")
+                    <th>Entries</th>
                     <th>Edit</th>
                     <th>Created By</th>
                 </tr>
@@ -54,10 +73,10 @@
                 @for(company <- currentPage.getList) {
                     <tr>
                         <td>
-                            @if(company.name == null) {
+                            @if(company.getName() == null) {
                                 <em>-</em>
                             } else {
-                                @company.name
+                                @company.getName()
                             }
                         </td>
                         <td>
@@ -87,6 +106,9 @@
                             } else {
                                 @company.zipcode
                             }
+                        </td>
+                        <td>
+                            @company.countEntries()
                         </td>
                         <td>
                             <a href="@routes.CompanyController.edit(company.id)">Edit</a>
@@ -127,8 +149,13 @@
         </div>
     }
 
-    <a class="btn success" id="add" href="@routes.CompanyController.create()">Add a new company</a>
-    <a class="btn success" id="addMany" href="@routes.CompanyController.createMany()">Add many companies</a>
+    @if(!disabled) {
+        <a class="btn success" id="add" href="@routes.CompanyController.create()">Add a new company</a>
+
+        @if(client.is_admin) {
+            <a class="btn success" id="addMany" href="@routes.CompanyController.createMany()">Add many companies</a>
+        }
+    }
 
 }
 

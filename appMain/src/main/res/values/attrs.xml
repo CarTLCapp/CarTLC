@@ -34,6 +34,16 @@
         <item name="android:paddingTop">2dp</item>
         <item name="android:paddingBottom">2dp</item>
     </style>
+    <style name="ProjectFullTextTitle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
+    <style name="ProjectFullTextSub">
+        <item name="android:textSize">17sp</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
     <style name="MessageLine">
         <item name="android:textSize">25sp</item>
         <item name="android:textAllCaps">false</item>
@@ -42,6 +52,10 @@
     <style name="EntryText">
         <item name="android:backgroundTint">@color/common_blue</item>
         <!--<item name="android:textCursorDrawable">@null</item>-->
+    </style>
+    <style name="HintText">
+        <item name="android:textColor">@color/entry_hint_color</item>
+        <item name="android:textSize">18sp</item>
     </style>
     <style name="ConfirmTitleText">
         <item name="android:textSize">20sp</item>
@@ -70,6 +84,14 @@
         <!--<item name="android:textCursorDrawable">@null</item>-->
     </style>
     <style name="NoteText">
+        <item name="android:textSize">18sp</item>
+    </style>
+    <style name="PictureNoteText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@color/note_background</item>
+    </style>
+    <style name="StatusText">
         <item name="android:textSize">18sp</item>
     </style>
 </resources>

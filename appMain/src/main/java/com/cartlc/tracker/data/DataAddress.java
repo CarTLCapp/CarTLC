@@ -8,7 +8,7 @@ import android.text.TextUtils;
 
 public class DataAddress {
     public long    id;
-    public int     server_id;
+    public int     serverId;
     public String  company;
     public String  street;
     public String  city;
@@ -45,7 +45,7 @@ public class DataAddress {
     }
 
     public DataAddress(int server_id, String company, String street, String city, String state, String zipcode) {
-        this.server_id = server_id;
+        this.serverId = server_id;
         this.company = company;
         this.street = street;
         this.city = city;
@@ -55,7 +55,7 @@ public class DataAddress {
 
     public DataAddress(long id, int server_id, String company, String street, String city, String state, String zipcode) {
         this.id = id;
-        this.server_id = server_id;
+        this.serverId = server_id;
         this.company = company;
         this.street = street;
         this.city = city;
@@ -163,7 +163,7 @@ public class DataAddress {
         sbuf.append(disabled);
         sbuf.append(")");
         sbuf.append(", S[");
-        sbuf.append(server_id);
+        sbuf.append(serverId);
         sbuf.append("], ID[");
         sbuf.append(id);
         sbuf.append("]");

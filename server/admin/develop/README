@@ -19,6 +19,7 @@ testProd
 
 Deployment:
 
+Inc version in server/play/build.sbt
 sbt -mem 2048
 dist
 r-wrap-server -d
@@ -31,3 +32,12 @@ run-server &
 Amazon:
 
 https://aws.amazon.com/
+
+PHPMyAdmin:
+   http://52.14.73.217/phpmyadmin
+   User: root p/w: cartlc
+
+Database Save:
+
+mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql
+p/w: cartcl
