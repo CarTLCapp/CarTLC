@@ -15,8 +15,8 @@ public class DataTruck implements Comparable<DataTruck> {
     public String licensePlateNumber;
 
     public boolean equals(int truckNumber, String licensePlate) {
-        if (this.truckNumber != truckNumber) {
-            return false;
+        if (this.truckNumber == truckNumber) {
+            return true;
         }
         if (this.licensePlateNumber == null) {
             return (licensePlate == null);
@@ -26,8 +26,8 @@ public class DataTruck implements Comparable<DataTruck> {
     }
 
     public boolean equals(DataTruck other) {
-        if (truckNumber != other.truckNumber) {
-            return false;
+        if (truckNumber != 0 && truckNumber == other.truckNumber) {
+            return true;
         }
         if (licensePlateNumber == null) {
             return other.licensePlateNumber == null;

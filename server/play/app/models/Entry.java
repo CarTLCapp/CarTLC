@@ -462,7 +462,7 @@ public class Entry extends com.avaje.ebean.Model {
         }
         if (list.size() > 1) {
             StringBuilder sbuf = new StringBuilder();
-            sbuf.append("More than entries found to fulfill workorder");
+            sbuf.append("More than one entry found to fulfill workorder");
             for (Entry entry : list) {
                 sbuf.append("\n");
                 sbuf.append(entry.toString());

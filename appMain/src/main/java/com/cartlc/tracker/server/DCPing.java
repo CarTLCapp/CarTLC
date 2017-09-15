@@ -594,10 +594,9 @@ public class DCPing extends DCPost {
                     if (item == null) {
                         DataTruck match = get(unprocessed, incoming);
                         if (match != null) {
-                            // If this name already exists, convert the existing one by simply giving it the server_id.
-                            match.serverId = incoming.serverId;
-                            TableTruck.getInstance().save(match);
-                            Timber.i("Commandeer local: " + match.toString());
+                            incoming.id = match.id;
+                            TableTruck.getInstance().save(incoming);
+                            Timber.i("Commandeer local: " + incoming.toString());
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
