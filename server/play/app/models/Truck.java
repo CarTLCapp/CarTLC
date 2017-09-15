@@ -54,40 +54,51 @@ public class Truck extends com.avaje.ebean.Model {
         return find.where().eq("upload_id", upload_id).findList();
     }
 
-    public static List<Truck> findBy(int truck_number, String license_plate) {
+    static List<Truck> findBy(int truck_number, String license_plate) {
         List<Truck> list;
-        if (truck_number != 0) {
-            list = find.where().eq("truck_number", truck_number).findList();
-        } else if (license_plate != null) {
+        if (license_plate != null) {
             list = find.where().eq("license_plate", license_plate).findList();
+            if (list.size() == 0) {
+                list = null;
+            } else if (list.size() > 1) {
+                Logger.error("Found too many trucks with " + license_plate);
+
+            }
         } else {
             list = null;
+        }
+        if (truck_number != 0 && list == null) {
+            list = find.where().eq("truck_number", truck_number).findList();
+            if (list.size() == 0) {
+                list = null;
+            } else if (list.size() > 1) {
+                Logger.error("Found too many trucks with truck number=" + truck_number);
+            }
         }
         return list;
     }
 
     public static Truck findFirst(int truck_number, String license_plate) {
-        List<Truck> trucks = findBy(truck_number, license_plate);
-        if (trucks == null || trucks.size() == 0) {
+        List<Truck> list = findBy(truck_number, license_plate);
+        if (list == null) {
             return null;
         }
-        if (trucks.size() > 1) {
-            Logger.error("Found too many trucks with " + truck_number + ", " + license_plate);
-        }
-        return trucks.get(0);
+        return list.get(0);
     }
 
     public static Truck add(int truck_number, String license_plate, int tech_id) {
         List<Truck> list = findBy(truck_number, license_plate);
         Truck truck = null;
-        if (list.size() > 1) {
-            Logger.error("Found too many trucks with " + truck_number + ", " + license_plate);
-            for (Truck t : list) {
-                Logger.error(t.toString());
+        if (list != null) {
+            if (list.size() > 1) {
+                Logger.error("Found too many trucks with " + truck_number + ", " + license_plate);
+                for (Truck t : list) {
+                    Logger.error(t.toString());
+                }
+                truck = list.get(0);
+            } else if (list.size() == 1) {
+                truck = list.get(0);
             }
-            truck = list.get(0);
-        } else if (list.size() == 1) {
-            truck = list.get(0);
         }
         if (truck == null) {
             truck = new Truck();

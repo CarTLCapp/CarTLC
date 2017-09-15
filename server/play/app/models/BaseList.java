@@ -69,9 +69,10 @@ public abstract class BaseList<T> {
     }
 
     protected class Parameters {
-        SortBy     sortBy;
-        Order      order;
-        List<Long> projectIds;
+        SortBy       sortBy;
+        Order        order;
+        List<Long>   projectIds;
+        List<String> companyNames;
 
         Parameters() {
             sortBy = SortBy.TIME;
@@ -82,27 +83,41 @@ public abstract class BaseList<T> {
             sortBy = other.sortBy;
             order = other.order;
             if (other.projectIds != null) {
-                projectIds = new ArrayList<Long>();
-                for (int i = 0; i < other.projectIds.size(); i++) {
-                    projectIds.add(other.projectIds.get(i));
-                }
+                projectIds = new ArrayList<Long>(other.projectIds);
+            }
+            if (other.companyNames != null) {
+                companyNames = new ArrayList<String>(other.companyNames);
             }
         }
 
         public boolean equals(Parameters other) {
             if (sortBy == other.sortBy && order == other.order) {
                 if (projectIds == null && other.projectIds == null) {
-                    return true;
-                }
-                if (projectIds == null || other.projectIds == null) {
-                    return false;
-                }
-                if (projectIds.size() != other.projectIds.size()) {
-                    return false;
-                }
-                for (int i = 0; i < projectIds.size(); i++) {
-                    if (projectIds.get(i) != other.projectIds.get(i)) {
+                } else {
+                    if (projectIds == null || other.projectIds == null) {
                         return false;
+                    }
+                    if (projectIds.size() != other.projectIds.size()) {
+                        return false;
+                    }
+                    for (int i = 0; i < projectIds.size(); i++) {
+                        if (projectIds.get(i) != other.projectIds.get(i)) {
+                            return false;
+                        }
+                    }
+                }
+                if (companyNames == null && other.companyNames == null) {
+                } else {
+                    if (companyNames == null || other.companyNames == null) {
+                        return false;
+                    }
+                    if (companyNames.size() != other.companyNames.size()) {
+                        return false;
+                    }
+                    for (int i = 0; i < companyNames.size(); i++) {
+                        if (companyNames.get(i) != other.companyNames.get(i)) {
+                            return false;
+                        }
                     }
                 }
                 return true;
@@ -149,11 +164,16 @@ public abstract class BaseList<T> {
         mLastParameters = null;
     }
 
-    public void setProjectIdFilter(List<Long> projects) {
+    protected void setProjectIdFilter(List<Long> projects) {
         mNextParameters.projectIds = projects;
     }
 
-    public void setProjects(Client client) {
+    public void computeFilters(Client client) {
+        setProjects(client);
+        setCompanies(client);
+    }
+
+    protected void setProjects(Client client) {
         if (client == null || client.is_admin) {
             setProjectIdFilter(null);
         } else {
@@ -170,6 +190,14 @@ public abstract class BaseList<T> {
         }
     }
 
+    protected void setCompanies(Client client) {
+        if (client == null || client.is_admin) {
+            mNextParameters.companyNames = null;
+        } else {
+            mNextParameters.companyNames = ClientCompanyNameAssociation.findCompaniesFor(client.id);
+        }
+    }
+
     protected String getOrderBy() {
         return mNextParameters.sortBy.code + " " + mNextParameters.order.code;
     }
@@ -181,6 +209,8 @@ public abstract class BaseList<T> {
     protected abstract void sort(List<T> list);
 
     protected abstract long getProjectId(T obj);
+
+    protected abstract String getCompanyName(T obj);
 
     public void compute() {
         if (mLastParameters != null && mNextParameters.equals(mLastParameters)) {
@@ -215,15 +245,22 @@ public abstract class BaseList<T> {
             return;
         }
         if (mNextParameters.projectIds != null && mNextParameters.projectIds.size() > 0) {
-            if (mNextParameters.projectIds != null && mNextParameters.projectIds.size() > 0) {
-                List<T> list = new ArrayList<T>();
-                for (T entry : mComputed) {
-                    if (mNextParameters.projectIds.contains(getProjectId(entry))) {
-                        list.add(entry);
-                    }
+            List<T> list = new ArrayList<T>();
+            for (T entry : mComputed) {
+                if (mNextParameters.projectIds.contains(getProjectId(entry))) {
+                    list.add(entry);
                 }
-                mComputed = list;
             }
+            mComputed = list;
+        }
+        if (mNextParameters.companyNames != null && mNextParameters.companyNames.size() > 0) {
+            List<T> list = new ArrayList<T>();
+            for (T entry : mComputed) {
+                if (mNextParameters.companyNames.contains(getCompanyName(entry))) {
+                    list.add(entry);
+                }
+            }
+            mComputed = list;
         }
         if (needsSort) {
             sort(mComputed);

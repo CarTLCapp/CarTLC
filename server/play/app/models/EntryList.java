@@ -39,6 +39,11 @@ public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
         return entry.project_id;
     }
 
+    @Override
+    protected String getCompanyName(Entry entry) {
+        return entry.getCompany();
+    }
+
     public int compare(Entry o1, Entry o2) {
         int value;
         if (mNextParameters.sortBy == SortBy.TRUCK_NUMBER) {

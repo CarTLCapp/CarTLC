@@ -60,8 +60,11 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
         return entry.project_id;
     }
 
-    public void setProjects() {
-        super.setProjects(client);
+    @Override
+    protected String getCompanyName(WorkOrder entry) { return entry.getCompanyName(); }
+
+    public void computeFilters() {
+        super.computeFilters(client);
     }
 
     public int compare(WorkOrder o1, WorkOrder o2) {

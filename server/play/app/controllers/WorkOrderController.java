@@ -58,7 +58,7 @@ public class WorkOrderController extends Controller {
         workList.setSortBy(sortBy);
         workList.setOrder(order);
         workList.clearCache();
-        workList.setProjects();
+        workList.computeFilters();
         workList.compute();
         return ok(views.html.work_order_list.render(workList, sortBy, order, Secured.getClient(ctx()), message));
     }
@@ -67,7 +67,7 @@ public class WorkOrderController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result viewProgressGrid() {
         progressGrid.setClient(Secured.getClient(ctx()));
-        progressGrid.setProjects();
+        progressGrid.computeFilters();
         progressGrid.compute();
         return ok(views.html.progress_grid.render(progressGrid, Secured.getClient(ctx())));
     }

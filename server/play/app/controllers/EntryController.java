@@ -44,7 +44,7 @@ public class EntryController extends Controller {
         entryList.setSortBy(sortBy);
         entryList.setOrder(order);
         entryList.clearCache();
-        entryList.setProjects(Secured.getClient(ctx()));
+        entryList.computeFilters(Secured.getClient(ctx()));
         entryList.compute();
         return ok(views.html.entry_list.render(entryList, sortBy, order));
     }
