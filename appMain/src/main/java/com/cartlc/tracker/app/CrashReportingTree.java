@@ -38,5 +38,6 @@ public class CrashReportingTree extends Timber.Tree {
                 TableCrash.getInstance().message(priority, message, null);
             }
         }
+        Timber.tag("CarTLC");
     }
 }

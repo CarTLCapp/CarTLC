@@ -180,7 +180,10 @@ public class DCPing extends DCPost {
             // If any entries do not yet have server-id's, try to get them.
             entries = TableEntry.getInstance().queryServerIds();
             if (entries.size() > 0) {
+                Timber.i("FOUND " + entries.size() + " entries without server IDS");
                 sendEntries(entries);
+            } else {
+                Timber.i("All entries have server ids");
             }
         } catch (Exception ex) {
             Timber.e(ex);

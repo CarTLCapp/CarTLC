@@ -197,10 +197,17 @@ public class Entry extends com.avaje.ebean.Model {
         if (truck == null) {
             return null;
         }
-        if (truck.license_plate != null) {
-            return truck.license_plate;
+        StringBuilder sbuf = new StringBuilder();
+        if (truck.truck_number > 0) {
+            sbuf.append(truck.truck_number);
         }
-        return Integer.toString(truck.truck_number);
+        if (truck.license_plate != null && !truck.license_plate.isEmpty()) {
+            if (sbuf.length() > 0) {
+                sbuf.append(" : ");
+            }
+            sbuf.append(truck.license_plate);
+        }
+        return sbuf.toString();
     }
 
     public String getEquipmentLine() {
