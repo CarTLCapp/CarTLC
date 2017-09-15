@@ -90,7 +90,7 @@ public class Technician extends com.avaje.ebean.Model {
     }
 
     public int countEntries() {
-        return Entry.countEntriesForNote(id);
+        return Entry.countEntriesForTechnician(id);
     }
 
     public static boolean canDelete(long id) {
