@@ -47,7 +47,7 @@ public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
     public int compare(Entry o1, Entry o2) {
         int value;
         if (mNextParameters.sortBy == SortBy.TRUCK_NUMBER) {
-            value = o1.getTruckLine().compareTo(o2.getTruckLine());
+            value = o1.truckCompareTo(o2);
         } else if (mNextParameters.sortBy == SortBy.PROJECT) {
             value = o1.getProjectLine().compareTo(o2.getProjectLine());
         } else {

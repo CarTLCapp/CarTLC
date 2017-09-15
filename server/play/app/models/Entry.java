@@ -210,6 +210,28 @@ public class Entry extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
+    public int truckCompareTo(Entry other) {
+        Truck truck = Truck.find.ref(truck_id);
+        Truck otruck = Truck.find.ref(other.truck_id);
+        if (truck == null || otruck == null) {
+            return 0;
+        }
+        if (truck.truck_number > 0 && otruck.truck_number > 0) {
+            return truck.truck_number - otruck.truck_number;
+        } else if (truck.truck_number > 0) {
+            return -1;
+        } else if (otruck.truck_number > 0) {
+            return 1;
+        }
+        if (truck.license_plate != null) {
+            return truck.license_plate.compareTo(otruck.license_plate);
+        }
+        if (otruck.license_plate == null) {
+            return 0;
+        }
+        return -1;
+    }
+
     public String getEquipmentLine() {
         List<Equipment> equipments = EntryEquipmentCollection.findEquipments(equipment_collection_id);
         StringBuilder sbuf = new StringBuilder();
