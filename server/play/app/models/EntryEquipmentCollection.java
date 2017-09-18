@@ -68,5 +68,18 @@ public class EntryEquipmentCollection extends Model {
             item.delete();
         }
     }
+
+    public static void removeUnused() {
+        List<EntryEquipmentCollection> items = list();
+        ArrayList<EntryEquipmentCollection> unused = new ArrayList<EntryEquipmentCollection>();
+        for (EntryEquipmentCollection item : items) {
+            if (!Entry.hasEntryForEquipmentCollectionId(item.collection_id)) {
+                unused.add(item);
+            }
+        }
+        for (EntryEquipmentCollection item : unused) {
+            Logger.debug("MYDEBUG: UNUSED EQ: " + item.id + ", " + item.collection_id + ", " + item.equipment_id);
+        }
+    }
 }
 

@@ -58,5 +58,18 @@ public class EntryNoteCollection extends Model {
             item.delete();
         }
     }
+
+    public static void removeUnused() {
+        List<EntryNoteCollection> items = find.where().findList();
+        ArrayList<EntryNoteCollection> unused = new ArrayList<EntryNoteCollection>();
+        for (EntryNoteCollection item : items) {
+            if (!Entry.hasEntryForNoteCollectionId(item.collection_id)) {
+                unused.add(item);
+            }
+        }
+        for (EntryNoteCollection item : unused) {
+            Logger.debug("MYDEBUG: UNUSED NOTE: " + item.id + ", " + item.collection_id + ", " + item.note_id);
+        }
+    }
 }
 

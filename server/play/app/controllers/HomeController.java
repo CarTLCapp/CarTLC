@@ -30,6 +30,8 @@ public class HomeController extends Controller {
         Client.initClient();
         EntryV2.transfer();
         Company.saveNames();
+        EntryEquipmentCollection.removeUnused();
+        EntryNoteCollection.removeUnused();
         return ok(views.html.home.render(Secured.getClient(ctx())));
     }
 

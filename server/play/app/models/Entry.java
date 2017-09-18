@@ -397,6 +397,10 @@ public class Entry extends com.avaje.ebean.Model {
         return false;
     }
 
+    public static boolean hasEntryForEquipmentCollectionId(final long collection_id) {
+        return find.where().eq("equipment_collection_id", collection_id).findList().size() > 0;
+    }
+
     public static boolean hasEntryForNote(final int tech_id, final long note_id) {
         List<Entry> items = find.where()
                 .eq("tech_id", tech_id)
@@ -423,6 +427,10 @@ public class Entry extends com.avaje.ebean.Model {
             }
         }
         return false;
+    }
+
+    public static boolean hasEntryForNoteCollectionId(final long collection_id) {
+        return find.where().eq("note_collection_id", collection_id).findList().size() > 0;
     }
 
     public static boolean hasEntryForTruck(final long truck_id) {
