@@ -345,31 +345,11 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static int countEntriesForNote(long note_id) {
-        int count = 0;
-        List<Entry> items = find.where().findList();
-        for (Entry entry : items) {
-            List<EntryNoteCollection> collection = EntryNoteCollection.findByCollectionId(entry.note_collection_id);
-            for (EntryNoteCollection note : collection) {
-                if (note.note_id == note_id) {
-                    count++;
-                }
-            }
-        }
-        return count;
+        return EntryNoteCollection.countNotes(note_id);
     }
 
     public static int countEntriesForEquipment(long equipment_id) {
-        List<Entry> items = find.where().findList();
-        int count = 0;
-        for (Entry entry : items) {
-            List<Equipment> collection = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
-            for (Equipment equip : collection) {
-                if (equip.id == equipment_id) {
-                    count++;
-                }
-            }
-        }
-        return count;
+        return EntryEquipmentCollection.countEquipments(equipment_id);
     }
 
     public static boolean hasEntryForProject(long project_id) {

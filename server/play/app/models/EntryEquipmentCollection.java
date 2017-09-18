@@ -47,6 +47,10 @@ public class EntryEquipmentCollection extends Model {
         return list;
     }
 
+    public static int countEquipments(long equipment_id) {
+        return find.where().eq("equipment_id", equipment_id).findList().size();
+    }
+
     public static boolean has(EntryEquipmentCollection collection) {
         List<EntryEquipmentCollection> items =
                 find.where()

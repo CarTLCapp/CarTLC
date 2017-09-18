@@ -46,6 +46,10 @@ public class EntryNoteCollection extends Model {
                 .findList();
     }
 
+    public static int countNotes(long note_id) {
+        return find.where().eq("note_id", note_id).findList().size();
+    }
+
     public static void deleteByCollectionId(long collection_id) {
         List<EntryNoteCollection> list = find.where()
                 .eq("collection_id", collection_id)
