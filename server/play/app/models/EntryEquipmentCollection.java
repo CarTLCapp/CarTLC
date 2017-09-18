@@ -77,8 +77,13 @@ public class EntryEquipmentCollection extends Model {
                 unused.add(item);
             }
         }
-        for (EntryEquipmentCollection item : unused) {
-            Logger.debug("MYDEBUG: UNUSED EQ: " + item.id + ", " + item.collection_id + ", " + item.equipment_id);
+        if (unused.size() > 0) {
+            StringBuilder sbuf = new StringBuilder();
+            for (EntryEquipmentCollection item : unused) {
+                sbuf.append("INSERT INTO `entry_equipment_collection` VALUES(" + item.id + "," + item.collection_id + "," + item.equipment_id + ");\n");
+                item.delete();
+            }
+            Logger.info(sbuf.toString());
         }
     }
 }
