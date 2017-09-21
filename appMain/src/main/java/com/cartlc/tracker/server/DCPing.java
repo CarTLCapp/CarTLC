@@ -90,14 +90,16 @@ public class DCPing extends DCPost {
             jsonObject.accumulate("first_name", PrefHelper.getInstance().getFirstName());
             jsonObject.accumulate("last_name", PrefHelper.getInstance().getLastName());
             jsonObject.accumulate("device_id", deviceId);
-            String result = post(REGISTER, jsonObject);
-            if (TextUtils.isDigitsOnly(result)) {
-                int tech_id = Integer.parseInt(result);
-                PrefHelper.getInstance().setTechID(tech_id);
-                PrefHelper.getInstance().setRegistrationChanged(false);
-                Timber.i("TECH ID=" + tech_id);
-            } else {
-                Timber.i("sendRegistration() failed");
+            String result = post(REGISTER, jsonObject, true);
+            if (result != null) {
+                if (TextUtils.isDigitsOnly(result)) {
+                    int tech_id = Integer.parseInt(result);
+                    PrefHelper.getInstance().setTechID(tech_id);
+                    PrefHelper.getInstance().setRegistrationChanged(false);
+                    Timber.i("TECH ID=" + tech_id);
+                } else {
+                    Timber.i("sendRegistration() failed");
+                }
             }
         } catch (Exception ex) {
             Timber.e(ex);
@@ -114,9 +116,8 @@ public class DCPing extends DCPost {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("device_id", deviceId);
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
-            String response = post(PING, jsonObject);
+            String response = post(PING, jsonObject, true);
             if (response == null) {
-                Timber.e("ping(): Unexpected NULL response from server");
                 return;
             }
             JSONObject object = parseResult(response);
@@ -193,7 +194,7 @@ public class DCPing extends DCPost {
     void queryProjects() {
         Timber.i("queryProjects()");
         try {
-            String response = post(PROJECTS);
+            String response = post(PROJECTS, true);
             if (response == null) {
                 Timber.e("queryProjects(): Unexpected NULL response from server");
                 return;
@@ -253,9 +254,8 @@ public class DCPing extends DCPost {
     void queryCompanies() {
         Timber.i("queryCompanies()");
         try {
-            String response = post(COMPANIES);
+            String response = post(COMPANIES, true);
             if (response == null) {
-                Timber.e("queryCompanies(): Unexpected NULL response from server");
                 return;
             }
             List<DataAddress> unprocessed = TableAddress.getInstance().query();
@@ -337,9 +337,8 @@ public class DCPing extends DCPost {
     void queryEquipments() {
         Timber.i("queryEquipments()");
         try {
-            String response = post(EQUIPMENTS);
+            String response = post(EQUIPMENTS, true);
             if (response == null) {
-                Timber.e("queryEquipments(): Unexpected NULL response from server");
                 return;
             }
             JSONObject object = parseResult(response);
@@ -466,9 +465,8 @@ public class DCPing extends DCPost {
     void queryNotes() {
         Timber.i("queryNotes()");
         try {
-            String response = post(NOTES);
+            String response = post(NOTES, true);
             if (response == null) {
-                Timber.e("queryNotes(): Unexpected NULL response from server");
                 return;
             }
             JSONObject object = parseResult(response);
@@ -529,7 +527,6 @@ public class DCPing extends DCPost {
                     // Note: project ID is from the perspective of the server, not the APP.
                     DataProject project = TableProjects.getInstance().queryByServerId(server_project_id);
                     if (project == null) {
-                        Timber.e("Can't find project with ID " + server_project_id);
                         continue;
                     }
                     incoming.collection_id = project.id;
@@ -575,9 +572,8 @@ public class DCPing extends DCPost {
     void queryTrucks() {
         Timber.i("queryTrucks()");
         try {
-            String response = post(TRUCKS);
+            String response = post(TRUCKS, true);
             if (response == null) {
-                Timber.e("queryTrucks(): Unexpected NULL response from server");
                 return;
             }
             JSONObject object = parseResult(response);
@@ -653,11 +649,16 @@ public class DCPing extends DCPost {
             jsonObject.accumulate("date", entry.date);
             jsonObject.accumulate("server_id", entry.serverId);
             DataTruck truck = entry.getTruck();
-            if (truck.truckNumber > 0) {
-                jsonObject.accumulate("truck_number", truck.truckNumber);
-            }
-            if (truck.licensePlateNumber != null) {
-                jsonObject.accumulate("license_plate", truck.licensePlateNumber);
+            if (truck != null) {
+                if (truck.truckNumber > 0) {
+                    jsonObject.accumulate("truck_number", truck.truckNumber);
+                }
+                if (truck.licensePlateNumber != null) {
+                    jsonObject.accumulate("license_plate", truck.licensePlateNumber);
+                }
+            } else {
+                Timber.e("Missing truck entry : " + entry.toString());
+                return false;
             }
             DataProject project = entry.getProject();
             if (project == null) {
@@ -725,15 +726,17 @@ public class DCPing extends DCPost {
                 jsonObject.put("notes", jarray);
             }
             Timber.i("SENDING " + jsonObject.toString());
-            String result = post(ENTER, jsonObject);
-            if (TextUtils.isDigitsOnly(result)) {
-                entry.uploadedMaster = true;
-                entry.serverId = Integer.parseInt(result);
-                TableEntry.getInstance().save(entry);
-                success = true;
-                Timber.i("SUCCESS, ENTRY SERVER ID is " + entry.serverId);
-            } else {
-                Timber.e("While trying to send entry " + entry.id + ": " + result);
+            String result = post(ENTER, jsonObject, true);
+            if (result != null) {
+                if (TextUtils.isDigitsOnly(result)) {
+                    entry.uploadedMaster = true;
+                    entry.serverId = Integer.parseInt(result);
+                    TableEntry.getInstance().save(entry);
+                    success = true;
+                    Timber.i("SUCCESS, ENTRY SERVER ID is " + entry.serverId);
+                } else {
+                    Timber.e("While trying to send entry " + entry.id + ": " + result);
+                }
             }
         } catch (Exception ex) {
             Timber.e(ex);
@@ -751,19 +754,24 @@ public class DCPing extends DCPost {
         return null;
     }
 
-    String post(String target) {
+    String post(String target, boolean sendErrors) {
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("device_id", ServerHelper.getInstance().getDeviceId());
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
-            return post(target, jsonObject);
+            return post(target, jsonObject, sendErrors);
         } catch (Exception ex) {
-            Timber.e(ex);
+            String msg = "Whle sending to " + target + "\n" + ex.getMessage();
+            if (sendErrors) {
+                Timber.e(TAG, msg);
+            } else {
+                Log.e(TAG, msg);
+            }
+            return null;
         }
-        return null;
     }
 
-    String post(String target, JSONObject json) {
+    String post(String target, JSONObject json, boolean sendErrors) {
         try {
             URL url = new URL(target);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -777,7 +785,12 @@ public class DCPing extends DCPost {
             connection.disconnect();
             return result;
         } catch (Exception ex) {
-            Log.e(TAG, ex.getMessage());
+            String msg = "Whle sending to " + target + "\n" + ex.getMessage();
+            if (sendErrors) {
+                Timber.e(TAG, msg);
+            } else {
+                Log.e(TAG, msg);
+            }
             return null;
         }
     }
@@ -805,7 +818,7 @@ public class DCPing extends DCPost {
             jsonObject.accumulate("code", line.code);
             jsonObject.accumulate("message", line.message);
             jsonObject.accumulate("trace", line.trace);
-            String result = post(MESSAGE, jsonObject);
+            String result = post(MESSAGE, jsonObject, false);
             if (result != null && Integer.parseInt(result) == 0) {
                 TableCrash.getInstance().setUploaded(line);
             } else {

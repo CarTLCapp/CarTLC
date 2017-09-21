@@ -182,8 +182,16 @@ public class ProjectController extends Controller {
             project.update();
             Logger.info("Project has been disabled: it had entries: " + project.name);
         } else {
-            Project.find.ref(id).delete();
-            Logger.info("Project has been deleted");
+            try {
+                Project.find.ref(id).delete();
+                Logger.info("Project has been deleted");
+            } catch (Exception ex) {
+                Logger.error(ex.getMessage());
+                Project project = Project.find.byId(id);
+                project.disabled = true;
+                project.update();
+                Logger.info("Project has been disabled: it could not be deleted: " + project.name);
+            }
         }
         Version.inc(Version.VERSION_PROJECT);
         return list();

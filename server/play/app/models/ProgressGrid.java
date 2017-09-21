@@ -68,7 +68,11 @@ public class ProgressGrid extends WorkOrderList {
     }
 
     public int getNumRows() {
-        return mComputed.size() / mNumCols + 1;
+        if (mNumCols > 0) {
+            return mComputed.size() / mNumCols + 1;
+        } else {
+            return 0;
+        }
     }
 
     public int getNumCols() {

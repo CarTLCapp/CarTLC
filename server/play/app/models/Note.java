@@ -96,6 +96,14 @@ public class Note extends Model implements Comparable<Note> {
                 .findList();
     }
 
+    public static boolean isDisabled(long note_id) {
+        Note note = find.ref(note_id);
+        if (note == null) {
+            return true;
+        }
+        return note.disabled;
+    }
+
     public static List<Note> findByName(String name) {
         return find.where().eq("name", name).findList();
     }

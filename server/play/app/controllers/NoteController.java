@@ -271,10 +271,12 @@ public class NoteController extends Controller {
         array = top.putArray("project_note");
         for (ProjectNoteCollection item : ProjectNoteCollection.find.all()) {
             if (noteIds.contains(item.note_id)) {
-                ObjectNode node = array.addObject();
-                node.put("id", item.id);
-                node.put("project_id", item.project_id);
-                node.put("note_id", item.note_id);
+                if (!Note.isDisabled(item.note_id)) {
+                    ObjectNode node = array.addObject();
+                    node.put("id", item.id);
+                    node.put("project_id", item.project_id);
+                    node.put("note_id", item.note_id);
+                }
             }
         }
         return ok(top);
