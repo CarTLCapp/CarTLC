@@ -228,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
     ZipCodeWatcher             mZipCodeWatcher;
     boolean                    mWasNext;
     boolean                    mCurStageEditing;
+    boolean                    mDoingCenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -368,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         mApp.ping();
+        mDoingCenter = false; // Safety
     }
 
     @Override
@@ -434,7 +436,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     boolean save(boolean isNext) {
-        if (mCurStageEditing) {
+        if (mCurStage == Stage.TRUCK) {
+            String value = mEntrySimple.getText().toString().trim();
+            if (TextUtils.isEmpty(value)) {
+                if (isNext) {
+                    showError(getString(R.string.error_need_a_truck_number));
+                }
+                return false;
+            } else {
+
+            }
+            PrefHelper.getInstance().parseTruckValue(value);
+        } else if (mCurStageEditing) {
             if (mCurStage == Stage.CITY) {
                 PrefHelper.getInstance().setCity(getEditText(mEntrySimple));
             } else if (mCurStage == Stage.STREET) {
@@ -480,16 +493,6 @@ public class MainActivity extends AppCompatActivity {
             }
             PrefHelper.getInstance().setRegistrationChanged(true);
             mApp.ping();
-        } else if (mCurStage == Stage.TRUCK) {
-            String value = mEntrySimple.getText().toString();
-            if (TextUtils.isEmpty(value)) {
-                if (isNext) {
-                    showError(getString(R.string.error_need_a_truck_number));
-                }
-                return false;
-            } else {
-                PrefHelper.getInstance().parseTruckValue(value);
-            }
         } else if (mCurStage == Stage.EQUIPMENT) {
             if (isNext) {
                 if (TableEquipment.getInstance().countChecked() == 0) {
@@ -574,8 +577,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void doBtnCenter() {
-        mCurStageEditing = true;
-        fillStage();
+        if (!mDoingCenter) {
+            mDoingCenter = true;
+            mCurStageEditing = true;
+            fillStage();
+            mDoingCenter = false;
+        }
     }
 
     void doViewProject() {
@@ -908,6 +915,7 @@ public class MainActivity extends AppCompatActivity {
         String title = getString(titleId);
         mTitle.setText(title);
         if (list.size() == 0) {
+            mMainListFrame.setVisibility(View.GONE);
             doBtnCenter();
         } else {
             mSimpleAdapter.setList(list);

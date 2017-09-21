@@ -13,8 +13,8 @@ android {
         applicationId "com.cartlc.tracker"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 8
-        versionName "2.01"
+        versionCode 10
+        versionName "2.03"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }

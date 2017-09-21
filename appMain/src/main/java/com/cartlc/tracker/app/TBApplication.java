@@ -32,7 +32,7 @@ import java.io.File;
 
 public class TBApplication extends Application {
 
-    static final Boolean OVERRIDE_IS_DEVELOPMENT_SERVER = null;
+    static final Boolean OVERRIDE_IS_DEVELOPMENT_SERVER = false;
 
     public static boolean IsDevelopmentServer() {
         if (OVERRIDE_IS_DEVELOPMENT_SERVER != null) {
@@ -40,6 +40,8 @@ public class TBApplication extends Application {
         }
         return BuildConfig.DEBUG;
     }
+
+    static final Boolean DEBUG_TREE = true;
 
     public static final String OTHER = "Other";
 
@@ -51,7 +53,7 @@ public class TBApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if (false && BuildConfig.DEBUG) {
+        if (IsDevelopmentServer() && DEBUG_TREE) {
             Timber.plant(new Timber.DebugTree());
         } else {
             Timber.plant(new CrashReportingTree());
