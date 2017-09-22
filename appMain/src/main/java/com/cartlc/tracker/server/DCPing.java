@@ -1,5 +1,6 @@
 package com.cartlc.tracker.server;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -64,8 +65,9 @@ public class DCPing extends DCPost {
     final String NOTES;
     final String TRUCKS;
     final String MESSAGE;
+    final String mVersion;
 
-    public DCPing() {
+    public DCPing(Context ctx) {
         if (PrefHelper.getInstance().isDevelopment()) {
             SERVER_URL = SERVER_URL_DEVELOPMENT;
         } else {
@@ -80,6 +82,14 @@ public class DCPing extends DCPost {
         NOTES = SERVER_URL + "notes";
         MESSAGE = SERVER_URL + "message";
         TRUCKS = SERVER_URL + "trucks";
+
+        String version = null;
+        try {
+            version = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionName;
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
+        mVersion = version;
     }
 
     public void sendRegistration() {
@@ -116,6 +126,7 @@ public class DCPing extends DCPost {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("device_id", deviceId);
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
+            jsonObject.accumulate("app_version", mVersion);
             String response = post(PING, jsonObject, true);
             if (response == null) {
                 return;
@@ -584,8 +595,12 @@ public class DCPing extends DCPost {
                     JSONObject ele = array.getJSONObject(i);
                     DataTruck incoming = new DataTruck();
                     incoming.serverId = ele.getInt("id");
-                    incoming.truckNumber = ele.getInt("truck_number");
-                    incoming.licensePlateNumber = ele.getString("license_plate");
+                    if (ele.has("truck_number")) {
+                        incoming.truckNumber = ele.getInt("truck_number");
+                    }
+                    if (ele.has("license_plate")) {
+                        incoming.licensePlateNumber = ele.getString("license_plate");
+                    }
                     DataTruck item = TableTruck.getInstance().queryByServerId(incoming.serverId);
                     if (item == null) {
                         DataTruck match = get(unprocessed, incoming);

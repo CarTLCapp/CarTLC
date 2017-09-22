@@ -23,7 +23,7 @@ public class DCService extends IntentService {
 
     public DCService() {
         super(SERVER_NAME);
-        mPing = new DCPing();
+        mPing = new DCPing(this);
         mZip = new DCZip();
         Timber.tag(DCService.class.getSimpleName());
     }

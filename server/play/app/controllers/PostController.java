@@ -146,8 +146,12 @@ public class PostController extends Controller
 			if (item.created_by_client || item.created_by == tech_id) {
 				ObjectNode node = array.addObject();
 				node.put("id", item.id);
-				node.put("truck_number", item.truck_number);
-				node.put("license_plate", item.license_plate);
+				if (item.truck_number > 0) {
+					node.put("truck_number", item.truck_number);
+				}
+				if (item.license_plate != null) {
+					node.put("license_plate", item.license_plate);
+				}
 			}
 		}
 		return ok(top);

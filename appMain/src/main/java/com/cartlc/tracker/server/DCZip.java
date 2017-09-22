@@ -69,6 +69,9 @@ public class DCZip extends DCPost {
             DataZipCode data = new DataZipCode();
             JSONObject root = new JSONObject(result);
             JSONArray results = root.getJSONArray("results");
+            if (results.length() == 0) {
+                return;
+            }
             JSONObject result0 = results.getJSONObject(0);
             JSONArray components = result0.getJSONArray("address_components");
             for (int i = 0; i < components.length(); i++) {
