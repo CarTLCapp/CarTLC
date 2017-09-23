@@ -48,7 +48,7 @@ public class TruckController extends Controller {
             flash(message);
             return ok(message);
         }
-        if (WorkOrder.countEntriesForTruck(id) > 0) {
+        if (truck.countWorkOrders() > 0) {
             String message = "Cannot delete this truck, it is being used in a work order.";
             flash(message);
             return ok(message);

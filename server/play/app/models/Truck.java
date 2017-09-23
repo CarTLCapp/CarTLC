@@ -138,8 +138,11 @@ public class Truck extends com.avaje.ebean.Model {
     }
 
     public int countEntries() {
-        StringBuilder sbuf = new StringBuilder();
         return Entry.countEntriesForTruck(id);
+    }
+
+    public int countWorkOrders() {
+        return WorkOrder.countWorkOrdersForTruck(id);
     }
 
     public String toString() {

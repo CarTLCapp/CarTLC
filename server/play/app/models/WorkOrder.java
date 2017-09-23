@@ -88,7 +88,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return null;
     }
 
-    public static int countEntriesForTruck(long truck_id) {
+    public static int countWorkOrdersForTruck(long truck_id) {
         return find.where().eq("truck_id", truck_id).findList().size();
     }
 

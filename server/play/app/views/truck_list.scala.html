@@ -18,6 +18,7 @@
                     <th>Truck Number</th>
                     <th>License Plate</th>
                     <th>Entries</th>
+                    <th>Work Orders</th>
                     <th>Delete</th>
                 </tr>
             </thead>
@@ -28,6 +29,7 @@
                         <td>@truck.getTruckNumber()</td>
                         <td>@truck.getLicensePlate()</td>
                         <td>@truck.countEntries()</td>
+                        <td>@truck.countWorkOrders()</td>
                         <td>
                             @if(client.is_admin) {
                                 <a href="@routes.TruckController.delete(truck.id)">Delete</a>
@@ -37,7 +39,6 @@
                         </td>
                     </tr>
                 }
-
             </tbody>
         </table>
         
