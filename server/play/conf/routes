@@ -110,6 +110,11 @@ GET     /messages/:id/view     controllers.MessageController.view(id:Long)
 GET     /messages/:id/delete   controllers.MessageController.delete(id:Long)
 GET     /messages/delete_all   controllers.MessageController.deleteAll()
 
+### TRUCKS ###
+
+GET     /truck              controllers.TruckController.list()
+GET     /truck/:id/delete   controllers.TruckController.delete(id:Long)
+
 ### EXTERNAL: APP REQUESTS & ENTRIES ###
 
 POST    /register              controllers.PostController.register()

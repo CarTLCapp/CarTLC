@@ -81,6 +81,9 @@ public class Technician extends com.avaje.ebean.Model {
     @Constraints.Required
     public boolean reset_upload;
 
+    @Constraints.Required
+    public String app_version;
+
     public String fullName() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(first_name);
@@ -91,6 +94,13 @@ public class Technician extends com.avaje.ebean.Model {
 
     public int countEntries() {
         return Entry.countEntriesForTechnician(id);
+    }
+
+    public String getAppVersion() {
+        if (app_version != null) {
+            return app_version;
+        }
+        return "";
     }
 
     public static boolean canDelete(long id) {

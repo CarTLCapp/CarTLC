@@ -41,7 +41,7 @@ public class TBApplication extends Application {
         return BuildConfig.DEBUG;
     }
 
-    static final Boolean DEBUG_TREE = true;
+    static final Boolean DEBUG_TREE = false;
 
     public static final String OTHER = "Other";
 

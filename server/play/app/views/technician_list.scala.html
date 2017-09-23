@@ -19,6 +19,7 @@
                     <th>Last Name</th>
                     <th>Tech ID</th>
                     <th>Device ID</th>
+                    <th>App Version</th>
                     <th>Entries</th>
                     <th>Edit</th>
                 </tr>
@@ -43,6 +44,7 @@
                         </td>
                         <td>@tech.id</td>
                         <td>@tech.device_id</td>
+                        <td>@tech.getAppVersion()</td>
                         <td>@tech.countEntries()</td>
                         <td>
                             @if(client.is_admin) {

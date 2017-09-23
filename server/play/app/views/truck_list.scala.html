@@ -1,0 +1,48 @@
+@(currentPage: List[Truck], client : Client)
+
+@main("FleetTLC - List Trucks", client) {
+
+    <h1 id="homeTitle">@Messages("trucks.list.title", currentPage.size())</h1>
+
+    @if(currentPage.size() == 0) {
+        
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+        
+    } else {
+        
+        <table class="techs zebra-striped">
+            <thead>
+                <tr>
+                    <th>Truck Number</th>
+                    <th>License Plate</th>
+                    <th>Entries</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(truck <- currentPage) {
+                    <tr>
+                        <td>@truck.getTruckNumber()</td>
+                        <td>@truck.getLicensePlate()</td>
+                        <td>@truck.countEntries()</td>
+                        <td>
+                            @if(client.is_admin) {
+                                <a href="@routes.TruckController.delete(truck.id)">Delete</a>
+                            } else {
+                                <em>-</em>
+                            }
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        
+    }
+
+}
+
+            

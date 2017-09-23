@@ -122,6 +122,26 @@ public class Truck extends com.avaje.ebean.Model {
         return truck;
     }
 
+    public String getTruckNumber() {
+        if (truck_number > 0) {
+            return Integer.toString(truck_number);
+        } else {
+            return "";
+        }
+    }
+
+    public String getLicensePlate() {
+        if (license_plate != null) {
+            return license_plate;
+        }
+        return "";
+    }
+
+    public int countEntries() {
+        StringBuilder sbuf = new StringBuilder();
+        return Entry.countEntriesForTruck(id);
+    }
+
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(id);
