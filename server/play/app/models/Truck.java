@@ -145,6 +145,10 @@ public class Truck extends com.avaje.ebean.Model {
         return WorkOrder.countWorkOrdersForTruck(id);
     }
 
+    public boolean canDelete() {
+        return countEntries() == 0 && countWorkOrders() == 0;
+    }
+
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(id);

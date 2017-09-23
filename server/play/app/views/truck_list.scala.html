@@ -31,7 +31,7 @@
                         <td>@truck.countEntries()</td>
                         <td>@truck.countWorkOrders()</td>
                         <td>
-                            @if(client.is_admin) {
+                            @if(client.is_admin && truck.canDelete()) {
                                 <a href="@routes.TruckController.delete(truck.id)">Delete</a>
                             } else {
                                 <em>-</em>
