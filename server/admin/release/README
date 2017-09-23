@@ -8,3 +8,9 @@ root/cartlc
 Josheidenberg@gmail.com
 Creative3
 https://play.google.com/apps/publish
+
+Database Save:
+
+mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql
+p/w: cartcl
+

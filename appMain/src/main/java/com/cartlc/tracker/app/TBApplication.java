@@ -32,7 +32,7 @@ import java.io.File;
 
 public class TBApplication extends Application {
 
-    static final Boolean OVERRIDE_IS_DEVELOPMENT_SERVER = false;
+    static final Boolean OVERRIDE_IS_DEVELOPMENT_SERVER = null;
 
     public static boolean IsDevelopmentServer() {
         if (OVERRIDE_IS_DEVELOPMENT_SERVER != null) {

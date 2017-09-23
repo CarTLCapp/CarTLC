@@ -65,7 +65,8 @@ public class DCPing extends DCPost {
     final String NOTES;
     final String TRUCKS;
     final String MESSAGE;
-    final String mVersion;
+    final Context mContext;
+    String mVersion;
 
     public DCPing(Context ctx) {
         if (PrefHelper.getInstance().isDevelopment()) {
@@ -82,14 +83,20 @@ public class DCPing extends DCPost {
         NOTES = SERVER_URL + "notes";
         MESSAGE = SERVER_URL + "message";
         TRUCKS = SERVER_URL + "trucks";
+        mContext = ctx;
+    }
 
-        String version = null;
-        try {
-            version = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionName;
-        } catch (Exception ex) {
-            Timber.e(ex);
+    String getVersion() {
+        if (mVersion == null) {
+            String version = null;
+            try {
+                version = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName;
+            } catch (Exception ex) {
+                Timber.e(ex);
+            }
+            mVersion = version;
         }
-        mVersion = version;
+        return mVersion;
     }
 
     public void sendRegistration() {
@@ -126,7 +133,7 @@ public class DCPing extends DCPost {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("device_id", deviceId);
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
-            jsonObject.accumulate("app_version", mVersion);
+            jsonObject.accumulate("app_version", getVersion());
             String response = post(PING, jsonObject, true);
             if (response == null) {
                 return;

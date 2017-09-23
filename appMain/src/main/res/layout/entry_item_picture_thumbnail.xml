@@ -27,17 +27,16 @@
 
     <TextView
         android:id="@+id/note"
-        android:layout_width="0dp"
+        style="@style/PictureNoteText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal|bottom"
-        android:layout_alignTop="@id/picture"
         android:layout_alignLeft="@id/picture"
         android:layout_alignRight="@id/picture"
+        android:layout_alignTop="@id/picture"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal|bottom"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        style="@style/PictureNoteText"
         android:textSize="12sp"/>
-
-    android:textSize="12sp"/>
 
 </RelativeLayout>
