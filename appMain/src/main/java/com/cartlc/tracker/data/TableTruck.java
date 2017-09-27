@@ -2,6 +2,7 @@ package com.cartlc.tracker.data;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
@@ -64,7 +65,7 @@ public class TableTruck {
     public long save(long truckNumber, String licensePlate) {
         String selection;
         String[] selectionArgs;
-        Cursor cursor;
+        Cursor cursor = null;
         ContentValues values = new ContentValues();
         DataTruck truck = new DataTruck();
         if (!TextUtils.isEmpty(licensePlate)) {
@@ -113,18 +114,27 @@ public class TableTruck {
                 Timber.e("Invalid truck entry ignored");
                 return 0;
             }
-            String[] columns = {KEY_ROWID};
-            selection = KEY_TRUCK_NUMBER + "=?";
-            selectionArgs = new String[]{Long.toString(truckNumber)};
-            cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-            if (cursor.getCount() == 0) {
-                values.put(KEY_TRUCK_NUMBER, truckNumber);
-                truck.id = mDb.insert(TABLE_NAME, null, values);
-            } else {
-                truck.id = cursor.getLong(cursor.getColumnIndex(KEY_ROWID));
+            try {
+                String[] columns = {KEY_ROWID};
+                selection = KEY_TRUCK_NUMBER + "=?";
+                selectionArgs = new String[]{Long.toString(truckNumber)};
+                cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+                if (cursor.getCount() == 0) {
+                    values.put(KEY_TRUCK_NUMBER, truckNumber);
+                    truck.id = mDb.insert(TABLE_NAME, null, values);
+                } else {
+                    final int rowIdIndex = cursor.getColumnIndex(KEY_ROWID);
+                    if (rowIdIndex >= 0) {
+                        truck.id = cursor.getLong(rowIdIndex);
+                    }
+                }
+            } catch (CursorIndexOutOfBoundsException ex) {
+                Timber.e(ex);
             }
         }
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
         return truck.id;
     }
 

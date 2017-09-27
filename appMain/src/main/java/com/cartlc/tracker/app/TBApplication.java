@@ -1,16 +1,19 @@
 package com.cartlc.tracker.app;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.multidex.MultiDex;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.data.DatabaseManager;
+import com.cartlc.tracker.data.TableCrash;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.etc.BootstrapData;
 import com.cartlc.tracker.data.TableZipCode;
@@ -45,6 +48,8 @@ public class TBApplication extends Application {
 
     public static final String OTHER = "Other";
 
+    CrashReportingTree mCrashTree = new CrashReportingTree();
+
     public TBApplication() {
         super();
     }
@@ -56,7 +61,7 @@ public class TBApplication extends Application {
         if (IsDevelopmentServer() && DEBUG_TREE) {
             Timber.plant(new Timber.DebugTree());
         } else {
-            Timber.plant(new CrashReportingTree());
+            Timber.plant(mCrashTree);
         }
         DatabaseManager.Init(this);
         PrefHelper.Init(this);
@@ -98,7 +103,17 @@ public class TBApplication extends Application {
 
     public static void hideKeyboard(Context ctx, View v) {
         InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(v.getWindowToken(),0);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+    }
+
+    public void setUncaughtExceptionHandler(final Activity act) {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                mCrashTree.log(Log.ERROR, "CarTLC", e.getMessage(), null);
+                act.finish();
+            }
+        });
     }
 
 //    public void checkPermissions(Activity act, PermissionListener listener) {

@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cartlc.tracker.R;
+import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.etc.PrefHelper;
 
@@ -28,6 +29,7 @@ public class ListEntryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_entries);
+        ((TBApplication) getApplicationContext()).setUncaughtExceptionHandler(this);
         ButterKnife.bind(this);
         mEntryListAdapter = new ListEntryAdapter(this, new ListEntryAdapter.OnItemSelectedListener() {
             @Override

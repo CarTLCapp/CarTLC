@@ -14,3 +14,8 @@ Database Save:
 mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql
 p/w: cartcl
 
+Tags:
+git tag -a vX.XX -m "Version X.XX"
+git push origin vX.XX
+OR
+git push origin --tags

@@ -235,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mApp = (TBApplication) getApplicationContext();
         setContentView(R.layout.activity_main);
+        mApp.setUncaughtExceptionHandler(this);
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
