@@ -107,13 +107,13 @@ public class TBApplication extends Application {
     }
 
     public void setUncaughtExceptionHandler(final Activity act) {
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                mCrashTree.log(Log.ERROR, "CarTLC", e.getMessage(), null);
-                act.finish();
-            }
-        });
+//        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+//            @Override
+//            public void uncaughtException(Thread t, Throwable e) {
+//                mCrashTree.log(Log.ERROR, "CarTLCarTLC", e.getMessage(), null);
+//                act.finish();
+//            }
+//        });
     }
 
 //    public void checkPermissions(Activity act, PermissionListener listener) {
