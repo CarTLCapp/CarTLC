@@ -840,6 +840,7 @@ public class DCPing extends DCPost {
             jsonObject.accumulate("code", line.code);
             jsonObject.accumulate("message", line.message);
             jsonObject.accumulate("trace", line.trace);
+            jsonObject.accumulate("app_version", line.version);
             String result = post(MESSAGE, jsonObject, false);
             if (result != null && Integer.parseInt(result) == 0) {
                 TableCrash.getInstance().setUploaded(line);

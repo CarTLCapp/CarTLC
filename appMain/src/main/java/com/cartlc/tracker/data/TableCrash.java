@@ -1,6 +1,7 @@
 package com.cartlc.tracker.data;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -20,6 +21,7 @@ public class TableCrash {
         public int     code;
         public String  message;
         public String  trace;
+        public String  version;
         public long    date;
         public boolean uploaded;
     }
@@ -31,12 +33,13 @@ public class TableCrash {
     static final String KEY_CODE     = "code";
     static final String KEY_MESSAGE  = "message";
     static final String KEY_TRACE    = "trace";
+    static final String KEY_VERSION  = "version";
     static final String KEY_UPLOADED = "uploaded";
 
     static TableCrash sInstance;
 
-    static void Init(SQLiteDatabase db) {
-        new TableCrash(db);
+    static void Init(Context ctx, SQLiteDatabase db) {
+        new TableCrash(ctx, db);
     }
 
     public static TableCrash getInstance() {
@@ -44,9 +47,11 @@ public class TableCrash {
     }
 
     final SQLiteDatabase mDb;
+    final Context mCtx;
 
-    TableCrash(SQLiteDatabase db) {
+    TableCrash(Context ctx, SQLiteDatabase db) {
         sInstance = this;
+        this.mCtx = ctx;
         this.mDb = db;
     }
 
@@ -65,9 +70,19 @@ public class TableCrash {
         sbuf.append(" text, ");
         sbuf.append(KEY_TRACE);
         sbuf.append(" text, ");
+        sbuf.append(KEY_VERSION);
+        sbuf.append(" text, ");
         sbuf.append(KEY_UPLOADED);
         sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
+    }
+
+    public static void upgrade10(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_VERSION + " text");
+        } catch (Exception ex) {
+            Timber.e(ex);
+        }
     }
 
     public void clearUploaded() {
@@ -95,6 +110,7 @@ public class TableCrash {
         int idxCode = cursor.getColumnIndex(KEY_CODE);
         int idxMessage = cursor.getColumnIndex(KEY_MESSAGE);
         int idxTrace = cursor.getColumnIndex(KEY_TRACE);
+        int idxVersion = cursor.getColumnIndex(KEY_VERSION);
         int idxUploaded = cursor.getColumnIndex(KEY_UPLOADED);
         ArrayList<CrashLine> lines = new ArrayList();
         while (cursor.moveToNext()) {
@@ -103,6 +119,7 @@ public class TableCrash {
             line.date = cursor.getLong(idxDate);
             line.code = cursor.getShort(idxCode);
             line.message = cursor.getString(idxMessage);
+            line.version = cursor.getString(idxVersion);
             line.trace = cursor.getString(idxTrace);
             line.uploaded = cursor.getShort(idxUploaded) != 0;
             lines.add(line);
@@ -119,6 +136,7 @@ public class TableCrash {
             values.put(KEY_CODE, code);
             values.put(KEY_MESSAGE, message);
             values.put(KEY_TRACE, trace);
+            values.put(KEY_VERSION, mCtx.getPackageManager().getPackageInfo(mCtx.getPackageName(), 0).versionName);
             mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {

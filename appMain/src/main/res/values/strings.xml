@@ -58,6 +58,7 @@
     <string name="error_empty">No elements</string>
     <string name="error_incorrect_digit_count">Incorrect digit count for these fields:\n%s\nDo you want to continue?</string>
     <string name="error_incorrect_note_count">%1$d of %2$d digits found</string>
+    <string name="error_need_status">Need to select a status</string>
 
     <string name="loading">LOADING...</string>
 

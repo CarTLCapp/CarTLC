@@ -68,7 +68,9 @@ public class ConfirmationFrame {
         }
         mNoteAdapter.setItems(entry.getNotesWithValuesOnly());
         DataTruck truck = entry.getTruck();
-        if (truck.licensePlateNumber == null) {
+        if (truck == null) {
+            mTruckNumberValue.setVisibility(View.GONE);
+        } else if (truck.licensePlateNumber == null) {
             if (truck.truckNumber == 0) {
                 mTruckNumberValue.setVisibility(View.GONE);
             } else {

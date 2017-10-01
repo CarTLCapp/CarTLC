@@ -17,15 +17,19 @@ public class DatabaseManager {
     static final String DATABASE_NAME    = "cartcl.db";
     // Note: Jumping from 2 to 9 to get around the allowBackup bug.
     // Could now drop it down to 3, but who cares.
-    static final int    DATABASE_VERSION = 9;
+    static final int    DATABASE_VERSION = 10;
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
     }
 
     static class DatabaseHelper extends SQLiteOpenHelper {
+
+        Context mCtx;
+
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
+            mCtx = context;
         }
 
         @Override
@@ -63,7 +67,7 @@ public class DatabaseManager {
             TablePictureCollection.Init(db);
             TableProjectAddressCombo.Init(db);
             TableProjects.Init(db);
-            TableCrash.Init(db);
+            TableCrash.Init(mCtx, db);
             TableZipCode.Init(db);
             TableTruck.Init(db);
         }
@@ -78,6 +82,8 @@ public class DatabaseManager {
                 TableNote.upgrade3(db);
                 TableTruck.getInstance().create();
                 TableEntry.getInstance().upgrade3();
+            } else if (oldVersion <= 9) {
+                TableCrash.upgrade10(db);
             }
         }
 

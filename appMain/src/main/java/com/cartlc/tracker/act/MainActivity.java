@@ -514,6 +514,13 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             }
+        } else if (mCurStage == Stage.STATUS) {
+            if (isNext) {
+                if (PrefHelper.getInstance().getStatus() == TruckStatus.UNKNOWN) {
+                    showError(getString(R.string.error_need_status));
+                    return false;
+                }
+            }
         }
         mCurStageEditing = false;
         mSoftKeyboardDetect.clear();
@@ -1153,6 +1160,10 @@ public class MainActivity extends AppCompatActivity {
                 mStatusComplete.setChecked(true);
             } else if (status == TruckStatus.PARTIAL) {
                 mStatusPartial.setChecked(true);
+            } else {
+                mStatusNeedsRepair.setChecked(false);
+                mStatusComplete.setChecked(false);
+                mStatusPartial.setChecked(false);
             }
         }
     }
