@@ -17,14 +17,18 @@
 
             <h3>Projects</h3>
 
-            @for(project <- Project.list()) {
-                @if(Client.hasProject(id, project.id)) {
-                    @b3.checkbox(techForm(project.name), '_label -> project.name, 'checked -> true)
-                } else {
-                    @b3.checkbox(techForm(project.name), '_label -> project.name)
+            <div class="checkbox-container">
+
+                @for(project <- Project.list()) {
+                    @if(Client.hasProject(id, project.id)) {
+                        @b3.checkbox(techForm(project.name), '_label -> project.name, 'checked -> true)
+                    } else {
+                        @b3.checkbox(techForm(project.name), '_label -> project.name)
+                    }
+                    <p><br></p>
                 }
-                <p><br></p>
-            }
+
+            </div>
 
             <h3>Company</h3>
 

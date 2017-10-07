@@ -26,6 +26,16 @@ table.progress {
     width: 200px;
 }
 
+.break-div {
+    display: block;
+    width: 98%;
+}
+
+.checkbox-container {
+    display: block;
+    width: 98%
+}
+
 #actions {
     position: relative;
 }
