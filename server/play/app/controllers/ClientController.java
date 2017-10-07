@@ -201,6 +201,7 @@ public class ClientController extends Controller {
             client.update();
             flash("success", "Client has been disabled");
         } else {
+            ClientCompanyNameAssociation.deleteEntries(id);
             Client.find.ref(id).delete();
             flash("success", "Client has been deleted");
         }
