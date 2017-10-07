@@ -116,6 +116,12 @@ public class ClientController extends Controller {
             return badRequest(views.html.client_createForm.render(clientForm));
         }
         InputClient inputClient = clientForm.get();
+        if (inputClient.name == null || inputClient.name.isEmpty()) {
+            return badRequest("No client name entered.");
+        }
+        if (inputClient.password == null || inputClient.password.isEmpty()) {
+            return badRequest("No client password entered.");
+        }
         if (Client.getUser(inputClient.name) != null) {
             return badRequest("Already have a client named: " + inputClient.name);
         }
