@@ -205,7 +205,7 @@ public class DCPing extends DCPost {
                 Timber.i("All entries have server ids");
             }
         } catch (Exception ex) {
-            TBApplication.ReportError(ex, DCPing.class, "ping()", "server");
+            TBApplication.ReportServerError(ex, DCPing.class, "ping()", "server");
         }
     }
 
@@ -760,6 +760,13 @@ public class DCPing extends DCPost {
                     TableEntry.getInstance().saveUploaded(entry);
                     success = true;
                     Timber.i("SUCCESS, ENTRY SERVER ID is " + entry.serverId);
+                    // DEBUG
+                    StringBuilder sbuf = new StringBuilder();
+                    sbuf.append("While trying to send entry: " );
+                    sbuf.append(entry.toString());
+                    sbuf.append("\nSUCCESS: ");
+                    sbuf.append(result);
+                    TBApplication.ShowError(sbuf.toString());
                 } else {
                     StringBuilder sbuf = new StringBuilder();
                     sbuf.append("While trying to send entry: " );
@@ -767,6 +774,7 @@ public class DCPing extends DCPost {
                     sbuf.append("\nERROR: ");
                     sbuf.append(result);
                     TBApplication.ShowError(sbuf.toString());
+                    Timber.e(sbuf.toString());
                 }
             }
         } catch (Exception ex) {
@@ -816,11 +824,12 @@ public class DCPing extends DCPost {
             connection.disconnect();
             return result;
         } catch (Exception ex) {
-            String msg = "Whle sending to " + target + "\n" + ex.getMessage();
             if (sendErrors) {
-                Timber.e(TAG, msg);
+                TBApplication.ReportServerError(ex, DCPing.class, "post()", "server");
             } else {
+                String msg = "While sending to " + target + "\n" + ex.getMessage();
                 Log.e(TAG, msg);
+                TBApplication.ShowError(msg);
             }
             return null;
         }

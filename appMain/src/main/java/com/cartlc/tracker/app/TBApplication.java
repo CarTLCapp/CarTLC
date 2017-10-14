@@ -126,7 +126,7 @@ public class TBApplication extends Application {
 //        PermissionHelper.getInstance().checkPermissions(act, PERMISSIONS, listener);
 //    }
 
-    public static void ReportError(Exception ex, Class claz, String function, String type) {
+    public static String ReportError(Exception ex, Class claz, String function, String type) {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("Class:");
         sbuf.append(claz.getSimpleName());
@@ -137,6 +137,7 @@ public class TBApplication extends Application {
         sbuf.append(": ");
         sbuf.append(ex.getMessage());
         Timber.e(sbuf.toString());
+        return sbuf.toString();
     }
 
     public String getVersion() throws PackageManager.NameNotFoundException {
@@ -150,8 +151,12 @@ public class TBApplication extends Application {
         return sbuf.toString();
     }
 
+    public static void ReportServerError(Exception ex, Class claz, String function, String type) {
+        String msg = ReportError(ex, claz, function, type);
+        ShowError(msg);
+    }
+
     public static void ShowError(String msg) {
-        Timber.e(msg);
         EventBus.getDefault().post(new EventError(msg));
     }
 }

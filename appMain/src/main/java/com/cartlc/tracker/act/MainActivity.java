@@ -14,6 +14,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AlertDialogLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -82,8 +83,10 @@ public class MainActivity extends AppCompatActivity {
     static final int MSG_AUTO_RETURN      = 0;
     static final int MSG_REFRESH_PROJECTS = 1;
     static final int MSG_SET_HINT         = 2;
+    static final int MSG_SHOW_ERROR       = 3;
 
     static final String KEY_HINT = "hint";
+    static final String KEY_MSG  = "msg";
 
     class MyHandler extends Handler {
         @Override
@@ -97,6 +100,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case MSG_SET_HINT:
                     mEntryHint.setText(msg.getData().getString(KEY_HINT));
+                    break;
+                case MSG_SHOW_ERROR:
+                    showServerError(msg.getData().getString(KEY_MSG));
                     break;
             }
         }
@@ -230,10 +236,11 @@ public class MainActivity extends AppCompatActivity {
     DividerItemDecoration      mDivider;
     String                     mCompanyEditing;
     ZipCodeWatcher             mZipCodeWatcher;
+    AlertDialog                mDialog;
     boolean                    mWasNext;
     boolean                    mCurStageEditing;
     boolean                    mDoingCenter;
-    boolean                    mShowServerError = true;
+    boolean mShowServerError = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -383,6 +390,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
         CheckError.getInstance().cleanup();
+        clearDialog();
     }
 
     public void onEvent(EventRefreshProjects event) {
@@ -404,7 +412,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void onEvent(EventError event) {
         if (mShowServerError) {
-            showServerError(event.toString());
+            Message msg = new Message();
+            msg.what = MSG_SHOW_ERROR;
+            Bundle bundle = new Bundle();
+            bundle.putString(KEY_MSG, event.toString());
+            msg.setData(bundle);
+            mHandler.sendMessage(msg);
         }
     }
 
@@ -1009,40 +1022,51 @@ public class MainActivity extends AppCompatActivity {
         fillStage();
     }
 
+    void clearDialog() {
+        if (mDialog != null) {
+            mDialog.dismiss();
+            mDialog = null;
+        }
+    }
+
     void showError(String message) {
+        clearDialog();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.title_error);
         builder.setMessage(message);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+                clearDialog();
                 if (mCurStage == Stage.PICTURE) {
                     setStage(Stage.CONFIRM);
                 }
             }
         });
-        builder.create().show();
+        mDialog = builder.create();
+        mDialog.show();
     }
 
     void showServerError(String message) {
+        clearDialog();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.title_error);
         builder.setMessage(message);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+                clearDialog();
             }
         });
         builder.setNegativeButton(R.string.btn_stop, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+                clearDialog();
                 mShowServerError = false;
             }
         });
-        builder.create().show();
+        mDialog = builder.create();
+        mDialog.show();
     }
 
     boolean detectNoteError() {
