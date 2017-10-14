@@ -14,7 +14,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AlertDialogLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -70,7 +69,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
-import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -1230,7 +1228,7 @@ public class MainActivity extends AppCompatActivity {
 
     void checkErrors() {
         if (PrefHelper.getInstance().getDoErrorCheck()) {
-            if (!CheckError.getInstance().checkErrors(this, new CheckError.CheckErrorResult() {
+            if (!CheckError.getInstance().checkEntryErrors(this, new CheckError.CheckErrorResult() {
                 @Override
                 public void doEdit() {
                     MainActivity.this.doEdit();

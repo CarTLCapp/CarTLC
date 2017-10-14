@@ -760,13 +760,6 @@ public class DCPing extends DCPost {
                     TableEntry.getInstance().saveUploaded(entry);
                     success = true;
                     Timber.i("SUCCESS, ENTRY SERVER ID is " + entry.serverId);
-                    // DEBUG
-                    StringBuilder sbuf = new StringBuilder();
-                    sbuf.append("While trying to send entry: " );
-                    sbuf.append(entry.toString());
-                    sbuf.append("\nSUCCESS: ");
-                    sbuf.append(result);
-                    TBApplication.ShowError(sbuf.toString());
                 } else {
                     StringBuilder sbuf = new StringBuilder();
                     sbuf.append("While trying to send entry: " );

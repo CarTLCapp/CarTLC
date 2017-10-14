@@ -72,4 +72,13 @@ public class DataStates {
         Collections.sort(unused);
         return unused;
     }
+
+    public static boolean isValid(String scan) {
+        for (String state : STATES) {
+            if (state.equalsIgnoreCase(scan)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

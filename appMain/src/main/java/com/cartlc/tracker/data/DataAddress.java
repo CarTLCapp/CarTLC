@@ -23,24 +23,11 @@ public class DataAddress {
         this.isBootStrap = true;
     }
 
-    public DataAddress(String company, String street, String city, String state) {
-        this.company = company;
-        this.street = street;
-        this.city = city;
-        this.state = state;
-        this.isBootStrap = true;
-    }
-
     public DataAddress(String company, String street, String city, String state, String zipcode) {
         this.company = company;
         this.street = street;
         this.city = city;
         this.state = state;
-        this.zipcode = zipcode;
-    }
-
-    public DataAddress(String company, String zipcode) {
-        this.company = company;
         this.zipcode = zipcode;
     }
 
@@ -108,8 +95,11 @@ public class DataAddress {
                 (state != null && state.length() > 0);
     }
 
-    boolean hasZipCode() {
-        return !TextUtils.isEmpty(zipcode);
+    public boolean hasValidState() {
+        if (TextUtils.isEmpty(state)) {
+            return true;
+        }
+        return DataStates.isValid(state);
     }
 
     @Override

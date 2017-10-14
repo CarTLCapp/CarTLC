@@ -70,6 +70,10 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
         return 1;
     }
 
+    public boolean hasValidState() {
+        return getAddress().hasValidState();
+    }
+
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();

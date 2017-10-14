@@ -209,4 +209,9 @@ public class TableProjectAddressCombo {
         }
     }
 
+    public void remove(DataProjectAddressCombo entry) {
+        String where = KEY_ROWID + "=?";
+        String[] whereArgs = {Long.toString(entry.id)};
+        mDb.delete(TABLE_NAME, where, whereArgs);
+    }
 }
