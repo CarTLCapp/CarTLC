@@ -95,6 +95,10 @@ public class MessageController extends Controller {
         if (value != null) {
             message.trace = value.textValue();
         }
+        value = json.findValue("app_version");
+        if (value != null) {
+            message.app_version = value.textValue();
+        }
         if (missing.size() > 0) {
             return missingRequest(missing);
         }

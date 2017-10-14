@@ -14,7 +14,6 @@ import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.DataTruck;
 import com.cartlc.tracker.data.DatabaseManager;
-import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
@@ -27,6 +26,7 @@ import com.cartlc.tracker.data.TablePictureCollection;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.data.TableTruck;
 import com.cartlc.tracker.etc.TruckStatus;
+import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.event.EventRefreshProjects;
 
 import org.json.JSONArray;
@@ -90,13 +90,11 @@ public class DCPing extends DCPost {
 
     String getVersion() {
         if (mVersion == null) {
-            String version = null;
             try {
-                version = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName;
+                mVersion = ((TBApplication) mContext.getApplicationContext()).getVersion();
             } catch (Exception ex) {
                 TBApplication.ReportError(ex, DCPing.class, "getVersion()", "server");
             }
-            mVersion = version;
         }
         return mVersion;
     }
@@ -759,11 +757,16 @@ public class DCPing extends DCPost {
                 if (TextUtils.isDigitsOnly(result)) {
                     entry.uploadedMaster = true;
                     entry.serverId = Integer.parseInt(result);
-                    TableEntry.getInstance().save(entry);
+                    TableEntry.getInstance().saveUploaded(entry);
                     success = true;
                     Timber.i("SUCCESS, ENTRY SERVER ID is " + entry.serverId);
                 } else {
-                    Timber.e("While trying to send entry " + entry.id + ": " + result);
+                    StringBuilder sbuf = new StringBuilder();
+                    sbuf.append("While trying to send entry: " );
+                    sbuf.append(entry.toString());
+                    sbuf.append("\nERROR: ");
+                    sbuf.append(result);
+                    TBApplication.ShowError(sbuf.toString());
                 }
             }
         } catch (Exception ex) {

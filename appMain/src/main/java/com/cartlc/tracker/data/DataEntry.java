@@ -155,7 +155,7 @@ public class DataEntry {
             }
         }
         uploadedAws = true;
-        TableEntry.getInstance().save(this);
+        TableEntry.getInstance().saveUploaded(this);
         EventBus.getDefault().post(new EventRefreshProjects());
     }
 

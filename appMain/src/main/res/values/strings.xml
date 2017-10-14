@@ -14,6 +14,7 @@
     <string name="btn_view">View</string>
     <string name="btn_delete">Delete</string>
     <string name="btn_later">Later</string>
+    <string name="btn_stop">Stop Showing</string>
 
     <string name="entry_hint_last_name">Last Name</string>
     <string name="entry_hint_first_name">First Name</string>

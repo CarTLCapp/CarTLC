@@ -369,8 +369,8 @@ public class TableEntry {
     }
 
     // Right now only used to update a few fields.
-    // Later this will be extended to save everything.
-    public void save(DataEntry entry) {
+    // Later this will be extended to saveUploaded everything.
+    public void saveUploaded(DataEntry entry) {
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
@@ -380,11 +380,11 @@ public class TableEntry {
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(entry.id)};
             if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {
-                Timber.e("TableEntry.save(): Unable to update entry");
+                Timber.e("TableEntry.saveUploaded(): Unable to update entry");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            TBApplication.ReportError(ex, TableEntry.class, "save()", "db");
+            TBApplication.ReportError(ex, TableEntry.class, "saveUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }

@@ -50,12 +50,14 @@ public class TableCrash {
     }
 
     final SQLiteDatabase mDb;
-    final Context mCtx;
+    final Context        mCtx;
+    final TBApplication  mApp;
 
     TableCrash(Context ctx, SQLiteDatabase db) {
         sInstance = this;
         this.mCtx = ctx;
         this.mDb = db;
+        this.mApp = (TBApplication) mCtx.getApplicationContext();
     }
 
     public void create() {
@@ -139,7 +141,7 @@ public class TableCrash {
             values.put(KEY_CODE, code);
             values.put(KEY_MESSAGE, message);
             values.put(KEY_TRACE, trace);
-            values.put(KEY_VERSION, mCtx.getPackageManager().getPackageInfo(mCtx.getPackageName(), 0).versionName);
+            values.put(KEY_VERSION, mApp.getVersion());
             mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {

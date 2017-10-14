@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.multidex.MultiDex;
 import android.support.v4.content.FileProvider;
@@ -12,6 +13,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.cartlc.tracker.BuildConfig;
+import com.cartlc.tracker.R;
+import com.cartlc.tracker.act.MainActivity;
 import com.cartlc.tracker.data.DatabaseManager;
 import com.cartlc.tracker.data.TableCrash;
 import com.cartlc.tracker.etc.CheckError;
@@ -19,6 +22,7 @@ import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.etc.BootstrapData;
 import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.data.DataZipCode;
+import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.server.AmazonHelper;
 import com.cartlc.tracker.server.DCService;
 import com.cartlc.tracker.server.ServerHelper;
@@ -133,7 +137,21 @@ public class TBApplication extends Application {
         sbuf.append(": ");
         sbuf.append(ex.getMessage());
         Timber.e(sbuf.toString());
-
     }
 
+    public String getVersion() throws PackageManager.NameNotFoundException {
+        StringBuilder sbuf = new StringBuilder();
+        String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        sbuf.append("v");
+        sbuf.append(version);
+        if (PrefHelper.getInstance().isDevelopment()) {
+            sbuf.append("d");
+        }
+        return sbuf.toString();
+    }
+
+    public static void ShowError(String msg) {
+        Timber.e(msg);
+        EventBus.getDefault().post(new EventError(msg));
+    }
 }

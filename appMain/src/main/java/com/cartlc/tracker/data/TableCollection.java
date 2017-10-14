@@ -103,7 +103,7 @@ public abstract class TableCollection {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            TBApplication.ReportError(ex, TableCollection.class, "save()", "db");
+            TBApplication.ReportError(ex, TableCollection.class, "saveUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -122,7 +122,7 @@ public abstract class TableCollection {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            TBApplication.ReportError(ex, TableCollection.class, "save()", "db");
+            TBApplication.ReportError(ex, TableCollection.class, "saveUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }

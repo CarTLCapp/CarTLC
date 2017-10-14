@@ -46,6 +46,9 @@ public class Message extends com.avaje.ebean.Model {
     @Constraints.Required
     public String trace;
 
+    @Constraints.Required
+    public String app_version;
+
     public String getTechName() {
         Technician tech = Technician.find.byId((long) tech_id);
         if (tech == null) {
@@ -78,6 +81,13 @@ public class Message extends com.avaje.ebean.Model {
     public String getTrace() {
         if (trace != null) {
             return trace.replaceAll("\\n", "<br/>");
+        }
+        return "";
+    }
+
+    public String getAppVersion() {
+        if (app_version != null) {
+            return app_version;
         }
         return "";
     }

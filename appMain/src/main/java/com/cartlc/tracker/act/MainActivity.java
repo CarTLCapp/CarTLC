@@ -59,6 +59,7 @@ import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.data.TableTruck;
 import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.etc.TruckStatus;
+import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.event.EventRefreshProjects;
 
 import java.io.File;
@@ -232,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
     boolean                    mWasNext;
     boolean                    mCurStageEditing;
     boolean                    mDoingCenter;
+    boolean                    mShowServerError = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -397,6 +399,12 @@ public class MainActivity extends AppCompatActivity {
             bundle.putString(KEY_HINT, event.getHint());
             msg.setData(bundle);
             mHandler.sendMessage(msg);
+        }
+    }
+
+    public void onEvent(EventError event) {
+        if (mShowServerError) {
+            showServerError(event.toString());
         }
     }
 
@@ -1017,6 +1025,26 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
+    void showServerError(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.title_error);
+        builder.setMessage(message);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton(R.string.btn_stop, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                mShowServerError = false;
+            }
+        });
+        builder.create().show();
+    }
+
     boolean detectNoteError() {
         if (!mNoteAdapter.isNotesComplete()) {
             showNoteError(mNoteAdapter.getNotes());
@@ -1075,13 +1103,7 @@ public class MainActivity extends AppCompatActivity {
         sbuf.append(getString(R.string.app_name));
         sbuf.append(" - ");
         try {
-            String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-            sbuf.append("v");
-            sbuf.append(version);
-
-            if (PrefHelper.getInstance().isDevelopment()) {
-                sbuf.append("d");
-            }
+            sbuf.append(mApp.getVersion());
         } catch (Exception ex) {
             TBApplication.ReportError(ex, MainActivity.class, "getVersionedTitle()", "main");
         }

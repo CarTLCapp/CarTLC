@@ -94,7 +94,7 @@ public class TableCollectionNoteEntry {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            TBApplication.ReportError(ex, TableCollectionNoteEntry.class, "save()", "db");
+            TBApplication.ReportError(ex, TableCollectionNoteEntry.class, "saveUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }

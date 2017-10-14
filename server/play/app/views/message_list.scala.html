@@ -44,6 +44,7 @@
                     @header("log_time", "Date")
                     @header("code", "Code")
                     @header("message", "Message")
+                    <th>Version</th>
                     <th>Trace</th>
                 </tr>
             </thead>
@@ -52,9 +53,10 @@
                 @for(message <- currentPage.getList) {
                     <tr>
                         <td>@message.getTechName()</td>
-                        <td>@message.log_time.format("yyyy-MM-dd kk:mm")</td>
+                        <td>@message.log_time.format("MM/dd kk:mm")</td>
                         <td>@message.getCodeName()</td>
                         <td>@message.message</td>
+                        <td>@message.getAppVersion()</td>
                         <td>
                         @if(message.trace == null) {
                             <em>-</em>

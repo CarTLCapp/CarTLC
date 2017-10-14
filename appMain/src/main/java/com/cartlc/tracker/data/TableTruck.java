@@ -75,9 +75,9 @@ public class TableTruck {
             selectionArgs = new String[]{licensePlate};
             cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
             if (cursor.moveToNext()) {
-                int idxId = cursor.getColumnIndex(KEY_ROWID);
-                int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
-                int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
+                final int idxId = cursor.getColumnIndex(KEY_ROWID);
+                final int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
+                final int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
                 truck.truckNumber = cursor.getInt(idxTruckNumber);
                 truck.licensePlateNumber = cursor.getString(idxLicensePlate);
                 truck.id = cursor.getLong(idxId);
@@ -131,7 +131,7 @@ public class TableTruck {
                     }
                 }
             } catch (CursorIndexOutOfBoundsException ex) {
-                TBApplication.ReportError(ex, TableTruck.class, "save()", "db");
+                TBApplication.ReportError(ex, TableTruck.class, "saveUploaded()", "db");
             }
         }
         if (cursor != null) {
