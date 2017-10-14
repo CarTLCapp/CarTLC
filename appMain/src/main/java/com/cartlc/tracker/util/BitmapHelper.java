@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Environment;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -48,7 +50,7 @@ public class BitmapHelper {
 
             bitmap.recycle();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, BitmapHelper.class, "createScaled()", original.toString());
             return null;
         }
         return scaledFilename;
@@ -83,7 +85,7 @@ public class BitmapHelper {
             rotated.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, BitmapHelper.class, "rotate()", picture.toString());
         }
     }
 

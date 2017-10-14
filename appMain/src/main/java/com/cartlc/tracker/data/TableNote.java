@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class TableNote {
         try {
             db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_NUM_DIGITS + " smallint default 0");
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "upgrade3()", "db");
         }
     }
 
@@ -75,7 +77,7 @@ public class TableNote {
         try {
             mDb.delete(TABLE_NAME, null, null);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "clear()", "db");
         }
     }
 
@@ -86,7 +88,7 @@ public class TableNote {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "count()", "db");
         }
         return count;
     }
@@ -107,7 +109,7 @@ public class TableNote {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "add(list)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -127,7 +129,7 @@ public class TableNote {
             item.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "add(item)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -142,7 +144,7 @@ public class TableNote {
             mDb.update(TABLE_NAME, values, null, null);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "clearValues()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -161,7 +163,7 @@ public class TableNote {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "query()", name);
         }
         return rowId;
     }
@@ -214,7 +216,7 @@ public class TableNote {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "query(selection)", "db");
         }
         return list;
     }
@@ -252,7 +254,7 @@ public class TableNote {
             mDb.update(TABLE_NAME, values, where, whereArgs);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "update(item)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -268,7 +270,7 @@ public class TableNote {
             mDb.update(TABLE_NAME, values, where, whereArgs);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "updateValue()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -295,11 +297,11 @@ public class TableNote {
             ContentValues values = new ContentValues();
             values.put(KEY_SERVER_ID, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("Unable to update entries");
+                Timber.e("TableNote.clearUploaded(): Unable to update entries");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableNote.class, "clearUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }

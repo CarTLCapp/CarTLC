@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,7 +80,7 @@ public class TableProjectAddressCombo {
             projectGroup.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjectAddressCombo.class, "add()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -92,7 +94,7 @@ public class TableProjectAddressCombo {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjectAddressCombo.class, "count()", "db");
         }
         return count;
     }
@@ -106,7 +108,7 @@ public class TableProjectAddressCombo {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjectAddressCombo.class, "countAddress()", "db");
         }
         return count;
     }
@@ -120,7 +122,7 @@ public class TableProjectAddressCombo {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjectAddressCombo.class, "countProjects()", "db");
         }
         return count;
     }
@@ -146,7 +148,7 @@ public class TableProjectAddressCombo {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjectAddressCombo.class, "query()", "db");
         }
         return list;
     }
@@ -167,7 +169,7 @@ public class TableProjectAddressCombo {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjectAddressCombo.class, "query(id)", "db");
         }
         return item;
     }
@@ -190,7 +192,7 @@ public class TableProjectAddressCombo {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjectAddressCombo.class, "query(project,address)", "db");
         }
         return id;
     }
@@ -203,7 +205,7 @@ public class TableProjectAddressCombo {
             values.put(KEY_LAST_USED, System.currentTimeMillis());
             mDb.update(TABLE_NAME, values, where, whereArgs);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjectAddressCombo.class, "updateUsed()", "db");
         }
     }
 

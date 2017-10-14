@@ -69,7 +69,7 @@ public class TableProjects {
         try {
             mDb.delete(TABLE_NAME, null, null);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "clear()", "db");
         }
     }
 
@@ -79,7 +79,7 @@ public class TableProjects {
             String[] whereArgs = {value};
             mDb.delete(TABLE_NAME, where, whereArgs);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "remove(value)", "db");
         }
     }
 
@@ -89,19 +89,9 @@ public class TableProjects {
             String[] whereArgs = {Long.toString(id)};
             mDb.delete(TABLE_NAME, where, whereArgs);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "remove(id)", "db");
         }
     }
-
-//    public void removeBootStrap() {
-//        String where = KEY_IS_BOOT + "=1";
-//        List<DataProject> list = query(where, null);
-//        for (DataProject item : list) {
-//            if ((TableEntry.getInstance().countProjects(item.id) == 0) && (TableProjectAddressCombo.getInstance().countProjects(item.id) == 0)) {
-//                remove(item.id);
-//            }
-//        }
-//    }
 
     public void add(List<String> list) {
         mDb.beginTransaction();
@@ -115,7 +105,7 @@ public class TableProjects {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "add()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -132,7 +122,7 @@ public class TableProjects {
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "addTest()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -151,7 +141,7 @@ public class TableProjects {
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "add(item)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -174,7 +164,7 @@ public class TableProjects {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "update()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -188,7 +178,7 @@ public class TableProjects {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "count()", "db");
         }
         return count;
     }
@@ -216,7 +206,7 @@ public class TableProjects {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "query()", "db");
         }
         // Move other to bottom of the list.
         if (list.contains(TBApplication.OTHER)) {
@@ -239,36 +229,10 @@ public class TableProjects {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "queryProjectName()", "db");
         }
         return projectName;
     }
-
-//    public List<DataProject> queryProjects() {
-//        ArrayList<DataProject> list = new ArrayList();
-//        try {
-//            final String[] columns = {KEY_NAME, KEY_ROWID, KEY_DISABLED, KEY_SERVER_ID};
-//
-//            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null);
-//            int idxValue = cursor.getColumnIndex(KEY_NAME);
-//            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
-//            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-//            int idxDisabled = cursor.getColumnIndex(KEY_DISABLED);
-//            DataProject project;
-//            while (cursor.moveToNext()) {
-//                project = new DataProject();
-//                project.name = cursor.getString(idxValue);
-//                project.disabled = cursor.getShort(idxDisabled) != 0;
-//                project.server_id = cursor.getInt(idxServerId);
-//                project.id = cursor.getLong(idxRowId);
-//                list.add(project);
-//            }
-//            cursor.close();
-//        } catch (Exception ex) {
-//            Timber.e(ex);
-//        }
-//        return list;
-//    }
 
     public DataProject queryByServerId(int server_id) {
         final String selection = KEY_SERVER_ID + "=?";
@@ -329,7 +293,7 @@ public class TableProjects {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "query()", "db");
         }
         return list;
     }
@@ -347,7 +311,7 @@ public class TableProjects {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "queryProjectName()", name);
         }
         return rowId;
     }
@@ -370,11 +334,11 @@ public class TableProjects {
             ContentValues values = new ContentValues();
             values.put(KEY_SERVER_ID, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("Unable to update entries");
+                Timber.e("TableProjects.clearUploaded(): Unable to update entries");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableProjects.class, "clearUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }

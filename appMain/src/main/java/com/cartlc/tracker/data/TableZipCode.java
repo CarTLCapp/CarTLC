@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import timber.log.Timber;
 
 /**
@@ -69,7 +71,7 @@ public class TableZipCode {
             mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableZipCode.class, "add()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -99,7 +101,7 @@ public class TableZipCode {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableZipCode.class, "query()", "db");
         }
         return data;
     }

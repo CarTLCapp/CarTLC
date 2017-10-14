@@ -49,7 +49,7 @@ public abstract class TableString {
         try {
             mDb.delete(mTableName, null, null);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableString.class, "clear()", "db");
         }
     }
 
@@ -59,7 +59,7 @@ public abstract class TableString {
             String[] whereArgs = {value};
             mDb.delete(mTableName, where, whereArgs);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableString.class, "remove()", value);
         }
     }
 
@@ -69,7 +69,7 @@ public abstract class TableString {
             String[] whereArgs = {Long.toString(id)};
             mDb.delete(mTableName, where, whereArgs);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableString.class, "remove(id)", "db");
         }
     }
 
@@ -84,7 +84,7 @@ public abstract class TableString {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableString.class, "add(list)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -99,7 +99,7 @@ public abstract class TableString {
             id = mDb.insert(mTableName, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableString.class, "add(item)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -113,7 +113,7 @@ public abstract class TableString {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableString.class, "count()", "db");
         }
         return count;
     }
@@ -131,7 +131,7 @@ public abstract class TableString {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableString.class, "query()", "db");
         }
         // Move other to bottom of the list.
         if (list.contains(TBApplication.OTHER)) {
@@ -154,7 +154,7 @@ public abstract class TableString {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableString.class, "query(id)", "db");
         }
         return projectName;
     }
@@ -172,7 +172,7 @@ public abstract class TableString {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableString.class, "query(name)", name);
         }
         return rowId;
     }

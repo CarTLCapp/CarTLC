@@ -122,4 +122,18 @@ public class TBApplication extends Application {
 //        PermissionHelper.getInstance().checkPermissions(act, PERMISSIONS, listener);
 //    }
 
+    public static void ReportError(Exception ex, Class claz, String function, String type) {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("Class:");
+        sbuf.append(claz.getSimpleName());
+        sbuf.append(".");
+        sbuf.append(function);
+        sbuf.append(" ");
+        sbuf.append(type);
+        sbuf.append(": ");
+        sbuf.append(ex.getMessage());
+        Timber.e(sbuf.toString());
+
+    }
+
 }

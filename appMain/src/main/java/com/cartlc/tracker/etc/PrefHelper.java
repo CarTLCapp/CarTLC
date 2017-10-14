@@ -471,6 +471,9 @@ public class PrefHelper extends PrefHelperBase {
         if (truck != null) {
             setTruckNumber(truck.truckNumber);
             setLicensePlate(truck.licensePlateNumber);
+        } else {
+            setTruckNumber(0);
+            setLicensePlate(null);
         }
         setStatus(entry.status);
         TableNote.getInstance().clearValues();
@@ -523,6 +526,15 @@ public class PrefHelper extends PrefHelperBase {
         setVersionNote(VERSION_RESET);
         setVersionProject(VERSION_RESET);
         setVersionEquipment(VERSION_RESET);
+        setVersionCompany(VERSION_RESET);
+        setVersionTruck(VERSION_RESET);
+    }
+
+    public void reloadProjects() {
+        setVersionProject(VERSION_RESET);
+    }
+
+    public void reloadEquipments() {
         setVersionEquipment(VERSION_RESET);
     }
 

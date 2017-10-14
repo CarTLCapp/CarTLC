@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -158,7 +160,7 @@ public class TableAddress {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "add(list)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -182,7 +184,7 @@ public class TableAddress {
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "add(address)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -202,7 +204,7 @@ public class TableAddress {
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "add(company)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -228,7 +230,7 @@ public class TableAddress {
             mDb.update(TABLE_NAME, values, where, whereArgs);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "update(address)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -241,7 +243,7 @@ public class TableAddress {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "count()", "db");
         }
         return count;
     }
@@ -325,7 +327,7 @@ public class TableAddress {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "query()", "db");
         }
         return list;
     }
@@ -374,7 +376,7 @@ public class TableAddress {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "queryStrings()", key);
         }
         return list;
     }
@@ -391,44 +393,10 @@ public class TableAddress {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "queryAddressId()", "db");
         }
         return id;
     }
-
-//    public long queryAddressId(String company, String zipcode) {
-//        long id = -1L;
-//        try {
-//            final String[] columns = {KEY_ROWID};
-//            SelectionArgs args = new SelectionArgs(company, null, null, null, zipcode);
-//            Cursor cursor = mDb.query(TABLE_NAME, columns, args.selection, args.selectionArgs, null, null, null, null);
-//            int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-//            if (cursor.moveToFirst()) {
-//                id = cursor.getLong(idxRowId);
-//            }
-//            cursor.close();
-//        } catch (Exception ex) {
-//            Timber.e(ex);
-//        }
-//        return id;
-//    }
-//
-//    public boolean hasCompanyName(String company) {
-//        boolean has = false;
-//        try {
-//            StringBuilder sbuf = new StringBuilder();
-//            sbuf.append(KEY_COMPANY);
-//            sbuf.append(" =?");
-//            final String selection = sbuf.toString();
-//            final String[] selectionArgs = {company};
-//            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
-//            has = cursor.getCount() > 0;
-//            cursor.close();
-//        } catch (Exception ex) {
-//            Timber.e(ex);
-//        }
-//        return has;
-//    }
 
     public void remove(long id) {
         try {
@@ -436,7 +404,7 @@ public class TableAddress {
             String[] whereArgs = {Long.toString(id)};
             mDb.delete(TABLE_NAME, where, whereArgs);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "remove()", "db");
         }
     }
 
@@ -469,13 +437,14 @@ public class TableAddress {
             ContentValues values = new ContentValues();
             values.put(KEY_SERVER_ID, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("Unable to update entries");
+                Timber.e("TableAddress.clearnUploaded(): Unable to update entries");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableAddress.class, "clearUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }
     }
+
 }

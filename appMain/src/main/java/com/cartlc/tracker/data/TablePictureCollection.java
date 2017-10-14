@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.etc.PrefHelper;
 
 import java.io.File;
@@ -79,7 +80,7 @@ public class TablePictureCollection {
         try {
             db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_NOTE + " text");
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TablePictureCollection.class, "upgrade3()", "db");
         }
     }
 
@@ -98,7 +99,7 @@ public class TablePictureCollection {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TablePictureCollection.class, "add()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -137,7 +138,7 @@ public class TablePictureCollection {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TablePictureCollection.class, "query()", "db");
         }
         return list;
     }
@@ -204,7 +205,7 @@ public class TablePictureCollection {
                 mDb.delete(TABLE_NAME, where, whereArgs);
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TablePictureCollection.class, "countPictures()", "db");
         }
         return count;
     }
@@ -221,7 +222,7 @@ public class TablePictureCollection {
             final String where = KEY_COLLECTION_ID + " =0";
             mDb.delete(TABLE_NAME, where, null);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TablePictureCollection.class, "clearPendingPictures()", "db");
         }
     }
 
@@ -231,7 +232,7 @@ public class TablePictureCollection {
             final String[] whereArgs = {Long.toString(item.id)};
             mDb.delete(TABLE_NAME, where, whereArgs);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TablePictureCollection.class, "remove()", "db");
         }
     }
 
@@ -265,7 +266,7 @@ public class TablePictureCollection {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TablePictureCollection.class, "update()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -277,11 +278,11 @@ public class TablePictureCollection {
             ContentValues values = new ContentValues();
             values.put(KEY_UPLOADED, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("Unable to update entries");
+                Timber.e("TablePictureCollection.clearUploaded(): Unable to update entries");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TablePictureCollection.class, "clearUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }

@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +68,7 @@ public class TableCollectionNoteEntry {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollectionNoteEntry.class, "countNotes(id)", "db");
         }
         return count;
     }
@@ -92,7 +94,7 @@ public class TableCollectionNoteEntry {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollectionNoteEntry.class, "save()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -116,7 +118,7 @@ public class TableCollectionNoteEntry {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollectionNoteEntry.class, "query()", "db");
         }
         return list;
     }

@@ -1082,8 +1082,8 @@ public class MainActivity extends AppCompatActivity {
             if (PrefHelper.getInstance().isDevelopment()) {
                 sbuf.append("d");
             }
-        } catch (Exception e) {
-            Timber.e(e);
+        } catch (Exception ex) {
+            TBApplication.ReportError(ex, MainActivity.class, "getVersionedTitle()", "main");
         }
         return sbuf.toString();
     }

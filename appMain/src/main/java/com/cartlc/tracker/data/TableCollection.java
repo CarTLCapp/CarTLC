@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +67,7 @@ public abstract class TableCollection {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "count()", "db");
         }
         return count;
     }
@@ -79,7 +81,7 @@ public abstract class TableCollection {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "countValues()", "db");
         }
         return count;
     }
@@ -101,7 +103,7 @@ public abstract class TableCollection {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "save()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -120,7 +122,7 @@ public abstract class TableCollection {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "save()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -137,7 +139,7 @@ public abstract class TableCollection {
             mDb.insert(mTableName, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "add(id,id)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -155,7 +157,7 @@ public abstract class TableCollection {
             item.id = mDb.insert(mTableName, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "add(item)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -175,7 +177,7 @@ public abstract class TableCollection {
             mDb.update(mTableName, values, where, whereArgs);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "update(item)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -194,7 +196,7 @@ public abstract class TableCollection {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "query(id)", "db");
         }
         return collection;
     }
@@ -222,7 +224,7 @@ public abstract class TableCollection {
             cursor.close();
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "query()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -251,7 +253,7 @@ public abstract class TableCollection {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "queryByServerId(id)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -264,7 +266,7 @@ public abstract class TableCollection {
             String[] whereArgs = new String[]{Long.toString(id)};
             mDb.delete(mTableName, where, whereArgs);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "remove(id)", "db");
         }
     }
 
@@ -274,7 +276,7 @@ public abstract class TableCollection {
             String[] whereArgs = new String[]{Long.toString(id)};
             mDb.delete(mTableName, where, whereArgs);
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "removeByCollectionId(id)", "db");
         }
     }
 
@@ -284,11 +286,11 @@ public abstract class TableCollection {
             ContentValues values = new ContentValues();
             values.put(KEY_SERVER_ID, 0);
             if (mDb.update(mTableName, values, null, null) == 0) {
-                Timber.e("Unable to update entries");
+                Timber.e("TableCollection.clearUploaded(): Unable to update entries");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCollection.class, "clearUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }

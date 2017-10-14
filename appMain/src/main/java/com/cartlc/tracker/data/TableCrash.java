@@ -4,6 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import com.cartlc.tracker.app.TBApplication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +84,7 @@ public class TableCrash {
         try {
             db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_VERSION + " text");
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableCrash.class, "upgrade10()", "db");
         }
     }
 
@@ -91,7 +94,7 @@ public class TableCrash {
             ContentValues values = new ContentValues();
             values.put(KEY_UPLOADED, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("Unable to update crash entries");
+                Timber.e("TableCrash.clearUploaded(): Unable to update crash entries");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -140,7 +143,7 @@ public class TableCrash {
             mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            Log.e("TableCrash", ex.getMessage());
         } finally {
             mDb.endTransaction();
         }
@@ -158,7 +161,7 @@ public class TableCrash {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            Log.e("TableCrash", ex.getMessage());
         } finally {
             mDb.endTransaction();
         }

@@ -2,6 +2,7 @@ package com.cartlc.tracker.server;
 
 import android.net.Uri;
 
+import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.data.DataZipCode;
 
@@ -94,7 +95,7 @@ public class DCZip extends DCPost {
                 Timber.e("Invalid zipcode response: " + result);
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, DCZip.class, "findZipCode()", zipcode);
         }
     }
 

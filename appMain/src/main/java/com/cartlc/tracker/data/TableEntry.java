@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.etc.TruckStatus;
 
@@ -121,7 +122,7 @@ public class TableEntry {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEntry.class, "upgrade3()", "db");
         }
     }
 
@@ -236,7 +237,7 @@ public class TableEntry {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEntry.class, "query()", "db");
         }
         return list;
     }
@@ -261,7 +262,7 @@ public class TableEntry {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEntry.class, "countProjectAddressCombo()", "db");
         }
         return count;
     }
@@ -282,54 +283,10 @@ public class TableEntry {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEntry.class, "countAddresses()", "db");
         }
         return count;
     }
-
-//    public int countEquipments(final long equipmentId) {
-//        int count = 0;
-//        try {
-//            final String[] columns = {KEY_EQUIPMENT_COLLECTION_ID};
-//            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
-//            int idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID);
-//            while (cursor.moveToNext()) {
-//                long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
-//                DataCollectionEquipmentEntry collection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
-//                for (long equipId : collection.equipmentListIds) {
-//                    if (equipId == equipmentId) {
-//                        count++;
-//                    }
-//                }
-//            }
-//            cursor.close();
-//        } catch (Exception ex) {
-//            Timber.e(ex);
-//        }
-//        return count;
-//    }
-//
-//    public int countNotes(final long noteId) {
-//        int count = 0;
-//        try {
-//            final String[] columns = {KEY_NOTE_COLLECTION_ID};
-//            Cursor cursor = mDb.query(TABLE_NAME, columns, null, null, null, null, null, null);
-//            int idxNoteCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID);
-//            while (cursor.moveToNext()) {
-//                long noteCollectionId = cursor.getLong(idxNoteCollectionId);
-//                List<DataNote> notes = TableCollectionNoteEntry.getInstance().query(noteCollectionId);
-//                for (DataNote note : notes) {
-//                    if (noteId == note.id) {
-//                        count++;
-//                    }
-//                }
-//            }
-//            cursor.close();
-//        } catch (Exception ex) {
-//            Timber.e(ex);
-//        }
-//        return count;
-//    }
 
     public int countTrucks(final long truckId) {
         int count = 0;
@@ -341,7 +298,7 @@ public class TableEntry {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEntry.class, "countTrucks()", "db");
         }
         return count;
     }
@@ -362,7 +319,7 @@ public class TableEntry {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEntry.class, "countProjects()", "db");
         }
         return count;
     }
@@ -405,7 +362,7 @@ public class TableEntry {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEntry.class, "add()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -423,11 +380,11 @@ public class TableEntry {
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(entry.id)};
             if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {
-                Timber.e("Unable to update entry");
+                Timber.e("TableEntry.save(): Unable to update entry");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEntry.class, "save()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -440,11 +397,11 @@ public class TableEntry {
             values.put(KEY_UPLOADED_MASTER, 0);
             values.put(KEY_UPLOADED_AWS, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("Unable to update entries");
+                Timber.e("TableEntry.clearUploaded(): Unable to update entries");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEntry.class, "clearUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }

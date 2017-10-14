@@ -10,6 +10,7 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.etc.PrefHelper;
@@ -122,7 +123,7 @@ public class AmazonHelper {
 
             @Override
             public void onError(int id, Exception ex) {
-                Timber.e(ex);
+                TBApplication.ReportError(ex, AmazonHelper.class, "sendPicture()", "amazon");
             }
         });
     }

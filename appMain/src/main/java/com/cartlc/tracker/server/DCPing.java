@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataCollectionItem;
 import com.cartlc.tracker.data.DataEntry;
@@ -13,6 +14,7 @@ import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.DataTruck;
 import com.cartlc.tracker.data.DatabaseManager;
+import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
@@ -92,7 +94,7 @@ public class DCPing extends DCPost {
             try {
                 version = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName;
             } catch (Exception ex) {
-                Timber.e(ex);
+                TBApplication.ReportError(ex, DCPing.class, "getVersion()", "server");
             }
             mVersion = version;
         }
@@ -119,7 +121,7 @@ public class DCPing extends DCPost {
                 }
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, DCPing.class, "sendRegistration()", "server");
         }
     }
 
@@ -205,7 +207,7 @@ public class DCPing extends DCPost {
                 Timber.i("All entries have server ids");
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, DCPing.class, "ping()", "server");
         }
     }
 
@@ -265,7 +267,7 @@ public class DCPing extends DCPost {
                 }
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, DCPing.class, "queryProjects()", "server");
         }
     }
 
@@ -339,7 +341,7 @@ public class DCPing extends DCPost {
                 TableAddress.getInstance().removeOrDisable(item);
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, DCPing.class, "queryCompanies()", "server");
         }
     }
 
@@ -419,10 +421,13 @@ public class DCPing extends DCPost {
                     if (project == null || equipment == null) {
                         if (project == null && equipment == null) {
                             Timber.e("Can't find any project with server ID " + server_project_id + " nor equipment ID " + server_equipment_id);
+                            PrefHelper.getInstance().reloadProjects();
                         } else if (project == null) {
                             Timber.e("Can't find any project with server ID " + server_project_id + " for equipment " + equipment.name);
+                            PrefHelper.getInstance().reloadProjects();
                         } else {
                             Timber.e("Can't find any equipment with server ID " + server_equipment_id + " for project " + project.name);
+                            PrefHelper.getInstance().reloadEquipments();
                         }
                         continue;
                     }
@@ -458,7 +463,7 @@ public class DCPing extends DCPost {
                 }
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, DCPing.class, "queryEquipments()", "server");
         }
     }
 
@@ -550,7 +555,7 @@ public class DCPing extends DCPost {
                     incoming.collection_id = project.id;
                     DataNote note = TableNote.getInstance().queryByServerId(server_note_id);
                     if (note == null) {
-                        Timber.e("Can't find picture_note with ID " + server_note_id);
+                        Timber.e("queryNotes(): Can't find picture_note with ID " + server_note_id);
                         continue;
                     }
                     incoming.value_id = note.id;
@@ -583,7 +588,7 @@ public class DCPing extends DCPost {
                 }
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, DCPing.class, "queryNotes()", "server");
         }
     }
 
@@ -639,7 +644,7 @@ public class DCPing extends DCPost {
                 }
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, DCPing.class, "queryTrucks()", "server");
         }
     }
 
@@ -680,12 +685,12 @@ public class DCPing extends DCPost {
                 }
             } else {
                 PrefHelper.getInstance().setDoErrorCheck(true);
-                Timber.e("Missing truck entry : " + entry.toString());
+                Timber.e("sendEntry(): Missing truck entry : " + entry.toString() + " (check error enabled)");
                 return false;
             }
             DataProject project = entry.getProject();
             if (project == null) {
-                Timber.e("No project name for entry -- abort");
+                Timber.e("sendEntry(): No project name for entry -- abort");
                 return false;
             }
             if (project.serverId > 0) {
@@ -695,7 +700,7 @@ public class DCPing extends DCPost {
             }
             DataAddress address = entry.getAddress();
             if (address == null) {
-                Timber.e("No address for entry -- abort");
+                Timber.e("sendEntry(): No address for entry -- abort");
                 return false;
             }
             if (address.serverId > 0) {
@@ -762,7 +767,7 @@ public class DCPing extends DCPost {
                 }
             }
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, DCPing.class, "sendEntry()", "server");
             return false;
         }
         return success;

@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,7 +85,7 @@ public class TableEquipment {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "count()", "db");
         }
         return count;
     }
@@ -96,7 +98,7 @@ public class TableEquipment {
             count = cursor.getCount();
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "countChecked()", "db");
         }
         return count;
     }
@@ -112,7 +114,7 @@ public class TableEquipment {
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "addTest()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -131,7 +133,7 @@ public class TableEquipment {
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "addLocal()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -154,7 +156,7 @@ public class TableEquipment {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "add(list)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -174,7 +176,7 @@ public class TableEquipment {
             item.id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "add(item)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -248,7 +250,7 @@ public class TableEquipment {
             }
             cursor.close();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "queryIdsChecked()", "db");
         }
         return list;
     }
@@ -280,7 +282,7 @@ public class TableEquipment {
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "setChecked(list)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -297,7 +299,7 @@ public class TableEquipment {
             mDb.update(TABLE_NAME, values, where, whereArgs);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "setChecked(item)", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -311,7 +313,7 @@ public class TableEquipment {
             mDb.update(TABLE_NAME, values, null, null);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "clearChecked()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -332,7 +334,7 @@ public class TableEquipment {
             mDb.update(TABLE_NAME, values, where, whereArgs);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "update()", "db");
         } finally {
             mDb.endTransaction();
         }
@@ -363,11 +365,11 @@ public class TableEquipment {
             ContentValues values = new ContentValues();
             values.put(KEY_SERVER_ID, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("Unable to update entries");
+                Timber.e("TableEquipment.clearUploaded(): Unable to update entries");
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
-            Timber.e(ex);
+            TBApplication.ReportError(ex, TableEquipment.class, "clearUploaded()", "db");
         } finally {
             mDb.endTransaction();
         }

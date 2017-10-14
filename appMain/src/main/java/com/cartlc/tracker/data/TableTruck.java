@@ -6,6 +6,8 @@ import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
+import com.cartlc.tracker.app.TBApplication;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -129,7 +131,7 @@ public class TableTruck {
                     }
                 }
             } catch (CursorIndexOutOfBoundsException ex) {
-                Timber.e(ex);
+                TBApplication.ReportError(ex, TableTruck.class, "save()", "db");
             }
         }
         if (cursor != null) {
