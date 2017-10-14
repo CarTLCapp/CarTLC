@@ -69,6 +69,7 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_REGISTRATION_CHANGED          = "registration_changed";
     static final        String KEY_IS_DEVELOPMENT                = "is_development";
     static final        String KEY_SPECIAL_UPDATE_CHECK          = "special_update_check";
+    static final        String KEY_DO_ERROR_CHECK                = "do_error_check";
 
     public static final String VERSION_PROJECT   = "version_project";
     public static final String VERSION_COMPANY   = "version_company";
@@ -295,6 +296,14 @@ public class PrefHelper extends PrefHelperBase {
         }
     }
 
+    public boolean getDoErrorCheck() {
+        return getInt(KEY_DO_ERROR_CHECK, 1) != 0;
+    }
+
+    public void setDoErrorCheck(boolean flag) {
+        setInt(KEY_DO_ERROR_CHECK, flag ? 1 : 0);
+    }
+
     public boolean hasRegistrationChanged() {
         return getInt(KEY_REGISTRATION_CHANGED, 0) != 0;
     }
@@ -305,15 +314,6 @@ public class PrefHelper extends PrefHelperBase {
 
     public boolean isDevelopment() {
         return getInt(KEY_IS_DEVELOPMENT, TBApplication.IsDevelopmentServer() ? 1 : 0) != 0;
-    }
-
-    // Return true if added.
-    public List<String> addIfNotFound(List<String> list, String element) {
-        if (element != null && !list.contains(element)) {
-            list.add(element);
-            Collections.sort(list);
-        }
-        return list;
     }
 
     public DataProjectAddressCombo getCurrentProjectGroup() {
@@ -362,18 +362,6 @@ public class PrefHelper extends PrefHelperBase {
         TableNote.getInstance().clearValues();
         TableEquipment.getInstance().clearChecked();
     }
-
-//    public boolean hasCurProject() {
-//        long projectGroupId = getCurrentProjectGroupId();
-//        if (projectGroupId < 0) {
-//            return false;
-//        }
-//        DataProjectAddressCombo projectGroup = TableProjectAddressCombo.getInstance().query(projectGroupId);
-//        if (projectGroup == null) {
-//            return false;
-//        }
-//        return true;
-//    }
 
     public boolean saveProjectAndAddressCombo() {
         String project = getProjectName();
@@ -495,9 +483,12 @@ public class PrefHelper extends PrefHelperBase {
         }
         entry.equipmentCollection.addChecked();
         DataTruck truck = entry.getTruck();
+        if (truck == null) {
+            truck = new DataTruck();
+        }
         truck.truckNumber = (int) getTruckNumber();
         truck.licensePlateNumber = getLicensePlate();
-        TableTruck.getInstance().save(truck);
+        entry.truckId = TableTruck.getInstance().save(truck);
         entry.status = getStatus();
         entry.uploadedMaster = false;
         entry.uploadedAws = false;

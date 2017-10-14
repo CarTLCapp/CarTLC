@@ -14,6 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.data.DatabaseManager;
 import com.cartlc.tracker.data.TableCrash;
+import com.cartlc.tracker.etc.CheckError;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.etc.BootstrapData;
 import com.cartlc.tracker.data.TableZipCode;
@@ -69,6 +70,7 @@ public class TBApplication extends Application {
         PermissionHelper.Init();
         AmazonHelper.Init(this);
         BootstrapData.Init();
+        CheckError.Init();
 
         PrefHelper.getInstance().detectSpecialUpdateCheck();
     }

@@ -183,6 +183,10 @@ public class TableEntry {
         return query(where, null);
     }
 
+    public List<DataEntry> query() {
+        return query(null, null);
+    }
+
     public DataEntry query(long id) {
         String where = KEY_ROWID + "=?";
         String[] whereArgs = new String[]{Long.toString(id)};
@@ -444,5 +448,11 @@ public class TableEntry {
         } finally {
             mDb.endTransaction();
         }
+    }
+
+    public void remove(DataEntry entry) {
+        String where = KEY_ROWID + "=?";
+        String[] whereArgs = {Long.toString(entry.id)};
+        mDb.delete(TABLE_NAME, where, whereArgs);
     }
 }

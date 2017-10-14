@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,6 +38,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
@@ -47,6 +47,7 @@ import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.DataZipCode;
+import com.cartlc.tracker.etc.CheckError;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableEntry;
@@ -58,7 +59,7 @@ import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.data.TableTruck;
 import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.etc.TruckStatus;
-import com.cartlc.tracker.event.EventPingDone;
+import com.cartlc.tracker.event.EventRefreshProjects;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -70,6 +71,8 @@ import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
+
+    static final boolean ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG; // true=Debugging only
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_EDIT_ENTRY    = 2;
@@ -377,9 +380,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        CheckError.getInstance().cleanup();
     }
 
-    public void onEvent(EventPingDone event) {
+    public void onEvent(EventRefreshProjects event) {
         if (mCurStage == Stage.CURRENT_PROJECT) {
             mHandler.sendEmptyMessage(MSG_REFRESH_PROJECTS);
         }
@@ -443,11 +447,16 @@ public class MainActivity extends AppCompatActivity {
                 if (isNext) {
                     showError(getString(R.string.error_need_a_truck_number));
                 }
-                return false;
+                if (!ALLOW_EMPTY_TRUCK) {
+                    return false;
+                }
+                // For debugging purposes only.
+                PrefHelper.getInstance().setTruckNumber(0);
+                PrefHelper.getInstance().setLicensePlate(null);
+                PrefHelper.getInstance().setDoErrorCheck(true);
             } else {
-
+                PrefHelper.getInstance().parseTruckValue(value);
             }
-            PrefHelper.getInstance().parseTruckValue(value);
         } else if (mCurStageEditing) {
             if (mCurStage == Stage.CITY) {
                 PrefHelper.getInstance().setCity(getEditText(mEntrySimple));
@@ -813,6 +822,7 @@ public class MainActivity extends AppCompatActivity {
                     mTitle.setText(R.string.title_current_project);
                     mMainList.setAdapter(mProjectAdapter);
                     mProjectAdapter.onDataChanged();
+                    checkErrors();
                 }
                 break;
             case TRUCK:
@@ -981,10 +991,14 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 fillStage();
             } else if (requestCode == REQUEST_EDIT_ENTRY) {
-                mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() + 1);
-                fillStage();
+                doEdit();
             }
         }
+    }
+
+    void doEdit() {
+        mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() + 1);
+        fillStage();
     }
 
     void showError(String message) {
@@ -1164,6 +1178,19 @@ public class MainActivity extends AppCompatActivity {
                 mStatusNeedsRepair.setChecked(false);
                 mStatusComplete.setChecked(false);
                 mStatusPartial.setChecked(false);
+            }
+        }
+    }
+
+    void checkErrors() {
+        if (PrefHelper.getInstance().getDoErrorCheck()) {
+            if (!CheckError.getInstance().checkErrors(this, new CheckError.CheckErrorResult() {
+                @Override
+                public void doEdit() {
+                    MainActivity.this.doEdit();
+                }
+            })) {
+                PrefHelper.getInstance().setDoErrorCheck(false);
             }
         }
     }

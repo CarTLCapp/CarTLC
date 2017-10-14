@@ -25,7 +25,7 @@ import com.cartlc.tracker.data.TablePictureCollection;
 import com.cartlc.tracker.data.TableProjects;
 import com.cartlc.tracker.data.TableTruck;
 import com.cartlc.tracker.etc.TruckStatus;
-import com.cartlc.tracker.event.EventPingDone;
+import com.cartlc.tracker.event.EventRefreshProjects;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -187,7 +187,7 @@ public class DCPing extends DCPost {
                 count = sendEntries(entries);
             }
             if (count > 0) {
-                EventBus.getDefault().post(new EventPingDone());
+                EventBus.getDefault().post(new EventRefreshProjects());
             }
             entries = TableEntry.getInstance().queryPendingPicturesToUpload();
             if (entries.size() > 0) {
@@ -679,6 +679,7 @@ public class DCPing extends DCPost {
                     jsonObject.accumulate("license_plate", truck.licensePlateNumber);
                 }
             } else {
+                PrefHelper.getInstance().setDoErrorCheck(true);
                 Timber.e("Missing truck entry : " + entry.toString());
                 return false;
             }

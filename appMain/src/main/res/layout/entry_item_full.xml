@@ -10,7 +10,6 @@
     android:layout_marginTop="4dp"
     android:background="@color/project_normal">
 
-
     <TextView
         android:id="@+id/project_name"
         style="@style/ProjectFullTextTitle"
@@ -39,12 +38,22 @@
         app:layout_constraintTop_toBottomOf="@+id/project_name"/>
 
     <TextView
+        android:id="@+id/label_status"
+        style="@style/ProjectFullTextSub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/title_status_"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/project_address"/>
+
+    <TextView
         android:id="@+id/status"
         style="@style/ProjectFullTextSub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Partial Install: 2 of 5 equipments, 3 or 5 pictures"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="3dp"
+        android:text="Partial Install"
+        app:layout_constraintLeft_toRightOf="@id/label_status"
         app:layout_constraintTop_toBottomOf="@+id/project_address"/>
 
     <TextView
@@ -67,14 +76,14 @@
 
     <View
         android:id="@+id/separator"
-        android:layout_width="match_parent"
+        android:layout_width="348dp"
         android:layout_height="2dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
         android:layout_marginTop="6dp"
         android:background="@android:color/white"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/equipments"/>
+        app:layout_constraintTop_toBottomOf="@+id/equipments"
+        android:layout_marginStart="5dp"/>
 
 
 </android.support.constraint.ConstraintLayout>

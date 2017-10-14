@@ -138,7 +138,7 @@ public class TableTruck {
         return truck.id;
     }
 
-    public void save(DataTruck truck) {
+    public long save(DataTruck truck) {
         ContentValues values = new ContentValues();
         values.put(KEY_TRUCK_NUMBER, truck.truckNumber);
         values.put(KEY_LICENSE_PLATE, truck.licensePlateNumber);
@@ -150,6 +150,7 @@ public class TableTruck {
         } else {
             truck.id = mDb.insert(TABLE_NAME, null, values);
         }
+        return truck.id;
     }
 
     public DataTruck query(long id) {

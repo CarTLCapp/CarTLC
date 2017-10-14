@@ -67,11 +67,11 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
     public void onBindViewHolder(final CustomViewHolder holder, final int position) {
         final DataEntry item = mItems.get(position);
         holder.projectName.setText(item.getProjectName());
-        holder.truckValue.setText(item.getTruck().toString());
+        holder.truckValue.setText(item.getTruckLine(mContext));
         holder.projectAddress.setText(item.getAddressLine());
         holder.status.setText(item.getStatus(mContext));
         holder.notes.setText(item.getNotesLine());
-        holder.equipments.setText(getEquipment(item));
+        holder.equipments.setText(item.getEquipmentLine(mContext));
 
         if (TextUtils.isEmpty(holder.notes.getText().toString().trim())) {
             holder.notes.setVisibility(View.GONE);
@@ -114,17 +114,5 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
         mSelectedPos = null;
     }
 
-    String getEquipment(DataEntry item) {
-        StringBuilder sbuf = new StringBuilder();
-        for (String name : item.getEquipmentNames()) {
-            if (sbuf.length() > 0) {
-                sbuf.append(", ");
-            }
-            sbuf.append(name);
-        }
-        if (sbuf.length() == 0) {
-            sbuf.append(mContext.getString(R.string.status_no_equipment));
-        }
-        return sbuf.toString();
-    }
+
 }

@@ -3,8 +3,9 @@ package com.cartlc.tracker.data;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.cartlc.tracker.R;
 import com.cartlc.tracker.etc.TruckStatus;
-import com.cartlc.tracker.event.EventPingDone;
+import com.cartlc.tracker.event.EventRefreshProjects;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,11 +156,33 @@ public class DataEntry {
         }
         uploadedAws = true;
         TableEntry.getInstance().save(this);
-        EventBus.getDefault().post(new EventPingDone());
+        EventBus.getDefault().post(new EventRefreshProjects());
     }
 
     public DataTruck getTruck() {
         return TableTruck.getInstance().query(truckId);
+    }
+
+    public String getTruckLine(Context ctx) {
+        DataTruck truck = getTruck();
+        if (truck != null) {
+            return truck.toString();
+        }
+        return ctx.getString(R.string.error_missing_truck_short);
+    }
+
+    public String getEquipmentLine(Context ctx) {
+        StringBuilder sbuf = new StringBuilder();
+        for (String name : getEquipmentNames()) {
+            if (sbuf.length() > 0) {
+                sbuf.append(", ");
+            }
+            sbuf.append(name);
+        }
+        if (sbuf.length() == 0) {
+            sbuf.append(ctx.getString(R.string.status_no_equipment));
+        }
+        return sbuf.toString();
     }
 
     public String toString() {

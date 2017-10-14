@@ -344,7 +344,6 @@ public class TableEquipment {
         mDb.delete(TABLE_NAME, where, whereArgs);
     }
 
-
     public void removeOrDisable(DataEquipment equip) {
         if (equip.isBootStrap) {
             if (TableCollectionEquipmentEntry.getInstance().countValues(equip.id) == 0) {
