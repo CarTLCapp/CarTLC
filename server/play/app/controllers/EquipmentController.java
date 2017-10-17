@@ -245,7 +245,8 @@ public class EquipmentController extends Controller {
         int tech_id = value.intValue();
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("equipments");
-        List<Equipment> equipments = Equipment.appList(tech_id);
+        // List<Equipment> equipments = Equipment.appList(tech_id);
+        List<Equipment> equipments = Equipment.all();
         List<Long> equipmentIds = new ArrayList<Long>();
         for (Equipment item : equipments) {
             if (!item.disabled) {
