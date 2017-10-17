@@ -58,6 +58,10 @@ public class Equipment extends Model implements Comparable<Equipment> {
                 .findList();
     }
 
+    public static List<Equipment> all() {
+        return find.where().eq("disabled", false).findList();
+    }
+
     public static List<Equipment> appList(int tech_id) {
         List<Equipment> items = find.where().eq("disabled", false).findList();
         List<Equipment> result = new ArrayList<Equipment>();
