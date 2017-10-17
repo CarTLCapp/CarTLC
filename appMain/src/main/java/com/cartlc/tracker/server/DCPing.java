@@ -354,7 +354,9 @@ public class DCPing extends DCPost {
         return null;
     }
 
+
     void queryEquipments() {
+        final boolean showDebug = BuildConfig.DEBUG;
         Timber.i("queryEquipments()");
         try {
             String response = post(EQUIPMENTS, true);
@@ -402,6 +404,7 @@ public class DCPing extends DCPost {
                 }
                 // Remaining unprocessed elements are disabled if they have entries.
                 for (DataEquipment item : unprocessed) {
+                    Timber.i("Remove or disabled: " + item.name);
                     TableEquipment.getInstance().removeOrDisable(item);
                 }
             }
@@ -441,7 +444,7 @@ public class DCPing extends DCPost {
                             match.server_id = server_id;
                             match.isBootStrap = false;
                             TableCollectionEquipmentProject.getInstance().update(match);
-                            if (BuildConfig.DEBUG) {
+                            if (showDebug) {
                                 String projectName = TableProjects.getInstance().queryProjectName(match.collection_id);
                                 String equipmentName = TableEquipment.getInstance().queryEquipmentName(match.value_id);
                                 Timber.i("Commandeer local: PROJECT COLLECTION " + projectName + " <=> " + equipmentName);
@@ -449,7 +452,7 @@ public class DCPing extends DCPost {
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
-                            if (BuildConfig.DEBUG) {
+                            if (showDebug) {
                                 String projectName = TableProjects.getInstance().queryProjectName(incoming.collection_id);
                                 String equipmentName = TableEquipment.getInstance().queryEquipmentName(incoming.value_id);
                                 Timber.i("New project collection: " + projectName + " <=> " + equipmentName);
@@ -459,7 +462,7 @@ public class DCPing extends DCPost {
                     } else {
                         // Change of IDs. A little weird, but we will allow it.
                         if (!incoming.equals(item)) {
-                            if (BuildConfig.DEBUG) {
+                            if (showDebug) {
                                 String projectName = TableProjects.getInstance().queryProjectName(item.collection_id);
                                 String equipmentName = TableEquipment.getInstance().queryEquipmentName(item.value_id);
                                 Timber.i("Change? " + projectName + " <=> " + equipmentName);
@@ -467,19 +470,28 @@ public class DCPing extends DCPost {
                             incoming.id = item.id;
                             incoming.server_id = item.server_id;
                             TableCollectionEquipmentProject.getInstance().update(incoming);
+                        } else {
+                            if (showDebug) {
+                                String projectName = TableProjects.getInstance().queryProjectName(item.collection_id);
+                                String equipmentName = TableEquipment.getInstance().queryEquipmentName(item.value_id);
+                                Timber.i("No change: " + projectName + " <=> " + equipmentName);
+                            }
                         }
                         unprocessed.remove(item);
                     }
-
-
                 }
                 for (DataCollectionItem item : unprocessed) {
-                    if (BuildConfig.DEBUG) {
+                    if (showDebug) {
                         String projectName = TableProjects.getInstance().queryProjectName(item.collection_id);
                         String equipmentName = TableEquipment.getInstance().queryEquipmentName(item.value_id);
                         Timber.i("Removing: " + projectName + " <=> " + equipmentName);
                     }
                     TableCollectionEquipmentProject.getInstance().remove(item.id);
+                }
+                if (showDebug) {
+                    if (unprocessed.size() == 0) {
+                        Timber.i("No unprocessed items.");
+                    }
                 }
             }
         } catch (Exception ex) {
