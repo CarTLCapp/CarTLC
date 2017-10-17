@@ -140,8 +140,12 @@ public class EntryController extends Controller {
             Entry existing;
             if (entry.id > 0) {
                 existing = Entry.find.byId(entry.id);
-                existing.entry_time = entry.entry_time;
-                existing.tech_id = entry.tech_id;
+                if (existing == null) {
+                    existing = Entry.findByDate(entry.tech_id, entry.entry_time);
+                } else {
+                    existing.entry_time = entry.entry_time;
+                    existing.tech_id = entry.tech_id;
+                }
             } else {
                 existing = Entry.findByDate(entry.tech_id, entry.entry_time);
             }

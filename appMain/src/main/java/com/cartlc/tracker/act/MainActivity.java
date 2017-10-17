@@ -669,6 +669,7 @@ public class MainActivity extends AppCompatActivity {
                     mFirstName.setText(PrefHelper.getInstance().getFirstName());
                     mLastName.setText(PrefHelper.getInstance().getLastName());
                 }
+                mApp.ping();
                 break;
             case PROJECT:
                 mPrev.setVisibility(View.VISIBLE);
@@ -828,6 +829,7 @@ public class MainActivity extends AppCompatActivity {
                     mCurStage = Stage.PROJECT;
                     fillStage();
                 } else {
+                    mApp.ping();
                     PrefHelper.getInstance().saveProjectAndAddressCombo();
                     showMainListFrame();
                     mCenter.setVisibility(View.VISIBLE);

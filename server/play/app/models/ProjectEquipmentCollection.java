@@ -44,6 +44,7 @@ public class ProjectEquipmentCollection extends Model {
                 list.add(equipment);
             }
         }
+        Collections.sort(list);
         return list;
     }
 

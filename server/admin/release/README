@@ -9,7 +9,14 @@ Josheidenberg@gmail.com
 Creative3
 https://play.google.com/apps/publish
 
-Database Save:
+=== Up Version: ===
+
+server/play/build.sbt
+remove old:
+rm ~/cartlc/CarTLC/server/play/target/universal/play-*-SNAPSHOT.zip
+rm ~/cartlc/wrap/2017-10-14/play-*-SNAPSHOT.zip
+
+=== Database Save: ===
 
 mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql
 p/w: cartcl

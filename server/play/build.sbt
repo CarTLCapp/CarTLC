@@ -1,6 +1,6 @@
 name := "play"
 
-version := "2.0.3-SNAPSHOT"
+version := "2.0.5-SNAPSHOT"
 
 scalaVersion := "2.11.11"
 

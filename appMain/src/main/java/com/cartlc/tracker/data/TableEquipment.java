@@ -192,6 +192,14 @@ public class TableEquipment {
         return null;
     }
 
+    public String queryEquipmentName(long id) {
+        DataEquipment equip = query(id);
+        if (equip != null) {
+            return equip.name;
+        }
+        return null;
+    }
+
     public DataEquipment queryByServerId(int server_id) {
         final String selection = KEY_SERVER_ID + "=?";
         final String[] selectionArgs = {Integer.toString(server_id)};

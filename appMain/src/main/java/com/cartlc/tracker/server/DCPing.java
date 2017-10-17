@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataCollectionItem;
@@ -14,6 +15,7 @@ import com.cartlc.tracker.data.DataPicture;
 import com.cartlc.tracker.data.DataProject;
 import com.cartlc.tracker.data.DataTruck;
 import com.cartlc.tracker.data.DatabaseManager;
+import com.cartlc.tracker.data.TableCollection;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
@@ -439,25 +441,45 @@ public class DCPing extends DCPost {
                             match.server_id = server_id;
                             match.isBootStrap = false;
                             TableCollectionEquipmentProject.getInstance().update(match);
-                            Timber.i("Commandeer local: PROJECT COLLECTION " + match.collection_id + ", " + match.value_id);
+                            if (BuildConfig.DEBUG) {
+                                String projectName = TableProjects.getInstance().queryProjectName(match.collection_id);
+                                String equipmentName = TableEquipment.getInstance().queryEquipmentName(match.value_id);
+                                Timber.i("Commandeer local: PROJECT COLLECTION " + projectName + " <=> " + equipmentName);
+                            }
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
-                            Timber.i("New project collection. " + incoming.collection_id + ", " + incoming.value_id);
+                            if (BuildConfig.DEBUG) {
+                                String projectName = TableProjects.getInstance().queryProjectName(incoming.collection_id);
+                                String equipmentName = TableEquipment.getInstance().queryEquipmentName(incoming.value_id);
+                                Timber.i("New project collection: " + projectName + " <=> " + equipmentName);
+                            }
                             TableCollectionEquipmentProject.getInstance().add(incoming);
                         }
                     } else {
                         // Change of IDs. A little weird, but we will allow it.
                         if (!incoming.equals(item)) {
-                            Timber.i("Change? " + item.collection_id + ", " + item.value_id);
+                            if (BuildConfig.DEBUG) {
+                                String projectName = TableProjects.getInstance().queryProjectName(item.collection_id);
+                                String equipmentName = TableEquipment.getInstance().queryEquipmentName(item.value_id);
+                                Timber.i("Change? " + projectName + " <=> " + equipmentName);
+                            }
                             incoming.id = item.id;
                             incoming.server_id = item.server_id;
                             TableCollectionEquipmentProject.getInstance().update(incoming);
                         }
+                        unprocessed.remove(item);
                     }
+
+
                 }
                 for (DataCollectionItem item : unprocessed) {
-                    TableCollectionEquipmentProject.getInstance().removeIfGone(item);
+                    if (BuildConfig.DEBUG) {
+                        String projectName = TableProjects.getInstance().queryProjectName(item.collection_id);
+                        String equipmentName = TableEquipment.getInstance().queryEquipmentName(item.value_id);
+                        Timber.i("Removing: " + projectName + " <=> " + equipmentName);
+                    }
+                    TableCollectionEquipmentProject.getInstance().remove(item.id);
                 }
             }
         } catch (Exception ex) {
