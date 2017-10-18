@@ -55,13 +55,9 @@ public class PostController extends Controller {
         Transaction txn = Ebean.beginTransaction();
         Result res;
         try {
-            Technician tech = Technician.findByDeviceId(device_id);
+            Technician tech = Technician.findByName(first_name, last_name, device_id);
             if (tech == null) {
-                // Locate by pure name
-                tech = Technician.findByName(first_name, last_name);
-                if (tech == null) {
-                    tech = new Technician();
-                }
+                tech = new Technician();
             }
             tech.first_name = first_name;
             tech.last_name = last_name;

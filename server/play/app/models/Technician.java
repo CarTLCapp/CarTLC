@@ -9,6 +9,7 @@ import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
 import modules.DataErrorException;
+import play.Logger;
 
 /**
  * User entity managed by Ebean
@@ -24,38 +25,25 @@ public class Technician extends com.avaje.ebean.Model {
         return find.all();
     }
 
-    public static Technician findByDeviceId(String device_id) throws DataErrorException {
-        List<Technician> items = find.where()
-                .eq("device_id", device_id)
-                .findList();
-        if (items.size() == 1) {
-            return items.get(0);
-        } else if (items.size() > 1) {
-            // THEN enhance this function to scan for disabled.
-            new DataErrorException("Too many clients with: " + device_id);
-        }
-        return null;
-    }
-
     @Transactional
-    public static Technician findByName(String first_name, String last_name) throws DataErrorException {
+    public static Technician findByName(String first_name, String last_name, String device_id) {
         List<Technician> items = find.where()
                 .eq("first_name", first_name)
                 .eq("last_name", last_name)
+                .eq("device_id", device_id)
                 .findList();
         if (items.size() == 0) {
-            return null;
-        }
-        if (items.size() > 1) {
-            // Get rid of others.
-            // TODO: ONLY REMOVE IF IT IS SAFE TO DO SO.
-            // THAT IS, there are NO ENTRIES of this TECH-ID.
-            // INSTEAD, set the DISABLED flag.
-
-            // THEN enhance this function to scan for disabled.
-            for (int i = 1; i < items.size(); i++) {
-                items.get(i).delete();
+            items = find.where()
+                    .eq("first_name", first_name)
+                    .eq("last_name", last_name)
+                    .findList();
+            if (items.size() == 0) {
+                return null;
+            } else if (items.size() > 1) {
+                Logger.error("Found more than one technician with the name: " + first_name + ", " + last_name + " -> just using the first encountered");
             }
+        } else if (items.size() > 1) {
+            Logger.error("Found more than one technician with the name: " + first_name + ", " + last_name + ", " + device_id + " -> just using the first encountered");
         }
         return items.get(0);
     }
