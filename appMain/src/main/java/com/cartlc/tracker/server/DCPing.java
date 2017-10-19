@@ -164,23 +164,23 @@ public class DCPing extends DCPost {
                 PrefHelper.getInstance().setVersionProject(version_project);
             }
             if (PrefHelper.getInstance().getVersionCompany() != version_company) {
-                queryCompanies();
                 Timber.i("New company version " + version_company);
+                queryCompanies();
                 PrefHelper.getInstance().setVersionCompany(version_company);
             }
             if (PrefHelper.getInstance().getVersionEquipment() != version_equipment) {
-                queryEquipments();
                 Timber.i("New equipment version " + version_equipment);
+                queryEquipments();
                 PrefHelper.getInstance().setVersionEquipment(version_equipment);
             }
             if (PrefHelper.getInstance().getVersionNote() != version_note) {
-                queryNotes();
                 Timber.i("New note version " + version_note);
+                queryNotes();
                 PrefHelper.getInstance().setVersionNote(version_note);
             }
             if (PrefHelper.getInstance().getVersionTruck() != version_truck) {
-                queryTrucks();
                 Timber.i("New truck version " + version_truck);
+                queryTrucks();
                 PrefHelper.getInstance().setVersionTruck(version_truck);
             }
             List<DataEntry> entries = TableEntry.getInstance().queryPendingDataToUploadToMaster();
@@ -229,7 +229,7 @@ public class DCPing extends DCPost {
                 DataProject project = TableProjects.getInstance().queryByServerId(server_id);
                 if (project == null) {
                     if (unprocessed.contains(name)) {
-                        // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
+                        // If this name already exists, convert the existing one by simply giving it the server_id.
                         DataProject existing = TableProjects.getInstance().queryByName(name);
                         existing.serverId = server_id;
                         existing.isBootStrap = false;
@@ -354,7 +354,6 @@ public class DCPing extends DCPost {
         return null;
     }
 
-
     void queryEquipments() {
         final boolean showDebug = BuildConfig.DEBUG;
         Timber.i("queryEquipments()");
@@ -425,8 +424,19 @@ public class DCPing extends DCPost {
                         if (project == null && equipment == null) {
                             Timber.e("Can't find any project with server ID " + server_project_id + " nor equipment ID " + server_equipment_id);
                             PrefHelper.getInstance().reloadProjects();
+                            PrefHelper.getInstance().reloadEquipments();
                         } else if (project == null) {
-                            Timber.e("Can't find any project with server ID " + server_project_id + " for equipment " + equipment.name);
+                            StringBuilder sbuf = new StringBuilder();
+                            sbuf.append("Can't find any project with server ID ");
+                            sbuf.append(server_project_id);
+                            sbuf.append(" for equipment ");
+                            sbuf.append(equipment.name);
+                            sbuf.append(". Projects=");
+                            for (String name : TableProjects.getInstance().query()) {
+                                sbuf.append(name);
+                                sbuf.append(":");
+                            }
+                            Timber.e(sbuf.toString());
                             PrefHelper.getInstance().reloadProjects();
                         } else {
                             Timber.e("Can't find any equipment with server ID " + server_equipment_id + " for project " + project.name);
