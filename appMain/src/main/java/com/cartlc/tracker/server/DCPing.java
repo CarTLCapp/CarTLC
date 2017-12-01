@@ -436,6 +436,7 @@ public class DCPing extends DCPost {
                                 sbuf.append(name);
                                 sbuf.append(":");
                             }
+                            sbuf.append(".");
                             Timber.e(sbuf.toString());
                             PrefHelper.getInstance().reloadProjects();
                         } else {

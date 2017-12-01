@@ -122,6 +122,9 @@ public class Client extends com.avaje.ebean.Model {
     }
 
     public List<Project> getProjects() {
+        if (id == null) {
+            return null;
+        }
         return ClientProjectAssociation.findProjects(id);
     }
 
