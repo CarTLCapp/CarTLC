@@ -37,6 +37,12 @@ public class Truck extends com.avaje.ebean.Model {
     @Constraints.Required
     public boolean created_by_client;
 
+    @Constraints.Required
+    public int project_id;
+
+    @Constraints.Required
+    public int company_id;
+
     public static Finder<Long, Truck> find = new Finder<Long, Truck>(Truck.class);
 
     public static Truck get(long id) {
