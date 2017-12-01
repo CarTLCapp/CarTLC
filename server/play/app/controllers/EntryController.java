@@ -167,15 +167,6 @@ public class EntryController extends Controller {
         } else {
             license_plate = null;
         }
-        if (truck_number == 0 && license_plate == null) {
-            missing.add("truck_number");
-            missing.add("license_plate");
-        } else {
-            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
-            // The reason is that other techs don't need to know about a local techs truck updates.
-            Truck truck = Truck.add(truck_number, license_plate, entry.tech_id);
-            entry.truck_id = truck.id;
-        }
         value = json.findValue("project_id");
         if (value == null) {
             missing.add("project_id");
@@ -205,6 +196,7 @@ public class EntryController extends Controller {
                             Version.inc(Version.VERSION_COMPANY);
                         }
                         entry.company_id = company.id;
+                        CompanyName.save(company.name);
                     } catch (Exception ex) {
                         return badRequest2("address: " + ex.getMessage());
                     }
@@ -214,6 +206,15 @@ public class EntryController extends Controller {
             }
         } else {
             entry.company_id = value.longValue();
+        }
+        if (truck_number == 0 && license_plate == null) {
+            missing.add("truck_number");
+            missing.add("license_plate");
+        } else {
+            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
+            // The reason is that other techs don't need to know about a local techs truck updates.
+            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_number, license_plate, entry.tech_id);
+            entry.truck_id = truck.id;
         }
         value = json.findValue("equipment");
         if (value != null) {

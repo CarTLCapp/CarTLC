@@ -38,10 +38,10 @@ public class Truck extends com.avaje.ebean.Model {
     public boolean created_by_client;
 
     @Constraints.Required
-    public int project_id;
+    public long project_id;
 
     @Constraints.Required
-    public int company_id;
+    public long company_name_id;
 
     public static Finder<Long, Truck> find = new Finder<Long, Truck>(Truck.class);
 
@@ -60,44 +60,65 @@ public class Truck extends com.avaje.ebean.Model {
         return find.where().eq("upload_id", upload_id).findList();
     }
 
-    static List<Truck> findBy(int truck_number, String license_plate) {
+    static List<Truck> findBy(long project_id, long company_name_id, int truck_number) {
         List<Truck> list;
-        if (license_plate != null) {
-            list = find.where().eq("license_plate", license_plate).findList();
-            if (list.size() == 0) {
-                list = null;
-            } else if (list.size() > 1) {
-                Logger.error("Found too many trucks with " + license_plate);
-
-            }
-        } else {
+        list = find.where()
+                .eq("project_id", project_id)
+                .eq("company_name_id", company_name_id)
+                .eq("truck_number", truck_number)
+                .findList();
+        if (list.size() == 0) {
             list = null;
-        }
-        if (truck_number != 0 && list == null) {
-            list = find.where().eq("truck_number", truck_number).findList();
-            if (list.size() == 0) {
-                list = null;
-            } else if (list.size() > 1) {
-                Logger.error("Found too many trucks with truck number=" + truck_number);
-            }
+        } else if (list.size() > 1) {
+            Logger.error("Found too many trucks with truck number="
+                    + truck_number + ", project_id=" + project_id + ", company_name_id=" + company_name_id);
         }
         return list;
     }
 
-    public static Truck findFirst(int truck_number, String license_plate) {
-        List<Truck> list = findBy(truck_number, license_plate);
+    public static Truck findFirst(long project_id, long company_name_id, int truck_number) {
+        List<Truck> list = findBy(project_id, company_name_id, truck_number);
         if (list == null) {
             return null;
         }
         return list.get(0);
     }
 
-    public static Truck add(int truck_number, String license_plate, int tech_id) {
-        List<Truck> list = findBy(truck_number, license_plate);
+    public static Truck add(long project_id, long company_id, int truck_number, String license_plate, int tech_id) {
+        long company_name_id = 0;
+        if (company_id > 0) {
+           Company company = Company.get(company_id);
+           if (company != null) {
+               company_name_id = CompanyName.save(company.name);
+           }
+        }
+        List<Truck> list;
+        if (project_id > 0 && company_name_id > 0) {
+            list = find.where()
+                    .eq("project_id", project_id)
+                    .eq("company_name_id", company_name_id)
+                    .eq("truck_number", truck_number)
+                    .findList();
+        } else if (project_id > 0) {
+            list = find.where()
+                    .eq("project_id", project_id)
+                    .eq("truck_number", truck_number)
+                    .findList();
+        } else if (company_name_id > 0) {
+            list = find.where()
+                    .eq("company_name_id", company_name_id)
+                    .eq("truck_number", truck_number)
+                    .findList();
+        } else {
+            list = find.where()
+                    .eq("truck_number", truck_number)
+                    .findList();
+        }
         Truck truck = null;
         if (list != null) {
             if (list.size() > 1) {
-                Logger.error("Found too many trucks with " + truck_number + ", " + license_plate);
+                Logger.error("Found too many trucks with "
+                        + truck_number + ", " + license_plate + ", project_id=" + project_id + ", company_name_id=" + company_name_id);
                 for (Truck t : list) {
                     Logger.error(t.toString());
                 }
@@ -109,6 +130,8 @@ public class Truck extends com.avaje.ebean.Model {
         if (truck == null) {
             truck = new Truck();
             truck.truck_number = truck_number;
+            truck.project_id = project_id;
+            truck.company_name_id = company_name_id;
             truck.license_plate = license_plate;
             truck.created_by = tech_id;
             truck.save();
@@ -118,6 +141,12 @@ public class Truck extends com.avaje.ebean.Model {
             }
             if (license_plate != null && !license_plate.equals(truck.license_plate)) {
                 truck.license_plate = license_plate;
+            }
+            if (project_id != 0) {
+                truck.project_id = project_id;
+            }
+            if (company_name_id != 0) {
+                truck.company_name_id = company_name_id;
             }
             if (truck.created_by == 0) {
                 truck.created_by = tech_id;
@@ -143,6 +172,29 @@ public class Truck extends com.avaje.ebean.Model {
         return "";
     }
 
+    public String getProjectLine() {
+        if (project_id == 0) {
+            return "";
+        }
+        Project project = Project.find.ref(project_id);
+        if (project == null) {
+            return "NOT FOUND: " + project_id;
+        }
+        return project.name;
+    }
+
+
+    public String getCompanyName() {
+        if (company_name_id == 0) {
+            return "";
+        }
+        String company = CompanyName.get(company_name_id);
+        if (company == null) {
+            return "NOT FOUND: " + company_name_id;
+        }
+        return company;
+    }
+
     public int countEntries() {
         return Entry.countEntriesForTruck(id);
     }
@@ -165,6 +217,14 @@ public class Truck extends com.avaje.ebean.Model {
         }
         if (license_plate != null) {
             sbuf.append(license_plate);
+        }
+        if (project_id > 0) {
+            sbuf.append(", ");
+            sbuf.append(getProjectLine());
+        }
+        if (company_name_id > 0) {
+            sbuf.append(", ");
+            sbuf.append(getCompanyName());
         }
         return sbuf.toString();
     }

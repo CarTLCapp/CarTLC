@@ -66,7 +66,7 @@ public class EntryV2 extends com.avaje.ebean.Model {
             entry.picture_collection_id = entry2.picture_collection_id;
             entry.note_collection_id = entry2.note_collection_id;
             if (entry2.truck_number != 0 || entry2.license_plate != null) {
-                Truck truck = Truck.add(entry2.truck_number, entry2.license_plate, entry.tech_id);
+                Truck truck = Truck.add(entry2.project_id, entry2.address_id, entry2.truck_number, entry2.license_plate, entry.tech_id);
                 entry.truck_id = truck.id;
             }
             entry.save();
