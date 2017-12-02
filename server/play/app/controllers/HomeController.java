@@ -32,6 +32,7 @@ public class HomeController extends Controller {
         Company.saveNames();
         EntryEquipmentCollection.removeUnused();
         EntryNoteCollection.removeUnused();
+        WorkOrder.fixTrucks();
         return ok(views.html.home.render(Secured.getClient(ctx())));
     }
 

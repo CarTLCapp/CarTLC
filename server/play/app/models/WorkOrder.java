@@ -266,5 +266,30 @@ public class WorkOrder extends com.avaje.ebean.Model {
         }
         return list.size();
     }
+
+    public static void fixTrucks() {
+        List<WorkOrder> list = list();
+        boolean didOne = false;
+        for (WorkOrder order : list) {
+            Truck truck = Truck.get(order.truck_id);
+            boolean changed = false;
+            if (truck.project_id == 0) {
+                truck.project_id = order.project_id;
+                changed = true;
+            }
+            if (truck.company_name_id == 0) {
+                String companyName = order.getCompanyName();
+                truck.company_name_id = CompanyName.save(companyName);
+                changed = true;
+            }
+            if (changed) {
+                truck.update();
+                didOne = true;
+            }
+        }
+        if (didOne) {
+            Version.inc(Version.VERSION_TRUCK);
+        }
+    }
 }
 
