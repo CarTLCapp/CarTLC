@@ -2,6 +2,7 @@ package com.cartlc.tracker.data;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 /**
  * Created by dug on 8/31/17.
@@ -56,18 +57,6 @@ public class DataTruck implements Comparable<DataTruck> {
 
     @Override
     public int compareTo(@NonNull DataTruck o) {
-        if (truckNumber > 0 && o.truckNumber > 0) {
-            return truckNumber - o.truckNumber;
-        } else {
-            if (licensePlateNumber == null) {
-                if (o.licensePlateNumber == null) {
-                    return 0;
-                }
-                return -1;
-            } else if (o.licensePlateNumber == null) {
-                return -1;
-            }
-            return licensePlateNumber.compareTo(o.licensePlateNumber);
-        }
+        return truckNumber - o.truckNumber;
     }
 }

@@ -1,5 +1,6 @@
 package com.cartlc.tracker.app;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -8,15 +9,11 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.multidex.MultiDex;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.cartlc.tracker.BuildConfig;
-import com.cartlc.tracker.R;
-import com.cartlc.tracker.act.MainActivity;
 import com.cartlc.tracker.data.DatabaseManager;
-import com.cartlc.tracker.data.TableCrash;
 import com.cartlc.tracker.etc.CheckError;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.etc.BootstrapData;
@@ -26,6 +23,8 @@ import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.server.AmazonHelper;
 import com.cartlc.tracker.server.DCService;
 import com.cartlc.tracker.server.ServerHelper;
+import com.cartlc.tracker.util.PermissionHelper.PermissionRequest;
+import com.cartlc.tracker.util.PermissionHelper.PermissionListener;
 
 import de.greenrobot.event.EventBus;
 import timber.log.Timber;
@@ -40,7 +39,7 @@ import java.io.File;
 
 public class TBApplication extends Application {
 
-    static final Boolean OVERRIDE_IS_DEVELOPMENT_SERVER = null;
+    static final Boolean OVERRIDE_IS_DEVELOPMENT_SERVER = false;
 
     public static boolean IsDevelopmentServer() {
         if (OVERRIDE_IS_DEVELOPMENT_SERVER != null) {
@@ -49,11 +48,16 @@ public class TBApplication extends Application {
         return BuildConfig.DEBUG;
     }
 
-    static final Boolean DEBUG_TREE = false;
+    static final Boolean DEBUG_TREE = true;
 
     public static final String OTHER = "Other";
 
     CrashReportingTree mCrashTree = new CrashReportingTree();
+
+    static final PermissionRequest[] PERMISSIONS = new PermissionRequest[]{
+            new PermissionRequest(Manifest.permission.WRITE_EXTERNAL_STORAGE, 0),
+            new PermissionRequest(Manifest.permission.READ_EXTERNAL_STORAGE, 0),
+    };
 
     public TBApplication() {
         super();
@@ -122,9 +126,9 @@ public class TBApplication extends Application {
 //        });
     }
 
-//    public void checkPermissions(Activity act, PermissionListener listener) {
-//        PermissionHelper.getInstance().checkPermissions(act, PERMISSIONS, listener);
-//    }
+    public void checkPermissions(Activity act, PermissionListener listener) {
+        PermissionHelper.getInstance().checkPermissions(act, PERMISSIONS, listener);
+    }
 
     public static String ReportError(Exception ex, Class claz, String function, String type) {
         StringBuilder sbuf = new StringBuilder();

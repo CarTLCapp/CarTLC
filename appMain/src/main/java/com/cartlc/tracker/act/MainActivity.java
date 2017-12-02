@@ -379,6 +379,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        mApp.checkPermissions(this, null);
         mApp.ping();
         mDoingCenter = false; // Safety
     }
