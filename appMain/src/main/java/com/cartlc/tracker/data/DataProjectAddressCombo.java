@@ -53,6 +53,14 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
         return mAddress;
     }
 
+    public String getCompanyName() {
+        DataAddress address = getAddress();
+        if (address != null) {
+            return address.company;
+        }
+        return null;
+    }
+
     public List<DataEntry> getEntries() {
         return TableEntry.getInstance().queryForProjectAddressCombo(id);
     }

@@ -14,27 +14,31 @@ public class DataTruck implements Comparable<DataTruck> {
     public long   serverId;
     public int    truckNumber;
     public String licensePlateNumber;
-
-    public boolean equals(int truckNumber, String licensePlate) {
-        if (this.truckNumber == truckNumber) {
-            return true;
-        }
-        if (this.licensePlateNumber == null) {
-            return (licensePlate == null);
-        } else {
-            return licensePlateNumber.equals(licensePlate);
-        }
-    }
+    public long   projectNameId;
+    public String companyName;
 
     public boolean equals(DataTruck other) {
-        if (truckNumber != 0 && truckNumber == other.truckNumber) {
-            return true;
+        if (truckNumber != other.truckNumber) {
+            return false;
+        }
+        if (projectNameId != other.projectNameId) {
+            return false;
+        }
+        if (companyName == null) {
+            if (other.companyName != null) {
+                return false;
+            }
+        } else if (!companyName.equals(other.companyName)) {
+            return false;
         }
         if (licensePlateNumber == null) {
-            return other.licensePlateNumber == null;
-        } else {
-            return licensePlateNumber.equals(other.licensePlateNumber);
+            if (other.licensePlateNumber != null) {
+                return false;
+            }
+        } else if (!licensePlateNumber.equals(other.licensePlateNumber)) {
+            return false;
         }
+        return true;
     }
 
     public String toString() {

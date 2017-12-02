@@ -100,7 +100,18 @@ public class TableEntry {
                 } else {
                     licensePlateNumber = null;
                 }
-                entry.truckId = TableTruck.getInstance().save(truckNumber, licensePlateNumber);
+                DataProjectAddressCombo projectGroup = TableProjectAddressCombo.getInstance().query(projectAddressComboId);
+                long projectNameId;
+                String companyName;
+                if (projectGroup != null) {
+                    projectNameId = projectGroup.projectNameId;
+                    companyName = projectGroup.getCompanyName();
+                } else {
+                    projectNameId = 0;
+                    companyName = null;
+                }
+                entry.truckId = TableTruck.getInstance().save(
+                        truckNumber, licensePlateNumber, projectNameId, companyName);
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
                 entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
 

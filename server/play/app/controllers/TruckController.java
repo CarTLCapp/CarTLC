@@ -159,6 +159,7 @@ public class TruckController extends Controller {
         truck.update();
 
         Logger.info("Truck updated: " + truck.toString());
+        Version.inc(Version.VERSION_TRUCK);
 
         return list();
     }

@@ -656,6 +656,18 @@ public class DCPing extends DCPost {
                     if (ele.has("license_plate")) {
                         incoming.licensePlateNumber = ele.getString("license_plate");
                     }
+                    if (ele.has("project_id")) {
+                        int project_server_id = ele.getInt("project_id");
+                        DataProject project = TableProjects.getInstance().queryByServerId(project_server_id);
+                        if (project == null) {
+                            Timber.e("Can't find any project with server ID " + project_server_id);
+                        } else {
+                            incoming.projectNameId = project.id;
+                        }
+                    }
+                    if (ele.has("company_name")) {
+                        incoming.companyName = ele.getString("company_name");
+                    }
                     DataTruck item = TableTruck.getInstance().queryByServerId(incoming.serverId);
                     if (item == null) {
                         DataTruck match = get(unprocessed, incoming);

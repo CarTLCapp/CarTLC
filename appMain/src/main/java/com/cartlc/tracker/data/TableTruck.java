@@ -6,6 +6,7 @@ import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
+import com.amazonaws.util.StringUtils;
 import com.cartlc.tracker.app.TBApplication;
 
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ public class TableTruck {
     static final String KEY_TRUCK_NUMBER  = "truck_number";
     static final String KEY_LICENSE_PLATE = "license_plate";
     static final String KEY_SERVER_ID     = "server_id";
+    static final String KEY_PROJECT_ID    = "project_id";
+    static final String KEY_COMPANY_NAME  = "company_name";
 
     static TableTruck sInstance;
 
@@ -56,15 +59,27 @@ public class TableTruck {
         sbuf.append(KEY_LICENSE_PLATE);
         sbuf.append(" varchar(128), ");
         sbuf.append(KEY_SERVER_ID);
-        sbuf.append(" integer)");
+        sbuf.append(" integer, ");
+        sbuf.append(KEY_PROJECT_ID);
+        sbuf.append(" int default 0, ");
+        sbuf.append(KEY_COMPANY_NAME);
+        sbuf.append(" varchar(256))");
         mDb.execSQL(sbuf.toString());
     }
 
+    public static void upgrade11(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_PROJECT_ID + " int default 0");
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_COMPANY_NAME + " varchar(256)");
+        } catch (Exception ex) {
+            TBApplication.ReportError(ex, TableTruck.class, "upgrade11()", "db");
+        }
+    }
     // Will ensure the said truck and license plate are stored in the database.
     // Trys to take care of existing entries smartly. Prefers license plate entry
     // to truck number entries in case of duplication.
     // @Returns id of newly saved truck.
-    public long save(long truckNumber, String licensePlate) {
+    public long save(long truckNumber, String licensePlate, long projectId, String companyName) {
         String selection;
         String[] selectionArgs;
         Cursor cursor = null;
@@ -78,13 +93,29 @@ public class TableTruck {
                 final int idxId = cursor.getColumnIndex(KEY_ROWID);
                 final int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
                 final int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
+                final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+                final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
                 truck.truckNumber = cursor.getInt(idxTruckNumber);
                 truck.licensePlateNumber = cursor.getString(idxLicensePlate);
+                truck.projectNameId = cursor.getInt(idxProjectId);
+                truck.companyName = cursor.getString(idxCompanyName);
                 truck.id = cursor.getLong(idxId);
+                String where = KEY_ROWID + "=?";
+                String[] whereArgs = new String[]{Long.toString(truck.id)};
+                boolean doUpdate = false;
                 if ((truckNumber != truck.truckNumber) && truckNumber > 0) {
-                    String where = KEY_ROWID + "=?";
-                    String[] whereArgs = new String[]{Long.toString(truck.id)};
                     values.put(KEY_TRUCK_NUMBER, truckNumber);
+                    doUpdate = true;
+                }
+                if (truck.projectNameId != projectId && projectId > 0) {
+                    values.put(KEY_PROJECT_ID, projectId);
+                    doUpdate = true;
+                }
+                if (companyName != null && !companyName.equals(truck.companyName)) {
+                    values.put(KEY_COMPANY_NAME, companyName);
+                    doUpdate = true;
+                }
+                if (doUpdate) {
                     mDb.update(TABLE_NAME, values, where, whereArgs);
                 }
             } else {
@@ -108,8 +139,14 @@ public class TableTruck {
                     }
                 } else {
                     values.put(KEY_LICENSE_PLATE, licensePlate);
-                    truck.id = mDb.insert(TABLE_NAME, null, values);
                 }
+                if (projectId > 0) {
+                    values.put(KEY_PROJECT_ID, projectId);
+                }
+                if (!TextUtils.isEmpty(companyName)) {
+                    values.put(KEY_COMPANY_NAME, companyName);
+                }
+                truck.id = mDb.insert(TABLE_NAME, null, values);
             }
         } else {
             if (truckNumber == 0) {
@@ -123,11 +160,35 @@ public class TableTruck {
                 cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
                 if (cursor.getCount() == 0) {
                     values.put(KEY_TRUCK_NUMBER, truckNumber);
+                    if (projectId > 0) {
+                        values.put(KEY_PROJECT_ID, projectId);
+                    }
+                    if (!TextUtils.isEmpty(companyName)) {
+                        values.put(KEY_COMPANY_NAME, companyName);
+                    }
                     truck.id = mDb.insert(TABLE_NAME, null, values);
                 } else {
                     final int rowIdIndex = cursor.getColumnIndex(KEY_ROWID);
+                    final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+                    final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
                     if (rowIdIndex >= 0) {
                         truck.id = cursor.getLong(rowIdIndex);
+                        truck.projectNameId = cursor.getInt(idxProjectId);
+                        truck.companyName = cursor.getString(idxCompanyName);
+                        boolean doUpdate = false;
+                        if (truck.projectNameId != projectId && projectId > 0) {
+                            values.put(KEY_PROJECT_ID, projectId);
+                            doUpdate = true;
+                        }
+                        if (companyName != null && !companyName.equals(truck.companyName)) {
+                            values.put(KEY_COMPANY_NAME, companyName);
+                            doUpdate = true;
+                        }
+                        if (doUpdate) {
+                            String where = KEY_ROWID + "=?";
+                            String[] whereArgs = new String[]{Long.toString(truck.id)};
+                            mDb.update(TABLE_NAME, values, where, whereArgs);
+                        }
                     }
                 }
             } catch (CursorIndexOutOfBoundsException ex) {
@@ -144,6 +205,8 @@ public class TableTruck {
         ContentValues values = new ContentValues();
         values.put(KEY_TRUCK_NUMBER, truck.truckNumber);
         values.put(KEY_LICENSE_PLATE, truck.licensePlateNumber);
+        values.put(KEY_PROJECT_ID, truck.projectNameId);
+        values.put(KEY_COMPANY_NAME, truck.companyName);
         values.put(KEY_SERVER_ID, truck.serverId);
         if (truck.id > 0) {
             String where = KEY_ROWID + "=?";
@@ -161,14 +224,18 @@ public class TableTruck {
         Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
         DataTruck truck = new DataTruck();
         if (cursor.moveToNext()) {
-            int idxId = cursor.getColumnIndex(KEY_ROWID);
-            int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
-            int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
-            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+            final int idxId = cursor.getColumnIndex(KEY_ROWID);
+            final int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
+            final int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
+            final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+            final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+            final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
             truck.id = cursor.getLong(idxId);
             truck.truckNumber = cursor.getInt(idxTruckNumber);
             truck.licensePlateNumber = cursor.getString(idxLicensePlate);
             truck.serverId = cursor.getLong(idxServerId);
+            truck.projectNameId = cursor.getInt(idxProjectId);
+            truck.companyName = cursor.getString(idxCompanyName);
         } else {
             truck = null;
         }
@@ -176,11 +243,17 @@ public class TableTruck {
     }
 
     public List<DataTruck> query() {
-        Cursor cursor = mDb.query(TABLE_NAME, null, null, null, null, null, null, null);
-        int idxId = cursor.getColumnIndex(KEY_ROWID);
-        int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
-        int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
-        int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+        return query(null, null);
+    }
+
+    public List<DataTruck> query(String selection, String [] selectionArgs) {
+        Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
+        final int idxId = cursor.getColumnIndex(KEY_ROWID);
+        final int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
+        final int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
+        final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+        final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+        final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
         List<DataTruck> list = new ArrayList();
         while (cursor.moveToNext()) {
             DataTruck truck = new DataTruck();
@@ -188,15 +261,41 @@ public class TableTruck {
             truck.truckNumber = cursor.getInt(idxTruckNumber);
             truck.licensePlateNumber = cursor.getString(idxLicensePlate);
             truck.serverId = cursor.getLong(idxServerId);
+            truck.projectNameId = cursor.getInt(idxProjectId);
+            truck.companyName = cursor.getString(idxCompanyName);
             list.add(truck);
         }
         return list;
     }
 
-    public List<String> queryStrings() {
-        ArrayList<String> list = new ArrayList();
-        List<DataTruck> trucks = query();
+    public List<String> queryStrings(DataProjectAddressCombo curGroup) {
+        String selection;
+        String [] selectionArgs;
+        if (curGroup != null) {
+            StringBuffer sbuf = new StringBuffer();
+            sbuf.append("(");
+            sbuf.append(KEY_PROJECT_ID);
+            sbuf.append("=? OR ");
+            sbuf.append(KEY_PROJECT_ID);
+            sbuf.append("=0)");
+            sbuf.append(" AND ");
+            sbuf.append("(");
+            sbuf.append(KEY_COMPANY_NAME);
+            sbuf.append("=? OR ");
+            sbuf.append(KEY_COMPANY_NAME);
+            sbuf.append(" IS NULL)");
+            selection = sbuf.toString();
+            selectionArgs = new String[]{
+                    curGroup.getProjectName(),
+                    curGroup.getCompanyName()
+            };
+        } else {
+            selection = null;
+            selectionArgs = null;
+        }
+        List<DataTruck> trucks = query(selection, selectionArgs);
         Collections.sort(trucks);
+        ArrayList<String> list = new ArrayList();
         for (DataTruck truck : trucks) {
             list.add(truck.toString());
         }
@@ -209,14 +308,18 @@ public class TableTruck {
         Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
         DataTruck truck = new DataTruck();
         if (cursor.moveToNext()) {
-            int idxId = cursor.getColumnIndex(KEY_ROWID);
-            int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
-            int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
-            int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+            final int idxId = cursor.getColumnIndex(KEY_ROWID);
+            final int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
+            final int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
+            final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+            final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
+            final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
             truck.id = cursor.getLong(idxId);
             truck.truckNumber = cursor.getInt(idxTruckNumber);
             truck.licensePlateNumber = cursor.getString(idxLicensePlate);
             truck.serverId = cursor.getLong(idxServerId);
+            truck.projectNameId = cursor.getInt(idxProjectId);
+            truck.companyName = cursor.getString(idxCompanyName);
         } else {
             truck = null;
         }

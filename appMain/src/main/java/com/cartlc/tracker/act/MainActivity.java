@@ -855,7 +855,8 @@ public class MainActivity extends AppCompatActivity {
                 mEntrySimple.setText(PrefHelper.getInstance().getTruckValue());
                 mEntrySimple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
                 showMainListFrame(mEntryFrame);
-                setList(R.string.title_truck, PrefHelper.KEY_TRUCK, TableTruck.getInstance().queryStrings());
+                setList(R.string.title_truck, PrefHelper.KEY_TRUCK,
+                        TableTruck.getInstance().queryStrings(PrefHelper.getInstance().getCurrentProjectGroup()));
                 break;
             case EQUIPMENT:
                 mNext.setVisibility(View.VISIBLE);

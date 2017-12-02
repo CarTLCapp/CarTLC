@@ -455,7 +455,11 @@ public class PrefHelper extends PrefHelperBase {
         entry.equipmentCollection = new DataCollectionEquipmentEntry(getNextEquipmentCollectionID());
         entry.equipmentCollection.addChecked();
         entry.pictureCollection = TablePictureCollection.getInstance().createCollectionFromPending();
-        entry.truckId = TableTruck.getInstance().save(getTruckNumber(), getLicensePlate());
+        entry.truckId = TableTruck.getInstance().save(
+                getTruckNumber(),
+                getLicensePlate(),
+                projectGroup.projectNameId,
+                projectGroup.getCompanyName());
         entry.status = getStatus();
         entry.saveNotes(getNextNoteCollectionID());
         entry.date = System.currentTimeMillis();
