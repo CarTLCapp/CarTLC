@@ -674,21 +674,21 @@ public class DCPing extends DCPost {
                         if (match != null) {
                             incoming.id = match.id;
                             TableTruck.getInstance().save(incoming);
-                            Timber.i("Commandeer local: " + incoming.toString());
+                            Timber.i("Commandeer local: " + incoming.toLongString());
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
-                            Timber.i("New truck: " + incoming.toString());
+                            Timber.i("New truck: " + incoming.toLongString());
                             TableTruck.getInstance().save(incoming);
                         }
                     } else {
                         // Change of data
                         if (!incoming.equals(item)) {
-                            Timber.i("Change: " + incoming.toString());
+                            Timber.i("Change: " + incoming.toLongString());
                             incoming.id = item.id;
                             TableTruck.getInstance().save(incoming);
                         } else {
-                            Timber.i("No change: " + item.toString());
+                            Timber.i("No change: " + item.toLongString());
                         }
                         unprocessed.remove(item);
                     }

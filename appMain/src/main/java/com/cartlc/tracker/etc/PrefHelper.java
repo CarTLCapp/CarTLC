@@ -286,6 +286,7 @@ public class PrefHelper extends PrefHelperBase {
         setVersionProject(VERSION_RESET);
         setVersionNote(VERSION_RESET);
         setVersionCompany(VERSION_RESET);
+        setVersionTruck(VERSION_RESET);
     }
 
     public void detectSpecialUpdateCheck() {

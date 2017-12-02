@@ -48,7 +48,6 @@ public class DataEquipment implements Comparable<DataEquipment> {
         return super.equals(obj);
     }
 
-
     @Override
     public int compareTo(@NonNull DataEquipment o) {
         return name.compareTo(o.name);

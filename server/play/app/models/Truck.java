@@ -54,7 +54,9 @@ public class Truck extends com.avaje.ebean.Model {
     }
 
     public static List<Truck> list() {
-        return find.all();
+        return find.where()
+                .orderBy("truck_number asc")
+                .findList();
     }
 
     public static List<Truck> findByUploadId(int upload_id) {
