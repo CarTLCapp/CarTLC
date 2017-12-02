@@ -500,6 +500,8 @@ public class PrefHelper extends PrefHelperBase {
         entry.status = getStatus();
         entry.uploadedMaster = false;
         entry.uploadedAws = false;
+        entry.hasError = false;
+        entry.serverErrorCount = 0;
         // Be careful here: I use the date to match an entry when looking up the server id for older APP versions.
         if (entry.serverId > 0) {
             entry.date = System.currentTimeMillis();

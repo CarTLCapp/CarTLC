@@ -68,10 +68,10 @@ public class TableTruck {
         mDb.execSQL(sbuf.toString());
     }
 
-    public static void upgrade11(SQLiteDatabase db) {
+    public void upgrade11() {
         try {
-            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_PROJECT_ID + " int default 0");
-            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_COMPANY_NAME + " varchar(256)");
+            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_PROJECT_ID + " int default 0");
+            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_COMPANY_NAME + " varchar(256)");
         } catch (Exception ex) {
             TBApplication.ReportError(ex, TableTruck.class, "upgrade11()", "db");
         }
@@ -150,7 +150,7 @@ public class TableTruck {
                 truck.id = mDb.insert(TABLE_NAME, null, values);
             }
         } else {
-            if (truckNumber == 0) {
+            if (truckNumber <= 0) {
                 Timber.e("Invalid truck entry ignored");
                 return 0;
             }
@@ -159,16 +159,7 @@ public class TableTruck {
                 selection = KEY_TRUCK_NUMBER + "=?";
                 selectionArgs = new String[]{Long.toString(truckNumber)};
                 cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-                if (cursor.getCount() == 0) {
-                    values.put(KEY_TRUCK_NUMBER, truckNumber);
-                    if (projectId > 0) {
-                        values.put(KEY_PROJECT_ID, projectId);
-                    }
-                    if (!TextUtils.isEmpty(companyName)) {
-                        values.put(KEY_COMPANY_NAME, companyName);
-                    }
-                    truck.id = mDb.insert(TABLE_NAME, null, values);
-                } else {
+                if (cursor != null && cursor.moveToFirst() && cursor.getCount() > 0) {
                     final int rowIdIndex = cursor.getColumnIndex(KEY_ROWID);
                     final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
                     final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
@@ -191,9 +182,24 @@ public class TableTruck {
                             mDb.update(TABLE_NAME, values, where, whereArgs);
                         }
                     }
+                    cursor.close();
+                }
+                else {
+                    cursor.close();
+                    values.put(KEY_TRUCK_NUMBER, truckNumber);
+                    if (projectId > 0) {
+                        values.put(KEY_PROJECT_ID, projectId);
+                    }
+                    if (!TextUtils.isEmpty(companyName)) {
+                        values.put(KEY_COMPANY_NAME, companyName);
+                    }
+                    truck.id = mDb.insert(TABLE_NAME, null, values);
                 }
             } catch (CursorIndexOutOfBoundsException ex) {
-                TBApplication.ReportError(ex, TableTruck.class, "saveUploaded()", "db");
+                StringBuilder sbuf = new StringBuilder();
+                sbuf.append(ex.getMessage());
+                sbuf.append(" while working with truck " + truckNumber);
+                TBApplication.ReportError(sbuf.toString(), TableTruck.class, "save()", "db");
             }
         }
         if (cursor != null) {

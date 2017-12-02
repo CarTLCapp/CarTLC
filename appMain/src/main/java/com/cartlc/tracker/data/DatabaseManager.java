@@ -17,7 +17,7 @@ public class DatabaseManager {
     static final String DATABASE_NAME    = "cartcl.db";
     // Note: Jumping from 2 to 9 to get around the allowBackup bug.
     // Could now drop it down to 3, but who cares.
-    static final int    DATABASE_VERSION = 11;
+    static final int    DATABASE_VERSION = 13;
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -84,9 +84,14 @@ public class DatabaseManager {
                 TableEntry.getInstance().upgrade3();
             } else if (oldVersion <= 9) {
                 TableCrash.upgrade10(db);
-                TableTruck.upgrade11(db);
+                TableTruck.getInstance().upgrade11();
             } else if (oldVersion <= 10) {
-                TableTruck.upgrade11(db);
+                TableTruck.getInstance().upgrade11();
+                TableEntry.getInstance().upgrade11(); // Collapse this back down to 11 when ready.
+            } else if (oldVersion <= 11) {
+                TableEntry.getInstance().upgrade11(); // Collapse this back down to 11 when ready.
+            } else if (oldVersion <= 12) {
+                TableEntry.getInstance().upgrade11B(); // Collapse this back down to 11 when ready.
             }
         }
 

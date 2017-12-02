@@ -25,15 +25,18 @@ public class DCPost {
         try {
             inputStream = connection.getInputStream();
         } catch (Exception ex) {
-            final String msg = "Server is DOWN. (" + ex.getMessage() + ")";
-            Log.e(TAG, msg);
-            TBApplication.ShowError(msg);
+            showError(connection);
             return null;
         }
         if (inputStream == null) {
-            final String msg = "NULL response from server";
-            Log.e(TAG, msg);
-            TBApplication.ShowError(msg);
+            showError(connection);
+            return null;
+        }
+        return getStreamString(inputStream);
+    }
+
+    protected String getStreamString(InputStream inputStream) throws IOException {
+        if (inputStream == null) {
             return null;
         }
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -45,6 +48,19 @@ public class DCPost {
             }
             sbuf.append(inputLine);
         }
+        reader.close();
         return sbuf.toString();
+    }
+
+    protected void showError(HttpURLConnection connection) throws IOException {
+        final String errorMsg = getStreamString(connection.getErrorStream());
+        String msg;
+        if (errorMsg == null) {
+            msg = "Server might be DOWN. Try again later.";
+        } else {
+            msg = "Server COMPLAINT: " + errorMsg;
+        }
+        Log.e(TAG, msg);
+        TBApplication.ShowError(msg);
     }
 }

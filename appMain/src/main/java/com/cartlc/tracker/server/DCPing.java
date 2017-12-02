@@ -58,6 +58,9 @@ public class DCPing extends DCPost {
     static final String UPLOAD_RESET_TRIGGER = "reset_upload";
     static final String RE_REGISTER_TRIGGER  = "re-register";
 
+    // After this many times indicate to the user if there is a problem that needs to be
+    // addressed with the entry.
+    static final int FAILED_UPLOADED_TRIGGER = 5;
 
     final String  SERVER_URL;
     final String  REGISTER;
@@ -715,8 +718,12 @@ public class DCPing extends DCPost {
     int sendEntries(List<DataEntry> list) {
         int count = 0;
         for (DataEntry entry : list) {
-            if (sendEntry(entry)) {
+            if (entry.hasError) {
+                PrefHelper.getInstance().setDoErrorCheck(true);
+            } else if (sendEntry(entry)) {
                 count++;
+            } else if (++entry.serverErrorCount > FAILED_UPLOADED_TRIGGER) {
+                entry.hasError = true;
             }
         }
         return count;
@@ -813,6 +820,8 @@ public class DCPing extends DCPost {
             if (result != null) {
                 if (TextUtils.isDigitsOnly(result)) {
                     entry.uploadedMaster = true;
+                    entry.serverErrorCount = 0;
+                    entry.hasError = false;
                     entry.serverId = Integer.parseInt(result);
                     TableEntry.getInstance().saveUploaded(entry);
                     success = true;

@@ -74,7 +74,7 @@ public class CheckError {
         public boolean checkErrors(Activity act, CheckErrorResult callback) {
             List<DataEntry> entries = TableEntry.getInstance().query();
             for (DataEntry entry : entries) {
-                if (!hasTruck(entry)) {
+                if (entry.hasError) {
                     showTruckError(act, entry, callback);
                     return true;
                 }

@@ -131,6 +131,10 @@ public class TBApplication extends Application {
     }
 
     public static String ReportError(Exception ex, Class claz, String function, String type) {
+        return ReportError(ex.getMessage(), claz, function, type);
+    }
+
+    public static String ReportError(String msg, Class claz, String function, String type) {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("Class:");
         sbuf.append(claz.getSimpleName());
@@ -139,7 +143,7 @@ public class TBApplication extends Application {
         sbuf.append(" ");
         sbuf.append(type);
         sbuf.append(": ");
-        sbuf.append(ex.getMessage());
+        sbuf.append(msg);
         Timber.e(sbuf.toString());
         return sbuf.toString();
     }

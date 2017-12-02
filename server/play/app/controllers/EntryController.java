@@ -327,10 +327,10 @@ public class EntryController extends Controller {
                             String name = subvalue.textValue();
                             List<Note> notes = Note.findByName(name);
                             if (notes == null || notes.size() == 0) {
-                                missing.add("note:" + name);
+                                missing.add("note: '" + name + "'");
                             } else if (notes.size() > 1) {
                                 Logger.error("Too many notes with name: " + name);
-                                missing.add("note:" + name);
+                                missing.add("note: '" + name + "'");
                             } else {
                                 collection.note_id = notes.get(0).id;
                             }
@@ -371,10 +371,14 @@ public class EntryController extends Controller {
     Result missingRequest(ArrayList<String> missing) {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("Missing fields:");
+        boolean comma = false;
         for (String field : missing)
         {
-            sbuf.append(" ");
+            if (comma) {
+                sbuf.append(", ");
+            }
             sbuf.append(field);
+            comma = true;
         }
         sbuf.append("\n");
         return badRequest2(sbuf.toString());

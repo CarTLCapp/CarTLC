@@ -45,8 +45,10 @@ public class TableEntry {
     static final String KEY_TRUCK_ID                 = "truck_id";
     static final String KEY_STATUS                   = "status";
     static final String KEY_SERVER_ID                = "server_id";
+    static final String KEY_SERVER_ERROR_COUNT       = "server_error_count";
     static final String KEY_UPLOADED_MASTER          = "uploaded_master";
     static final String KEY_UPLOADED_AWS             = "uploaded_aws";
+    static final String KEY_HAD_ERROR                = "had_error";
 
     static TableEntry sInstance;
 
@@ -137,6 +139,22 @@ public class TableEntry {
         }
     }
 
+    public void upgrade11() {
+        try {
+            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_HAD_ERROR + " bit default 0");
+        } catch (Exception ex) {
+            TBApplication.ReportError(ex, TableEntry.class, "upgrade11()", "db");
+        }
+    }
+
+    public void upgrade11B() {
+        try {
+            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_SERVER_ERROR_COUNT + " smallint default 0");
+        } catch (Exception ex) {
+            TBApplication.ReportError(ex, TableEntry.class, "upgrade11()", "db");
+        }
+    }
+
     public void clear() {
         try {
             mDb.delete(TABLE_NAME, null, null);
@@ -167,9 +185,13 @@ public class TableEntry {
         sbuf.append(" tinyint, ");
         sbuf.append(KEY_SERVER_ID);
         sbuf.append(" long default 0, ");
+        sbuf.append(KEY_SERVER_ERROR_COUNT);
+        sbuf.append(" smallint default 0, ");
         sbuf.append(KEY_UPLOADED_MASTER);
         sbuf.append(" bit default 0, ");
         sbuf.append(KEY_UPLOADED_AWS);
+        sbuf.append(" bit default 0, ");
+        sbuf.append(KEY_HAD_ERROR);
         sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
     }
@@ -223,8 +245,10 @@ public class TableEntry {
             int idxTruckId = cursor.getColumnIndex(KEY_TRUCK_ID);
             int idxStatus = cursor.getColumnIndex(KEY_STATUS);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
+            int idxServerErrorCount = cursor.getColumnIndex(KEY_SERVER_ERROR_COUNT);
             int idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER);
             int idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS);
+            int idxHasError = cursor.getColumnIndex(KEY_HAD_ERROR);
             DataEntry entry;
             while (cursor.moveToNext()) {
                 entry = new DataEntry();
@@ -242,8 +266,10 @@ public class TableEntry {
                     entry.status = TruckStatus.from(cursor.getInt(idxStatus));
                 }
                 entry.serverId = cursor.getInt(idxServerId);
+                entry.serverErrorCount = cursor.getShort(idxServerErrorCount);
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
                 entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
+                entry.hasError = cursor.getShort(idxHasError) != 0;
                 list.add(entry);
             }
             cursor.close();
@@ -355,8 +381,10 @@ public class TableEntry {
             values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId);
             values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollection.id);
             values.put(KEY_SERVER_ID, entry.serverId);
+            values.put(KEY_SERVER_ERROR_COUNT, entry.serverErrorCount);
             values.put(KEY_UPLOADED_AWS, entry.uploadedAws ? 1 : 0);
             values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster ? 1 : 0);
+            values.put(KEY_HAD_ERROR, entry.hasError ? 1 : 0);
             if (entry.status != null) {
                 values.put(KEY_STATUS, entry.status.ordinal());
             }
@@ -386,8 +414,10 @@ public class TableEntry {
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_SERVER_ID, entry.serverId);
+            values.put(KEY_SERVER_ERROR_COUNT, entry.serverErrorCount);
             values.put(KEY_UPLOADED_AWS, entry.uploadedAws ? 1 : 0);
             values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster ? 1 : 0);
+            values.put(KEY_HAD_ERROR, entry.hasError ? 1 : 0);
             String where = KEY_ROWID + "=?";
             String[] whereArgs = {Long.toString(entry.id)};
             if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {
@@ -407,6 +437,8 @@ public class TableEntry {
             ContentValues values = new ContentValues();
             values.put(KEY_UPLOADED_MASTER, 0);
             values.put(KEY_UPLOADED_AWS, 0);
+            values.put(KEY_HAD_ERROR, 0);
+            values.put(KEY_SERVER_ERROR_COUNT, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
                 Timber.e("TableEntry.clearUploaded(): Unable to update entries");
             }

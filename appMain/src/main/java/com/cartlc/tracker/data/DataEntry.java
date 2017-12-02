@@ -26,8 +26,10 @@ public class DataEntry {
     public long                         truckId;
     public TruckStatus                  status;
     public int                          serverId;
+    public short                        serverErrorCount;
     public boolean                      uploadedMaster;
     public boolean                      uploadedAws;
+    public boolean                      hasError;
 
     public DataEntry() {
     }
