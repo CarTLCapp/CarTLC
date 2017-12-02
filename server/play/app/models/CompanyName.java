@@ -62,7 +62,7 @@ public class CompanyName extends Model {
         }
     }
 
-    public static List<String> getNames() {
+    public static ArrayList<String> getNames() {
         List<CompanyName> list;
         list = find.where()
                 .eq("disabled", false)
@@ -72,6 +72,12 @@ public class CompanyName extends Model {
         for (CompanyName company : list) {
             names.add(company.name);
         }
+        return names;
+    }
+
+    public static List<String> getNamesWithBlank() {
+        ArrayList<String> names = getNames();
+        names.add(0, "");
         return names;
     }
 

@@ -14,8 +14,8 @@
 
             @b3.text(truckForm("truck_number"), '_label -> "Truck Number", '_help -> "")
             @b3.text(truckForm("license_plate"), '_label -> "License Plate", '_help -> "")
-            @b3.select(truckForm("project_name"), options = options(Project.listNames()), args = '_label -> "Project:")
-            @b3.select(truckForm("company_name"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
+            @b3.select(truckForm("project_name"), options = options(Project.listNamesWithBlank()), args = '_label -> "Project:")
+            @b3.select(truckForm("company_name"), options = options(CompanyName.getNamesWithBlank()), args = '_label -> "Company:")
 
         </fieldset>
 

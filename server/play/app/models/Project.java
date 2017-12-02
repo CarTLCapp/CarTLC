@@ -48,11 +48,17 @@ public class Project extends Model implements Comparable<Project> {
                 .orderBy("name asc").findList();
     }
 
-    public static List<String> listNames() {
+    public static ArrayList<String> listNames() {
         ArrayList<String> names = new ArrayList<String>();
         for (Project project : list()) {
             names.add(project.name);
         }
+        return names;
+    }
+
+    public static List<String> listNamesWithBlank() {
+        ArrayList<String> names = listNames();
+        names.add(0, "");
         return names;
     }
 

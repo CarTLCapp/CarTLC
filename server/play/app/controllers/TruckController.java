@@ -132,18 +132,30 @@ public class TruckController extends Controller {
         if (truck == null) {
             return badRequest("Cannot find truck");
         }
-        try {
-            truck.truck_number = Integer.parseInt(updateTruck.truck_number);
-        } catch (NumberFormatException ex) {
-            return badRequest(ex.getMessage());
+        if (updateTruck.truck_number.trim().isEmpty()) {
+            truck.truck_number = 0;
+        } else {
+            try {
+                truck.truck_number = Integer.parseInt(updateTruck.truck_number);
+            } catch (NumberFormatException ex) {
+                return badRequest(ex.getMessage());
+            }
         }
         truck.license_plate = updateTruck.license_plate;
-        Project project = Project.findByName(updateTruck.project_name);
-        if (project == null) {
-            return badRequest("Cannot find project named: " + updateTruck.project_name);
+        if (updateTruck.project_name.trim().isEmpty()) {
+            truck.project_id = 0;
+        } else {
+            Project project = Project.findByName(updateTruck.project_name);
+            if (project == null) {
+                return badRequest("Cannot find project named: " + updateTruck.project_name);
+            }
+            truck.project_id = project.id;
         }
-        truck.project_id = project.id;
-        truck.company_name_id = CompanyName.save(updateTruck.company_name);
+        if (updateTruck.company_name.trim().isEmpty()) {
+            truck.company_name_id = 0;
+        } else {
+            truck.company_name_id = CompanyName.save(updateTruck.company_name);
+        }
         truck.update();
 
         Logger.info("Truck updated: " + truck.toString());
