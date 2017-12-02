@@ -59,16 +59,16 @@ public class DCPing extends DCPost {
     static final String RE_REGISTER_TRIGGER  = "re-register";
 
 
-    final String SERVER_URL;
-    final String REGISTER;
-    final String ENTER;
-    final String PING;
-    final String PROJECTS;
-    final String COMPANIES;
-    final String EQUIPMENTS;
-    final String NOTES;
-    final String TRUCKS;
-    final String MESSAGE;
+    final String  SERVER_URL;
+    final String  REGISTER;
+    final String  ENTER;
+    final String  PING;
+    final String  PROJECTS;
+    final String  COMPANIES;
+    final String  EQUIPMENTS;
+    final String  NOTES;
+    final String  TRUCKS;
+    final String  MESSAGE;
     final Context mContext;
     String mVersion;
 
@@ -819,7 +819,7 @@ public class DCPing extends DCPost {
                     Timber.i("SUCCESS, ENTRY SERVER ID is " + entry.serverId);
                 } else {
                     StringBuilder sbuf = new StringBuilder();
-                    sbuf.append("While trying to send entry: " );
+                    sbuf.append("While trying to send entry: ");
                     sbuf.append(entry.toString());
                     sbuf.append("\nERROR: ");
                     sbuf.append(result);

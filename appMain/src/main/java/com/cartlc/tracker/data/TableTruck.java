@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.amazonaws.util.StringUtils;
 import com.cartlc.tracker.app.TBApplication;
@@ -286,7 +287,7 @@ public class TableTruck {
             sbuf.append(" IS NULL)");
             selection = sbuf.toString();
             selectionArgs = new String[]{
-                    curGroup.getProjectName(),
+                    Long.toString(curGroup.projectNameId),
                     curGroup.getCompanyName()
             };
         } else {
@@ -297,7 +298,9 @@ public class TableTruck {
         Collections.sort(trucks);
         ArrayList<String> list = new ArrayList();
         for (DataTruck truck : trucks) {
-            list.add(truck.toString());
+            if (TableEntry.getInstance().countTrucks(truck.id) == 0) {
+                list.add(truck.toString());
+            }
         }
         return list;
     }

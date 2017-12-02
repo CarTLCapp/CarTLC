@@ -61,6 +61,14 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
         return null;
     }
 
+    public String getHintLine() {
+        StringBuffer sbuf = new StringBuffer();
+        sbuf.append(getProjectName());
+        sbuf.append("\n");
+        sbuf.append(getCompanyName());
+        return sbuf.toString();
+    }
+
     public List<DataEntry> getEntries() {
         return TableEntry.getInstance().queryForProjectAddressCombo(id);
     }

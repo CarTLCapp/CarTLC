@@ -70,6 +70,9 @@ public class DataTruck implements Comparable<DataTruck> {
                 sbuf.append(", ");
             }
             sbuf.append(TableProjects.getInstance().queryProjectName(projectNameId));
+            sbuf.append("(");
+            sbuf.append(projectNameId);
+            sbuf.append(")");
         }
         if (companyName != null) {
             if (sbuf.length() > 0) {

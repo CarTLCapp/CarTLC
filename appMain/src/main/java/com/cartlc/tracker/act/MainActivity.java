@@ -857,6 +857,7 @@ public class MainActivity extends AppCompatActivity {
                 showMainListFrame(mEntryFrame);
                 setList(R.string.title_truck, PrefHelper.KEY_TRUCK,
                         TableTruck.getInstance().queryStrings(PrefHelper.getInstance().getCurrentProjectGroup()));
+                showEntryHint();
                 break;
             case EQUIPMENT:
                 mNext.setVisibility(View.VISIBLE);
@@ -1163,6 +1164,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case STATUS:
                 hint = getStatusHint();
+                break;
+            case TRUCK:
+                hint = PrefHelper.getInstance().getCurrentProjectGroup().getHintLine();
                 break;
         }
         if (hint != null && hint.length() > 0) {
