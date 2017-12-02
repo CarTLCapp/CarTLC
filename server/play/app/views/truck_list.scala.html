@@ -21,6 +21,7 @@
                     <th>Company</th>
                     <th>Entries</th>
                     <th>Work Orders</th>
+                    <th>Created By</th>
                     <th>Delete</th>
                 </tr>
             </thead>
@@ -34,6 +35,7 @@
                         <td>@truck.getCompanyName()</td>
                         <td>@truck.countEntries()</td>
                         <td>@truck.countWorkOrders()</td>
+                        <td>@truck.getCreatedBy()</td>
                         <td>
                             @if(client.is_admin) {
                                 <a href="@routes.TruckController.edit(truck.id)">Edit</a>

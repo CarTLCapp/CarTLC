@@ -204,6 +204,24 @@ public class Truck extends com.avaje.ebean.Model {
         return CompanyName.get(company_name_id);
     }
 
+    public String getCreatedBy() {
+        String name = "";
+        if (created_by > 0) {
+            if (created_by_client) {
+                Client client = Client.find.byId((long) created_by);
+                if (client != null) {
+                    name = client.name;
+                }
+            } else {
+                Technician tech = Technician.find.byId((long) created_by);
+                if (tech != null) {
+                    name = tech.fullName();
+                }
+            }
+        }
+        return name;
+    }
+
     public int countEntries() {
         return Entry.countEntriesForTruck(id);
     }

@@ -78,22 +78,20 @@ public class TruckController extends Controller {
         ArrayNode array = top.putArray("trucks");
         List<Truck> trucks = Truck.list();
         for (Truck item : trucks) {
-            if (item.created_by_client || item.created_by == tech_id) {
-                ObjectNode node = array.addObject();
-                node.put("id", item.id);
-                if (item.truck_number > 0) {
-                    node.put("truck_number", item.truck_number);
-                }
-                if (item.license_plate != null) {
-                    node.put("license_plate", item.license_plate);
-                }
-                if (item.project_id > 0) {
-                    node.put("project_id", item.project_id);
-                }
-                String companyName = item.getCompanyNameNullOkay();
-                if (companyName != null) {
-                    node.put("company_name", companyName);
-                }
+            ObjectNode node = array.addObject();
+            node.put("id", item.id);
+            if (item.truck_number > 0) {
+                node.put("truck_number", item.truck_number);
+            }
+            if (item.license_plate != null) {
+                node.put("license_plate", item.license_plate);
+            }
+            if (item.project_id > 0) {
+                node.put("project_id", item.project_id);
+            }
+            String companyName = item.getCompanyNameNullOkay();
+            if (companyName != null) {
+                node.put("company_name", companyName);
             }
         }
         return ok(top);
