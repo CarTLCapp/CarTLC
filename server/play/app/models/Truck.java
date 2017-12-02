@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+import java.lang.Long;
 
 import javax.persistence.*;
 
@@ -172,17 +173,16 @@ public class Truck extends com.avaje.ebean.Model {
         return "";
     }
 
-    public String getProjectLine() {
+    public String getProjectName() {
         if (project_id == 0) {
             return "";
         }
         Project project = Project.find.ref(project_id);
         if (project == null) {
-            return "NOT FOUND: " + project_id;
+            return Long.toString(project_id) + "?";
         }
         return project.name;
     }
-
 
     public String getCompanyName() {
         if (company_name_id == 0) {
@@ -190,9 +190,16 @@ public class Truck extends com.avaje.ebean.Model {
         }
         String company = CompanyName.get(company_name_id);
         if (company == null) {
-            return "NOT FOUND: " + company_name_id;
+            return Long.toString(company_name_id) + "?";
         }
         return company;
+    }
+
+    public String getCompanyNameNullOkay() {
+        if (company_name_id == 0) {
+            return null;
+        }
+        return CompanyName.get(company_name_id);
     }
 
     public int countEntries() {
@@ -220,7 +227,7 @@ public class Truck extends com.avaje.ebean.Model {
         }
         if (project_id > 0) {
             sbuf.append(", ");
-            sbuf.append(getProjectLine());
+            sbuf.append(getProjectName());
         }
         if (company_name_id > 0) {
             sbuf.append(", ");

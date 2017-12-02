@@ -138,28 +138,4 @@ public class PostController extends Controller {
         return badRequest(sbuf.toString());
     }
 
-    public Result queryTrucks() {
-        JsonNode json = request().body().asJson();
-        JsonNode value = json.findValue("tech_id");
-        if (value == null) {
-            return badRequest("missing field: tech_id");
-        }
-        int tech_id = value.intValue();
-        ObjectNode top = Json.newObject();
-        ArrayNode array = top.putArray("trucks");
-        List<Truck> trucks = Truck.list();
-        for (Truck item : trucks) {
-            if (item.created_by_client || item.created_by == tech_id) {
-                ObjectNode node = array.addObject();
-                node.put("id", item.id);
-                if (item.truck_number > 0) {
-                    node.put("truck_number", item.truck_number);
-                }
-                if (item.license_plate != null) {
-                    node.put("license_plate", item.license_plate);
-                }
-            }
-        }
-        return ok(top);
-    }
 }

@@ -17,6 +17,8 @@
                 <tr>
                     <th>Truck Number</th>
                     <th>License Plate</th>
+                    <th>Project</th>
+                    <th>Company</th>
                     <th>Entries</th>
                     <th>Work Orders</th>
                     <th>Delete</th>
@@ -28,11 +30,13 @@
                     <tr>
                         <td>@truck.getTruckNumber()</td>
                         <td>@truck.getLicensePlate()</td>
+                        <td>@truck.getProjectName()</td>
+                        <td>@truck.getCompanyName()</td>
                         <td>@truck.countEntries()</td>
                         <td>@truck.countWorkOrders()</td>
                         <td>
-                            @if(client.is_admin && truck.canDelete()) {
-                                <a href="@routes.TruckController.delete(truck.id)">Delete</a>
+                            @if(client.is_admin) {
+                                <a href="@routes.TruckController.edit(truck.id)">Edit</a>
                             } else {
                                 <em>-</em>
                             }

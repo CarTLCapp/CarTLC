@@ -59,7 +59,10 @@ public class DataPicture {
     }
 
     public boolean existsScaled() {
-        return getScaledFile().exists();
+        if (getScaledFile() != null) {
+            return getScaledFile().exists();
+        }
+        return false;
     }
 
     public void remove() {

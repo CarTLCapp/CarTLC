@@ -1,0 +1,35 @@
+@(id: Long, truckForm: Form[InputTruck])
+
+@import helper._
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - Edit Truck Number", home = "/truck") {
+    
+    <h1>Edit client</h1>
+    
+    @b3.form(routes.TruckController.update(id)) {
+        
+        <fieldset>
+
+            @b3.text(truckForm("truck_number"), '_label -> "Truck Number", '_help -> "")
+            @b3.text(truckForm("license_plate"), '_label -> "License Plate", '_help -> "")
+            @b3.select(truckForm("project_name"), options = options(Project.listNames()), args = '_label -> "Project:")
+            @b3.select(truckForm("company_name"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Save this client" class="btn primary"> or
+            <a href="@routes.ClientController.list()" class="btn">Cancel</a>
+        </div>
+
+    }
+
+    @if(Boolean.parseBoolean(truckForm("canDelete").value())) {
+        @b3.form(routes.TruckController.delete(id), 'class -> "topRight") {
+            <input type="submit" value="Delete this truck" class="btn danger">
+        }
+    }
+    
+}
