@@ -39,12 +39,23 @@ public class TechnicianController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
+        Client client = Secured.getClient(ctx());
         if (Secured.isAdmin(ctx())) {
             Form<Technician> technicianForm = formFactory.form(Technician.class).fill(Technician.find.byId(id));
-            return ok(views.html.technician_editForm.render(id, technicianForm));
+            return ok(views.html.technician_editForm.render(id, technicianForm, client));
         } else {
-            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+            return badRequest(views.html.home.render(client));
         }
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result resetUpload(Long id) {
+        Technician tech = Technician.find.byId(id);
+        if (tech != null) {
+            tech.reset_upload = true;
+            tech.update();
+        }
+        return list();
     }
 
     /**
@@ -55,7 +66,7 @@ public class TechnicianController extends Controller {
     public Result update(Long id) throws PersistenceException {
         Form<Technician> technicianForm = formFactory.form(Technician.class).bindFromRequest();
         if (technicianForm.hasErrors()) {
-            return badRequest(views.html.technician_editForm.render(id, technicianForm));
+            return badRequest(views.html.technician_editForm.render(id, technicianForm, Secured.getClient(ctx())));
         }
         Transaction txn = Ebean.beginTransaction();
         try {

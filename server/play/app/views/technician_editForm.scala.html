@@ -1,4 +1,4 @@
-@(id: Long, techForm: Form[Technician])
+@(id: Long, techForm: Form[Technician], client : Client)
 
 @import helper._
 
@@ -7,7 +7,7 @@
 @main("FleetTLC - Edit Technician", home = "/tech") {
     
     <h1>Edit user</h1>
-    
+
     @b3.form(routes.TechnicianController.update(id)) {
         
         <fieldset>
@@ -27,6 +27,12 @@
     @if(Technician.canDelete(id)) {
         @b3.form(routes.TechnicianController.delete(id), 'class -> "topRight") {
             <input type="submit" value="Delete this technician" class="btn danger">
+        }
+    }
+
+    @if(client.is_admin) {
+        @b3.form(routes.CompanyController.delete(id), 'class -> "topRight") {
+            <a href="@routes.TechnicianController.resetUpload(id)" class="btn">Reset Upload</a>
         }
     }
     
