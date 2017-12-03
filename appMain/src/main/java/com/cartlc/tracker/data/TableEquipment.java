@@ -355,15 +355,13 @@ public class TableEquipment {
     }
 
     public void removeOrDisable(DataEquipment equip) {
-        if (equip.isBootStrap) {
-            if (TableCollectionEquipmentEntry.getInstance().countValues(equip.id) == 0) {
-                Timber.i("remove(" + equip.id + ", " + equip.name + ")");
-                remove(equip.id);
-            } else {
-                Timber.i("disable(" + equip.id + ", " + equip.name + ")");
-                equip.disabled = true;
-                update(equip);
-            }
+        if (TableCollectionEquipmentEntry.getInstance().countValues(equip.id) == 0) {
+            Timber.i("remove(" + equip.id + ", " + equip.name + ")");
+            remove(equip.id);
+        } else {
+            Timber.i("disable(" + equip.id + ", " + equip.name + ")");
+            equip.disabled = true;
+            update(equip);
         }
     }
 

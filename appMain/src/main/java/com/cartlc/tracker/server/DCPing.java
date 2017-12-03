@@ -323,8 +323,8 @@ public class DCPing extends DCPost {
                         unprocessed.remove(match);
                     } else {
                         // Otherwise just add the new entry.
-                        Timber.i("New company: " + incoming.toString());
                         TableAddress.getInstance().add(incoming);
+                        Timber.i("New company: " + incoming.toString());
                     }
                 } else {
                     // Change of name, street, city or state?
@@ -335,8 +335,9 @@ public class DCPing extends DCPost {
                         Timber.i("Change: " + incoming.toString());
                         TableAddress.getInstance().update(incoming);
                     } else {
-                        Timber.i("No change: " + name);
+                        Timber.i("No change: " + incoming.toString());
                     }
+                    unprocessed.remove(item);
                 }
             }
             // Remaining unprocessed elements are disabled if they have entries.
@@ -406,7 +407,6 @@ public class DCPing extends DCPost {
                 }
                 // Remaining unprocessed elements are disabled if they have entries.
                 for (DataEquipment item : unprocessed) {
-                    Timber.i("Remove or disabled: " + item.name);
                     TableEquipment.getInstance().removeOrDisable(item);
                 }
             }
@@ -558,20 +558,20 @@ public class DCPing extends DCPost {
                             match.serverId = server_id;
                             match.num_digits = num_digits;
                             TableNote.getInstance().update(match);
-                            Timber.i("Commandeer local: " + name);
+                            Timber.i("Commandeer local: " + match.toString());
                             unprocessed.remove(match);
                         } else {
                             // Otherwise just add the new entry.
-                            Timber.i("New note: " + name);
                             TableNote.getInstance().add(incoming);
+                            Timber.i("New note: " + incoming.toString());
                         }
                     } else {
                         // Change of name, type and/or num_digits
                         if (!incoming.equals(item)) {
-                            Timber.i("Change: " + name);
                             incoming.id = item.id;
                             incoming.serverId = item.serverId;
                             TableNote.getInstance().update(incoming);
+                            Timber.i("Change: " + incoming.toString());
                         } else {
                             Timber.i("No change: " + item.toString());
                         }

@@ -3,6 +3,7 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
 
@@ -283,11 +284,11 @@ public class TableNote {
     }
 
     public void removeIfUnused(DataNote note) {
-        if (note.isBootStrap) {
-            if (TableCollectionNoteEntry.getInstance().countNotes(note.id) == 0) {
-                Timber.i("remove(" + note.id + ", " + note.name + ")");
-                remove(note.id);
-            }
+        if (TableCollectionNoteEntry.getInstance().countNotes(note.id) == 0) {
+            Timber.i("remove(" + note.id + ", " + note.name + ")");
+            remove(note.id);
+        } else {
+            Timber.i("Did not remove unused note because some entries are using it: " + note.toString());
         }
     }
 

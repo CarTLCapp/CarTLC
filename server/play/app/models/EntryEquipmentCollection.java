@@ -79,6 +79,7 @@ public class EntryEquipmentCollection extends Model {
         }
         if (unused.size() > 0) {
             StringBuilder sbuf = new StringBuilder();
+            sbuf.append("Unused entry-equipment items were removed. To recover execute the following SQL commands:\n");
             for (EntryEquipmentCollection item : unused) {
                 sbuf.append("INSERT INTO `entry_equipment_collection` VALUES(" + item.id + "," + item.collection_id + "," + item.equipment_id + ");\n");
                 item.delete();

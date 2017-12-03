@@ -152,9 +152,9 @@ public class DataAddress {
         sbuf.append("), D(");
         sbuf.append(disabled);
         sbuf.append(")");
-        sbuf.append(", S[");
+        sbuf.append(", SID[");
         sbuf.append(serverId);
-        sbuf.append("], ID[");
+        sbuf.append("], LID[");
         sbuf.append(id);
         sbuf.append("]");
         return sbuf.toString();

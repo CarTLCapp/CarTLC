@@ -409,15 +409,13 @@ public class TableAddress {
     }
 
     public void removeOrDisable(DataAddress item) {
-        if (item.isBootStrap) {
-            if ((TableEntry.getInstance().countAddresses(item.id) == 0) && (TableProjectAddressCombo.getInstance().countAddress(item.id) == 0)) {
-                Timber.i("remove(" + item.id + ", " + item.toString() + ")");
-                remove(item.id);
-            } else {
-                Timber.i("disable(" + item.id + ", " + item.toString() + ")");
-                item.disabled = true;
-                update(item);
-            }
+        if ((TableEntry.getInstance().countAddresses(item.id) == 0) && (TableProjectAddressCombo.getInstance().countAddress(item.id) == 0)) {
+            Timber.i("remove(" + item.id + ", " + item.toString() + ")");
+            remove(item.id);
+        } else {
+            Timber.i("disable(" + item.id + ", " + item.toString() + ")");
+            item.disabled = true;
+            update(item);
         }
     }
 

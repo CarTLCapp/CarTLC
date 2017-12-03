@@ -69,6 +69,7 @@ public class EntryNoteCollection extends Model {
         }
         if (unused.size() > 0) {
             StringBuilder sbuf = new StringBuilder();
+            sbuf.append("Unused note-entries were removed. To recover execute the following SQL commands:\n");
             for (EntryNoteCollection item : unused) {
                 sbuf.append("INSERT INTO `entry_note_collection` VALUES(" + item.id + "," + item.collection_id + "," + item.note_id + ",'" + item.note_value + "');\n");
                 item.delete();

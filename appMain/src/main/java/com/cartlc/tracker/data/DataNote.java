@@ -75,6 +75,8 @@ public class DataNote {
         }
         sbuf.append(", #DIGITS=");
         sbuf.append(num_digits);
+        sbuf.append(" SID=");
+        sbuf.append(serverId);
         return sbuf.toString();
     }
 
