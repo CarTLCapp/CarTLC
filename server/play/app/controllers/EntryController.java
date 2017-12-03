@@ -379,6 +379,11 @@ public class EntryController extends Controller {
         } else {
             ret_id = 0;
         }
+        Logger.debug("-ELEMENTS:-");
+        for (Entry e : Entry.find.findList()) {
+            Logger.debug(e.toString());
+        }
+        Logger.debug("------");
         return ok(Long.toString(ret_id));
     }
 
