@@ -327,7 +327,18 @@ public class EntryController extends Controller {
                             String name = subvalue.textValue();
                             List<Note> notes = Note.findByName(name);
                             if (notes == null || notes.size() == 0) {
-                                missing.add("note: '" + name + "'");
+                                // A tech can get into a situation where they are effectively
+                                // creating notes, even though the APP doesn't explicitly allow it,
+                                // if the server created a note, they got it, and then the server
+                                // later deletes it before the tech's app can update.
+                                Note note = new Note();
+                                note.name = name;
+                                note.type = Note.Type.TEXT;
+                                note.created_by = entry.tech_id;
+                                note.created_by_client = false;
+                                note.save();
+                                // Note: don't inc version number because other techs don't really need to know.
+                                Logger.info("Created new note: " + note.toString());
                             } else if (notes.size() > 1) {
                                 Logger.error("Too many notes with name: " + name);
                                 missing.add("note: '" + name + "'");
