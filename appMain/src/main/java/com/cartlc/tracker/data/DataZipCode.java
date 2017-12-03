@@ -12,10 +12,10 @@ public class DataZipCode {
     public String city;
 
     public boolean isValid() {
-        if (zipCode == null || stateLongName == null || stateShortName == null || city == null) {
+        if (zipCode == null || stateLongName == null || city == null) {
             return false;
         }
-        return zipCode.length() > 0 && stateLongName.length() > 0 && stateShortName.length() > 0 && city.length() > 0;
+        return zipCode.length() > 0 && stateLongName.length() > 0 && city.length() > 0;
     }
 
     public String toString() {
@@ -35,8 +35,22 @@ public class DataZipCode {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(city);
         sbuf.append(", ");
-        sbuf.append(stateShortName);
+        if (stateShortName == null) {
+            sbuf.append(stateLongName);
+        } else {
+            sbuf.append(stateShortName);
+        }
         return sbuf.toString();
+    }
+
+    public void check() {
+        if (DataStates.isValid(city)) {
+            if (stateShortName.equals(stateLongName)) {
+                stateLongName = city;
+                city = stateShortName;
+                stateShortName = null;
+            }
+        }
     }
 
 }

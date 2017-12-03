@@ -62,8 +62,8 @@ public class CheckError {
         return mErrorEntry.checkErrors(act, callback);
     }
 
-    public boolean checkProjectErrors(Activity act, CheckErrorResult callback) {
-        return mErrorProject.checkErrors(act, callback);
+    public boolean checkProjectErrors() {
+        return mErrorProject.checkErrors();
     }
 
     class CheckErrorEntry {
@@ -176,10 +176,11 @@ public class CheckError {
 
     class CheckErrorProject {
 
-        public boolean checkErrors(Activity act, CheckErrorResult callback) {
+        public boolean checkErrors() {
             List<DataProjectAddressCombo> entries = TableProjectAddressCombo.getInstance().query();
             for (DataProjectAddressCombo combo : entries) {
                 if (!combo.hasValidState()) {
+                    combo.fix();
                     return true;
                 }
             }

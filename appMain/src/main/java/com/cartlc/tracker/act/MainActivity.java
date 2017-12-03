@@ -61,6 +61,7 @@ import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.event.EventRefreshProjects;
+import com.cartlc.tracker.util.DialogHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -234,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
     DividerItemDecoration      mDivider;
     String                     mCompanyEditing;
     ZipCodeWatcher             mZipCodeWatcher;
-    AlertDialog                mDialog;
+    DialogHelper               mDialogHelper;
     boolean                    mWasNext;
     boolean                    mCurStageEditing;
     boolean                    mDoingCenter;
@@ -265,6 +266,7 @@ public class MainActivity extends AppCompatActivity {
                 TBApplication.hideKeyboard(MainActivity.this, v);
             }
         });
+        mDialogHelper = new DialogHelper(this);
         mCenter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -389,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
         CheckError.getInstance().cleanup();
-        clearDialog();
+        mDialogHelper.clearDialog();
     }
 
     public void onEvent(EventRefreshProjects event) {
@@ -1025,51 +1027,34 @@ public class MainActivity extends AppCompatActivity {
         fillStage();
     }
 
-    void clearDialog() {
-        if (mDialog != null) {
-            mDialog.dismiss();
-            mDialog = null;
-        }
-    }
-
-    void showError(String message) {
-        clearDialog();
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.title_error);
-        builder.setMessage(message);
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+    public void showError(String message) {
+        mDialogHelper.showError(message, new DialogHelper.DialogListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                clearDialog();
-                if (mCurStage == Stage.PICTURE) {
-                    setStage(Stage.CONFIRM);
+            public void onOkay() {
+                if (mCurStage == MainActivity.Stage.PICTURE) {
+                    setStage(MainActivity.Stage.CONFIRM);
                 }
             }
-        });
-        mDialog = builder.create();
-        mDialog.show();
-    }
 
-    void showServerError(String message) {
-        clearDialog();
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.title_error);
-        builder.setMessage(message);
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                clearDialog();
+            public void onCancel() {
             }
         });
-        builder.setNegativeButton(R.string.btn_stop, new DialogInterface.OnClickListener() {
+
+    }
+
+    public void showServerError(String message)
+    {
+        mDialogHelper.showServerError(message, new DialogHelper.DialogListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                clearDialog();
+            public void onOkay() {
+            }
+
+            @Override
+            public void onCancel() {
                 mShowServerError = false;
             }
         });
-        mDialog = builder.create();
-        mDialog.show();
     }
 
     boolean detectNoteError() {
@@ -1245,5 +1230,6 @@ public class MainActivity extends AppCompatActivity {
                 PrefHelper.getInstance().setDoErrorCheck(false);
             }
         }
+        CheckError.getInstance().checkProjectErrors();
     }
 }

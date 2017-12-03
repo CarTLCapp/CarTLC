@@ -1,6 +1,7 @@
 package com.cartlc.tracker.server;
 
 import android.net.Uri;
+import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.TableZipCode;
@@ -34,10 +35,10 @@ public class DCZip extends DCPost {
         public static ObjectType from(JSONArray types) throws JSONException {
             for (int i = 0; i < types.length(); i++) {
                 if ("locality".equals(types.getString(i))) {
-                    return STATE;
+                    return CITY;
                 }
                 if ("administrative_area_level_1".equals(types.getString(i))) {
-                    return CITY;
+                    return STATE;
                 }
                 if ("postal_code".equals(types.getString(i))) {
                     return ZIPCODE;
@@ -88,6 +89,8 @@ public class DCZip extends DCPost {
                     data.zipCode = ele.getString("long_name");
                 }
             }
+            data.check();
+
             if (data.isValid()) {
                 TableZipCode.getInstance().add(data);
                 EventBus.getDefault().post(data);

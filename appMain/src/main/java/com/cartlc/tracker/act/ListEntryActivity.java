@@ -12,10 +12,13 @@ import android.view.MenuItem;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
+import com.cartlc.tracker.etc.CheckError;
 import com.cartlc.tracker.etc.PrefHelper;
+import com.cartlc.tracker.util.DialogHelper;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 public class ListEntryActivity extends AppCompatActivity {
 
@@ -24,6 +27,7 @@ public class ListEntryActivity extends AppCompatActivity {
 
     ListEntryAdapter mEntryListAdapter;
     DataEntry        mSelected;
+    DialogHelper     mDialogHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +42,7 @@ public class ListEntryActivity extends AppCompatActivity {
                 invalidateOptionsMenu();
             }
         });
+        mDialogHelper = new DialogHelper(this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setAutoMeasureEnabled(true);
         mEntriesList.setLayoutManager(linearLayoutManager);
@@ -52,6 +57,12 @@ public class ListEntryActivity extends AppCompatActivity {
         mEntryListAdapter.onDataChanged();
         setTitle(PrefHelper.getInstance().getProjectName());
         setResult(RESULT_CANCELED);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mDialogHelper.clearDialog();
     }
 
     @Override
@@ -70,18 +81,11 @@ public class ListEntryActivity extends AppCompatActivity {
                 PrefHelper.getInstance().setFromEntry(mSelected);
                 setResult(RESULT_OK);
                 finish();
+            } else {
+                mDialogHelper.showError(getString(R.string.error_please_select_an_entry));
             }
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.findItem(R.id.edit);
-        if (item != null) {
-            item.setEnabled(mSelected != null && mSelected.serverId > 0);
-        }
-        return super.onPrepareOptionsMenu(menu);
     }
 
     void clear() {

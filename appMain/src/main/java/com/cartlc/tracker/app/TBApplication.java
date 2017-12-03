@@ -92,6 +92,7 @@ public class TBApplication extends Application {
     public void requestZipCode(String zipCode) {
         DataZipCode data = TableZipCode.getInstance().query(zipCode);
         if (data != null) {
+            data.check();
             EventBus.getDefault().post(data);
         } else if (ServerHelper.getInstance().hasConnection()) {
             Intent intent = new Intent(this, DCService.class);

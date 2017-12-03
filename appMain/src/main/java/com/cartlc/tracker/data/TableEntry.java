@@ -142,13 +142,6 @@ public class TableEntry {
     public void upgrade11() {
         try {
             mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_HAD_ERROR + " bit default 0");
-        } catch (Exception ex) {
-            TBApplication.ReportError(ex, TableEntry.class, "upgrade11()", "db");
-        }
-    }
-
-    public void upgrade11B() {
-        try {
             mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_SERVER_ERROR_COUNT + " smallint default 0");
         } catch (Exception ex) {
             TBApplication.ReportError(ex, TableEntry.class, "upgrade11()", "db");

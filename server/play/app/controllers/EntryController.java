@@ -142,6 +142,9 @@ public class EntryController extends Controller {
                 existing = Entry.find.byId(entry.id);
                 if (existing == null) {
                     existing = Entry.findByDate(entry.tech_id, entry.entry_time);
+                    if (existing != null) {
+                        Logger.info("Could not find entry with ID " + entry.id + ", so located based on time=" + entry.entry_time);
+                    }
                 } else {
                     existing.entry_time = entry.entry_time;
                     existing.tech_id = entry.tech_id;
@@ -149,7 +152,9 @@ public class EntryController extends Controller {
             } else {
                 existing = Entry.findByDate(entry.tech_id, entry.entry_time);
             }
-            if (existing != null) {
+            if (existing == null) {
+                entry.id = 0L;
+            } else {
                 entry = existing;
             }
         }
@@ -379,11 +384,6 @@ public class EntryController extends Controller {
         } else {
             ret_id = 0;
         }
-        Logger.debug("-ELEMENTS:-");
-        for (Entry e : Entry.find.findList()) {
-            Logger.debug(e.toString());
-        }
-        Logger.debug("------");
         return ok(Long.toString(ret_id));
     }
 

@@ -102,6 +102,19 @@ public class DataAddress {
         return DataStates.isValid(state);
     }
 
+    public boolean fix() {
+        if (!hasValidState()) {
+            if (DataStates.isValid(city)) {
+                String saved = city;
+                city = state;
+                state = saved;
+                TableAddress.getInstance().update(this);
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof DataAddress) {
