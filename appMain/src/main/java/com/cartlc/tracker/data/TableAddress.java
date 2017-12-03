@@ -299,8 +299,7 @@ public class TableAddress {
     List<DataAddress> query(String selection, String[] selectionArgs, String orderBy) {
         ArrayList<DataAddress> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_COMPANY, KEY_STATE, KEY_CITY, KEY_STREET, KEY_ZIPCODE, KEY_SERVER_ID, KEY_DISABLED, KEY_LOCAL, KEY_IS_BOOT};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, orderBy, null);
+            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, orderBy, null);
             int idxCompany = cursor.getColumnIndex(KEY_COMPANY);
             int idxState = cursor.getColumnIndex(KEY_STATE);
             int idxCity = cursor.getColumnIndex(KEY_CITY);

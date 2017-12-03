@@ -205,8 +205,7 @@ public abstract class TableCollection {
         List<DataCollectionItem> items = new ArrayList();
         mDb.beginTransaction();
         try {
-            final String[] columns = {KEY_ROWID, KEY_COLLECTION_ID, KEY_VALUE_ID, KEY_SERVER_ID, KEY_IS_BOOT};
-            Cursor cursor = mDb.query(mTableName, columns, null, null, null, null, null, null);
+            Cursor cursor = mDb.query(mTableName, null, null, null, null, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_VALUE_ID);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
@@ -235,10 +234,9 @@ public abstract class TableCollection {
         DataCollectionItem item = null;
         mDb.beginTransaction();
         try {
-            final String[] columns = {KEY_ROWID, KEY_COLLECTION_ID, KEY_VALUE_ID, KEY_IS_BOOT};
             String selection = KEY_SERVER_ID + "=?";
             String selectionArgs[] = {Integer.toString(server_id)};
-            Cursor cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null, null);
+            Cursor cursor = mDb.query(mTableName, null, selection, selectionArgs, null, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_VALUE_ID);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxCollectionId = cursor.getColumnIndex(KEY_COLLECTION_ID);

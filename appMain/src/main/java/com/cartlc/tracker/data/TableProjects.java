@@ -275,8 +275,7 @@ public class TableProjects {
     List<DataProject> query(String selection, String[] selectionArgs) {
         List<DataProject> list = new ArrayList();
         try {
-            final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_DISABLED, KEY_IS_BOOT,};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+            Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_NAME);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
             int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);

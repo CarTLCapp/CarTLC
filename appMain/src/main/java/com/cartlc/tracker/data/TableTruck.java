@@ -155,10 +155,9 @@ public class TableTruck {
                 return 0;
             }
             try {
-                String[] columns = {KEY_ROWID};
                 selection = KEY_TRUCK_NUMBER + "=?";
                 selectionArgs = new String[]{Long.toString(truckNumber)};
-                cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+                cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
                 if (cursor != null && cursor.moveToFirst() && cursor.getCount() > 0) {
                     final int rowIdIndex = cursor.getColumnIndex(KEY_ROWID);
                     final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
@@ -199,7 +198,7 @@ public class TableTruck {
                 StringBuilder sbuf = new StringBuilder();
                 sbuf.append(ex.getMessage());
                 sbuf.append(" while working with truck " + truckNumber);
-                TBApplication.ReportError(sbuf.toString(), TableTruck.class, "save()", "db");
+                TBApplication.ReportError(sbuf.toString(), TableTruck.class, "save(items)", "db");
             }
         }
         if (cursor != null) {
@@ -209,18 +208,22 @@ public class TableTruck {
     }
 
     public long save(DataTruck truck) {
-        ContentValues values = new ContentValues();
-        values.put(KEY_TRUCK_NUMBER, truck.truckNumber);
-        values.put(KEY_LICENSE_PLATE, truck.licensePlateNumber);
-        values.put(KEY_PROJECT_ID, truck.projectNameId);
-        values.put(KEY_COMPANY_NAME, truck.companyName);
-        values.put(KEY_SERVER_ID, truck.serverId);
-        if (truck.id > 0) {
-            String where = KEY_ROWID + "=?";
-            String[] whereArgs = new String[]{Long.toString(truck.id)};
-            mDb.update(TABLE_NAME, values, where, whereArgs);
-        } else {
-            truck.id = mDb.insert(TABLE_NAME, null, values);
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_TRUCK_NUMBER, truck.truckNumber);
+            values.put(KEY_LICENSE_PLATE, truck.licensePlateNumber);
+            values.put(KEY_PROJECT_ID, truck.projectNameId);
+            values.put(KEY_COMPANY_NAME, truck.companyName);
+            values.put(KEY_SERVER_ID, truck.serverId);
+            if (truck.id > 0) {
+                String where = KEY_ROWID + "=?";
+                String[] whereArgs = new String[]{Long.toString(truck.id)};
+                mDb.update(TABLE_NAME, values, where, whereArgs);
+            } else {
+                truck.id = mDb.insert(TABLE_NAME, null, values);
+            }
+        } catch (Exception ex) {
+            TBApplication.ReportError(ex, TableTruck.class, "save(truck)", "db");
         }
         return truck.id;
     }

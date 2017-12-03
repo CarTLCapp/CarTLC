@@ -216,8 +216,7 @@ public class TableEquipment {
 
     List<DataEquipment> query(String selection, String[] selectionArgs) {
         ArrayList<DataEquipment> list = new ArrayList();
-        final String[] columns = {KEY_ROWID, KEY_NAME, KEY_SERVER_ID, KEY_CHECKED, KEY_LOCAL, KEY_IS_BOOT, KEY_DISABLED};
-        Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
+        Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
         final int idxRowId = cursor.getColumnIndex(KEY_ROWID);
         final int idxName = cursor.getColumnIndex(KEY_NAME);
         final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
