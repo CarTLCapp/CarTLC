@@ -5,9 +5,7 @@ import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.amazonaws.util.StringUtils;
 import com.cartlc.tracker.app.TBApplication;
 
 import java.util.ArrayList;
@@ -249,6 +247,7 @@ public class TableTruck {
         } else {
             truck = null;
         }
+        cursor.close();
         return truck;
     }
 
@@ -275,6 +274,7 @@ public class TableTruck {
             truck.companyName = cursor.getString(idxCompanyName);
             list.add(truck);
         }
+        cursor.close();
         return list;
     }
 
@@ -335,6 +335,7 @@ public class TableTruck {
         } else {
             truck = null;
         }
+        cursor.close();
         return truck;
     }
 

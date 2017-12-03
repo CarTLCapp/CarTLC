@@ -96,7 +96,13 @@ public class TableCrash {
             ContentValues values = new ContentValues();
             values.put(KEY_UPLOADED, 0);
             if (mDb.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("TableCrash.clearUploaded(): Unable to update crash entries");
+                Cursor cursor = mDb.query(TABLE_NAME, null, null, null, null, null, null, null);
+                if (cursor != null) {
+                    if (cursor.moveToFirst() && cursor.getCount() > 0) {
+                        Timber.e("TableCrash.clearUploaded(): Unable to update crash entries");
+                    }
+                    cursor.close();
+                }
             }
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -129,6 +135,7 @@ public class TableCrash {
             line.uploaded = cursor.getShort(idxUploaded) != 0;
             lines.add(line);
         }
+        cursor.close();
         return lines;
     }
 

@@ -6,8 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.cartlc.tracker.app.TBApplication;
 
-import timber.log.Timber;
-
 import java.util.ArrayList;
 import java.util.List;
 

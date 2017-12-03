@@ -3,7 +3,6 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
 

@@ -249,6 +249,7 @@ public abstract class TableCollection {
                 item.server_id = server_id;
                 item.isBootStrap = cursor.getShort(idxTest) != 0;
             }
+            cursor.close();
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {
             TBApplication.ReportError(ex, TableCollection.class, "queryByServerId(id)", "db");

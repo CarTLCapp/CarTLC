@@ -7,10 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.cartlc.tracker.app.TBApplication;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import timber.log.Timber;
 
 /**
  * Created by dug on 5/10/17.
