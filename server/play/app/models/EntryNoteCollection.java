@@ -33,6 +33,9 @@ public class EntryNoteCollection extends Model {
     public static Finder<Long,EntryNoteCollection> find = new Finder<Long,EntryNoteCollection>(EntryNoteCollection.class);
 
     public String getName() {
+        if (note_id == null) {
+            return "BAD ID";
+        }
         Note note = Note.find.byId(note_id);
         if (note == null) {
             return "INVALID ID " + note_id;

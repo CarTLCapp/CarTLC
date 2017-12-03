@@ -208,5 +208,17 @@ public class Equipment extends Model implements Comparable<Equipment> {
         ProjectEquipmentCollection.deleteByEquipmentId(id);
         delete();
     }
+
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(id);
+        sbuf.append(":");
+        sbuf.append(name);
+        sbuf.append(",");
+        sbuf.append(disabled);
+        sbuf.append(",");
+        sbuf.append(getCreatedBy());
+        return sbuf.toString();
+    }
 }
 

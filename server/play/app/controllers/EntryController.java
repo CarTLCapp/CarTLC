@@ -248,7 +248,10 @@ public class EntryController extends Controller {
                                 equipment = new Equipment();
                                 equipment.name = name;
                                 equipment.created_by = entry.tech_id;
+                                equipment.created_by_client = false;
                                 equipment.save();
+                                Logger.info("Created new equipment: " + equipment.toString());
+                                newEquipmentCreated = true;
                             } else {
                                 if (equipments.size() > 1) {
                                     Logger.error("Too many equipments found with name: " + name);
@@ -256,7 +259,6 @@ public class EntryController extends Controller {
                                 equipment = equipments.get(0);
                             }
                             collection.equipment_id = equipment.id;
-                            newEquipmentCreated = true;
                         }
                     } else {
                         collection.equipment_id = subvalue.longValue();
@@ -337,6 +339,7 @@ public class EntryController extends Controller {
                                 note.created_by = entry.tech_id;
                                 note.created_by_client = false;
                                 note.save();
+                                collection.note_id = note.id;
                                 // Note: don't inc version number because other techs don't really need to know.
                                 Logger.info("Created new note: " + note.toString());
                             } else if (notes.size() > 1) {
