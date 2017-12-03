@@ -107,7 +107,7 @@ public class EntryController extends Controller {
         Entry entry = Entry.find.byId(entry_id);
         if (entry != null) {
             entry.remove(amazonHelper);
-            Logger.info("Entry has been deleted");
+            Logger.info("Entry has been deleted: " + entry_id);
         }
         return list();
     }
