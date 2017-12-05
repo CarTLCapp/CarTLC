@@ -76,6 +76,13 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return list.get(0);
     }
 
+    public static WorkOrder get(long id) {
+        if (id > 0) {
+            return find.byId(id);
+        }
+        return null;
+    }
+
     public static WorkOrder has(WorkOrder order) {
         List<WorkOrder> list = find.where()
                 .eq("client_id", order.client_id)

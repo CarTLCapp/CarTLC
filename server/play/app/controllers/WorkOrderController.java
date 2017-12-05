@@ -159,4 +159,44 @@ public class WorkOrderController extends Controller {
         return INDEX(count + " work orders deleted");
     }
 
+    /**
+     * Handle the 'edit form' submission
+     *
+     * @param id Id of the work order to edit
+     */
+    public Result update(Long id) throws PersistenceException {
+        Form<WorkOrderFormData> workOrderForm = formFactory.form(WorkOrderFormData.class).bindFromRequest();
+        if (workOrderForm.hasErrors()) {
+            return badRequest(views.html.workOrder_editForm.render(id, workOrderForm));
+        }
+        WorkOrder workOrderItem = WorkOrder.get(id);
+        if (workOrderItem == null) {
+            return badRequest("Could not find work order with ID " + id)
+        }
+        Truck truck = workOrderItem.getTruck();
+        if (truck == null) {
+            truck = new Truck();
+        }
+        try {
+            WorkOrderFormData workOrderFormData = workOrderForm.get();
+            if (workOrderFormData.truck_number.trim().length() > 0) {
+                truck.truck_number = Integer.parseInt(workOrderFormData.truck_number);
+            } else {
+                truck.truck_number = 0;
+            }
+            truck.license_plate = workOrderFormData.license_plate;
+            if (truck.id == 0) {
+                truck.project_id = workOrderItem.project_id;
+                truck.company_name_id = CompanyName.save(workOrderItem.getCompanyName());
+                truck.created_by = workOrderItem.client_id;
+                truck.created_by_client = true;
+                truck.upload_id = workOrderItem.upload_id;
+                truck.save();
+            } else {
+                truck.update();
+            }
+        }
+        return list();
+    }
+
 }

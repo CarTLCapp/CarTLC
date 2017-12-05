@@ -1,0 +1,30 @@
+@(id: Long, workOrderForm: Form[WorkOrderFormData], client : Client)
+
+@import helper._
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - Edit Work Order", client, "/work/list") {
+    
+    <h1>Edit Work Order</h1>
+    
+    @b3.form(routes.WorkOrderController.update(id)) {
+        
+        <fieldset>
+        
+            @b3.text(workOrderForm("truck_number"), '_label -> "Truck Number", '_help -> "")
+            @b3.text(workOrderForm("license_plate"), '_label -> "License Plate", '_help -> "")
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Save" class="btn primary"> or
+            <a href="@routes.WorkOrderController.list()" class="btn">Cancel</a>
+        </div>
+    }
+
+    @b3.form(routes.WorkOrderController.delete(id), 'class -> "topRight") {
+        <input type="submit" value="Delete Work Order" class="btn danger" onclick="return confirm('Are you sure you wish to delete this work order?');">
+    }
+
+}
