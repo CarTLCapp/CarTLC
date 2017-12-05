@@ -229,6 +229,7 @@ public class DCPing extends DCPost {
                 JSONObject ele = array.getJSONObject(i);
                 int server_id = ele.getInt("id");
                 String name = ele.getString("name");
+                boolean disabled = ele.getBoolean("disabled");
                 DataProject project = TableProjects.getInstance().queryByServerId(server_id);
                 if (project == null) {
                     if (unprocessed.contains(name)) {
@@ -236,24 +237,24 @@ public class DCPing extends DCPost {
                         DataProject existing = TableProjects.getInstance().queryByName(name);
                         existing.serverId = server_id;
                         existing.isBootStrap = false;
-                        existing.disabled = false;
+                        existing.disabled = disabled;
                         TableProjects.getInstance().update(existing);
                         Timber.i("Commandeer local: " + name);
                     } else {
                         // Otherwise just add the new project.
                         Timber.i("New project: " + name);
-                        TableProjects.getInstance().add(name, server_id);
+                        TableProjects.getInstance().add(name, server_id, disabled);
                     }
                 } else {
                     // Name change?
                     if (!name.equals(project.name)) {
                         Timber.i("New name: " + name);
                         project.name = name;
-                        project.disabled = false;
+                        project.disabled = disabled;
                         TableProjects.getInstance().update(project);
-                    } else if (project.disabled) {
-                        Timber.i("Project re-enabled: " + name);
-                        project.disabled = false;
+                    } else if (project.disabled != disabled) {
+                        Timber.i("Project " + name + " " + (disabled ? "disabled" : "enabled"));
+                        project.disabled = disabled;
                         TableProjects.getInstance().update(project);
                     } else {
                         Timber.i("No change: " + name);
@@ -663,7 +664,7 @@ public class DCPing extends DCPost {
                         int project_server_id = ele.getInt("project_id");
                         DataProject project = TableProjects.getInstance().queryByServerId(project_server_id);
                         if (project == null) {
-                            Timber.e("Can't find any project with server ID " + project_server_id);
+                            Timber.e("Can't find any project with server ID " + project_server_id + " for truck number " + incoming.truckNumber);
                         } else {
                             incoming.projectNameId = project.id;
                         }

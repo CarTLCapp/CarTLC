@@ -87,7 +87,7 @@ public class WorkOrderReader {
                     truck.license_plate = getFieldValue(values, WorkOrderField.LICENSE);
                     truck.project_id = project_id;
                     truck.company_name_id = company_name_id;
-                    Truck etruck = Truck.findFirst(truck.truck_number, truck.company_name_id, truck.truck_number);
+                    Truck etruck = Truck.findFirst(truck.project_id, truck.company_name_id, truck.truck_number);
                     long truck_id;
                     if (etruck == null) {
                         truck.upload_id = upload_id;

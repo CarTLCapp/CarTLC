@@ -201,11 +201,10 @@ public class ProjectController extends Controller {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("projects");
         for (Project project : Project.find.all()) {
-            if (!project.disabled) {
-                ObjectNode node = array.addObject();
-                node.put("id", project.id);
-                node.put("name", project.name);
-            }
+            ObjectNode node = array.addObject();
+            node.put("id", project.id);
+            node.put("name", project.name);
+            node.put("disabled", project.disabled);
         }
         return ok(top);
     }

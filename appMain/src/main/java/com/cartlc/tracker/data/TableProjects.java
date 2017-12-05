@@ -129,14 +129,14 @@ public class TableProjects {
     }
 
 
-    public long add(String item, int server_id) {
+    public long add(String item, int server_id, boolean disabled) {
         long id = -1L;
         mDb.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, item);
             values.put(KEY_SERVER_ID, server_id);
-            values.put(KEY_DISABLED, 0);
+            values.put(KEY_DISABLED, disabled ? 1 : 0);
             id = mDb.insert(TABLE_NAME, null, values);
             mDb.setTransactionSuccessful();
         } catch (Exception ex) {

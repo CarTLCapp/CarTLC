@@ -32,6 +32,9 @@ do
 done
 
 mkdir -p $WRAP
+
+ls $SRCFILE
+
 cp $SRCFILE $WRAP/$TGTFILE
 cp $WRAP/$TGTFILE $DROPBOX/
 
