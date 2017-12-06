@@ -6,7 +6,6 @@ import com.avaje.ebean.Transaction;
 import java.util.List;
 import java.io.File;
 
-
 import play.mvc.*;
 import play.data.*;
 import play.mvc.Http.*;
@@ -26,6 +25,8 @@ import modules.AmazonHelper;
 import play.db.ebean.Transactional;
 
 import play.Logger;
+
+import views.formdata.WorkOrderFormData;
 
 public class WorkOrderController extends Controller {
 
@@ -60,7 +61,7 @@ public class WorkOrderController extends Controller {
         workList.clearCache();
         workList.computeFilters();
         workList.compute();
-        return ok(views.html.work_order_list.render(workList, sortBy, order, Secured.getClient(ctx()), message));
+        return ok(views.html.workOrder_list.render(workList, sortBy, order, Secured.getClient(ctx()), message));
     }
 
 
@@ -79,7 +80,7 @@ public class WorkOrderController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result importWorkOrdersForm(String errors) {
         Form<ImportWorkOrder> importForm = formFactory.form(ImportWorkOrder.class);
-        return ok(views.html.work_order_import.render(importForm, Secured.getClient(ctx()), errors));
+        return ok(views.html.workOrder_import.render(importForm, Secured.getClient(ctx()), errors));
     }
 
     @Security.Authenticated(Secured.class)
@@ -160,18 +161,55 @@ public class WorkOrderController extends Controller {
     }
 
     /**
+     * Handle work order line deletion
+     */
+    @Security.Authenticated(Secured.class)
+    public Result delete(Long id) {
+        WorkOrder workOrderItem = WorkOrder.get(id);
+        if (workOrderItem == null) {
+            String message = "Invalid work order ID: " + id;
+            flash(message);
+            return ok(message);
+        }
+        WorkOrder.find.byId(id).delete();
+        return INDEX();
+    }
+
+    /**
+     * Display the 'edit form' of an existing Technician.
+     *
+     * @param id Id of the user to edit
+     */
+    @Security.Authenticated(Secured.class)
+    public Result edit(Long id) {
+        WorkOrder workOrderItem = WorkOrder.get(id);
+        if (workOrderItem == null) {
+            return badRequest("Could not find work order with ID " + id);
+        }
+        Form<WorkOrderFormData> workOrderForm = formFactory.form(WorkOrderFormData.class).fill(new WorkOrderFormData(workOrderItem));
+        Client client = Secured.getClient(ctx());
+        if (Secured.isAdmin(ctx())) {
+            return ok(views.html.workOrder_editForm.render(id, workOrderForm, client));
+        } else {
+            workOrderForm.reject("adminstrator", "Non administrators cannot change work order entries.");
+            return badRequest(views.html.home.render(client));
+        }
+    }
+
+    /**
      * Handle the 'edit form' submission
      *
      * @param id Id of the work order to edit
      */
     public Result update(Long id) throws PersistenceException {
+        Client client = Secured.getClient(ctx());
         Form<WorkOrderFormData> workOrderForm = formFactory.form(WorkOrderFormData.class).bindFromRequest();
         if (workOrderForm.hasErrors()) {
-            return badRequest(views.html.workOrder_editForm.render(id, workOrderForm));
+            return badRequest(views.html.workOrder_editForm.render(id, workOrderForm, client));
         }
         WorkOrder workOrderItem = WorkOrder.get(id);
         if (workOrderItem == null) {
-            return badRequest("Could not find work order with ID " + id)
+            return badRequest("Could not find work order with ID " + id);
         }
         Truck truck = workOrderItem.getTruck();
         if (truck == null) {
@@ -188,15 +226,29 @@ public class WorkOrderController extends Controller {
             if (truck.id == 0) {
                 truck.project_id = workOrderItem.project_id;
                 truck.company_name_id = CompanyName.save(workOrderItem.getCompanyName());
-                truck.created_by = workOrderItem.client_id;
+                truck.created_by = (int) workOrderItem.client_id;
                 truck.created_by_client = true;
                 truck.upload_id = workOrderItem.upload_id;
                 truck.save();
             } else {
                 truck.update();
             }
+        } catch (Exception ex) {
+            Logger.error(ex.getMessage());
         }
-        return list();
+        return INDEX();
+    }
+
+    public static boolean isValidTruckNumber(String line) {
+        if (line == null || line.isEmpty()) {
+            return false;
+        }
+        try {
+            Integer.parseInt(line);
+        } catch (Exception ex) {
+            return false;
+        }
+        return true;
     }
 
 }

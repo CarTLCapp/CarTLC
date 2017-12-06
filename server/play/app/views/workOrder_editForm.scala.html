@@ -1,4 +1,4 @@
-@(id: Long, workOrderForm: Form[WorkOrderFormData], client : Client)
+@(id: Long, workOrderForm: Form[views.formdata.WorkOrderFormData], client : Client)
 
 @import helper._
 
@@ -7,7 +7,10 @@
 @main("FleetTLC - Edit Work Order", client, "/work/list") {
     
     <h1>Edit Work Order</h1>
-    
+
+    <p>Project: @workOrderForm("project")</p>
+    <p>Company: @workOrderForm("company")</p>
+
     @b3.form(routes.WorkOrderController.update(id)) {
         
         <fieldset>
@@ -24,7 +27,7 @@
     }
 
     @b3.form(routes.WorkOrderController.delete(id), 'class -> "topRight") {
-        <input type="submit" value="Delete Work Order" class="btn danger" onclick="return confirm('Are you sure you wish to delete this work order?');">
+        <input type="submit" value="Delete Work Order Item" class="btn danger" onclick="return confirm('Are you sure you wish to delete this work order?');">
     }
 
 }
