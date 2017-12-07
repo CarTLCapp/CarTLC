@@ -14,7 +14,7 @@ https://play.google.com/apps/publish
 server/play/build.sbt
 remove old:
 rm ~/cartlc/CarTLC/server/play/target/universal/play-*-SNAPSHOT.zip
-rm ~/cartlc/wrap/2017-10-14/play-*-SNAPSHOT.zip
+rm ~/cartlc/wrap/`date +%Y-%m-%d`/play-*-SNAPSHOT.zip
 
 === Database Save: ===
 

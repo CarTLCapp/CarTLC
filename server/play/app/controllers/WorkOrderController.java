@@ -230,9 +230,14 @@ public class WorkOrderController extends Controller {
                 truck.created_by_client = true;
                 truck.upload_id = workOrderItem.upload_id;
                 truck.save();
+                Logger.info("New truck line: " + truck.toString());
+                workOrderItem.truck_id = truck.id;
+                workOrderItem.update();
             } else {
                 truck.update();
+                Logger.info("Truck updated: " + truck.toString());
             }
+            Version.inc(Version.VERSION_TRUCK);
         } catch (Exception ex) {
             Logger.error(ex.getMessage());
         }
