@@ -8,8 +8,8 @@
     
     <h1>Edit Work Order</h1>
 
-    <p>Project: @workOrderForm("project")</p>
-    <p>Company: @workOrderForm("company")</p>
+    <p>Project: @workOrderForm.get().project</p>
+    <p>Company: @workOrderForm.get().company</p>
 
     @b3.form(routes.WorkOrderController.update(id)) {
         
