@@ -10,6 +10,7 @@ picture.list.title={0,choice,0#No pictures|1#One Picture|1<{0,number,integer} pi
 message.list.title={0,choice,0#No error messages|1#One Message|1<{0,number,integer} messages} found
 clients.list.title={0,choice,0#No clients|1#One client|1<{0,number,integer} clients} found
 workorder.list.title={0,choice,0#No work orders|1#One Work Order|1<{0,number,integer} work orders} found
+workordersummary.list.title={0,choice,0#No work orders|1#One Project|1<{0,number,integer} work order projects} found
 trucks.list.title={0,choice,0#No trucks|1#One Truck|1<{0,number,integer} trucks} found
 
 project.list.header=Show {0} Projects

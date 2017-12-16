@@ -17,6 +17,7 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
 
     protected int lastUploadCount = -1;
     protected Client client;
+    protected Integer uploadId = null;
 
     public WorkOrderList() {
         super();
@@ -26,6 +27,8 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
         this.client = client;
     }
 
+    public void setUploadId(int uploadId) { this.uploadId = uploadId; }
+
     @Override
     public void clearCache() {
         super.clearCache();
@@ -34,11 +37,14 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
 
     @Override
     protected List<WorkOrder> getOrderedList() {
-        if (client == null || client.is_admin) {
-            return WorkOrder.find.where().orderBy(getOrderBy()).findList();
-        } else {
-            return WorkOrder.find.where().eq("client_id", client.id).orderBy(getOrderBy()).findList();
+        ExpressionList<WorkOrder> query = WorkOrder.find.where();
+        if (client != null && !client.is_admin) {
+            query = query.eq("client_id", client.id);
         }
+        if (uploadId != null) {
+            query = query.eq("upload_id", uploadId);
+        }
+        return query.orderBy(getOrderBy()).findList();
     }
 
     @Override
