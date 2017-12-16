@@ -47,6 +47,11 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return find.all();
     }
 
+    public static List<WorkOrder> list(String sortBy, String order) {
+        return find.where()
+                .orderBy(sortBy + " " + order).findList();
+    }
+
     public static PagedList<WorkOrder> list(int page, String sortBy, String order) {
         return find.where()
                 .orderBy(sortBy + " " + order)
@@ -213,8 +218,16 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return entry.getCellColor();
     }
 
-    static List<WorkOrder> findByUploadId(long upload_id, Client client) {
-        if (client == null || client.is_admin) {
+    static List<WorkOrder> findByUploadId(Integer upload_id, Client client) {
+        if (upload_id == null) {
+            if (client == null || client.is_admin) {
+                return find.where().findList();
+            } else {
+                return find.where()
+                        .eq("client_id", client.id)
+                        .findList();
+            }
+        } else if (client == null || client.is_admin) {
             return find.where()
                     .eq("upload_id", upload_id)
                     .findList();
@@ -226,50 +239,29 @@ public class WorkOrder extends com.avaje.ebean.Model {
         }
     }
 
-    public static List<WorkOrder> getLastUploaded(Client client) {
-        int upload_id = Version.get(Version.NEXT_UPLOAD_ID);
-        List<WorkOrder> list;
-        for (; upload_id > 0; upload_id--) {
-            list = findByUploadId(upload_id, client);
-            if (list.size() > 0) {
-                return list;
-            }
-        }
-        return null;
-    }
-
-    public static int deleteLastUploaded(Client client) {
-        List<WorkOrder> list = getLastUploaded(client);
-        if (list == null) {
+    public static int deleteByUploadId(Integer upload_id, Client client) {
+        if (upload_id == null || upload_id == 0) {
+            Logger.error("Cannot call deleteByUploadId() without an upload_id");
             return 0;
         }
-        if (list.size() > 0) {
-            int upload_id = list.get(0).upload_id;
-            for (WorkOrder order : list) {
-                order.delete();
-            }
-            if (upload_id > 0) {
-                List<Company> clist = Company.findByUploadId(upload_id);
-                for (Company company : clist) {
-                    if (!Entry.hasEntryForCompany(company.id)) {
-                        company.delete();
-                    }
-                }
-                List<Truck> tlist = Truck.findByUploadId(upload_id);
-                for (Truck truck : tlist) {
-                    if (!Entry.hasEntryForTruck(truck.id)) {
-                        truck.delete();
-                    }
-                }
+        List<WorkOrder> list = findByUploadId(upload_id, client);
+        if (list == null || list.size() == 0) {
+            return 0;
+        }
+        for (WorkOrder order : list) {
+            order.delete();
+        }
+        List<Company> clist = Company.findByUploadId(upload_id);
+        for (Company company : clist) {
+            if (!Entry.hasEntryForCompany(company.id)) {
+                company.delete();
             }
         }
-        return list.size();
-    }
-
-    public static int lastUploadCount(Client client) {
-        List<WorkOrder> list = getLastUploaded(client);
-        if (list == null) {
-            return 0;
+        List<Truck> tlist = Truck.findByUploadId(upload_id);
+        for (Truck truck : tlist) {
+            if (!Entry.hasEntryForTruck(truck.id)) {
+                truck.delete();
+            }
         }
         return list.size();
     }

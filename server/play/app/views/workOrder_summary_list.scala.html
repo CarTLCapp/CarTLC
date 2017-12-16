@@ -1,4 +1,4 @@
-@(currentPage: WorkOrderSummary, currentSortBy: String, currentOrder: String, client : Client, message : String)
+@(currentPage: WorkOrderSummaryList, currentSortBy: String, currentOrder: String, client : Client, message : String)
 
 @import helper._
 
@@ -36,7 +36,6 @@
     </style>
 
     <h1 id="homeTitle" class="fill">@Messages("workordersummary.list.title", currentPage.getTotalRowCount())
-        <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.viewProgressGrid()">Progress Grid</a></span>
         <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.exportWorkOrders()">Export Work Orders</a></span>
         <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.importWorkOrdersForm()">Import Work Orders</a></span>
     </h1>
@@ -60,43 +59,25 @@
                 <tr>
                     @header("client_id", "Client")
                     @header("project_id", "Project")
-                    @header("company", "Company")
-                    @header("street", "Street / Plant Name")
-                    @header("city", "City")
-                    @header("state", "State")
-                    @header("zipcode", "ZIP")
-                    @header("truck_line", "Truck")
-                    <th>Fulfilled</th>
-                    <th>Status</th>
-                    <th>Edit</th>
+                    <th># Companies</th>
+                    <th># Trucks</th>
+                    <th># Complete</th>
+                    <th>Last Modified</th>
+                    <th>View</th>
                 </tr>
             </thead>
             <tbody>
 
-                @for(order <- currentPage.getList()) {
+                @for(summary <- currentPage.getList()) {
                     <tr>
-                        <td>@order.getClientName()</td>
-                        <td>@order.getProjectLine()</td>
-                        <td>@order.getCompanyName()</td>
-                        <td>@order.getStreet()</td>
-                        <td>@order.getCity()</td>
-                        <td>@order.getState()</td>
-                        <td>@order.getZipCode()</td>
-                        <td>@order.getTruckLine()</td>
+                        <td>@summary.getClientName()</td>
+                        <td>@summary.getProjectName()</td>
+                        <td>@summary.getNumCompanies()</td>
+                        <td>@summary.getNumTrucks()</td>
+                        <td>@summary.getNumComplete()</td>
+                        <td>@summary.getLastModified()</td>
                         <td>
-                            @if(order.isFulfilled()) {
-                                <a href="@routes.WorkOrderController.view(order.id)">@order.getFulfilledDate()</a>
-                            } else {
-                                <em>-</em>
-                            }
-                        </td>
-                        <td bgcolor="@order.getCellColor()">@order.getStatus()</td>
-                        <td>
-                            @if(client.is_admin) {
-                                <a href="@routes.WorkOrderController.edit(order.id)">Edit</a>
-                            } else {
-                                <em>-</em>
-                            }
+                            <a href="@routes.WorkOrderController.listOrders(summary.getUploadId())">View</a>
                         </td>
                     </tr>
                 }
@@ -129,10 +110,6 @@
                 }
             </ul>
         </div>
-    }
-
-    @if(currentPage.getLastUploadCount() > 0) {
-        <a class="btn danger" id="delete" href="@routes.WorkOrderController.deleteLastUploaded()">Delete last @currentPage.getLastUploadCount() Work Orders Uploaded</a>
     }
 
 }

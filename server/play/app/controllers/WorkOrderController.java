@@ -33,6 +33,7 @@ public class WorkOrderController extends Controller {
     private FormFactory formFactory;
     private AmazonHelper amazonHelper;
     private WorkOrderList workList = new WorkOrderList();
+    private WorkOrderSummaryList summaryList = new WorkOrderSummaryList();
     private ProgressGrid progressGrid = new ProgressGrid();
 
     private static final String EXPORT_FILENAME = "export.csv";
@@ -54,7 +55,20 @@ public class WorkOrderController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result list(int page, String sortBy, String order, String message) {
+        summaryList.setClient(Secured.getClient(ctx()));
+        summaryList.setPage(page);
+        summaryList.setSortBy(sortBy);
+        summaryList.setOrder(order);
+        summaryList.clearCache();
+        summaryList.computeFilters();
+        summaryList.compute();
+        return ok(views.html.workOrder_summary_list.render(summaryList, sortBy, order, Secured.getClient(ctx()), message));
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result listOrders(Integer upload_id, int page, String sortBy, String order, String message) {
         workList.setClient(Secured.getClient(ctx()));
+        workList.setUploadId(upload_id);
         workList.setPage(page);
         workList.setSortBy(sortBy);
         workList.setOrder(order);
@@ -64,10 +78,10 @@ public class WorkOrderController extends Controller {
         return ok(views.html.workOrder_list.render(workList, sortBy, order, Secured.getClient(ctx()), message));
     }
 
-
     @Security.Authenticated(Secured.class)
-    public Result viewProgressGrid() {
+    public Result viewProgressGrid(Integer upload_id) {
         progressGrid.setClient(Secured.getClient(ctx()));
+        progressGrid.setUploadId(upload_id);
         progressGrid.computeFilters();
         progressGrid.compute();
         return ok(views.html.progress_grid.render(progressGrid, Secured.getClient(ctx())));
@@ -155,13 +169,13 @@ public class WorkOrderController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result deleteLastUploaded() {
-        int count = WorkOrder.deleteLastUploaded(Secured.getClient(ctx()));
+    public Result deleteSummary(Integer upload_id) {
+        int count = WorkOrder.deleteByUploadId(upload_id, Secured.getClient(ctx()));
         return INDEX(count + " work orders deleted");
     }
 
     /**
-     * Handle work order line deletion
+     * Handle single work order line deletion
      */
     @Security.Authenticated(Secured.class)
     public Result delete(Long id) {

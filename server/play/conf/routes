@@ -84,18 +84,22 @@ GET     /client/:id            controllers.ClientController.edit(id:Long)
 POST    /client/:id            controllers.ClientController.update(id:Long)
 POST    /client/:id/delete     controllers.ClientController.delete(id:Long)
 
-### WORK ORDERS
+### WORK ORDER SUMMARIES
 
+GET     /work/summary/list       controllers.WorkOrderController.list(p:Int ?= 0, s ?= "client_id", o ?= "desc", message ?= "")
+GET     /work/summary/:id/delete controllers.WorkOrderController.deleteSummary(id:Integer)
 GET     /work/import/form      controllers.WorkOrderController.importWorkOrdersForm()
 POST    /work/import           controllers.WorkOrderController.importWorkOrders()
 GET     /work/export           controllers.WorkOrderController.exportWorkOrders()
-GET     /work/list             controllers.WorkOrderController.list(p:Int ?= 0, s ?= "client_id", o ?= "desc", message ?= "")
+
+### WORK ORDERS
+
+GET     /work/list             controllers.WorkOrderController.listOrders(u:Integer, p:Int ?= 0, s ?= "client_id", o ?= "desc", message ?= "")
 GET     /work/:id/view         controllers.WorkOrderController.view(id:Long)
 GET     /work/:id/edit         controllers.WorkOrderController.edit(id:Long)
 GET     /work/:id/delete       controllers.WorkOrderController.delete(id:Long)
 GET     /work/:id/update       controllers.WorkOrderController.update(id:Long)
-GET     /work/delete_last      controllers.WorkOrderController.deleteLastUploaded()
-GET     /work/progress_grid    controllers.WorkOrderController.viewProgressGrid()
+GET     /work/progress_grid    controllers.WorkOrderController.viewProgressGrid(u:Integer)
 
 ### ENTRIES ###
 

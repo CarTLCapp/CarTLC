@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 import javax.persistence.*;
 
@@ -15,38 +16,16 @@ import com.avaje.ebean.*;
 
 public class WorkOrderSummary {
 
-    protected int upload_id;
-    protected long client_id;
-    protected long project_id;
-    protected int num_trucks;
-    protected HashSet<Long> companyMap = new HashSet<Long>();
+    public int upload_id;
+    public long client_id;
+    public long project_id;
+    public int num_trucks;
+    public int num_complete;
+    public HashSet<Long> companyMap = new HashSet<Long>();
+    public Date last_modified;
 
-    public static List<WorkOrderSummary> list() {
-        HashMap<Integer,WorkOrderSummary> map = new HashMap();
-        for (WorkOrder work : WorkOrder.list()) {
-            WorkOrderSummary summary;
-            if (!map.containsKey(work.upload_id)) {
-                summary = new WorkOrderSummary();
-                summary.upload_id = work.upload_id;
-                summary.client_id = work.client_id;
-                summary.project_id = work.project_id;
-                summary.num_trucks = 0;
-                map.put(work.upload_id, summary);
-            } else {
-                summary = map.get(work.upload_id);
-            }
-            summary.companyMap.add(work.company_id);
-            summary.num_trucks++;
-        }
-        return new ArrayList(map.values();)
-    }
-
-    public int getNumCompanies() {
-        return companyMap.size();
-    }
-
-    public int getNumTrucks() {
-        return num_trucks;
+    public int getUploadId() {
+        return upload_id;
     }
 
     public String getProjectName() {
@@ -64,5 +43,22 @@ public class WorkOrderSummary {
         }
         return "";
     }
+
+    public String getNumCompanies() {
+        return Integer.toString(companyMap.size());
+    }
+
+    public String getNumTrucks() {
+        return Integer.toString(num_trucks);
+    }
+
+    public String getLastModified() {
+        return new SimpleDateFormat("yyyy-MM-dd kk:mm").format(last_modified);
+    }
+
+    public String getNumComplete() {
+        return Integer.toString(num_complete);
+    }
+
 }
 

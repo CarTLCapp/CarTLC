@@ -36,9 +36,7 @@
     </style>
 
     <h1 id="homeTitle" class="fill">@Messages("workorder.list.title", currentPage.getTotalRowCount())
-        <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.viewProgressGrid()">Progress Grid</a></span>
-        <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.exportWorkOrders()">Export Work Orders</a></span>
-        <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.importWorkOrdersForm()">Import Work Orders</a></span>
+        <span style="float:right;font-size:16px"><a href="@routes.WorkOrderController.viewProgressGrid(currentPage.getUploadId())">Progress Grid</a></span>
     </h1>
 
     @if(message.length() > 0) {
@@ -46,6 +44,9 @@
             <em>@Html(HtmlFormat.escape(message).toString.replace("\n", "<br />"))</em>
         </div>
     }
+
+    <p>Client: @currentPage.getClientName()</p>
+    <p>Project: @currentPage.getProjectName()</p>
 
     @if(currentPage.getTotalRowCount() == 0) {
 
@@ -58,8 +59,6 @@
         <table>
             <thead>
                 <tr>
-                    @header("client_id", "Client")
-                    @header("project_id", "Project")
                     @header("company", "Company")
                     @header("street", "Street / Plant Name")
                     @header("city", "City")
@@ -75,8 +74,6 @@
 
                 @for(order <- currentPage.getList()) {
                     <tr>
-                        <td>@order.getClientName()</td>
-                        <td>@order.getProjectLine()</td>
                         <td>@order.getCompanyName()</td>
                         <td>@order.getStreet()</td>
                         <td>@order.getCity()</td>
@@ -131,10 +128,7 @@
         </div>
     }
 
-    @if(currentPage.getLastUploadCount() > 0) {
-        <a class="btn danger" id="delete" href="@routes.WorkOrderController.deleteLastUploaded()">Delete last @currentPage.getLastUploadCount() Work Orders Uploaded</a>
-    }
-
+    <a class="btn danger" id="delete" href="@routes.WorkOrderController.deleteSummary(currentPage.getUploadId())">Delete these work orders</a>
 }
 
             

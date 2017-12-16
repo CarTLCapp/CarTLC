@@ -15,7 +15,6 @@ import play.Logger;
  */
 public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<WorkOrder> {
 
-    protected int lastUploadCount = -1;
     protected Client client;
     protected Integer uploadId = null;
 
@@ -27,12 +26,25 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
         this.client = client;
     }
 
-    public void setUploadId(int uploadId) { this.uploadId = uploadId; }
+    public void setUploadId(Integer uploadId) { this.uploadId = uploadId; }
 
-    @Override
-    public void clearCache() {
-        super.clearCache();
-        lastUploadCount = -1;
+    public Integer getUploadId() {
+        return uploadId;
+    }
+
+    public String getClientName() {
+        if (client == null) {
+            return "";
+        }
+        return client.name;
+    }
+
+    public String getProjectName() {
+        List<WorkOrder> list = getList();
+        if (list.size() > 0) {
+            return list.get(0).getProjectLine();
+        }
+        return "";
     }
 
     @Override
@@ -41,7 +53,7 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
         if (client != null && !client.is_admin) {
             query = query.eq("client_id", client.id);
         }
-        if (uploadId != null) {
+        if (uploadId != null && uploadId > 0) {
             query = query.eq("upload_id", uploadId);
         }
         return query.orderBy(getOrderBy()).findList();
@@ -153,12 +165,5 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
             value *= -1;
         }
         return value;
-    }
-
-    public int getLastUploadCount() {
-        if (lastUploadCount < 0) {
-            lastUploadCount = WorkOrder.lastUploadCount(client);
-        }
-        return lastUploadCount;
     }
 }
