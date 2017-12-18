@@ -130,7 +130,9 @@
         </div>
     }
 
-    <a class="btn danger" id="delete" href="@routes.WorkOrderController.deleteSummary(currentPage.getUploadId())">Delete these work orders</a>
+     <div class="actions">
+        <a href="@routes.WorkOrderController.deleteSummary(currentPage.getUploadId())" class="btn danger" onclick="return confirm('This cannot be undone. Are you sure?');">Delete these work orders</a>
+    </div>
 }
 
             
