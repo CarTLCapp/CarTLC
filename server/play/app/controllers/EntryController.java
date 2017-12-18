@@ -33,10 +33,12 @@ public class EntryController extends Controller {
 
     private AmazonHelper amazonHelper;
     private EntryList entryList = new EntryList();
+    private FormFactory formFactory;
 
     @Inject
-    public EntryController(AmazonHelper amazonHelper) {
+    public EntryController(AmazonHelper amazonHelper, FormFactory formFactory) {
         this.amazonHelper = amazonHelper;
+        this.formFactory = formFactory;
     }
 
     public Result list(int page, String sortBy, String order) {
@@ -46,11 +48,17 @@ public class EntryController extends Controller {
         entryList.clearCache();
         entryList.computeFilters(Secured.getClient(ctx()));
         entryList.compute();
-        return ok(views.html.entry_list.render(entryList, sortBy, order));
+        Form<InputLines> searchForm = formFactory.form(InputLines.class);
+        return ok(views.html.entry_list.render(entryList, sortBy, order, searchForm));
     }
 
     public Result list() {
         return list(0, "entry_time", "desc");
+    }
+
+    public Result search() {
+        Form<InputLines> searchForm = formFactory.form(InputLines.class).bindFromRequest();
+        return ok("Done");
     }
 
     /**
