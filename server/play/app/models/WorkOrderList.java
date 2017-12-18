@@ -47,8 +47,7 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
         return "";
     }
 
-    @Override
-    protected List<WorkOrder> getOrderedList() {
+    protected ExpressionList<WorkOrder> getQuery() {
         ExpressionList<WorkOrder> query = WorkOrder.find.where();
         if (client != null && !client.is_admin) {
             query = query.eq("client_id", client.id);
@@ -56,16 +55,18 @@ public class WorkOrderList extends BaseList<WorkOrder> implements Comparator<Wor
         if (uploadId != null && uploadId > 0) {
             query = query.eq("upload_id", uploadId);
         }
+        return query;
+    }
+
+    @Override
+    protected List<WorkOrder> getOrderedList() {
+        ExpressionList<WorkOrder> query = getQuery();
         return query.orderBy(getOrderBy()).findList();
     }
 
     @Override
     protected List<WorkOrder> getRawList() {
-        if (client == null || client.is_admin) {
-            return WorkOrder.find.findList();
-        } else {
-            return WorkOrder.find.where().eq("client_id", client.id).findList();
-        }
+        return getQuery().findList();
     }
 
     @Override
