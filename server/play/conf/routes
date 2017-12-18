@@ -94,7 +94,7 @@ GET     /work/export           controllers.WorkOrderController.exportWorkOrders(
 
 ### WORK ORDERS
 
-GET     /work/list             controllers.WorkOrderController.listOrders(u:Integer, p:Int ?= 0, s ?= "client_id", o ?= "desc", message ?= "")
+GET     /work/list             controllers.WorkOrderController.listOrders(u:Integer ?= 0, p:Int ?= 0, s ?= "client_id", o ?= "desc", message ?= "")
 GET     /work/:id/view         controllers.WorkOrderController.view(id:Long)
 GET     /work/:id/edit         controllers.WorkOrderController.edit(id:Long)
 GET     /work/:id/delete       controllers.WorkOrderController.delete(id:Long)

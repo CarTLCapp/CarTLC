@@ -35,6 +35,7 @@ public class WorkOrderController extends Controller {
     private WorkOrderList workList = new WorkOrderList();
     private WorkOrderSummaryList summaryList = new WorkOrderSummaryList();
     private ProgressGrid progressGrid = new ProgressGrid();
+    private int editingUploadId;
 
     private static final String EXPORT_FILENAME = "export.csv";
 
@@ -67,6 +68,9 @@ public class WorkOrderController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result listOrders(Integer upload_id, int page, String sortBy, String order, String message) {
+        if (upload_id == 0) {
+            upload_id = editingUploadId;
+        }
         workList.setClient(Secured.getClient(ctx()));
         workList.setUploadId(upload_id);
         workList.setPage(page);
@@ -203,6 +207,7 @@ public class WorkOrderController extends Controller {
         Form<WorkOrderFormData> workOrderForm = formFactory.form(WorkOrderFormData.class).fill(new WorkOrderFormData(workOrderItem));
         Client client = Secured.getClient(ctx());
         if (Secured.isAdmin(ctx())) {
+            editingUploadId = workOrderItem.upload_id;
             return ok(views.html.workOrder_editForm.render(id, workOrderForm, client));
         } else {
             workOrderForm.reject("adminstrator", "Non administrators cannot change work order entries.");

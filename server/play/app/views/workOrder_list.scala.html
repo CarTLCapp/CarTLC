@@ -29,7 +29,7 @@
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - List Work Orders", client) {
+@main("FleetTLC - List Work Orders", client, "/work/summary/list") {
 
     <style>
         span {padding-left:50px}
@@ -45,8 +45,10 @@
         </div>
     }
 
-    <p>Client: @currentPage.getClientName()</p>
-    <p>Project: @currentPage.getProjectName()</p>
+    <h4>Client: @currentPage.getClientName()</h4>
+    <h4>Project: @currentPage.getProjectName()</h4>
+
+    <br>
 
     @if(currentPage.getTotalRowCount() == 0) {
 
