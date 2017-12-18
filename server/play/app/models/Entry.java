@@ -325,6 +325,40 @@ public class Entry extends com.avaje.ebean.Model {
         return false;
     }
 
+    public boolean match(String search) {
+        if (getProjectLine().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getCity().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getCompany().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getEquipmentLine().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getTruckLine().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getZipCode().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getTechName().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getAddressLine().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getState().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getStatus().toLowerCase().contains(search)) {
+            return true;
+        }
+        return false;
+    }
+
     public void remove(AmazonHelper amazonHelper) {
         EntryEquipmentCollection.deleteByCollectionId(equipment_collection_id);
         PictureCollection.deleteByCollectionId(picture_collection_id, amazonHelper);

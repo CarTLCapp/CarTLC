@@ -36,6 +36,10 @@ table.progress {
     width: 98%
 }
 
+.search {
+    vertical-align: middle
+}
+
 #actions {
     position: relative;
 }

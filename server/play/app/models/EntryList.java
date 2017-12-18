@@ -15,18 +15,20 @@ import play.Logger;
  */
 public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
 
+    protected String mSearch;
+
     public EntryList() {
         super();
     }
 
     @Override
     protected List<Entry> getOrderedList() {
-        return Entry.find.where().orderBy(getOrderBy()).findList();
+        return applySearch(Entry.find.where().orderBy(getOrderBy()).findList());
     }
 
     @Override
     protected List<Entry> getRawList() {
-        return Entry.find.findList();
+        return applySearch(Entry.find.findList());
     }
 
     @Override
@@ -42,6 +44,27 @@ public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
     @Override
     protected String getCompanyName(Entry entry) {
         return entry.getCompany();
+    }
+
+    public void setSearch(String search) {
+        if (search != null) {
+            mSearch = search.trim().toLowerCase();
+        } else {
+            mSearch = null;
+        }
+    }
+
+    protected List<Entry> applySearch(List<Entry> list) {
+        if (mSearch == null || mSearch.isEmpty()) {
+            return list;
+        }
+        List<Entry> result = new ArrayList<Entry>();
+        for (Entry entry : list) {
+            if (entry.match(mSearch)) {
+                result.add(entry);
+            }
+        }
+        return result;
     }
 
     public int compare(Entry o1, Entry o2) {

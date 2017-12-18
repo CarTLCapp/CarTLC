@@ -37,6 +37,8 @@ public abstract class BaseList<T> {
             this.code = code;
         }
 
+        public String toString() { return code; }
+
         public static SortBy from(String code) {
             for (SortBy item : values()) {
                 if (item.code.equals(code)) {
@@ -57,6 +59,8 @@ public abstract class BaseList<T> {
         Order(String code) {
             this.code = code;
         }
+
+        public String toString() { return code; }
 
         public static Order from(String code) {
             for (Order item : values()) {
@@ -172,6 +176,14 @@ public abstract class BaseList<T> {
 
     public void setPageSize(int pageSize) {
         mPageSize = pageSize;
+    }
+
+    public String getSortBy() {
+        return mNextParameters.sortBy.toString();
+    }
+
+    public String getOrder() {
+        return mNextParameters.order.toString();
     }
 
     public void clearCache() {
