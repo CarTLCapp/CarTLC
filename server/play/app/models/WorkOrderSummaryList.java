@@ -121,9 +121,9 @@ public class WorkOrderSummaryList extends BaseList<WorkOrderSummary> implements 
             if (o1.last_modified == null && o2.last_modified == null) {
                 value = 0;
             } else if (o2.last_modified == null) {
-                value = -1;
-            } else if (o1.last_modified == null) {
                 value = 1;
+            } else if (o1.last_modified == null) {
+                value = -1;
             } else {
                 long lvalue = o1.last_modified.getTime() - o2.last_modified.getTime();
                 if (lvalue == 0) {
