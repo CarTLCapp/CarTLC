@@ -133,8 +133,21 @@ public abstract class BaseList<T> {
     protected Parameters mNextParameters = new Parameters();
     protected int        mPageSize       = PAGE_SIZE;
     protected int mPage;
+    protected int mRowNumber;
 
     public BaseList() {
+    }
+
+    public void resetRowNumber() {
+        mRowNumber = 0;
+    }
+
+    public void incRowNumber() {
+        mRowNumber++;
+    }
+
+    public String getRowNumber() {
+        return Integer.toString(mRowNumber);
     }
 
     public void setSortBy(SortBy sortBy) {
