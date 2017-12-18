@@ -21,6 +21,7 @@ public abstract class BaseList<T> {
         CLIENT("client_id"),
         TECH("tech_id"),
         TIME("entry_time"),
+        LAST_MODIFIED("last_modified"),
         PROJECT("project_id"),
         TRUCK_NUMBER("truck_number"),
         TRUCK_LINE("truck_line"),
@@ -233,6 +234,7 @@ public abstract class BaseList<T> {
                 case TRUCK_LINE:
                 case PROJECT:
                 case CLIENT:
+                case LAST_MODIFIED:
                     mComputed = getRawList();
                     needsSort = true;
                     break;
