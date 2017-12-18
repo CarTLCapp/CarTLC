@@ -53,6 +53,9 @@ public class WorkOrderSummary {
     }
 
     public String getLastModified() {
+        if (last_modified == null) {
+            return "";
+        }
         return new SimpleDateFormat("yyyy-MM-dd kk:mm").format(last_modified);
     }
 
