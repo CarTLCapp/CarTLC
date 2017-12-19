@@ -64,6 +64,13 @@ public class EntryController extends Controller {
                 entryList.getSortBy(), entryList.getOrder(), searchForm));
     }
 
+    public Result searchClear() {
+        entryList.setSearch(null);
+        Form<InputLines> searchForm = formFactory.form(InputLines.class);
+        return ok(views.html.entry_list.render(entryList,
+                entryList.getSortBy(), entryList.getOrder(), searchForm));
+    }
+
     /**
      * Display the picture for an entry.
      */

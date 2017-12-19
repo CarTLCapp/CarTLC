@@ -29,6 +29,10 @@
 
     <h1 id="homeTitle">@Messages("entry.list.title", currentPage.getTotalRowCount())
         <span style="float:right;font-size:16px">
+               <a href="@routes.EntryController.searchClear()" class="btn">Clear</a>
+        </span>
+        <a href="@routes.ProjectController.list()" class="btn">Cancel</a>
+        <span style="float:right;font-size:16px">
             @helper.form(action = routes.EntryController.search()) {
                 @helper.inputText(searchForm("lines"), '_label -> "")
             }

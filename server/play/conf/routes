@@ -111,6 +111,7 @@ GET     /entry/:id/notes            controllers.EntryController.notes(id:Long)
 GET     /entry/:id/view             controllers.EntryController.view(id:Long)
 GET     /entry/:id/delete           controllers.EntryController.delete(id:Long)
 GET     /entry/search               controllers.EntryController.search()
+GET     /entry/search/clear         controllers.EntryController.searchClear()
 
 ### MESSAGES ###
 
