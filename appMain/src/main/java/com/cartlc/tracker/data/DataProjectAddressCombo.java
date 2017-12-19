@@ -32,6 +32,7 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
         this.projectNameId = projectNameId;
         this.addressId = addressId;
         mProjectName = null;
+        mAddress = null;
     }
 
     public String getProjectName() {
@@ -112,6 +113,8 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("ID=");
+        sbuf.append(id);
+        sbuf.append(", PROJID=");
         sbuf.append(projectNameId);
         sbuf.append(" [");
         sbuf.append(getProjectName());

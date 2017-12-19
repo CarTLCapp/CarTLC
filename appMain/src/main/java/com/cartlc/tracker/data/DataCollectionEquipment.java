@@ -41,4 +41,18 @@ public abstract class DataCollectionEquipment {
         return null;
     }
 
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        boolean first = true;
+        for (String name : getEquipmentNames()) {
+            if (first) {
+                first = false;
+            } else {
+                sbuf.append(",");
+            }
+            sbuf.append(name);
+        }
+        return sbuf.toString();
+    }
+
 }

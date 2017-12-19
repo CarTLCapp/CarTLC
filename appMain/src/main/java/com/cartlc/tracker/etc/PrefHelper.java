@@ -3,6 +3,7 @@ package com.cartlc.tracker.etc;
 import android.content.Context;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataAddress;
@@ -400,6 +401,11 @@ public class PrefHelper extends PrefHelperBase {
             combo.reset(projectNameId, addressId);
             if (!TableProjectAddressCombo.getInstance().save(combo)) {
                 Timber.e("saveProjectAndAddressCombo(): could not update project combo");
+                return false;
+            }
+            int count = TableEntry.getInstance().reUploadEntries(combo);
+            if (count > 0) {
+                Timber.i("saveProjectAddressCombo(): re-upload " + count + " entries");
             }
         } else {
             projectGroupId = TableProjectAddressCombo.getInstance().queryProjectGroupId(projectNameId, addressId);

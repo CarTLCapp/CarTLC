@@ -96,7 +96,7 @@ public class TableProjectAddressCombo {
             String [] whereArgs = new String [] {
                 Long.toString(projectGroup.id)
             };
-            projectGroup.id = mDb.update(TABLE_NAME, values, where, whereArgs);
+            mDb.update(TABLE_NAME, values, where, whereArgs);
             mDb.setTransactionSuccessful();
             success = true;
         } catch (Exception ex) {

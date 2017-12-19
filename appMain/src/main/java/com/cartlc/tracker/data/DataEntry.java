@@ -7,6 +7,7 @@ import com.cartlc.tracker.R;
 import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventRefreshProjects;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -191,18 +192,50 @@ public class DataEntry {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("ID=");
         sbuf.append(id);
-        sbuf.append(", ADDRESS=");
-        sbuf.append(projectAddressCombo == null ? "NULL" : projectAddressCombo.id);
-        sbuf.append(", EQUIPID=");
-        sbuf.append(equipmentCollection == null ? "NULL" : equipmentCollection.id);
-        sbuf.append(", NOTEID=");
-        sbuf.append(noteCollectionId);
-        sbuf.append(", TRUCKID=");
-        sbuf.append(truckId);
-        sbuf.append(", SERVERID=");
+        if (projectAddressCombo != null) {
+            sbuf.append("\nCOMBO=[");
+            sbuf.append(projectAddressCombo.toString());
+            sbuf.append("]");
+        }
+        if (equipmentCollection != null) {
+            sbuf.append("\nEQUIP=");
+            sbuf.append(equipmentCollection.toString());
+        }
+        sbuf.append("\nNOTES=[");
+        for (DataNote note : getNotesWithValuesOnly()) {
+            sbuf.append("[");
+            sbuf.append(note.toString());
+            sbuf.append("] ");
+        }
+        sbuf.append("]\n");
+        DataTruck truck = getTruck();
+        if (truck != null) {
+            sbuf.append("TRUCK=");
+            sbuf.append(truck.toLongString());
+            sbuf.append("\n");
+        }
+        if (date > 0) {
+            sbuf.append("DATE=");
+            sbuf.append(new SimpleDateFormat("yy-MM-dd_HH:mm:ss").format(date));
+            sbuf.append(" ");
+        }
+        sbuf.append("SERVERID=");
         sbuf.append(serverId);
-        sbuf.append(", STATUS=");
-        sbuf.append(status == null ? "NULL" : status.toString());
+        if (status != null) {
+            sbuf.append(", STATUS=");
+            sbuf.append(status.toString());
+        }
+        sbuf.append(", FLAGS=[");
+        if (uploadedAws) {
+            sbuf.append("UPLOADAWS");
+        }
+        if (uploadedMaster) {
+            sbuf.append(" UPLOADMASTER");
+        }
+        if (hasError) {
+            sbuf.append(" ERROR");
+        }
+        sbuf.append("]");
         return sbuf.toString();
     }
 }

@@ -3,6 +3,7 @@ package com.cartlc.tracker.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.etc.PrefHelper;
@@ -354,6 +355,20 @@ public class TableEntry {
         return count;
     }
 
+    public int reUploadEntries(DataProjectAddressCombo combo) {
+        int count = 0;
+        try {
+            final String where = KEY_PROJECT_ADDRESS_COMBO_ID + "=?";
+            final String[] whereArgs = {Long.toString(combo.id)};
+            ContentValues values = new ContentValues();
+            values.put(KEY_UPLOADED_MASTER, false);
+            count = mDb.update(TABLE_NAME, values, where, whereArgs);
+        } catch (Exception ex) {
+            TBApplication.ReportError(ex, TableEntry.class, "reUploadEntries()", "db");
+        }
+        return count;
+    }
+
     public void add(DataEntry entry) {
         mDb.beginTransaction();
         try {
@@ -448,4 +463,5 @@ public class TableEntry {
         String[] whereArgs = {Long.toString(entry.id)};
         mDb.delete(TABLE_NAME, where, whereArgs);
     }
+
 }

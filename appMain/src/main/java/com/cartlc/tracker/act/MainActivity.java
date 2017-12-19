@@ -852,7 +852,7 @@ public class MainActivity extends AppCompatActivity {
                     showMainListFrame();
                     mCenter.setVisibility(View.VISIBLE);
                     mPrev.setVisibility(View.VISIBLE);
-                    mPrev.setText(R.string.btn_view);
+                    mPrev.setText(R.string.btn_edit);
                     if (TableProjectAddressCombo.getInstance().count() > 0) {
                         mAdd.setVisibility(View.VISIBLE);
                     }
