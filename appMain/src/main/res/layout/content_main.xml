@@ -43,6 +43,14 @@
             android:layout_marginTop="2dp"
             android:visibility="gone"/>
 
+        <View
+            android:id="@+id/main_title_separator"
+            android:background="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="3dp"
+            android:visibility="gone"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -91,6 +99,14 @@
 
     <include layout="@layout/frame_confirmation"/>
 
+    <View
+        android:id="@+id/separator"
+        android:background="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"/>
+
     <FrameLayout
         android:id="@+id/main_list_frame"
         android:layout_width="wrap_content"
@@ -99,7 +115,7 @@
         android:layout_below="@id/main_title"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="5dp"
         android:focusable="true"
         android:visibility="gone">
 

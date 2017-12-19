@@ -88,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
     static final String KEY_HINT = "hint";
     static final String KEY_MSG  = "msg";
 
-    public static final int RESULT_EDIT_ENTRY   = 2;
-    public static final int RESULT_EDIT_PROJECT = 3;
+    public static final int RESULT_EDIT_ENTRY     = 2;
+    public static final int RESULT_EDIT_PROJECT   = 3;
     public static final int RESULT_DELETE_PROJECT = 4;
 
     class MyHandler extends Handler {
@@ -197,33 +197,34 @@ public class MainActivity extends AppCompatActivity {
 
     final static String KEY_STAGE = "stage";
 
-    @BindView(R.id.first_name)          EditText             mFirstName;
-    @BindView(R.id.last_name)           EditText             mLastName;
-    @BindView(R.id.entry_simple)        EditText             mEntrySimple;
-    @BindView(R.id.entry_hint)          TextView             mEntryHint;
-    @BindView(R.id.list_entry_hint)     TextView             mListEntryHint;
-    @BindView(R.id.frame_login)         ViewGroup            mLoginFrame;
-    @BindView(R.id.frame_entry)         ViewGroup            mEntryFrame;
-    @BindView(R.id.frame_status)        ViewGroup            mStatusFrame;
-    @BindView(R.id.main_list)           RecyclerView         mMainList;
-    @BindView(R.id.main_list_frame)     FrameLayout          mMainListFrame;
-    @BindView(R.id.next)                Button               mNext;
-    @BindView(R.id.prev)                Button               mPrev;
-    @BindView(R.id.new_entry)           Button               mCenter;
-    @BindView(R.id.main_title)          LinearLayout         mMainTitle;
-    @BindView(R.id.main_title_text)     TextView             mMainTitleText;
-    @BindView(R.id.sub_title)           TextView             mSubTitle;
-    @BindView(R.id.fab_add)             FloatingActionButton mAdd;
-    @BindView(R.id.frame_confirmation)  FrameLayout          mConfirmationFrameView;
-    @BindView(R.id.frame_pictures)      ViewGroup            mPictureFrame;
-    @BindView(R.id.list_pictures)       RecyclerView         mPictureList;
-    @BindView(R.id.empty)               TextView             mEmptyView;
-    @BindView(R.id.root)                ViewGroup            mRoot;
-    @BindView(R.id.buttons)             ViewGroup            mButtons;
-    @BindView(R.id.status_select)       RadioGroup           mStatusSelect;
-    @BindView(R.id.status_needs_repair) RadioButton          mStatusNeedsRepair;
-    @BindView(R.id.status_complete)     RadioButton          mStatusComplete;
-    @BindView(R.id.status_partial)      RadioButton          mStatusPartial;
+    @BindView(R.id.first_name)           EditText             mFirstName;
+    @BindView(R.id.last_name)            EditText             mLastName;
+    @BindView(R.id.entry_simple)         EditText             mEntrySimple;
+    @BindView(R.id.entry_hint)           TextView             mEntryHint;
+    @BindView(R.id.list_entry_hint)      TextView             mListEntryHint;
+    @BindView(R.id.frame_login)          ViewGroup            mLoginFrame;
+    @BindView(R.id.frame_entry)          ViewGroup            mEntryFrame;
+    @BindView(R.id.frame_status)         ViewGroup            mStatusFrame;
+    @BindView(R.id.main_list)            RecyclerView         mMainList;
+    @BindView(R.id.main_list_frame)      FrameLayout          mMainListFrame;
+    @BindView(R.id.next)                 Button               mNext;
+    @BindView(R.id.prev)                 Button               mPrev;
+    @BindView(R.id.new_entry)            Button               mCenter;
+    @BindView(R.id.main_title)           LinearLayout         mMainTitle;
+    @BindView(R.id.main_title_text)      TextView             mMainTitleText;
+    @BindView(R.id.sub_title)            TextView             mSubTitle;
+    @BindView(R.id.main_title_separator) View                 mMainTitleSeparator;
+    @BindView(R.id.fab_add)              FloatingActionButton mAdd;
+    @BindView(R.id.frame_confirmation)   FrameLayout          mConfirmationFrameView;
+    @BindView(R.id.frame_pictures)       ViewGroup            mPictureFrame;
+    @BindView(R.id.list_pictures)        RecyclerView         mPictureList;
+    @BindView(R.id.empty)                TextView             mEmptyView;
+    @BindView(R.id.root)                 ViewGroup            mRoot;
+    @BindView(R.id.buttons)              ViewGroup            mButtons;
+    @BindView(R.id.status_select)        RadioGroup           mStatusSelect;
+    @BindView(R.id.status_needs_repair)  RadioButton          mStatusNeedsRepair;
+    @BindView(R.id.status_complete)      RadioButton          mStatusComplete;
+    @BindView(R.id.status_partial)       RadioButton          mStatusPartial;
 
     Stage              mCurStage           = Stage.LOGIN;
     String             mCurKey             = PrefHelper.KEY_STATE;
@@ -664,6 +665,7 @@ public class MainActivity extends AppCompatActivity {
         mListEntryHint.setVisibility(View.GONE);
         mEntryHint.setVisibility(View.GONE);
         mSubTitle.setVisibility(View.GONE);
+        mMainTitleSeparator.setVisibility(View.GONE);
         mCompanyEditing = null;
 
         switch (mCurStage) {
@@ -851,6 +853,7 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().saveProjectAndAddressCombo(mEditCurProject);
                     mEditCurProject = false;
                     showMainListFrame();
+                    mMainTitleSeparator.setVisibility(View.VISIBLE);
                     mCenter.setVisibility(View.VISIBLE);
                     mPrev.setVisibility(View.VISIBLE);
                     mPrev.setText(R.string.btn_edit);
