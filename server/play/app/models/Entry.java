@@ -123,6 +123,9 @@ public class Entry extends com.avaje.ebean.Model {
         if (project == null) {
             return "NOT FOUND: " + project_id;
         }
+        if (project.name == null) {
+            return "";
+        }
         return project.name;
     }
 
@@ -138,6 +141,9 @@ public class Entry extends com.avaje.ebean.Model {
         Company company = Company.get(company_id);
         if (company == null) {
             return "NOT FOUND: " + company_id;
+        }
+        if (company.getName() == null) {
+            return "";
         }
         return company.getName();
     }
@@ -168,6 +174,9 @@ public class Entry extends com.avaje.ebean.Model {
         Company company = Company.get(company_id);
         if (company == null) {
             return "NOT FOUND: " + company_id;
+        }
+        if (company.city == null) {
+            return "";
         }
         return company.city;
     }
