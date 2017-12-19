@@ -56,7 +56,7 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_SAVED_PROJECT_GROUP_ID        = "saved_project_group_id";
     static final        String KEY_FIRST_NAME                    = "first_name";
     static final        String KEY_LAST_NAME                     = "last_name";
-    static final        String KEY_TRUCK_NUMBER                  = "truck_number";
+    static final        String KEY_TRUCK_NUMBER                  = "truck_number_string";
     static final        String KEY_LICENSE_PLATE                 = "license_plate";
     static final        String KEY_EDIT_ENTRY_ID                 = "edit_id";
     static final        String KEY_NEXT_PICTURE_COLLECTION_ID    = "next_picture_collection_id";
@@ -191,12 +191,12 @@ public class PrefHelper extends PrefHelperBase {
         return !TextUtils.isEmpty(getFirstName()) && !TextUtils.isEmpty(getLastName());
     }
 
-    public long getTruckNumber() {
-        return getLong(KEY_TRUCK_NUMBER, 0);
+    public String getTruckNumber() {
+        return getString(KEY_TRUCK_NUMBER, null);
     }
 
-    public void setTruckNumber(long id) {
-        setLong(KEY_TRUCK_NUMBER, id);
+    public void setTruckNumber(String id) {
+        setString(KEY_TRUCK_NUMBER, id);
     }
 
     public String getLicensePlate() {
@@ -350,7 +350,7 @@ public class PrefHelper extends PrefHelperBase {
     }
 
     public void clearLastEntry() {
-        setTruckNumber(0);
+        setTruckNumber(null);
         setLicensePlate(null);
         setStatus(null);
         setCurrentEditEntryId(0);
@@ -497,7 +497,7 @@ public class PrefHelper extends PrefHelperBase {
             setTruckNumber(truck.truckNumber);
             setLicensePlate(truck.licensePlateNumber);
         } else {
-            setTruckNumber(0);
+            setTruckNumber(null);
             setLicensePlate(null);
         }
         setStatus(entry.status);
@@ -514,7 +514,7 @@ public class PrefHelper extends PrefHelperBase {
         if (truck == null) {
             truck = new DataTruck();
         }
-        truck.truckNumber = (int) getTruckNumber();
+        truck.truckNumber = getTruckNumber();
         truck.licensePlateNumber = getLicensePlate();
         entry.truckId = TableTruck.getInstance().save(truck);
         entry.status = getStatus();
@@ -605,15 +605,15 @@ public class PrefHelper extends PrefHelperBase {
     public String getTruckValue() {
         String value;
         String license = getLicensePlate();
-        long number = getTruckNumber();
+        String number = getTruckNumber();
         if (TextUtils.isEmpty(license)) {
-            if (number > 0) {
-                value = Long.toString(number);
+            if (number != null) {
+                value = number;
             } else {
                 value = "";
             }
         } else {
-            if (number > 0) {
+            if (number != null) {
                 value = DataTruck.toString(number, license);
             } else {
                 value = license;
@@ -626,20 +626,20 @@ public class PrefHelper extends PrefHelperBase {
         if (value.contains(":")) {
             String[] ele = value.split(":");
             if (ele.length >= 2) {
-                setTruckNumber(Integer.parseInt(ele[0].trim()));
+                setTruckNumber(ele[0].trim());
                 setLicensePlate(ele[1].trim());
             } else if (ele.length == 1) {
                 if (TextUtils.isDigitsOnly(ele[0])) {
-                    setTruckNumber(Integer.parseInt(ele[0].trim()));
+                    setTruckNumber(ele[0].trim());
                 } else {
                     setLicensePlate(ele[0].trim());
                 }
             } else {
-                setTruckNumber(0);
+                setTruckNumber(null);
                 setLicensePlate(null);
             }
         } else if (TextUtils.isDigitsOnly(value)) {
-            setTruckNumber(Long.parseLong(value));
+            setTruckNumber(value);
         } else {
             setLicensePlate(value);
         }

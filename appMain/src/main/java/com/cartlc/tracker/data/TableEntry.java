@@ -114,7 +114,8 @@ public class TableEntry {
                     companyName = null;
                 }
                 entry.truckId = TableTruck.getInstance().save(
-                        truckNumber, licensePlateNumber, projectNameId, companyName);
+                        Integer.toString(truckNumber),
+                        licensePlateNumber, projectNameId, companyName);
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
                 entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
 

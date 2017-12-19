@@ -81,7 +81,13 @@ public class TruckController extends Controller {
             ObjectNode node = array.addObject();
             node.put("id", item.id);
             if (item.truck_number != null) {
-                node.put("truck_number", item.truck_number);
+                node.put("truck_number_string", item.truck_number);
+                // Backwards capability
+                try {
+                    int trucknum = Integer.valueOf(item.truck_number);
+                    node.put("truck_number", trucknum);
+                } catch (NumberFormatException ex) {
+                }
             }
             if (item.license_plate != null) {
                 node.put("license_plate", item.license_plate);

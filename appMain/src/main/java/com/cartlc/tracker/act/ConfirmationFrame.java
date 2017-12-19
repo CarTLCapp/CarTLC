@@ -71,11 +71,11 @@ public class ConfirmationFrame {
         if (truck == null) {
             mTruckNumberValue.setVisibility(View.GONE);
         } else if (truck.licensePlateNumber == null) {
-            if (truck.truckNumber == 0) {
+            if (truck.truckNumber == null) {
                 mTruckNumberValue.setVisibility(View.GONE);
             } else {
                 mTruckNumberValue.setVisibility(View.VISIBLE);
-                mTruckNumberValue.setText(Long.toString(truck.truckNumber));
+                mTruckNumberValue.setText(truck.truckNumber);
             }
         } else {
             mTruckNumberValue.setVisibility(View.VISIBLE);

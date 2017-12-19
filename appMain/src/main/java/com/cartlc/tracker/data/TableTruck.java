@@ -20,7 +20,7 @@ import timber.log.Timber;
 
 public class TableTruck {
 
-    static final String TABLE_NAME = "table_trucks";
+    static final String TABLE_NAME = "table_trucks_v14";
 
     static final String KEY_ROWID         = "_id";
     static final String KEY_TRUCK_NUMBER  = "truck_number";
@@ -54,7 +54,7 @@ public class TableTruck {
         sbuf.append(KEY_ROWID);
         sbuf.append(" integer primary key autoincrement, ");
         sbuf.append(KEY_TRUCK_NUMBER);
-        sbuf.append(" int default 0, ");
+        sbuf.append(" varchar(128), ");
         sbuf.append(KEY_LICENSE_PLATE);
         sbuf.append(" varchar(128), ");
         sbuf.append(KEY_SERVER_ID);
@@ -66,19 +66,11 @@ public class TableTruck {
         mDb.execSQL(sbuf.toString());
     }
 
-    public void upgrade11() {
-        try {
-            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_PROJECT_ID + " int default 0");
-            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_COMPANY_NAME + " varchar(256)");
-        } catch (Exception ex) {
-            TBApplication.ReportError(ex, TableTruck.class, "upgrade11()", "db");
-        }
-    }
     // Will ensure the said truck and license plate are stored in the database.
     // Trys to take care of existing entries smartly. Prefers license plate entry
     // to truck number entries in case of duplication.
     // @Returns id of newly saved truck.
-    public long save(long truckNumber, String licensePlate, long projectId, String companyName) {
+    public long save(String truckNumber, String licensePlate, long projectId, String companyName) {
         String selection;
         String[] selectionArgs;
         Cursor cursor = null;
@@ -94,7 +86,7 @@ public class TableTruck {
                 final int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
                 final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
                 final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
-                truck.truckNumber = cursor.getInt(idxTruckNumber);
+                truck.truckNumber = cursor.getString(idxTruckNumber);
                 truck.licensePlateNumber = cursor.getString(idxLicensePlate);
                 truck.projectNameId = cursor.getInt(idxProjectId);
                 truck.companyName = cursor.getString(idxCompanyName);
@@ -102,7 +94,7 @@ public class TableTruck {
                 String where = KEY_ROWID + "=?";
                 String[] whereArgs = new String[]{Long.toString(truck.id)};
                 boolean doUpdate = false;
-                if ((truckNumber != truck.truckNumber) && truckNumber > 0) {
+                if (truckNumber != null && !truckNumber.equals(truck.truckNumber)) {
                     values.put(KEY_TRUCK_NUMBER, truckNumber);
                     doUpdate = true;
                 }
@@ -118,10 +110,10 @@ public class TableTruck {
                     mDb.update(TABLE_NAME, values, where, whereArgs);
                 }
             } else {
-                if (truckNumber > 0) {
+                if (truckNumber != null) {
                     cursor.close();
                     selection = KEY_TRUCK_NUMBER + "=?";
-                    selectionArgs = new String[]{Long.toString(truckNumber)};
+                    selectionArgs = new String[]{truckNumber};
                     String[] columns = {KEY_ROWID};
                     cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
                     if (cursor.moveToNext()) {
@@ -148,13 +140,13 @@ public class TableTruck {
                 truck.id = mDb.insert(TABLE_NAME, null, values);
             }
         } else {
-            if (truckNumber <= 0) {
+            if (truckNumber == null) {
                 Timber.e("Invalid truck entry ignored");
                 return 0;
             }
             try {
                 selection = KEY_TRUCK_NUMBER + "=?";
-                selectionArgs = new String[]{Long.toString(truckNumber)};
+                selectionArgs = new String[]{truckNumber};
                 cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
                 if (cursor != null && cursor.moveToFirst() && cursor.getCount() > 0) {
                     final int rowIdIndex = cursor.getColumnIndex(KEY_ROWID);
@@ -216,7 +208,13 @@ public class TableTruck {
             if (truck.id > 0) {
                 String where = KEY_ROWID + "=?";
                 String[] whereArgs = new String[]{Long.toString(truck.id)};
-                mDb.update(TABLE_NAME, values, where, whereArgs);
+                if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {
+                    values.put(KEY_ROWID, truck.id);
+                    long confirm_id = mDb.insert(TABLE_NAME, null, values);
+                    if (confirm_id != truck.id) {
+                        Timber.e("Did not transfer truck properly for ID " + truck.id + "...got back " + confirm_id);
+                    }
+                }
             } else {
                 truck.id = mDb.insert(TABLE_NAME, null, values);
             }
@@ -239,7 +237,7 @@ public class TableTruck {
             final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
             final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
             truck.id = cursor.getLong(idxId);
-            truck.truckNumber = cursor.getInt(idxTruckNumber);
+            truck.truckNumber = cursor.getString(idxTruckNumber);
             truck.licensePlateNumber = cursor.getString(idxLicensePlate);
             truck.serverId = cursor.getLong(idxServerId);
             truck.projectNameId = cursor.getInt(idxProjectId);
@@ -267,7 +265,7 @@ public class TableTruck {
         while (cursor.moveToNext()) {
             DataTruck truck = new DataTruck();
             truck.id = cursor.getLong(idxId);
-            truck.truckNumber = cursor.getInt(idxTruckNumber);
+            truck.truckNumber = cursor.getString(idxTruckNumber);
             truck.licensePlateNumber = cursor.getString(idxLicensePlate);
             truck.serverId = cursor.getLong(idxServerId);
             truck.projectNameId = cursor.getInt(idxProjectId);
@@ -327,7 +325,7 @@ public class TableTruck {
             final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
             final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
             truck.id = cursor.getLong(idxId);
-            truck.truckNumber = cursor.getInt(idxTruckNumber);
+            truck.truckNumber = cursor.getString(idxTruckNumber);
             truck.licensePlateNumber = cursor.getString(idxLicensePlate);
             truck.serverId = cursor.getLong(idxServerId);
             truck.projectNameId = cursor.getInt(idxProjectId);

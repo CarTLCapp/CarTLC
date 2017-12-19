@@ -82,19 +82,6 @@ public class CheckError {
             return false;
         }
 
-        boolean hasTruck(DataEntry entry) {
-            DataTruck truck = entry.getTruck();
-            if (truck != null) {
-                if (truck.truckNumber > 0) {
-                    return true;
-                }
-                if (truck.licensePlateNumber != null) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         void showTruckError(final Activity act, final DataEntry entry, final CheckErrorResult callback) {
             AlertDialog.Builder builder = new AlertDialog.Builder(act);
             builder.setTitle(R.string.title_error);

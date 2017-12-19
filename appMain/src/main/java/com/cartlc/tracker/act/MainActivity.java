@@ -482,7 +482,7 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
                 // For debugging purposes only.
-                PrefHelper.getInstance().setTruckNumber(0);
+                PrefHelper.getInstance().setTruckNumber(null);
                 PrefHelper.getInstance().setLicensePlate(null);
                 PrefHelper.getInstance().setDoErrorCheck(true);
             } else {

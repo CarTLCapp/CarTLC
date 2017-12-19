@@ -3,6 +3,7 @@ package com.cartlc.tracker.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.cartlc.tracker.etc.PrefHelper;
 
@@ -18,7 +19,7 @@ public class DatabaseManager {
     // Note: Jumping from 2 to 9 to get around the allowBackup bug.
     // Could now drop it down to 3, but who cares.
     // Jumping again from 10 to 13 to help with development.
-    static final int    DATABASE_VERSION = 13;
+    static final int    DATABASE_VERSION = 15;
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -71,6 +72,7 @@ public class DatabaseManager {
             TableCrash.Init(mCtx, db);
             TableZipCode.Init(db);
             TableTruck.Init(db);
+            TableTruckV13.Init(db);
         }
 
         @Override
@@ -85,10 +87,17 @@ public class DatabaseManager {
                 TableEntry.getInstance().upgrade3();
             } else if (oldVersion <= 9) {
                 TableCrash.upgrade10(db);
-                TableTruck.getInstance().upgrade11();
+                TableTruckV13.getInstance().upgrade11();
+                TableTruck.getInstance().create();
+                TableTruckV13.getInstance().transfer();
             } else if (oldVersion <= 12) {
-                TableTruck.getInstance().upgrade11();
+                TableTruckV13.getInstance().upgrade11();
+                TableTruck.getInstance().create();
+                TableTruckV13.getInstance().transfer();
                 TableEntry.getInstance().upgrade11();
+            } else if (oldVersion <= 15) {
+                TableTruck.getInstance().create();
+                TableTruckV13.getInstance().transfer();
             }
         }
 

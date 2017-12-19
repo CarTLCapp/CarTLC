@@ -654,8 +654,10 @@ public class DCPing extends DCPost {
                     JSONObject ele = array.getJSONObject(i);
                     DataTruck incoming = new DataTruck();
                     incoming.serverId = ele.getInt("id");
-                    if (ele.has("truck_number")) {
-                        incoming.truckNumber = ele.getInt("truck_number");
+                    if (ele.has("truck_number_string")) {
+                        incoming.truckNumber = ele.getString("truck_number_string");
+                    } else if (ele.has("truck_number")) {
+                        incoming.truckNumber = Integer.toString(ele.getInt("truck_number"));
                     }
                     if (ele.has("license_plate")) {
                         incoming.licensePlateNumber = ele.getString("license_plate");
@@ -740,7 +742,7 @@ public class DCPing extends DCPost {
             jsonObject.accumulate("server_id", entry.serverId);
             DataTruck truck = entry.getTruck();
             if (truck != null) {
-                if (truck.truckNumber > 0) {
+                if (truck.truckNumber != null) {
                     jsonObject.accumulate("truck_number", truck.truckNumber);
                 }
                 if (truck.licensePlateNumber != null) {

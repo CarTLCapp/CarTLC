@@ -12,7 +12,7 @@ public class DataTruck implements Comparable<DataTruck> {
 
     public long   id;
     public long   serverId;
-    public int    truckNumber;
+    public String truckNumber;
     public String licensePlateNumber;
     public long   projectNameId;
     public String companyName;
@@ -56,7 +56,11 @@ public class DataTruck implements Comparable<DataTruck> {
 
     public String toLongString() {
         StringBuilder sbuf = new StringBuilder();
-        if (truckNumber > 0) {
+        if (id > 0) {
+            sbuf.append(id);
+        }
+        if (truckNumber != null) {
+            sbuf.append(", ");
             sbuf.append(truckNumber);
         }
         if (!TextUtils.isEmpty(licensePlateNumber)) {
@@ -83,9 +87,9 @@ public class DataTruck implements Comparable<DataTruck> {
         return sbuf.toString();
     }
 
-    public static String toString(long truckNumber, String licensePlateNumber) {
+    public static String toString(String truckNumber, String licensePlateNumber) {
         StringBuilder sbuf = new StringBuilder();
-        if (truckNumber > 0) {
+        if (truckNumber != null) {
             sbuf.append(truckNumber);
         }
         if (!TextUtils.isEmpty(licensePlateNumber)) {
@@ -99,6 +103,12 @@ public class DataTruck implements Comparable<DataTruck> {
 
     @Override
     public int compareTo(@NonNull DataTruck o) {
-        return truckNumber - o.truckNumber;
+        if (truckNumber == null) {
+            if (o.truckNumber == null) {
+                return 0;
+            }
+            return -1;
+        }
+        return truckNumber.compareTo(o.truckNumber);
     }
 }
