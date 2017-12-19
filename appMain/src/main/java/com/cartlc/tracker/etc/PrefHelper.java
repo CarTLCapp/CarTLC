@@ -342,6 +342,7 @@ public class PrefHelper extends PrefHelperBase {
         setCity(null);
         setCompany(null);
         setStreet(null);
+        setZipCode(null);
         setProject(null);
         setSavedProjectGroupId(getCurrentProjectGroupId());
         setCurrentProjectGroupId(-1L);
@@ -433,6 +434,7 @@ public class PrefHelper extends PrefHelperBase {
         setStreet(address.street);
         setCity(address.city);
         setState(address.state);
+        setZipCode(address.zipcode);
     }
 
     public long getNextPictureCollectionID() {
@@ -568,6 +570,13 @@ public class PrefHelper extends PrefHelperBase {
         String company = getCompany();
         if (company != null) {
             sbuf.append(company);
+        }
+        String street = getStreet();
+        if (street != null) {
+            if (sbuf.length() > 0) {
+                sbuf.append("\n");
+            }
+            sbuf.append(street);
         }
         String city = getCity();
         if (city != null) {

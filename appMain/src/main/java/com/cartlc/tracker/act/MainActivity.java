@@ -719,9 +719,6 @@ public class MainActivity extends AppCompatActivity {
             case ZIPCODE: {
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
-                PrefHelper.getInstance().setCity(null);
-                PrefHelper.getInstance().setState(null);
-                PrefHelper.getInstance().setZipCode(null);
                 showEntryHint();
                 showSubTitleHint();
                 final String company = PrefHelper.getInstance().getCompany();
@@ -734,7 +731,7 @@ public class MainActivity extends AppCompatActivity {
                     mMainTitleText.setText(R.string.title_zipcode);
                     mEntryFrame.setVisibility(View.VISIBLE);
                     mEntrySimple.setHint(R.string.title_zipcode);
-                    mEntrySimple.setText("");
+                    mEntrySimple.setText(PrefHelper.getInstance().getZipCode());
                     mEntrySimple.addTextChangedListener(mZipCodeWatcher);
                     mEntrySimple.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 } else {
