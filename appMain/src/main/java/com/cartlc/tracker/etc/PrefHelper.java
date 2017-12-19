@@ -362,12 +362,10 @@ public class PrefHelper extends PrefHelperBase {
     public boolean saveProjectAndAddressCombo(boolean modifyCurrent) {
         String project = getProjectName();
         if (TextUtils.isEmpty((project))) {
-            Timber.i("saveProjectAndAddressCombo(): quit on empty project");
             return false;
         }
         String company = getCompany();
         if (TextUtils.isEmpty(company)) {
-            Timber.i("saveProjectAndAddressCombo(): quit on empty company");
             return false;
         }
         String state = getState();
@@ -407,6 +405,7 @@ public class PrefHelper extends PrefHelperBase {
             if (count > 0) {
                 Timber.i("saveProjectAddressCombo(): re-upload " + count + " entries");
             }
+            TableProjectAddressCombo.getInstance().updateUsed(projectGroupId);
         } else {
             projectGroupId = TableProjectAddressCombo.getInstance().queryProjectGroupId(projectNameId, addressId);
             if (projectGroupId < 0) {

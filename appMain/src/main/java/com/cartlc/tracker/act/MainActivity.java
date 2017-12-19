@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int RESULT_EDIT_ENTRY   = 2;
     public static final int RESULT_EDIT_PROJECT = 3;
+    public static final int RESULT_DELETE_PROJECT = 4;
 
     class MyHandler extends Handler {
         @Override
@@ -1032,6 +1033,11 @@ public class MainActivity extends AppCompatActivity {
             doEditEntry();
         } else if (resultCode == RESULT_EDIT_PROJECT) {
             doEditProject();
+        } else if (resultCode == RESULT_DELETE_PROJECT) {
+            PrefHelper.getInstance().clearCurProject();
+            mCurStageEditing = false;
+            mCurStage = Stage.CURRENT_PROJECT;
+            fillStage();
         } else if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 fillStage();

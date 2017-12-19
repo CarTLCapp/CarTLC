@@ -28,16 +28,16 @@
 
         <RelativeLayout
             android:id="@+id/address_box"
-            android:layout_margin="10dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
 
             <Button
                 android:id="@+id/edit_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
                 android:text="@string/btn_edit"/>
 
             <TextView
@@ -45,30 +45,31 @@
                 style="@style/ProjectFullTextTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Project Name"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@id/edit_address"/>
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@id/edit_address"
+                android:text="Project Name"/>
 
             <TextView
                 android:id="@+id/project_address"
                 style="@style/ProjectFullTextSub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Company Name, 5103 Some Road, Some City, State 99900"
                 android:layout_alignParentLeft="true"
                 android:layout_below="@id/project_name"
-                android:layout_toLeftOf="@id/edit_address"/>
+                android:layout_toLeftOf="@id/edit_address"
+                android:text="Company Name, 5103 Some Road, Some City, State 99900"/>
 
         </RelativeLayout>
 
-        <View android:id="@+id/line"
-              android:layout_width="match_parent"
-              android:layout_height="2dp"
-              android:layout_below="@id/address_box"
-              android:layout_alignParentLeft="true"
-              android:layout_alignParentRight="true"
-              android:background="@android:color/white"/>
+        <View
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/address_box"
+            android:background="@android:color/white"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list_entries"
@@ -77,6 +78,16 @@
             android:layout_alignParentBottom="true"
             android:layout_below="@id/line"
             android:layout_marginTop="10dp"/>
+
+        <Button
+            android:id="@+id/delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/line"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:text="@string/btn_delete"
+            android:visibility="gone"/>
 
     </RelativeLayout>
 

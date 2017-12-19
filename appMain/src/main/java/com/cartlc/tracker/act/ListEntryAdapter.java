@@ -34,6 +34,7 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
         @BindView(R.id.status)          TextView status;
         @BindView(R.id.notes)           TextView notes;
         @BindView(R.id.equipments)      TextView equipments;
+        @BindView(R.id.edit)            TextView edit;
 
         public CustomViewHolder(View view) {
             super(view);
@@ -42,13 +43,12 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
     }
 
     public interface OnItemSelectedListener {
-        void onSelected(DataEntry entry);
+        void onEdit(DataEntry entry);
     }
 
     final Context                mContext;
     final OnItemSelectedListener mListener;
     List<DataEntry> mItems;
-    Integer         mSelectedPos;
 
     public ListEntryAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;
@@ -68,27 +68,16 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
         holder.status.setText(item.getStatus(mContext));
         holder.notes.setText(item.getNotesLine());
         holder.equipments.setText(item.getEquipmentLine(mContext));
-
+        holder.edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onEdit(item);
+            }
+        });
         if (TextUtils.isEmpty(holder.notes.getText().toString().trim())) {
             holder.notes.setVisibility(View.GONE);
         } else {
             holder.notes.setVisibility(View.VISIBLE);
-        }
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSelectedPos = position;
-                if (mListener != null) {
-                    mListener.onSelected(item);
-                }
-                notifyDataSetChanged();
-            }
-        });
-        if (mSelectedPos != null && mSelectedPos == position) {
-            mSelectedPos = position;
-            holder.itemView.setBackgroundResource(R.color.project_highlight);
-        } else {
-            holder.itemView.setBackgroundResource(R.color.project_normal);
         }
     }
 
@@ -105,10 +94,4 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
             mItems = combo.getEntries();
         }
     }
-
-    public void clear() {
-        mSelectedPos = null;
-    }
-
-
 }
