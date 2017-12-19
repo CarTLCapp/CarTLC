@@ -51,8 +51,8 @@
     <string name="title_status_">Status:</string>
     <string name="title_truck_">Truck:</string>
     <string name="title_activity_list_entries">Project Entries</string>
-    <string name="title_elements">%d elements</string>
-    <string name="title_element">one element</string>
+    <string name="title_elements">%d entries</string>
+    <string name="title_element">one entry</string>
 
     <string name="error_enter_your_name">Please enter your name</string>
     <string name="error_need_a_truck_number">Need a truck number</string>
