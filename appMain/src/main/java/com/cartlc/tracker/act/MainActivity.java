@@ -1217,11 +1217,9 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(getString(R.string.entry_hint_edit_project));
         sbuf.append("\n");
-        DataProjectAddressCombo combo = PrefHelper.getInstance().getCurrentProjectGroup();
-        sbuf.append(combo.getProjectName());
+        sbuf.append(PrefHelper.getInstance().getProjectName());
         sbuf.append("\n");
-        DataAddress address = combo.getAddress();
-        sbuf.append(address.getBlock());
+        sbuf.append(PrefHelper.getInstance().getAddress());
         return sbuf.toString();
     }
 

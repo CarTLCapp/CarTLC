@@ -380,25 +380,27 @@ public class PrefHelper extends PrefHelperBase {
             address.isLocal = true;
             addressId = TableAddress.getInstance().add(address);
             if (addressId < 0) {
-                Timber.i("saveProjectAndAddressCombo(): could not find address: " + address.toString());
+                Timber.e("saveProjectAndAddressCombo(): could not find address: " + address.toString());
                 return false;
             }
         }
         long projectNameId = TableProjects.getInstance().queryProjectName(project);
         if (projectNameId < 0) {
-            Timber.i("saveProjectAndAddressCombo(): could not find project: " + project);
+            Timber.e("saveProjectAndAddressCombo(): could not find project: " + project);
             return false;
         }
         long projectGroupId;
         if (modifyCurrent) {
             projectGroupId = getCurrentProjectGroupId();
             if (projectGroupId < 0) {
-                Timber.i("saveProjectAndAddressCombo(): could not modify current project, none is alive");
+                Timber.e("saveProjectAndAddressCombo(): could not modify current project, none is alive");
                 return false;
             }
             DataProjectAddressCombo combo = TableProjectAddressCombo.getInstance().query(projectGroupId);
-            combo.projectNameId = projectNameId;
-            combo.addressId = addressId;
+            combo.reset(projectNameId, addressId);
+            if (!TableProjectAddressCombo.getInstance().save(combo)) {
+                Timber.e("saveProjectAndAddressCombo(): could not update project combo");
+            }
         } else {
             projectGroupId = TableProjectAddressCombo.getInstance().queryProjectGroupId(projectNameId, addressId);
             if (projectGroupId < 0) {

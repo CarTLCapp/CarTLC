@@ -28,6 +28,12 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
         this.addressId = addressId;
     }
 
+    public void reset(long projectNameId, long addressId) {
+        this.projectNameId = projectNameId;
+        this.addressId = addressId;
+        mProjectName = null;
+    }
+
     public String getProjectName() {
         if (mProjectName == null) {
             mProjectName = TableProjects.getInstance().queryProjectName(projectNameId);
