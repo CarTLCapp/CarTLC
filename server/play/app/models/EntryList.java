@@ -7,6 +7,8 @@ import com.avaje.ebean.*;
 import play.db.ebean.*;
 import play.Logger;
 
+import play.twirl.api.Html;
+
 /**
  * Created because Ebean doesn't work in one annoying aspect:
  * When I try to join the Entry and Company tables so that I can do
@@ -48,7 +50,7 @@ public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
 
     public void setSearch(String search) {
         if (search != null) {
-            mSearch = search.trim().toLowerCase();
+            mSearch = search.trim();
         } else {
             mSearch = null;
         }
@@ -65,6 +67,22 @@ public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
             }
         }
         return result;
+    }
+
+    public Html highlightSearch(String element) {
+        if (element.contains(mSearch)) {
+            int pos = element.indexOf(mSearch);
+            if (pos >= 0) {
+                StringBuilder sbuf = new StringBuilder();
+                sbuf.append(element.substring(0, pos));
+                sbuf.append("<b>");
+                sbuf.append(element.substring(pos, mSearch.length() + pos));
+                sbuf.append("</b>");
+                sbuf.append(element.substring(mSearch.length() + pos));
+                return Html.apply(sbuf.toString());
+            }
+        }
+        return Html.apply(element);
     }
 
     public int compare(Entry o1, Entry o2) {

@@ -74,7 +74,7 @@
                         <td>@entry.getTechName()</td>
                         <td>@entry.entry_time.format("yyyy-MM-dd kk:mm")</td>
                         <td>@entry.getProjectLine()</td>
-                        <td>@entry.getCompany()</td>
+                        <td>@currentPage.highlightSearch(entry.getCompany())</td>
                         <td>@entry.getStreet()</td>
                         <td>@entry.getCity()</td>
                         <td>@entry.getState()</td>

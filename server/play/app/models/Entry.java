@@ -147,6 +147,9 @@ public class Entry extends com.avaje.ebean.Model {
         if (company == null) {
             return "NOT FOUND: " + company_id;
         }
+        if (company.street == null) {
+            return "";
+        }
         return company.street;
     }
 
@@ -154,6 +157,9 @@ public class Entry extends com.avaje.ebean.Model {
         Company company = Company.get(company_id);
         if (company == null) {
             return "NOT FOUND: " + company_id;
+        }
+        if (company.state == null) {
+            return "";
         }
         return company.state;
     }
@@ -170,6 +176,9 @@ public class Entry extends com.avaje.ebean.Model {
         Company company = Company.get(company_id);
         if (company == null) {
             return "NOT FOUND: " + company_id;
+        }
+        if (company.zipcode == null) {
+            return "";
         }
         return company.zipcode;
     }
@@ -326,34 +335,34 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public boolean match(String search) {
-        if (getProjectLine().toLowerCase().contains(search)) {
+        if (getProjectLine().contains(search)) {
             return true;
         }
-        if (getCity().toLowerCase().contains(search)) {
+        if (getCity().contains(search)) {
             return true;
         }
-        if (getCompany().toLowerCase().contains(search)) {
+        if (getCompany().contains(search)) {
             return true;
         }
-        if (getEquipmentLine().toLowerCase().contains(search)) {
+        if (getEquipmentLine().contains(search)) {
             return true;
         }
-        if (getTruckLine().toLowerCase().contains(search)) {
+        if (getTruckLine().contains(search)) {
             return true;
         }
-        if (getZipCode().toLowerCase().contains(search)) {
+        if (getZipCode().contains(search)) {
             return true;
         }
-        if (getTechName().toLowerCase().contains(search)) {
+        if (getTechName().contains(search)) {
             return true;
         }
-        if (getAddressLine().toLowerCase().contains(search)) {
+        if (getAddressLine().contains(search)) {
             return true;
         }
-        if (getState().toLowerCase().contains(search)) {
+        if (getState().contains(search)) {
             return true;
         }
-        if (getStatus().toLowerCase().contains(search)) {
+        if (getStatus().contains(search)) {
             return true;
         }
         return false;
