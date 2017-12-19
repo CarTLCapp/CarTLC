@@ -52,7 +52,7 @@ public class WorkOrderWriter {
             Company company;
             for (WorkOrder order : list) {
                 truck = order.getTruck();
-                br.write(Integer.toString(truck.truck_number));
+                br.write(truck.truck_number);
                 br.write(",");
                 br.write(truck.license_plate);
                 br.write(",");

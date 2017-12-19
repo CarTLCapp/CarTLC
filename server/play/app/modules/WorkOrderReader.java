@@ -83,7 +83,7 @@ public class WorkOrderReader {
                         continue;
                     }
                     Truck truck = new Truck();
-                    truck.truck_number = getFieldValueInt(values, WorkOrderField.TRUCK_NUMBER);
+                    truck.truck_number = getFieldValue(values, WorkOrderField.TRUCK_NUMBER);
                     truck.license_plate = getFieldValue(values, WorkOrderField.LICENSE);
                     truck.project_id = project_id;
                     truck.company_name_id = company_name_id;

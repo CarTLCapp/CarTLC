@@ -180,13 +180,13 @@ public class EntryController extends Controller {
                 entry = existing;
             }
         }
-        int truck_number;
+        String truck_number;
         String license_plate;
         value = json.findValue("truck_number");
         if (value != null) {
-            truck_number = value.intValue();
+            truck_number = value.textValue();
         } else {
-            truck_number = 0;
+            truck_number = null;
         }
         value = json.findValue("license_plate");
         if (value != null) {
@@ -234,7 +234,7 @@ public class EntryController extends Controller {
         } else {
             entry.company_id = value.longValue();
         }
-        if (truck_number == 0 && license_plate == null) {
+        if (truck_number == null && license_plate == null) {
             missing.add("truck_number");
             missing.add("license_plate");
         } else {

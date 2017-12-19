@@ -80,7 +80,7 @@ public class TruckController extends Controller {
         for (Truck item : trucks) {
             ObjectNode node = array.addObject();
             node.put("id", item.id);
-            if (item.truck_number > 0) {
+            if (item.truck_number != null) {
                 node.put("truck_number", item.truck_number);
             }
             if (item.license_plate != null) {
@@ -130,15 +130,7 @@ public class TruckController extends Controller {
         if (truck == null) {
             return badRequest("Cannot find truck");
         }
-        if (updateTruck.truck_number.trim().isEmpty()) {
-            truck.truck_number = 0;
-        } else {
-            try {
-                truck.truck_number = Integer.parseInt(updateTruck.truck_number);
-            } catch (NumberFormatException ex) {
-                return badRequest(ex.getMessage());
-            }
-        }
+        truck.truck_number = updateTruck.truck_number;
         truck.license_plate = updateTruck.license_plate;
         if (updateTruck.project_name.trim().isEmpty()) {
             truck.project_id = 0;

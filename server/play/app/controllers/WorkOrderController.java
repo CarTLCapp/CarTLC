@@ -236,11 +236,7 @@ public class WorkOrderController extends Controller {
         }
         try {
             WorkOrderFormData workOrderFormData = workOrderForm.get();
-            if (workOrderFormData.truck_number.trim().length() > 0) {
-                truck.truck_number = Integer.parseInt(workOrderFormData.truck_number);
-            } else {
-                truck.truck_number = 0;
-            }
+            truck.truck_number = workOrderFormData.truck_number;
             truck.license_plate = workOrderFormData.license_plate;
             if (truck.id == 0) {
                 truck.project_id = workOrderItem.project_id;

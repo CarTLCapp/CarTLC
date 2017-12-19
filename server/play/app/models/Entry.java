@@ -216,7 +216,7 @@ public class Entry extends com.avaje.ebean.Model {
             return null;
         }
         StringBuilder sbuf = new StringBuilder();
-        if (truck.truck_number > 0) {
+        if (truck.truck_number != null && !truck.truck_number.isEmpty()) {
             sbuf.append(truck.truck_number);
         }
         if (truck.license_plate != null && !truck.license_plate.isEmpty()) {
@@ -234,12 +234,8 @@ public class Entry extends com.avaje.ebean.Model {
         if (truck == null || otruck == null) {
             return 0;
         }
-        if (truck.truck_number > 0 && otruck.truck_number > 0) {
-            return truck.truck_number - otruck.truck_number;
-        } else if (truck.truck_number > 0) {
-            return -1;
-        } else if (otruck.truck_number > 0) {
-            return 1;
+        if (truck.truck_number != null) {
+            return truck.truck_number.compareTo(otruck.truck_number);
         }
         if (truck.license_plate != null) {
             return truck.license_plate.compareTo(otruck.license_plate);

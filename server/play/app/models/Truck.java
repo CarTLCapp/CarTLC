@@ -24,7 +24,7 @@ public class Truck extends com.avaje.ebean.Model {
     public Long id;
 
     @Constraints.Required
-    public int truck_number;
+    public String truck_number;
 
     @Constraints.Required
     public String license_plate;
@@ -33,16 +33,16 @@ public class Truck extends com.avaje.ebean.Model {
     public int upload_id;
 
     @Constraints.Required
-    public int created_by;
-
-    @Constraints.Required
-    public boolean created_by_client;
-
-    @Constraints.Required
     public long project_id;
 
     @Constraints.Required
     public long company_name_id;
+
+    @Constraints.Required
+    public int created_by;
+
+    @Constraints.Required
+    public boolean created_by_client;
 
     public static Finder<Long, Truck> find = new Finder<Long, Truck>(Truck.class);
 
@@ -63,7 +63,7 @@ public class Truck extends com.avaje.ebean.Model {
         return find.where().eq("upload_id", upload_id).findList();
     }
 
-    static List<Truck> findBy(long project_id, long company_name_id, int truck_number) {
+    static List<Truck> findBy(long project_id, long company_name_id, String truck_number) {
         List<Truck> list;
         list = find.where()
                 .eq("project_id", project_id)
@@ -79,7 +79,7 @@ public class Truck extends com.avaje.ebean.Model {
         return list;
     }
 
-    public static Truck findFirst(long project_id, long company_name_id, int truck_number) {
+    public static Truck findFirst(long project_id, long company_name_id, String truck_number) {
         List<Truck> list = findBy(project_id, company_name_id, truck_number);
         if (list == null) {
             return null;
@@ -87,7 +87,7 @@ public class Truck extends com.avaje.ebean.Model {
         return list.get(0);
     }
 
-    public static Truck add(long project_id, long company_id, int truck_number, String license_plate, int tech_id) {
+    public static Truck add(long project_id, long company_id, String truck_number, String license_plate, int tech_id) {
         long company_name_id = 0;
         if (company_id > 0) {
            Company company = Company.get(company_id);
@@ -139,7 +139,7 @@ public class Truck extends com.avaje.ebean.Model {
             truck.created_by = tech_id;
             truck.save();
         } else {
-            if (truck_number != 0 && truck_number != truck.truck_number) {
+            if (truck_number != null && !truck_number.equals(truck.truck_number)) {
                 truck.truck_number = truck_number;
             }
             if (license_plate != null && !license_plate.equals(truck.license_plate)) {
@@ -161,8 +161,8 @@ public class Truck extends com.avaje.ebean.Model {
     }
 
     public String getTruckNumber() {
-        if (truck_number > 0) {
-            return Integer.toString(truck_number);
+        if (truck_number != null) {
+            return truck_number;
         } else {
             return "";
         }
@@ -238,10 +238,11 @@ public class Truck extends com.avaje.ebean.Model {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(id);
         sbuf.append(":");
-        if (truck_number != 0) {
+        sbuf.append("T");
+        if (truck_number != null) {
             sbuf.append(truck_number);
-            sbuf.append("#");
         }
+        sbuf.append(", L");
         if (license_plate != null) {
             sbuf.append(license_plate);
         }

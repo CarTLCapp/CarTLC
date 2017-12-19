@@ -48,11 +48,11 @@ public class ProgressGrid extends WorkOrderList {
         if (order == null) {
             return "";
         }
-        int truck_number = order.getTruckNumber();
-        if (truck_number == 0) {
+        String truck_number = order.getTruckNumber();
+        if (truck_number == null) {
             return "";
         }
-        return Integer.toString(truck_number);
+        return truck_number;
     }
 
     public String getCellColor(int row, int col) {

@@ -182,10 +182,10 @@ public class WorkOrder extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
-    public int getTruckNumber() {
+    public String getTruckNumber() {
         Truck truck = Truck.get(truck_id);
         if (truck == null) {
-            return 0;
+            return "";
         }
         return truck.truck_number;
     }

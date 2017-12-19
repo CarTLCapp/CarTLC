@@ -82,7 +82,6 @@ public class ClientController extends Controller {
 
         ClientProjectAssociation.addNew(id, getCheckedProjects(clientForm));
         Logger.info("Client " + client.name + " has been updated");
-
         Logger.info("Company value was " + updateClient.company);
 
         if (updateClient.company != null && !updateClient.company.trim().isEmpty()) {
