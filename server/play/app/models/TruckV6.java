@@ -62,18 +62,7 @@ public class TruckV6 extends com.avaje.ebean.Model {
             truck.project_id = truck6.project_id;
             truck.company_name_id = truck6.company_name_id;
             truck.save();
-//
-//            List<WorkOrder> workOrders = WorkOrder.find.where().eq("truck_id", truck6.id).findList();
-//            for (WorkOrder work : workOrders) {
-//                work.truck_id = truck.id;
-//                work.update();
-//            }
-//            List<Entry> entries = Entry.find.where().eq("truck_id", truck6.id).findList();
-//            for (Entry entry : entries) {
-//                entry.truck_id = truck.id;
-//                entry.update();
-//            }
-//            truck6.delete();
+            truck6.delete();
         }
     }
 
