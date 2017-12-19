@@ -18,15 +18,32 @@
         android:layout_marginTop="30dp"
         android:src="@drawable/logo"/>
 
-    <TextView
+    <LinearLayout
         android:id="@+id/main_title"
-        style="@style/SetupTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/logo"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
-        android:text="@string/title_login"/>
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/main_title_text"
+            style="@style/SetupTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/title_login"/>
+
+        <TextView
+            android:id="@+id/sub_title"
+            style="@style/SubTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="2dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/buttons"

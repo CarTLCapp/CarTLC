@@ -11,9 +11,9 @@ import timber.log.Timber;
  */
 
 public class DataProjectAddressCombo implements Comparable<DataProjectAddressCombo> {
-    public       long id;
-    public final long projectNameId;
-    public final long addressId;
+    public long id;
+    public long projectNameId;
+    public long addressId;
     String      mProjectName;
     DataAddress mAddress;
 
@@ -51,6 +51,14 @@ public class DataProjectAddressCombo implements Comparable<DataProjectAddressCom
             }
         }
         return mAddress;
+    }
+
+    public String getAddressLine() {
+        DataAddress address = getAddress();
+        if (address != null) {
+            return address.getLine();
+        }
+        return "Invalid";
     }
 
     public String getCompanyName() {

@@ -9,7 +9,6 @@ import com.cartlc.tracker.data.DataAddress;
 import com.cartlc.tracker.data.DataCollectionEquipmentEntry;
 import com.cartlc.tracker.data.DataCollectionEquipmentProject;
 import com.cartlc.tracker.data.DataEntry;
-import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataTruck;
 import com.cartlc.tracker.data.TableAddress;
@@ -24,9 +23,7 @@ import com.cartlc.tracker.data.TableTruck;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import timber.log.Timber;
 
@@ -322,23 +319,20 @@ public class PrefHelper extends PrefHelperBase {
         return TableProjectAddressCombo.getInstance().query(projectGroupId);
     }
 
-    public void setupFromCurrentProjectId() {
+    public void setFromCurrentProjectId() {
         DataProjectAddressCombo projectGroup = getCurrentProjectGroup();
         if (projectGroup != null) {
             setProject(projectGroup.getProjectName());
             DataAddress address = projectGroup.getAddress();
             if (address != null) {
-                setState(address.state);
-                setCity(address.city);
-                setCompany(address.company);
-                setStreet(address.street);
+                setAddress(address);
             }
         }
     }
 
     public void recoverProject() {
         setCurrentProjectGroupId(getSavedProjectGroupId());
-        setupFromCurrentProjectId();
+        setFromCurrentProjectId();
     }
 
     public void clearCurProject() {
@@ -364,7 +358,7 @@ public class PrefHelper extends PrefHelperBase {
         TableEquipment.getInstance().clearChecked();
     }
 
-    public boolean saveProjectAndAddressCombo() {
+    public boolean saveProjectAndAddressCombo(boolean modifyCurrent) {
         String project = getProjectName();
         if (TextUtils.isEmpty((project))) {
             Timber.i("saveProjectAndAddressCombo(): quit on empty project");
@@ -387,21 +381,34 @@ public class PrefHelper extends PrefHelperBase {
             addressId = TableAddress.getInstance().add(address);
             if (addressId < 0) {
                 Timber.i("saveProjectAndAddressCombo(): could not find address: " + address.toString());
+                return false;
             }
         }
         long projectNameId = TableProjects.getInstance().queryProjectName(project);
-        if (addressId >= 0 && projectNameId >= 0) {
-            long projectGroupId = TableProjectAddressCombo.getInstance().queryProjectGroupId(projectNameId, addressId);
+        if (projectNameId < 0) {
+            Timber.i("saveProjectAndAddressCombo(): could not find project: " + project);
+            return false;
+        }
+        long projectGroupId;
+        if (modifyCurrent) {
+            projectGroupId = getCurrentProjectGroupId();
+            if (projectGroupId < 0) {
+                Timber.i("saveProjectAndAddressCombo(): could not modify current project, none is alive");
+                return false;
+            }
+            DataProjectAddressCombo combo = TableProjectAddressCombo.getInstance().query(projectGroupId);
+            combo.projectNameId = projectNameId;
+            combo.addressId = addressId;
+        } else {
+            projectGroupId = TableProjectAddressCombo.getInstance().queryProjectGroupId(projectNameId, addressId);
             if (projectGroupId < 0) {
                 projectGroupId = TableProjectAddressCombo.getInstance().add(new DataProjectAddressCombo(projectNameId, addressId));
             } else {
                 TableProjectAddressCombo.getInstance().updateUsed(projectGroupId);
             }
             setCurrentProjectGroupId(projectGroupId);
-            return true;
         }
-        Timber.i("saveProjectAndAddressCombo(): could not find project: " + project);
-        return false;
+        return true;
     }
 
     public void setCurrentProjectGroup(DataProjectAddressCombo group) {

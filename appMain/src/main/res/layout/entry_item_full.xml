@@ -11,11 +11,11 @@
     android:background="@color/project_normal">
 
     <TextView
-        android:id="@+id/project_name"
-        style="@style/ProjectFullTextTitle"
+        android:id="@+id/label_truck"
+        style="@style/ProjectFullTextSub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Project Name"
+        android:text="@string/title_truck_"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
@@ -25,17 +25,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="333 : RURYRR11"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginLeft="3dp"
+        app:layout_constraintLeft_toRightOf="@id/label_truck"
         app:layout_constraintTop_toTopOf="parent"/>
-
-    <TextView
-        android:id="@+id/project_address"
-        style="@style/ProjectFullTextSub"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Company Name, 5103 Some Road, Some City, State 99900"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/project_name"/>
 
     <TextView
         android:id="@+id/label_status"
@@ -44,7 +36,7 @@
         android:layout_height="wrap_content"
         android:text="@string/title_status_"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/project_address"/>
+        app:layout_constraintTop_toBottomOf="@id/label_truck"/>
 
     <TextView
         android:id="@+id/status"
@@ -54,7 +46,7 @@
         android:layout_marginLeft="3dp"
         android:text="Partial Install"
         app:layout_constraintLeft_toRightOf="@id/label_status"
-        app:layout_constraintTop_toBottomOf="@+id/project_address"/>
+        app:layout_constraintTop_toBottomOf="@id/truck_value"/>
 
     <TextView
         android:id="@+id/notes"
@@ -84,6 +76,5 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/equipments"
         android:layout_marginStart="5dp"/>
-
 
 </android.support.constraint.ConstraintLayout>

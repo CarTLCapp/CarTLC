@@ -30,9 +30,7 @@ import timber.log.Timber;
 public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.CustomViewHolder> {
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.project_name)    TextView projectName;
         @BindView(R.id.truck_value)     TextView truckValue;
-        @BindView(R.id.project_address) TextView projectAddress;
         @BindView(R.id.status)          TextView status;
         @BindView(R.id.notes)           TextView notes;
         @BindView(R.id.equipments)      TextView equipments;
@@ -66,9 +64,7 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
     @Override
     public void onBindViewHolder(final CustomViewHolder holder, final int position) {
         final DataEntry item = mItems.get(position);
-        holder.projectName.setText(item.getProjectName());
         holder.truckValue.setText(item.getTruckLine(mContext));
-        holder.projectAddress.setText(item.getAddressLine());
         holder.status.setText(item.getStatus(mContext));
         holder.notes.setText(item.getNotesLine());
         holder.equipments.setText(item.getEquipmentLine(mContext));

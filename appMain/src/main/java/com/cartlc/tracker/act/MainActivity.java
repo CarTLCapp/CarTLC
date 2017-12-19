@@ -32,6 +32,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
@@ -86,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
 
     static final String KEY_HINT = "hint";
     static final String KEY_MSG  = "msg";
+
+    public static final int RESULT_EDIT_ENTRY   = 2;
+    public static final int RESULT_EDIT_PROJECT = 3;
 
     class MyHandler extends Handler {
         @Override
@@ -205,7 +209,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.next)                Button               mNext;
     @BindView(R.id.prev)                Button               mPrev;
     @BindView(R.id.new_entry)           Button               mCenter;
-    @BindView(R.id.main_title)          TextView             mTitle;
+    @BindView(R.id.main_title)          LinearLayout         mMainTitle;
+    @BindView(R.id.main_title_text)     TextView             mMainTitleText;
+    @BindView(R.id.sub_title)           TextView             mSubTitle;
     @BindView(R.id.fab_add)             FloatingActionButton mAdd;
     @BindView(R.id.frame_confirmation)  FrameLayout          mConfirmationFrameView;
     @BindView(R.id.frame_pictures)      ViewGroup            mPictureFrame;
@@ -240,6 +246,7 @@ public class MainActivity extends AppCompatActivity {
     boolean                    mCurStageEditing;
     boolean                    mDoingCenter;
     boolean mShowServerError = true;
+    boolean mEditCurProject  = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -348,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
         mZipCodeWatcher = new ZipCodeWatcher();
         mLastName.setOnEditorActionListener(mAutoNext);
         mEntrySimple.setOnEditorActionListener(mAutoNext);
-        PrefHelper.getInstance().setupFromCurrentProjectId();
+        PrefHelper.getInstance().setFromCurrentProjectId();
         computeCurStage();
         if (savedInstanceState != null) {
             mCurStage = Stage.from(savedInstanceState.getInt(KEY_STAGE));
@@ -655,6 +662,7 @@ public class MainActivity extends AppCompatActivity {
         mEmptyView.setVisibility(View.GONE);
         mListEntryHint.setVisibility(View.GONE);
         mEntryHint.setVisibility(View.GONE);
+        mSubTitle.setVisibility(View.GONE);
         mCompanyEditing = null;
 
         switch (mCurStage) {
@@ -668,7 +676,7 @@ public class MainActivity extends AppCompatActivity {
                     mLoginFrame.setVisibility(View.VISIBLE);
                     mCenter.setVisibility(View.VISIBLE);
                     mCenter.setText(R.string.title_login);
-                    mTitle.setText(R.string.title_login);
+                    mMainTitleText.setText(R.string.title_login);
                     mFirstName.setText(PrefHelper.getInstance().getFirstName());
                     mLastName.setText(PrefHelper.getInstance().getLastName());
                 }
@@ -677,6 +685,7 @@ public class MainActivity extends AppCompatActivity {
             case PROJECT:
                 mPrev.setVisibility(View.VISIBLE);
                 showMainListFrame();
+                showSubTitleHint();
                 if (PrefHelper.getInstance().getProjectName() != null) {
                     mNext.setVisibility(View.VISIBLE);
                 }
@@ -685,8 +694,9 @@ public class MainActivity extends AppCompatActivity {
             case COMPANY:
                 mPrev.setVisibility(View.VISIBLE);
                 mNext.setVisibility(View.VISIBLE);
+                showSubTitleHint();
                 if (mCurStageEditing) {
-                    mTitle.setText(R.string.title_company);
+                    mMainTitleText.setText(R.string.title_company);
                     mEntryFrame.setVisibility(View.VISIBLE);
                     mEntrySimple.setHint(R.string.title_company);
                     if (isLocalCompany()) {
@@ -710,6 +720,7 @@ public class MainActivity extends AppCompatActivity {
                 PrefHelper.getInstance().setState(null);
                 PrefHelper.getInstance().setZipCode(null);
                 showEntryHint();
+                showSubTitleHint();
                 final String company = PrefHelper.getInstance().getCompany();
                 List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
                 final boolean hasZipCodes = zipcodes.size() > 0;
@@ -717,7 +728,7 @@ public class MainActivity extends AppCompatActivity {
                     mCurStageEditing = true;
                 }
                 if (mCurStageEditing) {
-                    mTitle.setText(R.string.title_zipcode);
+                    mMainTitleText.setText(R.string.title_zipcode);
                     mEntryFrame.setVisibility(View.VISIBLE);
                     mEntrySimple.setHint(R.string.title_zipcode);
                     mEntrySimple.setText("");
@@ -733,6 +744,7 @@ public class MainActivity extends AppCompatActivity {
             }
             case STATE: {
                 showEntryHint();
+                showSubTitleHint();
                 showMainListFrame();
                 mPrev.setVisibility(View.VISIBLE);
                 final String company = PrefHelper.getInstance().getCompany();
@@ -766,6 +778,7 @@ public class MainActivity extends AppCompatActivity {
             }
             case CITY: {
                 showEntryHint();
+                showSubTitleHint();
                 mPrev.setVisibility(View.VISIBLE);
                 final String company = PrefHelper.getInstance().getCompany();
                 final String zipcode = PrefHelper.getInstance().getZipCode();
@@ -782,7 +795,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (mCurStageEditing) {
                     mEntryFrame.setVisibility(View.VISIBLE);
-                    mTitle.setText(R.string.title_city);
+                    mMainTitleText.setText(R.string.title_city);
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
@@ -802,6 +815,7 @@ public class MainActivity extends AppCompatActivity {
             case STREET: {
                 mPrev.setVisibility(View.VISIBLE);
                 showEntryHint();
+                showSubTitleHint();
                 List<String> streets = TableAddress.getInstance().queryStreets(
                         PrefHelper.getInstance().getCompany(),
                         PrefHelper.getInstance().getCity(),
@@ -811,7 +825,7 @@ public class MainActivity extends AppCompatActivity {
                     mCurStageEditing = true;
                 }
                 if (mCurStageEditing) {
-                    mTitle.setText(R.string.title_street);
+                    mMainTitleText.setText(R.string.title_street);
                     mEntryFrame.setVisibility(View.VISIBLE);
                     mEntrySimple.setHint(R.string.title_street);
                     mEntrySimple.setText("");
@@ -833,7 +847,8 @@ public class MainActivity extends AppCompatActivity {
                     fillStage();
                 } else {
                     mApp.ping();
-                    PrefHelper.getInstance().saveProjectAndAddressCombo();
+                    PrefHelper.getInstance().saveProjectAndAddressCombo(mEditCurProject);
+                    mEditCurProject = false;
                     showMainListFrame();
                     mCenter.setVisibility(View.VISIBLE);
                     mPrev.setVisibility(View.VISIBLE);
@@ -843,7 +858,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     mCurKey = null;
                     mCenter.setText(R.string.btn_new_project);
-                    mTitle.setText(R.string.title_current_project);
+                    mMainTitleText.setText(R.string.title_current_project);
                     mMainList.setAdapter(mProjectAdapter);
                     mProjectAdapter.onDataChanged();
                     checkErrors();
@@ -866,14 +881,14 @@ public class MainActivity extends AppCompatActivity {
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing) {
                     mEntryFrame.setVisibility(View.VISIBLE);
-                    mTitle.setText(R.string.title_equipment);
+                    mMainTitleText.setText(R.string.title_equipment);
                     mEntrySimple.setHint(R.string.title_equipment);
                     mEntrySimple.setText("");
                 } else {
                     if (isNewEquipmentOkay()) {
                         mCenter.setVisibility(View.VISIBLE);
                     }
-                    mTitle.setText(R.string.title_equipment_installed);
+                    mMainTitleText.setText(R.string.title_equipment_installed);
                     mMainList.setAdapter(mEquipmentAdapter);
                     mEquipmentAdapter.onDataChanged();
                     showMainListFrame();
@@ -884,7 +899,7 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
                 mNoteAdapter.onDataChanged();
-                mTitle.setText(R.string.title_notes);
+                mMainTitleText.setText(R.string.title_notes);
                 showMainListFrame();
                 if (mNoteAdapter.getItemCount() == 0) {
                     mMainList.setVisibility(View.GONE);
@@ -896,7 +911,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case PICTURE:
                 int pictureCount = PrefHelper.getInstance().getNumPicturesTaken();
-                mTitle.setText(getString(R.string.title_picture, pictureCount));
+                mMainTitleText.setText(getString(R.string.title_picture, pictureCount));
                 mPrev.setVisibility(View.VISIBLE);
                 if (mCurStageEditing || pictureCount == 0) {
                     mCurStageEditing = false;
@@ -920,7 +935,7 @@ public class MainActivity extends AppCompatActivity {
                 mNext.setVisibility(View.VISIBLE);
                 mNext.setText(R.string.btn_done);
                 mStatusFrame.setVisibility(View.VISIBLE);
-                mTitle.setText(R.string.title_status);
+                mMainTitleText.setText(R.string.title_status);
                 setStatusButton();
                 mCurEntry = null;
                 break;
@@ -931,7 +946,7 @@ public class MainActivity extends AppCompatActivity {
                 mConfirmationFrame.setVisibility(View.VISIBLE);
                 mCurEntry = PrefHelper.getInstance().saveEntry();
                 mConfirmationFrame.fill(mCurEntry);
-                mTitle.setText(R.string.title_confirmation);
+                mMainTitleText.setText(R.string.title_confirmation);
                 break;
             case ADD_ELEMENT:
                 TableEntry.getInstance().add(mCurEntry);
@@ -957,7 +972,7 @@ public class MainActivity extends AppCompatActivity {
         boolean hasSelection = true;
         mCurKey = key;
         String title = getString(titleId);
-        mTitle.setText(title);
+        mMainTitleText.setText(title);
         if (list.size() == 0) {
             mMainListFrame.setVisibility(View.GONE);
             doBtnCenter();
@@ -1013,17 +1028,25 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_EDIT_ENTRY) {
+            doEditEntry();
+        } else if (resultCode == RESULT_EDIT_PROJECT) {
+            doEditProject();
+        } else if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 fillStage();
-            } else if (requestCode == REQUEST_EDIT_ENTRY) {
-                doEdit();
             }
         }
     }
 
-    void doEdit() {
+    void doEditEntry() {
         mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() + 1);
+        fillStage();
+    }
+
+    void doEditProject() {
+        mCurStage = Stage.from(Stage.PROJECT.ordinal());
+        mEditCurProject = true;
         fillStage();
     }
 
@@ -1043,8 +1066,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void showServerError(String message)
-    {
+    public void showServerError(String message) {
         mDialogHelper.showServerError(message, new DialogHelper.DialogListener() {
             @Override
             public void onOkay() {
@@ -1160,7 +1182,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public String getStatusHint() {
+    String getStatusHint() {
         StringBuilder sbuf = new StringBuilder();
         int countPictures = PrefHelper.getInstance().getNumPicturesTaken();
         int maxEquip = PrefHelper.getInstance().getNumEquipPossible();
@@ -1171,13 +1193,45 @@ public class MainActivity extends AppCompatActivity {
         return sbuf.toString();
     }
 
+    void showSubTitleHint() {
+        String hint = null;
+        switch (mCurStage) {
+            case PROJECT:
+            case COMPANY:
+            case ZIPCODE:
+            case STATE:
+            case CITY:
+            case STREET:
+                if (mEditCurProject) {
+                    hint = getEditProjectHint();
+                }
+                break;
+        }
+        if (hint != null && hint.length() > 0) {
+            mSubTitle.setText(hint);
+            mSubTitle.setVisibility(View.VISIBLE);
+        }
+    }
+
+    String getEditProjectHint() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(getString(R.string.entry_hint_edit_project));
+        sbuf.append("\n");
+        DataProjectAddressCombo combo = PrefHelper.getInstance().getCurrentProjectGroup();
+        sbuf.append(combo.getProjectName());
+        sbuf.append("\n");
+        DataAddress address = combo.getAddress();
+        sbuf.append(address.getBlock());
+        return sbuf.toString();
+    }
+
     void showMainListFrame() {
         showMainListFrame(null);
     }
 
     void showMainListFrame(View below) {
         if (below == null) {
-            below = mTitle;
+            below = mMainTitle;
         }
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mMainListFrame.getLayoutParams();
         params.addRule(RelativeLayout.BELOW, below.getId());
@@ -1224,7 +1278,7 @@ public class MainActivity extends AppCompatActivity {
             if (!CheckError.getInstance().checkEntryErrors(this, new CheckError.CheckErrorResult() {
                 @Override
                 public void doEdit() {
-                    MainActivity.this.doEdit();
+                    MainActivity.this.doEditEntry();
                 }
             })) {
                 PrefHelper.getInstance().setDoErrorCheck(false);

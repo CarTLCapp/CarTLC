@@ -84,6 +84,29 @@ public class TableProjectAddressCombo {
         return projectGroup.id;
     }
 
+    public boolean save(DataProjectAddressCombo projectGroup) {
+        mDb.beginTransaction();
+        boolean success = false;
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_PROJECT_ID, projectGroup.projectNameId);
+            values.put(KEY_ADDRESS_ID, projectGroup.addressId);
+            values.put(KEY_LAST_USED, System.currentTimeMillis());
+            String where = KEY_ROWID + "=?";
+            String [] whereArgs = new String [] {
+                Long.toString(projectGroup.id)
+            };
+            projectGroup.id = mDb.update(TABLE_NAME, values, where, whereArgs);
+            mDb.setTransactionSuccessful();
+            success = true;
+        } catch (Exception ex) {
+            TBApplication.ReportError(ex, TableProjectAddressCombo.class, "save()", "db");
+        } finally {
+            mDb.endTransaction();
+        }
+        return success;
+    }
+
     public int count() {
         int count = 0;
         try {
