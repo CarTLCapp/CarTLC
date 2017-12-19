@@ -9,6 +9,8 @@ import com.cartlc.tracker.app.TBApplication;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Created by dug on 5/10/17.
  */
@@ -107,6 +109,30 @@ public class TableProjectAddressCombo {
         return success;
     }
 
+    /**
+     * If there are other project groups that are exactly the same as the passed,
+     * then merge all entries into this one and delete the other.
+     *
+     * @param projectGroup
+     */
+    public void mergeIdenticals(DataProjectAddressCombo projectGroup) {
+        List<Long> identicals = queryProjectGroupIds(projectGroup.projectNameId, projectGroup.addressId);
+        if (identicals.size() <= 1) {
+            return;
+        }
+        identicals.remove(projectGroup.id);
+        for (Long other_id : identicals) {
+            List<DataEntry> entries = TableEntry.getInstance().queryForProjectAddressCombo(other_id);
+            Timber.i("Found " + entries.size() + " entries with matching combo id " + other_id + " to " + projectGroup.id);
+            for (DataEntry entry : entries) {
+                entry.projectAddressCombo = projectGroup;
+                entry.uploadedMaster = false;
+                TableEntry.getInstance().saveProjectAddressCombo(entry);
+            }
+            remove(other_id);
+        }
+    }
+
     public int count() {
         int count = 0;
         try {
@@ -195,7 +221,15 @@ public class TableProjectAddressCombo {
     }
 
     public long queryProjectGroupId(long projectNameId, long addressId) {
-        long id = -1L;
+        List<Long> ids = queryProjectGroupIds(projectNameId, addressId);
+        if (ids.size() >= 1) {
+            return ids.get(0);
+        }
+        return -1;
+    }
+
+    public ArrayList<Long> queryProjectGroupIds(long projectNameId, long addressId) {
+        ArrayList<Long> ids = new ArrayList<>();
         try {
             final String[] columns = {KEY_ROWID};
             StringBuilder sbuf = new StringBuilder();
@@ -207,14 +241,14 @@ public class TableProjectAddressCombo {
             final String[] selectionArgs = {Long.toString(projectNameId), Long.toString(addressId)};
             Cursor cursor = mDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
             int idxRowId = cursor.getColumnIndex(KEY_ROWID);
-            if (cursor.moveToFirst()) {
-                id = cursor.getLong(idxRowId);
+            while (cursor.moveToNext()) {
+                ids.add(cursor.getLong(idxRowId));
             }
             cursor.close();
         } catch (Exception ex) {
             TBApplication.ReportError(ex, TableProjectAddressCombo.class, "query(project,address)", "db");
         }
-        return id;
+        return ids;
     }
 
     public void updateUsed(long id) {
@@ -229,9 +263,9 @@ public class TableProjectAddressCombo {
         }
     }
 
-    public void remove(DataProjectAddressCombo combo) {
+    public void remove(long combo_id) {
         String where = KEY_ROWID + "=?";
-        String[] whereArgs = {Long.toString(combo.id)};
+        String[] whereArgs = {Long.toString(combo_id)};
         mDb.delete(TABLE_NAME, where, whereArgs);
     }
 }

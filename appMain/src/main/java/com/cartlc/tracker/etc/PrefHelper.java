@@ -396,11 +396,15 @@ public class PrefHelper extends PrefHelperBase {
                 return false;
             }
             DataProjectAddressCombo combo = TableProjectAddressCombo.getInstance().query(projectGroupId);
+            if (combo == null) {
+                return false;
+            }
             combo.reset(projectNameId, addressId);
             if (!TableProjectAddressCombo.getInstance().save(combo)) {
                 Timber.e("saveProjectAndAddressCombo(): could not update project combo");
                 return false;
             }
+            TableProjectAddressCombo.getInstance().mergeIdenticals(combo);
             int count = TableEntry.getInstance().reUploadEntries(combo);
             if (count > 0) {
                 Timber.i("saveProjectAddressCombo(): re-upload " + count + " entries");

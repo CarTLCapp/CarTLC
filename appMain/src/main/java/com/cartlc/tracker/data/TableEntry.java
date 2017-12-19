@@ -439,6 +439,25 @@ public class TableEntry {
         }
     }
 
+    public void saveProjectAddressCombo(DataEntry entry) {
+        mDb.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster ? 1 : 0);
+            values.put(KEY_PROJECT_ADDRESS_COMBO_ID, entry.projectAddressCombo.id);
+            String where = KEY_ROWID + "=?";
+            String[] whereArgs = {Long.toString(entry.id)};
+            if (mDb.update(TABLE_NAME, values, where, whereArgs) == 0) {
+                Timber.e("TableEntry.saveProjectAddressCombo(): Unable to update entry");
+            }
+            mDb.setTransactionSuccessful();
+        } catch (Exception ex) {
+            TBApplication.ReportError(ex, TableEntry.class, "saveProjectAddressCombo()", "db");
+        } finally {
+            mDb.endTransaction();
+        }
+    }
+
     public void clearUploaded() {
         mDb.beginTransaction();
         try {
