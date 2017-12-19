@@ -26,7 +26,7 @@
 
     }
 
-    @if(Boolean.parseBoolean(truckForm("canDelete").value())) {
+    @if(truckForm.get().canDelete()) {
         @b3.form(routes.TruckController.delete(id), 'class -> "topRight") {
             <input type="submit" value="Delete this truck" class="btn danger">
         }
