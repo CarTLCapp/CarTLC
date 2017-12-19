@@ -60,12 +60,16 @@ public class EntryController extends Controller {
         Form<InputLines> searchForm = formFactory.form(InputLines.class).bindFromRequest();
         InputLines lines = searchForm.get();
         entryList.setSearch(lines.lines);
+        entryList.clearCache();
+        entryList.compute();
         return ok(views.html.entry_list.render(entryList,
                 entryList.getSortBy(), entryList.getOrder(), searchForm));
     }
 
     public Result searchClear() {
         entryList.setSearch(null);
+        entryList.clearCache();
+        entryList.compute();
         Form<InputLines> searchForm = formFactory.form(InputLines.class);
         return ok(views.html.entry_list.render(entryList,
                 entryList.getSortBy(), entryList.getOrder(), searchForm));
