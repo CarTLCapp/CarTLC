@@ -76,9 +76,9 @@ public class EntryList extends BaseList<Entry> implements Comparator<Entry> {
                 if (pos >= 0) {
                     StringBuilder sbuf = new StringBuilder();
                     sbuf.append(element.substring(0, pos));
-                    sbuf.append("<b>");
+                    sbuf.append("<mark>");
                     sbuf.append(element.substring(pos, mSearch.length() + pos));
-                    sbuf.append("</b>");
+                    sbuf.append("</mark>");
                     sbuf.append(element.substring(mSearch.length() + pos));
                     return Html.apply(sbuf.toString());
                 }

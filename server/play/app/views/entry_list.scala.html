@@ -71,20 +71,20 @@
                     @currentPage.incRowNumber()
                     <tr>
                         <td>@currentPage.getRowNumber()</td>
-                        <td>@entry.getTechName()</td>
+                        <td>@currentPage.highlightSearch(entry.getTechName())</td>
                         <td>@entry.entry_time.format("yyyy-MM-dd kk:mm")</td>
-                        <td>@entry.getProjectLine()</td>
+                        <td>@currentPage.highlightSearch(entry.getProjectLine())</td>
                         <td>@currentPage.highlightSearch(entry.getCompany())</td>
-                        <td>@entry.getStreet()</td>
-                        <td>@entry.getCity()</td>
-                        <td>@entry.getState()</td>
-                        <td>@entry.getZipCode()</td>
-                        <td>@entry.getTruckLine()</td>
-                        <td>@entry.getEquipmentLine()</td>
+                        <td>@currentPage.highlightSearch(entry.getStreet())</td>
+                        <td>@currentPage.highlightSearch(entry.getCity())</td>
+                        <td>@currentPage.highlightSearch(entry.getState())</td>
+                        <td>@currentPage.highlightSearch(entry.getZipCode())</td>
+                        <td>@currentPage.highlightSearch(entry.getTruckLine())</td>
+                        <td>@currentPage.highlightSearch(entry.getEquipmentLine())</td>
                         <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
                         <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum()</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
-                        <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
+                        <td bgcolor="@entry.getCellColor()">@currentPage.highlightSearch(entry.getStatus())</td>
                     </tr>
                 }
 
