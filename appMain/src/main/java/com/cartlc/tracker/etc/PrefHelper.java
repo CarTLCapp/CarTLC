@@ -516,6 +516,7 @@ public class PrefHelper extends PrefHelperBase {
         }
         truck.truckNumber = getTruckNumber();
         truck.licensePlateNumber = getLicensePlate();
+        truck.hasEntry = true;
         entry.truckId = TableTruck.getInstance().save(truck);
         entry.status = getStatus();
         entry.uploadedMaster = false;

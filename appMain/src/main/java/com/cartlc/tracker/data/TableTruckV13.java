@@ -73,6 +73,7 @@ public class TableTruckV13 {
             truck.serverId = cursor.getLong(idxServerId);
             truck.projectNameId = cursor.getInt(idxProjectId);
             truck.companyName = cursor.getString(idxCompanyName);
+            truck.hasEntry = TableEntry.getInstance().countTrucks(truck.id) > 0;
             TableTruck.getInstance().save(truck);
         }
         cursor.close();

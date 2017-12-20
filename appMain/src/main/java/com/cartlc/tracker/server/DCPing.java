@@ -128,7 +128,7 @@ public class DCPing extends DCPost {
         }
     }
 
-    public void ping() {
+    public synchronized void ping() {
         Timber.i("ping()");
         try {
             if (PrefHelper.getInstance().getTechID() == 0) {
@@ -674,6 +674,9 @@ public class DCPing extends DCPost {
                     if (ele.has("company_name")) {
                         incoming.companyName = ele.getString("company_name");
                     }
+                    if (ele.has("has_entries")) {
+                        incoming.hasEntry = ele.getBoolean("has_entries");
+                    }
                     DataTruck item = TableTruck.getInstance().queryByServerId(incoming.serverId);
                     if (item == null) {
                         DataTruck match = get(unprocessed, incoming);
@@ -690,7 +693,7 @@ public class DCPing extends DCPost {
                     } else {
                         // Change of data
                         if (!incoming.equals(item)) {
-                            Timber.i("Change: " + incoming.toLongString());
+                            Timber.i("Change: " + incoming.toLongString() + " from " + item.toLongString());
                             incoming.id = item.id;
                             TableTruck.getInstance().save(incoming);
                         } else {

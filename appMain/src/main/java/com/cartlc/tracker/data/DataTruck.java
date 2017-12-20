@@ -10,12 +10,13 @@ import android.util.Log;
 
 public class DataTruck implements Comparable<DataTruck> {
 
-    public long   id;
-    public long   serverId;
-    public String truckNumber;
-    public String licensePlateNumber;
-    public long   projectNameId;
-    public String companyName;
+    public long    id;
+    public long    serverId;
+    public String  truckNumber;
+    public String  licensePlateNumber;
+    public long    projectNameId;
+    public String  companyName;
+    public boolean hasEntry;
 
     // Used by List.remove(). See DCPing.queryTrucks().
     public boolean equals(Object other) {
@@ -27,7 +28,11 @@ public class DataTruck implements Comparable<DataTruck> {
     }
 
     public boolean equals(DataTruck other) {
-        if (truckNumber != other.truckNumber) {
+        if (truckNumber == null) {
+            if (other.truckNumber != null) {
+                return false;
+            }
+        } else if (!truckNumber.equals(other.truckNumber)) {
             return false;
         }
         if (projectNameId != other.projectNameId) {
@@ -47,6 +52,9 @@ public class DataTruck implements Comparable<DataTruck> {
         } else if (!licensePlateNumber.equals(other.licensePlateNumber)) {
             return false;
         }
+        if (hasEntry != other.hasEntry) {
+            return false;
+        }
         return true;
     }
 
@@ -56,9 +64,7 @@ public class DataTruck implements Comparable<DataTruck> {
 
     public String toLongString() {
         StringBuilder sbuf = new StringBuilder();
-        if (id > 0) {
-            sbuf.append(id);
-        }
+        sbuf.append(id);
         if (truckNumber != null) {
             sbuf.append(", ");
             sbuf.append(truckNumber);
@@ -83,6 +89,9 @@ public class DataTruck implements Comparable<DataTruck> {
                 sbuf.append(", ");
             }
             sbuf.append(companyName);
+        }
+        if (hasEntry) {
+            sbuf.append(", HASENTRY");
         }
         return sbuf.toString();
     }

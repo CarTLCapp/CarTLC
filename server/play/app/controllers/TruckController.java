@@ -99,6 +99,8 @@ public class TruckController extends Controller {
             if (companyName != null) {
                 node.put("company_name", companyName);
             }
+            int count = item.countEntries();
+            note.put("has_entries", (count > 0));
         }
         return ok(top);
     }

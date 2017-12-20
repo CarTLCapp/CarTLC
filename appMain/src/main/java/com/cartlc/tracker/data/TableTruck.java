@@ -28,6 +28,7 @@ public class TableTruck {
     static final String KEY_SERVER_ID     = "server_id";
     static final String KEY_PROJECT_ID    = "project_id";
     static final String KEY_COMPANY_NAME  = "company_name";
+    static final String KEY_HAS_ENTRY     = "has_entry";
 
     static TableTruck sInstance;
 
@@ -62,8 +63,18 @@ public class TableTruck {
         sbuf.append(KEY_PROJECT_ID);
         sbuf.append(" int default 0, ");
         sbuf.append(KEY_COMPANY_NAME);
-        sbuf.append(" varchar(256))");
+        sbuf.append(" varchar(256), ");
+        sbuf.append(KEY_HAS_ENTRY);
+        sbuf.append(" bit default 0)");
         mDb.execSQL(sbuf.toString());
+    }
+
+    public void upgrade16() {
+        try {
+            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_HAS_ENTRY + " bit default 0");
+        } catch (Exception ex) {
+            TBApplication.ReportError(ex, TableEntry.class, "upgrade16()", "db");
+        }
     }
 
     // Will ensure the said truck and license plate are stored in the database.
@@ -172,8 +183,7 @@ public class TableTruck {
                         }
                     }
                     cursor.close();
-                }
-                else {
+                } else {
                     cursor.close();
                     values.put(KEY_TRUCK_NUMBER, truckNumber);
                     if (projectId > 0) {
@@ -205,6 +215,7 @@ public class TableTruck {
             values.put(KEY_PROJECT_ID, truck.projectNameId);
             values.put(KEY_COMPANY_NAME, truck.companyName);
             values.put(KEY_SERVER_ID, truck.serverId);
+            values.put(KEY_HAS_ENTRY, truck.hasEntry);
             if (truck.id > 0) {
                 String where = KEY_ROWID + "=?";
                 String[] whereArgs = new String[]{Long.toString(truck.id)};
@@ -236,12 +247,14 @@ public class TableTruck {
             final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
             final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
+            final int idxHasEntry = cursor.getColumnIndex(KEY_HAS_ENTRY);
             truck.id = cursor.getLong(idxId);
             truck.truckNumber = cursor.getString(idxTruckNumber);
             truck.licensePlateNumber = cursor.getString(idxLicensePlate);
             truck.serverId = cursor.getLong(idxServerId);
             truck.projectNameId = cursor.getInt(idxProjectId);
             truck.companyName = cursor.getString(idxCompanyName);
+            truck.hasEntry = cursor.getShort(idxHasEntry) != 0;
         } else {
             truck = null;
         }
@@ -253,7 +266,7 @@ public class TableTruck {
         return query(null, null);
     }
 
-    public List<DataTruck> query(String selection, String [] selectionArgs) {
+    public List<DataTruck> query(String selection, String[] selectionArgs) {
         Cursor cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
         final int idxId = cursor.getColumnIndex(KEY_ROWID);
         final int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
@@ -261,6 +274,7 @@ public class TableTruck {
         final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
         final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
         final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
+        final int idxHasEntry = cursor.getColumnIndex(KEY_HAS_ENTRY);
         List<DataTruck> list = new ArrayList();
         while (cursor.moveToNext()) {
             DataTruck truck = new DataTruck();
@@ -270,6 +284,7 @@ public class TableTruck {
             truck.serverId = cursor.getLong(idxServerId);
             truck.projectNameId = cursor.getInt(idxProjectId);
             truck.companyName = cursor.getString(idxCompanyName);
+            truck.hasEntry = cursor.getShort(idxHasEntry) != 0;
             list.add(truck);
         }
         cursor.close();
@@ -278,7 +293,7 @@ public class TableTruck {
 
     public List<String> queryStrings(DataProjectAddressCombo curGroup) {
         String selection;
-        String [] selectionArgs;
+        String[] selectionArgs;
         if (curGroup != null) {
             StringBuffer sbuf = new StringBuffer();
             sbuf.append("(");
@@ -292,6 +307,10 @@ public class TableTruck {
             sbuf.append("=? OR ");
             sbuf.append(KEY_COMPANY_NAME);
             sbuf.append(" IS NULL)");
+            sbuf.append(" AND ");
+            sbuf.append("(");
+            sbuf.append(KEY_HAS_ENTRY);
+            sbuf.append("=0)");
             selection = sbuf.toString();
             selectionArgs = new String[]{
                     Long.toString(curGroup.projectNameId),
@@ -303,11 +322,9 @@ public class TableTruck {
         }
         List<DataTruck> trucks = query(selection, selectionArgs);
         Collections.sort(trucks);
-        ArrayList<String> list = new ArrayList();
+        ArrayList<String> list = new ArrayList<>();
         for (DataTruck truck : trucks) {
-            if (TableEntry.getInstance().countTrucks(truck.id) == 0) {
-                list.add(truck.toString());
-            }
+            list.add(truck.toString());
         }
         return list;
     }
@@ -324,12 +341,14 @@ public class TableTruck {
             final int idxServerId = cursor.getColumnIndex(KEY_SERVER_ID);
             final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
             final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
+            final int idxHasEntry = cursor.getColumnIndex(KEY_HAS_ENTRY);
             truck.id = cursor.getLong(idxId);
             truck.truckNumber = cursor.getString(idxTruckNumber);
             truck.licensePlateNumber = cursor.getString(idxLicensePlate);
             truck.serverId = cursor.getLong(idxServerId);
             truck.projectNameId = cursor.getInt(idxProjectId);
             truck.companyName = cursor.getString(idxCompanyName);
+            truck.hasEntry = cursor.getShort(idxHasEntry) != 0;
         } else {
             truck = null;
         }

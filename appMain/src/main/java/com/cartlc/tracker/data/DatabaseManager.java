@@ -19,7 +19,7 @@ public class DatabaseManager {
     // Note: Jumping from 2 to 9 to get around the allowBackup bug.
     // Could now drop it down to 3, but who cares.
     // Jumping again from 10 to 13 to help with development.
-    static final int    DATABASE_VERSION = 15;
+    static final int    DATABASE_VERSION = 16;
 
     public static void Init(Context ctx) {
         new DatabaseManager(ctx);
@@ -95,9 +95,13 @@ public class DatabaseManager {
                 TableTruck.getInstance().create();
                 TableTruckV13.getInstance().transfer();
                 TableEntry.getInstance().upgrade11();
-            } else if (oldVersion <= 15) {
+            } else if (oldVersion <= 14) {
                 TableTruck.getInstance().create();
                 TableTruckV13.getInstance().transfer();
+            } else if (oldVersion <= 15) {
+                // TODO: before release get rid of this. Move 14 above to 15.
+                // Also delete upgrade16 function.
+                TableTruck.getInstance().upgrade16();
             }
         }
 
