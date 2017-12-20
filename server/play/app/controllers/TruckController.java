@@ -100,7 +100,7 @@ public class TruckController extends Controller {
                 node.put("company_name", companyName);
             }
             int count = item.countEntries();
-            note.put("has_entries", (count > 0));
+            node.put("has_entries", (count > 0));
         }
         return ok(top);
     }
