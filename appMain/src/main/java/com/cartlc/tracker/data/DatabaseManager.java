@@ -95,13 +95,9 @@ public class DatabaseManager {
                 TableTruck.getInstance().create();
                 TableTruckV13.getInstance().transfer();
                 TableEntry.getInstance().upgrade11();
-            } else if (oldVersion <= 14) {
+            } else if (oldVersion <= 15) {
                 TableTruck.getInstance().create();
                 TableTruckV13.getInstance().transfer();
-            } else if (oldVersion <= 15) {
-                // TODO: before release get rid of this. Move 14 above to 15.
-                // Also delete upgrade16 function.
-                TableTruck.getInstance().upgrade16();
             }
         }
 

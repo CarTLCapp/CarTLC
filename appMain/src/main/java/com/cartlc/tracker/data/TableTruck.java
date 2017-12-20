@@ -69,14 +69,6 @@ public class TableTruck {
         mDb.execSQL(sbuf.toString());
     }
 
-    public void upgrade16() {
-        try {
-            mDb.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_HAS_ENTRY + " bit default 0");
-        } catch (Exception ex) {
-            TBApplication.ReportError(ex, TableEntry.class, "upgrade16()", "db");
-        }
-    }
-
     // Will find exact match of the truck given the parameters. Otherwise will create
     // a new truck with these values.
     // @Returns id of newly saved truck.
