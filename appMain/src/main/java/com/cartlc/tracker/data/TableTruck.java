@@ -77,132 +77,41 @@ public class TableTruck {
         }
     }
 
-    // Will ensure the said truck and license plate are stored in the database.
-    // Trys to take care of existing entries smartly. Prefers license plate entry
-    // to truck number entries in case of duplication.
+    // Will find exact match of the truck given the parameters. Otherwise will create
+    // a new truck with these values.
     // @Returns id of newly saved truck.
     public long save(String truckNumber, String licensePlate, long projectId, String companyName) {
-        String selection;
-        String[] selectionArgs;
-        Cursor cursor = null;
         ContentValues values = new ContentValues();
-        DataTruck truck = new DataTruck();
-        if (!TextUtils.isEmpty(licensePlate)) {
-            selection = KEY_LICENSE_PLATE + "=?";
-            selectionArgs = new String[]{licensePlate};
-            cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
-            if (cursor.moveToNext()) {
-                final int idxId = cursor.getColumnIndex(KEY_ROWID);
-                final int idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER);
-                final int idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE);
-                final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
-                final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
-                truck.truckNumber = cursor.getString(idxTruckNumber);
-                truck.licensePlateNumber = cursor.getString(idxLicensePlate);
-                truck.projectNameId = cursor.getInt(idxProjectId);
-                truck.companyName = cursor.getString(idxCompanyName);
-                truck.id = cursor.getLong(idxId);
-                String where = KEY_ROWID + "=?";
-                String[] whereArgs = new String[]{Long.toString(truck.id)};
-                boolean doUpdate = false;
-                if (truckNumber != null && !truckNumber.equals(truck.truckNumber)) {
-                    values.put(KEY_TRUCK_NUMBER, truckNumber);
-                    doUpdate = true;
-                }
-                if (truck.projectNameId != projectId && projectId > 0) {
-                    values.put(KEY_PROJECT_ID, projectId);
-                    doUpdate = true;
-                }
-                if (companyName != null && !companyName.equals(truck.companyName)) {
-                    values.put(KEY_COMPANY_NAME, companyName);
-                    doUpdate = true;
-                }
-                if (doUpdate) {
-                    mDb.update(TABLE_NAME, values, where, whereArgs);
-                }
-            } else {
-                if (truckNumber != null) {
-                    cursor.close();
-                    selection = KEY_TRUCK_NUMBER + "=?";
-                    selectionArgs = new String[]{truckNumber};
-                    String[] columns = {KEY_ROWID};
-                    cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null);
-                    if (cursor.moveToNext()) {
-                        int idxId = cursor.getColumnIndex(KEY_ROWID);
-                        truck.id = cursor.getLong(idxId);
-                        String where = KEY_ROWID + "=?";
-                        String[] whereArgs = new String[]{Long.toString(truck.id)};
-                        values.put(KEY_LICENSE_PLATE, licensePlate);
-                        mDb.update(TABLE_NAME, values, where, whereArgs);
-                    } else {
-                        values.put(KEY_TRUCK_NUMBER, truckNumber);
-                        values.put(KEY_LICENSE_PLATE, licensePlate);
-                        truck.id = mDb.insert(TABLE_NAME, null, values);
-                    }
-                } else {
-                    values.put(KEY_LICENSE_PLATE, licensePlate);
-                }
-                if (projectId > 0) {
-                    values.put(KEY_PROJECT_ID, projectId);
-                }
-                if (!TextUtils.isEmpty(companyName)) {
-                    values.put(KEY_COMPANY_NAME, companyName);
-                }
-                truck.id = mDb.insert(TABLE_NAME, null, values);
+        DataTruck truck;
+        List<DataTruck> trucks = query(truckNumber, licensePlate, projectId, companyName);
+        if (trucks.size() > 0) {
+            truck = trucks.get(0);
+            if (truck.projectNameId == 0) {
+                truck.projectNameId = projectId;
+                values.put(KEY_PROJECT_ID, projectId);
             }
+            if (truck.companyName == null) {
+                truck.companyName = companyName;
+                values.put(KEY_COMPANY_NAME, companyName);
+            }
+            truck.hasEntry = true;
+            values.put(KEY_HAS_ENTRY, 1);
+            String where = KEY_ROWID + "=?";
+            String[] whereArgs = new String[]{Long.toString(truck.id)};
+            mDb.update(TABLE_NAME, values, where, whereArgs);
         } else {
-            if (truckNumber == null) {
-                Timber.e("Invalid truck entry ignored");
-                return 0;
-            }
-            try {
-                selection = KEY_TRUCK_NUMBER + "=?";
-                selectionArgs = new String[]{truckNumber};
-                cursor = mDb.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null);
-                if (cursor != null && cursor.moveToFirst() && cursor.getCount() > 0) {
-                    final int rowIdIndex = cursor.getColumnIndex(KEY_ROWID);
-                    final int idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID);
-                    final int idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME);
-                    if (rowIdIndex >= 0) {
-                        truck.id = cursor.getLong(rowIdIndex);
-                        truck.projectNameId = cursor.getInt(idxProjectId);
-                        truck.companyName = cursor.getString(idxCompanyName);
-                        boolean doUpdate = false;
-                        if (truck.projectNameId != projectId && projectId > 0) {
-                            values.put(KEY_PROJECT_ID, projectId);
-                            doUpdate = true;
-                        }
-                        if (companyName != null && !companyName.equals(truck.companyName)) {
-                            values.put(KEY_COMPANY_NAME, companyName);
-                            doUpdate = true;
-                        }
-                        if (doUpdate) {
-                            String where = KEY_ROWID + "=?";
-                            String[] whereArgs = new String[]{Long.toString(truck.id)};
-                            mDb.update(TABLE_NAME, values, where, whereArgs);
-                        }
-                    }
-                    cursor.close();
-                } else {
-                    cursor.close();
-                    values.put(KEY_TRUCK_NUMBER, truckNumber);
-                    if (projectId > 0) {
-                        values.put(KEY_PROJECT_ID, projectId);
-                    }
-                    if (!TextUtils.isEmpty(companyName)) {
-                        values.put(KEY_COMPANY_NAME, companyName);
-                    }
-                    truck.id = mDb.insert(TABLE_NAME, null, values);
-                }
-            } catch (CursorIndexOutOfBoundsException ex) {
-                StringBuilder sbuf = new StringBuilder();
-                sbuf.append(ex.getMessage());
-                sbuf.append(" while working with truck " + truckNumber);
-                TBApplication.ReportError(sbuf.toString(), TableTruck.class, "save(items)", "db");
-            }
-        }
-        if (cursor != null) {
-            cursor.close();
+            truck = new DataTruck();
+            truck.truckNumber = truckNumber;
+            truck.licensePlateNumber = licensePlate;
+            truck.companyName = companyName;
+            truck.projectNameId = projectId;
+            truck.hasEntry = true;
+            values.put(KEY_TRUCK_NUMBER, truckNumber);
+            values.put(KEY_COMPANY_NAME, companyName);
+            values.put(KEY_PROJECT_ID, projectId);
+            values.put(KEY_LICENSE_PLATE, licensePlate);
+            values.put(KEY_HAS_ENTRY, 1);
+            truck.id = mDb.insert(TABLE_NAME, null, values);
         }
         return truck.id;
     }
@@ -215,7 +124,7 @@ public class TableTruck {
             values.put(KEY_PROJECT_ID, truck.projectNameId);
             values.put(KEY_COMPANY_NAME, truck.companyName);
             values.put(KEY_SERVER_ID, truck.serverId);
-            values.put(KEY_HAS_ENTRY, truck.hasEntry);
+            values.put(KEY_HAS_ENTRY, truck.hasEntry ? 1 : 0);
             if (truck.id > 0) {
                 String where = KEY_ROWID + "=?";
                 String[] whereArgs = new String[]{Long.toString(truck.id)};
@@ -260,6 +169,65 @@ public class TableTruck {
         }
         cursor.close();
         return truck;
+    }
+
+    public List<DataTruck> queryByTruckNumber(int truck_number) {
+        String selection = KEY_TRUCK_NUMBER + "=?";
+        String [] selectionArgs = {
+            Integer.toString(truck_number)
+        };
+        return query(selection, selectionArgs);
+    }
+
+    public List<DataTruck> queryByLicensePlate(String license_plate) {
+        String selection = KEY_TRUCK_NUMBER + "=?";
+        String [] selectionArgs = {
+                license_plate
+        };
+        return query(selection, selectionArgs);
+    }
+
+    public List<DataTruck> query(String truck_number, String license_plate, long projectId, String companyName) {
+        StringBuffer selection = new StringBuffer();
+        ArrayList<String> selectionArgs = new ArrayList<>();
+
+        if (truck_number != null && truck_number.trim().length() > 0) {
+            selection.append(KEY_TRUCK_NUMBER);
+            selection.append("=?");
+            selectionArgs.add(truck_number);
+        }
+        if (license_plate != null && license_plate.trim().length() > 0) {
+            if (selection.length() > 0) {
+                selection.append(" AND ");
+            }
+            selection.append(KEY_LICENSE_PLATE);
+            selection.append("=?");
+            selectionArgs.add(license_plate);
+        }
+        if (projectId > 0) {
+            if (selection.length() > 0) {
+                selection.append(" AND ");
+            }
+            selection.append("(");
+            selection.append(KEY_PROJECT_ID);
+            selection.append("=? OR ");
+            selection.append(KEY_PROJECT_ID);
+            selection.append("=0)");
+            selectionArgs.add(Long.toString(projectId));
+        }
+        if (companyName != null && companyName.trim().length() > 0) {
+            if (selection.length() > 0) {
+                selection.append(" AND ");
+            }
+            selection.append("(");
+            selection.append(KEY_COMPANY_NAME);
+            selection.append("=? OR ");
+            selection.append(KEY_COMPANY_NAME);
+            selection.append(" IS NULL)");
+            selectionArgs.add(companyName);
+        }
+        String [] selArgs = new String[selectionArgs.size()];
+        return query(selection.toString(), selectionArgs.toArray(selArgs));
     }
 
     public List<DataTruck> query() {

@@ -50,7 +50,7 @@ public class PrefHelper extends PrefHelperBase {
     static public final String KEY_STATE                         = "state";
     static public final String KEY_CITY                          = "city";
     static public final String KEY_ZIPCODE                       = "zipcode";
-    static public final String KEY_TRUCK                         = "truck";
+    static public final String KEY_TRUCK                         = "truck"; // Number & License
     static public final String KEY_STATUS                        = "status";
     static final        String KEY_CURRENT_PROJECT_GROUP_ID      = "current_project_group_id";
     static final        String KEY_SAVED_PROJECT_GROUP_ID        = "saved_project_group_id";
@@ -352,6 +352,7 @@ public class PrefHelper extends PrefHelperBase {
     public void clearLastEntry() {
         setTruckNumber(null);
         setLicensePlate(null);
+        setKeyValue(KEY_TRUCK, null);
         setStatus(null);
         setCurrentEditEntryId(0);
         setCurrentPictureCollectionId(0);
@@ -518,6 +519,9 @@ public class PrefHelper extends PrefHelperBase {
         truck.licensePlateNumber = getLicensePlate();
         truck.hasEntry = true;
         entry.truckId = TableTruck.getInstance().save(truck);
+
+        Log.d("CarTLC", "SAVED TRUCK: " + TableTruck.getInstance().query(entry.truckId).toLongString());
+
         entry.status = getStatus();
         entry.uploadedMaster = false;
         entry.uploadedAws = false;

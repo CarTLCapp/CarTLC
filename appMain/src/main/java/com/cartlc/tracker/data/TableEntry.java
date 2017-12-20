@@ -113,9 +113,19 @@ public class TableEntry {
                     projectNameId = 0;
                     companyName = null;
                 }
-                entry.truckId = TableTruck.getInstance().save(
-                        Integer.toString(truckNumber),
-                        licensePlateNumber, projectNameId, companyName);
+                DataTruck truck = getTruck(truckNumber, licensePlateNumber);
+                if (truck != null) {
+                    truck.companyName = companyName;
+                    truck.projectNameId = projectNameId;
+                    truck.id = TableTruck.getInstance().save(truck);
+                } else {
+                    truck = new DataTruck();
+                    truck.projectNameId = projectNameId;
+                    truck.companyName = companyName;
+                    truck.licensePlateNumber = licensePlateNumber;
+                    truck.truckNumber = Integer.toString(truckNumber);
+                }
+                entry.truckId = TableTruck.getInstance().save(truck);
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster) != 0;
                 entry.uploadedAws = cursor.getShort(idxUploadedAws) != 0;
 
@@ -139,6 +149,31 @@ public class TableEntry {
         } catch (Exception ex) {
             TBApplication.ReportError(ex, TableEntry.class, "upgrade3()", "db");
         }
+    }
+
+    DataTruck getTruck(int truckNumber, String license_plate) {
+        DataTruck truck = null;
+        List<DataTruck> trucks = TableTruck.getInstance().queryByLicensePlate(license_plate);
+        if (trucks.size() == 1) {
+            truck = trucks.get(0);
+            if (truckNumber > 0 && truck.truckNumber != null) {
+                if (!truck.truckNumber.equals(Integer.toString(truckNumber))) {
+                    truck = null;
+                }
+            }
+        }
+        if (truck == null) {
+            trucks = TableTruck.getInstance().queryByTruckNumber(truckNumber);
+            if (trucks.size() == 1) {
+                truck = trucks.get(0);
+                if (license_plate != null && truck.licensePlateNumber != null) {
+                    if (!truck.licensePlateNumber.equals(license_plate)) {
+                        truck = null;
+                    }
+                }
+            }
+        }
+        return truck;
     }
 
     public void upgrade11() {
