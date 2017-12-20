@@ -70,16 +70,9 @@ public class ConfirmationFrame {
         DataTruck truck = entry.getTruck();
         if (truck == null) {
             mTruckNumberValue.setVisibility(View.GONE);
-        } else if (truck.licensePlateNumber == null) {
-            if (truck.truckNumber == null) {
-                mTruckNumberValue.setVisibility(View.GONE);
-            } else {
-                mTruckNumberValue.setVisibility(View.VISIBLE);
-                mTruckNumberValue.setText(truck.truckNumber);
-            }
         } else {
+            mTruckNumberValue.setText(truck.toString());
             mTruckNumberValue.setVisibility(View.VISIBLE);
-            mTruckNumberValue.setText(truck.licensePlateNumber);
         }
         mSimpleAdapter.setList(entry.getEquipmentNames());
         mPictureAdapter.setList(entry.getPictures());

@@ -693,7 +693,7 @@ public class DCPing extends DCPost {
                     } else {
                         // Change of data
                         if (!incoming.equals(item)) {
-                            Timber.i("Change: " + incoming.toLongString() + " from " + item.toLongString());
+                            Timber.i("Change: [" + incoming.toLongString() + "] from [" + item.toLongString() + "]");
                             incoming.id = item.id;
                             TableTruck.getInstance().save(incoming);
                         } else {
@@ -745,6 +745,9 @@ public class DCPing extends DCPost {
             jsonObject.accumulate("server_id", entry.serverId);
             DataTruck truck = entry.getTruck();
             if (truck != null) {
+                if (truck.serverId > 0) {
+                    jsonObject.accumulate("truck_id", truck.serverId);
+                }
                 if (truck.truckNumber != null) {
                     jsonObject.accumulate("truck_number", truck.truckNumber);
                 }

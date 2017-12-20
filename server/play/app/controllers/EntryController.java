@@ -180,8 +180,15 @@ public class EntryController extends Controller {
                 entry = existing;
             }
         }
+        int truck_id;
         String truck_number;
         String license_plate;
+        value = json.findValue("truck_id");
+        if (value == null) {
+            truck_id = 0;
+        } else {
+            truck_id = value.intValue();
+        }
         value = json.findValue("truck_number");
         if (value != null) {
             truck_number = value.textValue();
@@ -234,13 +241,14 @@ public class EntryController extends Controller {
         } else {
             entry.company_id = value.longValue();
         }
-        if (truck_number == null && license_plate == null) {
+        if (truck_number == null && license_plate == null && truck_id == 0) {
+            missing.add("truck_id");
             missing.add("truck_number");
             missing.add("license_plate");
         } else {
             // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
             // The reason is that other techs don't need to know about a local techs truck updates.
-            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_number, license_plate, entry.tech_id);
+            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_id, truck_number, license_plate, entry.tech_id);
             entry.truck_id = truck.id;
         }
         value = json.findValue("equipment");

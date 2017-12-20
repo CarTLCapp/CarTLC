@@ -87,7 +87,7 @@ public class Truck extends com.avaje.ebean.Model {
         return list.get(0);
     }
 
-    public static Truck add(long project_id, long company_id, String truck_number, String license_plate, int tech_id) {
+    public static Truck add(long project_id, long company_id, long truck_id, String truck_number, String license_plate, int tech_id) {
         long company_name_id = 0;
         if (company_id > 0) {
            Company company = Company.get(company_id);
@@ -95,39 +95,57 @@ public class Truck extends com.avaje.ebean.Model {
                company_name_id = CompanyName.save(company.name);
            }
         }
-        List<Truck> list;
-        if (project_id > 0 && company_name_id > 0) {
-            list = find.where()
-                    .eq("project_id", project_id)
-                    .eq("company_name_id", company_name_id)
-                    .eq("truck_number", truck_number)
-                    .findList();
-        } else if (project_id > 0) {
-            list = find.where()
-                    .eq("project_id", project_id)
-                    .eq("truck_number", truck_number)
-                    .findList();
-        } else if (company_name_id > 0) {
-            list = find.where()
-                    .eq("company_name_id", company_name_id)
-                    .eq("truck_number", truck_number)
-                    .findList();
-        } else {
-            list = find.where()
-                    .eq("truck_number", truck_number)
-                    .findList();
-        }
         Truck truck = null;
-        if (list != null) {
-            if (list.size() > 1) {
-                Logger.error("Found too many trucks with "
-                        + truck_number + ", " + license_plate + ", project_id=" + project_id + ", company_name_id=" + company_name_id);
-                for (Truck t : list) {
-                    Logger.error(t.toString());
+        List<Truck> list;
+        if (truck_id > 0) {
+            truck = get(truck_id);
+            if (truck.truck_number != null && truck_number != null && !truck.truck_number.equals(truck_number)) {
+                Logger.error("TRUCK ID " + truck_id + " mismatch number: " + truck_number + " != " + truck.truck_number);
+                truck = null;
+            } else if (truck.license_plate != null && license_plate != null && !truck.license_plate.equals(license_plate)) {
+                Logger.error("TRUCK ID " + truck_id + " mismatch license: " + license_plate + " != " + truck.license_plate);
+                truck = null;
+            } else if (truck.project_id > 0 && project_id > 0 && truck.project_id != project_id) {
+                Logger.error("TRUCK ID " + truck_id + " mismatch project: " + project_id + " != " + truck.project_id);
+                truck = null;
+            } else if (truck.company_name_id > 0 && company_name_id > 0 && truck.company_name_id != company_name_id) {
+                Logger.error("TRUCK ID " + truck_id + " mismatch company: " + company_name_id + " != " + truck.company_name_id);
+                truck = null;
+            }
+        }
+        if (truck == null) {
+            if (project_id > 0 && company_name_id > 0) {
+                list = find.where()
+                        .eq("project_id", project_id)
+                        .eq("company_name_id", company_name_id)
+                        .eq("truck_number", truck_number)
+                        .findList();
+            } else if (project_id > 0) {
+                list = find.where()
+                        .eq("project_id", project_id)
+                        .eq("truck_number", truck_number)
+                        .findList();
+            } else if (company_name_id > 0) {
+                list = find.where()
+                        .eq("company_name_id", company_name_id)
+                        .eq("truck_number", truck_number)
+                        .findList();
+            } else {
+                list = find.where()
+                        .eq("truck_number", truck_number)
+                        .findList();
+            }
+            if (list != null) {
+                if (list.size() > 1) {
+                    Logger.error("Found too many trucks with "
+                            + truck_number + ", " + license_plate + ", project_id=" + project_id + ", company_name_id=" + company_name_id);
+                    for (Truck t : list) {
+                        Logger.error(t.toString());
+                    }
+                    truck = list.get(0);
+                } else if (list.size() == 1) {
+                    truck = list.get(0);
                 }
-                truck = list.get(0);
-            } else if (list.size() == 1) {
-                truck = list.get(0);
             }
         }
         if (truck == null) {

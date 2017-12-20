@@ -84,7 +84,7 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
             @Override
             public void afterTextChanged(Editable s) {
                 if (holder.label.isSelected()) {
-                    item.value = s.toString();
+                    item.value = s.toString().trim();
                     TableNote.getInstance().updateValue(item);
                     mListener.textEntered(item);
                 }
