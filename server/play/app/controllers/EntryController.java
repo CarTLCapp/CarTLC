@@ -189,11 +189,16 @@ public class EntryController extends Controller {
         } else {
             truck_id = value.intValue();
         }
-        value = json.findValue("truck_number");
-        if (value != null) {
-            truck_number = value.textValue();
+        value = json.findValue("truck_number_string");
+        if (value == null) {
+            value = json.findValue("truck_number");
+            if (value != null) {
+                truck_number = Integer.toString(value.intValue());
+            } else {
+                truck_number = null;
+            }
         } else {
-            truck_number = null;
+            truck_number = value.textValue();
         }
         value = json.findValue("license_plate");
         if (value != null) {

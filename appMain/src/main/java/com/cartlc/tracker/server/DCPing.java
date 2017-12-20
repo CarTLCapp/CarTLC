@@ -749,7 +749,7 @@ public class DCPing extends DCPost {
                     jsonObject.accumulate("truck_id", truck.serverId);
                 }
                 if (truck.truckNumber != null) {
-                    jsonObject.accumulate("truck_number", truck.truckNumber);
+                    jsonObject.accumulate("truck_number_string", truck.truckNumber);
                 }
                 if (truck.licensePlateNumber != null) {
                     jsonObject.accumulate("license_plate", truck.licensePlateNumber);
