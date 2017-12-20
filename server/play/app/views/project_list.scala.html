@@ -35,6 +35,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Equipment</th>
+                    <th>Notes</th>
                     <th>Entries</th>
                     <th>Edit</th>
                 </tr>
@@ -51,6 +52,7 @@
                             }
                         </td>
                         <td>@project.getEquipmentsLine()</td>
+                        <td>@project.getNotesLine()</td>
                         <td>@project.countEntries()</td>
                         <td>
                             @if(client.is_admin) {

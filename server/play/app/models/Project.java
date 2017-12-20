@@ -90,6 +90,19 @@ public class Project extends Model implements Comparable<Project> {
         return sbuf.toString();
     }
 
+    public String getNotesLine() {
+        List<Note> items = ProjectNoteCollection.findNotes(id);
+        Collections.sort(items);
+        StringBuilder sbuf = new StringBuilder();
+        for (Note item : items) {
+            if (sbuf.length() > 0) {
+                sbuf.append(", ");
+            }
+            sbuf.append(item.name);
+        }
+        return sbuf.toString();
+    }
+
     @Override
     public int compareTo(Project project) {
         return name.compareTo(project.name);

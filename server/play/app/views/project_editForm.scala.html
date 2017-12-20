@@ -1,4 +1,4 @@
-@(id: Long, projectForm: Form[Project], client : Client)
+@(id: Long, projectForm: Form[InputProject], client : Client)
 
 @import helper._
 
@@ -15,6 +15,36 @@
             @b3.text(projectForm("name"), '_label -> "Name", '_help -> "")
 
         </fieldset>
+
+        <h3>Equipment</h3>
+
+        <div class="checkbox-container-columns">
+
+            @for(equipment <- Equipment.list()) {
+                @if(ProjectEquipmentCollection.hasEquipment(id, equipment.id)) {
+                    @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name, 'checked -> true)
+                } else {
+                    @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name)
+                }
+                <div style="clear:both;"></div>
+            }
+
+        </div>
+
+        <h3>Notes</h3>
+
+        <div class="checkbox-container-columns">
+
+            @for(note <- Note.list()) {
+                @if(ProjectNoteCollection.hasNote(id, note.id)) {
+                    @b3.checkbox(projectForm(note.name), '_label -> note.name, 'checked -> true)
+                } else {
+                    @b3.checkbox(projectForm(note.name), '_label -> note.name)
+                }
+                <div style="clear:both;"></div>
+            }
+
+        </div>
 
         <div class="actions">
             <input type="submit" value="Save this project" class="btn primary"> or

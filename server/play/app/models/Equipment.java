@@ -47,6 +47,10 @@ public class Equipment extends Model implements Comparable<Equipment> {
      */
     public static Finder<Long, Equipment> find = new Finder<Long, Equipment>(Equipment.class);
 
+    public static List<Equipment> list() {
+        return list(false);
+    }
+
     public static List<Equipment> list(boolean disabled) {
         return list("name", "asc", disabled);
     }

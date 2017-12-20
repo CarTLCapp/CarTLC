@@ -8,8 +8,6 @@ import play.data.*;
 
 import static play.data.Form.*;
 
-import play.Logger;
-
 import models.*;
 
 import javax.inject.Inject;
@@ -22,6 +20,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import play.db.ebean.Transactional;
+
+import java.util.List;
+import java.util.ArrayList;
+import play.Logger;
 
 /**
  * Manage a database of projects.
@@ -63,7 +65,7 @@ public class ProjectController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
-        Form<Project> projectForm = formFactory.form(Project.class).fill(Project.find.byId(id));
+        Form<InputProject> projectForm = formFactory.form(InputProject.class).fill(new InputProject(Project.find.byId(id)));
         return ok(views.html.project_editForm.render(id, projectForm, Secured.getClient(ctx())));
     }
 
@@ -73,7 +75,7 @@ public class ProjectController extends Controller {
      * @param id Id of the project to edit
      */
     public Result update(Long id) throws PersistenceException {
-        Form<Project> projectForm = formFactory.form(Project.class).bindFromRequest();
+        Form<InputProject> projectForm = formFactory.form(InputProject.class).bindFromRequest();
         if (projectForm.hasErrors()) {
             return badRequest(views.html.project_editForm.render(id, projectForm, Secured.getClient(ctx())));
         }
@@ -81,11 +83,16 @@ public class ProjectController extends Controller {
         try {
             Project savedProject = Project.find.byId(id);
             if (savedProject != null) {
-                Project newProjectData = projectForm.get();
+                InputProject newProjectData = projectForm.get();
                 savedProject.name = newProjectData.name;
                 savedProject.update();
-                flash("success", "Project " + projectForm.get().name + " has been updated");
+
+                ProjectEquipmentCollection.addNew(id, getCheckedEquipments(projectForm));
+                ProjectNoteCollection.addNew(id, getCheckedNotes(projectForm));
+
                 txn.commit();
+
+                Logger.info("Project " + savedProject.name + " has been updated");
 
                 Version.inc(Version.VERSION_PROJECT);
             }
@@ -93,6 +100,30 @@ public class ProjectController extends Controller {
             txn.end();
         }
         return list();
+    }
+
+    List<Equipment> getCheckedEquipments(Form<InputProject> projectForm) {
+        List<Equipment> equipments = new ArrayList<Equipment>();
+        for (Equipment equipment : Equipment.list()) {
+            if (projectForm.field(equipment.name) != null &&
+                    projectForm.field(equipment.name).value() != null &&
+                    projectForm.field(equipment.name).value().equals("true")) {
+                equipments.add(equipment);
+            }
+        }
+        return equipments;
+    }
+
+    List<Note> getCheckedNotes(Form<InputProject> projectForm) {
+        List<Note> notes = new ArrayList<Note>();
+        for (Note note : Note.list()) {
+            if (projectForm.field(note.name) != null &&
+                    projectForm.field(note.name).value() != null &&
+                    projectForm.field(note.name).value().equals("true")) {
+                notes.add(note);
+            }
+        }
+        return notes;
     }
 
     /**

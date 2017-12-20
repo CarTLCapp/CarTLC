@@ -48,6 +48,13 @@ public class ProjectEquipmentCollection extends Model {
         return list;
     }
 
+    public static boolean hasEquipment(long project_id, long equipment_id) {
+        return find.where()
+                .eq("project_id", project_id)
+                .eq("equipment_id", equipment_id)
+                .findList().size() > 0;
+    }
+
     public static List<Project> findProjects(long equipment_id) {
         List<ProjectEquipmentCollection> items = find.where()
                 .eq("equipment_id", equipment_id)
@@ -91,6 +98,25 @@ public class ProjectEquipmentCollection extends Model {
                 .findList();
         for (ProjectEquipmentCollection item : items) {
             item.delete();
+        }
+    }
+
+    public static void deleteByProjectId(long project_id) {
+        List<ProjectEquipmentCollection> items = find.where()
+                .eq("project_id", project_id)
+                .findList();
+        for (ProjectEquipmentCollection item : items) {
+            item.delete();
+        }
+    }
+
+    public static void addNew(long project_id, List<Equipment> equipments) {
+        deleteByProjectId(project_id);
+        for (Equipment equipment : equipments) {
+            ProjectEquipmentCollection entry = new ProjectEquipmentCollection();
+            entry.project_id = project_id;
+            entry.equipment_id = equipment.id;
+            entry.save();
         }
     }
 

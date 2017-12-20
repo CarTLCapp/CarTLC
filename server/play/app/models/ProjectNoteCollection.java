@@ -63,6 +63,13 @@ public class ProjectNoteCollection extends Model {
         return list;
     }
 
+    public static boolean hasNote(long project_id, long note_id) {
+        return find.where()
+                .eq("note_id", note_id)
+                .eq("project_id", project_id)
+                .findList().size() > 0;
+    }
+
     public static boolean has(ProjectNoteCollection collection) {
         List<ProjectNoteCollection> items =
                 find.where()
@@ -83,6 +90,27 @@ public class ProjectNoteCollection extends Model {
         }
         return null;
     }
+
+
+    public static void deleteByProjectId(long project_id) {
+        List<ProjectNoteCollection> items = find.where()
+                .eq("project_id", project_id)
+                .findList();
+        for (ProjectNoteCollection item : items) {
+            item.delete();
+        }
+    }
+
+    public static void addNew(long project_id, List<Note> notes) {
+        deleteByProjectId(project_id);
+        for (Note note : notes) {
+            ProjectNoteCollection entry = new ProjectNoteCollection();
+            entry.project_id = project_id;
+            entry.note_id = note.id;
+            entry.save();
+        }
+    }
+
 
 }
 

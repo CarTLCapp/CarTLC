@@ -36,6 +36,13 @@ table.progress {
     width: 98%
 }
 
+.checkbox-container-columns {
+    display: block;
+    width: 98%;
+	column-count: 4;
+}
+
+
 .search {
     vertical-align: middle
 }

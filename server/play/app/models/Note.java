@@ -85,6 +85,10 @@ public class Note extends Model implements Comparable<Note> {
      */
     public static Finder<Long, Note> find = new Finder<Long, Note>(Note.class);
 
+    public static List<Note> list() {
+        return list(false );
+    }
+
     public static List<Note> list(boolean disabled) {
         return list("name", "asc", disabled);
     }
