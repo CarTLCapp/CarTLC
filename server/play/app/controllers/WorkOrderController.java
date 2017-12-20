@@ -86,9 +86,16 @@ public class WorkOrderController extends Controller {
     public Result viewProgressGrid(Integer upload_id) {
         progressGrid.setClient(Secured.getClient(ctx()));
         progressGrid.setUploadId(upload_id);
+        progressGrid.clearCache();
         progressGrid.computeFilters();
         progressGrid.compute();
-        return ok(views.html.progress_grid.render(progressGrid, Secured.getClient(ctx())));
+        String home;
+        if (upload_id == null || upload_id == 0) {
+            home = "/";
+        } else {
+            home = "/work/summary/list";
+        }
+        return ok(views.html.progress_grid.render(progressGrid, Secured.getClient(ctx()), home));
     }
 
     public Result importWorkOrdersForm() {
