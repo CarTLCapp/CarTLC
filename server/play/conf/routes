@@ -86,7 +86,7 @@ POST    /client/:id/delete     controllers.ClientController.delete(id:Long)
 
 ### WORK ORDER SUMMARIES
 
-GET     /work/summary/list       controllers.WorkOrderController.list(p:Int ?= 0, s ?= "client_id", o ?= "desc", message ?= "")
+GET     /work/summary/list       controllers.WorkOrderController.list(p:Int ?= 0, s ?= "last_modified", o ?= "desc", message ?= "")
 GET     /work/summary/:id/delete controllers.WorkOrderController.deleteSummary(id:Integer)
 GET     /work/import/form      controllers.WorkOrderController.importWorkOrdersForm()
 POST    /work/import           controllers.WorkOrderController.importWorkOrders()

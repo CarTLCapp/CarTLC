@@ -47,11 +47,11 @@ public class WorkOrderController extends Controller {
     }
 
     public Result INDEX() {
-        return list(0, "client_id", "desc", "");
+        return list(0, "last_modified", "desc", "");
     }
 
     public Result INDEX(String msg) {
-        return list(0, "client_id", "desc", msg);
+        return list(0, "last_modified", "desc", msg);
     }
 
     @Security.Authenticated(Secured.class)
