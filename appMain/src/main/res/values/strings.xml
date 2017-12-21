@@ -21,6 +21,7 @@
     <string name="entry_hint_notes">Add any notes here</string>
     <string name="entry_hint_skip_zip">Enter ZIP or hit NEXT</string>
     <string name="entry_hint_edit_project">Changing Existing Project:</string>
+    <string name="entry_hint_truck">Can be just Truck Number\nor Truck Number : License Plate</string>
     <string name="title_profile">Profile</string>
     <string name="title_upload">Upload</string>
     <string name="title_login">Login</string>
@@ -33,8 +34,8 @@
     <string name="title_address_">Address:</string>
     <string name="title_zipcode">ZIP</string>
     <string name="title_current_project">Current Project</string>
-    <string name="title_truck">Truck Number</string>
-    <string name="title_truck_number_">Truck Number:</string>
+    <string name="title_truck">Truck</string>
+    <string name="title_truck_number_">Truck:</string>
     <string name="title_equipment_installed">Equipment Installed</string>
     <string name="title_equipment_installed_">Equipment Installed:</string>
     <string name="title_equipment">Equipment</string>
