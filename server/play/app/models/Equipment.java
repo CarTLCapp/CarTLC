@@ -138,6 +138,14 @@ public class Equipment extends Model implements Comparable<Equipment> {
         return sbuf.toString();
     }
 
+    public String getNumEntriesAsk() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("/equipment/");
+        sbuf.append(id);
+        sbuf.append("/num_entries");
+        return sbuf.toString();
+    }
+
     public String getCreatedBy() {
         StringBuilder sbuf = new StringBuilder();
         if (created_by != 0) {

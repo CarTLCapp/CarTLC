@@ -54,17 +54,18 @@
                             }
                         </td>
                         <td>@equipment.getProjectsLine()</td>
-                        <td id=@equipment.getNumEntriesTag()></td>
+                        <td id="@equipment.getNumEntriesTag()"></td>
                         <td><a href="@routes.EquipmentController.edit(equipment.id)">Edit</a></td>
                         <td>@equipment.getCreatedBy()</td>
                     </tr>
 
                     <script type="text/javascript">
-                        $.getJSON(@routes.EquipmentController.getNumEntries(equipment.id), function(data) {
-                           if (data != null) {
-                                $("#" + data.tag).html(data.num_entries);
-                           }
-                        });
+                        var xhttp = new XMLHttpRequest();
+                        xhttp.onreadystatechange = function() {
+                            document.getElementById("@equipment.getNumEntriesTag()").innerHTML = this.responseText;
+                        };
+                        xhttp.open("GET", "@equipment.getNumEntriesAsk()", false);
+                        xhttp.send();
                     </script>
                 }
 

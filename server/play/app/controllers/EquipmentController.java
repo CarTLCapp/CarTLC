@@ -57,11 +57,11 @@ public class EquipmentController extends Controller {
 
     public Result getNumEntries(Long equip_id) {
         Equipment equip = Equipment.find.byId(equip_id);
-        ObjectNode result = Json.newObject();
-        if (equip != null) {
-            result.put("tag", equip.getNumEntriesTag());
-            result.put("num_entries", Integer.toString(equip.getNumEntries()));
+        if (equip == null) {
+            return badRequest("Invalid ID");
         }
+        String result = Integer.toString(equip.getNumEntries());
+        Logger.info("CALLING WITH " + result);
         return ok(result);
     }
 
