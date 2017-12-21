@@ -102,7 +102,7 @@ public class WorkOrderReader {
                             } else {
                                 if (Entry.countEntriesForTruck(truck.id) == 0) {
                                     truck.update();
-                                } else {
+                                } else if (!truck.license_plate.equals(etruck.license_plate)) {
                                     warning("Ignoring license_plate from file for truck", line);
                                 }
                             }
