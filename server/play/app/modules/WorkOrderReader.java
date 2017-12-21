@@ -88,26 +88,35 @@ public class WorkOrderReader {
                     truck.project_id = project_id;
                     truck.company_name_id = company_name_id;
                     Truck etruck = Truck.findFirst(truck.project_id, truck.company_name_id, truck.truck_number);
-                    long truck_id;
                     if (etruck == null) {
                         truck.upload_id = upload_id;
                         truck.created_by = (int) client_id;
                         truck.created_by_client = true;
                         truck.save();
-                        truck_id = truck.id;
                         truckNewCount++;
                     } else {
-                        truck_id = etruck.id;
+                        truck.id = etruck.id;
+                        if (truck.license_plate != null && truck.license_plate.trim().length() > 0) {
+                            if (etruck.license_plate == null || etruck.license_plate.trim().length() == 0) {
+                                truck.update();
+                            } else {
+                                if (Entry.countEntriesForTruck(truck.id) == 0) {
+                                    truck.update();
+                                } else {
+                                    warning("Ignoring license_plate from file for truck", line);
+                                }
+                            }
+                        }
                     }
                     WorkOrder order;
-                    order = WorkOrder.findFirstByTruckId(truck_id);
+                    order = WorkOrder.findFirstByTruckId(truck.id);
                     if (order == null) {
                         order = new WorkOrder();
                     }
                     order.client_id = client_id;
                     order.project_id = project_id;
                     order.upload_id = upload_id;
-                    order.truck_id = truck_id;
+                    order.truck_id = truck.id;
                     Company company = new Company();
                     company.name = getFieldValue(values, WorkOrderField.COMPANY, company_name);
                     company.street = getFieldValue(values, WorkOrderField.STREET);
