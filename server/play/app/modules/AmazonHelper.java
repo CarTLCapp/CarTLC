@@ -16,7 +16,7 @@ import com.amazonaws.services.s3.transfer.PersistableTransfer;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 
 import play.Logger;
-import play.Configuration;
+import com.typesafe.config.Config;
 
 @Singleton
 public class AmazonHelper {
@@ -73,10 +73,10 @@ public class AmazonHelper {
         }
     }
 
-    final Configuration configuration;
+    final Config configuration;
 
     @Inject
-    public AmazonHelper(Configuration configuration) {
+    public AmazonHelper(Config configuration) {
         this.configuration = configuration;
     }
 

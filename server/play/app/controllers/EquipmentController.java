@@ -18,22 +18,22 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.concurrent.*;
+import play.libs.concurrent.HttpExecutionContext;
 
-import play.libs.Json;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.JsonNode;
 /**
  * Manage a database of equipment.
  */
 public class EquipmentController extends Controller {
 
     private FormFactory formFactory;
+    private HttpExecutionContext httpExecutionContext;
 
     @Inject
-    public EquipmentController(FormFactory formFactory) {
+    public EquipmentController(FormFactory formFactory,
+                               HttpExecutionContext ec) {
         this.formFactory = formFactory;
+        this.httpExecutionContext = ec;
     }
 
     /**
@@ -55,14 +55,20 @@ public class EquipmentController extends Controller {
         return ok(views.html.equipment_list.render(Equipment.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
-    public Result getNumEntries(Long equip_id) {
+    public CompletionStage<Result> getNumEntries(Long equip_id) {
+        return calcNumEntries(equip_id).thenApplyAsync(result -> {
+            return ok(result);
+        }, httpExecutionContext.current());
+    }
+
+    private static CompletionStage<String> calcNumEntries(Long equip_id) {
         Equipment equip = Equipment.find.byId(equip_id);
         if (equip == null) {
-            return badRequest("Invalid ID");
+            Logger.error("Invalid equipment ID of " + equip_id);
+            return CompletableFuture.completedFuture("");
         }
-        String result = Integer.toString(equip.getNumEntries());
-        Logger.info("CALLING WITH " + result);
-        return ok(result);
+        Logger.info("COMPUTING for " + equip_id);
+        return CompletableFuture.completedFuture(Integer.toString(equip.getNumEntries()));
     }
 
     /**

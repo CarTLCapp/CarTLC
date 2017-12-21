@@ -129,7 +129,7 @@ public class CompanyController extends Controller {
             }
             Version.inc(Version.VERSION_COMPANY);
         } catch (DataErrorException ex) {
-            linesForm.reject("lines", ex.getMessage());
+            linesForm.withError("lines", ex.getMessage());
             return badRequest(views.html.companies_createForm.render(linesForm));
         }
         return list();

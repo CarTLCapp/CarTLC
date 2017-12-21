@@ -49,7 +49,7 @@ public class ClientController extends Controller {
         if (Secured.isAdmin(ctx())) {
             return ok(views.html.client_editForm.render(id, clientForm));
         } else {
-            clientForm.reject("adminstrator", "Non administrators cannot change clients.");
+            clientForm.withError("adminstrator", "Non administrators cannot change clients.");
             return badRequest(views.html.home.render(Secured.getClient(ctx())));
         }
     }
@@ -68,7 +68,7 @@ public class ClientController extends Controller {
         }
         Client curClient = Secured.getClient(ctx());
         if (!curClient.is_admin) {
-            clientForm.reject("adminstrator", "Non administrators cannot change clients.");
+            clientForm.withError("adminstrator", "Non administrators cannot change clients.");
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
         InputClient updateClient = clientForm.get();
@@ -111,7 +111,7 @@ public class ClientController extends Controller {
         }
         Client curClient = Secured.getClient(ctx());
         if (!curClient.is_admin) {
-            clientForm.reject("adminstrator", "Non administrators cannot create clients.");
+            clientForm.withError("adminstrator", "Non administrators cannot create clients.");
             return badRequest(views.html.client_createForm.render(clientForm));
         }
         InputClient inputClient = clientForm.get();
@@ -141,8 +141,8 @@ public class ClientController extends Controller {
         List<Project> projects = new ArrayList<Project>();
         for (Project project : Project.list()) {
             if (clientForm.field(project.name) != null &&
-                    clientForm.field(project.name).value() != null &&
-                    clientForm.field(project.name).value().equals("true")) {
+                    clientForm.field(project.name).getValue() != null &&
+                    clientForm.field(project.name).getValue().equals("true")) {
                 projects.add(project);
             }
         }
@@ -158,7 +158,7 @@ public class ClientController extends Controller {
         Client curClient = Secured.getClient(ctx());
         if (!curClient.is_admin) {
             Form<InputClient> clientForm = formFactory.form(InputClient.class).bindFromRequest();
-            clientForm.reject("adminstrator", "Non administrators cannot delete clients.");
+            clientForm.withError("adminstrator", "Non administrators cannot delete clients.");
             return badRequest(views.html.client_editForm.render(id, clientForm));
         }
         Client client = Client.find.byId(id);

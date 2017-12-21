@@ -106,8 +106,8 @@ public class ProjectController extends Controller {
         List<Equipment> equipments = new ArrayList<Equipment>();
         for (Equipment equipment : Equipment.list()) {
             if (projectForm.field(equipment.name) != null &&
-                    projectForm.field(equipment.name).value() != null &&
-                    projectForm.field(equipment.name).value().equals("true")) {
+                    projectForm.field(equipment.name).getValue() != null &&
+                    projectForm.field(equipment.name).getValue().equals("true")) {
                 equipments.add(equipment);
             }
         }
@@ -118,8 +118,8 @@ public class ProjectController extends Controller {
         List<Note> notes = new ArrayList<Note>();
         for (Note note : Note.list()) {
             if (projectForm.field(note.name) != null &&
-                    projectForm.field(note.name).value() != null &&
-                    projectForm.field(note.name).value().equals("true")) {
+                    projectForm.field(note.name).getValue() != null &&
+                    projectForm.field(note.name).getValue().equals("true")) {
                 notes.add(note);
             }
         }

@@ -8,7 +8,7 @@ libraryDependencies += jdbc
 libraryDependencies += "com.adrianhurt" %% "play-bootstrap" % "1.0-P25-B3"
 
 libraryDependencies += javaJdbc
-libraryDependencies += cache
+libraryDependencies += ehcache
 libraryDependencies += javaWs
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.21"

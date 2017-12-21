@@ -217,7 +217,7 @@ public class WorkOrderController extends Controller {
             editingUploadId = workOrderItem.upload_id;
             return ok(views.html.workOrder_editForm.render(id, workOrderForm, client));
         } else {
-            workOrderForm.reject("adminstrator", "Non administrators cannot change work order entries.");
+            workOrderForm.withError("adminstrator", "Non administrators cannot change work order entries.");
             return badRequest(views.html.home.render(client));
         }
     }
