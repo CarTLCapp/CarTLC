@@ -18,6 +18,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
 
+
+import play.libs.Json;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.JsonNode;
 /**
  * Manage a database of equipment.
  */
@@ -43,9 +49,20 @@ public class EquipmentController extends Controller {
         return list(true);
     }
 
+
     @Security.Authenticated(Secured.class)
     public Result list(boolean disabled) {
         return ok(views.html.equipment_list.render(Equipment.list(disabled), Secured.getClient(ctx()), disabled));
+    }
+
+    public Result getNumEntries(Long equip_id) {
+        Equipment equip = Equipment.find.byId(equip_id);
+        ObjectNode result = Json.newObject();
+        if (equip != null) {
+            result.put("tag", equip.getNumEntriesTag());
+            result.put("num_entries", Integer.toString(equip.getNumEntries()));
+        }
+        return ok(result);
     }
 
     /**

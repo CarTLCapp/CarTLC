@@ -54,10 +54,18 @@
                             }
                         </td>
                         <td>@equipment.getProjectsLine()</td>
-                        <td>@equipment.getNumEntries()</td>
+                        <td id=@equipment.getNumEntriesTag()></td>
                         <td><a href="@routes.EquipmentController.edit(equipment.id)">Edit</a></td>
                         <td>@equipment.getCreatedBy()</td>
                     </tr>
+
+                    <script type="text/javascript">
+                        $.getJSON(@routes.EquipmentController.getNumEntries(equipment.id), function(data) {
+                           if (data != null) {
+                                $("#" + data.tag).html(data.num_entries);
+                           }
+                        });
+                    </script>
                 }
 
             </tbody>

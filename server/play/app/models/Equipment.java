@@ -42,6 +42,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
 
     @Constraints.Required
     public boolean created_by_client;
+
     /**
      * Generic query helper for entity Computer with id Long
      */
@@ -126,8 +127,15 @@ public class Equipment extends Model implements Comparable<Equipment> {
         return sbuf.toString();
     }
 
-    public String getNumEntries() {
-        return Integer.toString(Entry.countEntriesForEquipment(id));
+    public int getNumEntries() {
+        return Entry.countEntriesForEquipment(id);
+    }
+
+    public String getNumEntriesTag() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("num_entries");
+        sbuf.append(id);
+        return sbuf.toString();
     }
 
     public String getCreatedBy() {
