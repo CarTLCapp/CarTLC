@@ -12,8 +12,8 @@ public class WorkerExecutionContext extends CustomExecutionContext {
 
     @javax.inject.Inject
     public WorkerExecutionContext(ActorSystem actorSystem) {
-        // uses a custom thread pool defined in application.conf
-        super(actorSystem, "custom.dispatcher");
+        // See application.conf for definition
+        super(actorSystem, "small-worker-dispatcher");
     }
 
 }

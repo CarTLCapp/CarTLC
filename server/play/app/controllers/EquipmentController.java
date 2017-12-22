@@ -8,6 +8,8 @@ import static play.data.Form.*;
 import play.Logger;
 
 import models.*;
+import modules.WorkerExecutionContext;
+
 import java.util.List;
 import java.util.ArrayList;
 import javax.inject.Inject;
@@ -19,7 +21,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.concurrent.*;
-import play.libs.concurrent.HttpExecutionContext;
+import play.libs.concurrent.HttpExecution;
 
 /**
  * Manage a database of equipment.
@@ -27,13 +29,13 @@ import play.libs.concurrent.HttpExecutionContext;
 public class EquipmentController extends Controller {
 
     private FormFactory formFactory;
-    private HttpExecutionContext httpExecutionContext;
+    private WorkerExecutionContext executionContext;
 
     @Inject
     public EquipmentController(FormFactory formFactory,
-                               HttpExecutionContext ec) {
+                               WorkerExecutionContext ec) {
         this.formFactory = formFactory;
-        this.httpExecutionContext = ec;
+        this.executionContext = ec;
     }
 
     /**
@@ -56,9 +58,10 @@ public class EquipmentController extends Controller {
     }
 
     public CompletionStage<Result> getNumEntries(Long equip_id) {
+        Executor myEc = HttpExecution.fromThread((Executor) executionContext);
         return calcNumEntries(equip_id).thenApplyAsync(result -> {
             return ok(result);
-        }, httpExecutionContext.current());
+        }, myEc);
     }
 
     private static CompletionStage<String> calcNumEntries(Long equip_id) {
