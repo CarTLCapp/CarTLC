@@ -116,7 +116,7 @@ public class ProjectController extends Controller {
         List<Note> notes = new ArrayList<Note>();
         for (Note note : Note.list()) {
             try {
-                if (projectForm.field(note.name).value().get().equals("true")) {
+                if (projectForm.field(note.name).getValue().get().equals("true")) {
                     notes.add(note);
                 }
             } catch (Exception ex) {
