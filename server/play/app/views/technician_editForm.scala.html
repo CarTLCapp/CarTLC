@@ -6,7 +6,15 @@
 
 @main("FleetTLC - Edit Technician", home = "/tech") {
     
-    <h1>Edit user</h1>
+    <h1 id="homeTitle" class="fill">Edit user
+        @if(client.is_admin) {
+            <span style="float:right;font-size:16px"><a href="@routes.TechnicianController.resetUpload(id)">Reset Upload</a></span>
+        }
+        @if(Technician.canDelete(id)) {
+            &nbsp;&nbsp;
+            <a href="@routes.TechnicianController.delete(id)" class="btn danger" onclick="return confirm('Are you sure?');">Delete this technician</a>
+        }
+    </h1>
 
     @b3.form(routes.TechnicianController.update(id)) {
 
@@ -25,19 +33,4 @@
         </div>
 
     }
-
-    @if(Technician.canDelete(id)) {
-        @b3.form(routes.TechnicianController.delete(id), 'class -> "topRight") {
-            @CSRF.formField
-            <input type="submit" value="Delete this technician" class="btn danger">
-        }
-    }
-
-    @if(client.is_admin) {
-        @b3.form(routes.CompanyController.delete(id), 'class -> "topRight") {
-            @CSRF.formField
-            <a href="@routes.TechnicianController.resetUpload(id)" class="btn">Reset Upload</a>
-        }
-    }
-    
 }

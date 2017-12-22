@@ -176,10 +176,10 @@ public class CompanyController extends Controller {
             Company company = Company.get(id);
             company.disabled = true;
             company.update();
-            flash("success", "Company has been disabled: it had entries");
+            Logger.info("Company has been disabled, it had entries: " + company.name);
         } else {
             Company.delete(id);
-            flash("success", "Company has been deleted");
+            Logger.info("Company has been deleted");
         }
         Version.inc(Version.VERSION_COMPANY);
         return list();
