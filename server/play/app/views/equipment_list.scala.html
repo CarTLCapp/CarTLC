@@ -58,15 +58,6 @@
                         <td><a href="@routes.EquipmentController.edit(equipment.id)">Edit</a></td>
                         <td>@equipment.getCreatedBy()</td>
                     </tr>
-
-                    <script type="text/javascript">
-                        var xhttp = new XMLHttpRequest();
-                        xhttp.onreadystatechange = function() {
-                            document.getElementById("@equipment.getNumEntriesTag()").innerHTML = this.responseText;
-                        };
-                        xhttp.open("GET", "@equipment.getNumEntriesAsk()", false);
-                        xhttp.send();
-                    </script>
                 }
 
             </tbody>
@@ -82,6 +73,24 @@
         }
     }
 
+    <script type="text/javascript">
+        fillNextNumEntries() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.status == 400) {
+                    var xmlDoc = this.responseXML;
+                    var tag = getElementsByTagName("tag")[0].childNodes[0].nodeValue;
+                    var value = getElementsByTagName("data")[0].childNodes[0].nodeValue;
+                    document.getElementById(tag).innerHTML = value;
+                    fillNextNumEntries();
+                }
+            };
+            xhttp.open("GET", "@routes.EquipmentController.fillNumEntriesNext()", false);
+            xhttp.send();
+        }
+        @routes.EquipmentController.fillNumEntriesInit();
+        fillNextNumEntries();
+    </script>
 }
 
             

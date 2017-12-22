@@ -30,12 +30,14 @@ public class EquipmentController extends Controller {
 
     private FormFactory formFactory;
     private WorkerExecutionContext executionContext;
+    private CalcNumEntries calcNumEntries;
 
     @Inject
     public EquipmentController(FormFactory formFactory,
                                WorkerExecutionContext ec) {
         this.formFactory = formFactory;
         this.executionContext = ec;
+        this.calcNumEntries = new CalcNumEntries();
     }
 
     /**
@@ -55,23 +57,6 @@ public class EquipmentController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result list(boolean disabled) {
         return ok(views.html.equipment_list.render(Equipment.list(disabled), Secured.getClient(ctx()), disabled));
-    }
-
-    public CompletionStage<Result> getNumEntries(Long equip_id) {
-        Executor myEc = HttpExecution.fromThread((Executor) executionContext);
-        return calcNumEntries(equip_id).thenApplyAsync(result -> {
-            return ok(result);
-        }, myEc);
-    }
-
-    private static CompletionStage<String> calcNumEntries(Long equip_id) {
-        Equipment equip = Equipment.find.byId(equip_id);
-        if (equip == null) {
-            Logger.error("Invalid equipment ID of " + equip_id);
-            return CompletableFuture.completedFuture("");
-        }
-        Logger.info("COMPUTING for " + equip_id);
-        return CompletableFuture.completedFuture(Integer.toString(equip.getNumEntries()));
     }
 
     /**
@@ -300,5 +285,56 @@ public class EquipmentController extends Controller {
         }
         return ok(top);
     }
+
+    class CalcNumEntries {
+
+        List<Equipment> mList;
+        int mPosition;
+
+        void init() {
+            mList = Equipment.list(false);
+            mPosition = -1;
+        }
+
+        Equipment getNextEquipment() {
+            if (++mPosition >= mList.size()) {
+                return null;
+            }
+            return mList.get(mPosition);
+        }
+
+        CompletionStage<Result> fillNumEntriesNext() {
+            Executor myEc = HttpExecution.fromThread((Executor) executionContext);
+            Equipment equip = getNextEquipment();
+            if (equip == null) {
+                return CompletableFuture.completedFuture(noContent());
+            }
+            return calcNumEntries(equip).thenApplyAsync(result -> {
+                StringBuilder sbuf = new StringBuilder();
+                sbuf.append("<tag>");
+                sbuf.append(equip.getNumEntriesTag());
+                sbuf.append("</tag>");
+                sbuf.append("<data>");
+                sbuf.append(result);
+                sbuf.append("</data>");
+                return ok(sbuf.toString()).as("application/xml");
+            }, myEc);
+        }
+
+        CompletionStage<String> calcNumEntries(Equipment equip) {
+            Logger.info("COMPUTING for " + equip.id);
+            return CompletableFuture.completedFuture(Integer.toString(equip.getNumEntries()));
+        }
+    }
+
+    public Result fillNumEntriesInit() {
+        calcNumEntries.init();
+        return ok();
+    }
+
+    public CompletionStage<Result> fillNumEntriesNext() {
+        return calcNumEntries.fillNumEntriesNext();
+    }
+
 }
 
