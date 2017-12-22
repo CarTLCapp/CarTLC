@@ -28,6 +28,48 @@ import play.libs.concurrent.HttpExecution;
  */
 public class EquipmentController extends Controller {
 
+    class CalcNumEntries {
+
+        List<Equipment> mList;
+        int mPosition;
+
+        List<Equipment> init(boolean disabled) {
+            mList = Equipment.list(disabled);
+            mPosition = -1;
+            return mList;
+        }
+
+        Equipment getNextEquipment() {
+            if (++mPosition >= mList.size()) {
+                return null;
+            }
+            return mList.get(mPosition);
+        }
+
+        CompletionStage<Result> fillNumEntriesNext() {
+            Executor myEc = HttpExecution.fromThread((Executor) executionContext);
+            Equipment equip = getNextEquipment();
+            if (equip == null) {
+                return CompletableFuture.completedFuture(noContent());
+            }
+            return calcNumEntries(equip).thenApplyAsync(result -> {
+                StringBuilder sbuf = new StringBuilder();
+                sbuf.append("<tag>");
+                sbuf.append(equip.getNumEntriesTag());
+                sbuf.append("</tag>");
+                sbuf.append("<data>");
+                sbuf.append(result);
+                sbuf.append("</data>");
+                return ok(sbuf.toString()).as("application/xml");
+            }, myEc);
+        }
+
+        CompletionStage<String> calcNumEntries(Equipment equip) {
+            Logger.info("COMPUTING for " + equip.id);
+            return CompletableFuture.completedFuture(Integer.toString(equip.getNumEntries()));
+        }
+    }
+
     private FormFactory formFactory;
     private WorkerExecutionContext executionContext;
     private CalcNumEntries calcNumEntries;
@@ -56,7 +98,7 @@ public class EquipmentController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result list(boolean disabled) {
-        return ok(views.html.equipment_list.render(Equipment.list(disabled), Secured.getClient(ctx()), disabled));
+        return ok(views.html.equipment_list.render(calcNumEntries.init(disabled), Secured.getClient(ctx()), disabled));
     }
 
     /**
@@ -284,52 +326,6 @@ public class EquipmentController extends Controller {
             }
         }
         return ok(top);
-    }
-
-    class CalcNumEntries {
-
-        List<Equipment> mList;
-        int mPosition;
-
-        void init() {
-            mList = Equipment.list(false);
-            mPosition = -1;
-        }
-
-        Equipment getNextEquipment() {
-            if (++mPosition >= mList.size()) {
-                return null;
-            }
-            return mList.get(mPosition);
-        }
-
-        CompletionStage<Result> fillNumEntriesNext() {
-            Executor myEc = HttpExecution.fromThread((Executor) executionContext);
-            Equipment equip = getNextEquipment();
-            if (equip == null) {
-                return CompletableFuture.completedFuture(noContent());
-            }
-            return calcNumEntries(equip).thenApplyAsync(result -> {
-                StringBuilder sbuf = new StringBuilder();
-                sbuf.append("<tag>");
-                sbuf.append(equip.getNumEntriesTag());
-                sbuf.append("</tag>");
-                sbuf.append("<data>");
-                sbuf.append(result);
-                sbuf.append("</data>");
-                return ok(sbuf.toString()).as("application/xml");
-            }, myEc);
-        }
-
-        CompletionStage<String> calcNumEntries(Equipment equip) {
-            Logger.info("COMPUTING for " + equip.id);
-            return CompletableFuture.completedFuture(Integer.toString(equip.getNumEntries()));
-        }
-    }
-
-    public Result fillNumEntriesInit() {
-        calcNumEntries.init();
-        return ok();
     }
 
     public CompletionStage<Result> fillNumEntriesNext() {

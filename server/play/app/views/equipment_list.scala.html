@@ -74,7 +74,7 @@
     }
 
     <script type="text/javascript">
-        fillNextNumEntries() {
+        function fillNextNumEntries() {
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (this.status == 400) {
@@ -88,7 +88,6 @@
             xhttp.open("GET", "@routes.EquipmentController.fillNumEntriesNext()", false);
             xhttp.send();
         }
-        @routes.EquipmentController.fillNumEntriesInit();
         fillNextNumEntries();
     </script>
 }

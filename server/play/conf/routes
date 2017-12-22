@@ -59,8 +59,7 @@ GET     /equipment/:id/project/:projectId/add       controllers.EquipmentControl
 GET     /equipment/:id/project/:projectId/remove    controllers.EquipmentController.removeProject(id:Long, projectId:Long)
 POST    /equipment/:id/delete       controllers.EquipmentController.delete(id:Long)
 GET     /equipment/:id/enable       controllers.EquipmentController.enable(id:Long)
-GET     /equipment/num_entries/init  controllers.EquipmentController.fillNumEntriesInit()
-GET     /equipment/num_entries/next  controllers.EquipmentController.fillNumEntriesNext()
+GET     /equipment/num_entries/next controllers.EquipmentController.fillNumEntriesNext()
 
 ### NOTES ###
 

@@ -34,8 +34,10 @@ Amazon:
 https://aws.amazon.com/
 
 PHPMyAdmin:
-   http://52.14.73.217/phpmyadmin
+   http://52.14.73.217/phpmyadmin OR
+   http://cartlc.arqnetworks.com/phpmyadmin
    User: root p/w: cartlc
+   Additional: cartlc p/w: cartcl#@!
 
 Database Save:
 
