@@ -9,7 +9,9 @@
     <h1>Edit user</h1>
 
     @b3.form(routes.TechnicianController.update(id)) {
-        
+
+        @CSRF.formField
+
         <fieldset>
         
             @b3.text(techForm("first_name"), '_label -> "First Name", '_help -> "")

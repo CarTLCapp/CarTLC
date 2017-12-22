@@ -14,6 +14,8 @@
 
     @helper.form(routes.NoteController.saveMany()) {
 
+        @CSRF.formField
+
         <fieldset>
             @helper.textarea(linesForm("lines"), 'rows -> 10, 'cols -> 80, '_label -> "")
         </fieldset>

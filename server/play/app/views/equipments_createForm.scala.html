@@ -17,6 +17,8 @@
 
     @helper.form(routes.EquipmentController.saveMany()) {
 
+        @CSRF.formField
+
         <fieldset>
             @helper.textarea(linesForm("lines"), 'rows -> 10, 'cols -> 80, '_label -> "")
         </fieldset>

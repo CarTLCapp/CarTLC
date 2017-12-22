@@ -9,7 +9,9 @@
     <h1>Edit project</h1>
     
     @b3.form(routes.ProjectController.update(id)) {
-        
+
+        @CSRF.formField
+
         <fieldset>
         
             @b3.text(projectForm("name"), '_label -> "Name", '_help -> "")

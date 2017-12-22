@@ -21,7 +21,9 @@
     </ul>
     
     @helper.form(routes.WorkOrderController.importWorkOrders(), 'enctype -> "multipart/form-data") {
-        
+
+        @CSRF.formField
+
         <fieldset>
 
             <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>

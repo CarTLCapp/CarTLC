@@ -12,7 +12,9 @@
     <p>Company: @workOrderForm.get().company</p>
 
     @b3.form(routes.WorkOrderController.update(id)) {
-        
+
+        @CSRF.formField
+
         <fieldset>
         
             @b3.text(workOrderForm("truck_number"), '_label -> "Truck Number", '_help -> "")

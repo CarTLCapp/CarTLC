@@ -9,7 +9,9 @@
     <h1>Add a project</h1>
     
     @b3.form(routes.ProjectController.save()) {
-        
+
+        @CSRF.formField
+
         <fieldset>
             @b3.text(projectForm("name"), '_label -> "Name", '_help -> "")
         </fieldset>
@@ -18,7 +20,6 @@
             <input type="submit" value="Create this project" class="btn primary"> or
             <a href="@routes.ProjectController.list()" class="btn">Cancel</a>
         </div>
-
     }
 
     <p>After creating, go to Edit Project to easily assign Equipments and Notes.</p>

@@ -9,7 +9,9 @@
     <h1>Add a note</h1>
     
     @b3.form(routes.NoteController.save()) {
-        
+
+        @CSRF.formField
+
         <fieldset>
             @b3.text(noteForm("name"), '_label -> "Name", '_help -> "")
             @b3.number(noteForm("num_digits"), '_label -> "Num Digits", '_help -> "")

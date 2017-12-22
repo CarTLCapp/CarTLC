@@ -14,6 +14,7 @@ libraryDependencies += javaWs
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.21"
 
 libraryDependencies += evolutions
+libraryDependencies += guice
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava, PlayEbean)
 

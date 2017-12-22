@@ -9,7 +9,9 @@
     <h1>Add a company</h1>
     
     @b3.form(routes.CompanyController.save()) {
-        
+
+        @CSRF.formField
+
         <fieldset>
             @b3.text(companyForm("name"), '_label -> "Name", '_help -> "")
             @b3.text(companyForm("street"), '_label -> "Street", '_help -> "")

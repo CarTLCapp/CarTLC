@@ -9,7 +9,9 @@
     <h1>Add a client</h1>
     
     @b3.form(routes.ClientController.save()) {
-        
+
+        @CSRF.formField
+
         <fieldset>
             @b3.text(techForm("name"), '_label -> "Logon name:  ", '_help -> "")
             @b3.text(techForm("password"), '_label -> "Password:  ", '_help -> "")
