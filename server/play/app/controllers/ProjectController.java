@@ -79,7 +79,6 @@ public class ProjectController extends Controller {
         if (projectForm.hasErrors()) {
             return badRequest(views.html.project_editForm.render(id, projectForm, Secured.getClient(ctx())));
         }
-        Transaction txn = Ebean.beginTransaction();
         try {
             Project savedProject = Project.find.byId(id);
             if (savedProject != null) {
@@ -90,14 +89,12 @@ public class ProjectController extends Controller {
                 ProjectEquipmentCollection.addNew(id, getCheckedEquipments(projectForm));
                 ProjectNoteCollection.addNew(id, getCheckedNotes(projectForm));
 
-                txn.commit();
-
                 Logger.info("Project " + savedProject.name + " has been updated");
 
                 Version.inc(Version.VERSION_PROJECT);
             }
-        } finally {
-            txn.end();
+        } catch (Exception ex) {
+            Logger.error(ex.getMessage());
         }
         return list();
     }
@@ -105,10 +102,11 @@ public class ProjectController extends Controller {
     List<Equipment> getCheckedEquipments(Form<InputProject> projectForm) {
         List<Equipment> equipments = new ArrayList<Equipment>();
         for (Equipment equipment : Equipment.list()) {
-            if (projectForm.field(equipment.name) != null &&
-                    projectForm.field(equipment.name).getValue() != null &&
-                    projectForm.field(equipment.name).getValue().equals("true")) {
-                equipments.add(equipment);
+            try {
+                if (projectForm.field(equipment.name).getValue().get().equals("true")) {
+                    equipments.add(equipment);
+                }
+            } catch (Exception ex) {
             }
         }
         return equipments;
@@ -117,10 +115,11 @@ public class ProjectController extends Controller {
     List<Note> getCheckedNotes(Form<InputProject> projectForm) {
         List<Note> notes = new ArrayList<Note>();
         for (Note note : Note.list()) {
-            if (projectForm.field(note.name) != null &&
-                    projectForm.field(note.name).getValue() != null &&
-                    projectForm.field(note.name).getValue().equals("true")) {
-                notes.add(note);
+            try {
+                if (projectForm.field(note.name).value().get().equals("true")) {
+                    notes.add(note);
+                }
+            } catch (Exception ex) {
             }
         }
         return notes;

@@ -140,10 +140,11 @@ public class ClientController extends Controller {
     List<Project> getCheckedProjects(Form<InputClient> clientForm) {
         List<Project> projects = new ArrayList<Project>();
         for (Project project : Project.list()) {
-            if (clientForm.field(project.name) != null &&
-                    clientForm.field(project.name).getValue() != null &&
-                    clientForm.field(project.name).getValue().equals("true")) {
-                projects.add(project);
+            try {
+                if (clientForm.field(project.name).getValue().get().equals("true")) {
+                    projects.add(project);
+                }
+            } catch (Exception ex) {
             }
         }
         return projects;
