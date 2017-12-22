@@ -62,7 +62,6 @@ public class EquipmentController extends Controller {
         }
 
         CompletionStage<String> calcNumEntries(Equipment equip) {
-            Logger.info("COMPUTING for " + equip.id);
             return CompletableFuture.completedFuture(Integer.toString(equip.getNumEntries()));
         }
     }
