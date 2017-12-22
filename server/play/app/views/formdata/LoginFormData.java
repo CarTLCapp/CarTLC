@@ -1,6 +1,8 @@
 package views.formdata;
 
-import play.data.validation.ValidationError;
+import play.data.validation.Constraints;
+import play.data.validation.Constraints.Validate;
+import play.data.validation.Constraints.Validatable;
 import java.util.ArrayList;
 import java.util.List;
 import models.Client;
@@ -8,7 +10,8 @@ import models.Client;
 /**
  * Backing class for the login form.
  */
-public class LoginFormData {
+@Validate
+public class LoginFormData implements Validatable<String> {
 
   /** The submitted username. */
   public String username = "";
@@ -25,13 +28,11 @@ public class LoginFormData {
    * Checks to see that email and password are valid credentials.
    * @return Null if valid, or a List[ValidationError] if problems found.
    */
-  public List<ValidationError> validate() {
-    List<ValidationError> errors = new ArrayList<>();
+  public String validate() {
     if (!Client.isValid(username, password)) {
-      errors.add(new ValidationError("username", ""));
-      errors.add(new ValidationError("password", ""));      
+      return "Invalid username or password";
     }
-    return (errors.size() > 0) ? errors : null;
+    return null;
   }
 
 }
