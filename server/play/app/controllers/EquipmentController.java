@@ -54,13 +54,10 @@ public class EquipmentController extends Controller {
             }
             return calcNumEntries(equip).thenApplyAsync(result -> {
                 StringBuilder sbuf = new StringBuilder();
-                sbuf.append("<tag>");
                 sbuf.append(equip.getNumEntriesTag());
-                sbuf.append("</tag>");
-                sbuf.append("<data>");
+                sbuf.append(",");
                 sbuf.append(result);
-                sbuf.append("</data>");
-                return ok(sbuf.toString()).as("application/xml");
+                return ok(sbuf.toString());
             }, myEc);
         }
 

@@ -77,10 +77,11 @@
         function fillNextNumEntries() {
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
-                if (this.status == 400) {
-                    var xmlDoc = this.responseXML;
-                    var tag = getElementsByTagName("tag")[0].childNodes[0].nodeValue;
-                    var value = getElementsByTagName("data")[0].childNodes[0].nodeValue;
+                if (this.status == 200) {
+                    var line = this.responseText;
+                    var pos = line.indexOf(",");
+                    var tag = line.substring(0, pos);
+                    var value = line.substring(pos+1);
                     document.getElementById(tag).innerHTML = value;
                     fillNextNumEntries();
                 }
