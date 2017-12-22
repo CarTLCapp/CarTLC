@@ -46,6 +46,7 @@
     }
     
     @b3.form(routes.ClientController.delete(id), 'class -> "topRight") {
+        @CSRF.formField
         <input type="submit" value="Delete this client" class="btn danger">
     }
     

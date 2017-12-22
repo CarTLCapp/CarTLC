@@ -50,6 +50,9 @@
     }
 
     @b3.form(routes.EquipmentController.delete(id), 'class -> "topRight") {
+
+        @CSRF.formField
+
         @if(Equipment.isDisabled(id)) {
             <a href="@routes.EquipmentController.enable(id)" class="btn">Enable Equipment</a>
         } else {

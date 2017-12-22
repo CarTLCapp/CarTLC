@@ -57,6 +57,7 @@
     }
 
     @b3.form(routes.NoteController.delete(id), 'class -> "topRight") {
+        @CSRF.formField
         @if(Note.isDisabled(id)) {
             <a href="@routes.NoteController.enable(id)" class="btn">Enable Note</a>
         } else {

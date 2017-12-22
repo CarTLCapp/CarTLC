@@ -29,6 +29,7 @@
     }
 
     @b3.form(routes.WorkOrderController.delete(id), 'class -> "topRight") {
+        @CSRF.formField
         <input type="submit" value="Delete Work Order Item" class="btn danger" onclick="return confirm('Are you sure you wish to delete this work order item?');">
     }
 

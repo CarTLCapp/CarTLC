@@ -28,12 +28,14 @@
 
     @if(Technician.canDelete(id)) {
         @b3.form(routes.TechnicianController.delete(id), 'class -> "topRight") {
+            @CSRF.formField
             <input type="submit" value="Delete this technician" class="btn danger">
         }
     }
 
     @if(client.is_admin) {
         @b3.form(routes.CompanyController.delete(id), 'class -> "topRight") {
+            @CSRF.formField
             <a href="@routes.TechnicianController.resetUpload(id)" class="btn">Reset Upload</a>
         }
     }

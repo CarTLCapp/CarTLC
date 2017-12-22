@@ -56,6 +56,9 @@
 
     @if(client.is_admin) {
         @b3.form(routes.ProjectController.delete(id), 'class -> "topRight") {
+
+            @CSRF.formField
+
             @if(Project.isDisabled(id)) {
                 <a href="@routes.ProjectController.enable(id)" class="btn">Enable Project</a>
             } else {

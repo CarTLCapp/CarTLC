@@ -31,6 +31,9 @@
 
     @if(client.is_admin) {
         @b3.form(routes.CompanyController.delete(id), 'class -> "topRight") {
+
+            @CSRF.formField
+
             @if(Company.isDisabled(id)) {
                 <a href="@routes.CompanyController.enable(id)" class="btn">Enable Company Address</a>
             } else {
