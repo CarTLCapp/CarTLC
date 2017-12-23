@@ -27,6 +27,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
     }
 
     private static final long serialVersionUID = 1L;
+    private static final int  PAGE_SIZE        = 20;
 
     @Id
     public Long id;
@@ -61,6 +62,12 @@ public class Equipment extends Model implements Comparable<Equipment> {
                 .eq("disabled", disabled)
                 .orderBy(sortBy + " " + order)
                 .findList();
+    }
+
+    public static PagedList<Equipment> list(int page, boolean disabled) {
+        return find.where()
+                .eq("disabled", disabled)
+                .findPagedList(page, PAGE_SIZE);
     }
 
     public static List<Equipment> all() {

@@ -47,8 +47,7 @@ GET     /company/:id/enable         controllers.CompanyController.enable(id:Long
 
 ### EQUIPMENTS ###
 
-GET     /equipment                  controllers.EquipmentController.list()
-GET     /equipment/disabled         controllers.EquipmentController.list_disabled()
+GET     /equipment                  controllers.EquipmentController.list(p:Int ?= 0, disabled:Boolean ?= false)
 GET     /equipment/new              controllers.EquipmentController.create()
 POST    /equipment                  controllers.EquipmentController.save()
 GET     /equipment/new/many         controllers.EquipmentController.createMany()

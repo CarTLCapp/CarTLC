@@ -13,7 +13,7 @@
 
     <p>Display the list of uploaded entries from the technicians.</p>
 
-    <h3><a href="@routes.ProjectController.list">Projects</a></h3>
+    <h3><a href="@routes.ProjectController.list()">Projects</a></h3>
 
     <p>Manage the list of projects.</p>
 
@@ -21,11 +21,11 @@
 
     <p>Manage the list of companies and their addresses.</p>
 
-    <h3><a href="@routes.EquipmentController.list">Equipments</a></h3>
+    <h3><a href="@routes.EquipmentController.list()">Equipments</a></h3>
 
     <p>Manage the list of equipments and their association with projects.</p>
 
-    <h3><a href="@routes.NoteController.list">Notes</a></h3>
+    <h3><a href="@routes.NoteController.list()">Notes</a></h3>
 
     <p>Manage the list of notes and their association with projects.</p>
 
@@ -33,7 +33,7 @@
 
     @if(client.is_admin) {
 
-        <h3><a href="@routes.TechnicianController.list">Technicians</a></h3>
+        <h3><a href="@routes.TechnicianController.list()">Technicians</a></h3>
 
         <p>Manage the technicians that are sending data up from the tablets using the APP.</p>
 

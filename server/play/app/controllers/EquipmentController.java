@@ -6,6 +6,7 @@ import play.mvc.*;
 import play.data.*;
 import static play.data.Form.*;
 import play.Logger;
+import com.avaje.ebean.PagedList;
 
 import models.*;
 import modules.WorkerExecutionContext;
@@ -30,13 +31,15 @@ public class EquipmentController extends Controller {
 
     class CalcNumEntries {
 
+        PagedList<Equipment> mPagedList;
         List<Equipment> mList;
         int mPosition;
 
-        List<Equipment> init(boolean disabled) {
-            mList = Equipment.list(disabled);
+        PagedList<Equipment> init(int page, boolean disabled) {
+            mPagedList = Equipment.list(page, disabled);
+            mList = mPagedList.getList();
             mPosition = -1;
-            return mList;
+            return mPagedList;
         }
 
         Equipment getNextEquipment() {
@@ -82,19 +85,16 @@ public class EquipmentController extends Controller {
      * Display the list of equipments.
      */
     @Security.Authenticated(Secured.class)
+    public Result list(int page, boolean disabled) {
+        return ok(views.html.equipment_list.render(
+                    calcNumEntries.init(page, disabled),
+                    Secured.getClient(ctx()),
+                    disabled));
+    }
+
+    @Security.Authenticated(Secured.class)
     public Result list() {
-        return list(false);
-    }
-
-    @Security.Authenticated(Secured.class)
-    public Result list_disabled() {
-        return list(true);
-    }
-
-
-    @Security.Authenticated(Secured.class)
-    public Result list(boolean disabled) {
-        return ok(views.html.equipment_list.render(calcNumEntries.init(disabled), Secured.getClient(ctx()), disabled));
+        return list(0, false);
     }
 
     /**

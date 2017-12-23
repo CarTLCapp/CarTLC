@@ -1,36 +1,27 @@
-
-play/: The source for the server, built using Play Framework.
-admin/: Misc helpful files
-NOTES.odt : details
-
-Login To Server:
-
+Login To Server: 
+------------
 ssh -i ~/.ssh/cartlc.pem ubuntu@cartlc.arqnetworks.com
 
 Web Access:
-
+------------
 http://cartlc.arqnetworks.com/
 
 Starting Play:
-
+------------
 cd play
 sbt -mem 2048
-testProd
+run
 
 Deployment:
-
+----------
 Inc version in server/play/build.sbt
 sbt -mem 2048
 dist
 r-wrap-server -d
 follow instructions
 
-Then on Server execute:
-kill-server
-run-server &
-
 Amazon:
-
+-------
 https://aws.amazon.com/
 
 PHPMyAdmin:
@@ -39,7 +30,9 @@ PHPMyAdmin:
    User: root p/w: cartlc
    Additional: cartlc p/w: cartcl#@!
 
-Database Save:
-
+Database:
+--------
 mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql
 p/w: cartcl
+
+scp -i ~/.ssh/cartlc.pem ubuntu@cartlc.arqnetworks.com:backup/somefile .

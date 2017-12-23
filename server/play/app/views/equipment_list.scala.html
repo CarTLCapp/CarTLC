@@ -1,6 +1,10 @@
-@(currentPage: List[Equipment], client : Client, disabled : Boolean)
+@(currentPage: com.avaje.ebean.PagedList[Equipment], client : Client, disabled : Boolean)
 
-@header = { @Messages("equipment.list.title", currentPage.size()) }
+@header = { @Messages("equipment.list.title", currentPage.getTotalRowCount()) }
+
+@link(newPage:Int) = @{
+    routes.EquipmentController.list(newPage, disabled)
+}
 
 @main("FleetTLC - List Equipments", client) {
 
@@ -8,13 +12,13 @@
         @if(disabled) {
             <h1 id="homeTitle" class="fill">@header
                 <span style="float:right;font-size:16px">
-                    <a href="@routes.EquipmentController.list()">Show Active Equipments</a>
+                    <a href="@routes.EquipmentController.list(0, false)">Show Active Equipments</a>
                 </span>
             </h1>
         } else {
             <h1 id="homeTitle" class="fill">@header
                 <span style="float:right;font-size:16px">
-                    <a href="@routes.EquipmentController.list_disabled()">Show Disabled Equipments</a>
+                    <a href="@routes.EquipmentController.list(0, true)">Show Disabled Equipments</a>
                 </span>
             </h1>
         }
@@ -24,7 +28,7 @@
 
     <h1 id="homeTitle"></h1>
 
-    @if(currentPage.size() == 0) {
+    @if(currentPage.getTotalRowCount() == 0) {
         
         <div class="well">
             <em>Nothing to display</em>
@@ -44,7 +48,7 @@
             </thead>
             <tbody>
 
-                @for(equipment <- currentPage) {
+                @for(equipment <- currentPage.getList()) {
                     <tr>
                         <td>
                             @if(equipment.name == null) {
@@ -72,6 +76,32 @@
             <a class="btn success" id="addMany" href="@routes.EquipmentController.createMany()">Add many equipment items</a>
         }
     }
+
+    <div id="pagination" class="pagination">
+        <ul>
+            @if(currentPage.hasPrev()) {
+            <li class="prev">
+                <a href="@link(currentPage.getPageIndex() - 1)">&larr; Previous</a>
+            </li>
+            } else {
+            <li class="prev disabled">
+                <a>&larr; Previous</a>
+            </li>
+            }
+            <li class="current">
+                <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
+            </li>
+            @if(currentPage.hasNext()) {
+            <li class="next">
+                <a href="@link(currentPage.getPageIndex() + 1)">Next &rarr;</a>
+            </li>
+            } else {
+            <li class="next disabled">
+                <a>Next &rarr;</a>
+            </li>
+            }
+        </ul>
+    </div>
 
     <script type="text/javascript">
         var xhttp = new XMLHttpRequest();

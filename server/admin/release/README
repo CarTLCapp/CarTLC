@@ -21,6 +21,8 @@ rm ~/cartlc/wrap/`date +%Y-%m-%d`/play-*-SNAPSHOT.zip
 mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql
 p/w: cartcl
 
+scp -i ~/.ssh/FleetTLC.pem ubuntu@ec2-18-217-15-185.us-east-2.compute.amazonaws.com:backup/somefile .
+
 Tags:
 git tag -a vX.XX -m "Version X.XX"
 git push origin vX.XX
