@@ -6,6 +6,8 @@ If form validation fails, then the fields will have Twitter Bootstrap error high
 Clients should set the "error" key in flash scope to provide feedback on errors.
 **************************@
 
+@import helper._
+
 @(reverseRoute: play.api.mvc.Call, usernameField: Field, passwordField: Field)
 <div class="row">
     <div class="col-sm-4 col-sm-offset-4">
@@ -15,20 +17,21 @@ Clients should set the "error" key in flash scope to provide feedback on errors.
             </div>
             <div class="panel-body">
                 @helper.form(reverseRoute, 'role -> "form") {
+                @CSRF.formField
                 <fieldset>
-                    <div class="form-group @if(usernameField.hasErrors) {has-error}" >
-                        <input id="@usernameField.id" name="@usernameField.name" value="@usernameField.value.getOrElse("")" class="form-control" placeholder="User Name" type="text">
-                    </div>
-                    <div class="form-group @if(passwordField.hasErrors) {has-error}" >
-                        <input id="@passwordField.id" name="@passwordField.name" value="@passwordField.value.getOrElse("")" class="form-control" placeholder="Password" type="password">
-                    </div>
-                    <input class="btn btn-lg btn-success btn-block" type="submit" value="Login">
-                </fieldset>
+                        <div class="form-group @if(usernameField.hasErrors) {has-error}" >
+                            <input id="@usernameField.id" name="@usernameField.name" value="@usernameField.value.getOrElse("")" class="form-control" placeholder="User Name" type="text">
+                        </div>
+                        <div class="form-group @if(passwordField.hasErrors) {has-error}" >
+                            <input id="@passwordField.id" name="@passwordField.name" value="@passwordField.value.getOrElse("")" class="form-control" placeholder="Password" type="password">
+                        </div>
+                        <input class="btn btn-lg btn-success btn-block" type="submit" value="Login">
+                    </fieldset>
                 }
                 @if(flash.containsKey("error")) {
-                <div id="error-message" class="text-danger">
-                    @flash.get("error")
-                </div>
+                    <div id="error-message" class="text-danger">
+                        @flash.get("error")
+                    </div>
                 }
             </div>
         </div>
