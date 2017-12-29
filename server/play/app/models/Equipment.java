@@ -138,11 +138,19 @@ public class Equipment extends Model implements Comparable<Equipment> {
         return Entry.countEntriesForEquipment(id);
     }
 
-    public String getNumEntriesTag() {
+    private String getTag(String key) {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("num_entries");
+        sbuf.append(key);
         sbuf.append(id);
         return sbuf.toString();
+    }
+
+    public String getTagNumEntries() {
+        return getTag("num_entries");
+    }
+
+    public String getTagProjectsLine() {
+        return getTag("projects");
     }
 
     public String getCreatedBy() {

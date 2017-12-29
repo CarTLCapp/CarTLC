@@ -10,6 +10,7 @@ import com.avaje.ebean.PagedList;
 
 import models.*;
 import modules.WorkerExecutionContext;
+import modules.CalcHelper;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -29,56 +30,50 @@ import play.libs.concurrent.HttpExecution;
  */
 public class EquipmentController extends Controller {
 
-    class CalcNumEntries {
+    class CalcRowItem extends CalcHelper<Equipment> {
 
-        PagedList<Equipment> mPagedList;
-        List<Equipment> mList;
-        int mPosition;
-
-        PagedList<Equipment> init(int page, boolean disabled) {
-            mPagedList = Equipment.list(page, disabled);
-            mList = mPagedList.getList();
-            mPosition = -1;
-            return mPagedList;
+        public CalcRowItem(WorkerExecutionContext ec) {
+            super(ec);
         }
 
-        Equipment getNextEquipment() {
-            if (++mPosition >= mList.size()) {
-                return null;
+        protected PagedList<Equipment> init(int page, boolean disabled) {
+            return init(Equipment.list(page, disabled));
+        }
+
+        @Override
+        protected String getTag(Equipment item) {
+            if (mPass == 0) {
+                return item.getTagNumEntries();
+            } else {
+                return item.getTagProjectsLine();
             }
-            return mList.get(mPosition);
         }
 
-        CompletionStage<Result> fillNumEntriesNext() {
-            Executor myEc = HttpExecution.fromThread((Executor) executionContext);
-            Equipment equip = getNextEquipment();
-            if (equip == null) {
-                return CompletableFuture.completedFuture(noContent());
+        @Override
+        protected String calc(Equipment equip) {
+            if (mPass == 0) {
+                return Integer.toString(equip.getNumEntries());
+            } else {
+                return equip.getProjectsLine();
             }
-            return calcNumEntries(equip).thenApplyAsync(result -> {
-                StringBuilder sbuf = new StringBuilder();
-                sbuf.append(equip.getNumEntriesTag());
-                sbuf.append(",");
-                sbuf.append(result);
-                return ok(sbuf.toString());
-            }, myEc);
         }
 
-        CompletionStage<String> calcNumEntries(Equipment equip) {
-            return CompletableFuture.completedFuture(Integer.toString(equip.getNumEntries()));
+        @Override
+        protected boolean repeat() {
+            return (mPass == 0);
         }
     }
 
     private FormFactory formFactory;
     private WorkerExecutionContext executionContext;
-    private CalcNumEntries calcNumEntries;
+    private CalcRowItem calcRowItem;
 
     @Inject
     public EquipmentController(FormFactory formFactory,
                                WorkerExecutionContext ec) {
         this.formFactory = formFactory;
         this.executionContext = ec;
-        this.calcNumEntries = new CalcNumEntries();
+        this.calcRowItem = new CalcRowItem(ec);
     }
 
     /**
@@ -87,7 +82,7 @@ public class EquipmentController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result list(int page, boolean disabled) {
         return ok(views.html.equipment_list.render(
-                    calcNumEntries.init(page, disabled),
+                    calcRowItem.init(page, disabled),
                     Secured.getClient(ctx()),
                     disabled));
     }
@@ -95,6 +90,10 @@ public class EquipmentController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result list() {
         return list(0, false);
+    }
+
+    public CompletionStage<Result> fillNext() {
+        return calcRowItem.calcNext(this);
     }
 
     /**
@@ -324,9 +323,6 @@ public class EquipmentController extends Controller {
         return ok(top);
     }
 
-    public CompletionStage<Result> fillNumEntriesNext() {
-        return calcNumEntries.fillNumEntriesNext();
-    }
 
 }
 

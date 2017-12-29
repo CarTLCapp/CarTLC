@@ -57,8 +57,8 @@
                                 @equipment.name
                             }
                         </td>
-                        <td>@equipment.getProjectsLine()</td>
-                        <td id="@equipment.getNumEntriesTag()"></td>
+                        <td id="@equipment.getTagProjectsLine()"></td>
+                        <td id="@equipment.getTagNumEntries()"></td>
                         <td><a href="@routes.EquipmentController.edit(equipment.id)">Edit</a></td>
                         <td>@equipment.getCreatedBy()</td>
                     </tr>
@@ -108,15 +108,15 @@
         xhttp.onreadystatechange = function() {
             if (this.responseText.length > 0 && this.status == 200) {
                 var line = this.responseText;
-                var pos = line.indexOf(",");
+                var pos = line.indexOf("|");
                 var tag = line.substring(0, pos);
                 var value = line.substring(pos+1);
                 document.getElementById(tag).innerHTML = value;
-                xhttp.open("GET", "@routes.EquipmentController.fillNumEntriesNext()", true);
+                xhttp.open("GET", "@routes.EquipmentController.fillNext()", true);
                 xhttp.send();
             }
         };
-        xhttp.open("GET", "@routes.EquipmentController.fillNumEntriesNext()", true);
+        xhttp.open("GET", "@routes.EquipmentController.fillNext()", true);
         xhttp.send();
     </script>
 }
