@@ -43,18 +43,18 @@ public class EquipmentController extends Controller {
         @Override
         protected String getTag(Equipment item) {
             if (mPass == 0) {
-                return item.getTagNumEntries();
-            } else {
                 return item.getTagProjectsLine();
+            } else {
+                return item.getTagNumEntries();
             }
         }
 
         @Override
         protected String calc(Equipment equip) {
             if (mPass == 0) {
-                return Integer.toString(equip.getNumEntries());
-            } else {
                 return equip.getProjectsLine();
+            } else {
+                return Integer.toString(equip.getNumEntries());
             }
         }
 
