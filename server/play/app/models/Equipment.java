@@ -27,7 +27,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
     }
 
     private static final long serialVersionUID = 1L;
-    private static final int  PAGE_SIZE        = 20;
+    private static final int  PAGE_SIZE        = 25;
 
     @Id
     public Long id;
@@ -108,17 +108,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
     }
 
     public List<Project> getProjects() {
-        List<Project> list = ProjectEquipmentCollection.findProjects(id);
-        if (created_by != 0) {
-            for (Project project : Project.find.all()) {
-                if (Entry.hasEquipment(project.id, id)) {
-                    if (!list.contains(project)) {
-                        list.add(project);
-                    }
-                }
-            }
-        }
-        return list;
+        return ProjectEquipmentCollection.findProjects(id);
     }
 
     public String getProjectsLine() {
