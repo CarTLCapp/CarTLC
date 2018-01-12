@@ -1,4 +1,4 @@
-@(currentPage: EntryList, currentSortBy: String, currentOrder: String, searchForm : Form[InputLines])
+@(currentPage: EntryPagedList, currentSortBy: String, currentOrder: String, searchForm : Form[InputLines])
 
 @link(newPage:Int, newSortBy:String) = @{
     var sortBy = currentSortBy
@@ -55,10 +55,10 @@
                     @header("entry_time", "Date")
                     @header("project_id", "Project")
                     @header("company", "Company")
-                    @header("street", "Street / Plant Name")
-                    @header("city", "City")
-                    @header("state", "State")
-                    @header("zipcode", "ZIP")
+                    <th>Street / Plant Name</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>ZIP</th>
                     @header("truck_number", "Truck")
                     <th>Equipment</th>
                     <th>Pictures</th>

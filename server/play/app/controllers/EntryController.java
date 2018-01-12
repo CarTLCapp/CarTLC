@@ -32,7 +32,7 @@ public class EntryController extends Controller {
     private static final int PAGE_SIZE = 100;
 
     private AmazonHelper amazonHelper;
-    private EntryList entryList = new EntryList();
+    private EntryPagedList entryList = new EntryPagedList();
     private FormFactory formFactory;
 
     @Inject
