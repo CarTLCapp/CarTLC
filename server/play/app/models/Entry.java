@@ -110,6 +110,46 @@ public class Entry extends com.avaje.ebean.Model {
                 .findPagedList(page, pageSize);
     }
 
+    public static PagedList<Entry> listJoined(int page, int pageSize, String sortBy, String order) {
+        return find.where()
+                .orderBy(sortBy + " " + order)
+                .findPagedList(page, pageSize);
+    }
+
+    public boolean match(String search) {
+        if (getProjectLine().contains(search)) {
+            return true;
+        }
+        if (getCity().contains(search)) {
+            return true;
+        }
+        if (getCompany().contains(search)) {
+            return true;
+        }
+        if (getEquipmentLine().contains(search)) {
+            return true;
+        }
+        if (getTruckLine().contains(search)) {
+            return true;
+        }
+        if (getZipCode().contains(search)) {
+            return true;
+        }
+        if (getTechName().contains(search)) {
+            return true;
+        }
+        if (getAddressLine().contains(search)) {
+            return true;
+        }
+        if (getState().contains(search)) {
+            return true;
+        }
+        if (getStatus().contains(search)) {
+            return true;
+        }
+        return false;
+    }
+
     public String getTechName() {
         Technician tech = Technician.find.ref((long) tech_id);
         if (tech == null) {
@@ -339,39 +379,6 @@ public class Entry extends com.avaje.ebean.Model {
         return false;
     }
 
-    public boolean match(String search) {
-        if (getProjectLine().contains(search)) {
-            return true;
-        }
-        if (getCity().contains(search)) {
-            return true;
-        }
-        if (getCompany().contains(search)) {
-            return true;
-        }
-        if (getEquipmentLine().contains(search)) {
-            return true;
-        }
-        if (getTruckLine().contains(search)) {
-            return true;
-        }
-        if (getZipCode().contains(search)) {
-            return true;
-        }
-        if (getTechName().contains(search)) {
-            return true;
-        }
-        if (getAddressLine().contains(search)) {
-            return true;
-        }
-        if (getState().contains(search)) {
-            return true;
-        }
-        if (getStatus().contains(search)) {
-            return true;
-        }
-        return false;
-    }
 
     public void remove(AmazonHelper amazonHelper) {
         EntryEquipmentCollection.deleteByCollectionId(equipment_collection_id);
