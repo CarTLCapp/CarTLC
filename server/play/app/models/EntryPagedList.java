@@ -105,9 +105,11 @@ public class EntryPagedList {
         query.append(", e.truck_id, e.status");
         query.append(", c.name, c.street, c.city, c.state, c.zipcode");
         query.append(", p.name");
+        query.append(", t.first_name, t.last_name");
         query.append(" FROM entry AS e");
         query.append(" INNER JOIN company AS c ON e.company_id = c.id");
         query.append(" INNER JOIN project AS p ON e.project_id = p.id");
+        query.append(" INNER JOIN technician AS t ON e.tech_id = t.id");
         query.append(" ORDER BY ");
         query.append(getSortBy());
         query.append(" ");
@@ -121,7 +123,7 @@ public class EntryPagedList {
 
         if (mParams.hasSearch()) {
             final String search = mParams.mSearch;
-            query.append(" WHERE");
+            query.append(" WHERE ");
             query.append(appendSearch("c.name"));
             query.append(" OR ");
             query.append(appendSearch("c.city"));
@@ -133,6 +135,10 @@ public class EntryPagedList {
             query.append(appendSearch("c.zipcode"));
             query.append(" OR ");
             query.append(appendSearch("p.name"));
+            query.append(" OR ");
+            query.append(appendSearch("t.first_name"));
+            query.append(" OR ");
+            query.append(appendSearch("t.last_name"));
         }
         return query.toString();
     }
