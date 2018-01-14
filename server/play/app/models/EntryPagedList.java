@@ -186,9 +186,16 @@ public class EntryPagedList {
             entry.picture_collection_id = row.getLong("picture_collection_id");
             entry.note_collection_id = row.getLong("note_collection_id");
             entry.truck_id = row.getLong("truck_id");
-            entry.status = Entry.Status.from(row.getInteger("status"));
+            entry.status = Entry.Status.from(getInteger(row, "status"));
             mResult.mList.add(entry);
         }
+    }
+
+    Integer getInteger(SqlRow row, String column) {
+        if (row.get(column) == null) {
+            return null;
+        }
+        return row.getInteger(column);
     }
 
     public List<Entry> getList() {
@@ -222,7 +229,7 @@ public class EntryPagedList {
     }
 
     public int getPageIndex() {
-        return mParams.mPage + 1;
+        return mParams.mPage;
     }
 
     public String getDisplayXtoYofZ(String to, String of) {

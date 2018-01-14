@@ -104,7 +104,7 @@ GET     /work/progress_grid    controllers.WorkOrderController.viewProgressGrid(
 ### ENTRIES ###
 
 # Entries list (look at the default values for pagination parameters)
-GET     /entry                      controllers.EntryController.list(p:Int ?= 0, s ?= "entry_time", o ?= "desc")
+GET     /entry                      controllers.EntryController.list(p:Int ?= 0, s ?= null, o ?= null)
 GET     /entry/:id/pictures         controllers.EntryController.pictures(id:Long)
 GET     /entry/:filename/picture    controllers.EntryController.getImage(filename:String)
 GET     /entry/:id/notes            controllers.EntryController.notes(id:Long)
