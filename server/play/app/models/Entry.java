@@ -48,6 +48,9 @@ public class Entry extends com.avaje.ebean.Model {
         }
 
         public static Status from(String match) {
+            if (match == null) {
+                return Status.UNKNOWN;
+            }
             for (Status value : values()) {
                 if (value.toString().compareToIgnoreCase(match) == 0) {
                     return value;

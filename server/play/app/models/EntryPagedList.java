@@ -12,11 +12,15 @@ import play.twirl.api.Html;
 public class EntryPagedList {
 
     public enum SortBy {
-        TECH("tech_id"),
-        TIME("entry_time"),
-        PROJECT("project_id"),
-        TRUCK_NUMBER("truck_number"),
-        COMPANY("company_id");
+        TECH("te.last_name"),
+        TIME("e.entry_time"),
+        PROJECT("p.name"),
+        TRUCK_NUMBER("tr.truck_number"),
+        COMPANY_NAME("c.name"),
+        COMPANY_STREET("c.street"),
+        COMPANY_CITY("c.city"),
+        COMPANY_STATE("c.state"),
+        COMPANY_ZIP("c.zipcode");
 
         String code;
 
@@ -105,11 +109,13 @@ public class EntryPagedList {
         query.append(", e.truck_id, e.status");
         query.append(", c.name, c.street, c.city, c.state, c.zipcode");
         query.append(", p.name");
-        query.append(", t.first_name, t.last_name");
+        query.append(", te.id, te.first_name, te.last_name");
+        query.append(", tr.id, tr.truck_number, tr.license_plate");
         query.append(" FROM entry AS e");
         query.append(" INNER JOIN company AS c ON e.company_id = c.id");
         query.append(" INNER JOIN project AS p ON e.project_id = p.id");
-        query.append(" INNER JOIN technician AS t ON e.tech_id = t.id");
+        query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
+        query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
         query.append(" ORDER BY ");
         query.append(getSortBy());
         query.append(" ");
@@ -136,9 +142,13 @@ public class EntryPagedList {
             query.append(" OR ");
             query.append(appendSearch("p.name"));
             query.append(" OR ");
-            query.append(appendSearch("t.first_name"));
+            query.append(appendSearch("te.first_name"));
             query.append(" OR ");
-            query.append(appendSearch("t.last_name"));
+            query.append(appendSearch("te.last_name"));
+            query.append(" OR ");
+            query.append(appendSearch("tr.truck_number"));
+            query.append(" OR ");
+            query.append(appendSearch("tr.license_plate"));
         }
         return query.toString();
     }
