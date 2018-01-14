@@ -171,7 +171,7 @@ public class EntryPagedList {
     }
 
     String appendSearch(String column) {
-        return column + " LIKE '%" + mParams.mSearch + "%'";
+        return column + " LIKE BINARY '%" + mParams.mSearch + "%'";
     }
 
     public void compute() {
