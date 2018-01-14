@@ -11,32 +11,34 @@ import play.twirl.api.Html;
 
 public class EntryPagedList {
 
-    public enum SortBy {
-        TECH("te.last_name"),
-        TIME("e.entry_time"),
-        PROJECT("p.name"),
-        TRUCK_NUMBER("tr.truck_number"),
-        COMPANY_NAME("c.name"),
-        COMPANY_STREET("c.street"),
-        COMPANY_CITY("c.city"),
-        COMPANY_STATE("c.state"),
-        COMPANY_ZIP("c.zipcode");
+    public enum PagedSortBy {
+        TECH("tech_name", "te.last_name"),
+        TIME("time", "e.entry_time"),
+        PROJECT("project_name", "p.name"),
+        TRUCK_NUMBER("truck_number", "tr.truck_number"),
+        COMPANY_NAME("company_name", "c.name"),
+        STREET("street", "c.street"),
+        CITY("city", "c.city"),
+        STATE("state", "c.state"),
+        ZIP("zipcode", "c.zipcode");
 
         String code;
+        String alias;
 
-        SortBy(String code) {
+        PagedSortBy(String alias, String code) {
             this.code = code;
+            this.alias = alias;
         }
 
         public String toString() { return code; }
 
-        public static SortBy from(String code) {
-            for (SortBy item : values()) {
-                if (item.code.equals(code)) {
+        public static PagedSortBy from(String match) {
+            for (PagedSortBy item : values()) {
+                if (item.code.equals(match) || item.alias.equals(match)) {
                     return item;
                 }
             }
-            Logger.error("Invalid sort by : " + code);
+            Logger.error("Invalid sort by : " + match);
             return null;
         }
     }
@@ -44,7 +46,7 @@ public class EntryPagedList {
     class Parameters {
         int mPage;
         int mPageSize = PAGE_SIZE;
-        SortBy mSortBy = SortBy.from("entry_time");
+        PagedSortBy mSortBy = PagedSortBy.from("time");
         String mOrder = "desc";
         String mSearch;
 
@@ -71,7 +73,7 @@ public class EntryPagedList {
     }
 
     public void setSortBy(String sortBy) {
-        mParams.mSortBy = SortBy.from(sortBy);
+        mParams.mSortBy = PagedSortBy.from(sortBy);
     }
 
     public String getSortBy() {
