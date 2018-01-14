@@ -110,12 +110,6 @@ public class Entry extends com.avaje.ebean.Model {
                 .findPagedList(page, pageSize);
     }
 
-    public static PagedList<Entry> listJoined(int page, int pageSize, String sortBy, String order) {
-        return find.where()
-                .orderBy(sortBy + " " + order)
-                .findPagedList(page, pageSize);
-    }
-
     public boolean match(String search) {
         if (getProjectLine().contains(search)) {
             return true;

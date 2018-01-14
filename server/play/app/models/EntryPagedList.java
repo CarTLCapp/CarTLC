@@ -37,36 +37,49 @@ public class EntryPagedList {
         }
     }
 
+    class Parameters {
+        int mPage;
+        int mPageSize = PAGE_SIZE;
+        SortBy mSortBy = SortBy.from("entry_time");
+        String mOrder = "desc";
+        String mSearch;
+
+        boolean hasSearch() {
+            return mSearch != null && !mSearch.isEmpty();
+        }
+    }
+
+    class Result {
+        List<Entry> mList = new ArrayList<Entry>();
+        int mNumTotalRows;
+    }
+
     static final int PAGE_SIZE = 100;
 
-    PagedList<Entry> mEntries;
-    int mPage;
+    Parameters mParams = new Parameters();
+    Result mResult = new Result();
     int mRowNumber;
-    int mPageSize = PAGE_SIZE;
-    SortBy mSortBy = SortBy.from("entry_time");
-    String mOrder = "desc";
-    String mSearch;
 
     public EntryPagedList() {}
 
     public void setPage(int page) {
-        mPage = page;
+        mParams.mPage = page;
     }
 
     public void setSortBy(String sortBy) {
-        mSortBy = SortBy.from(sortBy);
+        mParams.mSortBy = SortBy.from(sortBy);
     }
 
     public String getSortBy() {
-        return mSortBy.toString();
+        return mParams.mSortBy.toString();
     }
 
     public void setOrder(String order) {
-        mOrder = order;
+        mParams.mOrder = order;
     }
 
     public String getOrder() {
-        return mOrder;
+        return mParams.mOrder;
     }
 
     public void clearCache() {
@@ -83,21 +96,85 @@ public class EntryPagedList {
     void setCompanies(Client client) {
     }
 
+    String buildQuery() {
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
+        query.append(", e.equipment_collection_id");
+        query.append(", e.picture_collection_id");
+        query.append(", e.note_collection_id");
+        query.append(", e.truck_id, e.status");
+        query.append(", c.name, c.street, c.city, c.state, c.zipcode");
+        query.append(", p.name");
+        query.append(" FROM entry AS e");
+        query.append(" INNER JOIN company AS c ON e.company_id = c.id");
+        query.append(" INNER JOIN project AS p ON e.project_id = p.id");
+        query.append(" ORDER BY ");
+        query.append(getSortBy());
+        query.append(" ");
+        query.append(getOrder());
+
+        int start = mParams.mPage * mParams.mPageSize;
+        query.append(" LIMIT ");
+        query.append(start);
+        query.append(", ");
+        query.append(mParams.mPageSize);
+
+        if (mParams.hasSearch()) {
+            final String search = mParams.mSearch;
+            query.append(" WHERE");
+            query.append(appendSearch("c.name"));
+            query.append(" OR ");
+            query.append(appendSearch("c.city"));
+            query.append(" OR ");
+            query.append(appendSearch("c.street"));
+            query.append(" OR ");
+            query.append(appendSearch("c.state"));
+            query.append(" OR ");
+            query.append(appendSearch("c.zipcode"));
+            query.append(" OR ");
+            query.append(appendSearch("p.name"));
+        }
+        return query.toString();
+    }
+
+    String appendSearch(String column) {
+        return column + " LIKE '%" + mParams.mSearch + "%'";
+    }
+
     public void compute() {
-        mEntries = Entry.list(mPage, mPageSize, getSortBy(), getOrder());
+        mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
+        String query = buildQuery();
+        List<SqlRow> entries = Ebean.createSqlQuery(query).findList();
+        mResult.mList.clear();
+        if (entries == null || entries.size() == 0) {
+            return;
+        }
+        for (SqlRow row : entries) {
+            Entry entry = new Entry();
+            entry.id = row.getLong("id");
+            entry.tech_id = row.getInteger("tech_id");
+            entry.entry_time = row.getDate("entry_time");
+            entry.project_id = row.getLong("project_id");
+            entry.equipment_collection_id = row.getLong("equipment_collection_id");
+            entry.picture_collection_id = row.getLong("picture_collection_id");
+            entry.note_collection_id = row.getLong("note_collection_id");
+            entry.truck_id = row.getLong("truck_id");
+            entry.status = Entry.Status.from(row.getInteger("status"));
+            mResult.mList.add(entry);
+        }
     }
 
     public List<Entry> getList() {
         compute();
-        return mEntries.getList();
+        return mResult.mList;
     }
 
     public int getTotalRowCount() {
-        return mEntries.getTotalRowCount();
+        return mResult.mNumTotalRows;
     }
 
     public void resetRowNumber() {
-        mRowNumber = mPage * mPageSize;
+        mRowNumber = mParams.mPage * mParams.mPageSize;
     }
 
     public void incRowNumber() {
@@ -109,34 +186,49 @@ public class EntryPagedList {
     }
 
     public boolean hasPrev() {
-        return mEntries.hasPrev();
+        return mParams.mPage > 0;
     }
 
     public boolean hasNext() {
-        return mEntries.hasNext();
+        int next = (mParams.mPage+1) * mParams.mPageSize;
+        return (next < mResult.mNumTotalRows);
     }
 
     public int getPageIndex() {
-        return mEntries.getPageIndex();
+        return mParams.mPage + 1;
     }
 
     public String getDisplayXtoYofZ(String to, String of) {
-        return mEntries.getDisplayXtoYofZ(to, of);
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("Displaying ");
+        int start = mParams.mPage * mParams.mPageSize;
+        int last = start + mParams.mPageSize - 1;
+        if (last >= mResult.mNumTotalRows) {
+            last = mResult.mNumTotalRows - 1;
+        }
+        sbuf.append(start);
+        sbuf.append(" - ");
+        sbuf.append(last);
+        sbuf.append(" of ");
+        sbuf.append(mResult.mNumTotalRows);
+        return sbuf.toString();
     }
 
     public Html highlightSearch(String element) {
-        if (element != null && mSearch != null && !mSearch.isEmpty()) {
-            if (element.contains(mSearch)) {
-                int pos = element.indexOf(mSearch);
-                if (pos >= 0) {
-                    StringBuilder sbuf = new StringBuilder();
-                    sbuf.append(element.substring(0, pos));
-                    sbuf.append("<mark>");
-                    sbuf.append(element.substring(pos, mSearch.length() + pos));
-                    sbuf.append("</mark>");
-                    sbuf.append(element.substring(mSearch.length() + pos));
-                    return Html.apply(sbuf.toString());
-                }
+        if (!mParams.hasSearch() || element == null) {
+            return Html.apply(element);
+        }
+        final String search = mParams.mSearch;
+        if (element.contains(search)) {
+            int pos = element.indexOf(search);
+            if (pos >= 0) {
+                StringBuilder sbuf = new StringBuilder();
+                sbuf.append(element.substring(0, pos));
+                sbuf.append("<mark>");
+                sbuf.append(element.substring(pos, search.length() + pos));
+                sbuf.append("</mark>");
+                sbuf.append(element.substring(search.length() + pos));
+                return Html.apply(sbuf.toString());
             }
         }
         return Html.apply(element);
@@ -144,9 +236,9 @@ public class EntryPagedList {
 
     public void setSearch(String search) {
         if (search != null) {
-            mSearch = search.trim();
+            mParams.mSearch = search.trim();
         } else {
-            mSearch = null;
+            mParams.mSearch = null;
         }
     }
 
