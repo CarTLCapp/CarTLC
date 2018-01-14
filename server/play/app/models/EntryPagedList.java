@@ -110,7 +110,7 @@ public class EntryPagedList {
     void setCompanies(Client client) {
     }
 
-    String buildQuery() {
+    String buildQuery(boolean countOnly) {
         StringBuilder query = new StringBuilder();
         query.append("SELECT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
         query.append(", e.equipment_collection_id");
@@ -126,17 +126,6 @@ public class EntryPagedList {
         query.append(" INNER JOIN project AS p ON e.project_id = p.id");
         query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
         query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
-        query.append(" ORDER BY ");
-        query.append(getSortBy());
-        query.append(" ");
-        query.append(getOrder());
-
-        int start = mParams.mPage * mParams.mPageSize;
-        query.append(" LIMIT ");
-        query.append(start);
-        query.append(", ");
-        query.append(mParams.mPageSize);
-
         if (mParams.hasSearch()) {
             final String search = mParams.mSearch;
             query.append(" WHERE ");
@@ -160,6 +149,18 @@ public class EntryPagedList {
             query.append(" OR ");
             query.append(appendSearch("tr.license_plate"));
         }
+        if (!countOnly) {
+            query.append(" ORDER BY ");
+            query.append(getSortBy());
+            query.append(" ");
+            query.append(getOrder());
+
+            int start = mParams.mPage * mParams.mPageSize;
+            query.append(" LIMIT ");
+            query.append(start);
+            query.append(", ");
+            query.append(mParams.mPageSize);
+        }
         return query.toString();
     }
 
@@ -168,9 +169,17 @@ public class EntryPagedList {
     }
 
     public void compute() {
-        mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
-        String query = buildQuery();
-        List<SqlRow> entries = Ebean.createSqlQuery(query).findList();
+        List<SqlRow> entries;
+        if (mParams.hasSearch()) {
+            String query = buildQuery(true);
+            entries = Ebean.createSqlQuery(query).findList();
+            mResult.mNumTotalRows = entries.size();
+        } else {
+            mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
+        }
+        String query = buildQuery(false);
+        entries = Ebean.createSqlQuery(query).findList();
+
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
             return;
@@ -186,7 +195,9 @@ public class EntryPagedList {
             entry.picture_collection_id = row.getLong("picture_collection_id");
             entry.note_collection_id = row.getLong("note_collection_id");
             entry.truck_id = row.getLong("truck_id");
-            entry.status = Entry.Status.from(getInteger(row, "status"));
+            if (row.get("status") != null) { // WHY DO I NEED THIS?
+                entry.status = Entry.Status.from(getInteger(row, "status"));
+            }
             mResult.mList.add(entry);
         }
     }
