@@ -73,7 +73,11 @@ public class EntryPagedList {
     }
 
     public void setSortBy(String sortBy) {
-        mParams.mSortBy = PagedSortBy.from(sortBy);
+        if (sortBy == null) {
+            mParams.mSortBy = PagedSortBy.TIME;
+        } else {
+            mParams.mSortBy = PagedSortBy.from(sortBy);
+        }
     }
 
     public String getSortBy() {
@@ -81,7 +85,11 @@ public class EntryPagedList {
     }
 
     public void setOrder(String order) {
-        mParams.mOrder = order;
+        if (order == null) {
+            mParams.mOrder = "desc";
+        } else {
+            mParams.mOrder = order;
+        }
     }
 
     public String getOrder() {

@@ -53,7 +53,7 @@ public class EntryController extends Controller {
     }
 
     public Result list() {
-        return list(0, "entry_time", "desc");
+        return list(0, null, null);
     }
 
     public Result search() {
