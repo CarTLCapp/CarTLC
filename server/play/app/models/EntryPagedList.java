@@ -155,6 +155,7 @@ public class EntryPagedList {
             entry.tech_id = row.getInteger("tech_id");
             entry.entry_time = row.getDate("entry_time");
             entry.project_id = row.getLong("project_id");
+            entry.company_id = row.getLong("company_id");
             entry.equipment_collection_id = row.getLong("equipment_collection_id");
             entry.picture_collection_id = row.getLong("picture_collection_id");
             entry.note_collection_id = row.getLong("note_collection_id");
