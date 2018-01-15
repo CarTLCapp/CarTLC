@@ -82,22 +82,22 @@ public class EntryPagedList {
         }
 
         public void setSearch(String search) {
+            mTerms.clear();
             if (search != null) {
                 String[] terms = search.trim().split(" +");
-                mTerms = new ArrayList<String>(Arrays.asList(terms));
-            } else {
-                mTerms.clear();
+                for (String term : terms) {
+                    mTerms.add(term.toLowerCase());
+                }
             }
         }
 
         ArrayList<TermMatch> match(String element) {
             ArrayList<TermMatch> matches = new ArrayList<>();
+            String elementNoCase = element.toLowerCase();
             for (String term : mTerms) {
-                if (element.contains(term)) {
-                    int pos = element.indexOf(term);
-                    if (pos >= 0) {
-                        matches.add(new TermMatch(term, pos));
-                    }
+                int pos = element.indexOf(term);
+                if (pos >= 0) {
+                    matches.add(new TermMatch(term, pos));
                 }
             }
             Collections.sort(matches);
@@ -218,7 +218,7 @@ public class EntryPagedList {
         query.append(", e.equipment_collection_id");
         query.append(", e.picture_collection_id");
         query.append(", e.note_collection_id");
-        query.append(", e.truck_id, e.status e.time_zone");
+        query.append(", e.truck_id, e.status, e.time_zone");
         query.append(" FROM entry AS e");
         query.append(" INNER JOIN company AS c ON e.company_id = c.id");
         query.append(" INNER JOIN project AS p ON e.project_id = p.id");
