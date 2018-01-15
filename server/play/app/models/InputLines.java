@@ -28,5 +28,9 @@ public class InputLines extends Model {
     public String [] getLines() {
         return lines.split("\\n");
     }
+
+    public void setLines(String lines) {
+        this.lines = lines;
+    }
 }
 
