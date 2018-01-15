@@ -117,12 +117,6 @@ public class EntryPagedList {
         query.append(", e.picture_collection_id");
         query.append(", e.note_collection_id");
         query.append(", e.truck_id, e.status");
-        query.append(", c.name, c.street, c.city, c.state, c.zipcode");
-        query.append(", p.name");
-        query.append(", te.id, te.first_name, te.last_name");
-        query.append(", tr.id, tr.truck_number, tr.license_plate");
-        query.append(", eqc.collection_id, eqc.equipment_id");
-        query.append(", eq.name");
         query.append(" FROM entry AS e");
         query.append(" INNER JOIN company AS c ON e.company_id = c.id");
         query.append(" INNER JOIN project AS p ON e.project_id = p.id");
@@ -178,7 +172,7 @@ public class EntryPagedList {
         return new InputSearch(mParams.mSearch);
     }
 
-    public void compute() {
+    public synchronized void compute() {
         List<SqlRow> entries;
         if (mParams.hasSearch()) {
             String query = buildQuery(true);
