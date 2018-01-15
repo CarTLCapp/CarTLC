@@ -273,7 +273,7 @@ public class EntryPagedList {
         return new InputSearch(mSearch.getAll());
     }
 
-    public synchronized void compute() {
+    public void compute() {
         List<SqlRow> entries;
         String query;
         if (mSearch.hasMultipleTerms()) {
@@ -330,7 +330,7 @@ public class EntryPagedList {
         return row.getInteger(column);
     }
 
-    public List<Entry> getList() {
+    public synchronized List<Entry> getList() {
         compute();
         return mResult.mList;
     }
