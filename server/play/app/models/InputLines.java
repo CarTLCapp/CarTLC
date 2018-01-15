@@ -16,7 +16,14 @@ public class InputLines extends Model {
 
     private static final long serialVersionUID = 1L;
 
-    public String lines;
+    public InputLines(String lines) {
+        if (lines == null) {
+            this.lines = "";
+        }
+        this.lines = lines;
+    }
+
+    public String lines = "";
 
     public String [] getLines() {
         return lines.split("\\n");

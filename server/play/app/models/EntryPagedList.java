@@ -175,11 +175,7 @@ public class EntryPagedList {
     }
 
     public InputLines getSearchInputLines() {
-        InputLines inputLines = new InputLines();
-        if (mParams.mSearch != null) {
-            inputLines.lines = mParams.mSearch;
-        }
-        return inputLines;
+        return new InputLines(mParams.mSearch);
     }
 
     public void compute() {
