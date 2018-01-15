@@ -174,6 +174,13 @@ public class EntryPagedList {
         return column + " LIKE BINARY '%" + mParams.mSearch + "%'";
     }
 
+    public String getSearch() {
+        if (mParams.mSearch == null) {
+            return "";
+        }
+        return mParams.mSearch;
+    }
+
     public void compute() {
         List<SqlRow> entries;
         if (mParams.hasSearch()) {
@@ -291,6 +298,7 @@ public class EntryPagedList {
         } else {
             mParams.mSearch = null;
         }
+        mParams.mPage = 0;
     }
 
 }
