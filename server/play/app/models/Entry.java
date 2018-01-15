@@ -7,6 +7,7 @@ import java.io.File;
 import javax.persistence.*;
 
 import play.db.ebean.*;
+import play.db.ebean.*;
 import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
@@ -104,6 +105,9 @@ public class Entry extends com.avaje.ebean.Model {
 
     @Constraints.Required
     public Status status;
+
+    @Constraints.Required
+    public String time_zone;
 
     public static Finder<Long, Entry> find = new Finder<Long, Entry>(Entry.class);
 
@@ -252,8 +256,18 @@ public class Entry extends com.avaje.ebean.Model {
         return status.getCellColor();
     }
 
+    static SimpleDateFormat sFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm zzz");
+
     public String getDate() {
-        return new SimpleDateFormat("yyyy-MM-dd kk:mm zzz").format(entry_time);
+        sFormat.setTimeZone(getTimeZone());
+        return sFormat.format(entry_time);
+    }
+
+    public TimeZone getTimeZone() {
+        if (time_zone == null) {
+            return TimeZone.getDefault();
+        }
+        return TimeZone.getTimeZone(time_zone);
     }
 
     public String getTruckLine() {

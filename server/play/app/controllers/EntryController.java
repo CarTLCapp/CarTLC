@@ -155,10 +155,12 @@ public class EntryController extends Controller {
         }
         value = json.findValue("date_string");
         if (value != null) {
+            String date_value = value.textValue();
             try {
-                entry.entry_time = mDateFormat.parse(value.textValue());
+                entry.entry_time = mDateFormat.parse(date_value);
+                entry.time_zone = pickOutTimeZone(date_value);
             } catch (Exception ex) {
-                Logger.error("While parsing " + value + ":" + ex.getMessage());
+                Logger.error("While parsing " + date_value + ":" + ex.getMessage());
             }
         } else {
             value = json.findValue("date");
@@ -433,6 +435,14 @@ public class EntryController extends Controller {
             ret_id = 0;
         }
         return ok(Long.toString(ret_id));
+    }
+
+    String pickOutTimeZone(String value) {
+        int pos = value.indexOf('Z');
+        if (pos >= 0) {
+            return value.substring(pos+1);
+        }
+        return null;
     }
 
     Result missingRequest(ArrayList<String> missing) {

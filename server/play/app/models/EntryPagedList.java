@@ -218,7 +218,7 @@ public class EntryPagedList {
         query.append(", e.equipment_collection_id");
         query.append(", e.picture_collection_id");
         query.append(", e.note_collection_id");
-        query.append(", e.truck_id, e.status");
+        query.append(", e.truck_id, e.status e.time_zone");
         query.append(" FROM entry AS e");
         query.append(" INNER JOIN company AS c ON e.company_id = c.id");
         query.append(" INNER JOIN project AS p ON e.project_id = p.id");
@@ -310,6 +310,7 @@ public class EntryPagedList {
         entry.id = row.getLong("id");
         entry.tech_id = row.getInteger("tech_id");
         entry.entry_time = row.getDate("entry_time");
+        entry.time_zone = row.getString("time_zone");
         entry.project_id = row.getLong("project_id");
         entry.company_id = row.getLong("company_id");
         entry.equipment_collection_id = row.getLong("equipment_collection_id");
