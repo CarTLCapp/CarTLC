@@ -81,7 +81,7 @@ public class Entry extends com.avaje.ebean.Model {
     @Constraints.Required
     public int tech_id;
 
-    @Formats.DateTime(pattern = "yyyy-MM-dd kk:mm")
+    @Formats.DateTime(pattern = "yyyy-MM-dd kk:mm zzz")
     public Date entry_time;
 
     @Constraints.Required
@@ -111,6 +111,15 @@ public class Entry extends com.avaje.ebean.Model {
         return find.where()
                 .orderBy(sortBy + " " + order)
                 .findPagedList(page, pageSize);
+    }
+
+    public boolean match(List<String> terms) {
+        for (String term : terms) {
+            if (!match(term)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean match(String search) {
@@ -244,7 +253,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getDate() {
-        return new SimpleDateFormat("yyyy-MM-dd kk:mm").format(entry_time);
+        return new SimpleDateFormat("yyyy-MM-dd kk:mm zzz").format(entry_time);
     }
 
     public String getTruckLine() {

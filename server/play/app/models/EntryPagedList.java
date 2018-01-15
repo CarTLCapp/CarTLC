@@ -43,16 +43,117 @@ public class EntryPagedList {
         }
     }
 
+    class TermMatch implements Comparable<TermMatch> {
+        String mTerm;
+        int mPos;
+
+        public TermMatch(String term, int pos) {
+            mTerm = term;
+            mPos = pos;
+        }
+
+        @Override
+        public int compareTo(TermMatch item) {
+            return mPos - item.mPos;
+        }
+
+        int start() {
+            return mPos;
+        }
+
+        int end() {
+            return mPos + mTerm.length();
+        }
+    }
+
+    class SearchTerms {
+        List<String> mTerms;
+
+        SearchTerms() {
+            mTerms = new ArrayList<>();
+        }
+
+        boolean hasSearch() {
+            return mTerms.size() > 0;
+        }
+
+        boolean hasMultipleTerms() {
+            return mTerms.size() > 1;
+        }
+
+        public void setSearch(String search) {
+            if (search != null) {
+                String[] terms = search.trim().split(" +");
+                mTerms = new ArrayList<String>(Arrays.asList(terms));
+            } else {
+                mTerms.clear();
+            }
+        }
+
+        ArrayList<TermMatch> match(String element) {
+            ArrayList<TermMatch> matches = new ArrayList<>();
+            for (String term : mTerms) {
+                if (element.contains(term)) {
+                    int pos = element.indexOf(term);
+                    if (pos >= 0) {
+                        matches.add(new TermMatch(term, pos));
+                    }
+                }
+            }
+            Collections.sort(matches);
+            return matches;
+        }
+
+        public Html highlight(String element) {
+            if (!hasSearch() || element == null) {
+                return Html.apply(element);
+            }
+            List<TermMatch> matches = match(element);
+            StringBuilder sbuf = new StringBuilder();
+            int curPos = 0;
+            for (TermMatch match : matches) {
+                sbuf.append(element.substring(curPos, match.start()));
+                sbuf.append("<mark>");
+                sbuf.append(element.substring(match.start(), match.end()));
+                sbuf.append("</mark>");
+                curPos = match.end();
+            }
+            sbuf.append(element.substring(curPos));
+            return Html.apply(sbuf.toString());
+        }
+
+        String getPrimary() {
+            return mTerms.get(0);
+        }
+
+        String getAll() {
+            StringBuilder sbuf = new StringBuilder();
+            for (String term : mTerms) {
+                if (sbuf.length() > 0) {
+                    sbuf.append(" " );
+                }
+                sbuf.append(term);
+            }
+            return sbuf.toString();
+        }
+
+        void refine() {
+            ArrayList<Entry> outgoing = new ArrayList<>();
+            List<String> subterms = mTerms.subList(1, mTerms.size());
+            for (Entry entry : mResult.mList) {
+                if (entry.match(subterms)) {
+                    outgoing.add(entry);
+                }
+            }
+            mResult.mList = outgoing;
+        }
+    }
+
     class Parameters {
         int mPage;
         int mPageSize = PAGE_SIZE;
         PagedSortBy mSortBy = PagedSortBy.from("time");
         String mOrder = "desc";
-        String mSearch;
-
-        boolean hasSearch() {
-            return mSearch != null && !mSearch.isEmpty();
-        }
     }
 
     class Result {
@@ -64,6 +165,7 @@ public class EntryPagedList {
 
     Parameters mParams = new Parameters();
     Result mResult = new Result();
+    SearchTerms mSearch = new SearchTerms();
     int mRowNumber;
 
     public EntryPagedList() {}
@@ -110,7 +212,7 @@ public class EntryPagedList {
     void setCompanies(Client client) {
     }
 
-    String buildQuery(boolean countOnly) {
+    String buildQuery(boolean limitOkay) {
         StringBuilder query = new StringBuilder();
         query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
         query.append(", e.equipment_collection_id");
@@ -124,8 +226,7 @@ public class EntryPagedList {
         query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
         query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
         query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
-        if (mParams.hasSearch()) {
-            final String search = mParams.mSearch;
+        if (mSearch.hasSearch()) {
             query.append(" WHERE ");
             query.append(appendSearch("c.name"));
             query.append(" OR ");
@@ -149,12 +250,12 @@ public class EntryPagedList {
             query.append(" OR ");
             query.append(appendSearch("eq.name"));
         }
-        if (!countOnly) {
-            query.append(" ORDER BY ");
-            query.append(getSortBy());
-            query.append(" ");
-            query.append(getOrder());
+        query.append(" ORDER BY ");
+        query.append(getSortBy());
+        query.append(" ");
+        query.append(getOrder());
 
+        if (limitOkay) {
             int start = mParams.mPage * mParams.mPageSize;
             query.append(" LIMIT ");
             query.append(start);
@@ -165,45 +266,60 @@ public class EntryPagedList {
     }
 
     String appendSearch(String column) {
-        return column + " LIKE BINARY '%" + mParams.mSearch + "%'";
+        return column + " LIKE '%" + mSearch.getPrimary() + "%'";
     }
 
     public InputSearch getInputSearch() {
-        return new InputSearch(mParams.mSearch);
+        return new InputSearch(mSearch.getAll());
     }
 
     public synchronized void compute() {
         List<SqlRow> entries;
-        if (mParams.hasSearch()) {
-            String query = buildQuery(true);
+        String query;
+        if (mSearch.hasMultipleTerms()) {
+            query = buildQuery(false);
+            entries = Ebean.createSqlQuery(query).findList();
+        } else if (mSearch.hasSearch()) {
+            query = buildQuery(false);
             entries = Ebean.createSqlQuery(query).findList();
             mResult.mNumTotalRows = entries.size();
+            query = buildQuery(true);
+            entries = Ebean.createSqlQuery(query).findList();
         } else {
+            query = buildQuery(true);
+            entries = Ebean.createSqlQuery(query).findList();
             mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
         }
-        String query = buildQuery(false);
-        entries = Ebean.createSqlQuery(query).findList();
-
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
             return;
         }
         for (SqlRow row : entries) {
-            Entry entry = new Entry();
-            entry.id = row.getLong("id");
-            entry.tech_id = row.getInteger("tech_id");
-            entry.entry_time = row.getDate("entry_time");
-            entry.project_id = row.getLong("project_id");
-            entry.company_id = row.getLong("company_id");
-            entry.equipment_collection_id = row.getLong("equipment_collection_id");
-            entry.picture_collection_id = row.getLong("picture_collection_id");
-            entry.note_collection_id = row.getLong("note_collection_id");
-            entry.truck_id = row.getLong("truck_id");
-            if (row.get("status") != null) { // WHY DO I NEED THIS?
-                entry.status = Entry.Status.from(getInteger(row, "status"));
-            }
-            mResult.mList.add(entry);
+            mResult.mList.add(parseEntry(row));
         }
+        if (mSearch.hasMultipleTerms()) {
+            mSearch.refine();
+            mResult.mNumTotalRows = mResult.mList.size();
+            mParams.mPageSize = mResult.mList.size();
+            mParams.mPage = 0;
+        }
+    }
+
+    Entry parseEntry(SqlRow row) {
+        Entry entry = new Entry();
+        entry.id = row.getLong("id");
+        entry.tech_id = row.getInteger("tech_id");
+        entry.entry_time = row.getDate("entry_time");
+        entry.project_id = row.getLong("project_id");
+        entry.company_id = row.getLong("company_id");
+        entry.equipment_collection_id = row.getLong("equipment_collection_id");
+        entry.picture_collection_id = row.getLong("picture_collection_id");
+        entry.note_collection_id = row.getLong("note_collection_id");
+        entry.truck_id = row.getLong("truck_id");
+        if (row.get("status") != null) { // WHY DO I NEED THIS?
+            entry.status = Entry.Status.from(getInteger(row, "status"));
+        }
+        return entry;
     }
 
     Integer getInteger(SqlRow row, String column) {
@@ -264,32 +380,13 @@ public class EntryPagedList {
     }
 
     public Html highlightSearch(String element) {
-        if (!mParams.hasSearch() || element == null) {
-            return Html.apply(element);
-        }
-        final String search = mParams.mSearch;
-        if (element.contains(search)) {
-            int pos = element.indexOf(search);
-            if (pos >= 0) {
-                StringBuilder sbuf = new StringBuilder();
-                sbuf.append(element.substring(0, pos));
-                sbuf.append("<mark>");
-                sbuf.append(element.substring(pos, search.length() + pos));
-                sbuf.append("</mark>");
-                sbuf.append(element.substring(search.length() + pos));
-                return Html.apply(sbuf.toString());
-            }
-        }
-        return Html.apply(element);
+        return mSearch.highlight(element);
     }
 
     public void setSearch(String search) {
-        if (search != null) {
-            mParams.mSearch = search.trim();
-        } else {
-            mParams.mSearch = null;
-        }
+        mSearch.setSearch(search);
         mParams.mPage = 0;
+        mParams.mPageSize = PAGE_SIZE;
     }
 
 }
