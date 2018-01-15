@@ -9,6 +9,7 @@ import com.cartlc.tracker.event.EventRefreshProjects;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -18,6 +19,9 @@ import de.greenrobot.event.EventBus;
  */
 
 public class DataEntry {
+
+    static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
+
     public long                         id;
     public long                         date;
     public DataProjectAddressCombo      projectAddressCombo;
@@ -68,6 +72,10 @@ public class DataEntry {
             return status.getString(ctx);
         }
         return TruckStatus.UNKNOWN.getString(ctx);
+    }
+
+    public String getDate() {
+        return new SimpleDateFormat(DATE_FORMAT).format(new Date(date));
     }
 
     // Return all the notes, with values overlaid.

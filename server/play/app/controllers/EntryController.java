@@ -10,6 +10,7 @@ import models.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.text.SimpleDateFormat;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
@@ -30,26 +31,29 @@ import play.Logger;
 public class EntryController extends Controller {
 
     private static final int PAGE_SIZE = 100;
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
 
-    private AmazonHelper amazonHelper;
-    private EntryPagedList entryList = new EntryPagedList();
-    private FormFactory formFactory;
+    private AmazonHelper mAmazonHelper;
+    private EntryPagedList mEntryList = new EntryPagedList();
+    private FormFactory mFormFactory;
+    private SimpleDateFormat mDateFormat;
 
     @Inject
-    public EntryController(AmazonHelper amazonHelper, FormFactory formFactory) {
-        this.amazonHelper = amazonHelper;
-        this.formFactory = formFactory;
+    public EntryController(AmazonHelper mAmazonHelper, FormFactory mFormFactory) {
+        this.mAmazonHelper = mAmazonHelper;
+        this.mFormFactory = mFormFactory;
+        this.mDateFormat = new SimpleDateFormat(DATE_FORMAT);
     }
 
     public Result list(int page, String sortBy, String order) {
-        entryList.setPage(page);
-        entryList.setSortBy(sortBy);
-        entryList.setOrder(order);
-        entryList.clearCache();
-        entryList.computeFilters(Secured.getClient(ctx()));
-        entryList.compute();
-        Form<InputSearch> searchForm = formFactory.form(InputSearch.class).fill(entryList.getInputSearch());
-        return ok(views.html.entry_list.render(entryList, sortBy, order, searchForm));
+        mEntryList.setPage(page);
+        mEntryList.setSortBy(sortBy);
+        mEntryList.setOrder(order);
+        mEntryList.clearCache();
+        mEntryList.computeFilters(Secured.getClient(ctx()));
+        mEntryList.compute();
+        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).fill(mEntryList.getInputSearch());
+        return ok(views.html.entry_list.render(mEntryList, sortBy, order, searchForm));
     }
 
     public Result list() {
@@ -57,22 +61,22 @@ public class EntryController extends Controller {
     }
 
     public Result search() {
-        Form<InputSearch> searchForm = formFactory.form(InputSearch.class).bindFromRequest();
+        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).bindFromRequest();
         InputSearch lines = searchForm.get();
-        entryList.setSearch(lines.search);
-        entryList.clearCache();
-        entryList.compute();
-        return ok(views.html.entry_list.render(entryList,
-                entryList.getSortBy(), entryList.getOrder(), searchForm));
+        mEntryList.setSearch(lines.search);
+        mEntryList.clearCache();
+        mEntryList.compute();
+        return ok(views.html.entry_list.render(mEntryList,
+                mEntryList.getSortBy(), mEntryList.getOrder(), searchForm));
     }
 
     public Result searchClear() {
-        entryList.setSearch(null);
-        entryList.clearCache();
-        entryList.compute();
-        Form<InputSearch> searchForm = formFactory.form(InputSearch.class);
-        return ok(views.html.entry_list.render(entryList,
-                entryList.getSortBy(), entryList.getOrder(), searchForm));
+        mEntryList.setSearch(null);
+        mEntryList.clearCache();
+        mEntryList.compute();
+        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
+        return ok(views.html.entry_list.render(mEntryList,
+                mEntryList.getSortBy(), mEntryList.getOrder(), searchForm));
     }
 
     /**
@@ -89,11 +93,11 @@ public class EntryController extends Controller {
     }
 
     void loadPictures(Entry entry) {
-        entry.loadPictures(request().host(), amazonHelper);
+        entry.loadPictures(request().host(), mAmazonHelper);
     }
 
     public Result getImage(String picture) {
-        File localFile = amazonHelper.getLocalFile(picture);
+        File localFile = mAmazonHelper.getLocalFile(picture);
         if (localFile.exists()) {
             return ok(localFile);
         } else {
@@ -128,7 +132,7 @@ public class EntryController extends Controller {
     public Result delete(Long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry != null) {
-            entry.remove(amazonHelper);
+            entry.remove(mAmazonHelper);
             Logger.info("Entry has been deleted: " + entry_id);
         }
         return list();
@@ -149,11 +153,20 @@ public class EntryController extends Controller {
         } else {
             entry.tech_id = value.intValue();
         }
-        value = json.findValue("date");
-        if (value == null) {
-            missing.add("date");
+        value = json.findValue("date_string");
+        if (value != null) {
+            try {
+                entry.entry_time = mDateFormat.parse(value.textValue());
+            } catch (Exception ex) {
+                Logger.error("While parsing " + value + ":" + ex.getMessage());
+            }
         } else {
-            entry.entry_time = new Date(value.longValue());
+            value = json.findValue("date");
+            if (value == null) {
+                missing.add("date");
+            } else {
+                entry.entry_time = new Date(value.longValue());
+            }
         }
         value = json.findValue("server_id");
         if (value != null) {

@@ -39,6 +39,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -735,14 +737,16 @@ public class DCPing extends DCPost {
         return count;
     }
 
+
     boolean sendEntry(DataEntry entry) {
         boolean success = false;
         Timber.i("sendEntry(" + entry.id + ")");
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
-            jsonObject.accumulate("date", entry.date);
+            jsonObject.accumulate("date_string", entry.getDate());
             jsonObject.accumulate("server_id", entry.serverId);
+
             DataTruck truck = entry.getTruck();
             if (truck != null) {
                 if (truck.serverId > 0) {
