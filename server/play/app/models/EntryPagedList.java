@@ -174,11 +174,12 @@ public class EntryPagedList {
         return column + " LIKE BINARY '%" + mParams.mSearch + "%'";
     }
 
-    public String getSearch() {
-        if (mParams.mSearch == null) {
-            return "";
+    public InputLines getSearchInputLines() {
+        InputLines inputLines = new InputLines();
+        if (mParams.mSearch != null) {
+            inputLines.lines = mParams.mSearch;
         }
-        return mParams.mSearch;
+        return inputLines;
     }
 
     public void compute() {

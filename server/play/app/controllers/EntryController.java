@@ -48,8 +48,7 @@ public class EntryController extends Controller {
         entryList.clearCache();
         entryList.computeFilters(Secured.getClient(ctx()));
         entryList.compute();
-        Form<InputLines> searchForm = formFactory.form(InputLines.class);
-        searchForm.get().lines = entryList.getSearch();
+        Form<InputLines> searchForm = formFactory.form(InputLines.class).fill(entryList.getSearchInputLines());
         return ok(views.html.entry_list.render(entryList, sortBy, order, searchForm));
     }
 
