@@ -127,34 +127,34 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public boolean match(String search) {
-        if (getProjectLine().contains(search)) {
+        if (getProjectLine().toLowerCase().contains(search)) {
             return true;
         }
-        if (getCity().contains(search)) {
+        if (getCity().toLowerCase().contains(search)) {
             return true;
         }
-        if (getCompany().contains(search)) {
+        if (getCompany().toLowerCase().contains(search)) {
             return true;
         }
-        if (getEquipmentLine().contains(search)) {
+        if (getEquipmentLine().toLowerCase().contains(search)) {
             return true;
         }
-        if (getTruckLine().contains(search)) {
+        if (getTruckLine().toLowerCase().contains(search)) {
             return true;
         }
-        if (getZipCode().contains(search)) {
+        if (getZipCode().toLowerCase().contains(search)) {
             return true;
         }
-        if (getTechName().contains(search)) {
+        if (getTechName().toLowerCase().contains(search)) {
             return true;
         }
-        if (getAddressLine().contains(search)) {
+        if (getAddressLine().toLowerCase().contains(search)) {
             return true;
         }
-        if (getState().contains(search)) {
+        if (getState().toLowerCase().contains(search)) {
             return true;
         }
-        if (getStatus().contains(search)) {
+        if (getStatus().toLowerCase().contains(search)) {
             return true;
         }
         return false;

@@ -95,7 +95,7 @@ public class EntryPagedList {
             ArrayList<TermMatch> matches = new ArrayList<>();
             String elementNoCase = element.toLowerCase();
             for (String term : mTerms) {
-                int pos = element.indexOf(term);
+                int pos = elementNoCase.indexOf(term);
                 if (pos >= 0) {
                     matches.add(new TermMatch(term, pos));
                 }
