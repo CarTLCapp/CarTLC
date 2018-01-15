@@ -48,7 +48,7 @@ public class EntryController extends Controller {
         entryList.clearCache();
         entryList.computeFilters(Secured.getClient(ctx()));
         entryList.compute();
-        Form<InputLines> searchForm = formFactory.form(InputLines.class).fill(entryList.getSearchInputLines());
+        Form<InputSearch> searchForm = formFactory.form(InputSearch.class).fill(entryList.getInputSearch());
         return ok(views.html.entry_list.render(entryList, sortBy, order, searchForm));
     }
 
@@ -57,9 +57,9 @@ public class EntryController extends Controller {
     }
 
     public Result search() {
-        Form<InputLines> searchForm = formFactory.form(InputLines.class).bindFromRequest();
-        InputLines lines = searchForm.get();
-        entryList.setSearch(lines.lines);
+        Form<InputSearch> searchForm = formFactory.form(InputSearch.class).bindFromRequest();
+        InputSearch lines = searchForm.get();
+        entryList.setSearch(lines.search);
         entryList.clearCache();
         entryList.compute();
         return ok(views.html.entry_list.render(entryList,
@@ -70,7 +70,7 @@ public class EntryController extends Controller {
         entryList.setSearch(null);
         entryList.clearCache();
         entryList.compute();
-        Form<InputLines> searchForm = formFactory.form(InputLines.class);
+        Form<InputSearch> searchForm = formFactory.form(InputSearch.class);
         return ok(views.html.entry_list.render(entryList,
                 entryList.getSortBy(), entryList.getOrder(), searchForm));
     }

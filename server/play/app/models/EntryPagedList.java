@@ -174,8 +174,8 @@ public class EntryPagedList {
         return column + " LIKE BINARY '%" + mParams.mSearch + "%'";
     }
 
-    public InputLines getSearchInputLines() {
-        return new InputLines(mParams.mSearch);
+    public InputSearch getInputSearch() {
+        return new InputSearch(mParams.mSearch);
     }
 
     public void compute() {
