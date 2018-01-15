@@ -112,7 +112,7 @@ public class EntryPagedList {
 
     String buildQuery(boolean countOnly) {
         StringBuilder query = new StringBuilder();
-        query.append("SELECT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
+        query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
         query.append(", e.equipment_collection_id");
         query.append(", e.picture_collection_id");
         query.append(", e.note_collection_id");
