@@ -99,6 +99,7 @@ public class WorkOrderReader {
                         if (truck.license_plate != null && truck.license_plate.trim().length() > 0) {
                             if (etruck.license_plate == null || etruck.license_plate.trim().length() == 0) {
                                 truck.update();
+                                warning("Truck " + truck.truck_number + " now has license " + truck.license_plate, line);
                             } else {
                                 if (Entry.countEntriesForTruck(truck.id) == 0) {
                                     truck.update();
@@ -112,6 +113,8 @@ public class WorkOrderReader {
                     order = WorkOrder.findFirstByTruckId(truck.id);
                     if (order == null) {
                         order = new WorkOrder();
+                    } else {
+                        warning("Reusing existing work order", line);
                     }
                     order.client_id = client_id;
                     order.project_id = project_id;

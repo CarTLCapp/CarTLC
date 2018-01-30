@@ -84,7 +84,7 @@ public class EntryPagedList {
         public void setSearch(String search) {
             mTerms.clear();
             if (search != null) {
-                String[] terms = search.trim().split(" +");
+                String[] terms = search.trim().toLowerCase().split(" +");
                 for (String term : terms) {
                     if (term.trim().length() > 0) {
                         mTerms.add(term.trim().toLowerCase());

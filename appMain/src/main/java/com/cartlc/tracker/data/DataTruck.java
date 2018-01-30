@@ -117,6 +117,8 @@ public class DataTruck implements Comparable<DataTruck> {
                 return 0;
             }
             return -1;
+        } else if (o.truckNumber == null) {
+            return 1;
         }
         return truckNumber.compareTo(o.truckNumber);
     }
