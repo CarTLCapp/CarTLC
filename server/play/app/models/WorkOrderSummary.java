@@ -16,15 +16,15 @@ import com.avaje.ebean.*;
 
 public class WorkOrderSummary {
 
-    static final int COMPANY_LINE_LIMIT = 43;
+    static final int COMPANY_LINE_LIMIT = 63;
 
     public int upload_id;
     public long client_id;
     public long project_id;
     public int num_trucks;
     public int num_complete;
-    public HashSet<Long> companyMap = new HashSet<Long>();
     public Date last_modified;
+    private HashSet<Long> companyMap = new HashSet<Long>();
 
     public int getUploadId() {
         return upload_id;
@@ -66,6 +66,12 @@ public class WorkOrderSummary {
             return client.name;
         }
         return "";
+    }
+
+    public void addCompany(long company_id) {
+        if (!companyMap.contains(company_id)) {
+            companyMap.add(company_id);
+        }
     }
 
     public String getNumCompanies() {

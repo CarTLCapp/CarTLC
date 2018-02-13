@@ -39,7 +39,7 @@ public class WorkOrderSummaryList extends BaseList<WorkOrderSummary> implements 
             } else {
                 summary = map.get(work.upload_id);
             }
-            summary.companyMap.add(work.company_id);
+            summary.addCompany(work.company_id);
             summary.num_trucks++;
 
             Entry entry = Entry.getFulfilledBy(work);
