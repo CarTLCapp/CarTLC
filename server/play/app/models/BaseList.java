@@ -15,7 +15,7 @@ import play.Logger;
  */
 public abstract class BaseList<T> {
 
-    protected static final int PAGE_SIZE = 100;
+    protected static final int PAGE_SIZE = 50;
 
     public enum SortBy {
         CLIENT("client_id"),
