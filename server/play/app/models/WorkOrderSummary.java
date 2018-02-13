@@ -24,7 +24,7 @@ public class WorkOrderSummary {
     public int num_trucks;
     public int num_complete;
     public Date last_modified;
-    private HashSet<Long> companyMap = new HashSet<Long>();
+    private HashSet<String> companyMap = new HashSet<String>();
 
     public int getUploadId() {
         return upload_id;
@@ -40,16 +40,13 @@ public class WorkOrderSummary {
 
     public String getCompanyLine() {
         StringBuilder sbuf = new StringBuilder();
-        Iterator<Long> iterator = companyMap.iterator();
+        Iterator<String> iterator = companyMap.iterator();
         while (iterator.hasNext()) {
-            Long company_id = iterator.next();
-            Company company = Company.get(company_id);
-            if (company != null) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(", ");
-                }
-                sbuf.append(company.name);
+            String company_name = iterator.next();
+            if (sbuf.length() > 0) {
+                sbuf.append(", ");
             }
+            sbuf.append(company_name);
         }
         if (sbuf.length() > COMPANY_LINE_LIMIT) {
             sbuf.setLength(COMPANY_LINE_LIMIT-7);
@@ -69,8 +66,9 @@ public class WorkOrderSummary {
     }
 
     public void addCompany(long company_id) {
-        if (!companyMap.contains(company_id)) {
-            companyMap.add(company_id);
+        Company company = Company.get(company_id);
+        if (company != null) {
+            companyMap.add(company.name);
         }
     }
 
