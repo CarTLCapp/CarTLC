@@ -61,6 +61,7 @@
             <thead>
                 <tr>
                     @header("client_id", "Client")
+                    <th>Company</th>
                     @header("project_id", "Project")
                     <th># Addresses</th>
                     <th># Trucks</th>
@@ -74,6 +75,7 @@
                 @for(summary <- currentPage.getList()) {
                     <tr>
                         <td>@summary.getClientName()</td>
+                        <td>@summary.getCompanyLine()</td>
                         <td>@summary.getProjectName()</td>
                         <td>@summary.getNumCompanies()</td>
                         <td>@summary.getNumTrucks()</td>

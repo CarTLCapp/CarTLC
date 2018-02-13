@@ -16,6 +16,8 @@ import com.avaje.ebean.*;
 
 public class WorkOrderSummary {
 
+    static final int COMPANY_LINE_LIMIT = 43;
+
     public int upload_id;
     public long client_id;
     public long project_id;
@@ -34,6 +36,28 @@ public class WorkOrderSummary {
             return project.name;
         }
         return "";
+    }
+
+    public String getCompanyLine() {
+        StringBuilder sbuf = new StringBuilder();
+        Iterator<Long> iterator = companyMap.iterator();
+        while (iterator.hasNext()) {
+            Long company_id = iterator.next();
+            Company company = Company.get(company_id);
+            if (company != null) {
+                if (sbuf.length() > 0) {
+                    sbuf.append(", ");
+                }
+                sbuf.append(company.name);
+            }
+        }
+        if (sbuf.length() > COMPANY_LINE_LIMIT) {
+            sbuf.setLength(COMPANY_LINE_LIMIT-7);
+            sbuf.append("...[");
+            sbuf.append(companyMap.size());
+            sbuf.append("]");
+        }
+        return sbuf.toString();
     }
 
     public String getClientName() {

@@ -54,7 +54,7 @@ public class DCPing extends DCPost {
 
     static final String TAG = "DCPing";
 
-    static final String SERVER_URL_DEVELOPMENT = "http://cartlc.arqnetworks.com/";
+    static final String SERVER_URL_DEVELOPMENT = "http://fleetdev.arqnetworks.com/";
     static final String SERVER_URL_RELEASE     = "http://fleettlc.arqnetworks.com/";
 
     static final String UPLOAD_RESET_TRIGGER = "reset_upload";
