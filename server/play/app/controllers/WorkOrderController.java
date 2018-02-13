@@ -70,9 +70,12 @@ public class WorkOrderController extends Controller {
     public Result listOrders(Integer upload_id, int page, String sortBy, String order, String message) {
         if (upload_id == 0) {
             upload_id = editingUploadId;
+            editingUploadId = 0;
+        }
+        if (upload_id > 0) {
+            workList.setUploadId(upload_id);
         }
         workList.setClient(Secured.getClient(ctx()));
-        workList.setUploadId(upload_id);
         workList.setPage(page);
         workList.setSortBy(sortBy);
         workList.setOrder(order);
