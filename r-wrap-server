@@ -11,15 +11,14 @@ cp $FILE $WRAP/
 echo "FOUND: $FILE"
 COPY=`ls $WRAP/*.zip`
 
-PEM=~/.ssh/cartlc.pem
-SERVER="ubuntu@cartlc.arqnetworks.com"
+PEM=~/.ssh/FleetTLC.pem
+SERVER="ubuntu@fleetdev.arqnetworks.com"
 
 while [[ $# -gt 0 ]]
 do
 	key="$1"
 	case $key in
 		-r)
-			PEM=~/.ssh/FleetTLC.pem
 			SERVER="ubuntu@ec2-18-217-15-185.us-east-2.compute.amazonaws.com"
     		shift
     	;;

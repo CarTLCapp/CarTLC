@@ -283,15 +283,27 @@ public class TableEntry {
             while (cursor.moveToNext()) {
                 entry = new DataEntry();
                 entry.id = cursor.getLong(idxRow);
-                entry.date = cursor.getLong(idxDate);
-                long projectAddressComboId = cursor.getLong(idxProjectAddressCombo);
-                entry.projectAddressCombo = TableProjectAddressCombo.getInstance().query(projectAddressComboId);
-                long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
-                entry.equipmentCollection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
-                long pictureCollectionId = cursor.getLong(idxPictureCollectionId);
-                entry.pictureCollection = TablePictureCollection.getInstance().query(pictureCollectionId);
-                entry.noteCollectionId = cursor.getLong(idxNotetCollectionId);
-                entry.truckId = cursor.getInt(idxTruckId);
+                if (!cursor.isNull(idxDate)) {
+                    entry.date = cursor.getLong(idxDate);
+                }
+                if (!cursor.isNull(idxProjectAddressCombo)) {
+                    long projectAddressComboId = cursor.getLong(idxProjectAddressCombo);
+                    entry.projectAddressCombo = TableProjectAddressCombo.getInstance().query(projectAddressComboId);
+                }
+                if (!cursor.isNull(idxEquipmentCollectionId)) {
+                    long equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId);
+                    entry.equipmentCollection = TableCollectionEquipmentEntry.getInstance().queryForCollectionId(equipmentCollectionId);
+                }
+                if (!cursor.isNull(idxPictureCollectionId)) {
+                    long pictureCollectionId = cursor.getLong(idxPictureCollectionId);
+                    entry.pictureCollection = TablePictureCollection.getInstance().query(pictureCollectionId);
+                }
+                if (!cursor.isNull(idxNotetCollectionId)) {
+                    entry.noteCollectionId = cursor.getLong(idxNotetCollectionId);
+                }
+                if (!cursor.isNull(idxTruckId)) {
+                    entry.truckId = cursor.getInt(idxTruckId);
+                }
                 if (!cursor.isNull(idxStatus)) {
                     entry.status = TruckStatus.from(cursor.getInt(idxStatus));
                 }
@@ -304,7 +316,20 @@ public class TableEntry {
             }
             cursor.close();
         } catch (Exception ex) {
-            TBApplication.ReportError(ex, TableEntry.class, "query()", "db");
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(ex.getMessage());
+            sbuf.append(" [");
+            if (where != null) {
+                sbuf.append(where);
+                if (whereArgs != null && whereArgs.length > 0) {
+                    for (String arg : whereArgs) {
+                        sbuf.append(", ");
+                        sbuf.append(arg);
+                    }
+                }
+            }
+            sbuf.append("]");
+            TBApplication.ReportError(sbuf.toString(), TableEntry.class, "query()", "db");
         }
         return list;
     }
