@@ -42,6 +42,12 @@ public class TruckController extends Controller {
         return ok(views.html.truck_list.render(Truck.list(), Secured.getClient(ctx())));
     }
 
+    @Security.Authenticated(Secured.class)
+    public Result cleanup() {
+        Truck.cleanup();
+        return list();
+    }
+
     /**
      * Handle truck deletion
      */
@@ -162,10 +168,5 @@ public class TruckController extends Controller {
         return list();
     }
 
-    @Security.Authenticated(Secured.class)
-    public Result cleanup() {
-        Truck.cleanup();
-        return list();
-    }
 }
             
