@@ -27,17 +27,21 @@
 
 @main("FleetTLC - List Entries") {
 
-    <h1 id="homeTitle">@Messages("entry.list.title", currentPage.getTotalRowCount())
-        <span style="float:right;font-size:16px">
-               <a href="@routes.EntryController.searchClear()" class="btn">Clear</a>
-        </span>
-        <span style="float:right;font-size:16px">
-            @helper.form(action = routes.EntryController.search()) {
-                @helper.inputText(searchForm("search"), '_label -> "")
-            }
-        </span>
-        <span style="float:right;font-size:16px"><div class="search">Search:</div></span>
-    </h1>
+    @if(currentPage.isByTruck()) {
+        <h1 id="homeTitle">@currentPage.getByTruckLine()</h1>
+    } else {
+        <h1 id="homeTitle">@Messages("entry.list.title", currentPage.getTotalRowCount())
+            <span style="float:right;font-size:16px">
+                   <a href="@routes.EntryController.searchClear()" class="btn">Clear</a>
+            </span>
+            <span style="float:right;font-size:16px">
+                @helper.form(action = routes.EntryController.search()) {
+                    @helper.inputText(searchForm("search"), '_label -> "")
+                }
+            </span>
+            <span style="float:right;font-size:16px"><div class="search">Search:</div></span>
+        </h1>
+    }
 
     @if(currentPage.getTotalRowCount() == 0) {
 

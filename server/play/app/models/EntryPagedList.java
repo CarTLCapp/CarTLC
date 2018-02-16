@@ -219,6 +219,18 @@ public class EntryPagedList {
         mByTruckId = truck_id;
     }
 
+    public boolean isByTruck() {
+        return mByTruckId != 0;
+    }
+
+    public String getByTruckLine() {
+        Truck truck = Truck.find.byId(mByTruckId);
+        if (truck != null) {
+            return truck.getLine();
+        }
+        return "";
+    }
+
     String buildQuery(boolean limitOkay) {
         StringBuilder query = new StringBuilder();
         query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
@@ -361,6 +373,7 @@ public class EntryPagedList {
     public String getRowNumber() {
         return Integer.toString(mRowNumber);
     }
+
 
     public boolean hasPrev() {
         return mParams.mPage > 0;

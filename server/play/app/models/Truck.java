@@ -263,6 +263,30 @@ public class Truck extends com.avaje.ebean.Model {
         return name;
     }
 
+    public String getLine() {
+        StringBuilder sbuf = new StringBuilder();
+        String bit = getTruckNumber();
+        if (bit.length() > 0) {
+            sbuf.append(bit);
+        }
+        bit = getLicensePlate();
+        if (bit.length() > 0) {
+            sbuf.append(" : ");
+            sbuf.append(bit);
+        }
+        bit = getProjectName();
+        if (bit.length() > 0) {
+            sbuf.append(", ");
+            sbuf.append(bit);
+        }
+        bit = getCompanyName();
+        if (bit.length() > 0) {
+            sbuf.append(", ");
+            sbuf.append(bit);
+        }
+        return sbuf.toString();
+    }
+
     public int countEntries() {
         return Entry.countEntriesForTruck(id);
     }
