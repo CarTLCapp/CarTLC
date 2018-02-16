@@ -168,6 +168,7 @@ public class EntryPagedList {
     Parameters mParams = new Parameters();
     Result mResult = new Result();
     SearchTerms mSearch = new SearchTerms();
+    long mByTruckId;
     int mRowNumber;
 
     public EntryPagedList() {}
@@ -214,6 +215,10 @@ public class EntryPagedList {
     void setCompanies(Client client) {
     }
 
+    public void setByTruckId(long truck_id) {
+        mByTruckId = truck_id;
+    }
+
     String buildQuery(boolean limitOkay) {
         StringBuilder query = new StringBuilder();
         query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
@@ -228,7 +233,11 @@ public class EntryPagedList {
         query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
         query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
         query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
-        if (mSearch.hasSearch()) {
+        if (mByTruckId > 0) {
+            query.append(" WHERE ");
+            query.append("e.truck_id=");
+            query.append(mByTruckId);
+        } else if (mSearch.hasSearch()) {
             query.append(" WHERE ");
             query.append(appendSearch("c.name"));
             query.append(" OR ");
@@ -388,6 +397,7 @@ public class EntryPagedList {
 
     public void setSearch(String search) {
         mSearch.setSearch(search);
+        mByTruckId = 0;
         mParams.mPage = 0;
         mParams.mPageSize = PAGE_SIZE;
     }

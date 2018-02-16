@@ -2,7 +2,11 @@
 
 @main("FleetTLC - List Trucks", client) {
 
-    <h1 id="homeTitle">@Messages("trucks.list.title", currentPage.size())</h1>
+    <h1 id="homeTitle">@Messages("trucks.list.title", currentPage.size())
+        <span style="float:right;font-size:16px">
+            <a href="@routes.TruckController.cleanup()" class="btn">Cleanup</a>
+        </span>
+    </h1>
 
     @if(currentPage.size() == 0) {
         
@@ -33,7 +37,7 @@
                         <td>@truck.getLicensePlate()</td>
                         <td>@truck.getProjectName()</td>
                         <td>@truck.getCompanyName()</td>
-                        <td>@truck.countEntries()</td>
+                        <td><a href="@routes.EntryController.showByTruck(truck.id)">@truck.countEntries()</a></td>
                         <td>@truck.countWorkOrders()</td>
                         <td>@truck.getCreatedBy()</td>
                         <td>

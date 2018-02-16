@@ -112,6 +112,7 @@ GET     /entry/:id/view             controllers.EntryController.view(id:Long)
 GET     /entry/:id/delete           controllers.EntryController.delete(id:Long)
 GET     /entry/search               controllers.EntryController.search()
 GET     /entry/search/clear         controllers.EntryController.searchClear()
+GET     /entry/:id/bytruck          controllers.EntryController.showByTruck(id:Long)
 
 ### MESSAGES ###
 
@@ -126,6 +127,7 @@ GET     /truck                 controllers.TruckController.list()
 GET     /truck/:id/delete      controllers.TruckController.delete(id:Long)
 GET     /truck/:id             controllers.TruckController.edit(id:Long)
 POST    /truck/:id             controllers.TruckController.update(id:Long)
+GET     /truck/cleanup         controllers.TruckController.cleanup()
 
 ### EXTERNAL: APP REQUESTS & ENTRIES ###
 

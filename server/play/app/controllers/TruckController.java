@@ -162,5 +162,10 @@ public class TruckController extends Controller {
         return list();
     }
 
+    @Security.Authenticated(Secured.class)
+    public Result cleanup() {
+        Truck.cleanup();
+        return list();
+    }
 }
             

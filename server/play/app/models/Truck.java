@@ -79,6 +79,29 @@ public class Truck extends com.avaje.ebean.Model {
         return list;
     }
 
+    public static int cleanup() {
+        StringBuilder sbuf = new StringBuilder();
+        List<Truck> list = find.all();
+        int count = 0;
+        for (Truck truck : list) {
+            if (truck.getProjectName().length() > 0) {
+                continue;
+            }
+            if (truck.getCompanyName().length() > 0) {
+                continue;
+            }
+            if (truck.countEntries() > 0) {
+                Logger.info("Cannot delete truck, has entries: " + truck.toString());
+                continue;
+            }
+            Logger.info("Deleting truck: " + truck.toString());
+            truck.delete();
+            count++;
+        }
+        Logger.info("Deleted " + count + " trucks");
+        return count;
+    }
+
     public static Truck findFirst(long project_id, long company_name_id, String truck_number) {
         List<Truck> list = findBy(project_id, company_name_id, truck_number);
         if (list == null) {

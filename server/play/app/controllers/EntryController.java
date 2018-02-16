@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import java.util.Date;
 import java.util.Iterator;
 import modules.AmazonHelper;
+import modules.Globals;
 import java.io.File;
 import play.db.ebean.Transactional;
 import play.libs.Json;
@@ -37,15 +38,21 @@ public class EntryController extends Controller {
     private EntryPagedList mEntryList = new EntryPagedList();
     private FormFactory mFormFactory;
     private SimpleDateFormat mDateFormat;
+    private Globals mGlobals;
 
     @Inject
-    public EntryController(AmazonHelper mAmazonHelper, FormFactory mFormFactory) {
-        this.mAmazonHelper = mAmazonHelper;
-        this.mFormFactory = mFormFactory;
+    public EntryController(AmazonHelper amazonHelper, FormFactory formFactory, Globals globals) {
+        this.mAmazonHelper = amazonHelper;
+        this.mFormFactory = formFactory;
         this.mDateFormat = new SimpleDateFormat(DATE_FORMAT);
+        this.mGlobals = globals;
     }
 
     public Result list(int page, String sortBy, String order) {
+        if (mGlobals.isClearSearch()) {
+            mEntryList.setSearch(null);
+            mGlobals.setClearSearch(false);
+        }
         mEntryList.setPage(page);
         mEntryList.setSortBy(sortBy);
         mEntryList.setOrder(order);
@@ -77,6 +84,13 @@ public class EntryController extends Controller {
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
         return ok(views.html.entry_list.render(mEntryList,
                 mEntryList.getSortBy(), mEntryList.getOrder(), searchForm));
+    }
+
+    public Result showByTruck(long truck_id) {
+        mGlobals.setClearSearch(false);
+        mEntryList.setSearch(null);
+        mEntryList.setByTruckId(truck_id);
+        return list();
     }
 
     /**
