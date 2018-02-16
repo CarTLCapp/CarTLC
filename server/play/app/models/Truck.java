@@ -65,6 +65,7 @@ public class Truck extends com.avaje.ebean.Model {
                 .ne("project_id", 0)
                 .ne("company_name_id", 0)
                 .endJunction()
+                .orderBy("truck_number asc")
                 .findList();
     }
 
