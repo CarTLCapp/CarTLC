@@ -28,23 +28,36 @@ import play.Logger;
  */
 public class TruckController extends Controller {
 
-    private FormFactory formFactory;
+    private static final String FILTER_SHOW = "Enable Filter";
+    private static final String FILTER_HIDE = "Disable Filter";
 
+    private FormFactory mFormFactory;
+    private boolean mFilter;
+    
     @Inject
     public TruckController(FormFactory formFactory) {
-        this.formFactory = formFactory;
+        this.mFormFactory = formFactory;
     }
 
     /**
      * Display the list of trucks.
      */
     public Result list() {
-        return ok(views.html.truck_list.render(Truck.list(), Secured.getClient(ctx())));
+        if (mFilter) {
+            return ok(views.html.truck_list.render(Truck.listFiltered(), Secured.getClient(ctx()), FILTER_HIDE));
+        } else {
+            return ok(views.html.truck_list.render(Truck.list(), Secured.getClient(ctx()), FILTER_SHOW));
+        }
     }
 
     @Security.Authenticated(Secured.class)
     public Result cleanup() {
         Truck.cleanup();
+        return list();
+    }
+
+    public Result toggleFilter() {
+        mFilter = !mFilter;
         return list();
     }
 
@@ -118,7 +131,7 @@ public class TruckController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result edit(Long id) {
-        Form<InputTruck> truckForm = formFactory.form(InputTruck.class).fill(new InputTruck(Truck.get(id)));
+        Form<InputTruck> truckForm = mFormFactory.form(InputTruck.class).fill(new InputTruck(Truck.get(id)));
         if (Secured.isAdmin(ctx())) {
             return ok(views.html.truck_editForm.render(id, truckForm));
         } else {
@@ -135,7 +148,7 @@ public class TruckController extends Controller {
     @Transactional
     @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
-        Form<InputTruck> truckForm = formFactory.form(InputTruck.class).bindFromRequest();
+        Form<InputTruck> truckForm = mFormFactory.form(InputTruck.class).bindFromRequest();
         if (truckForm.hasErrors()) {
             return badRequest(views.html.truck_editForm.render(id, truckForm));
         }

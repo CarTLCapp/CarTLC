@@ -125,6 +125,7 @@ GET     /messages/delete_all   controllers.MessageController.deleteAll()
 
 GET     /truck                 controllers.TruckController.list()
 GET     /truck/cleanup         controllers.TruckController.cleanup()
+GET     /truck/toggle_filter   controllers.TruckController.toggleFilter()
 GET     /truck/:id/delete      controllers.TruckController.delete(id:Long)
 GET     /truck/:id             controllers.TruckController.edit(id:Long)
 POST    /truck/:id             controllers.TruckController.update(id:Long)

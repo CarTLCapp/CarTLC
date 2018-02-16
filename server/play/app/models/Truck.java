@@ -59,6 +59,15 @@ public class Truck extends com.avaje.ebean.Model {
                 .findList();
     }
 
+    public static List<Truck> listFiltered() {
+        return find.where()
+                .disjunction()
+                .ne("project_id", 0)
+                .ne("company_name_id", 0)
+                .endJunction()
+                .findList();
+    }
+
     public static List<Truck> findByUploadId(int upload_id) {
         return find.where().eq("upload_id", upload_id).findList();
     }
@@ -301,22 +310,22 @@ public class Truck extends com.avaje.ebean.Model {
 
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
+        sbuf.append("ID ");
         sbuf.append(id);
-        sbuf.append(":");
-        sbuf.append("T");
+        sbuf.append(" ");
         if (truck_number != null) {
             sbuf.append(truck_number);
         }
-        sbuf.append(", L");
         if (license_plate != null) {
+            sbuf.append(" : ");
             sbuf.append(license_plate);
         }
         if (project_id > 0) {
-            sbuf.append(", ");
+            sbuf.append(", PROJECT ");
             sbuf.append(getProjectName());
         }
         if (company_name_id > 0) {
-            sbuf.append(", ");
+            sbuf.append(", COMPANY ");
             sbuf.append(getCompanyName());
         }
         return sbuf.toString();
