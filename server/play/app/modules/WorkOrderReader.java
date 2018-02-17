@@ -136,6 +136,9 @@ public class WorkOrderReader {
                         companyNewCount++;
                     } else {
                         order.company_id = existing.id;
+                        company.created_by = (int) client_id;
+                        company.created_by_client = true;
+                        company.update();
                     }
                     if (WorkOrder.has(order) == null) {
                         order.save();
