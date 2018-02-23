@@ -285,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
         mAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                doBtnAdd();
+                doBtnPlus();
             }
         });
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -583,7 +583,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void doBtnAdd() {
+    void doBtnPlus() {
         if (PrefHelper.getInstance().getCurrentEditEntryId() != 0) {
             PrefHelper.getInstance().clearLastEntry();
         }

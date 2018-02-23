@@ -130,7 +130,6 @@ public abstract class TableCollection {
 
     public void add(long collectionId, long valueId) {
         mDb.beginTransaction();
-        removeByCollectionId(collectionId);
         try {
             ContentValues values = new ContentValues();
             values.clear();
@@ -187,7 +186,7 @@ public abstract class TableCollection {
         List<Long> collection = new ArrayList();
         try {
             final String[] columns = {KEY_VALUE_ID};
-            final String selection = KEY_COLLECTION_ID + " =?";
+            final String selection = KEY_COLLECTION_ID + "=?";
             final String[] selectionArgs = {Long.toString(collection_id)};
             Cursor cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null, null);
             int idxValue = cursor.getColumnIndex(KEY_VALUE_ID);

@@ -65,6 +65,11 @@ public class DataTruck implements Comparable<DataTruck> {
     public String toLongString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(id);
+        if (serverId != 0) {
+            sbuf.append(" [");
+            sbuf.append(serverId);
+            sbuf.append("]");
+        }
         if (truckNumber != null) {
             sbuf.append(", ");
             sbuf.append(truckNumber);

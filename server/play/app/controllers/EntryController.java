@@ -321,6 +321,9 @@ public class EntryController extends Controller {
                                 equipment.save();
                                 Logger.info("Created new equipment: " + equipment.toString());
                                 newEquipmentCreated = true;
+
+                                ProjectEquipmentCollection.addNew(entry.project_id, equipment);
+                                Logger.info("Registered for project:" + entry.project_id);
                             } else {
                                 if (equipments.size() > 1) {
                                     Logger.error("Too many equipments found with name: " + name);

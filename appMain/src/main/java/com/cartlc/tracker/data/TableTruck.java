@@ -2,10 +2,7 @@ package com.cartlc.tracker.data;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.TextUtils;
-
 import com.cartlc.tracker.app.TBApplication;
 
 import java.util.ArrayList;
