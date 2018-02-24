@@ -11,6 +11,7 @@ GET     /                         controllers.HomeController.index()
 GET     /login                    controllers.HomeController.login()
 POST    /login                    controllers.HomeController.postLogin()
 GET     /logout                   controllers.HomeController.logout()
+GET     /problem                  controllers.HomeController.problem(msg : String)
 
 ### TECHNICIANS ###
 

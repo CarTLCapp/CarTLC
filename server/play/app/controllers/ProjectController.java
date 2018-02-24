@@ -134,7 +134,7 @@ public class ProjectController extends Controller {
             Form<Project> projectForm = formFactory.form(Project.class);
             return ok(views.html.project_createForm.render(projectForm));
         } else {
-            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+            return HomeController.PROBLEM("Only administators can create projects");
         }
     }
 
@@ -166,7 +166,7 @@ public class ProjectController extends Controller {
             Form<InputLines> linesForm = formFactory.form(InputLines.class);
             return ok(views.html.projects_createForm.render(linesForm));
         } else {
-            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+            return HomeController.PROBLEM("Only administrators can create projects");
         }
     }
 
@@ -204,7 +204,7 @@ public class ProjectController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result delete(Long id) {
         if (!Secured.isAdmin(ctx())) {
-            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+            return HomeController.PROBLEM("Only administrators can delete projects");
         }
         if (Entry.hasEntryForProject(id)) {
             Project project = Project.find.byId(id);
@@ -243,7 +243,7 @@ public class ProjectController extends Controller {
     @Transactional
     public Result enable(Long id) {
         if (!Secured.isAdmin(ctx())) {
-            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+            return HomeController.PROBLEM("Only administrators can enable projects");
         }
         Project project = Project.find.byId(id);
         project.disabled = false;

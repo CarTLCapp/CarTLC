@@ -1,6 +1,10 @@
 name := "play"
 
-version := "2.2.8-SNAPSHOT"
+import com.typesafe.config._
+
+val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
+
+version := conf.getString("app.version")
 
 scalaVersion := "2.11.11"
 

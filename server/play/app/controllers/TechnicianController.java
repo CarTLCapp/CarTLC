@@ -44,7 +44,7 @@ public class TechnicianController extends Controller {
             Form<Technician> technicianForm = formFactory.form(Technician.class).fill(Technician.find.byId(id));
             return ok(views.html.technician_editForm.render(id, technicianForm, client));
         } else {
-            return badRequest(views.html.home.render(client));
+            return HomeController.PROBLEM("Only adminstrators can change technician details");
         }
     }
 
@@ -98,6 +98,5 @@ public class TechnicianController extends Controller {
             return ok(message);
         }
     }
-
 }
             

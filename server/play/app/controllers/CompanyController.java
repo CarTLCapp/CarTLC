@@ -170,7 +170,7 @@ public class CompanyController extends Controller {
     @Transactional
     public Result delete(Long id) {
         if (!Secured.isAdmin(ctx())) {
-            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+            return HomeController.PROBLEM("only administrators can delete companies");
         }
         if (Entry.hasEntryForCompany(id)) {
             Company company = Company.get(id);
@@ -189,7 +189,7 @@ public class CompanyController extends Controller {
     @Transactional
     public Result enable(Long id) {
         if (!Secured.isAdmin(ctx())) {
-            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+            return HomeController.PROBLEM("Only administrators can enable companies");
         }
         Company company = Company.get(id);
         company.disabled = false;

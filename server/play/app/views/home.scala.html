@@ -1,11 +1,11 @@
-@(client : Client)
+@(client : Client, version : String)
 
 @*
 * Call the `main` template with two arguments. The first
 * argument is a `String` with the header of the page, the second
 * argument is an `Html` object containing the body of the page.
 *@
-@main("FleetTLC", client) {
+@main("FleetTLC $version", client) {
 
     <h2>Data</h2>
 

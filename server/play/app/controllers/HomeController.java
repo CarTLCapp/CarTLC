@@ -5,6 +5,7 @@ import com.avaje.ebean.Transaction;
 
 import play.mvc.*;
 import play.data.*;
+import com.typesafe.config.Config;
 
 import static play.data.Form.*;
 
@@ -20,22 +21,32 @@ import javax.persistence.PersistenceException;
 public class HomeController extends Controller {
 
     private FormFactory mFormFactory;
-    private Globals mGlobals;
+    private Globals     mGlobals;
+    private String      mVersion;
 
     @Inject
-    public HomeController(FormFactory formFactory, Globals globals) {
-        this.mFormFactory = formFactory;
-        this.mGlobals = globals;
+    public HomeController(FormFactory formFactory, Globals globals, Config config) {
+        mFormFactory = formFactory;
+        mGlobals = globals;
+        mVersion = config.getString("app.version");
     }
 
     @Security.Authenticated(Secured.class)
     public Result index() {
         mGlobals.setClearSearch(true);
-        return ok(views.html.home.render(Secured.getClient(ctx())));
+        return ok(views.html.home.render(Secured.getClient(ctx()), mVersion));
     }
 
     public static Result HOME() {
         return Results.redirect(routes.HomeController.index());
+    }
+
+    public Result problem(String msg) {
+        return badRequest(views.html.home.render(Secured.getClient(ctx()), mVersion));
+    }
+
+    public static Result PROBLEM(String msg) {
+        return Results.redirect(routes.HomeController.problem(msg));
     }
 
     /**

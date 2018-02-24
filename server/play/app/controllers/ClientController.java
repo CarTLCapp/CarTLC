@@ -49,8 +49,7 @@ public class ClientController extends Controller {
         if (Secured.isAdmin(ctx())) {
             return ok(views.html.client_editForm.render(id, clientForm));
         } else {
-            clientForm.withError("adminstrator", "Non administrators cannot change clients.");
-            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+            return HomeController.PROBLEM("Non administrators cannot change clients.");
         }
     }
 

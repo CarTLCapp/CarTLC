@@ -135,8 +135,7 @@ public class TruckController extends Controller {
         if (Secured.isAdmin(ctx())) {
             return ok(views.html.truck_editForm.render(id, truckForm));
         } else {
-            truckForm.withError("adminstrator", "Non administrators cannot change truck entries.");
-            return badRequest(views.html.home.render(Secured.getClient(ctx())));
+            return HomeController.PROBLEM("Non administrators cannot change truck entries.");
         }
     }
 
