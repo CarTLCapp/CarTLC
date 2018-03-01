@@ -22,8 +22,8 @@ public class EntryPagedList {
         STATE("state", "c.state"),
         ZIP("zipcode", "c.zipcode");
 
-        String code;
         String alias;
+        String code;
 
         PagedSortBy(String alias, String code) {
             this.code = code;
@@ -238,6 +238,10 @@ public class EntryPagedList {
         query.append(", e.picture_collection_id");
         query.append(", e.note_collection_id");
         query.append(", e.truck_id, e.status, e.time_zone");
+        for (PagedSortBy sortBy : PagedSortBy.values()) {
+            query.append(", ");
+            query.append(sortBy.code);
+        }
         query.append(" FROM entry AS e");
         query.append(" INNER JOIN company AS c ON e.company_id = c.id");
         query.append(" INNER JOIN project AS p ON e.project_id = p.id");
