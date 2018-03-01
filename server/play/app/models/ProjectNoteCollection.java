@@ -91,10 +91,18 @@ public class ProjectNoteCollection extends Model {
         return null;
     }
 
-
     public static void deleteByProjectId(long project_id) {
         List<ProjectNoteCollection> items = find.where()
                 .eq("project_id", project_id)
+                .findList();
+        for (ProjectNoteCollection item : items) {
+            item.delete();
+        }
+    }
+
+    public static void deleteByNoteId(long note_id) {
+        List<ProjectNoteCollection> items = find.where()
+                .eq("note_id", note_id)
                 .findList();
         for (ProjectNoteCollection item : items) {
             item.delete();

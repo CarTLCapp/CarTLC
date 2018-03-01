@@ -218,8 +218,9 @@ public class NoteController extends Controller {
             note.update();
             Logger.info("Note has been disabled: it had entries: " + note.name);
         } else {
-            Logger.info("Note has been deleted: " + note.name);
+            ProjectNoteCollection.deleteByNoteId(note.id);
             note.delete();
+            Logger.info("Note has been deleted: " + note.name);
         }
         Version.inc(Version.VERSION_NOTE);
         return list();
