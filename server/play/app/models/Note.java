@@ -23,7 +23,7 @@ public class Note extends Model implements Comparable<Note> {
         TEXT("Text"),
         NUMERIC("Numeric"),
         ALPHANUMERIC("Alphanumeric"),
-        NUMERIC_WITH_SPACES("Numeric w/ Spaces"),
+        NUMERIC_WITH_SPACES("Numeric_with_spaces"),
         MULTILINE("Multiline");
 
         public String display;
