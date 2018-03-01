@@ -10,7 +10,6 @@ public class Globals {
     boolean mClearSearch;
 
     public Globals() {
-        Logger.info("Globals()");
         Client.initClient();
         EntryV2.transfer();
         Company.saveNames();

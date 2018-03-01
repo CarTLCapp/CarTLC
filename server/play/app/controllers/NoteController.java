@@ -152,7 +152,7 @@ public class NoteController extends Controller {
                     }
                 }
                 if (activeProject == null) {
-                    return badRequest("First line must indicate valid project");
+                    return badRequest("First line must being with " + PROJECT + " and then be followed by a valid project");
                 }
                 Note.Type type = null;
                 int pos = name.indexOf(':');
