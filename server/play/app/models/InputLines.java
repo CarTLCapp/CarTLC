@@ -16,21 +16,24 @@ public class InputLines extends Model {
 
     private static final long serialVersionUID = 1L;
 
-    public InputLines(String lines) {
-        if (lines == null) {
-            this.lines = "";
-        }
-        this.lines = lines;
+    private String mLines = "";
+
+    public InputLines() {
     }
 
-    public String lines = "";
+    public InputLines(String lines) {
+        if (lines == null) {
+            mLines = "";
+        }
+        mLines = lines;
+    }
 
     public String [] getLines() {
-        return lines.split("\\n");
+        return mLines.split("\\n");
     }
 
     public void setLines(String lines) {
-        this.lines = lines;
+        mLines = lines;
     }
 }
 
