@@ -10,14 +10,21 @@
 
     <p>You may create several notes at once. One note name per line.</p>
 
-    <p>To assocate the note item with a project put a project name on it's own line starting with the "Project:".
-        Then, subsequent note lines will be associated with that project.</p>
+    <p>To assocate the note item with one or more projects start a line with "Project:".
+        Then list a comma separated list of projects to be associated with the subsequent notes.</p>
 
     <p>For example:<br>
-        Project:<br>
+        Project: Fed Ex, Smart Drive<br>
         New Note 1<br>
         New Note 2<br>
     </p>
+
+    <p>You may also specify the type for each new note. For example:</p>
+
+    <p>Project: Fed Ex<br>
+       New Note 1:Numeric</p>
+
+    <p>Valid types: Text, Numeric, Alphanumeric, Numeric w/ Spaces, Multiline</p>
 
     @helper.form(routes.NoteController.saveMany()) {
 

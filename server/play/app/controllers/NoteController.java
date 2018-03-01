@@ -140,19 +140,28 @@ public class NoteController extends Controller {
         }
         final String PROJECT = "Project:";
         String[] lines = linesForm.get().getLines();
-        Project activeProject = null;
+        List<Project> activeProjects = new ArrayList<Project>();
         for (String name : lines) {
             name = name.trim();
             if (!name.isEmpty()) {
                 if (name.startsWith(PROJECT)) {
-                    Project project = Project.findByName(name.substring(PROJECT.length()).trim());
-                    if (project != null) {
-                        activeProject = project;
-                        continue;
+                    String line = name.substring(PROJECT.length()).trim();
+                    String [] project_names = line.split(",");
+                    for (String project_name : project_names) {
+                        String use_name = project_name.trim();
+                        if (use_name.length() > 0) {
+                            Project project = Project.findByName(use_name);
+                            if (project != null) {
+                                activeProjects.add(project);
+                            } else {
+                                return badRequest("Could not locate any project with name: '" + use_name + "'");
+                            }
+                        }
                     }
+                    continue;
                 }
-                if (activeProject == null) {
-                    return badRequest("First line must being with " + PROJECT + " and then be followed by a valid project");
+                if (activeProjects.size() == 0) {
+                    return badRequest("First line must being with " + PROJECT + " and then be followed by a comma separated list of projects");
                 }
                 Note.Type type = null;
                 int pos = name.indexOf(':');
@@ -160,6 +169,9 @@ public class NoteController extends Controller {
                     String typeStr = name.substring(pos + 1).trim();
                     name = name.substring(0, pos).trim();
                     type = Note.Type.from(typeStr);
+                    if (type == null) {
+                        return badRequest("Invalid note type: '" + typeStr + "'");
+                    }
                 }
                 List<Note> notes = Note.findByName(name);
                 Note note;
@@ -181,15 +193,14 @@ public class NoteController extends Controller {
                         note.update();
                     }
                 }
-                if (activeProject != null) {
+                for (Project project : activeProjects) {
                     ProjectNoteCollection collection = new ProjectNoteCollection();
-                    collection.project_id = activeProject.id;
+                    collection.project_id = project.id;
                     collection.note_id = note.id;
                     if (!ProjectNoteCollection.has(collection)) {
                         collection.save();
                     }
                 }
-
             }
         }
         Version.inc(Version.VERSION_NOTE);

@@ -48,7 +48,7 @@ public class Note extends Model implements Comparable<Note> {
                     return value;
                 }
             }
-            return Type.TEXT;
+            return null;
         }
     }
 
