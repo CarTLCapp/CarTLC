@@ -350,8 +350,14 @@ public class EntryPagedList {
             entries = Ebean.createSqlQuery(query).findList();
         } else {
             query = buildQuery(true);
+            if (mLimitByProject.size() > 0) {
+                query = buildQuery(false);
+                entries = Ebean.createSqlQuery(query).findList();
+                mResult.mNumTotalRows = entries.size();
+            } else {
+                mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
+            }
             entries = Ebean.createSqlQuery(query).findList();
-            mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
         }
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
