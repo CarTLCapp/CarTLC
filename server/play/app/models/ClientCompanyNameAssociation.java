@@ -37,17 +37,11 @@ public class ClientCompanyNameAssociation extends Model {
     }
 
     public static String findCompanyNameFor(long client_id) {
-        List<ClientCompanyNameAssociation> items = find.where()
-                .eq("client_id", client_id)
-                .findList();
-        String companyName = null;
-        for (ClientCompanyNameAssociation item : items) {
-            companyName = CompanyName.get(item.company_name_id);
-            if (companyName != null) {
-                break;
-            }
+        List<String> result = findCompaniesFor(client_id);
+        if (result.size() > 0) {
+            return result.get(0);
         }
-        return companyName;
+        return null;
     }
 
     public static List<String> findCompaniesFor(long client_id) {

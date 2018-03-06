@@ -168,6 +168,8 @@ public class EntryPagedList {
     Parameters mParams = new Parameters();
     Result mResult = new Result();
     SearchTerms mSearch = new SearchTerms();
+    List<Long> mLimitByProject = new ArrayList<Long>();
+    List<String> mLimitByCompanyName = new ArrayList<String>();
     long mByTruckId;
     int mRowNumber;
 
@@ -202,6 +204,8 @@ public class EntryPagedList {
     }
 
     public void clearCache() {
+        mLimitByCompanyName.clear();
+        mLimitByProject.clear();
     }
 
     public void computeFilters(Client client) {
@@ -210,9 +214,16 @@ public class EntryPagedList {
     }
 
     void setProjects(Client client) {
+        mLimitByProject.clear();
+        List<Project> projects = client.getProjects();
+        for (Project project : projects) {
+            mLimitByProject.add(project.id);
+        }
     }
 
     void setCompanies(Client client) {
+        mLimitByCompanyName.clear();
+        mLimitByCompanyName.addAll(client.getCompanyNames());
     }
 
     public void setByTruckId(long truck_id) {
@@ -254,7 +265,7 @@ public class EntryPagedList {
             query.append("e.truck_id=");
             query.append(mByTruckId);
         } else if (mSearch.hasSearch()) {
-            query.append(" WHERE ");
+            query.append(" WHERE (");
             query.append(appendSearch("c.name"));
             query.append(" OR ");
             query.append(appendSearch("c.city"));
@@ -276,6 +287,18 @@ public class EntryPagedList {
             query.append(appendSearch("tr.license_plate"));
             query.append(" OR ");
             query.append(appendSearch("eq.name"));
+            query.append(")");
+            if (mLimitByProject.size() > 0) {
+                query.append(" AND ");
+                query.append("(");
+                addFilters(query);
+                query.append(")");
+            }
+        } else {
+            if (mLimitByProject.size() > 0) {
+                query.append(" WHERE ");
+                addFilters(query);
+            }
         }
         query.append(" ORDER BY ");
         query.append(getSortBy());
@@ -290,6 +313,19 @@ public class EntryPagedList {
             query.append(mParams.mPageSize);
         }
         return query.toString();
+    }
+
+    void addFilters(StringBuilder query) {
+        boolean first = true;
+        for (long project_id : mLimitByProject) {
+            if (first) {
+                first = false;
+            } else {
+                query.append(" OR ");
+            }
+            query.append("p.id = ");
+            query.append(project_id);
+        }
     }
 
     String appendSearch(String column) {
