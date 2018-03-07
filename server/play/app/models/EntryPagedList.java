@@ -160,7 +160,7 @@ public class EntryPagedList {
 
     class Result {
         List<Entry> mList = new ArrayList<Entry>();
-        int mNumTotalRows;
+        long mNumTotalRows;
     }
 
     static final int PAGE_SIZE = 100;
@@ -346,34 +346,18 @@ public class EntryPagedList {
         if (mSearch.hasMultipleTerms()) {
             query = buildQuery(false);
             entries = Ebean.createSqlQuery(query).findList();
+            mResult.mNumTotalRows = entries.size();
         } else if (mSearch.hasSearch()) {
             query = buildQuery(true);
             SqlRow row = Ebean.createSqlQuery(query).findUnique();
-            Iterator<String> keys = row.keys();
-            while (keys.hasNext()) {
-                Logger.info("ROW1 KEY: " + keys.next());
-            }
-            Collection<Object> values = row.values();
-            for (Object value : values) {
-                Logger.info("ROW1 VALUE: " + value.getClass().getSimpleName());
-            }
+            mResult.mNumTotalRows = row.getLong("count(e.id)");
             query = buildQuery(false);
             entries = Ebean.createSqlQuery(query).findList();
-            mResult.mNumTotalRows = entries.size();
         } else {
             if (mLimitByProject.size() > 0) {
                 query = buildQuery(true);
                 SqlRow row = Ebean.createSqlQuery(query).findUnique();
-                Iterator<String> keys = row.keys();
-                while (keys.hasNext()) {
-                    Logger.info("ROW2 KEY: " + keys.next());
-                }
-                Collection<Object> values = row.values();
-                for (Object value : values) {
-                    Logger.info("ROW2 VALUE: " + value.getClass().getSimpleName());
-                }
-                entries = Ebean.createSqlQuery(query).findList();
-                mResult.mNumTotalRows = entries.size();
+                mResult.mNumTotalRows = row.getLong("count(e.id)");
             } else {
                 mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
             }
@@ -425,7 +409,7 @@ public class EntryPagedList {
         return mResult.mList;
     }
 
-    public int getTotalRowCount() {
+    public long getTotalRowCount() {
         return mResult.mNumTotalRows;
     }
 
@@ -458,8 +442,8 @@ public class EntryPagedList {
     public String getDisplayXtoYofZ(String to, String of) {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("Displaying ");
-        int start = mParams.mPage * mParams.mPageSize;
-        int last = start + mParams.mPageSize - 1;
+        long start = mParams.mPage * mParams.mPageSize;
+        long last = start + mParams.mPageSize - 1;
         if (last >= mResult.mNumTotalRows) {
             last = mResult.mNumTotalRows - 1;
         }
