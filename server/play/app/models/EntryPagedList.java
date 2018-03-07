@@ -242,16 +242,20 @@ public class EntryPagedList {
         return "";
     }
 
-    String buildQuery(boolean limitOkay) {
+    String buildQuery(boolean isCount) {
         StringBuilder query = new StringBuilder();
-        query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
-        query.append(", e.equipment_collection_id");
-        query.append(", e.picture_collection_id");
-        query.append(", e.note_collection_id");
-        query.append(", e.truck_id, e.status, e.time_zone");
-        for (PagedSortBy sortBy : PagedSortBy.values()) {
-            query.append(", ");
-            query.append(sortBy.code);
+        if (isCount) {
+            query.append("SELECT COUNT(e.id)");
+        } else {
+            query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
+            query.append(", e.equipment_collection_id");
+            query.append(", e.picture_collection_id");
+            query.append(", e.note_collection_id");
+            query.append(", e.truck_id, e.status, e.time_zone");
+            for (PagedSortBy sortBy : PagedSortBy.values()) {
+                query.append(", ");
+                query.append(sortBy.code);
+            }
         }
         query.append(" FROM entry AS e");
         query.append(" INNER JOIN company AS c ON e.company_id = c.id");
@@ -305,7 +309,7 @@ public class EntryPagedList {
         query.append(" ");
         query.append(getOrder());
 
-        if (limitOkay) {
+        if (!isCount) {
             int start = mParams.mPage * mParams.mPageSize;
             query.append(" LIMIT ");
             query.append(start);
@@ -343,20 +347,37 @@ public class EntryPagedList {
             query = buildQuery(false);
             entries = Ebean.createSqlQuery(query).findList();
         } else if (mSearch.hasSearch()) {
+            query = buildQuery(true);
+            SqlRow row = Ebean.createSqlQuery(query).findUnique();
+            Iterator<String> keys = row.keys();
+            while (keys.hasNext()) {
+                Logger.info("ROW1 KEY: " + keys.next());
+            }
+            Collection<Object> values = row.values();
+            for (Object value : values) {
+                Logger.info("ROW1 VALUE: " + value.getClass().getSimpleName());
+            }
             query = buildQuery(false);
             entries = Ebean.createSqlQuery(query).findList();
             mResult.mNumTotalRows = entries.size();
-            query = buildQuery(true);
-            entries = Ebean.createSqlQuery(query).findList();
         } else {
-            query = buildQuery(true);
             if (mLimitByProject.size() > 0) {
-                query = buildQuery(false);
+                query = buildQuery(true);
+                SqlRow row = Ebean.createSqlQuery(query).findUnique();
+                Iterator<String> keys = row.keys();
+                while (keys.hasNext()) {
+                    Logger.info("ROW2 KEY: " + keys.next());
+                }
+                Collection<Object> values = row.values();
+                for (Object value : values) {
+                    Logger.info("ROW2 VALUE: " + value.getClass().getSimpleName());
+                }
                 entries = Ebean.createSqlQuery(query).findList();
                 mResult.mNumTotalRows = entries.size();
             } else {
                 mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
             }
+            query = buildQuery(false);
             entries = Ebean.createSqlQuery(query).findList();
         }
         mResult.mList.clear();
