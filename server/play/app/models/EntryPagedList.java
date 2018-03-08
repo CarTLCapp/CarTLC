@@ -249,7 +249,6 @@ public class EntryPagedList {
             query.append(" FROM entry AS e");
             query.append(" INNER JOIN project AS p ON e.project_id = p.id");
             query.append(" INNER JOIN company AS c ON e.company_id = c.id");
-            query.append(" INNER JOIN project AS p ON e.project_id = p.id");
             query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
             query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
             // For some reason if I include eqc and eq tables, the COUNT(*) includes all records?
