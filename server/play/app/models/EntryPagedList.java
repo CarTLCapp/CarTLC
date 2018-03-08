@@ -248,6 +248,11 @@ public class EntryPagedList {
             query.append("SELECT COUNT(*)");
             query.append(" FROM entry AS e");
             query.append(" INNER JOIN project AS p ON e.project_id = p.id");
+            query.append(" INNER JOIN company AS c ON e.company_id = c.id");
+            query.append(" INNER JOIN project AS p ON e.project_id = p.id");
+            query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
+            query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
+            // For some reason if I include eqc and eq tables, the COUNT(*) includes all records?
         } else {
             query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
             query.append(", e.equipment_collection_id");
@@ -291,8 +296,11 @@ public class EntryPagedList {
             query.append(appendSearch("tr.truck_number"));
             query.append(" OR ");
             query.append(appendSearch("tr.license_plate"));
-            query.append(" OR ");
-            query.append(appendSearch("eq.name"));
+            if (!isCount) {
+                // Can't do this until I figure out why COUNT(*) oddity occurs.
+                query.append(" OR ");
+                query.append(appendSearch("eq.name"));
+            }
             query.append(")");
             if (mLimitByProject.size() > 0) {
                 query.append(" AND ");
@@ -306,12 +314,13 @@ public class EntryPagedList {
                 addFilters(query);
             }
         }
-        query.append(" ORDER BY ");
-        query.append(getSortBy());
-        query.append(" ");
-        query.append(getOrder());
-
-        if (!isCount) {
+        if (isCount) {
+            query.append(" GROUP BY p.id");
+        } else {
+            query.append(" ORDER BY ");
+            query.append(getSortBy());
+            query.append(" ");
+            query.append(getOrder());
             int start = mParams.mPage * mParams.mPageSize;
             query.append(" LIMIT ");
             query.append(start);
@@ -353,8 +362,10 @@ public class EntryPagedList {
             query = buildQuery(true);
             SqlRow row = Ebean.createSqlQuery(query).findUnique();
             mResult.mNumTotalRows = row.getLong("count(*)");
+            Logger.info("GOT[COUNT] " + mResult.mNumTotalRows + " from " + query);
             query = buildQuery(false);
             entries = Ebean.createSqlQuery(query).findList();
+            Logger.info("GOT[ENTRY] " + entries.size() + " from " + query);
         } else {
             if (mLimitByProject.size() > 0) {
                 query = buildQuery(true);
