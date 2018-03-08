@@ -93,6 +93,17 @@ public class EntryPagedList {
             }
         }
 
+        boolean hasMatch(String element) {
+            String elementNoCase = element.toLowerCase();
+            for (String term : mTerms) {
+                int pos = elementNoCase.indexOf(term);
+                if (pos >= 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         ArrayList<TermMatch> match(String element) {
             ArrayList<TermMatch> matches = new ArrayList<>();
             String elementNoCase = element.toLowerCase();
@@ -203,11 +214,6 @@ public class EntryPagedList {
         return mParams.mOrder;
     }
 
-    public void clearCache() {
-        mLimitByCompanyName.clear();
-        mLimitByProject.clear();
-    }
-
     public void computeFilters(Client client) {
         setProjects(client);
         setCompanies(client);
@@ -242,7 +248,7 @@ public class EntryPagedList {
         return "";
     }
 
-    String buildQuery(boolean isCount) {
+    String buildQuery(boolean isCount, boolean useLimit) {
         StringBuilder query = new StringBuilder();
         if (isCount) {
             query.append("SELECT COUNT(*)");
@@ -252,6 +258,8 @@ public class EntryPagedList {
             query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
             query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
             // For some reason if I include eqc and eq tables, the COUNT(*) includes all records?
+            // query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
+            // query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
         } else {
             query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
             query.append(", e.equipment_collection_id");
@@ -315,7 +323,7 @@ public class EntryPagedList {
         }
         if (isCount) {
             query.append(" GROUP BY p.id");
-        } else {
+        } else if (useLimit) {
             query.append(" ORDER BY ");
             query.append(getSortBy());
             query.append(" ");
@@ -350,30 +358,30 @@ public class EntryPagedList {
         return new InputSearch(mSearch.getAll());
     }
 
+    public void clearCache() {
+        mResult.mNumTotalRows = 0;
+    }
+
     public void compute() {
         List<SqlRow> entries;
         String query;
         if (mSearch.hasMultipleTerms()) {
-            query = buildQuery(false);
+            query = buildQuery(false, false);
             entries = Ebean.createSqlQuery(query).findList();
-            mResult.mNumTotalRows = entries.size();
         } else if (mSearch.hasSearch()) {
-            query = buildQuery(true);
-            SqlRow row = Ebean.createSqlQuery(query).findUnique();
-            mResult.mNumTotalRows = row.getLong("count(*)");
-            Logger.info("GOT[COUNT] " + mResult.mNumTotalRows + " from " + query);
-            query = buildQuery(false);
+            query = buildQuery(false, true);
             entries = Ebean.createSqlQuery(query).findList();
-            Logger.info("GOT[ENTRY] " + entries.size() + " from " + query);
         } else {
-            if (mLimitByProject.size() > 0) {
-                query = buildQuery(true);
-                SqlRow row = Ebean.createSqlQuery(query).findUnique();
-                mResult.mNumTotalRows = row.getLong("count(*)");
-            } else {
-                mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
+            if (mResult.mNumTotalRows == 0) {
+                if (mLimitByProject.size() > 0) {
+                    query = buildQuery(true, true);
+                    entries = Ebean.createSqlQuery(query).findList();
+                    mResult.mNumTotalRows = getCount(entries);
+                } else {
+                    mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
+                }
             }
-            query = buildQuery(false);
+            query = buildQuery(false, true);
             entries = Ebean.createSqlQuery(query).findList();
         }
         mResult.mList.clear();
@@ -388,7 +396,30 @@ public class EntryPagedList {
             mResult.mNumTotalRows = mResult.mList.size();
             mParams.mPageSize = mResult.mList.size();
             mParams.mPage = 0;
+        } else if (mSearch.hasSearch()) {
+            if (mResult.mNumTotalRows == 0) {
+                if (hasEquipmentMatch(mResult.mList)) {
+                    query = buildQuery(false, false);
+                    entries = Ebean.createSqlQuery(query).findList();
+                    mResult.mNumTotalRows = entries.size();
+                } else {
+                    query = buildQuery(true, true);
+                    entries = Ebean.createSqlQuery(query).findList();
+                    mResult.mNumTotalRows = getCount(entries);
+                }
+            }
         }
+    }
+
+    long getCount(List<SqlRow> list) {
+        int row = 0;
+        for (SqlRow trow : list) {
+            if (trow.containsKey("count(*)")) {
+                return trow.getLong("count(*)");
+            }
+        }
+        Logger.error("Could not find number of rows");
+        return 0;
     }
 
     Entry parseEntry(SqlRow row) {
@@ -407,6 +438,16 @@ public class EntryPagedList {
             entry.status = Entry.Status.from(getInteger(row, "status"));
         }
         return entry;
+    }
+
+    boolean hasEquipmentMatch(List<Entry> entries) {
+        for (Entry entry : entries) {
+            String line = entry.getEquipmentLine();
+            if (mSearch.hasMatch(line)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     Integer getInteger(SqlRow row, String column) {
@@ -436,7 +477,6 @@ public class EntryPagedList {
     public String getRowNumber() {
         return Integer.toString(mRowNumber);
     }
-
 
     public boolean hasPrev() {
         return mParams.mPage > 0;

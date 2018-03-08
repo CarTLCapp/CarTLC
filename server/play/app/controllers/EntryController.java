@@ -52,11 +52,13 @@ public class EntryController extends Controller {
         if (mGlobals.isClearSearch()) {
             mEntryList.setSearch(null);
             mGlobals.setClearSearch(false);
+            mEntryList.clearCache();
+        } else if (page == 0) {
+            mEntryList.clearCache();
         }
         mEntryList.setPage(page);
         mEntryList.setSortBy(sortBy);
         mEntryList.setOrder(order);
-        mEntryList.clearCache();
         mEntryList.computeFilters(Secured.getClient(ctx()));
         mEntryList.compute();
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).fill(mEntryList.getInputSearch());
