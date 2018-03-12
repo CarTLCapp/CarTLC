@@ -763,7 +763,7 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
-                    if (!TextUtils.isEmpty(zipcode) && (states.size() == 1)) {
+                    if (states.size() == 1) {
                         PrefHelper.getInstance().setState(states.get(0));
                         skip();
                     } else {
@@ -798,7 +798,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
-                    if (!TextUtils.isEmpty(zipcode) && !TextUtils.isEmpty(state) && cities.size() == 1) {
+                    if (!TextUtils.isEmpty(state) && (cities.size() == 1)) {
                         PrefHelper.getInstance().setCity(cities.get(0));
                         skip();
                     } else {
@@ -1210,6 +1210,8 @@ public class MainActivity extends AppCompatActivity {
             case STREET:
                 if (mEditCurProject) {
                     hint = getEditProjectHint();
+                }  else {
+                    hint = getCurProjectHint();
                 }
                 break;
             case TRUCK:
@@ -1226,6 +1228,14 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(getString(R.string.entry_hint_edit_project));
         sbuf.append("\n");
+        sbuf.append(PrefHelper.getInstance().getProjectName());
+        sbuf.append("\n");
+        sbuf.append(PrefHelper.getInstance().getAddress());
+        return sbuf.toString();
+    }
+
+    String getCurProjectHint() {
+        StringBuilder sbuf = new StringBuilder();
         sbuf.append(PrefHelper.getInstance().getProjectName());
         sbuf.append("\n");
         sbuf.append(PrefHelper.getInstance().getAddress());
