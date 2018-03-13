@@ -87,5 +87,6 @@
 
     <string name="perm_read_external_storage">Grant external read storage permission to help storage uploaded files.</string>
     <string name="perm_write_external_storage">Grant external write storage permission to help storage uploaded files.</string>
+    <string name="perm_location">Grant location permission to help creating a new project easier.</string>
 
 </resources>

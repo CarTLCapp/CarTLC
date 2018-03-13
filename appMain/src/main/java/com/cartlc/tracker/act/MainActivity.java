@@ -1,10 +1,12 @@
 package com.cartlc.tracker.act;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -63,6 +65,10 @@ import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.event.EventRefreshProjects;
 import com.cartlc.tracker.util.DialogHelper;
+import com.cartlc.tracker.util.PermissionHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -229,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
     String             mCurKey             = PrefHelper.KEY_STATE;
     MyHandler          mHandler            = new MyHandler();
     SoftKeyboardDetect mSoftKeyboardDetect = new SoftKeyboardDetect();
+    private FusedLocationProviderClient mFusedLocationClient;
     TBApplication              mApp;
     SimpleListAdapter          mSimpleAdapter;
     ProjectListAdapter         mProjectAdapter;
@@ -243,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
     String                     mCompanyEditing;
     ZipCodeWatcher             mZipCodeWatcher;
     DialogHelper               mDialogHelper;
+    Location                   mLocation;
     boolean                    mWasNext;
     boolean                    mCurStageEditing;
     boolean                    mDoingCenter;
@@ -252,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mApp = (TBApplication) getApplicationContext();
         setContentView(R.layout.activity_main);
         mApp.setUncaughtExceptionHandler(this);
@@ -366,6 +375,16 @@ public class MainActivity extends AppCompatActivity {
         setTitle(getVersionedTitle());
     }
 
+    void getLocation() throws SecurityException {
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        mLocation = location;
+                    }
+                });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -389,7 +408,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        mApp.checkPermissions(this, null);
+        mApp.checkPermissions(this, new PermissionHelper.PermissionListener() {
+            @Override
+            public void onGranted(String permission) {
+                if (Manifest.permission.ACCESS_FINE_LOCATION.equals(permission)) {
+                    getLocation();
+                }
+            }
+
+            @Override
+            public void onDenied(String permission) {
+            }
+        });
         mApp.ping();
         mDoingCenter = false; // Safety
     }
@@ -763,8 +793,7 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
-                    if (states.size() == 1) {
-                        PrefHelper.getInstance().setState(states.get(0));
+                    if (autoFillState(states)) {
                         skip();
                     } else {
                         if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
@@ -798,8 +827,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
-                    if (!TextUtils.isEmpty(state) && (cities.size() == 1)) {
-                        PrefHelper.getInstance().setCity(cities.get(0));
+                    if (autoFillCity(state, cities)) {
                         skip();
                     } else {
                         showMainListFrame();
@@ -830,10 +858,14 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setText("");
                     mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 } else {
-                    mCenter.setVisibility(View.VISIBLE);
-                    showMainListFrame();
-                    if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
-                        mNext.setVisibility(View.VISIBLE);
+                    if (autoFillStreet(streets)) {
+                       skip();
+                    } else {
+                        mCenter.setVisibility(View.VISIBLE);
+                        showMainListFrame();
+                        if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
+                            mNext.setVisibility(View.VISIBLE);
+                        }
                     }
                 }
                 break;
@@ -958,6 +990,26 @@ public class MainActivity extends AppCompatActivity {
                 fillStage();
                 break;
         }
+    }
+
+    boolean autoFillState(List<String> states) {
+        if ((states.size() == 1) && mWasNext) {
+            PrefHelper.getInstance().setState(states.get(0));
+            return true;
+        }
+        return false;
+    }
+
+    boolean autoFillCity(String state, List<String> cities) {
+        if (!TextUtils.isEmpty(state) && (cities.size() == 1) && mWasNext) {
+            PrefHelper.getInstance().setCity(cities.get(0));
+            return true;
+        }
+        return false;
+    }
+
+    boolean autoFillStreet(List<String> streets) {
+        return false;
     }
 
     boolean isNewEquipmentOkay() {

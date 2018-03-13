@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.cartlc.tracker.BuildConfig;
+import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DatabaseManager;
 import com.cartlc.tracker.etc.CheckError;
 import com.cartlc.tracker.etc.PrefHelper;
@@ -23,6 +24,7 @@ import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.server.AmazonHelper;
 import com.cartlc.tracker.server.DCService;
 import com.cartlc.tracker.server.ServerHelper;
+import com.cartlc.tracker.util.LocationHelper;
 import com.cartlc.tracker.util.PermissionHelper.PermissionRequest;
 import com.cartlc.tracker.util.PermissionHelper.PermissionListener;
 
@@ -55,8 +57,9 @@ public class TBApplication extends Application {
     CrashReportingTree mCrashTree = new CrashReportingTree();
 
     static final PermissionRequest[] PERMISSIONS = new PermissionRequest[]{
-            new PermissionRequest(Manifest.permission.WRITE_EXTERNAL_STORAGE, 0),
-            new PermissionRequest(Manifest.permission.READ_EXTERNAL_STORAGE, 0),
+            new PermissionRequest(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.perm_read_external_storage),
+            new PermissionRequest(Manifest.permission.READ_EXTERNAL_STORAGE, R.string.perm_write_external_storage),
+            new PermissionRequest(Manifest.permission.ACCESS_FINE_LOCATION, R.string.perm_location),
     };
 
     public TBApplication() {
@@ -81,6 +84,7 @@ public class TBApplication extends Application {
         CheckError.Init();
 
         PrefHelper.getInstance().detectSpecialUpdateCheck();
+        LocationHelper.Init(this);
     }
 
     public void ping() {
