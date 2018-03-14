@@ -2,16 +2,17 @@ package com.cartlc.tracker.util;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +41,6 @@ public class LocationHelper {
         static final String GOOGLE_LOC = "http://maps.googleapis.com/maps/api/geocode/json?";
 
         OnLocationCallback mCallback;
-        Address mAddress;
 
         GetAddressTask(OnLocationCallback callback) {
             mCallback = callback;
@@ -50,18 +50,39 @@ public class LocationHelper {
         protected Address doInBackground(Location... locs)
         {
             Location loc = locs[0];
-            Address address = getAddress1(loc);
+            Address address;
+            address = getAddressFromDatabase(loc);
+            if (address != null) {
+                return address;
+            }
+            address = getAddressFromGeocoder(loc);
+            if (address != null) {
+                Log.d("MYDEBUG", "Address from geocoder: " + address.toString());
+                return storeAddressToDatabase(loc, address);
+            }
+            return storeAddressToDatabase(loc, getAddressFromNetwork(loc));
+        }
+
+        /**
+         * Lookup the address in internal database.
+         * The reason is that there is a limit to the number of times you can hit Google's geocacher.
+         */
+        Address getAddressFromDatabase(Location location) {
+            return null;
+        }
+
+        Address storeAddressToDatabase(Location location, Address address) {
             if (address == null) {
-                address = getAddress2(loc);
+                return null;
             }
             return address;
         }
 
-        Address getAddress1(Location location)
+        Address getAddressFromGeocoder(Location location)
         {
             try {
-                List<Address> addressList = mGeocoder.getFromLocation(location.getLatitude(),
-                        location.getLongitude(), 1);
+                List<Address> addressList = mGeocoder.getFromLocation(
+                        location.getLatitude(), location.getLongitude(), 1);
                 if (addressList != null && addressList.size() > 0) {
                     return addressList.get(0);
                 }
@@ -71,13 +92,14 @@ public class LocationHelper {
             return null;
         }
 
-        Address getAddress2(Location location)
+        Address getAddressFromNetwork(Location location)
         {
-            List<Address> list = getFromLocation(location.getLatitude(), location.getLongitude(),
-                    1);
+            List<Address> list = getFromLocation(
+                    location.getLatitude(), location.getLongitude(),1);
             if (list == null || list.size() == 0) {
                 return null;
             }
+            Log.d("MYDEBUG", "Address from network: " + list.get(0).toString());
             return list.get(0);
         }
 
@@ -105,13 +127,7 @@ public class LocationHelper {
                     stringBuilder.append((char) b);
                 }
                 JSONObject jsonObject = new JSONObject();
-                /*
-                 * TODO: STORE the returned string in our database, with a lookup key of the
-				 * latitude and
-				 * longitude. We can do a lookup if we hit this multiple times. The reason is that
-				  * there
-				 * is a limit to the number of times you can hit Google's geocacher.
-				 */
+
                 jsonObject = new JSONObject(stringBuilder.toString());
 
                 retList = new ArrayList<Address>();
@@ -169,72 +185,58 @@ public class LocationHelper {
         }
 
         @Override
-        protected void onPostExecute(Address result)
+        protected void onPostExecute(Address address)
         {
-            mAddress = result;
-
-            if (mAddress != null) {
+            Log.d("MYDEBUG", "onPostExecute()");
+            if (address != null) {
+                // TODO: Store in database
                 if (LOG) {
-                    Log.i(TAG, "Address=" + mAddress.toString());
+                    Log.i(TAG, "MYDEBUG Address=" + address.toString());
                 }
-                invokeCallback();
+                invokeCallback(address);
             } else if (LOG) {
-                Log.e(TAG, "NO ADDRESS");
+                Log.e(TAG, "MYDEBUG NO ADDRESS");
             }
         }
 
-        void invokeCallback()
+        void invokeCallback(Address address)
         {
-            if (mAddress != null && mCallback != null) {
-                mCallback.onLocationUpdate(getLocationString());
+            if (mCallback != null) {
+                mCallback.onLocationUpdate(getLocationString(address));
             }
         }
 
-        public String getLocationString()
+        public String getLocationString(Address address)
         {
-            if (mAddress != null) {
-                String result = getLocation(mLocationSelector);
-
-                if (LOG) {
-                    Log.i(TAG, "LOCATION " + mLocationSelector + "=" + mLocationSelector);
-                }
-                return result;
-            }
-            return DEFAULT_LOCATION_HACK;
+            return getLocation(address, mLocationSelector);
         }
 
-
-        String getLocation(int selector)
+        String getLocation(Address address, int selector)
         {
-            if (mAddress == null) {
-                return null;
-            }
             switch (selector) {
                 case 1:
-                    return mAddress.getAddressLine(1);
+                    return address.getAddressLine(1);
                 case 2:
-                    return mAddress.getSubThoroughfare();
+                    return address.getSubThoroughfare();
                 case 3:
-                    return mAddress.getFeatureName();
+                    return address.getFeatureName();
                 case 4:
-                    return mAddress.getSubAdminArea();
+                    return address.getSubAdminArea();
                 case 5:
-                    return mAddress.getSubLocality();
+                    return address.getSubLocality();
                 case 6:
-                    return mAddress.getPremises();
+                    return address.getPremises();
                 case 7:
-                    return mAddress.getLocality();
+                    return address.getLocality();
                 case 8:
-                    return mAddress.getThoroughfare();
+                    return address.getThoroughfare();
                 case 9:
-                    return mAddress.getAdminArea();
+                    return address.getAdminArea();
                 case 10:
-                    return mAddress.getCountryName();
+                    return address.getCountryName();
             }
             return null;
         }
-
-
     }
 
     public interface OnLocationCallback
@@ -255,6 +257,7 @@ public class LocationHelper {
     TBApplication mApp;
     final Geocoder mGeocoder;
     int mLocationSelector;
+    FusedLocationProviderClient mFusedLocationClient;
 
     LocationHelper(TBApplication app)
     {
@@ -264,10 +267,46 @@ public class LocationHelper {
         mLocationSelector = 1;
     }
 
-    public void requestAddress(Location location, OnLocationCallback callback)
+    void requestAddress(Location location, OnLocationCallback callback)
     {
         GetAddressTask task = new GetAddressTask(callback);
         task.execute(location);
+    }
+
+    public void requestLocation(final Activity act, final OnLocationCallback callback) {
+        if (mFusedLocationClient == null) {
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(act);
+        }
+        Log.d("MYDEBUG", "requestLocation()");
+
+        mApp.checkPermissions(act, new PermissionHelper.PermissionListener() {
+            @Override
+            public void onGranted(String permission) {
+                Log.d("MYDEBUG", "PERMISSION GRANTED: " + permission);
+                if (Manifest.permission.ACCESS_FINE_LOCATION.equals(permission)) {
+                    getLocation(act, callback);
+                }
+            }
+
+            @Override
+            public void onDenied(String permission) {
+            }
+        });
+    }
+
+    public void onDestroy() {
+        mFusedLocationClient = null;
+    }
+
+    void getLocation(Activity act, final OnLocationCallback callback) throws SecurityException {
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(act, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        Log.d("MYDEBUG", "GOT LOCATION=" + location.toString());
+                        requestAddress(location, callback);
+                    }
+                });
     }
 
 }

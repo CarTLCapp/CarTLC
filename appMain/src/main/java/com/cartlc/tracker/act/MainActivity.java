@@ -24,6 +24,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -65,6 +66,7 @@ import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.event.EventRefreshProjects;
 import com.cartlc.tracker.util.DialogHelper;
+import com.cartlc.tracker.util.LocationHelper;
 import com.cartlc.tracker.util.PermissionHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -235,7 +237,6 @@ public class MainActivity extends AppCompatActivity {
     String             mCurKey             = PrefHelper.KEY_STATE;
     MyHandler          mHandler            = new MyHandler();
     SoftKeyboardDetect mSoftKeyboardDetect = new SoftKeyboardDetect();
-    private FusedLocationProviderClient mFusedLocationClient;
     TBApplication              mApp;
     SimpleListAdapter          mSimpleAdapter;
     ProjectListAdapter         mProjectAdapter;
@@ -250,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
     String                     mCompanyEditing;
     ZipCodeWatcher             mZipCodeWatcher;
     DialogHelper               mDialogHelper;
-    Location                   mLocation;
+    String                     mLocation;
     boolean                    mWasNext;
     boolean                    mCurStageEditing;
     boolean                    mDoingCenter;
@@ -260,7 +261,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mApp = (TBApplication) getApplicationContext();
         setContentView(R.layout.activity_main);
         mApp.setUncaughtExceptionHandler(this);
@@ -373,16 +373,17 @@ public class MainActivity extends AppCompatActivity {
         fillStage();
         EventBus.getDefault().register(this);
         setTitle(getVersionedTitle());
+        getLocation();
     }
 
-    void getLocation() throws SecurityException {
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        mLocation = location;
-                    }
-                });
+    void getLocation() {
+        LocationHelper.getInstance().requestLocation(this, new LocationHelper.OnLocationCallback() {
+            @Override
+            public void onLocationUpdate(String location) {
+                Log.d("MYDEBUG", "onLocationUpdate=" + location);
+                mLocation = location;
+            }
+        });
     }
 
     @Override
@@ -408,18 +409,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        mApp.checkPermissions(this, new PermissionHelper.PermissionListener() {
-            @Override
-            public void onGranted(String permission) {
-                if (Manifest.permission.ACCESS_FINE_LOCATION.equals(permission)) {
-                    getLocation();
-                }
-            }
-
-            @Override
-            public void onDenied(String permission) {
-            }
-        });
         mApp.ping();
         mDoingCenter = false; // Safety
     }

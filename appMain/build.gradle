@@ -38,10 +38,10 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:4.5.0'
     implementation 'com.jakewharton:butterknife:8.5.1'
     implementation 'com.squareup.picasso:picasso:2.6.0-SNAPSHOT'
-    implementation 'com.google.android.gms:play-services:10.2.6'
     implementation 'de.greenrobot:eventbus:2.4.0'
     implementation 'com.android.support:multidex:1.0.1'
     implementation 'com.google.android.gms:play-services-location:11.8.0'
+    implementation 'com.google.android.gms:play-services:11.8.0'
 
     implementation 'com.amazonaws:aws-android-sdk-core:2.4.3'
     implementation 'com.amazonaws:aws-android-sdk-s3:2.4.3'
