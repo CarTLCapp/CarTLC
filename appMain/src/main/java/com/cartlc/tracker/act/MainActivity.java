@@ -1,12 +1,11 @@
 package com.cartlc.tracker.act;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.location.Location;
+import android.location.Address;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -67,10 +66,6 @@ import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.event.EventRefreshProjects;
 import com.cartlc.tracker.util.DialogHelper;
 import com.cartlc.tracker.util.LocationHelper;
-import com.cartlc.tracker.util.PermissionHelper;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -83,6 +78,7 @@ import de.greenrobot.event.EventBus;
 public class MainActivity extends AppCompatActivity {
 
     static final boolean ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG; // true=Debugging only
+    static final boolean LOCATION_ENABLE = false;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_EDIT_ENTRY    = 2;
@@ -251,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
     String                     mCompanyEditing;
     ZipCodeWatcher             mZipCodeWatcher;
     DialogHelper               mDialogHelper;
-    String                     mLocation;
+    Address                    mAddress;
     boolean                    mWasNext;
     boolean                    mCurStageEditing;
     boolean                    mDoingCenter;
@@ -377,13 +373,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void getLocation() {
-        LocationHelper.getInstance().requestLocation(this, new LocationHelper.OnLocationCallback() {
-            @Override
-            public void onLocationUpdate(String location) {
-                Log.d("MYDEBUG", "onLocationUpdate=" + location);
-                mLocation = location;
-            }
-        });
+        if (LOCATION_ENABLE) {
+            LocationHelper.getInstance().requestLocation(this, new LocationHelper.OnLocationCallback() {
+                @Override
+                public void onLocationUpdate(Address address) {
+                    Log.d("MYDEBUG", "onLocationUpdate=" + address.toString());
+                    mAddress = address;
+                }
+            });
+        }
     }
 
     @Override
@@ -419,6 +417,7 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
         CheckError.getInstance().cleanup();
         mDialogHelper.clearDialog();
+        LocationHelper.getInstance().onDestroy();
     }
 
     public void onEvent(EventRefreshProjects event) {
@@ -711,6 +710,7 @@ public class MainActivity extends AppCompatActivity {
                     mNext.setVisibility(View.VISIBLE);
                 }
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, TableProjects.getInstance().query(true));
+                getLocation();
                 break;
             case COMPANY:
                 mPrev.setVisibility(View.VISIBLE);
@@ -782,7 +782,7 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
-                    if (autoFillState(states)) {
+                    if (didAutoFillState(states)) {
                         skip();
                     } else {
                         if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
@@ -816,7 +816,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
-                    if (autoFillCity(state, cities)) {
+                    if (didAutoFillCity(state, cities)) {
                         skip();
                     } else {
                         showMainListFrame();
@@ -847,7 +847,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setText("");
                     mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 } else {
-                    if (autoFillStreet(streets)) {
+                    if (didAutoFillStreet(streets)) {
                        skip();
                     } else {
                         mCenter.setVisibility(View.VISIBLE);
@@ -981,23 +981,63 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    boolean autoFillState(List<String> states) {
-        if ((states.size() == 1) && mWasNext) {
-            PrefHelper.getInstance().setState(states.get(0));
-            return true;
+    boolean didAutoFillState(List<String> states) {
+        String state = getAutoFillState(states);
+        if (state == null) {
+            return false;
         }
-        return false;
+        PrefHelper.getInstance().setState(state);
+        return true;
     }
 
-    boolean autoFillCity(String state, List<String> cities) {
-        if (!TextUtils.isEmpty(state) && (cities.size() == 1) && mWasNext) {
-            PrefHelper.getInstance().setCity(cities.get(0));
-            return true;
+    String getAutoFillState(List<String> states) {
+        if (!mWasNext) {
+            return null;
         }
-        return false;
+        if (states.size() == 1) {
+            return states.get(0);
+        }
+        if (mAddress != null) {
+            return LocationHelper.getInstance().matchState(mAddress, states);
+        }
+        return null;
     }
 
-    boolean autoFillStreet(List<String> streets) {
+    boolean didAutoFillCity(String state, List<String> cities) {
+        String city = getAutoFillCity(state, cities);
+        if (city == null) {
+            return false;
+        }
+        PrefHelper.getInstance().setCity(city);
+        return true;
+    }
+
+    String getAutoFillCity(String state, List<String> cities) {
+        if (!mWasNext) {
+            return null;
+        }
+        if (cities.size() == 1) {
+            return cities.get(0);
+        }
+        if (TextUtils.isEmpty(state)) {
+            return null;
+        }
+        if (mAddress != null) {
+            return LocationHelper.getInstance().matchCity(mAddress, state, cities);
+        }
+        return null;
+    }
+
+    boolean didAutoFillStreet(List<String> streets) {
+        final String state = PrefHelper.getInstance().getState();
+        final String city = PrefHelper.getInstance().getCity();
+        if (mAddress != null) {
+            String street = LocationHelper.getInstance().matchStreet(mAddress, state, city, streets);
+            if (street != null) {
+                PrefHelper.getInstance().setStreet(street);
+                return true;
+            }
+        }
         return false;
     }
 

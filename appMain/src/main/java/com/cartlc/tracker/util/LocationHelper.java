@@ -27,17 +27,20 @@ import java.util.List;
 import java.util.Locale;
 
 /**
+ * Find the location the user is at and return the best street address we can find.
  * Created by dug on 3/12/18.
  */
-
 public class LocationHelper {
 
     static final String TAG = LocationHelper.class.getSimpleName();
     static final Boolean LOG = true;
-    static final String DEFAULT_LOCATION_HACK = "Chicago, IL";
 
-    class GetAddressTask extends AsyncTask<Location, Void, Address>
+    public interface OnLocationCallback
     {
+        void onLocationUpdate(Address address);
+    }
+
+    class GetAddressTask extends AsyncTask<Location, Void, Address> {
         static final String GOOGLE_LOC = "http://maps.googleapis.com/maps/api/geocode/json?";
 
         OnLocationCallback mCallback;
@@ -47,8 +50,7 @@ public class LocationHelper {
         }
 
         @Override
-        protected Address doInBackground(Location... locs)
-        {
+        protected Address doInBackground(Location... locs) {
             Location loc = locs[0];
             Address address;
             address = getAddressFromDatabase(loc);
@@ -57,7 +59,6 @@ public class LocationHelper {
             }
             address = getAddressFromGeocoder(loc);
             if (address != null) {
-                Log.d("MYDEBUG", "Address from geocoder: " + address.toString());
                 return storeAddressToDatabase(loc, address);
             }
             return storeAddressToDatabase(loc, getAddressFromNetwork(loc));
@@ -78,8 +79,7 @@ public class LocationHelper {
             return address;
         }
 
-        Address getAddressFromGeocoder(Location location)
-        {
+        Address getAddressFromGeocoder(Location location) {
             try {
                 List<Address> addressList = mGeocoder.getFromLocation(
                         location.getLatitude(), location.getLongitude(), 1);
@@ -92,19 +92,16 @@ public class LocationHelper {
             return null;
         }
 
-        Address getAddressFromNetwork(Location location)
-        {
+        Address getAddressFromNetwork(Location location) {
             List<Address> list = getFromLocation(
-                    location.getLatitude(), location.getLongitude(),1);
+                    location.getLatitude(), location.getLongitude(), 1);
             if (list == null || list.size() == 0) {
                 return null;
             }
-            Log.d("MYDEBUG", "Address from network: " + list.get(0).toString());
             return list.get(0);
         }
 
-        List<Address> getFromLocation(double lat, double lng, int maxResult)
-        {
+        List<Address> getFromLocation(double lat, double lng, int maxResult) {
             Uri buildUri = Uri.parse(GOOGLE_LOC).buildUpon().appendQueryParameter("latlng",
                     String.valueOf(lat) + "," + String.valueOf(lng)).appendQueryParameter
                     ("sensor", "true").appendQueryParameter("language", Locale.ENGLISH
@@ -185,63 +182,16 @@ public class LocationHelper {
         }
 
         @Override
-        protected void onPostExecute(Address address)
-        {
-            Log.d("MYDEBUG", "onPostExecute()");
+        protected void onPostExecute(Address address) {
             if (address != null) {
-                // TODO: Store in database
                 if (LOG) {
-                    Log.i(TAG, "MYDEBUG Address=" + address.toString());
+                    Log.i(TAG, "Got address=" + address.toString());
                 }
-                invokeCallback(address);
-            } else if (LOG) {
-                Log.e(TAG, "MYDEBUG NO ADDRESS");
+                if (mCallback != null) {
+                    mCallback.onLocationUpdate(address);
+                }
             }
         }
-
-        void invokeCallback(Address address)
-        {
-            if (mCallback != null) {
-                mCallback.onLocationUpdate(getLocationString(address));
-            }
-        }
-
-        public String getLocationString(Address address)
-        {
-            return getLocation(address, mLocationSelector);
-        }
-
-        String getLocation(Address address, int selector)
-        {
-            switch (selector) {
-                case 1:
-                    return address.getAddressLine(1);
-                case 2:
-                    return address.getSubThoroughfare();
-                case 3:
-                    return address.getFeatureName();
-                case 4:
-                    return address.getSubAdminArea();
-                case 5:
-                    return address.getSubLocality();
-                case 6:
-                    return address.getPremises();
-                case 7:
-                    return address.getLocality();
-                case 8:
-                    return address.getThoroughfare();
-                case 9:
-                    return address.getAdminArea();
-                case 10:
-                    return address.getCountryName();
-            }
-            return null;
-        }
-    }
-
-    public interface OnLocationCallback
-    {
-        void onLocationUpdate(String location);
     }
 
     static LocationHelper sInstance;
@@ -277,12 +227,9 @@ public class LocationHelper {
         if (mFusedLocationClient == null) {
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(act);
         }
-        Log.d("MYDEBUG", "requestLocation()");
-
         mApp.checkPermissions(act, new PermissionHelper.PermissionListener() {
             @Override
             public void onGranted(String permission) {
-                Log.d("MYDEBUG", "PERMISSION GRANTED: " + permission);
                 if (Manifest.permission.ACCESS_FINE_LOCATION.equals(permission)) {
                     getLocation(act, callback);
                 }
@@ -303,10 +250,21 @@ public class LocationHelper {
                 .addOnSuccessListener(act, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        Log.d("MYDEBUG", "GOT LOCATION=" + location.toString());
                         requestAddress(location, callback);
                     }
                 });
+    }
+
+    public static String matchState(Address address, List<String> state) {
+        return null;
+    }
+
+    public static String matchCity(Address address, String state, List<String> cities) {
+        return null;
+    }
+
+    public static String matchStreet(Address address, String state, String city, List<String> streets) {
+        return null;
     }
 
 }
