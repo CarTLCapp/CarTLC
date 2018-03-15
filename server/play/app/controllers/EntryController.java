@@ -10,6 +10,9 @@ import models.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -18,8 +21,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import java.util.Date;
-import java.util.Iterator;
+
 import modules.AmazonHelper;
 import modules.Globals;
 import java.io.File;
@@ -33,19 +35,22 @@ public class EntryController extends Controller {
 
     private static final int PAGE_SIZE = 100;
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
+    private static final String DATE_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ss'#'Z";
 
     private AmazonHelper mAmazonHelper;
     private EntryPagedList mEntryList = new EntryPagedList();
     private FormFactory mFormFactory;
     private SimpleDateFormat mDateFormat;
+    private SimpleDateFormat mDateFormat2;
     private Globals mGlobals;
 
     @Inject
     public EntryController(AmazonHelper amazonHelper, FormFactory formFactory, Globals globals) {
-        this.mAmazonHelper = amazonHelper;
-        this.mFormFactory = formFactory;
-        this.mDateFormat = new SimpleDateFormat(DATE_FORMAT);
-        this.mGlobals = globals;
+        mAmazonHelper = amazonHelper;
+        mFormFactory = formFactory;
+        mDateFormat = new SimpleDateFormat(DATE_FORMAT);
+        mDateFormat2 = new SimpleDateFormat(DATE_FORMAT2);
+        mGlobals = globals;
     }
 
     public Result list(int page, String sortBy, String order) {
@@ -173,8 +178,13 @@ public class EntryController extends Controller {
         if (value != null) {
             String date_value = value.textValue();
             try {
-                entry.entry_time = mDateFormat.parse(date_value);
-                entry.time_zone = pickOutTimeZone(date_value);
+                if (date_value.indexOf('#') > 0) {
+                    entry.entry_time = mDateFormat2.parse(date_value);
+                    entry.time_zone = pickOutTimeZone2(date_value);
+                } else {
+                    entry.entry_time = mDateFormat.parse(date_value);
+                    entry.time_zone = pickOutTimeZone(date_value);
+                }
             } catch (Exception ex) {
                 Logger.error("While parsing " + date_value + ":" + ex.getMessage());
             }
@@ -460,6 +470,16 @@ public class EntryController extends Controller {
         int pos = value.indexOf('Z');
         if (pos >= 0) {
             return value.substring(pos+1);
+        }
+        return null;
+    }
+
+    String pickOutTimeZone2(String value) {
+        int pos = value.indexOf('#');
+        if (pos >= 0) {
+            String timez = value.substring(pos+1);
+            TimeZone timezone = TimeZone.getTimeZone(timez);
+            return timezone.getID();
         }
         return null;
     }
