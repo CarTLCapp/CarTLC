@@ -478,7 +478,7 @@ public class EntryController extends Controller {
         int pos = value.indexOf('#');
         if (pos >= 0) {
             String timez = value.substring(pos+1);
-            TimeZone timezone = TimeZone.getTimeZone(timez);
+            TimeZone timezone = TimeZone.getTimeZone("GMT" + timez);
             return timezone.getID();
         }
         return null;

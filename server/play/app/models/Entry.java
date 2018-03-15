@@ -256,7 +256,7 @@ public class Entry extends com.avaje.ebean.Model {
         return status.getCellColor();
     }
 
-    static SimpleDateFormat sFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm zzz");
+    static SimpleDateFormat sFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm z");
 
     public String getDate() {
         sFormat.setTimeZone(getTimeZone());
