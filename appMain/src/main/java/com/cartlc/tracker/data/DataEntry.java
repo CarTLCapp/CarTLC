@@ -20,7 +20,7 @@ import de.greenrobot.event.EventBus;
 
 public class DataEntry {
 
-    static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'#'Z";
+    static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z";
 
     public long                         id;
     public long                         date;

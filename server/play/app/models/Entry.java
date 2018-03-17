@@ -1,8 +1,7 @@
 package models;
 
 import java.util.*;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.io.File;
 
 import javax.persistence.*;
@@ -257,15 +256,22 @@ public class Entry extends com.avaje.ebean.Model {
         return status.getCellColor();
     }
 
-    static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a zzz";
+    static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a z";
 
     public String getDate() {
-        Instant instant = entry_time.toInstant();
-        ZoneId zoneId = ZoneId.of(time_zone);
-        LocalDateTime localDateTime = instant.atZone(zoneId).toLocalDateTime();
-        DateTimeFormatter format = DateTimeFormatter.ofPattern(DATE_FORMAT);
-        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
-        return format.format(zonedDateTime);
+        SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+        if (time_zone != null) {
+            if (time_zone.startsWith("-") || time_zone.startsWith("+")) {
+                format.setTimeZone(TimeZone.getTimeZone("GMT" + time_zone));
+            } else if (time_zone.equals("CDT") || time_zone.equals("Central Daylight Time")) {
+                format.setTimeZone(TimeZone.getTimeZone("GMT-5:00"));
+            } else if (time_zone.equals("EDT")) {
+                format.setTimeZone(TimeZone.getTimeZone("GMT-4:00"));
+            } else {
+                format.setTimeZone(TimeZone.getTimeZone(time_zone));
+            }
+        }
+        return format.format(entry_time);
     }
 
     public String getTruckLine() {

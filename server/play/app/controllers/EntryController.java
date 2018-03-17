@@ -35,13 +35,11 @@ public class EntryController extends Controller {
 
     private static final int PAGE_SIZE = 100;
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
-    private static final String DATE_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ss'#'Z";
 
     private AmazonHelper mAmazonHelper;
     private EntryPagedList mEntryList = new EntryPagedList();
     private FormFactory mFormFactory;
     private SimpleDateFormat mDateFormat;
-    private SimpleDateFormat mDateFormat2;
     private Globals mGlobals;
 
     @Inject
@@ -49,7 +47,6 @@ public class EntryController extends Controller {
         mAmazonHelper = amazonHelper;
         mFormFactory = formFactory;
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
-        mDateFormat2 = new SimpleDateFormat(DATE_FORMAT2);
         mGlobals = globals;
     }
 
@@ -178,13 +175,8 @@ public class EntryController extends Controller {
         if (value != null) {
             String date_value = value.textValue();
             try {
-                if (date_value.indexOf('#') > 0) {
-                    entry.entry_time = mDateFormat2.parse(date_value);
-                    entry.time_zone = pickOutTimeZone(date_value, '#');
-                } else {
-                    entry.entry_time = mDateFormat.parse(date_value);
-                    entry.time_zone = pickOutTimeZone(date_value, 'Z');
-                }
+                entry.entry_time = mDateFormat.parse(date_value);
+                entry.time_zone = pickOutTimeZone(date_value, 'Z');
             } catch (Exception ex) {
                 Logger.error("While parsing " + date_value + ":" + ex.getMessage());
             }
