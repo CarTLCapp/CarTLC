@@ -222,8 +222,10 @@ public class EntryPagedList {
     void setProjects(Client client) {
         mLimitByProject.clear();
         List<Project> projects = client.getProjects();
-        for (Project project : projects) {
-            mLimitByProject.add(project.id);
+        if (projects != null) {
+            for (Project project : projects) {
+                mLimitByProject.add(project.id);
+            }
         }
     }
 

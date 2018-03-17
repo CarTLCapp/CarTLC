@@ -80,6 +80,10 @@ public class BitmapHelper {
             Matrix matrix = new Matrix();
             matrix.postRotate(degrees);
             Bitmap bitmap = BitmapFactory.decodeFile(picture.getAbsolutePath());
+            if (bitmap == null) {
+                TBApplication.ReportError(picture.getAbsolutePath(), BitmapHelper.class, "rotate()", "bitmap");
+                return;
+            }
             Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
             FileOutputStream fos = new FileOutputStream(picture.getAbsoluteFile());
             rotated.compress(Bitmap.CompressFormat.JPEG, 100, fos);

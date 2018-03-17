@@ -116,6 +116,10 @@ public class PostController extends Controller {
                 result.put("reset_upload", true);
                 tech.reset_upload = false;
             }
+            if (tech.reload_code != null && !tech.reload_code.isEmpty()) {
+                result.put("reload_code", tech.reload_code);
+                tech.reload_code = null;
+            }
             tech.last_ping = new Date(System.currentTimeMillis());
             tech.app_version = app_version;
             tech.save();

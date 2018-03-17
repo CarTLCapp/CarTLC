@@ -278,6 +278,11 @@ public class EntryController extends Controller {
             }
         } else {
             entry.company_id = value.longValue();
+            Company company = Company.get(entry.company_id);
+            if (company == null) {
+                Technician.AddReloadCode(entry.tech_id, 'c');
+                return badRequest2("address: no such company with ID " + entry.company_id);
+            }
         }
         if (truck_number == null && license_plate == null && truck_id == 0) {
             missing.add("truck_id");

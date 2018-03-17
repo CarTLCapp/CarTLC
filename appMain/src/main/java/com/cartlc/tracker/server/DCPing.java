@@ -59,6 +59,7 @@ public class DCPing extends DCPost {
 
     static final String UPLOAD_RESET_TRIGGER = "reset_upload";
     static final String RE_REGISTER_TRIGGER  = "re-register";
+    static final String RELOAD_CODE = "reload_code";
 
     // After this many times indicate to the user if there is a problem that needs to be
     // addressed with the entry.
@@ -156,6 +157,26 @@ public class DCPing extends DCPost {
                 if (object.getBoolean(RE_REGISTER_TRIGGER)) {
                     Timber.i("RE-REGISTER DETECTED!");
                     sendRegistration();
+                }
+            }
+            if (object.has(RELOAD_CODE)) {
+                String reload_code = object.getString(RELOAD_CODE);
+                if (!TextUtils.isEmpty(reload_code)) {
+                    if (reload_code.contains("p")) {
+                        PrefHelper.getInstance().setVersionProject(0);
+                    }
+                    if (reload_code.contains("e")) {
+                        PrefHelper.getInstance().setVersionEquipment(0);
+                    }
+                    if (reload_code.contains("n")) {
+                        PrefHelper.getInstance().setVersionNote(0);
+                    }
+                    if (reload_code.contains("c")) {
+                        PrefHelper.getInstance().setVersionCompany(0);
+                    }
+                    if (reload_code.contains("t")) {
+                        PrefHelper.getInstance().setVersionTruck(0);
+                    }
                 }
             }
             int version_project = object.getInt(PrefHelper.VERSION_PROJECT);

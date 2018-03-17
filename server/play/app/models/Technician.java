@@ -72,6 +72,9 @@ public class Technician extends com.avaje.ebean.Model {
     @Constraints.Required
     public String app_version;
 
+    @Constraints.Required
+    public String reload_code;
+
     public String fullName() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(first_name);
@@ -89,6 +92,23 @@ public class Technician extends com.avaje.ebean.Model {
             return app_version;
         }
         return "";
+    }
+
+    public static void AddReloadCode(long tech_id, char ch) {
+        Technician tech = Technician.find.byId(tech_id);
+        if (tech == null) {
+            return;
+        }
+        tech.addReloadCode(ch);
+        tech.update();
+    }
+
+    public void addReloadCode(char ch) {
+        if (reload_code == null) {
+            reload_code = String.valueOf(ch);
+        } else {
+            reload_code.concat(String.valueOf(ch));
+        }
     }
 
     public static boolean canDelete(long id) {
