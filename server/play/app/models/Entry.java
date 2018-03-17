@@ -1,7 +1,8 @@
 package models;
 
 import java.util.*;
-import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.io.File;
 
 import javax.persistence.*;
@@ -256,18 +257,15 @@ public class Entry extends com.avaje.ebean.Model {
         return status.getCellColor();
     }
 
-    static SimpleDateFormat sFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm z");
+    static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a zzz";
 
     public String getDate() {
-        sFormat.setTimeZone(getTimeZone());
-        return sFormat.format(entry_time);
-    }
-
-    public TimeZone getTimeZone() {
-        if (time_zone == null) {
-            return TimeZone.getDefault();
-        }
-        return TimeZone.getTimeZone(time_zone);
+        Instant instant = entry_time.toInstant();
+        ZoneId zoneId = ZoneId.of(time_zone);
+        LocalDateTime localDateTime = instant.atZone(zoneId).toLocalDateTime();
+        DateTimeFormatter format = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+        return format.format(zonedDateTime);
     }
 
     public String getTruckLine() {

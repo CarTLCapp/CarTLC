@@ -180,10 +180,10 @@ public class EntryController extends Controller {
             try {
                 if (date_value.indexOf('#') > 0) {
                     entry.entry_time = mDateFormat2.parse(date_value);
-                    entry.time_zone = pickOutTimeZone2(date_value);
+                    entry.time_zone = pickOutTimeZone(date_value, '#');
                 } else {
                     entry.entry_time = mDateFormat.parse(date_value);
-                    entry.time_zone = pickOutTimeZone(date_value);
+                    entry.time_zone = pickOutTimeZone(date_value, 'Z');
                 }
             } catch (Exception ex) {
                 Logger.error("While parsing " + date_value + ":" + ex.getMessage());
@@ -466,20 +466,10 @@ public class EntryController extends Controller {
         return ok(Long.toString(ret_id));
     }
 
-    String pickOutTimeZone(String value) {
-        int pos = value.indexOf('Z');
+    String pickOutTimeZone(String value, char sp) {
+        int pos = value.indexOf(sp);
         if (pos >= 0) {
             return value.substring(pos+1);
-        }
-        return null;
-    }
-
-    String pickOutTimeZone2(String value) {
-        int pos = value.indexOf('#');
-        if (pos >= 0) {
-            String timez = value.substring(pos+1);
-            TimeZone timezone = TimeZone.getTimeZone("GMT" + timez);
-            return timezone.getID();
         }
         return null;
     }
