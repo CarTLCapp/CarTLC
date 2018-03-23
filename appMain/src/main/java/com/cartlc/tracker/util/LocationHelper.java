@@ -255,16 +255,43 @@ public class LocationHelper {
                 });
     }
 
-    public static String matchState(Address address, List<String> state) {
+    public static String matchState(Address address, List<String> states) {
+        return match(address.getAdminArea(), states);
+    }
+
+    public static String matchCity(Address address, List<String> cities) {
+        return match(address.getLocality(), cities);
+    }
+
+    public static String matchStreet(Address address, List<String> streets) {
+        List<String> thoroughFares = new ArrayList<>();
+        for (String street : streets) {
+            if (street.contains(address.getThoroughfare())) {
+                thoroughFares.add(street);
+            }
+            if (street.contains(address.getFeatureName())) {
+                return street;
+            }
+        }
+        if (thoroughFares.size() == 1) {
+            return thoroughFares.get(0);
+        }
         return null;
     }
 
-    public static String matchCity(Address address, String state, List<String> cities) {
+    static String match(String match, List<String> items) {
+        if (hasMatch(items, match)) {
+            return match;
+        }
         return null;
     }
 
-    public static String matchStreet(Address address, String state, String city, List<String> streets) {
-        return null;
+    static boolean hasMatch(List<String> items, String match) {
+        for (String item : items) {
+            if (item.compareToIgnoreCase(match) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
-
 }

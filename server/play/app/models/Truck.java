@@ -147,26 +147,50 @@ public class Truck extends com.avaje.ebean.Model {
             }
         }
         if (truck == null) {
-            if (project_id > 0 && company_name_id > 0) {
-                list = find.where()
-                        .eq("project_id", project_id)
-                        .eq("company_name_id", company_name_id)
-                        .eq("truck_number", truck_number)
-                        .findList();
-            } else if (project_id > 0) {
-                list = find.where()
-                        .eq("project_id", project_id)
-                        .eq("truck_number", truck_number)
-                        .findList();
-            } else if (company_name_id > 0) {
-                list = find.where()
-                        .eq("company_name_id", company_name_id)
-                        .eq("truck_number", truck_number)
-                        .findList();
+            if (truck_number != null) {
+                if (project_id > 0 && company_name_id > 0) {
+                    list = find.where()
+                            .eq("project_id", project_id)
+                            .eq("company_name_id", company_name_id)
+                            .eq("truck_number", truck_number)
+                            .findList();
+                } else if (project_id > 0) {
+                    list = find.where()
+                            .eq("project_id", project_id)
+                            .eq("truck_number", truck_number)
+                            .findList();
+                } else if (company_name_id > 0) {
+                    list = find.where()
+                            .eq("company_name_id", company_name_id)
+                            .eq("truck_number", truck_number)
+                            .findList();
+                } else {
+                    list = find.where()
+                            .eq("truck_number", truck_number)
+                            .findList();
+                }
             } else {
-                list = find.where()
-                        .eq("truck_number", truck_number)
-                        .findList();
+                if (project_id > 0 && company_name_id > 0) {
+                    list = find.where()
+                            .eq("project_id", project_id)
+                            .eq("company_name_id", company_name_id)
+                            .eq("license_plate", license_plate)
+                            .findList();
+                } else if (project_id > 0) {
+                    list = find.where()
+                            .eq("project_id", project_id)
+                            .eq("license_plate", license_plate)
+                            .findList();
+                } else if (company_name_id > 0) {
+                    list = find.where()
+                            .eq("company_name_id", company_name_id)
+                            .eq("license_plate", license_plate)
+                            .findList();
+                } else {
+                    list = find.where()
+                            .eq("license_plate", license_plate)
+                            .findList();
+                }
             }
             if (list != null) {
                 if (list.size() > 1) {

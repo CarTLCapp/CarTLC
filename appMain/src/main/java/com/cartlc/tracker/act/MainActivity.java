@@ -78,7 +78,7 @@ import de.greenrobot.event.EventBus;
 public class MainActivity extends AppCompatActivity {
 
     static final boolean ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG; // true=Debugging only
-    static final boolean LOCATION_ENABLE = false;
+    static final boolean LOCATION_ENABLE = true;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_EDIT_ENTRY    = 2;
@@ -816,7 +816,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
-                    if (didAutoFillCity(state, cities)) {
+                    if (didAutoFillCity(cities)) {
                         skip();
                     } else {
                         showMainListFrame();
@@ -1003,8 +1003,8 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    boolean didAutoFillCity(String state, List<String> cities) {
-        String city = getAutoFillCity(state, cities);
+    boolean didAutoFillCity(List<String> cities) {
+        String city = getAutoFillCity(cities);
         if (city == null) {
             return false;
         }
@@ -1012,27 +1012,22 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    String getAutoFillCity(String state, List<String> cities) {
+    String getAutoFillCity(List<String> cities) {
         if (!mWasNext) {
             return null;
         }
         if (cities.size() == 1) {
             return cities.get(0);
         }
-        if (TextUtils.isEmpty(state)) {
-            return null;
-        }
         if (mAddress != null) {
-            return LocationHelper.getInstance().matchCity(mAddress, state, cities);
+            return LocationHelper.getInstance().matchCity(mAddress, cities);
         }
         return null;
     }
 
     boolean didAutoFillStreet(List<String> streets) {
-        final String state = PrefHelper.getInstance().getState();
-        final String city = PrefHelper.getInstance().getCity();
         if (mAddress != null) {
-            String street = LocationHelper.getInstance().matchStreet(mAddress, state, city, streets);
+            String street = LocationHelper.getInstance().matchStreet(mAddress, streets);
             if (street != null) {
                 PrefHelper.getInstance().setStreet(street);
                 return true;
