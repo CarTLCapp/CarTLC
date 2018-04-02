@@ -281,6 +281,7 @@ public class LocationHelper {
 
     static String match(String match, List<String> items) {
         if (hasMatch(items, match)) {
+            Log.d("MYDEBUG", "match=" + match);
             return match;
         }
         return null;
