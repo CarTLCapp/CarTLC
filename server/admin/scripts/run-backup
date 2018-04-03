@@ -1,3 +1,7 @@
 #!/bin/bash
-cd ~/backup
+# crontab -e
+# Add:
+# @weekly ubuntu /home/ubuntu/bin/run-backup
+H=/home/ubuntu
+cd $H/backup
 mysqldump --databases cartlc -u cartlc --password=cartcl > dump-`date +%Y-%m-%d`.sql
