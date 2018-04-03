@@ -15,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DatabaseManager;
+import com.cartlc.tracker.data.TableCrash;
 import com.cartlc.tracker.etc.CheckError;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.etc.BootstrapData;
@@ -51,6 +52,8 @@ public class TBApplication extends Application {
     }
 
     static final Boolean DEBUG_TREE = false;
+
+    public static final Boolean REPORT_LOCATION = BuildConfig.DEBUG;
 
     public static final String OTHER = "Other";
 

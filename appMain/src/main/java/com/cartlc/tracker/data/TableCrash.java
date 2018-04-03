@@ -175,4 +175,8 @@ public class TableCrash {
             mDb.endTransaction();
         }
     }
+
+    public void info(String message) {
+        message(Log.INFO, message, null);
+    }
 }

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
+import com.cartlc.tracker.data.TableCrash;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -23,6 +24,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -189,6 +191,7 @@ public class LocationHelper {
                 }
                 if (mCallback != null) {
                     mCallback.onLocationUpdate(address);
+                    infoReport(address);
                 }
             }
         }
@@ -208,6 +211,7 @@ public class LocationHelper {
     final Geocoder mGeocoder;
     int mLocationSelector;
     FusedLocationProviderClient mFusedLocationClient;
+    HashSet<Long> mReportMap = new HashSet();
 
     LocationHelper(TBApplication app)
     {
@@ -281,7 +285,6 @@ public class LocationHelper {
 
     static String match(String match, List<String> items) {
         if (hasMatch(items, match)) {
-            Log.d("MYDEBUG", "match=" + match);
             return match;
         }
         return null;
@@ -294,5 +297,17 @@ public class LocationHelper {
             }
         }
         return false;
+    }
+
+    public void infoReport(Address address) {
+        if (TBApplication.REPORT_LOCATION) {
+            long code = address.getAdminArea().hashCode();
+            code += address.getLocality().hashCode();
+            if (!mReportMap.contains(code)) {
+                mReportMap.add(code);
+                TableCrash.getInstance().info("LOCATION: " + address.toString());
+            }
+            Log.i(TAG, address.toString());
+        }
     }
 }

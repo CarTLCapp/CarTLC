@@ -30,31 +30,56 @@ public class TableAddress {
                 sbuf.append("=?");
                 args.add(company);
             }
-            if (state != null && !TextUtils.isEmpty(state)) {
+            if (!TextUtils.isEmpty(state)) {
                 if (sbuf.length() > 0) {
                     sbuf.append(" AND ");
                 }
-                sbuf.append(KEY_STATE);
-                sbuf.append("=?");
-                args.add(state);
+                DataStates.State dstate = DataStates.get(state);
+                if (dstate != null) {
+                    sbuf.append("(");
+                    sbuf.append("LOWER(");
+                    sbuf.append(KEY_STATE);
+                    sbuf.append(")");
+                    sbuf.append("=?");
+                    args.add(dstate.full.toLowerCase());
+
+                    sbuf.append(" OR ");
+
+                    sbuf.append("LOWER(");
+                    sbuf.append(KEY_STATE);
+                    sbuf.append(")");
+                    sbuf.append("=?");
+                    args.add(dstate.abbr.toLowerCase());
+
+                    sbuf.append(")");
+                } else {
+                    sbuf.append(KEY_STATE);
+                    sbuf.append("=?");
+                    args.add(state);
+                }
             }
-            if (city != null && !TextUtils.isEmpty(city)) {
+            if (!TextUtils.isEmpty(city)) {
                 if (sbuf.length() > 0) {
                     sbuf.append(" AND ");
                 }
+                sbuf.append("LOWER(");
                 sbuf.append(KEY_CITY);
+                sbuf.append(")");
                 sbuf.append("=?");
-                args.add(city);
+
+                args.add(city.toLowerCase());
             }
-            if (street != null && !TextUtils.isEmpty(street)) {
+            if (!TextUtils.isEmpty(street)) {
                 if (sbuf.length() > 0) {
                     sbuf.append(" AND ");
                 }
+                sbuf.append("LOWER(");
                 sbuf.append(KEY_STREET);
+                sbuf.append(")");
                 sbuf.append("=?");
-                args.add(street);
+                args.add(street.toLowerCase());
             }
-            if (zipcode != null && !TextUtils.isEmpty(zipcode)) {
+            if (!TextUtils.isEmpty(zipcode)) {
                 if (sbuf.length() > 0) {
                     sbuf.append(" AND ");
                 }

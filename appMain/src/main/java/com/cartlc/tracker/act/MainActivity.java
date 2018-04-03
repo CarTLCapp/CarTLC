@@ -79,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
 
     static final boolean ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG; // true=Debugging only
     static final boolean LOCATION_ENABLE = true;
-    static final boolean USE_ZIPCODE = false;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_EDIT_ENTRY    = 2;
@@ -378,7 +377,6 @@ public class MainActivity extends AppCompatActivity {
             LocationHelper.getInstance().requestLocation(this, new LocationHelper.OnLocationCallback() {
                 @Override
                 public void onLocationUpdate(Address address) {
-                    Log.d("MYDEBUG", "onLocationUpdate=" + address.toString());
                     mAddress = address;
                 }
             });
@@ -424,19 +422,6 @@ public class MainActivity extends AppCompatActivity {
     public void onEvent(EventRefreshProjects event) {
         if (mCurStage == Stage.CURRENT_PROJECT) {
             mHandler.sendEmptyMessage(MSG_REFRESH_PROJECTS);
-        }
-    }
-
-    public void onEvent(DataZipCode event) {
-        if (USE_ZIPCODE) {
-            if (mCurStage == Stage.ZIPCODE) {
-                Message msg = new Message();
-                msg.what = MSG_SET_HINT;
-                Bundle bundle = new Bundle();
-                bundle.putString(KEY_HINT, event.getHint());
-                msg.setData(bundle);
-                mHandler.sendMessage(msg);
-            }
         }
     }
 
@@ -520,11 +505,6 @@ public class MainActivity extends AppCompatActivity {
                     if (group != null) {
                         TableCollectionEquipmentProject.getInstance().addLocal(name, group.projectNameId);
                     }
-                }
-            } else if (USE_ZIPCODE && mCurStage == Stage.ZIPCODE) {
-                String zipCode = getEditText(mEntrySimple);
-                if (isZipCode(zipCode)) {
-                    PrefHelper.getInstance().setZipCode(zipCode);
                 }
             } else if (mCurStage == Stage.COMPANY) {
                 String newCompanyName = getEditText(mEntrySimple).trim();
@@ -737,34 +717,6 @@ public class MainActivity extends AppCompatActivity {
                     checkEdit();
                 }
                 break;
-            case ZIPCODE: {
-                if (USE_ZIPCODE) {
-                    mPrev.setVisibility(View.VISIBLE);
-                    mNext.setVisibility(View.VISIBLE);
-                    showEntryHint();
-                    showSubTitleHint();
-                    final String company = PrefHelper.getInstance().getCompany();
-                    List<String> zipcodes = TableAddress.getInstance().queryZipCodes(company);
-                    final boolean hasZipCodes = zipcodes.size() > 0;
-                    if (!hasZipCodes) {
-                        mCurStageEditing = true;
-                    }
-                    if (mCurStageEditing) {
-                        mMainTitleText.setText(R.string.title_zipcode);
-                        mEntryFrame.setVisibility(View.VISIBLE);
-                        mEntrySimple.setHint(R.string.title_zipcode);
-                        mEntrySimple.setText(PrefHelper.getInstance().getZipCode());
-                        mEntrySimple.addTextChangedListener(mZipCodeWatcher);
-                        mEntrySimple.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                    } else {
-                        showMainListFrame();
-                        setList(R.string.title_zipcode, PrefHelper.KEY_ZIPCODE, zipcodes);
-                        mCenter.setVisibility(View.VISIBLE);
-                        mNext.setVisibility(View.VISIBLE);
-                    }
-                }
-                break;
-            }
             case STATE: {
                 showEntryHint();
                 showSubTitleHint();
@@ -787,7 +739,9 @@ public class MainActivity extends AppCompatActivity {
                     PrefHelper.getInstance().setState(null);
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
-                    if (didAutoFillState(states)) {
+                    autoNarrowStates(states);
+                    if (states.size() == 1) {
+                        PrefHelper.getInstance().setState(states.get(0));
                         skip();
                     } else {
                         if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
@@ -821,7 +775,9 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setHint(R.string.title_city);
                     mEntrySimple.setText("");
                 } else {
-                    if (didAutoFillCity(cities)) {
+                    autoNarrowCities(cities);
+                    if (cities.size() == 1) {
+                        PrefHelper.getInstance().setCity(cities.get(0));
                         skip();
                     } else {
                         showMainListFrame();
@@ -852,8 +808,10 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setText("");
                     mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 } else {
-                    if (didAutoFillStreet(streets)) {
-                       skip();
+                    autoNarrowStreets(streets);
+                    if (streets.size() == 1) {
+                        PrefHelper.getInstance().setStreet(streets.get(0));
+                        skip();
                     } else {
                         mCenter.setVisibility(View.VISIBLE);
                         showMainListFrame();
@@ -986,59 +944,55 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    boolean didAutoFillState(List<String> states) {
-        String state = getAutoFillState(states);
-        if (state == null) {
-            return false;
-        }
-        PrefHelper.getInstance().setState(state);
-        return true;
-    }
-
-    String getAutoFillState(List<String> states) {
+    void autoNarrowStates(List<String> states) {
         if (!mWasNext) {
-            return null;
+            return;
         }
         if (states.size() == 1) {
-            return states.get(0);
+            return;
         }
-        if (mAddress != null) {
-            return LocationHelper.getInstance().matchState(mAddress, states);
+        if (mAddress == null) {
+            return;
         }
-        return null;
+        String state = LocationHelper.getInstance().matchState(mAddress, states);
+        if (state != null) {
+            states.clear();
+            states.add(state);
+        }
     }
 
-    boolean didAutoFillCity(List<String> cities) {
-        String city = getAutoFillCity(cities);
-        if (city == null) {
-            return false;
-        }
-        PrefHelper.getInstance().setCity(city);
-        return true;
-    }
-
-    String getAutoFillCity(List<String> cities) {
+    void autoNarrowCities(List<String> cities) {
         if (!mWasNext) {
-            return null;
+            return;
         }
         if (cities.size() == 1) {
-            return cities.get(0);
+            return;
         }
-        if (mAddress != null) {
-            return LocationHelper.getInstance().matchCity(mAddress, cities);
+        if (mAddress == null) {
+            return;
         }
-        return null;
+        String city = LocationHelper.getInstance().matchCity(mAddress, cities);
+        if (city != null) {
+            cities.clear();
+            cities.add(city);
+        }
     }
 
-    boolean didAutoFillStreet(List<String> streets) {
-        if (mAddress != null) {
-            String street = LocationHelper.getInstance().matchStreet(mAddress, streets);
-            if (street != null) {
-                PrefHelper.getInstance().setStreet(street);
-                return true;
-            }
+    void autoNarrowStreets(List<String> streets) {
+        if (!mWasNext) {
+            return;
         }
-        return false;
+        if (streets.size() == 1) {
+            return;
+        }
+        if (mAddress == null) {
+            return;
+        }
+        String street = LocationHelper.getInstance().matchStreet(mAddress, streets);
+        if (street != null) {
+            streets.clear();
+            streets.add(street);
+        }
     }
 
     boolean isNewEquipmentOkay() {
@@ -1250,7 +1204,6 @@ public class MainActivity extends AppCompatActivity {
     void showEntryHint() {
         String hint = null;
         switch (mCurStage) {
-//            case ZIPCODE:
             case STATE:
             case CITY:
             case STREET:
@@ -1285,7 +1238,6 @@ public class MainActivity extends AppCompatActivity {
         switch (mCurStage) {
             case PROJECT:
             case COMPANY:
-//            case ZIPCODE:
             case STATE:
             case CITY:
             case STREET:
