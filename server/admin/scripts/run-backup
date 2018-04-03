@@ -4,4 +4,6 @@
 # @weekly ubuntu /home/ubuntu/bin/run-backup
 H=/home/ubuntu
 cd $H/backup
-mysqldump --databases cartlc -u cartlc --password=cartcl > dump-`date +%Y-%m-%d`.sql
+FILE=dump-`date +%Y-%m-%d`.sql
+mysqldump --databases cartlc -u cartlc --password=cartcl > $FILE
+chmod 444 $FILE
