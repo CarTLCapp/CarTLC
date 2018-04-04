@@ -77,7 +77,7 @@ import de.greenrobot.event.EventBus;
 public class MainActivity extends AppCompatActivity {
 
     static final boolean ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG; // true=Debugging only
-    static final boolean LOCATION_ENABLE = true;
+    static final boolean LOCATION_ENABLE = TBApplication.LOCATION_ENABLE;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_EDIT_ENTRY    = 2;

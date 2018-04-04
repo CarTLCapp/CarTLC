@@ -54,6 +54,7 @@ public class TBApplication extends Application {
     static final Boolean DEBUG_TREE = false;
 
     public static final Boolean REPORT_LOCATION = BuildConfig.DEBUG;
+    public static final boolean LOCATION_ENABLE = true;
 
     public static final String OTHER = "Other";
 

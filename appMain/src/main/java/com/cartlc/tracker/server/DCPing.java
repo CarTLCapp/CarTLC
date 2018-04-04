@@ -255,7 +255,9 @@ public class DCPing extends DCPost {
                 boolean disabled = ele.getBoolean("disabled");
                 DataProject project = TableProjects.getInstance().queryByServerId(server_id);
                 if (project == null) {
-                    if (unprocessed.contains(name)) {
+                    if (TextUtils.isEmpty(name)) {
+                        TBApplication.ReportError("Got empty project name from server", DCPing.class, "queryProjects()", "server");
+                    } else if (unprocessed.contains(name)) {
                         // If this name already exists, convert the existing one by simply giving it the server_id.
                         DataProject existing = TableProjects.getInstance().queryByName(name);
                         existing.serverId = server_id;
@@ -263,6 +265,7 @@ public class DCPing extends DCPost {
                         existing.disabled = disabled;
                         TableProjects.getInstance().update(existing);
                         Timber.i("Commandeer local: " + name);
+
                     } else {
                         // Otherwise just add the new project.
                         Timber.i("New project: " + name);
@@ -313,6 +316,11 @@ public class DCPing extends DCPost {
                 JSONObject ele = array.getJSONObject(i);
                 int server_id = ele.getInt("id");
                 name = ele.getString("name");
+
+                if (TextUtils.isEmpty(name)) {
+                    TBApplication.ReportError("Got empty company name from server", DCPing.class, "queryCompanies()", "server");
+                    continue;
+                }
                 if (ele.has("street")) {
                     street = ele.getString("street");
                 } else {
