@@ -341,25 +341,39 @@ public class EntryPagedList {
     }
 
     void addFilters(StringBuilder query) {
+        StringBuilder projects = new StringBuilder();
         boolean first = true;
         for (long project_id : mLimitByProject) {
             if (first) {
                 first = false;
             } else {
-                query.append(" OR ");
+                projects.append(" OR ");
             }
-            query.append("p.id = ");
-            query.append(project_id);
+            projects.append("p.id = ");
+            projects.append(project_id);
         }
+        StringBuilder companies = new StringBuilder();
+        first = true;
         for (String companyName : mLimitByCompanyName) {
             if (first) {
                 first = false;
             } else {
-                query.append(" OR ");
+                companies.append(" OR ");
             }
-            query.append("c.name = '");
-            query.append(companyName);
-            query.append("'");
+            companies.append("c.name = '");
+            companies.append(companyName);
+            companies.append("'");
+        }
+        if (projects.length() > 0 && companies.length() > 0) {
+            query.append("(");
+            query.append(projects.toString());
+            query.append(") AND (");
+            query.append(companies.toString());
+            query.append(")");
+        } else if (projects.length() > 0) {
+            query.append(projects.toString());
+        } else if (companies.length() > 0) {
+            query.append(companies.toString());
         }
     }
 
