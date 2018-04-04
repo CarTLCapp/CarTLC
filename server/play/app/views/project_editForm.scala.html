@@ -23,11 +23,13 @@
         <div class="checkbox-container-columns">
 
             @for(equipment <- Equipment.list()) {
-                @if(ProjectEquipmentCollection.hasEquipment(id, equipment.id)) {
-                    @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name, 'checked -> true)
-                } else {
-                    @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name)
-                }
+                <div class="checkbox-item">
+                    @if(ProjectEquipmentCollection.hasEquipment(id, equipment.id)) {
+                        @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name, 'checked -> true)
+                    } else {
+                        @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name)
+                    }
+                </div>
                 <div style="clear:both;"></div>
             }
 
@@ -38,11 +40,13 @@
         <div class="checkbox-container-columns">
 
             @for(note <- Note.list()) {
-                @if(ProjectNoteCollection.hasNote(id, note.id)) {
-                    @b3.checkbox(projectForm(note.name), '_label -> note.name, 'checked -> true)
-                } else {
-                    @b3.checkbox(projectForm(note.name), '_label -> note.name)
-                }
+                <div class="checkbox-item">
+                    @if(ProjectNoteCollection.hasNote(id, note.id)) {
+                        @b3.checkbox(projectForm(note.name), '_label -> note.name, 'checked -> true)
+                    } else {
+                        @b3.checkbox(projectForm(note.name), '_label -> note.name)
+                    }
+                </div>
                 <div style="clear:both;"></div>
             }
 

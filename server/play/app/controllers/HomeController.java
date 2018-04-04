@@ -54,7 +54,6 @@ public class HomeController extends Controller {
      *
      * @return The Login page.
      */
-    @Security.Authenticated(Secured.class)
     public Result login() {
         Client.initClient();
         Form<LoginFormData> formData = mFormFactory.form(LoginFormData.class).bindFromRequest();
