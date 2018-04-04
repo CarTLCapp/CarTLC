@@ -336,7 +336,6 @@ public class EntryPagedList {
             query.append(", ");
             query.append(mParams.mPageSize);
         }
-        Logger.info("MYDEBUG QUERY: " + query.toString());
         return query.toString();
     }
 
