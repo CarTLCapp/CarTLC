@@ -48,7 +48,6 @@ import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.DataStates;
-import com.cartlc.tracker.data.DataZipCode;
 import com.cartlc.tracker.etc.CheckError;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableAddress;
@@ -180,10 +179,12 @@ public class MainActivity extends AppCompatActivity {
         STREET,
         CURRENT_PROJECT,
         TRUCK,
+        PICTURE_1,
         EQUIPMENT,
         NOTES,
-        PICTURE,
+        PICTURE_2,
         STATUS,
+        PICTURE_3,
         CONFIRM,
         ADD_ELEMENT;
 
@@ -194,6 +195,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             return LOGIN;
+        }
+
+        public Stage advance() {
+            return Stage.from(ordinal() + 1);
+        }
+
+        public Stage previous() {
+            return Stage.from(ordinal() - 1);
         }
     }
 
@@ -466,7 +475,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (!hasNotes) {
                 mCurStage = Stage.NOTES;
             } else {
-                mCurStage = Stage.PICTURE;
+                mCurStage = Stage.PICTURE_2;
             }
         }
     }
@@ -597,7 +606,7 @@ public class MainActivity extends AppCompatActivity {
 
     void doNext_() {
         mWasNext = true;
-        mCurStage = Stage.from(mCurStage.ordinal() + 1);
+        mCurStage = mCurStage.advance();
         fillStage();
     }
 
@@ -617,7 +626,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (mCurStage == Stage.STATE) {
                 mCurStage = Stage.COMPANY;
             } else {
-                mCurStage = Stage.from(mCurStage.ordinal() - 1);
+                mCurStage = mCurStage.previous();
             }
             fillStage();
         }
@@ -893,11 +902,17 @@ public class MainActivity extends AppCompatActivity {
                     mEmptyView.setVisibility(View.GONE);
                 }
                 break;
-            case PICTURE:
+            case PICTURE_1:
+            case PICTURE_2:
+            case PICTURE_3:
                 int pictureCount = PrefHelper.getInstance().getNumPicturesTaken();
-                mMainTitleText.setText(getString(R.string.title_picture, pictureCount));
+                if (pictureCount == 1) {
+                    mMainTitleText.setText(getString(R.string.title_photo));
+                } else {
+                    mMainTitleText.setText(getString(R.string.title_photos, pictureCount));
+                }
                 mPrev.setVisibility(View.VISIBLE);
-                if (mCurStageEditing || pictureCount == 0) {
+                if (mCurStageEditing || pictureCount < getExpectedPictureMin()) {
                     mCurStageEditing = false;
                     if (!dispatchPictureRequest()) {
                         showError(getString(R.string.error_cannot_take_picture));
@@ -1080,7 +1095,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void doEditEntry() {
-        mCurStage = Stage.from(Stage.CURRENT_PROJECT.ordinal() + 1);
+        mCurStage = Stage.CURRENT_PROJECT.advance();
         fillStage();
     }
 
@@ -1094,8 +1109,10 @@ public class MainActivity extends AppCompatActivity {
         mDialogHelper.showError(message, new DialogHelper.DialogListener() {
             @Override
             public void onOkay() {
-                if (mCurStage == MainActivity.Stage.PICTURE) {
-                    setStage(MainActivity.Stage.CONFIRM);
+                if (mCurStage == MainActivity.Stage.PICTURE_1 ||
+                    mCurStage == MainActivity.Stage.PICTURE_2 ||
+                        mCurStage == MainActivity.Stage.PICTURE_3) {
+                    mCurStage.advance();
                 }
             }
 
@@ -1340,5 +1357,17 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         CheckError.getInstance().checkProjectErrors();
+    }
+
+    int getExpectedPictureMin() {
+        switch (mCurStage) {
+            case PICTURE_1:
+                return 1;
+            case PICTURE_2:
+                return 2;
+            case PICTURE_3:
+                return 3;
+        }
+        return 3;
     }
 }

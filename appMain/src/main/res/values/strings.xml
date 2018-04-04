@@ -46,7 +46,8 @@
     <string name="title_entries_">Entries:</string>
     <string name="title_uploaded_">Uploaded:</string>
     <string name="title_uploaded_done">Uploaded ALL</string>
-    <string name="title_picture">Photo %d</string>
+    <string name="title_photo">1 Photo</string>
+    <string name="title_photos">%d Photos</string>
     <string name="title_pictures_">Pictures:</string>
     <string name="title_status">Status</string>
     <string name="title_status_">Status:</string>
