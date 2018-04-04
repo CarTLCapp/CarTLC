@@ -320,7 +320,13 @@ public class EntryPagedList {
         } else {
             if (mLimitByProject.size() > 0) {
                 query.append(" WHERE ");
-                addFilters(query);
+                addProjectFilters(query);
+            }
+            if (mLimitByCompanyName.size() > 0) {
+                for (String name : mLimitByCompanyName) {
+                    Logger.info("COMPANY NAME: " + name);
+                }
+                // Limit by company names too.
             }
         }
         if (isCount) {
@@ -336,10 +342,11 @@ public class EntryPagedList {
             query.append(", ");
             query.append(mParams.mPageSize);
         }
+        Logger.info("MYDEBUG QUERY: " + entry_id);
         return query.toString();
     }
 
-    void addFilters(StringBuilder query) {
+    void addProjectFilters(StringBuilder query) {
         boolean first = true;
         for (long project_id : mLimitByProject) {
             if (first) {
