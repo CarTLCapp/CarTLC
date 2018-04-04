@@ -311,22 +311,16 @@ public class EntryPagedList {
                 query.append(appendSearch("eq.name"));
             }
             query.append(")");
-            if (mLimitByProject.size() > 0) {
+            if (mLimitByProject.size() > 0 || mLimitByCompanyName.size() > 0) {
                 query.append(" AND ");
                 query.append("(");
                 addFilters(query);
                 query.append(")");
             }
         } else {
-            if (mLimitByProject.size() > 0) {
+            if (mLimitByProject.size() > 0 || mLimitByCompanyName.size() > 0) {
                 query.append(" WHERE ");
-                addProjectFilters(query);
-            }
-            if (mLimitByCompanyName.size() > 0) {
-                for (String name : mLimitByCompanyName) {
-                    Logger.info("COMPANY NAME: " + name);
-                }
-                // Limit by company names too.
+                addFilters(query);
             }
         }
         if (isCount) {
@@ -342,11 +336,11 @@ public class EntryPagedList {
             query.append(", ");
             query.append(mParams.mPageSize);
         }
-        Logger.info("MYDEBUG QUERY: " + entry_id);
+        Logger.info("MYDEBUG QUERY: " + query.toString());
         return query.toString();
     }
 
-    void addProjectFilters(StringBuilder query) {
+    void addFilters(StringBuilder query) {
         boolean first = true;
         for (long project_id : mLimitByProject) {
             if (first) {
@@ -356,6 +350,16 @@ public class EntryPagedList {
             }
             query.append("p.id = ");
             query.append(project_id);
+        }
+        for (String companyName : mLimitByCompanyName) {
+            if (first) {
+                first = false;
+            } else {
+                query.append(" OR ");
+            }
+            query.append("c.name = '");
+            query.append(companyName);
+            query.append("'");
         }
     }
 
