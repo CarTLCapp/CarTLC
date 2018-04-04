@@ -18,10 +18,14 @@
 
             <h3>Projects</h3>
 
-            @for(project <- Project.list()) {
-                @b3.checkbox(techForm(project.name), '_label -> project.name)
-                <p><br></p>
-            }
+            <div class="checkbox-container">
+
+                @for(project <- Project.list()) {
+                    @b3.checkbox(techForm(project.name), '_label -> project.name)
+                    <div style="clear:both;"></div>
+                }
+
+            </div>
 
             <h3>Company</h3>
 
