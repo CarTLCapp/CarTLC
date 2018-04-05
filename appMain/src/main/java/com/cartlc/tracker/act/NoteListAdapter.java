@@ -31,16 +31,18 @@ public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.Custom
         }
     }
 
-    final protected Context                    mContext;
-    protected       List<DataNote>             mItems;
+    final protected Context        mContext;
+    final protected LayoutInflater mLayoutInflater;
+    protected       List<DataNote> mItems;
 
     public NoteListAdapter(Context context) {
         mContext = context;
+        mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_note, parent, false);
+        View view = mLayoutInflater.inflate(R.layout.entry_item_note, parent, false);
         return new CustomViewHolder(view);
     }
 

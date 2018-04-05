@@ -33,8 +33,9 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
         }
     }
 
-    final Context mContext;
-    final int     mEntryItemLayoutId;
+    final Context        mContext;
+    final LayoutInflater mLayoutInflater;
+    final int            mEntryItemLayoutId;
     OnItemSelectedListener mListener;
     List<String>           mItems;
     int     mSelectedPos  = -1;
@@ -44,16 +45,18 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
         mContext = context;
         mListener = listener;
         mEntryItemLayoutId = R.layout.entry_item_simple;
+        mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     public SimpleListAdapter(Context context, int entryItemLayoutId) {
         mContext = context;
         mEntryItemLayoutId = entryItemLayoutId;
+        mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(mEntryItemLayoutId, parent, false);
+        View view = mLayoutInflater.inflate(mEntryItemLayoutId, parent, false);
         return new CustomViewHolder(view);
     }
 

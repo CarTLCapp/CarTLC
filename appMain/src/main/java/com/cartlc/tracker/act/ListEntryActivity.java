@@ -18,7 +18,6 @@ import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.data.TableProjectAddressCombo;
 import com.cartlc.tracker.etc.PrefHelper;
-import com.cartlc.tracker.util.DialogHelper;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

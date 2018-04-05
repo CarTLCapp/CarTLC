@@ -99,4 +99,7 @@
     <style name="StatusText">
         <item name="android:textSize">18sp</item>
     </style>
+    <style name="ConfirmQuestionText">
+        <item name="android:textSize">18sp</item>
+    </style>
 </resources>

@@ -85,16 +85,16 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
         }
     }
 
-    final protected Context mContext;
+    final protected Context        mContext;
+    final protected LayoutInflater mLayoutInflater;
     protected List<DataPicture> mItems = new ArrayList();
     protected Integer mDecHeight;
     protected MyHandler mHandler = new MyHandler();
-    Integer        mMaxHeight;
-    LayoutInflater mLayoutInflater;
+    Integer mMaxHeight;
 
     public PictureListAdapter(Context context) {
         mContext = context;
-        mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     protected int getItemLayout() {
@@ -114,7 +114,7 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(getItemLayout(), parent, false);
+        View view = mLayoutInflater.inflate(getItemLayout(), parent, false);
         return new CustomViewHolder(view);
     }
 
@@ -214,7 +214,6 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
     public Uri getUri(File file) {
         return TBApplication.getUri(mContext, file);
     }
-
 
     @Override
     public int getItemCount() {

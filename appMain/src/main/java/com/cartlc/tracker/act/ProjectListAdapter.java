@@ -37,18 +37,20 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         }
     }
 
-    final Context mContext;
+    final Context        mContext;
+    final LayoutInflater mLayoutInflater;
     List<DataProjectAddressCombo> mProjectGroups;
     Long                          mCurProjectGroupId;
 
     public ProjectListAdapter(Context context) {
         mContext = context;
+        mLayoutInflater = LayoutInflater.from(mContext);
         onDataChanged();
     }
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_project, null);
+        View view = mLayoutInflater.inflate(R.layout.entry_item_project, null);
         return new CustomViewHolder(view);
     }
 

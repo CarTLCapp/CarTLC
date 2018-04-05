@@ -8,20 +8,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.amazonaws.util.StringUtils;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
 import com.cartlc.tracker.etc.PrefHelper;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 /**
  * Created by dug on 5/12/17.
@@ -30,11 +26,11 @@ import timber.log.Timber;
 public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.CustomViewHolder> {
 
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.truck_value)     TextView truckValue;
-        @BindView(R.id.status)          TextView status;
-        @BindView(R.id.notes)           TextView notes;
-        @BindView(R.id.equipments)      TextView equipments;
-        @BindView(R.id.edit)            TextView edit;
+        @BindView(R.id.truck_value) TextView truckValue;
+        @BindView(R.id.status)      TextView status;
+        @BindView(R.id.notes)       TextView notes;
+        @BindView(R.id.equipments)  TextView equipments;
+        @BindView(R.id.edit)        TextView edit;
 
         public CustomViewHolder(View view) {
             super(view);
@@ -48,16 +44,18 @@ public class ListEntryAdapter extends RecyclerView.Adapter<ListEntryAdapter.Cust
 
     final Context                mContext;
     final OnItemSelectedListener mListener;
+    final LayoutInflater         mLayoutInflater;
     List<DataEntry> mItems;
 
     public ListEntryAdapter(Context context, OnItemSelectedListener listener) {
         mContext = context;
         mListener = listener;
+        mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_full, parent, false);
+        View view = mLayoutInflater.inflate(R.layout.entry_item_full, parent, false);
         return new CustomViewHolder(view);
     }
 

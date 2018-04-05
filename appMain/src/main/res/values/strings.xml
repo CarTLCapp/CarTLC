@@ -90,4 +90,13 @@
     <string name="perm_write_external_storage">Grant external write storage permission to help storage uploaded files.</string>
     <string name="perm_location">Grant location permission to help creating a new project easier.</string>
 
+    <string name="confirm_title">Confirmation Checklist</string>
+    <string name="confirm_question_1">Is the truck clean and trash picked up?</string>
+    <string name="confirm_question_2">Are all screws and hardware installed?</string>
+    <string name="confirm_question_3">Are all driver supplies returned to their original location?</string>
+    <string name="confirm_question_4">IS THE KEY TURNED OFF?</string>
+    <string name="confirm_question_5">Are the headlights and dome light turned off?</string>
+    <string name="confirm_question_6">Do you have all your tools?</string>
+    <string name="confirm_question_7">Did you remember to pick up trash around the truck?!!</string>
+
 </resources>

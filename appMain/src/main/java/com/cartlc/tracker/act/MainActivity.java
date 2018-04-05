@@ -569,6 +569,20 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             }
+        } else if (mCurStage == Stage.CONFIRM) {
+            if (isNext) {
+                mDialogHelper.showConfirmDialog(new DialogHelper.DialogListener() {
+                    @Override
+                    public void onOkay() {
+                        doNext_();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                    }
+                });
+                return false;
+            }
         }
         mCurStageEditing = false;
         mSoftKeyboardDetect.clear();

@@ -9,16 +9,13 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cartlc.tracker.R;
-import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataEntry;
 import com.cartlc.tracker.data.DataNote;
 import com.cartlc.tracker.data.DataProjectAddressCombo;
-import com.cartlc.tracker.data.TableEntry;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableNote;
 import com.cartlc.tracker.data.TableCollectionNoteProject;
@@ -28,7 +25,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 /**
  * Created by dug on 5/12/17.
@@ -54,16 +50,18 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
 
     final protected Context        mContext;
     final protected EntryListener  mListener;
+    final protected LayoutInflater mLayoutInflater;
     protected       List<DataNote> mItems;
 
     public NoteListEntryAdapter(Context context, EntryListener listener) {
         mContext = context;
         mListener = listener;
+        mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_item_entry_note, parent, false);
+        View view = mLayoutInflater.inflate(R.layout.entry_item_entry_note, parent, false);
         return new CustomViewHolder(view);
     }
 
