@@ -32,6 +32,7 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -373,6 +374,13 @@ public class MainActivity extends AppCompatActivity {
         mZipCodeWatcher = new ZipCodeWatcher();
         mLastName.setOnEditorActionListener(mAutoNext);
         mEntrySimple.setOnEditorActionListener(mAutoNext);
+        mSecondaryLogin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mSecondaryFirstName.setEnabled(isChecked);
+                mSecondaryLastName.setEnabled(isChecked);
+            }
+        });
         PrefHelper.getInstance().setFromCurrentProjectId();
         computeCurStage();
         if (savedInstanceState != null) {
@@ -545,13 +553,13 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
             if (mSecondaryLogin.isChecked()) {
-                firstName = getEditText(mFirstName);
-                lastName = getEditText(mLastName);
+                firstName = getEditText(mSecondaryFirstName);
+                lastName = getEditText(mSecondaryLastName);
                 PrefHelper.getInstance().setSecondaryFirstName(firstName);
                 PrefHelper.getInstance().setSecondaryLastName(lastName);
+                PrefHelper.getInstance().setSecondaryEnabled(true);
             } else {
-                PrefHelper.getInstance().setSecondaryFirstName(null);
-                PrefHelper.getInstance().setSecondaryLastName(null);
+                PrefHelper.getInstance().setSecondaryEnabled(false);
             }
             PrefHelper.getInstance().setRegistrationChanged(true);
             mApp.ping();
@@ -719,7 +727,7 @@ public class MainActivity extends AppCompatActivity {
                     mLastName.setText(PrefHelper.getInstance().getLastName());
                     mSecondaryFirstName.setText(PrefHelper.getInstance().getSecondaryFirstName());
                     mSecondaryLastName.setText(PrefHelper.getInstance().getSecondaryLastName());
-                    mSecondaryLogin.setChecked(PrefHelper.getInstance().hasSecondaryName());
+                    mSecondaryLogin.setChecked(PrefHelper.getInstance().isSecondaryEnabled());
                 }
                 mApp.ping();
                 break;

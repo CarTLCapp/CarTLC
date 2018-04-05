@@ -54,7 +54,10 @@ public class SecondaryTechnician extends com.avaje.ebean.Model {
     }
 
     public static void save(long entry_id, long secondary_tech_id) {
-        find.where().eq("entry_id", entry_id).delete();
+        ist<SecondaryTechnician> list = find.where().eq("entry_id", entry_id).findList();
+        if (list.size() > 0) {
+            find.where().eq("entry_id", entry_id).delete();
+        }
         SecondaryTechnician item = new SecondaryTechnician();
         item.entry_id = entry_id;
         item.secondary_tech_id = secondary_tech_id;

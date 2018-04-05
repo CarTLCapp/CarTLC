@@ -58,6 +58,7 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_LAST_NAME                     = "last_name";
     static final        String KEY_SECONDARY_FIRST_NAME          = "secondary_first_name";
     static final        String KEY_SECONDARY_LAST_NAME           = "secondary_last_name";
+    static final        String KEY_HAS_SECONDARY                 = "has_secondary";
     static final        String KEY_TRUCK_NUMBER                  = "truck_number_string";
     static final        String KEY_LICENSE_PLATE                 = "license_plate";
     static final        String KEY_EDIT_ENTRY_ID                 = "edit_id";
@@ -220,6 +221,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public boolean hasSecondaryName() {
         return !TextUtils.isEmpty(getSecondaryFirstName()) && !TextUtils.isEmpty(getSecondaryLastName());
+    }
+
+    public boolean isSecondaryEnabled() {
+        return getInt(KEY_HAS_SECONDARY, 0) != 0;
+    }
+
+    public void setSecondaryEnabled(boolean flag) {
+        setInt(KEY_HAS_SECONDARY, flag ? 1 : 0);
     }
 
     public String getTruckNumber() {
