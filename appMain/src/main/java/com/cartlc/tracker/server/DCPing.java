@@ -114,7 +114,7 @@ public class DCPing extends DCPost {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("first_name", PrefHelper.getInstance().getFirstName());
             jsonObject.accumulate("last_name", PrefHelper.getInstance().getLastName());
-            if (PrefHelper.getInstance().hasSecondaryName()) {
+            if (PrefHelper.getInstance().isSecondaryEnabled() && PrefHelper.getInstance().hasSecondaryName()) {
                 jsonObject.accumulate("secondary_first_name", PrefHelper.getInstance().getSecondaryFirstName());
                 jsonObject.accumulate("secondary_last_name", PrefHelper.getInstance().getSecondaryLastName());
             }
@@ -800,7 +800,7 @@ public class DCPing extends DCPost {
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
-            if (PrefHelper.getInstance().getSecondaryTechID() > 0) {
+            if (PrefHelper.getInstance().isSecondaryEnabled() && PrefHelper.getInstance().getSecondaryTechID() > 0) {
                 jsonObject.accumulate("secondary_tech_id", PrefHelper.getInstance().getSecondaryTechID());
             }
             jsonObject.accumulate("date_string", entry.getDate());
