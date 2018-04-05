@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 @Singleton
 public class PostController extends Controller {
+
     @Inject
     public PostController() {
     }
@@ -52,10 +53,32 @@ public class PostController extends Controller {
         if (missing.size() > 0) {
             return missingRequest(missing);
         }
+        long tech_id;
+        tech_id = saveTechnician(first_name, last_name, device_id);
+        if (tech_id == 0) {
+            return badRequest("Bad technician registration.");
+        }
+        long secondary_tech_id = 0;
+        first_name = json.findPath("secondary_first_name").textValue();
+        last_name = json.findPath("secondary_last_name").textValue();
+
+        if (first_name != null && !first_name.isEmpty() && last_name != null && !last_name.isEmpty()) {
+            secondary_tech_id = saveTechnician(first_name, last_name, device_id);
+        }
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(tech_id);
+        if (secondary_tech_id > 0) {
+            sbuf.append(":");
+            sbuf.append(secondary_tech_id);
+        }
+        return ok(sbuf.toString());
+    }
+
+    long saveTechnician(String first_name, String last_name, String device_id) {
+        Technician tech = null;
         Transaction txn = Ebean.beginTransaction();
-        Result res;
         try {
-            Technician tech = Technician.findByName(first_name, last_name, device_id);
+            tech = Technician.findByName(first_name, last_name);
             if (tech == null) {
                 tech = new Technician();
             }
@@ -64,13 +87,15 @@ public class PostController extends Controller {
             tech.device_id = device_id;
             tech.save();
             txn.commit();
-            res = ok(Long.toString(tech.id));
         } catch (Exception ex) {
-            res = badRequest(ex.getMessage());
+            Logger.error(ex.getMessage());
         } finally {
             txn.end();
         }
-        return res;
+        if (tech == null) {
+            return 0L;
+        }
+        return tech.id;
     }
 
     @Transactional

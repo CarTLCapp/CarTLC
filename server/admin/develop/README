@@ -6,7 +6,7 @@ ssh -i ~/.ssh/cartlc.pem ubuntu@cartlc.arqnetworks.com
 ssh -i ~/.ssh/FleetTLC.pem ubuntu@ec2-18-219-26-13.us-east-2.compute.amazonaws.com
 ssh -i ~/.ssh/FleetTLC.pem ubuntu@fleetdev.arqnetworks.com
 
-ubuntu@fleetdev.arqnetworks.com/phpmyadmin
+fleetdev.arqnetworks.com/phpmyadmin
 cartlc/cartlc
 root/cartlc
 

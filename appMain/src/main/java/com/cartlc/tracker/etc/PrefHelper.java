@@ -56,6 +56,8 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_SAVED_PROJECT_GROUP_ID        = "saved_project_group_id";
     static final        String KEY_FIRST_NAME                    = "first_name";
     static final        String KEY_LAST_NAME                     = "last_name";
+    static final        String KEY_SECONDARY_FIRST_NAME          = "secondary_first_name";
+    static final        String KEY_SECONDARY_LAST_NAME           = "secondary_last_name";
     static final        String KEY_TRUCK_NUMBER                  = "truck_number_string";
     static final        String KEY_LICENSE_PLATE                 = "license_plate";
     static final        String KEY_EDIT_ENTRY_ID                 = "edit_id";
@@ -64,6 +66,7 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_NEXT_NOTE_COLLECTION_ID       = "next_note_collection_id";
     static final        String KEY_CURRENT_PICTURE_COLLECTION_ID = "picture_collection_id";
     static final        String KEY_TECH_ID                       = "tech_id";
+    static final        String KEY_SECONDARY_TECH_ID             = "secondary_tech_id";
     static final        String KEY_REGISTRATION_CHANGED          = "registration_changed";
     static final        String KEY_IS_DEVELOPMENT                = "is_development";
     static final        String KEY_SPECIAL_UPDATE_CHECK          = "special_update_check";
@@ -89,6 +92,14 @@ public class PrefHelper extends PrefHelperBase {
 
     public void setTechID(int id) {
         setInt(KEY_TECH_ID, id);
+    }
+
+    public int getSecondaryTechID() {
+        return getInt(KEY_SECONDARY_TECH_ID, 0);
+    }
+
+    public void setSecondaryTechID(int id) {
+        setInt(KEY_SECONDARY_TECH_ID, id);
     }
 
     public String getStreet() {
@@ -189,6 +200,26 @@ public class PrefHelper extends PrefHelperBase {
 
     public boolean hasName() {
         return !TextUtils.isEmpty(getFirstName()) && !TextUtils.isEmpty(getLastName());
+    }
+
+    public void setSecondaryFirstName(String name) {
+        setString(KEY_SECONDARY_FIRST_NAME, name);
+    }
+
+    public String getSecondaryFirstName() {
+        return getString(KEY_SECONDARY_FIRST_NAME, null);
+    }
+
+    public void setSecondaryLastName(String name) {
+        setString(KEY_SECONDARY_LAST_NAME, name);
+    }
+
+    public String getSecondaryLastName() {
+        return getString(KEY_SECONDARY_LAST_NAME, null);
+    }
+
+    public boolean hasSecondaryName() {
+        return !TextUtils.isEmpty(getSecondaryFirstName()) && !TextUtils.isEmpty(getSecondaryLastName());
     }
 
     public String getTruckNumber() {

@@ -259,6 +259,8 @@ public class EntryPagedList {
             query.append(" INNER JOIN company AS c ON e.company_id = c.id");
             query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
             query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
+            query.append(" INNER JOIN secondary_technician AS ste ON e.id = ste.entry_id");
+            query.append(" INNER JOIN technician AS te2 ON ste.tech_id = te2.id");
             // For some reason if I include eqc and eq tables, the COUNT(*) includes all records?
             // query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
             // query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
@@ -279,6 +281,8 @@ public class EntryPagedList {
             query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
             query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
             query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
+            query.append(" INNER JOIN secondary_technician AS ste ON e.id = ste.entry_id");
+            query.append(" INNER JOIN technician AS te2 ON ste.tech_id = te2.id");
         }
         if (mByTruckId > 0) {
             query.append(" WHERE ");
@@ -305,6 +309,10 @@ public class EntryPagedList {
             query.append(appendSearch("tr.truck_number"));
             query.append(" OR ");
             query.append(appendSearch("tr.license_plate"));
+            query.append(" OR ");
+            query.append(appendSearch("te2.first_name"));
+            query.append(" OR ");
+            query.append(appendSearch("te2.last_name"));
             if (!isCount) {
                 // Can't do this until I figure out why COUNT(*) oddity occurs.
                 query.append(" OR ");

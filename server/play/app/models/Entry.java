@@ -165,7 +165,15 @@ public class Entry extends com.avaje.ebean.Model {
         if (tech == null) {
             return "NOT FOUND: " + tech_id;
         }
-        return tech.fullName();
+        Technician tech2 = SecondaryTechnician.findSecondaryTechByEntryId(id);
+        if (tech2 == null) {
+            return tech.fullName();
+        }
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(tech.fullName());
+        sbuf.append(" & ");
+        sbuf.append(tech2.fullName());
+        return sbuf.toString();
     }
 
     public String getProjectLine() {

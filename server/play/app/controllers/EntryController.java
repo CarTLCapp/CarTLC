@@ -171,6 +171,13 @@ public class EntryController extends Controller {
         } else {
             entry.tech_id = value.intValue();
         }
+        int secondary_tech_id;
+        value = json.findValue("secondary_tech_id");
+        if (value != null) {
+            secondary_tech_id = value.intValue();
+        } else {
+            secondary_tech_id = 0;
+        }
         value = json.findValue("date_string");
         if (value != null) {
             String date_value = value.textValue();
@@ -453,6 +460,10 @@ public class EntryController extends Controller {
         } else {
             entry.save();
             Logger.debug("Created new entry " + entry.id);
+        }
+        if (secondary_tech_id > 0) {
+            SecondaryTechnician.save(entry.id, secondary_tech_id);
+            Logger.debug("Assigned secondary technician " + secondary_tech_id + " to " + entry.id);
         }
         long ret_id;
         if (retServerId) {

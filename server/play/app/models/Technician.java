@@ -26,24 +26,16 @@ public class Technician extends com.avaje.ebean.Model {
     }
 
     @Transactional
-    public static Technician findByName(String first_name, String last_name, String device_id) {
+    public static Technician findByName(String first_name, String last_name) {
         List<Technician> items = find.where()
                 .eq("first_name", first_name)
                 .eq("last_name", last_name)
-                .eq("device_id", device_id)
                 .findList();
         if (items.size() == 0) {
-            items = find.where()
-                    .eq("first_name", first_name)
-                    .eq("last_name", last_name)
-                    .findList();
-            if (items.size() == 0) {
-                return null;
-            } else if (items.size() > 1) {
-                Logger.error("Found more than one technician with the name: " + first_name + ", " + last_name + " -> just using the first encountered");
-            }
-        } else if (items.size() > 1) {
-            Logger.error("Found more than one technician with the name: " + first_name + ", " + last_name + ", " + device_id + " -> just using the first encountered");
+            return null;
+        }
+        if (items.size() > 1) {
+            Logger.error("Found more than one technician with the name: " + first_name + ", " + last_name + " -> just using the first encountered");
         }
         return items.get(0);
     }

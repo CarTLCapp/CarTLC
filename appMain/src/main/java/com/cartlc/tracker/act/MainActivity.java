@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -76,7 +77,7 @@ import de.greenrobot.event.EventBus;
 public class MainActivity extends AppCompatActivity {
 
     static final boolean ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG; // true=Debugging only
-    static final boolean LOCATION_ENABLE = TBApplication.LOCATION_ENABLE;
+    static final boolean LOCATION_ENABLE   = TBApplication.LOCATION_ENABLE;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_EDIT_ENTRY    = 2;
@@ -211,6 +212,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.first_name)           EditText             mFirstName;
     @BindView(R.id.last_name)            EditText             mLastName;
     @BindView(R.id.entry_simple)         EditText             mEntrySimple;
+    @BindView(R.id.secondary_login)      CheckBox             mSecondaryLogin;
+    @BindView(R.id.secondary_first_name) EditText             mSecondaryFirstName;
+    @BindView(R.id.secondary_last_name)  EditText             mSecondaryLastName;
     @BindView(R.id.entry_hint)           TextView             mEntryHint;
     @BindView(R.id.list_entry_hint)      TextView             mListEntryHint;
     @BindView(R.id.frame_login)          ViewGroup            mLoginFrame;
@@ -540,6 +544,15 @@ public class MainActivity extends AppCompatActivity {
                 showError(getString(R.string.error_enter_your_name));
                 return false;
             }
+            if (mSecondaryLogin.isChecked()) {
+                firstName = getEditText(mFirstName);
+                lastName = getEditText(mLastName);
+                PrefHelper.getInstance().setSecondaryFirstName(firstName);
+                PrefHelper.getInstance().setSecondaryLastName(lastName);
+            } else {
+                PrefHelper.getInstance().setSecondaryFirstName(null);
+                PrefHelper.getInstance().setSecondaryLastName(null);
+            }
             PrefHelper.getInstance().setRegistrationChanged(true);
             mApp.ping();
         } else if (mCurStage == Stage.EQUIPMENT) {
@@ -704,6 +717,9 @@ public class MainActivity extends AppCompatActivity {
                     mMainTitleText.setText(R.string.title_login);
                     mFirstName.setText(PrefHelper.getInstance().getFirstName());
                     mLastName.setText(PrefHelper.getInstance().getLastName());
+                    mSecondaryFirstName.setText(PrefHelper.getInstance().getSecondaryFirstName());
+                    mSecondaryLastName.setText(PrefHelper.getInstance().getSecondaryLastName());
+                    mSecondaryLogin.setChecked(PrefHelper.getInstance().hasSecondaryName());
                 }
                 mApp.ping();
                 break;
@@ -1124,7 +1140,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onOkay() {
                 if (mCurStage == MainActivity.Stage.PICTURE_1 ||
-                    mCurStage == MainActivity.Stage.PICTURE_2 ||
+                        mCurStage == MainActivity.Stage.PICTURE_2 ||
                         mCurStage == MainActivity.Stage.PICTURE_3) {
                     mCurStage.advance();
                 }
@@ -1273,7 +1289,7 @@ public class MainActivity extends AppCompatActivity {
             case STREET:
                 if (mEditCurProject) {
                     hint = getEditProjectHint();
-                }  else {
+                } else {
                     hint = getCurProjectHint();
                 }
                 break;

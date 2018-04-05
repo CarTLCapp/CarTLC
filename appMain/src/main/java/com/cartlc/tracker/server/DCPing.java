@@ -114,21 +114,49 @@ public class DCPing extends DCPost {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("first_name", PrefHelper.getInstance().getFirstName());
             jsonObject.accumulate("last_name", PrefHelper.getInstance().getLastName());
+            if (PrefHelper.getInstance().hasSecondaryName()) {
+                jsonObject.accumulate("secondary_first_name", PrefHelper.getInstance().getSecondaryFirstName());
+                jsonObject.accumulate("secondary_last_name", PrefHelper.getInstance().getSecondaryLastName());
+            }
             jsonObject.accumulate("device_id", deviceId);
             String result = post(REGISTER, jsonObject, true);
             if (result != null) {
-                if (TextUtils.isDigitsOnly(result)) {
-                    int tech_id = Integer.parseInt(result);
-                    PrefHelper.getInstance().setTechID(tech_id);
+                if (parseRegistrationResult(result)) {
                     PrefHelper.getInstance().setRegistrationChanged(false);
-                    Timber.i("TECH ID=" + tech_id);
-                } else {
-                    Timber.i("sendRegistration() failed");
                 }
             }
         } catch (Exception ex) {
             TBApplication.ReportError(ex, DCPing.class, "sendRegistration()", "server");
         }
+    }
+
+    boolean parseRegistrationResult(String result) {
+        try {
+            if (result.contains(":")) {
+                int pos = result.indexOf(':');
+                String word = result.substring(0, pos);
+                int tech_id = Integer.parseInt(word);
+                PrefHelper.getInstance().setTechID(tech_id);
+                Timber.i("TECH ID=" + tech_id);
+
+                word = result.substring(pos + 1);
+                tech_id = Integer.parseInt(word);
+                PrefHelper.getInstance().setSecondaryTechID(tech_id);
+                Timber.i("SECONDARY TECH ID=" + tech_id);
+                return true;
+            }
+            if (TextUtils.isDigitsOnly(result)) {
+                int tech_id = Integer.parseInt(result);
+                PrefHelper.getInstance().setTechID(tech_id);
+                PrefHelper.getInstance().setSecondaryTechID(0);
+                Timber.i("TECH ID=" + tech_id);
+                return true;
+            }
+            Timber.e("sendRegistration() failed on: " + result);
+        } catch (NumberFormatException ex) {
+            Timber.e("sendRegistration(): PARSE ERROR on: " + result);
+        }
+        return false;
     }
 
     public synchronized void ping() {
@@ -766,13 +794,15 @@ public class DCPing extends DCPost {
         return count;
     }
 
-
     boolean sendEntry(DataEntry entry) {
         boolean success = false;
         Timber.i("sendEntry(" + entry.id + ")");
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.accumulate("tech_id", PrefHelper.getInstance().getTechID());
+            if (PrefHelper.getInstance().getSecondaryTechID() > 0) {
+                jsonObject.accumulate("secondary_tech_id", PrefHelper.getInstance().getSecondaryTechID());
+            }
             jsonObject.accumulate("date_string", entry.getDate());
             jsonObject.accumulate("server_id", entry.serverId);
 
