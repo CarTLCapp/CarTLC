@@ -19,6 +19,7 @@ GCResample/libs
 GCResample/obj
 GCResample/jni/frameworks
 GCResample/jni/system
+appMain/release
 
 # Gradle files
 .gradle/

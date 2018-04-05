@@ -5,7 +5,7 @@
 #
 DATE=`date +%F`
 VERSION=`grep versionName appMain/build.gradle | awk '{gsub(/"/, "", $2); print $2}'`
-SRCFILE=`ls appMain/*.apk`
+SRCFILE=`ls appMain/release/*.apk`
 TGTFILE="CarTLC-r${VERSION}.apk"
 WRAP=~/cartlc/wrap/$DATE
 DROPBOX=~/Dropbox/Publish
@@ -16,7 +16,7 @@ do
 
 	case $key in
 		-d|--debug)
-			SRCFILE="./appMain/build/outputs/apk/appMain-debug.apk"
+			SRCFILE="./appMain/build/outputs/apk/debug/appMain-debug.apk"
 			TGTFILE="CarTLC-d${VERSION}.apk"
     		shift # past argument
     	;;
