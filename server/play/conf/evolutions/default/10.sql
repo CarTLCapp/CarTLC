@@ -2,7 +2,7 @@
 
 # --- !Ups
 
-CREATE TABLE secondary_technicians (
+CREATE TABLE secondary_technician (
     id                  int auto_increment primary key,
     entry_id            int default 0,
     secondary_tech_id   int default 0,
@@ -10,4 +10,4 @@ CREATE TABLE secondary_technicians (
 
 # --- !Downs
 
-DROP TABLE if exists secondary_technicians;
+DROP TABLE if exists secondary_technician;
