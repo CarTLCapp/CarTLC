@@ -22,18 +22,19 @@ import butterknife.ButterKnife;
 
 public class ConfirmationFrame {
 
-    @BindView(R.id.project_name_value)    TextView                    mProjectNameValue;
-    @BindView(R.id.truck_number_value)    TextView                    mTruckNumberValue;
-    @BindView(R.id.project_address_value) TextView                    mAddressValue;
-    @BindView(R.id.status_value)          TextView                    mStatusValue;
-    @BindView(R.id.equipment_grid)        RecyclerView                mEquipmentGrid;
-    @BindView(R.id.notes_list)            RecyclerView                mNoteList;
-    @BindView(R.id.confirm_pictures_list) RecyclerView                mPictureList;
-    final                                 FrameLayout                 mTop;
-    final                                 SimpleListAdapter           mSimpleAdapter;
-    final                                 NoteListAdapter             mNoteAdapter;
-    final                                 PictureThumbnailListAdapter mPictureAdapter;
-    final                                 Context                     mCtx;
+    @BindView(R.id.project_name_value)     TextView                    mProjectNameValue;
+    @BindView(R.id.truck_number_value)     TextView                    mTruckNumberValue;
+    @BindView(R.id.project_address_value)  TextView                    mAddressValue;
+    @BindView(R.id.status_value)           TextView                    mStatusValue;
+    @BindView(R.id.equipment_grid)         RecyclerView                mEquipmentGrid;
+    @BindView(R.id.notes_list)             RecyclerView                mNoteList;
+    @BindView(R.id.confirm_pictures_list)  RecyclerView                mPictureList;
+    @BindView(R.id.confirm_pictures_label) TextView                    mPicturesTitle;
+    final                                  FrameLayout                 mTop;
+    final                                  SimpleListAdapter           mSimpleAdapter;
+    final                                  NoteListAdapter             mNoteAdapter;
+    final                                  PictureThumbnailListAdapter mPictureAdapter;
+    final                                  Context                     mCtx;
 
     public ConfirmationFrame(FrameLayout top) {
         mCtx = top.getContext();
@@ -77,5 +78,6 @@ public class ConfirmationFrame {
         mSimpleAdapter.setList(entry.getEquipmentNames());
         mPictureAdapter.setList(entry.getPictures());
         mStatusValue.setText(entry.getStatus(mCtx));
+        mPicturesTitle.setText(mCtx.getString(R.string.title_pictures_, entry.getPictures().size()));
     }
 }

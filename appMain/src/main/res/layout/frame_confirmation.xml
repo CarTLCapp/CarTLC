@@ -144,7 +144,6 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="@dimen/confirm_gap_height"
-            android:text="@string/title_pictures_"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/notes_list"/>
 

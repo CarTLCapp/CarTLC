@@ -50,7 +50,7 @@
     <string name="title_uploaded_done">Uploaded ALL</string>
     <string name="title_photo">1 Photo</string>
     <string name="title_photos">%d Photos</string>
-    <string name="title_pictures_">Pictures:</string>
+    <string name="title_pictures_">Pictures: %d</string>
     <string name="title_status">Status</string>
     <string name="title_status_">Status:</string>
     <string name="title_truck_">Truck:</string>
