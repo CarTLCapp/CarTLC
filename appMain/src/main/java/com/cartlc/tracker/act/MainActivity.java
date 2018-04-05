@@ -41,6 +41,7 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.R;
@@ -69,6 +70,7 @@ import com.cartlc.tracker.util.LocationHelper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -179,14 +181,15 @@ public class MainActivity extends AppCompatActivity {
         STATE,
         CITY,
         STREET,
+        CONFIRM_ADDRESS,
         CURRENT_PROJECT,
         TRUCK,
         PICTURE_1,
         EQUIPMENT,
         NOTES,
         PICTURE_2,
-        STATUS,
         PICTURE_3,
+        STATUS,
         CONFIRM,
         ADD_ELEMENT;
 
@@ -266,6 +269,7 @@ public class MainActivity extends AppCompatActivity {
     boolean                    mDoingCenter;
     boolean mShowServerError = true;
     boolean mEditCurProject  = false;
+    boolean mAddressConfirmOkay = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -317,7 +321,12 @@ public class MainActivity extends AppCompatActivity {
         });
         mProjectAdapter = new ProjectListAdapter(this);
         mEquipmentAdapter = new EquipmentSelectListAdapter(this);
-        mPictureAdapter = new PictureListAdapter(this);
+        mPictureAdapter = new PictureListAdapter(this, new PictureListAdapter.RefreshCountListener() {
+            @Override
+            public void refresh(int newCount) {
+                setPhotoTitleCount(newCount);
+            }
+        });
         linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         linearLayoutManager.setAutoMeasureEnabled(true);
         mPictureList.setLayoutManager(linearLayoutManager);
@@ -758,9 +767,16 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     showMainListFrame();
                     mCenter.setVisibility(View.VISIBLE);
-                    List<String> companies = TableAddress.getInstance().queryCompanies();
-                    setList(R.string.title_company, PrefHelper.KEY_COMPANY, companies);
-                    checkEdit();
+                    List<DataAddress> companies = TableAddress.getInstance().query();
+                    autoNarrowCompanies(companies);
+                    List<String> companyNames = getNames(companies);
+                    if (companyNames.size() == 1) {
+                        PrefHelper.getInstance().setCompany(companyNames.get(0));
+                        skip();
+                    } else {
+                        setList(R.string.title_company, PrefHelper.KEY_COMPANY, companyNames);
+                        checkCenterButtonIsEdit();
+                    }
                 }
                 break;
             case STATE: {
@@ -855,12 +871,13 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 } else {
                     autoNarrowStreets(streets);
+                    mCenter.setVisibility(View.VISIBLE);
+                    showMainListFrame();
                     if (streets.size() == 1) {
                         PrefHelper.getInstance().setStreet(streets.get(0));
+                        mAddressConfirmOkay = true;
                         skip();
                     } else {
-                        mCenter.setVisibility(View.VISIBLE);
-                        showMainListFrame();
                         if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
                             mNext.setVisibility(View.VISIBLE);
                         }
@@ -868,7 +885,18 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             }
-            case CURRENT_PROJECT:
+            case CONFIRM_ADDRESS: {
+                if (mAddressConfirmOkay) {
+                    mAddressConfirmOkay = false;
+                    showSubTitleHint();
+                    mPrev.setVisibility(View.VISIBLE);
+                    mNext.setVisibility(View.VISIBLE);
+                } else {
+                    skip();
+                }
+                break;
+            }
+            case CURRENT_PROJECT: {
                 if (mCurStageEditing) {
                     PrefHelper.getInstance().clearCurProject();
                     mCurStageEditing = false;
@@ -894,6 +922,7 @@ public class MainActivity extends AppCompatActivity {
                     checkErrors();
                 }
                 break;
+            }
             case TRUCK:
                 mNext.setVisibility(View.VISIBLE);
                 mPrev.setVisibility(View.VISIBLE);
@@ -944,27 +973,31 @@ public class MainActivity extends AppCompatActivity {
             case PICTURE_2:
             case PICTURE_3:
                 int pictureCount = PrefHelper.getInstance().getNumPicturesTaken();
-                if (pictureCount == 1) {
-                    mMainTitleText.setText(getString(R.string.title_photo));
+                if (pictureCount >= 3 && mCurStage == Stage.PICTURE_3) {
+                    skip();
                 } else {
-                    mMainTitleText.setText(getString(R.string.title_photos, pictureCount));
-                }
-                mPrev.setVisibility(View.VISIBLE);
-                if (mCurStageEditing || pictureCount < getExpectedPictureMin()) {
-                    mCurStageEditing = false;
-                    if (!dispatchPictureRequest()) {
-                        showError(getString(R.string.error_cannot_take_picture));
+                    if (mWasNext) {
+                        showPictureToast(pictureCount);
+                        mWasNext = false;
                     }
-                } else {
-                    mNext.setVisibility(View.VISIBLE);
-                    mCenter.setVisibility(View.VISIBLE);
-                    mCenter.setText(R.string.btn_another);
-                    mPictureFrame.setVisibility(View.VISIBLE);
-                    mPictureList.setVisibility(View.VISIBLE);
-                    mPictureAdapter.setList(
-                            TablePictureCollection.getInstance().removeNonExistant(
-                                    TablePictureCollection.getInstance().queryPictures(PrefHelper.getInstance().getCurrentPictureCollectionId()
-                                    )));
+                    setPhotoTitleCount(pictureCount);
+                    mPrev.setVisibility(View.VISIBLE);
+                    if (mCurStageEditing || pictureCount < getExpectedPictureMin()) {
+                        mCurStageEditing = false;
+                        if (!dispatchPictureRequest()) {
+                            showError(getString(R.string.error_cannot_take_picture));
+                        }
+                    } else {
+                        mNext.setVisibility(View.VISIBLE);
+                        mCenter.setVisibility(View.VISIBLE);
+                        mCenter.setText(R.string.btn_another);
+                        mPictureFrame.setVisibility(View.VISIBLE);
+                        mPictureList.setVisibility(View.VISIBLE);
+                        mPictureAdapter.setList(
+                                TablePictureCollection.getInstance().removeNonExistant(
+                                        TablePictureCollection.getInstance().queryPictures(PrefHelper.getInstance().getCurrentPictureCollectionId()
+                                        )));
+                    }
                 }
                 break;
             case STATUS:
@@ -994,6 +1027,37 @@ public class MainActivity extends AppCompatActivity {
                 fillStage();
                 break;
         }
+    }
+
+    List<String> getNames(List<DataAddress> companies) {
+        List<String> list = new ArrayList<>();
+        for (DataAddress address : companies) {
+            if (!list.contains(address.company)) {
+                list.add(address.company);
+            }
+        }
+        Collections.sort(list);
+        return list;
+    }
+
+    void autoNarrowCompanies(List<DataAddress> companies) {
+        if (!mWasNext) {
+            return;
+        }
+        if (companies.size() == 1) {
+            return;
+        }
+        if (mAddress == null) {
+            return;
+        }
+        List<DataAddress> reduced = new ArrayList<>();
+        for (DataAddress company : companies) {
+            if (LocationHelper.getInstance().matchCompany(mAddress, company)) {
+                reduced.add(company);
+            }
+        }
+        companies.clear();
+        companies.addAll(reduced);
     }
 
     void autoNarrowStates(List<String> states) {
@@ -1040,11 +1104,7 @@ public class MainActivity extends AppCompatActivity {
         if (mAddress == null) {
             return;
         }
-        String street = LocationHelper.getInstance().matchStreet(mAddress, streets);
-        if (street != null) {
-            streets.clear();
-            streets.add(street);
-        }
+        LocationHelper.getInstance().reduceStreets(mAddress, streets);
     }
 
     boolean isNewEquipmentOkay() {
@@ -1055,7 +1115,7 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    // Return false if NoneSelected situation has occured.
+    // Return false if NoneSelected situation has occurred.
     boolean setList(int titleId, String key, List<String> list) {
         boolean hasSelection = true;
         mCurKey = key;
@@ -1087,7 +1147,7 @@ public class MainActivity extends AppCompatActivity {
             if (mCurStage == Stage.PROJECT || mCurStage == Stage.CITY || mCurStage == Stage.STATE || mCurStage == Stage.STREET) {
                 mNext.setVisibility(View.VISIBLE);
             } else if (mCurStage == Stage.COMPANY) {
-                checkEdit();
+                checkCenterButtonIsEdit();
             } else if (mCurStage == Stage.TRUCK) {
                 mEntrySimple.setText(text);
             }
@@ -1213,7 +1273,7 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    void checkEdit() {
+    void checkCenterButtonIsEdit() {
         if (mCurStage == Stage.COMPANY) {
             if (isLocalCompany()) {
                 mCenter.setText(R.string.btn_edit);
@@ -1261,6 +1321,7 @@ public class MainActivity extends AppCompatActivity {
             case STATE:
             case CITY:
             case STREET:
+            case CONFIRM_ADDRESS:
                 hint = PrefHelper.getInstance().getAddress();
                 break;
             case STATUS:
@@ -1295,6 +1356,7 @@ public class MainActivity extends AppCompatActivity {
             case STATE:
             case CITY:
             case STREET:
+            case CONFIRM_ADDRESS:
                 if (mEditCurProject) {
                     hint = getEditProjectHint();
                 } else {
@@ -1302,7 +1364,9 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case TRUCK:
-                hint = PrefHelper.getInstance().getCurrentProjectGroup().getHintLine();
+                if (PrefHelper.getInstance().getCurrentProjectGroup() != null) {
+                    hint = PrefHelper.getInstance().getCurrentProjectGroup().getHintLine();
+                }
                 break;
         }
         if (hint != null && hint.length() > 0) {
@@ -1311,20 +1375,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void showPictureToast(int pictureCount) {
+        String msg;
+        if (pictureCount <= 0) {
+            msg = getString(R.string.picture_help_1);
+        } else if (pictureCount <= 1) {
+            msg = getString(R.string.picture_help_2);
+        } else if (pictureCount <= 2) {
+            msg = getString(R.string.picture_help_3);
+        } else {
+            msg = null;
+        }
+        if (msg != null) {
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        }
+    }
+
     String getEditProjectHint() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(getString(R.string.entry_hint_edit_project));
         sbuf.append("\n");
-        sbuf.append(PrefHelper.getInstance().getProjectName());
-        sbuf.append("\n");
+        String name = PrefHelper.getInstance().getProjectName();
+        if (name != null) {
+            sbuf.append(name);
+            sbuf.append("\n");
+        }
         sbuf.append(PrefHelper.getInstance().getAddress());
         return sbuf.toString();
     }
 
     String getCurProjectHint() {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append(PrefHelper.getInstance().getProjectName());
-        sbuf.append("\n");
+        String name = PrefHelper.getInstance().getProjectName();
+        if (name != null) {
+            sbuf.append(name);
+            sbuf.append("\n");
+        }
         sbuf.append(PrefHelper.getInstance().getAddress());
         return sbuf.toString();
     }
@@ -1380,6 +1466,14 @@ public class MainActivity extends AppCompatActivity {
             mStatusComplete.setChecked(false);
             mStatusPartial.setChecked(false);
             mStatusSelect.clearCheck();
+        }
+    }
+
+    void setPhotoTitleCount(int count) {
+        if (count == 1) {
+            mMainTitleText.setText(getString(R.string.title_photo));
+        } else {
+            mMainTitleText.setText(getString(R.string.title_photos, count));
         }
     }
 

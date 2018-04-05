@@ -70,6 +70,10 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
         }
     }
 
+    interface RefreshCountListener {
+        void refresh(int newCount);
+    }
+
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
         protected @BindView(R.id.picture)               ImageView imageView;
         protected @Nullable @BindView(R.id.remove)      ImageView removeView;
@@ -87,14 +91,16 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
 
     final protected Context        mContext;
     final protected LayoutInflater mLayoutInflater;
+    final protected RefreshCountListener mListener;
     protected List<DataPicture> mItems = new ArrayList();
     protected Integer mDecHeight;
     protected MyHandler mHandler = new MyHandler();
     Integer mMaxHeight;
 
-    public PictureListAdapter(Context context) {
+    public PictureListAdapter(Context context, RefreshCountListener listener) {
         mContext = context;
         mLayoutInflater = LayoutInflater.from(mContext);
+        mListener = listener;
     }
 
     protected int getItemLayout() {
@@ -171,6 +177,9 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
                         item.remove();
                         mItems.remove(item);
                         notifyDataSetChanged();
+                        if (mListener != null) {
+                            mListener.refresh(mItems.size());
+                        }
                     }
                 });
             }

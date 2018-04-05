@@ -52,7 +52,9 @@ public class ListEntryActivity extends AppCompatActivity implements ListEntryAda
             @Override
             public void onClick(View v) {
                 DataProjectAddressCombo projectGroup = PrefHelper.getInstance().getCurrentProjectGroup();
-                TableProjectAddressCombo.getInstance().remove(projectGroup.id);
+                if (projectGroup != null) {
+                    TableProjectAddressCombo.getInstance().remove(projectGroup.id);
+                }
                 setResult(MainActivity.RESULT_DELETE_PROJECT);
                 finish();
             }

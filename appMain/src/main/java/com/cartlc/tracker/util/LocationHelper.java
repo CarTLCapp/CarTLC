@@ -7,9 +7,12 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
+import com.cartlc.tracker.data.DataAddress;
+import com.cartlc.tracker.data.DataStates;
 import com.cartlc.tracker.data.TableCrash;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -259,28 +262,77 @@ public class LocationHelper {
                 });
     }
 
+    public static boolean match(String string1, String string2) {
+        if (string1 == null || string2 == null) {
+            return false;
+        }
+        return string1.compareToIgnoreCase(string2) == 0;
+    }
+
+    boolean hasState(Address address) {
+        return !TextUtils.isEmpty(address.getAdminArea());
+    }
+
+    boolean hasCity(Address address) {
+        return !TextUtils.isEmpty(address.getLocality());
+    }
+
+    public boolean matchCompany(Address address, DataAddress company) {
+        if (LocationHelper.getInstance().hasState(address)) {
+            if (!LocationHelper.getInstance().matchState(address, company.state)) {
+                return false;
+            }
+        }
+        if (LocationHelper.getInstance().hasCity(address)) {
+            if (!LocationHelper.getInstance().matchCity(address, company.city)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static boolean matchState(Address address, String state) {
+        String stateFull = DataStates.getAbbr(state);
+        String addressFull = DataStates.getAbbr(address.getAdminArea());
+        return match(addressFull, stateFull);
+    }
+
     public static String matchState(Address address, List<String> states) {
         return match(address.getAdminArea(), states);
+    }
+
+    static boolean matchCity(Address address, String city) {
+        return match(address.getLocality(), city);
     }
 
     public static String matchCity(Address address, List<String> cities) {
         return match(address.getLocality(), cities);
     }
 
-    public static String matchStreet(Address address, List<String> streets) {
-        List<String> thoroughFares = new ArrayList<>();
+    public static void reduceStreets(Address address, List<String> streets) {
+        List<String> reduced = new ArrayList<>();
+        String compareWith = stripNumbers(replaceOrdinals(address.getThoroughfare()));
         for (String street : streets) {
-            if (street.contains(address.getThoroughfare())) {
-                thoroughFares.add(street);
-            }
-            if (street.contains(address.getFeatureName())) {
-                return street;
+            if (replaceOrdinals(stripNumbers(street)).compareToIgnoreCase(compareWith) == 0) {
+                reduced.add(street);
             }
         }
-        if (thoroughFares.size() == 1) {
-            return thoroughFares.get(0);
+        if (reduced.size() > 0) {
+            streets.clear();
+            streets.addAll(reduced);
         }
-        return null;
+    }
+
+    static String stripNumbers(String line) {
+        return line.replaceAll("[0-9\\s]+", "");
+    }
+
+    static String replaceOrdinals(String line) {
+        String result = line.replace("North", "N");
+        result = result.replace("South", "S");
+        result = result.replace("West", "W");
+        result = result.replace("East", "E");
+        return result;
     }
 
     static String match(String match, List<String> items) {

@@ -27,7 +27,7 @@ import butterknife.ButterKnife;
 public class PictureThumbnailListAdapter extends PictureListAdapter {
 
     public PictureThumbnailListAdapter(Context context) {
-        super(context);
+        super(context, null);
     }
 
     @Override

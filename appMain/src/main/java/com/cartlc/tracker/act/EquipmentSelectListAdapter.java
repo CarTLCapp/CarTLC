@@ -16,6 +16,7 @@ import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.data.TableEquipment;
 import com.cartlc.tracker.data.TableCollectionEquipmentProject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class EquipmentSelectListAdapter extends RecyclerView.Adapter<EquipmentSe
     }
 
     final protected Context             mContext;
-    protected       List<DataEquipment> mItems;
+    protected       List<DataEquipment> mItems = new ArrayList();
 
     public EquipmentSelectListAdapter(Context context) {
         mContext = context;
