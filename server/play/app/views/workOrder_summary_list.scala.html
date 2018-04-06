@@ -63,9 +63,9 @@
                     @header("client_id", "Client")
                     <th>Company</th>
                     @header("project_id", "Project")
-                    <th># Addresses</th>
-                    <th># Trucks</th>
-                    <th># Complete</th>
+                    <th>% Complete</th>
+                    <th># Techs</th>
+                    <th>Days Active</th>
                     @header("last_modified", "Last Modified")
                     <th>View</th>
                 </tr>
@@ -77,9 +77,9 @@
                         <td>@summary.getClientName()</td>
                         <td>@summary.getCompanyLine()</td>
                         <td>@summary.getProjectName()</td>
-                        <td>@summary.getNumCompanies()</td>
-                        <td>@summary.getNumTrucks()</td>
-                        <td>@summary.getNumComplete()</td>
+                        <td>@summary.getPercentCompleteLine()</td>
+                        <td>@summary.getNumTechs()</td>
+                        <td>@summary.getDaysActive()</td>
                         <td>@summary.getLastModified()</td>
                         <td>
                             <a href="@routes.WorkOrderController.listOrders(summary.getUploadId())">View</a>

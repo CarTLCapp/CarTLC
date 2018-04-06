@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.text.SimpleDateFormat;
 
 import javax.persistence.*;
@@ -23,7 +24,9 @@ public class WorkOrderSummary {
     public long project_id;
     public int num_trucks;
     public int num_complete;
-    public Date last_modified;
+    public int num_techs;
+    public Date first_date;
+    public Date last_date;
     private HashSet<String> companyMap = new HashSet<String>();
 
     public int getUploadId() {
@@ -57,6 +60,31 @@ public class WorkOrderSummary {
         return sbuf.toString();
     }
 
+    public String getPercentCompleteLine() {
+        StringBuilder sbuf = new StringBuilder();
+        float percent = (float) num_trucks / (float) num_complete;
+        sbuf.append(String.format("%.2f", percent));
+        sbuf.append("% Complete (");
+        sbuf.append(num_trucks);
+        sbuf.append("/");
+        sbuf.append(num_complete);
+        sbuf.append(")");
+        return sbuf.toString();
+    }
+
+    public String getNumTechs() {
+        return Integer.toString(num_techs);
+    }
+
+    public String getDaysActive() {
+        if (first_date == null || last_date == null) {
+            return "";
+        }
+        long diff = last_date.getTime() - first_date.getTime();
+        long days = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+        return Long.toString(days);
+    }
+
     public String getClientName() {
         Client client = Client.get(client_id);
         if (client != null) {
@@ -76,19 +104,11 @@ public class WorkOrderSummary {
         return Integer.toString(companyMap.size());
     }
 
-    public String getNumTrucks() {
-        return Integer.toString(num_trucks);
-    }
-
     public String getLastModified() {
-        if (last_modified == null) {
+        if (last_date == null) {
             return "";
         }
-        return new SimpleDateFormat("yyyy-MM-dd kk:mm").format(last_modified);
-    }
-
-    public String getNumComplete() {
-        return Integer.toString(num_complete);
+        return new SimpleDateFormat("yyyy-MM-dd kk:mm").format(last_date);
     }
 
 }
