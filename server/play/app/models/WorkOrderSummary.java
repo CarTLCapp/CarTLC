@@ -62,8 +62,11 @@ public class WorkOrderSummary {
 
     public String getPercentCompleteLine() {
         StringBuilder sbuf = new StringBuilder();
-        float percent = (float) num_complete / (float) num_trucks;
-        sbuf.append(String.format("%.2f", percent));
+        if (num_trucks == 0) {
+            return "";
+        }
+        long percent = (long) ((float) num_complete / (float) num_trucks * 100f);
+        sbuf.append(percent);
         sbuf.append("% Complete (");
         sbuf.append(num_complete);
         sbuf.append("/");
@@ -73,14 +76,23 @@ public class WorkOrderSummary {
     }
 
     public String getNumTechs() {
+        if (num_techs == 0) {
+            return "";
+        }
         return Integer.toString(num_techs);
     }
 
     public String getDaysActive() {
-        if (first_date == null || last_date == null) {
+        if (first_date == null && last_date == null) {
             return "";
         }
+        if (first_date == null || last_date == null) {
+            return "1";
+        }
         long diff = last_date.getTime() - first_date.getTime();
+        if (diff == 0) {
+            return "1";
+        }
         long oneDay = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.DAYS);
         long days = diff / oneDay + (((diff % oneDay) > 0) ? 1 : 0);
         return Long.toString(days);
