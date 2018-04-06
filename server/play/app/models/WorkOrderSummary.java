@@ -62,12 +62,12 @@ public class WorkOrderSummary {
 
     public String getPercentCompleteLine() {
         StringBuilder sbuf = new StringBuilder();
-        float percent = (float) num_trucks / (float) num_complete;
+        float percent = (float) num_complete / (float) num_trucks;
         sbuf.append(String.format("%.2f", percent));
         sbuf.append("% Complete (");
-        sbuf.append(num_trucks);
-        sbuf.append("/");
         sbuf.append(num_complete);
+        sbuf.append("/");
+        sbuf.append(num_trucks);
         sbuf.append(")");
         return sbuf.toString();
     }
