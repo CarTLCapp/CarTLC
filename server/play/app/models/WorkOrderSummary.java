@@ -81,7 +81,8 @@ public class WorkOrderSummary {
             return "";
         }
         long diff = last_date.getTime() - first_date.getTime();
-        long days = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+        long oneDay = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.DAYS);
+        long days = diff / oneDay + (((diff % oneDay) > 0) ? 1 : 0);
         return Long.toString(days);
     }
 
