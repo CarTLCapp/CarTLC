@@ -81,6 +81,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -1049,7 +1050,8 @@ public class MainActivity extends AppCompatActivity {
         if (!mWasNext) {
             return;
         }
-        if (companies.size() == 1) {
+        List<String> companyNames = getNames(companies);
+        if (companyNames.size() == 1) {
             return;
         }
         if (mAddress == null) {
@@ -1060,6 +1062,9 @@ public class MainActivity extends AppCompatActivity {
             if (LocationHelper.getInstance().matchCompany(mAddress, company)) {
                 reduced.add(company);
             }
+        }
+        if (reduced.size() == 0) {
+            return;
         }
         companies.clear();
         companies.addAll(reduced);
