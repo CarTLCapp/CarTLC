@@ -1,14 +1,13 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.server;
 
-import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.telephony.TelephonyManager;
 
 import com.google.android.gms.iid.InstanceID;
-
-import java.util.UUID;
 
 /**
  * Created by dug on 5/22/17.

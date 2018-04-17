@@ -1,3 +1,6 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.util;
 
 import android.Manifest;
@@ -37,11 +40,10 @@ import java.util.Locale;
  */
 public class LocationHelper {
 
-    static final String TAG = LocationHelper.class.getSimpleName();
+    static final String  TAG = LocationHelper.class.getSimpleName();
     static final Boolean LOG = true;
 
-    public interface OnLocationCallback
-    {
+    public interface OnLocationCallback {
         void onLocationUpdate(Address address);
     }
 
@@ -212,20 +214,18 @@ public class LocationHelper {
 
     TBApplication mApp;
     final Geocoder mGeocoder;
-    int mLocationSelector;
+    int                         mLocationSelector;
     FusedLocationProviderClient mFusedLocationClient;
     HashSet<Long> mReportMap = new HashSet();
 
-    LocationHelper(TBApplication app)
-    {
+    LocationHelper(TBApplication app) {
         sInstance = this;
         mApp = app;
         mGeocoder = new Geocoder(mApp);
         mLocationSelector = 1;
     }
 
-    void requestAddress(Location location, OnLocationCallback callback)
-    {
+    void requestAddress(Location location, OnLocationCallback callback) {
         GetAddressTask task = new GetAddressTask(callback);
         task.execute(location);
     }

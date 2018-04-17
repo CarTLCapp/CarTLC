@@ -1,3 +1,6 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package models;
 
 import play.Logger;

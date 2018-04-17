@@ -1,19 +1,12 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.data;
 
-import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.TextUtils;
-import android.util.Log;
 
 import com.cartlc.tracker.app.TBApplication;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import timber.log.Timber;
 
 /**
  * Created by dug on 8/31/17.

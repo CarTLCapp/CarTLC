@@ -1,3 +1,6 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.app;
 
 import android.Manifest;
@@ -15,7 +18,6 @@ import android.view.inputmethod.InputMethodManager;
 import com.cartlc.tracker.BuildConfig;
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.data.DatabaseManager;
-import com.cartlc.tracker.data.TableCrash;
 import com.cartlc.tracker.etc.CheckError;
 import com.cartlc.tracker.etc.PrefHelper;
 import com.cartlc.tracker.etc.BootstrapData;
@@ -35,10 +37,6 @@ import timber.log.Timber;
 import com.cartlc.tracker.util.PermissionHelper;
 
 import java.io.File;
-
-/**
- * Created by dug on 4/14/17.
- */
 
 public class TBApplication extends Application {
 

@@ -1,10 +1,10 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.data;
 
-import android.content.Context;
-import android.net.Uri;
 import android.text.TextUtils;
 
-import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.util.BitmapHelper;
 
 import java.io.File;

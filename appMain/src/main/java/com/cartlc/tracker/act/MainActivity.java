@@ -1,3 +1,6 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.act;
 
 import android.content.Context;
@@ -11,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -67,6 +71,7 @@ import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.event.EventRefreshProjects;
 import com.cartlc.tracker.util.DialogHelper;
 import com.cartlc.tracker.util.LocationHelper;
+import com.cartlc.tracker.util.PermissionHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -1303,6 +1308,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         mCurStage = Stage.from(savedInstanceState.getInt(KEY_STAGE));
         super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        PermissionHelper.getInstance().handlePermissionResult(requestCode, permissions, grantResults);
     }
 
     @Override
