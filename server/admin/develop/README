@@ -44,3 +44,8 @@ mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql
 p/w: cartcl
 
 scp -i ~/.ssh/cartlc.pem ubuntu@cartlc.arqnetworks.com:backup/somefile .
+
+Restore:
+mysql -u cartlc -p
+mysql> use cartlc
+mysql> source dump.sql

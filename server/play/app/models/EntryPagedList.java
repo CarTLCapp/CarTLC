@@ -14,6 +14,8 @@ import play.twirl.api.Html;
 
 public class EntryPagedList {
 
+    static final Boolean COUNT_OKAY = false;
+
     public enum PagedSortBy {
         TECH("tech_name", "te.last_name"),
         TIME("time", "e.entry_time"),
@@ -435,7 +437,7 @@ public class EntryPagedList {
             mParams.mPage = 0;
         } else if (mSearch.hasSearch()) {
             if (mResult.mNumTotalRows == 0) {
-                if (hasEquipmentMatch(mResult.mList)) {
+                if (!COUNT_OKAY || hasEquipmentMatch(mResult.mList)) {
                     query = buildQuery(false, false);
                     entries = Ebean.createSqlQuery(query).findList();
                     mResult.mNumTotalRows = entries.size();
