@@ -28,9 +28,10 @@
 @main("FleetTLC - List Entries") {
 
     @if(currentPage.isByTruck()) {
-        <h1 id="homeTitle">TRUCK @currentPage.getByTruckLine()</h1>
+        <h1>TRUCK @currentPage.getByTruckLine()</h1>
     } else {
-        <h1 id="homeTitle">@Messages("entry.list.title", currentPage.getTotalRowCount())
+        <h1 id="homeTitle">
+            <span id="homeCount">...</span>
             <span style="float:right;font-size:16px">
                    <a href="@routes.EntryController.searchClear()" class="btn">Clear</a>
             </span>
@@ -43,7 +44,7 @@
         </h1>
     }
 
-    @if(currentPage.getTotalRowCount() == 0) {
+    @if(!currentPage.hasRows()) {
 
         <div class="well">
             <em>Nothing to display</em>
@@ -101,29 +102,33 @@
         @if(!currentPage.isByTruck()) {
             <div id="pagination" class="pagination">
                 <ul>
-                    @if(currentPage.hasPrev()) {
-                    <li class="prev">
+                    <li id="previous" class="prev disabled">
                         <a href="@link(currentPage.getPageIndex() - 1, null)">&larr; Previous</a>
                     </li>
-                    } else {
-                    <li class="prev disabled">
-                        <a>&larr; Previous</a>
-                    </li>
-                    }
                     <li class="current">
-                        <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
+                        <a id="currentPage"></a>
                     </li>
-                    @if(currentPage.hasNext()) {
-                    <li class="next">
+                    <li id="next" class="next disabled">
                         <a href="@link(currentPage.getPageIndex() + 1, null)">Next &rarr;</a>
                     </li>
-                    } else {
-                    <li class="next disabled">
-                        <a>Next &rarr;</a>
-                    </li>
-                    }
                 </ul>
             </div>
+
+            <script type="text/javascript">
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.responseText.length > 0 && this.status == 200) {
+                        var line = this.responseText;
+                        var bits = line.split("|");
+                        document.getElementById("previous").setAttribute("class", bits[0])
+                        document.getElementById("currentPage").innerHTML = bits[1];
+                        document.getElementById("next").setAttribute("class", bits[2]);
+                        document.getElementById("homeCount").innerHTML = bits[3];
+                    }
+                };
+                xhttp.open("GET", "@routes.EntryController.computeTotalNumRows()", true);
+                xhttp.send();
+            </script>
         }
     }
 

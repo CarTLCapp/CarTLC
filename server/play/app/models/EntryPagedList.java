@@ -14,8 +14,6 @@ import play.twirl.api.Html;
 
 public class EntryPagedList {
 
-    static final Boolean COUNT_OKAY = false;
-
     public enum PagedSortBy {
         TECH("tech_name", "te.last_name"),
         TIME("time", "e.entry_time"),
@@ -192,6 +190,14 @@ public class EntryPagedList {
     public EntryPagedList() {}
 
     public void setPage(int page) {
+        if (page < 0) {
+            page = 0;
+        } else {
+            int next = page * mParams.mPageSize;
+            if (next >= mResult.mNumTotalRows) {
+                page = mParams.mPage;
+            }
+        }
         mParams.mPage = page;
     }
 
@@ -255,40 +261,28 @@ public class EntryPagedList {
         return "";
     }
 
-    String buildQuery(boolean isCount, boolean useLimit) {
+    String buildQuery(boolean useLimit) {
         StringBuilder query = new StringBuilder();
-        if (isCount) {
-            query.append("SELECT COUNT(*)");
-            query.append(" FROM entry AS e");
-            query.append(" INNER JOIN project AS p ON e.project_id = p.id");
-            query.append(" INNER JOIN company AS c ON e.company_id = c.id");
-            query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
-            query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
-            query.append(" LEFT JOIN secondary_technician AS ste ON e.id = ste.entry_id");
-            query.append(" LEFT JOIN technician AS te2 ON ste.secondary_tech_id = te2.id");
-            // For some reason if I include eqc and eq tables, the COUNT(*) includes all records?
-            // query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
-            // query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
-        } else {
-            query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
-            query.append(", e.equipment_collection_id");
-            query.append(", e.picture_collection_id");
-            query.append(", e.note_collection_id");
-            query.append(", e.truck_id, e.status, e.time_zone");
-            for (PagedSortBy sortBy : PagedSortBy.values()) {
-                query.append(", ");
-                query.append(sortBy.code);
-            }
-            query.append(" FROM entry AS e");
-            query.append(" INNER JOIN company AS c ON e.company_id = c.id");
-            query.append(" INNER JOIN project AS p ON e.project_id = p.id");
-            query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
-            query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
-            query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
-            query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
-            query.append(" LEFT JOIN secondary_technician AS ste ON e.id = ste.entry_id");
-            query.append(" LEFT JOIN technician AS te2 ON ste.secondary_tech_id = te2.id");
+
+        query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
+        query.append(", e.equipment_collection_id");
+        query.append(", e.picture_collection_id");
+        query.append(", e.note_collection_id");
+        query.append(", e.truck_id, e.status, e.time_zone");
+        for (PagedSortBy sortBy : PagedSortBy.values()) {
+            query.append(", ");
+            query.append(sortBy.code);
         }
+        query.append(" FROM entry AS e");
+        query.append(" INNER JOIN company AS c ON e.company_id = c.id");
+        query.append(" INNER JOIN project AS p ON e.project_id = p.id");
+        query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
+        query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
+        query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
+        query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
+        query.append(" LEFT JOIN secondary_technician AS ste ON e.id = ste.entry_id");
+        query.append(" LEFT JOIN technician AS te2 ON ste.secondary_tech_id = te2.id");
+
         if (mByTruckId > 0) {
             query.append(" WHERE ");
             query.append("e.truck_id=");
@@ -318,11 +312,8 @@ public class EntryPagedList {
             query.append(appendSearch("te2.first_name"));
             query.append(" OR ");
             query.append(appendSearch("te2.last_name"));
-            if (!isCount) {
-                // Can't do this until I figure out why COUNT(*) oddity occurs.
-                query.append(" OR ");
-                query.append(appendSearch("eq.name"));
-            }
+            query.append(" OR ");
+            query.append(appendSearch("eq.name"));
             query.append(")");
             if (mLimitByProject.size() > 0 || mLimitByCompanyName.size() > 0) {
                 query.append(" AND ");
@@ -336,9 +327,7 @@ public class EntryPagedList {
                 addFilters(query);
             }
         }
-        if (isCount) {
-            query.append(" GROUP BY p.id");
-        } else if (useLimit) {
+        if (useLimit) {
             query.append(" ORDER BY ");
             query.append(getSortBy());
             query.append(" ");
@@ -404,25 +393,8 @@ public class EntryPagedList {
     public void compute() {
         List<SqlRow> entries;
         String query;
-        if (mSearch.hasMultipleTerms()) {
-            query = buildQuery(false, false);
-            entries = Ebean.createSqlQuery(query).findList();
-        } else if (mSearch.hasSearch()) {
-            query = buildQuery(false, true);
-            entries = Ebean.createSqlQuery(query).findList();
-        } else {
-            if (mResult.mNumTotalRows == 0) {
-                if (mLimitByProject.size() > 0) {
-                    query = buildQuery(true, true);
-                    entries = Ebean.createSqlQuery(query).findList();
-                    mResult.mNumTotalRows = getCount(entries);
-                } else {
-                    mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
-                }
-            }
-            query = buildQuery(false, true);
-            entries = Ebean.createSqlQuery(query).findList();
-        }
+        query = buildQuery(true);
+        entries = Ebean.createSqlQuery(query).findList();
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
             return;
@@ -430,35 +402,23 @@ public class EntryPagedList {
         for (SqlRow row : entries) {
             mResult.mList.add(parseEntry(row));
         }
-        if (mSearch.hasMultipleTerms()) {
-            mSearch.refine();
-            mResult.mNumTotalRows = mResult.mList.size();
-            mParams.mPageSize = mResult.mList.size();
-            mParams.mPage = 0;
-        } else if (mSearch.hasSearch()) {
-            if (mResult.mNumTotalRows == 0) {
-                if (!COUNT_OKAY || hasEquipmentMatch(mResult.mList)) {
-                    query = buildQuery(false, false);
-                    entries = Ebean.createSqlQuery(query).findList();
-                    mResult.mNumTotalRows = entries.size();
-                } else {
-                    query = buildQuery(true, true);
-                    entries = Ebean.createSqlQuery(query).findList();
-                    mResult.mNumTotalRows = getCount(entries);
-                }
-            }
-        }
     }
 
-    long getCount(List<SqlRow> list) {
-        int row = 0;
-        for (SqlRow trow : list) {
-            if (trow.containsKey("count(*)")) {
-                return trow.getLong("count(*)");
+    public boolean hasRows() {
+        return mResult.mList.size() > 0;
+    }
+
+    public long computeTotalNumRows() {
+        if (mResult.mNumTotalRows == 0) {
+            if (!mSearch.hasSearch() && mLimitByProject.size() == 0) {
+                mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
+            } else {
+                String query = buildQuery(false);
+                List<SqlRow> entries = Ebean.createSqlQuery(query).findList();
+                mResult.mNumTotalRows = entries.size();
             }
         }
-        Logger.error("Could not find number of rows");
-        return 0;
+        return mResult.mNumTotalRows;
     }
 
     Entry parseEntry(SqlRow row) {
@@ -530,7 +490,7 @@ public class EntryPagedList {
         return mParams.mPage;
     }
 
-    public String getDisplayXtoYofZ(String to, String of) {
+    public String getDisplayingXtoYofZ() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("Displaying ");
         long start = mParams.mPage * mParams.mPageSize;

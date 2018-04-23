@@ -10,6 +10,7 @@ import play.data.*;
 import static play.data.Form.*;
 
 import models.*;
+import modules.WorkerExecutionContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+import java.util.concurrent.*;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -31,6 +33,8 @@ import java.io.File;
 import play.db.ebean.Transactional;
 import play.libs.Json;
 import play.Logger;
+import play.libs.concurrent.HttpExecution;
+
 /**
  * Manage a database of equipment.
  */
@@ -44,13 +48,18 @@ public class EntryController extends Controller {
     private FormFactory mFormFactory;
     private SimpleDateFormat mDateFormat;
     private Globals mGlobals;
+    private WorkerExecutionContext mExecutionContext;
 
     @Inject
-    public EntryController(AmazonHelper amazonHelper, FormFactory formFactory, Globals globals) {
+    public EntryController(AmazonHelper amazonHelper,
+                           FormFactory formFactory,
+                           WorkerExecutionContext executionContext,
+                           Globals globals) {
         mAmazonHelper = amazonHelper;
         mFormFactory = formFactory;
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
         mGlobals = globals;
+        mExecutionContext = executionContext;
     }
 
     public Result list(int page, String sortBy, String order) {
@@ -98,6 +107,36 @@ public class EntryController extends Controller {
         mEntryList.setSearch(null);
         mEntryList.setByTruckId(truck_id);
         return list();
+    }
+
+    public CompletionStage<Result> computeTotalNumRows() {
+        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
+        return CompletableFuture.completedFuture(mEntryList.computeTotalNumRows()).thenApplyAsync(result -> {
+            StringBuilder sbuf = new StringBuilder();
+            if (mEntryList.hasPrev()) {
+                sbuf.append("prev");
+            } else {
+                sbuf.append("prev disabled");
+            }
+            sbuf.append("|");
+            sbuf.append(mEntryList.getDisplayingXtoYofZ());
+            sbuf.append("|");
+            if (mEntryList.hasNext()) {
+                sbuf.append("next");
+            } else {
+                sbuf.append("next disabled");
+            }
+            sbuf.append("|");
+            if (result == 0) {
+                sbuf.append("No entries");
+            } else if (result == 1) {
+                sbuf.append("One entry");
+            } else {
+                sbuf.append(result);
+                sbuf.append(" entries found");
+            }
+            return ok(sbuf.toString());
+        }, myEc);
     }
 
     /**

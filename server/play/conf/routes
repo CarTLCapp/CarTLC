@@ -114,6 +114,7 @@ GET     /entry/:id/delete           controllers.EntryController.delete(id:Long)
 GET     /entry/search               controllers.EntryController.search()
 GET     /entry/search/clear         controllers.EntryController.searchClear()
 GET     /entry/:id/bytruck          controllers.EntryController.showByTruck(id:Long)
+GET     /entry/compute_totals       controllers.EntryController.computeTotalNumRows()
 
 ### MESSAGES ###
 
