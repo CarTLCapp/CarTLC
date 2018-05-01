@@ -7,13 +7,13 @@ repositories {
 }
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.cartlc.tracker"
         minSdkVersion 19
-        targetSdkVersion 25
-        versionCode 27
-        versionName "2.33"
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 28
+        versionName "2.34"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -26,26 +26,27 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation project(':supportLib')
-    implementation 'com.android.support:recyclerview-v7:25.2.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation 'com.jakewharton.timber:timber:4.5.0'
-    implementation 'com.jakewharton:butterknife:8.5.1'
-    implementation 'com.squareup.picasso:picasso:2.6.0-SNAPSHOT'
+    implementation "com.android.support:appcompat-v7:$rootProject.ext.android"
+    implementation "com.android.support:design:$rootProject.ext.android"
+    implementation "com.android.support:recyclerview-v7:$rootProject.ext.android"
+    implementation "com.android.support.constraint:constraint-layout:$rootProject.ext.constraint_layout"
+    implementation "com.jakewharton.timber:timber:$rootProject.ext.timber"
+    implementation "com.jakewharton:butterknife:$rootProject.ext.butterknife"
+    implementation "com.squareup.picasso:picasso:$rootProject.ext.picasso"
     implementation 'de.greenrobot:eventbus:2.4.0'
-    implementation 'com.android.support:multidex:1.0.1'
-    implementation 'com.google.android.gms:play-services-location:11.8.0'
-    implementation 'com.google.android.gms:play-services:11.8.0'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation "com.google.android.gms:play-services-location:$rootProject.ext.play_services"
+    implementation "com.google.android.gms:play-services-gcm:$rootProject.ext.play_services"
 
-    implementation 'com.amazonaws:aws-android-sdk-core:2.4.3'
-    implementation 'com.amazonaws:aws-android-sdk-s3:2.4.3'
-    implementation 'com.amazonaws:aws-android-sdk-ddb:2.4.3'
+    implementation "com.amazonaws:aws-android-sdk-core:$rootProject.ext.aws"
+    implementation "com.amazonaws:aws-android-sdk-s3:$rootProject.ext.aws"
+    implementation "com.amazonaws:aws-android-sdk-ddb:$rootProject.ext.aws"
 
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.ext.butterknife"
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 }

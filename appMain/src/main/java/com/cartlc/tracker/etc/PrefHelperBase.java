@@ -26,7 +26,7 @@ public class PrefHelperBase {
         return mPrefs;
     }
 
-    String getPrefFile() {
+    protected String getPrefFile() {
         return mCtx.getPackageName() + "_preferences";
     }
 
@@ -37,7 +37,7 @@ public class PrefHelperBase {
     public void setString(String key, String value) {
         SharedPreferences.Editor editor = getPrefs().edit();
         editor.putString(key, value);
-        editor.commit();
+        editor.apply();
     }
 
     public long getLong(String key, long defaultValue) {
@@ -47,7 +47,7 @@ public class PrefHelperBase {
     public void setLong(String key, long value) {
         SharedPreferences.Editor editor = getPrefs().edit();
         editor.putLong(key, value);
-        editor.commit();
+        editor.apply();
     }
 
 
@@ -58,6 +58,6 @@ public class PrefHelperBase {
     public void setInt(String key, int value) {
         SharedPreferences.Editor editor = getPrefs().edit();
         editor.putInt(key, value);
-        editor.commit();
+        editor.apply();
     }
 }

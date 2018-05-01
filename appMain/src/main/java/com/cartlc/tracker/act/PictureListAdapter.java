@@ -130,7 +130,7 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
     @Override
     public void onBindViewHolder(final CustomViewHolder holder, final int position) {
         final DataPicture item = mItems.get(position);
-        Picasso.with(mContext).cancelRequest(holder.imageView);
+        Picasso.get().cancelRequest(holder.imageView);
         Picasso.Builder builder = new Picasso.Builder(mContext);
         builder.listener(new Picasso.Listener() {
             @Override

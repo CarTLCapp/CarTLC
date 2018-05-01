@@ -12,6 +12,7 @@ import com.cartlc.tracker.app.TBApplication;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import timber.log.Timber;
 
@@ -44,7 +45,7 @@ public class TableAddress {
                     sbuf.append(KEY_STATE);
                     sbuf.append(")");
                     sbuf.append("=?");
-                    args.add(dstate.full.toLowerCase());
+                    args.add(dstate.full.toLowerCase(Locale.getDefault()));
 
                     sbuf.append(" OR ");
 
@@ -52,7 +53,7 @@ public class TableAddress {
                     sbuf.append(KEY_STATE);
                     sbuf.append(")");
                     sbuf.append("=?");
-                    args.add(dstate.abbr.toLowerCase());
+                    args.add(dstate.abbr.toLowerCase(Locale.getDefault()));
 
                     sbuf.append(")");
                 } else {
@@ -70,7 +71,7 @@ public class TableAddress {
                 sbuf.append(")");
                 sbuf.append("=?");
 
-                args.add(city.toLowerCase());
+                args.add(city.toLowerCase(Locale.getDefault()));
             }
             if (!TextUtils.isEmpty(street)) {
                 if (sbuf.length() > 0) {
@@ -80,7 +81,7 @@ public class TableAddress {
                 sbuf.append(KEY_STREET);
                 sbuf.append(")");
                 sbuf.append("=?");
-                args.add(street.toLowerCase());
+                args.add(street.toLowerCase(Locale.getDefault()));
             }
             if (!TextUtils.isEmpty(zipcode)) {
                 if (sbuf.length() > 0) {

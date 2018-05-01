@@ -64,7 +64,7 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
     }
 
     @Override
-    public void onBindViewHolder(CustomViewHolder holder, final int position) {
+    public void onBindViewHolder(final CustomViewHolder holder, int position) {
         final String text = mItems.get(position);
         holder.simpleText.setText(text);
 
@@ -78,6 +78,7 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Cu
         holder.simpleText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int position = holder.getAdapterPosition();
                 setSelected(position);
                 if (mListener != null) {
                     mListener.onSelectedItem(position, text);

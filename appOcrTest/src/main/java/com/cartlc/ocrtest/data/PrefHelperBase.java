@@ -34,6 +34,6 @@ public class PrefHelperBase {
     protected void setString(String key, String value) {
         SharedPreferences.Editor editor = getPrefs().edit();
         editor.putString(key, value);
-        editor.commit();
+        editor.apply();
     }
 }

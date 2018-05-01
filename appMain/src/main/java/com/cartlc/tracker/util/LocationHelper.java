@@ -87,6 +87,9 @@ public class LocationHelper {
         }
 
         Address getAddressFromGeocoder(Location location) {
+            if (location == null) {
+                return null;
+            }
             try {
                 List<Address> addressList = mGeocoder.getFromLocation(
                         location.getLatitude(), location.getLongitude(), 1);
@@ -100,6 +103,9 @@ public class LocationHelper {
         }
 
         Address getAddressFromNetwork(Location location) {
+            if (location == null) {
+                return null;
+            }
             List<Address> list = getFromLocation(
                     location.getLatitude(), location.getLongitude(), 1);
             if (list == null || list.size() == 0) {
@@ -130,11 +136,11 @@ public class LocationHelper {
                 while ((b = stream.read()) != -1) {
                     stringBuilder.append((char) b);
                 }
-                JSONObject jsonObject = new JSONObject();
+                JSONObject jsonObject;
 
                 jsonObject = new JSONObject(stringBuilder.toString());
 
-                retList = new ArrayList<Address>();
+                retList = new ArrayList<>();
                 String status = jsonObject.getString("status");
                 if ("OK".equalsIgnoreCase(status)) {
                     JSONArray results = jsonObject.getJSONArray("results");

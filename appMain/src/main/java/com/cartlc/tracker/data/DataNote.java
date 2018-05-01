@@ -3,6 +3,8 @@
  */
 package com.cartlc.tracker.data;
 
+import java.util.Locale;
+
 /**
  * Created by dug on 5/16/17.
  */
@@ -26,9 +28,9 @@ public class DataNote {
         }
 
         public static Type from(String item) {
-            String match = item.toLowerCase().trim();
+            String match = item.toLowerCase(Locale.getDefault()).trim();
             for (Type value : values()) {
-                if (value.toString().toLowerCase().equals(match)) {
+                if (value.toString().toLowerCase(Locale.getDefault()).equals(match)) {
                     return value;
                 }
             }

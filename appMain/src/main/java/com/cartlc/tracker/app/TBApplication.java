@@ -35,6 +35,7 @@ import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
 import com.cartlc.tracker.util.PermissionHelper;
+import com.squareup.leakcanary.LeakCanary;
 
 import java.io.File;
 
@@ -50,6 +51,7 @@ public class TBApplication extends Application {
     }
 
     static final Boolean DEBUG_TREE = false;
+    static final Boolean LEAK_CANARY = false;
 
     public static final Boolean REPORT_LOCATION = true; // BuildConfig.DEBUG;
     public static final boolean LOCATION_ENABLE = true;
@@ -72,6 +74,14 @@ public class TBApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        if (LEAK_CANARY) {
+            if (LeakCanary.isInAnalyzerProcess(this)) {
+                // This process is dedicated to LeakCanary for heap analysis.
+                // You should not init your app in this process.
+                return;
+            }
+            LeakCanary.install(this);
+        }
         if (IsDevelopmentServer() && DEBUG_TREE) {
             Timber.plant(new Timber.DebugTree());
         } else {

@@ -14,6 +14,7 @@ import android.provider.Settings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -153,7 +154,7 @@ public class PermissionHelper {
     static PermissionHelper sInstance;
 
     HashMap<String, RequestToken> mTokens = new HashMap<>();
-    Queue<RequestToken>           mLive   = new ConcurrentLinkedDeque<>();
+    Queue<RequestToken>           mLive   = new LinkedList<>();
 
     AlertDialog  mAlertDialog;
     RequestToken mLastRequest;
