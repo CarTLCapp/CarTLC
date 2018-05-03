@@ -67,6 +67,17 @@ public class EntryPagedList {
         int end() {
             return mPos + mTerm.length();
         }
+
+        public String toString() {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append("term=");
+            sbuf.append(mTerm);
+            sbuf.append(", start=");
+            sbuf.append(start());
+            sbuf.append(", end=");
+            sbuf.append(end());
+            return sbuf.toString();
+        }
     }
 
     class SearchTerms {
@@ -110,14 +121,19 @@ public class EntryPagedList {
         ArrayList<TermMatch> match(String element) {
             ArrayList<TermMatch> matches = new ArrayList<>();
             String elementNoCase = element.toLowerCase();
+            TermMatch match;
+            int startPos = 0;
             for (String term : mTerms) {
-                int pos = elementNoCase.indexOf(term);
+                int pos = elementNoCase.indexOf(term, startPos);
                 if (pos >= 0) {
-                    matches.add(new TermMatch(term, pos));
+                    match = new TermMatch(term, pos);
+                    matches.add(match);
+                    startPos = match.end();
                 }
             }
             Collections.sort(matches);
             return matches;
+
         }
 
         public Html highlight(String element) {
