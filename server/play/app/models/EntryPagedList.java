@@ -14,6 +14,41 @@ import play.twirl.api.Html;
 
 public class EntryPagedList {
 
+    public enum Logic {
+        AND("AND"),
+        OR("OR");
+
+        final String display;
+
+        Logic(String text) {
+            this.display = text;
+        }
+
+        public String getDisplay() {
+            return display;
+        }
+
+        public static ArrayList<String> items() {
+            ArrayList<String> items = new ArrayList<>();
+            for (Logic item : values()) {
+                items.add(item.display);
+            }
+            return items;
+        }
+
+        public static Logic from(String display) {
+            if (display == null) {
+                return Logic.OR;
+            }
+            for (Logic item : values()) {
+                if (item.display.equals(display)) {
+                    return item;
+                }
+            }
+            return Logic.OR;
+        }
+    }
+
     public enum PagedSortBy {
         TECH("tech_name", "te.last_name"),
         TIME("time", "e.entry_time"),
@@ -33,7 +68,9 @@ public class EntryPagedList {
             this.alias = alias;
         }
 
-        public String toString() { return code; }
+        public String toString() {
+            return code;
+        }
 
         public static PagedSortBy from(String match) {
             for (PagedSortBy item : values()) {
@@ -82,6 +119,7 @@ public class EntryPagedList {
 
     class SearchTerms {
         List<String> mTerms;
+        Logic mLogic = Logic.OR;
 
         SearchTerms() {
             mTerms = new ArrayList<>();
@@ -107,13 +145,35 @@ public class EntryPagedList {
             }
         }
 
+        public void setLogic(Logic logic) {
+            if (logic == null) {
+                mLogic = Logic.OR;
+            } else {
+                mLogic = logic;
+            }
+        }
+
+        public Logic getLogic() {
+            return mLogic;
+        }
+
         boolean hasMatch(String element) {
             String elementNoCase = element.toLowerCase();
+            boolean hadFailure = false;
+            boolean hadMatch = false;
             for (String term : mTerms) {
                 int pos = elementNoCase.indexOf(term);
                 if (pos >= 0) {
-                    return true;
+                    if (mLogic == Logic.OR) {
+                        return true;
+                    }
+                    hadMatch = true;
+                } else {
+                    hadFailure = true;
                 }
+            }
+            if (hadMatch && !hadFailure && mLogic == Logic.AND) {
+                return true;
             }
             return false;
         }
@@ -123,15 +183,22 @@ public class EntryPagedList {
             String elementNoCase = element.toLowerCase();
             TermMatch match;
             int startPos = 0;
+            boolean hadFailure = false;
             for (String term : mTerms) {
                 int pos = elementNoCase.indexOf(term, startPos);
                 if (pos >= 0) {
                     match = new TermMatch(term, pos);
                     matches.add(match);
                     startPos = match.end();
+                } else {
+                    hadFailure = true;
                 }
             }
-            Collections.sort(matches);
+            if (hadFailure && mLogic == Logic.AND) {
+                matches.clear();
+            } else {
+                Collections.sort(matches);
+            }
             return matches;
 
         }
@@ -162,7 +229,7 @@ public class EntryPagedList {
             StringBuilder sbuf = new StringBuilder();
             for (String term : mTerms) {
                 if (sbuf.length() > 0) {
-                    sbuf.append(" " );
+                    sbuf.append(" ");
                 }
                 sbuf.append(term);
             }
@@ -203,7 +270,8 @@ public class EntryPagedList {
     long mByTruckId;
     int mRowNumber;
 
-    public EntryPagedList() {}
+    public EntryPagedList() {
+    }
 
     public void setPage(int page) {
         if (page < 0) {
@@ -399,7 +467,7 @@ public class EntryPagedList {
     }
 
     public InputSearch getInputSearch() {
-        return new InputSearch(mSearch.getAll());
+        return new InputSearch(mSearch.getAll(), mSearch.getLogic().getDisplay());
     }
 
     public void clearCache() {
@@ -498,7 +566,7 @@ public class EntryPagedList {
     }
 
     public boolean hasNext() {
-        int next = (mParams.mPage+1) * mParams.mPageSize;
+        int next = (mParams.mPage + 1) * mParams.mPageSize;
         return (next < mResult.mNumTotalRows);
     }
 
@@ -526,11 +594,19 @@ public class EntryPagedList {
         return mSearch.highlight(element);
     }
 
+    public void clearSearch() {
+        setSearch(null, null);
+    }
+
     public void setSearch(String search) {
+        setSearch(search, null);
+    }
+
+    public void setSearch(String search, String logic) {
         mSearch.setSearch(search);
+        mSearch.setLogic(Logic.from(logic));
         mByTruckId = 0;
         mParams.mPage = 0;
         mParams.mPageSize = PAGE_SIZE;
     }
-
 }

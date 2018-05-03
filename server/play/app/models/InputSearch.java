@@ -9,29 +9,24 @@ import javax.persistence.*;
 import com.avaje.ebean.Model;
 import play.data.format.*;
 import play.data.validation.*;
+import models.EntryPagedList.Logic;
 
 import com.avaje.ebean.*;
 
 public class InputSearch extends Model {
     private static final long serialVersionUID = 1L;
-    private static final String OPTION_OR = "OR";
-    private static final String OPTION_AND = "AND";
-    private static final ArrayList<String> OPTIONS = new ArrayList<>();
-
-    static {
-        OPTIONS.add(OPTION_OR);
-        OPTIONS.add(OPTION_AND);
-    }
 
     public String search;
-    public String logic = OPTION_OR;
+    public String logic;
 
     public InputSearch(String search) {
-        if (search == null) {
-            this.search = null;
-        } else {
-            this.search = search;
-        }
+        this.search = search;
+        this.logic = EntryPagedList.Logic.OR.getDisplay();
+    }
+
+    public InputSearch(String search, String logic) {
+        this.search = search;
+        this.logic = logic;
     }
 
     public InputSearch() {
@@ -46,12 +41,12 @@ public class InputSearch extends Model {
         this.search = search;
     }
 
-    public boolean isLogicalAnd() {
-        return logic.equals(OPTION_AND);
+    public String getLogic() {
+        return logic;
     }
 
-    public ArrayList<String> getOptions() {
-        return OPTIONS;
+    public static ArrayList<String> options() {
+        return Logic.items();
     }
 }
 

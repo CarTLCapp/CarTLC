@@ -64,7 +64,7 @@ public class EntryController extends Controller {
 
     public Result list(int page, String sortBy, String order) {
         if (mGlobals.isClearSearch()) {
-            mEntryList.setSearch(null);
+            mEntryList.clearSearch();
             mGlobals.setClearSearch(false);
             mEntryList.clearCache();
         } else if (page == 0) {
@@ -86,8 +86,7 @@ public class EntryController extends Controller {
     public Result search() {
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).bindFromRequest();
         InputSearch search = searchForm.get();
-        Logger.info("SEARCH LOGICAL AND=" + search.isLogicalAnd());
-        mEntryList.setSearch(search.search);
+        mEntryList.setSearch(search.search, search.getLogic());
         mEntryList.clearCache();
         mEntryList.compute();
         return ok(views.html.entry_list.render(mEntryList,
@@ -95,7 +94,7 @@ public class EntryController extends Controller {
     }
 
     public Result searchClear() {
-        mEntryList.setSearch(null);
+        mEntryList.clearSearch();
         mEntryList.clearCache();
         mEntryList.compute();
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
