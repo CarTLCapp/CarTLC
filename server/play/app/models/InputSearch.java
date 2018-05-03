@@ -9,7 +9,6 @@ import javax.persistence.*;
 import com.avaje.ebean.Model;
 import play.data.format.*;
 import play.data.validation.*;
-import models.EntryPagedList.Logic;
 
 import com.avaje.ebean.*;
 
@@ -17,16 +16,9 @@ public class InputSearch extends Model {
     private static final long serialVersionUID = 1L;
 
     public String search;
-    public String logic;
 
     public InputSearch(String search) {
         this.search = search;
-        this.logic = EntryPagedList.Logic.OR.getDisplay();
-    }
-
-    public InputSearch(String search, String logic) {
-        this.search = search;
-        this.logic = logic;
     }
 
     public InputSearch() {
@@ -41,12 +33,5 @@ public class InputSearch extends Model {
         this.search = search;
     }
 
-    public String getLogic() {
-        return logic;
-    }
-
-    public static ArrayList<String> options() {
-        return Logic.items();
-    }
 }
 

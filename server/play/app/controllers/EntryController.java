@@ -86,7 +86,7 @@ public class EntryController extends Controller {
     public Result search() {
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).bindFromRequest();
         InputSearch search = searchForm.get();
-        mEntryList.setSearch(search.search, search.getLogic());
+        mEntryList.setSearch(search.search);
         mEntryList.clearCache();
         mEntryList.compute();
         return ok(views.html.entry_list.render(mEntryList,
