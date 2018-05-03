@@ -14,7 +14,17 @@ import com.avaje.ebean.*;
 
 public class InputSearch extends Model {
     private static final long serialVersionUID = 1L;
+    private static final String OPTION_OR = "OR";
+    private static final String OPTION_AND = "AND";
+    private static final ArrayList<String> OPTIONS = new ArrayList<>();
+
+    static {
+        OPTIONS.add(OPTION_OR);
+        OPTIONS.add(OPTION_AND);
+    }
+
     public String search;
+    public String logic = OPTION_OR;
 
     public InputSearch(String search) {
         if (search == null) {
@@ -34,6 +44,14 @@ public class InputSearch extends Model {
 
     public void setSearch(String search) {
         this.search = search;
+    }
+
+    public boolean isLogicalAnd() {
+        return logic.equals(OPTION_AND);
+    }
+
+    public ArrayList<String> getOptions() {
+        return OPTIONS;
     }
 }
 
