@@ -54,7 +54,6 @@ public class TBApplication extends Application {
     static final Boolean LEAK_CANARY = false;
 
     public static final Boolean REPORT_LOCATION = true; // BuildConfig.DEBUG;
-    public static final boolean LOCATION_ENABLE = true;
 
     public static final String OTHER = "Other";
 

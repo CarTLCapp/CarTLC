@@ -12,7 +12,6 @@ import timber.log.Timber;
 /**
  * Created by dug on 5/10/17.
  */
-
 public class DataProjectAddressCombo implements Comparable<DataProjectAddressCombo> {
     public long id;
     public long projectNameId;

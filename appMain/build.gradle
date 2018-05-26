@@ -12,8 +12,8 @@ android {
         applicationId "com.cartlc.tracker"
         minSdkVersion 19
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 28
-        versionName "2.34"
+        versionCode 29
+        versionName "2.35"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -23,11 +23,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':supportLib')
     implementation "com.android.support:appcompat-v7:$rootProject.ext.android"
     implementation "com.android.support:design:$rootProject.ext.android"
@@ -40,13 +43,10 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.play_services"
     implementation "com.google.android.gms:play-services-gcm:$rootProject.ext.play_services"
-
     implementation "com.amazonaws:aws-android-sdk-core:$rootProject.ext.aws"
     implementation "com.amazonaws:aws-android-sdk-s3:$rootProject.ext.aws"
     implementation "com.amazonaws:aws-android-sdk-ddb:$rootProject.ext.aws"
-
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.ext.butterknife"
-
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 }

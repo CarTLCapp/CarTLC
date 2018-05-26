@@ -27,7 +27,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,7 +35,6 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -86,7 +84,6 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity {
 
     static final boolean ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG; // true=Debugging only
-    static final boolean LOCATION_ENABLE   = TBApplication.LOCATION_ENABLE;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_EDIT_ENTRY    = 2;
@@ -235,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.next)                 Button               mNext;
     @BindView(R.id.prev)                 Button               mPrev;
     @BindView(R.id.new_entry)            Button               mCenter;
+    @BindView(R.id.change)               Button               mChange;
     @BindView(R.id.main_title)           LinearLayout         mMainTitle;
     @BindView(R.id.main_title_text)      TextView             mMainTitleText;
     @BindView(R.id.sub_title)            TextView             mSubTitle;
@@ -273,9 +271,11 @@ public class MainActivity extends AppCompatActivity {
     boolean                    mWasNext;
     boolean                    mCurStageEditing;
     boolean                    mDoingCenter;
-    boolean mShowServerError = true;
-    boolean mEditCurProject  = false;
+    boolean mShowServerError    = true;
+    boolean mEditCurProject     = false;
     boolean mAddressConfirmOkay = false;
+    boolean mDidAutoSkip        = false;
+    boolean mAutoNarrowOkay     = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -284,55 +284,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mApp.setUncaughtExceptionHandler(this);
         ButterKnife.bind(this);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mRoot.getViewTreeObserver().addOnGlobalLayoutListener(mSoftKeyboardDetect);
         mInputMM = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        mNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                doBtnNext();
-                TBApplication.hideKeyboard(MainActivity.this, v);
-            }
-        });
-        mPrev.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                doBtnPrev();
-                TBApplication.hideKeyboard(MainActivity.this, v);
-            }
-        });
+        mNext.setOnClickListener(this::doBtnNextFromUser);
+        mPrev.setOnClickListener(this::doBtnPrevFromUser);
+        mChange.setOnClickListener(v -> doBtnChangeCompany());
         mDialogHelper = new DialogHelper(this);
-        mCenter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                doBtnCenter();
-            }
-        });
-        mAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                doBtnPlus();
-            }
-        });
+        mCenter.setOnClickListener((v) -> doBtnCenter());
+        mAdd.setOnClickListener((View view) -> doBtnPlus());
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mMainList.setLayoutManager(linearLayoutManager);
         mDivider = new DividerItemDecoration(mMainList.getContext(), linearLayoutManager.getOrientation());
         mMainList.addItemDecoration(mDivider);
-        mSimpleAdapter = new SimpleListAdapter(this, new SimpleListAdapter.OnItemSelectedListener() {
-            @Override
-            public void onSelectedItem(int position, String text) {
-                onSelected(text);
-            }
-        });
+        mSimpleAdapter = new SimpleListAdapter(this, (int position, String text) -> onSelected(text));
         mProjectAdapter = new ProjectListAdapter(this);
         mEquipmentAdapter = new EquipmentSelectListAdapter(this);
-        mPictureAdapter = new PictureListAdapter(this, new PictureListAdapter.RefreshCountListener() {
-            @Override
-            public void refresh(int newCount) {
-                setPhotoTitleCount(newCount);
-            }
-        });
+        mPictureAdapter = new PictureListAdapter(this, (int newCount) -> setPhotoTitleCount(newCount));
         linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         linearLayoutManager.setAutoMeasureEnabled(true);
         mPictureList.setLayoutManager(linearLayoutManager);
@@ -379,22 +348,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mConfirmationFrame = new ConfirmationFrame(mConfirmationFrameView);
-        mAutoNext = new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                mHandler.sendEmptyMessageDelayed(MSG_AUTO_RETURN, AUTO_RETURN_DELAY_MS);
-                return false;
-            }
+        mAutoNext = (v, actionId, event) -> {
+            mHandler.sendEmptyMessageDelayed(MSG_AUTO_RETURN, AUTO_RETURN_DELAY_MS);
+            return false;
         };
         mZipCodeWatcher = new ZipCodeWatcher();
         mLastName.setOnEditorActionListener(mAutoNext);
         mEntrySimple.setOnEditorActionListener(mAutoNext);
-        mSecondaryLogin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mSecondaryFirstName.setEnabled(isChecked);
-                mSecondaryLastName.setEnabled(isChecked);
-            }
+        mSecondaryLogin.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mSecondaryFirstName.setEnabled(isChecked);
+            mSecondaryLastName.setEnabled(isChecked);
         });
         PrefHelper.getInstance().setFromCurrentProjectId();
         computeCurStage();
@@ -408,14 +371,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void getLocation() {
-        if (LOCATION_ENABLE) {
-            LocationHelper.getInstance().requestLocation(this, new LocationHelper.OnLocationCallback() {
-                @Override
-                public void onLocationUpdate(Address address) {
-                    mAddress = address;
-                }
-            });
-        }
+        LocationHelper.getInstance().requestLocation(this, address -> mAddress = address);
     }
 
     @Override
@@ -627,6 +583,7 @@ public class MainActivity extends AppCompatActivity {
 
     void skip() {
         if (mWasNext) {
+            mDidAutoSkip = true;
             doBtnNext();
         } else {
             doBtnPrev();
@@ -639,6 +596,12 @@ public class MainActivity extends AppCompatActivity {
         } else {
             doBtnNext();
         }
+    }
+
+    void doBtnNextFromUser(View v) {
+        mDidAutoSkip = false;
+        doBtnNext();
+        TBApplication.hideKeyboard(MainActivity.this, v);
     }
 
     void doBtnPlus() {
@@ -658,6 +621,12 @@ public class MainActivity extends AppCompatActivity {
         mWasNext = true;
         mCurStage = mCurStage.advance();
         fillStage();
+    }
+
+    void doBtnPrevFromUser(View v) {
+        mDidAutoSkip = false;
+        doBtnPrev();
+        TBApplication.hideKeyboard(MainActivity.this, v);
     }
 
     void doBtnPrev() {
@@ -691,6 +660,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void doBtnChangeCompany() {
+        mCurStage = Stage.COMPANY;
+        mWasNext = false;
+        mAutoNarrowOkay = false;
+        PrefHelper.getInstance().setState(null);
+        PrefHelper.getInstance().setCity(null);
+        PrefHelper.getInstance().setCompany(null);
+        PrefHelper.getInstance().setStreet(null);
+        PrefHelper.getInstance().setZipCode(null);
+        fillStage();
+    }
+
     void doViewProject() {
         Intent intent = new Intent(this, ListEntryActivity.class);
         startActivityForResult(intent, REQUEST_EDIT_ENTRY);
@@ -711,6 +692,7 @@ public class MainActivity extends AppCompatActivity {
         mNext.setVisibility(View.INVISIBLE);
         mNext.setText(R.string.btn_next);
         mPrev.setVisibility(View.INVISIBLE);
+        mChange.setVisibility(View.GONE);
         mCenter.setVisibility(View.INVISIBLE);
         mCenter.setText(R.string.btn_add);
         mPrev.setText(R.string.btn_prev);
@@ -776,7 +758,7 @@ public class MainActivity extends AppCompatActivity {
                     List<DataAddress> companies = TableAddress.getInstance().query();
                     autoNarrowCompanies(companies);
                     List<String> companyNames = getNames(companies);
-                    if (companyNames.size() == 1) {
+                    if (companyNames.size() == 1 && mAutoNarrowOkay) {
                         PrefHelper.getInstance().setCompany(companyNames.get(0));
                         skip();
                     } else {
@@ -808,7 +790,7 @@ public class MainActivity extends AppCompatActivity {
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states);
                 } else {
                     autoNarrowStates(states);
-                    if (states.size() == 1) {
+                    if (states.size() == 1 && mAutoNarrowOkay) {
                         PrefHelper.getInstance().setState(states.get(0));
                         skip();
                     } else {
@@ -816,6 +798,7 @@ public class MainActivity extends AppCompatActivity {
                             mNext.setVisibility(View.VISIBLE);
                         }
                         mCenter.setVisibility(View.VISIBLE);
+                        checkChangeCompanyButtonVisible();
                     }
                 }
                 break;
@@ -844,7 +827,7 @@ public class MainActivity extends AppCompatActivity {
                     mEntrySimple.setText("");
                 } else {
                     autoNarrowCities(cities);
-                    if (cities.size() == 1) {
+                    if (cities.size() == 1 && mAutoNarrowOkay) {
                         PrefHelper.getInstance().setCity(cities.get(0));
                         skip();
                     } else {
@@ -853,6 +836,7 @@ public class MainActivity extends AppCompatActivity {
                         if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
                             mNext.setVisibility(View.VISIBLE);
                         }
+                        checkChangeCompanyButtonVisible();
                     }
                 }
                 break;
@@ -879,7 +863,7 @@ public class MainActivity extends AppCompatActivity {
                     autoNarrowStreets(streets);
                     mCenter.setVisibility(View.VISIBLE);
                     showMainListFrame();
-                    if (streets.size() == 1) {
+                    if (streets.size() == 1 && mAutoNarrowOkay) {
                         PrefHelper.getInstance().setStreet(streets.get(0));
                         mAddressConfirmOkay = true;
                         skip();
@@ -887,6 +871,7 @@ public class MainActivity extends AppCompatActivity {
                         if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
                             mNext.setVisibility(View.VISIBLE);
                         }
+                        checkChangeCompanyButtonVisible();
                     }
                 }
                 break;
@@ -897,6 +882,7 @@ public class MainActivity extends AppCompatActivity {
                     showSubTitleHint();
                     mPrev.setVisibility(View.VISIBLE);
                     mNext.setVisibility(View.VISIBLE);
+                    checkChangeCompanyButtonVisible();
                 } else {
                     skip();
                 }
@@ -906,6 +892,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mCurStageEditing) {
                     PrefHelper.getInstance().clearCurProject();
                     mCurStageEditing = false;
+                    mAutoNarrowOkay = true;
                     mCurStage = Stage.PROJECT;
                     fillStage();
                 } else {
@@ -1047,7 +1034,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void autoNarrowCompanies(List<DataAddress> companies) {
-        if (!mWasNext) {
+        if (!isAutoNarrowOkay()) {
             return;
         }
         List<String> companyNames = getNames(companies);
@@ -1071,7 +1058,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void autoNarrowStates(List<String> states) {
-        if (!mWasNext) {
+        if (!isAutoNarrowOkay()) {
             return;
         }
         if (states.size() == 1) {
@@ -1080,7 +1067,7 @@ public class MainActivity extends AppCompatActivity {
         if (mAddress == null) {
             return;
         }
-        String state = LocationHelper.getInstance().matchState(mAddress, states);
+        String state = LocationHelper.matchState(mAddress, states);
         if (state != null) {
             states.clear();
             states.add(state);
@@ -1088,7 +1075,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void autoNarrowCities(List<String> cities) {
-        if (!mWasNext) {
+        if (!isAutoNarrowOkay()) {
             return;
         }
         if (cities.size() == 1) {
@@ -1097,7 +1084,7 @@ public class MainActivity extends AppCompatActivity {
         if (mAddress == null) {
             return;
         }
-        String city = LocationHelper.getInstance().matchCity(mAddress, cities);
+        String city = LocationHelper.matchCity(mAddress, cities);
         if (city != null) {
             cities.clear();
             cities.add(city);
@@ -1105,7 +1092,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void autoNarrowStreets(List<String> streets) {
-        if (!mWasNext) {
+        if (!isAutoNarrowOkay()) {
             return;
         }
         if (streets.size() == 1) {
@@ -1114,7 +1101,7 @@ public class MainActivity extends AppCompatActivity {
         if (mAddress == null) {
             return;
         }
-        LocationHelper.getInstance().reduceStreets(mAddress, streets);
+        LocationHelper.reduceStreets(mAddress, streets);
     }
 
     boolean isNewEquipmentOkay() {
@@ -1267,19 +1254,11 @@ public class MainActivity extends AppCompatActivity {
         }
         String msg = getString(R.string.error_incorrect_digit_count, sbuf.toString());
         builder.setMessage(msg);
-        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                doNext_();
-                dialog.dismiss();
-            }
+        builder.setPositiveButton(android.R.string.yes, (dialog, which) -> {
+            doNext_();
+            dialog.dismiss();
         });
-        builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(android.R.string.no, (dialog, which) -> dialog.dismiss());
         builder.create().show();
     }
 
@@ -1290,6 +1269,12 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 mCenter.setText(R.string.btn_add);
             }
+        }
+    }
+
+    void checkChangeCompanyButtonVisible() {
+        if (mDidAutoSkip) {
+            mChange.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1328,6 +1313,10 @@ public class MainActivity extends AppCompatActivity {
 
     boolean isZipCode(String zipCode) {
         return zipCode != null && zipCode.length() == 5 && zipCode.matches("^[0-9]*$");
+    }
+
+    boolean isAutoNarrowOkay() {
+        return mWasNext && mAutoNarrowOkay;
     }
 
     void showEntryHint() {
@@ -1494,12 +1483,7 @@ public class MainActivity extends AppCompatActivity {
 
     void checkErrors() {
         if (PrefHelper.getInstance().getDoErrorCheck()) {
-            if (!CheckError.getInstance().checkEntryErrors(this, new CheckError.CheckErrorResult() {
-                @Override
-                public void doEdit() {
-                    MainActivity.this.doEditEntry();
-                }
-            })) {
+            if (!CheckError.getInstance().checkEntryErrors(this, MainActivity.this::doEditEntry)) {
                 PrefHelper.getInstance().setDoErrorCheck(false);
             }
         }
