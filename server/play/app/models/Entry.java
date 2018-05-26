@@ -364,6 +364,19 @@ public class Entry extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
+    public String getNoteLine() {
+        StringBuilder sbuf = new StringBuilder();
+        for (EntryNoteCollection note : getNotes()) {
+            if (sbuf.length() > 0) {
+                sbuf.append(",");
+            }
+            sbuf.append(note.getName());
+            sbuf.append("=");
+            sbuf.append(note.getValue());
+        }
+        return sbuf.toString();
+    }
+
     public boolean hasPictures() {
         return getPictures().size() > 0;
     }

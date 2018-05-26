@@ -57,6 +57,11 @@ public class EntryPagedList {
             mPos = pos;
         }
 
+        public TermMatch(TermMatch other) {
+            mTerm = other.mTerm;
+            mPos = other.mPos;
+        }
+
         @Override
         public int compareTo(TermMatch item) {
             return mPos - item.mPos;
@@ -87,6 +92,10 @@ public class EntryPagedList {
 
         SearchTerms() {
             mTerms = new ArrayList<>();
+        }
+
+        public SearchTerms(SearchTerms other) {
+            mTerms = new ArrayList<>(other.mTerms);
         }
 
         boolean hasSearch() {
@@ -207,8 +216,21 @@ public class EntryPagedList {
     List<String> mLimitByCompanyName = new ArrayList<String>();
     long mByTruckId;
     int mRowNumber;
+    boolean mAllEntries;
 
     public EntryPagedList() {
+    }
+
+    // Used by export(), so no paging.
+    public EntryPagedList(EntryPagedList other) {
+        mParams.mSortBy = other.mParams.mSortBy;
+        mParams.mOrder = other.mParams.mOrder;
+        mSearch = new SearchTerms(other.mSearch);
+        mLimitByProject = new ArrayList<>(other.mLimitByProject);
+        mLimitByCompanyName = new ArrayList<>(other.mLimitByCompanyName);
+        mByTruckId = other.mByTruckId;
+        mRowNumber = 0;
+        mAllEntries = true;
     }
 
     public void setPage(int page) {
@@ -245,6 +267,10 @@ public class EntryPagedList {
 
     public String getOrder() {
         return mParams.mOrder;
+    }
+
+    public boolean isOrderDesc() {
+        return ((mParams.mOrder == null) || mParams.mOrder.equals("desc"));
     }
 
     public void computeFilters(Client client) {
@@ -349,11 +375,12 @@ public class EntryPagedList {
                 addFilters(query);
             }
         }
+        query.append(" ORDER BY ");
+        query.append(getSortBy());
+        query.append(" ");
+        query.append(getOrder());
+
         if (useLimit) {
-            query.append(" ORDER BY ");
-            query.append(getSortBy());
-            query.append(" ");
-            query.append(getOrder());
             int start = mParams.mPage * mParams.mPageSize;
             query.append(" LIMIT ");
             query.append(start);
@@ -415,7 +442,7 @@ public class EntryPagedList {
     public void compute() {
         List<SqlRow> entries;
         String query;
-        if (mSearch.hasMultipleTerms()) {
+        if (mSearch.hasMultipleTerms() || mAllEntries) {
             query = buildQuery(false);
         } else {
             query = buildQuery(true);
@@ -430,6 +457,10 @@ public class EntryPagedList {
         }
         if (mSearch.hasMultipleTerms()) {
             mSearch.refine();
+            mResult.mNumTotalRows = mResult.mList.size();
+            mParams.mPageSize = mResult.mList.size();
+            mParams.mPage = 0;
+        } else if (mAllEntries) {
             mResult.mNumTotalRows = mResult.mList.size();
             mParams.mPageSize = mResult.mList.size();
             mParams.mPage = 0;
@@ -491,7 +522,15 @@ public class EntryPagedList {
     }
 
     public synchronized List<Entry> getList() {
-        compute();
+        return mResult.mList;
+    }
+
+    public List<Entry> getOrderedList() {
+        if (isOrderDesc()) {
+            List<Entry> reversed = new ArrayList<>(mResult.mList);
+            Collections.reverse(reversed);
+            return reversed;
+        }
         return mResult.mList;
     }
 

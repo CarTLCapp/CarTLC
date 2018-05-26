@@ -46,6 +46,10 @@ public class EntryNoteCollection extends Model {
         return note.name;
     }
 
+    public String getValue() {
+        return note_value;
+    }
+
     public static List<EntryNoteCollection> findByCollectionId(long collection_id) {
         return find.where()
                 .eq("collection_id", collection_id)

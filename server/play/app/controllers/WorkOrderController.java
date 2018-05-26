@@ -25,6 +25,8 @@ import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
 import modules.AmazonHelper;
+import modules.WorkOrderReader;
+import modules.WorkOrderWriter;
 import play.db.ebean.Transactional;
 
 import play.Logger;

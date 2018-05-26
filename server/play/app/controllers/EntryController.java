@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 import modules.AmazonHelper;
 import modules.Globals;
+import modules.EntryListWriter;
 import java.io.File;
 import play.db.ebean.Transactional;
 import play.libs.Json;
@@ -42,6 +43,7 @@ public class EntryController extends Controller {
 
     private static final int PAGE_SIZE = 100;
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
+    private static final String EXPORT_FILENAME = "export.csv";
 
     private AmazonHelper mAmazonHelper;
     private EntryPagedList mEntryList = new EntryPagedList();
@@ -137,6 +139,21 @@ public class EntryController extends Controller {
             }
             return ok(sbuf.toString());
         }, myEc);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result export() {
+        Client client = Secured.getClient(ctx());
+        File file = new File(EXPORT_FILENAME);
+
+        EntryPagedList entryList = new EntryPagedList(mEntryList);
+        entryList.computeFilters(Secured.getClient(ctx()));
+        entryList.compute();
+        EntryListWriter writer = new EntryListWriter(entryList.getList());
+        if (!writer.save(file)) {
+            return badRequest2(writer.getError());
+        }
+        return ok(file);
     }
 
     /**
