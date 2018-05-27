@@ -96,13 +96,13 @@ public class BitmapHelper {
         }
     }
 
-    public static int [] getImageSize(String pathname) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(pathname, options);
-        int [] result = new int[2];
-        result[0] = options.outWidth;
-        result[1] = options.outHeight;
-        return result;
-    }
+//    public static int [] getImageSize(String pathname) {
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inJustDecodeBounds = true;
+//        BitmapFactory.decodeFile(pathname, options);
+//        int [] result = new int[2];
+//        result[0] = options.outWidth;
+//        result[1] = options.outHeight;
+//        return result;
+//    }
 }

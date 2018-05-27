@@ -5,11 +5,13 @@ package com.cartlc.tracker.act;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.cartlc.tracker.R;
 import com.cartlc.tracker.app.TBApplication;
 import com.cartlc.tracker.data.DataPicture;
+import com.cartlc.tracker.etc.PrefHelper;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
@@ -92,9 +94,10 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
         }
     }
 
-    final protected Context        mContext;
-    final protected LayoutInflater mLayoutInflater;
+    final protected Context              mContext;
+    final protected LayoutInflater       mLayoutInflater;
     final protected RefreshCountListener mListener;
+    HashMap<String, Integer> mRotation = new HashMap();
     protected List<DataPicture> mItems = new ArrayList();
     protected Integer mDecHeight;
     protected MyHandler mHandler = new MyHandler();
@@ -132,21 +135,18 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
         final DataPicture item = mItems.get(position);
         Picasso.get().cancelRequest(holder.imageView);
         Picasso.Builder builder = new Picasso.Builder(mContext);
-        builder.listener(new Picasso.Listener() {
-            @Override
-            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                StringBuilder sbuf = new StringBuilder();
-                sbuf.append("While processing: ");
-                sbuf.append(uri.toString());
-                sbuf.append("\n");
-                sbuf.append(exception.getMessage());
-                Timber.e(sbuf.toString());
+        builder.listener((picasso, uri, exception) -> {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append("While processing: ");
+            sbuf.append(uri.toString());
+            sbuf.append("\n");
+            sbuf.append(exception.getMessage());
+            Timber.e(sbuf.toString());
 
-                holder.loading.setText(R.string.error_while_loading_picture);
-                holder.imageView.setImageResource(android.R.color.transparent);
+            holder.loading.setText(R.string.error_while_loading_picture);
+            holder.imageView.setImageResource(android.R.color.transparent);
 
-                mHandler.sendEmptyMessageDelayed(MSG_DECREASE_SIZE, DELAY_DECREASE_SIZE);
-            }
+            mHandler.sendEmptyMessageDelayed(MSG_DECREASE_SIZE, DELAY_DECREASE_SIZE);
         });
         File pictureFile;
         if (item.existsUnscaled()) {
@@ -174,43 +174,29 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
             holder.loading.setVisibility(View.GONE);
 
             if (holder.removeView != null) {
-                holder.removeView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        item.remove();
-                        mItems.remove(item);
-                        notifyDataSetChanged();
-                        if (mListener != null) {
-                            mListener.refresh(mItems.size());
-                        }
+                holder.removeView.setOnClickListener(v -> {
+                    item.remove();
+                    mItems.remove(item);
+                    notifyDataSetChanged();
+                    if (mListener != null) {
+                        mListener.refresh(mItems.size());
                     }
                 });
             }
             if (holder.rotateCWView != null) {
-                holder.rotateCWView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        item.rotateCW();
-                        notifyDataSetChanged();
-                    }
+                holder.rotateCWView.setOnClickListener(v -> {
+                    incRotation(item, item.rotateCW());
+                    notifyDataSetChanged();
                 });
             }
             if (holder.rotateCCWView != null) {
-                holder.rotateCCWView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        item.rotateCCW();
-                        notifyDataSetChanged();
-                    }
+                holder.rotateCCWView.setOnClickListener(v -> {
+                    incRotation(item, item.rotateCCW());
+                    notifyDataSetChanged();
                 });
             }
             if (holder.noteDialogView != null) {
-                holder.noteDialogView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showPictureNoteDialog(item);
-                    }
-                });
+                holder.noteDialogView.setOnClickListener(v -> showPictureNoteDialog(item));
             }
             if (holder.noteView != null) {
                 if (TextUtils.isEmpty(item.note)) {
@@ -247,19 +233,50 @@ public class PictureListAdapter extends RecyclerView.Adapter<PictureListAdapter.
         edt.setText(item.note);
 
         builder.setTitle(R.string.picture_note_title);
-        builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                item.setNote(edt.getText().toString().trim());
-                dialog.dismiss();
-                notifyDataSetChanged();
-            }
+        builder.setPositiveButton("Done", (dialog, whichButton) -> {
+            item.setNote(edt.getText().toString().trim());
+            dialog.dismiss();
+            notifyDataSetChanged();
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, whichButton) -> dialog.dismiss());
         AlertDialog b = builder.create();
         b.show();
+    }
+
+    void incRotation(DataPicture item, int degrees) {
+        File file = item.getUnscaledFile();
+        String path = file.getAbsolutePath();
+        if (mRotation.containsKey(path)) {
+            int value = (mRotation.get(path) + degrees) % 360;
+            mRotation.put(path, value);
+        } else {
+            mRotation.put(path, degrees);
+        }
+    }
+
+    public int getCommonRotation() {
+        int commonRotation = 0;
+        for (DataPicture picture : mItems) {
+            String path = picture.getUnscaledFile().getAbsolutePath();
+            if (!mRotation.containsKey(path)) {
+                return 0;
+            }
+            int rotation = mRotation.get(path);
+            if (commonRotation == 0) {
+                commonRotation = rotation;
+            } else if (commonRotation != rotation) {
+                return 0;
+            }
+        }
+        return commonRotation;
+    }
+
+    public boolean hadSomeRotations() {
+        for (String key : mRotation.keySet()) {
+            if (mRotation.get(key) != 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

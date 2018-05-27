@@ -97,20 +97,15 @@ public class DataPicture {
         TablePictureCollection.getInstance().update(this, null);
     }
 
-    public void rotateCW() {
+    public int rotateCW() {
         BitmapHelper.rotate(getUnscaledFile(), 90);
+        return 90;
     }
 
-    public void rotateCCW() {
+    public int rotateCCW() {
         BitmapHelper.rotate(getUnscaledFile(), -90);
+        return -90;
     }
-
-//    public int[] getImageSize() {
-//        if (imgSize == null) {
-//            imgSize = BitmapHelper.getImageSize(getUnscaledFile().getAbsolutePath());
-//        }
-//        return imgSize;
-//    }
 
     public String toString() {
         StringBuilder sbuf = new StringBuilder();

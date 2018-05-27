@@ -81,9 +81,12 @@
     <string name="picture_note_hint">Enter note for picture</string>
     <string name="picture_note_title">Picture Note</string>
 
-    <string name="picture_help_1">Take picture of truck number</string>
-    <string name="picture_help_2">Take picture of wiring</string>
-    <string name="picture_help_3">Take picture of cab floor</string>
+    <string name="picture_help_1">Take picture of truck number and any pre-existing damage to truck, inside and out.</string>
+    <string name="picture_help_2">Take picture of completed wiring</string>
+    <string name="picture_help_3">Take picture of completed equipment installation and clean can including cab floor</string>
+
+    <string name="picture_rotate_dialog_title">Always rotate?</string>
+    <string name="picture_rotate_dialog_message">Automatically rotate pictures by %d degrees?</string>
 
     <string name="status_unknown">Unknown</string>
     <string name="status_needs_repair">Needs Repair</string>

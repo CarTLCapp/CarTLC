@@ -75,6 +75,7 @@ public class PrefHelper extends PrefHelperBase {
     static final        String KEY_IS_DEVELOPMENT                = "is_development";
     static final        String KEY_SPECIAL_UPDATE_CHECK          = "special_update_check";
     static final        String KEY_DO_ERROR_CHECK                = "do_error_check";
+    static final        String KEY_AUTO_ROTATE_PICTURE           = "auto_rotate_picture";
 
     public static final String VERSION_PROJECT   = "version_project";
     public static final String VERSION_COMPANY   = "version_company";
@@ -702,6 +703,19 @@ public class PrefHelper extends PrefHelperBase {
         DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
         DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
         return collection.getEquipment().size();
+    }
+
+    public int getAutoRotatePicture() {
+        return getInt(KEY_AUTO_ROTATE_PICTURE, 0);
+    }
+
+    public void incAutoRotatePicture(int degrees) {
+        int newValue = (getAutoRotatePicture() + degrees) % 360;
+        setInt(KEY_AUTO_ROTATE_PICTURE, newValue);
+    }
+
+    public void clearAutoRotatePicture() {
+        setInt(KEY_AUTO_ROTATE_PICTURE, 0);
     }
 
 }

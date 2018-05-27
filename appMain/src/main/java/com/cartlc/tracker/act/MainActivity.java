@@ -4,18 +4,20 @@
 package com.cartlc.tracker.act;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.location.Address;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -67,6 +69,7 @@ import com.cartlc.tracker.data.TableZipCode;
 import com.cartlc.tracker.etc.TruckStatus;
 import com.cartlc.tracker.event.EventError;
 import com.cartlc.tracker.event.EventRefreshProjects;
+import com.cartlc.tracker.util.BitmapHelper;
 import com.cartlc.tracker.util.DialogHelper;
 import com.cartlc.tracker.util.LocationHelper;
 import com.cartlc.tracker.util.PermissionHelper;
@@ -93,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
     static final int MSG_REFRESH_PROJECTS = 1;
     static final int MSG_SET_HINT         = 2;
     static final int MSG_SHOW_ERROR       = 3;
+    static final int NUM_MSGS             = 4;
 
     static final String KEY_HINT = "hint";
     static final String KEY_MSG  = "msg";
@@ -100,6 +104,31 @@ public class MainActivity extends AppCompatActivity {
     public static final int RESULT_EDIT_ENTRY     = 2;
     public static final int RESULT_EDIT_PROJECT   = 3;
     public static final int RESULT_DELETE_PROJECT = 4;
+
+    class RotatePictureTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            autoRotatePictureResult();
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (result && !isDestroyed() && !isFinishing() && isPictureStage()) {
+                mPictureAdapter.notifyDataSetChanged();
+            }
+        }
+
+        boolean isPictureStage() {
+            switch (mCurStage) {
+                case PICTURE_1:
+                case PICTURE_2:
+                case PICTURE_3:
+                    return true;
+            }
+            return false;
+        }
+    }
 
     class MyHandler extends Handler {
         @Override
@@ -191,8 +220,8 @@ public class MainActivity extends AppCompatActivity {
         EQUIPMENT,
         NOTES,
         PICTURE_2,
-        PICTURE_3,
         STATUS,
+        PICTURE_3,
         CONFIRM,
         ADD_ELEMENT;
 
@@ -214,7 +243,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    final static String KEY_STAGE = "stage";
+    final static String KEY_STAGE          = "stage";
+    final static String KEY_TAKING_PICTURE = "picture";
 
     @BindView(R.id.first_name)           EditText             mFirstName;
     @BindView(R.id.last_name)            EditText             mLastName;
@@ -242,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.frame_pictures)       ViewGroup            mPictureFrame;
     @BindView(R.id.list_pictures)        RecyclerView         mPictureList;
     @BindView(R.id.empty)                TextView             mEmptyView;
-    @BindView(R.id.root)                 ViewGroup            mRoot;
+    @BindView(R.id.root)                 CoordinatorLayout    mRoot;
     @BindView(R.id.buttons)              ViewGroup            mButtons;
     @BindView(R.id.status_select)        RadioGroup           mStatusSelect;
     @BindView(R.id.status_needs_repair)  RadioButton          mStatusNeedsRepair;
@@ -268,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
     ZipCodeWatcher             mZipCodeWatcher;
     DialogHelper               mDialogHelper;
     Address                    mAddress;
+    File                       mTakingPictureFile;
     boolean                    mWasNext;
     boolean                    mCurStageEditing;
     boolean                    mDoingCenter;
@@ -408,6 +439,9 @@ public class MainActivity extends AppCompatActivity {
         CheckError.getInstance().cleanup();
         mDialogHelper.clearDialog();
         LocationHelper.getInstance().onDestroy();
+        for (int what = 0; what < NUM_MSGS; what++) {
+            mHandler.removeMessages(what);
+        }
     }
 
     public void onEvent(EventRefreshProjects event) {
@@ -966,31 +1000,27 @@ public class MainActivity extends AppCompatActivity {
             case PICTURE_2:
             case PICTURE_3:
                 int pictureCount = PrefHelper.getInstance().getNumPicturesTaken();
-                if (pictureCount >= 3 && mCurStage == Stage.PICTURE_3) {
-                    skip();
+                if (mWasNext) {
+                    showPictureToast(pictureCount);
+                    mWasNext = false;
+                }
+                setPhotoTitleCount(pictureCount);
+                mPrev.setVisibility(View.VISIBLE);
+                if (mCurStageEditing || pictureCount < getExpectedPictureMin()) {
+                    mCurStageEditing = false;
+                    if (!dispatchPictureRequest()) {
+                        showError(getString(R.string.error_cannot_take_picture));
+                    }
                 } else {
-                    if (mWasNext) {
-                        showPictureToast(pictureCount);
-                        mWasNext = false;
-                    }
-                    setPhotoTitleCount(pictureCount);
-                    mPrev.setVisibility(View.VISIBLE);
-                    if (mCurStageEditing || pictureCount < getExpectedPictureMin()) {
-                        mCurStageEditing = false;
-                        if (!dispatchPictureRequest()) {
-                            showError(getString(R.string.error_cannot_take_picture));
-                        }
-                    } else {
-                        mNext.setVisibility(View.VISIBLE);
-                        mCenter.setVisibility(View.VISIBLE);
-                        mCenter.setText(R.string.btn_another);
-                        mPictureFrame.setVisibility(View.VISIBLE);
-                        mPictureList.setVisibility(View.VISIBLE);
-                        mPictureAdapter.setList(
-                                TablePictureCollection.getInstance().removeNonExistant(
-                                        TablePictureCollection.getInstance().queryPictures(PrefHelper.getInstance().getCurrentPictureCollectionId()
-                                        )));
-                    }
+                    mNext.setVisibility(View.VISIBLE);
+                    mCenter.setVisibility(View.VISIBLE);
+                    mCenter.setText(R.string.btn_another);
+                    mPictureFrame.setVisibility(View.VISIBLE);
+                    mPictureList.setVisibility(View.VISIBLE);
+                    mPictureAdapter.setList(
+                            TablePictureCollection.getInstance().removeNonExistant(
+                                    TablePictureCollection.getInstance().queryPictures(PrefHelper.getInstance().getCurrentPictureCollectionId()
+                                    )));
                 }
                 break;
             case STATUS:
@@ -1010,6 +1040,7 @@ public class MainActivity extends AppCompatActivity {
                 mCurEntry = PrefHelper.getInstance().saveEntry();
                 mConfirmationFrame.fill(mCurEntry);
                 mMainTitleText.setText(R.string.title_confirmation);
+                storeCommonRotation();
                 break;
             case ADD_ELEMENT:
                 TableEntry.getInstance().add(mCurEntry);
@@ -1158,6 +1189,7 @@ public class MainActivity extends AppCompatActivity {
             TablePictureCollection.getInstance().add(pictureFile, PrefHelper.getInstance().getCurrentPictureCollectionId());
             Uri pictureUri = TBApplication.getUri(this, pictureFile);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
+            mTakingPictureFile = pictureFile;
             // Grant permissions
             List<ResolveInfo> resInfoList = getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
             for (ResolveInfo resolveInfo : resInfoList) {
@@ -1184,7 +1216,28 @@ public class MainActivity extends AppCompatActivity {
             fillStage();
         } else if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                new RotatePictureTask().execute();
                 fillStage();
+            }
+        }
+    }
+
+    void autoRotatePictureResult() {
+        if (mTakingPictureFile != null && mTakingPictureFile.exists()) {
+            int degrees = PrefHelper.getInstance().getAutoRotatePicture();
+            if (degrees != 0) {
+                BitmapHelper.rotate(mTakingPictureFile, degrees);
+            }
+        }
+    }
+
+    void storeCommonRotation() {
+        int commonRotation = mPictureAdapter.getCommonRotation();
+        if (commonRotation != 0) {
+            PrefHelper.getInstance().incAutoRotatePicture(commonRotation);
+        } else {
+            if (mPictureAdapter.hadSomeRotations()) {
+                PrefHelper.getInstance().clearAutoRotatePicture();
             }
         }
     }
@@ -1297,6 +1350,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         mCurStage = Stage.from(savedInstanceState.getInt(KEY_STAGE));
+        String path = savedInstanceState.getString(KEY_TAKING_PICTURE, null);
+        if (path != null) {
+            mTakingPictureFile = new File(path);
+        }
         super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -1308,6 +1365,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(KEY_STAGE, mCurStage.ordinal());
+        if (mTakingPictureFile != null) {
+            outState.putString(KEY_TAKING_PICTURE, mTakingPictureFile.getAbsolutePath());
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -1380,19 +1440,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void showPictureToast(int pictureCount) {
-        String msg;
+        int msgId;
         if (pictureCount <= 0) {
-            msg = getString(R.string.picture_help_1);
+            msgId = R.string.picture_help_1;
         } else if (pictureCount <= 1) {
-            msg = getString(R.string.picture_help_2);
+            msgId = R.string.picture_help_2;
         } else if (pictureCount <= 2) {
-            msg = getString(R.string.picture_help_3);
+            msgId = R.string.picture_help_3;
         } else {
-            msg = null;
+            return;
         }
-        if (msg != null) {
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        Toast toast = Toast.makeText(this, msgId, Toast.LENGTH_LONG);
+        ViewGroup top = (ViewGroup) toast.getView();
+        View view = top.getChildAt(0);
+        if (view instanceof TextView) {
+            ((TextView) view).setTextSize(getResources().getDimension(R.dimen.picture_toast_size));
         }
+        toast.show();
     }
 
     String getEditProjectHint() {

@@ -10,6 +10,8 @@
 
     <integer name="note_label_width">5</integer>
     <integer name="note_value_width">8</integer>
+
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="picture_toast_size">10sp</dimen>
 
 </resources>
