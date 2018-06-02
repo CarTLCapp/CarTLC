@@ -8,6 +8,8 @@ import com.avaje.ebean.Transaction;
 import play.mvc.*;
 import play.data.*;
 import static play.data.Form.*;
+import akka.actor.*;
+import scala.concurrent.duration.Duration;
 
 import models.*;
 import modules.WorkerExecutionContext;
@@ -51,18 +53,21 @@ public class EntryController extends Controller {
     private SimpleDateFormat mDateFormat;
     private Globals mGlobals;
     private WorkerExecutionContext mExecutionContext;
+    private ActorSystem mActorSystem;
     private String mExportMsg;
 
     @Inject
     public EntryController(AmazonHelper amazonHelper,
                            FormFactory formFactory,
                            WorkerExecutionContext executionContext,
+                           ActorSystem actorSystem,
                            Globals globals) {
         mAmazonHelper = amazonHelper;
         mFormFactory = formFactory;
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
         mGlobals = globals;
         mExecutionContext = executionContext;
+        mActorSystem = actorSystem;
     }
 
     public Result list(int page, String sortBy, String order) {
@@ -143,7 +148,22 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public CompletionStage<Result> export() {
+    public Result export() {
+        Client client = Secured.getClient(ctx());
+        new ExportTask(client);
+        return ok("");
+    }
+
+    class ExportTask {
+        ExportTask(Client client) {
+            mActorSystem.scheduler().scheduleOnce(
+                    Duration.create(0, TimeUnit.SECONDS), () -> { export(client); }, mExecutionContext
+            );
+        }
+    }
+
+    @Security.Authenticated(Secured.class)
+    public CompletionStage<Result> export2() {
         Client client = Secured.getClient(ctx());
         Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
         return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
@@ -573,5 +593,6 @@ public class EntryController extends Controller {
         Logger.error("ERROR: " + field);
         return badRequest(field);
     }
+
 }
 
