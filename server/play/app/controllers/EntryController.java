@@ -51,6 +51,7 @@ public class EntryController extends Controller {
     private SimpleDateFormat mDateFormat;
     private Globals mGlobals;
     private WorkerExecutionContext mExecutionContext;
+    private String mExportMsg;
 
     @Inject
     public EntryController(AmazonHelper amazonHelper,
@@ -142,18 +143,29 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result export() {
+    public CompletionStage<Result> export() {
         Client client = Secured.getClient(ctx());
-        File file = new File(EXPORT_FILENAME);
+        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
+        return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
+            if (result == 0) {
+                return badRequest2(mExportMsg);
+            }
+            return ok(mExportMsg);
+        }, myEc);
+    }
 
+    private int export(Client client) {
         EntryPagedList entryList = new EntryPagedList(mEntryList);
-        entryList.computeFilters(Secured.getClient(ctx()));
+        entryList.computeFilters(client);
         entryList.compute();
         EntryListWriter writer = new EntryListWriter(entryList.getList());
+        File file = new File(EXPORT_FILENAME);
         if (!writer.save(file)) {
-            return badRequest2(writer.getError());
+            mExportMsg = writer.getError();
+            return 0;
         }
-        return ok(file);
+        mExportMsg = file.getAbsolutePath();
+        return 1;
     }
 
     /**
