@@ -46,7 +46,7 @@ public class EntryController extends Controller {
 
     private static final int PAGE_SIZE = 100;
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
-    private static final String EXPORT_FILENAME = "export.csv";
+    private static final String EXPORT_FILENAME = "/tmp/export.csv";
 
     private AmazonHelper mAmazonHelper;
     private EntryPagedList mEntryList = new EntryPagedList();
@@ -154,14 +154,6 @@ public class EntryController extends Controller {
         return export(client);
     }
 
-    @Security.Authenticated(Secured.class)
-    public CompletionStage<Result> export2() {
-        Client client = Secured.getClient(ctx());
-        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
-        return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
-            return result;
-        }, myEc);
-    }
 
     private Result export(Client client) {
         EntryPagedList entryList = new EntryPagedList(mEntryList);
@@ -175,6 +167,15 @@ public class EntryController extends Controller {
             return badRequest2(ex.getMessage());
         }
         return ok(file);
+    }
+
+    @Security.Authenticated(Secured.class)
+    public CompletionStage<Result> export2() {
+        Client client = Secured.getClient(ctx());
+        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
+        return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
+            return result;
+        }, myEc);
     }
 
     /**
