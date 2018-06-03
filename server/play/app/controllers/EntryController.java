@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import java.util.concurrent.*;
+import java.io.IOException;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -150,16 +151,7 @@ public class EntryController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result export() {
         Client client = Secured.getClient(ctx());
-        new ExportTask(client);
-        return ok("");
-    }
-
-    class ExportTask {
-        ExportTask(Client client) {
-            mActorSystem.scheduler().scheduleOnce(
-                    Duration.create(0, TimeUnit.SECONDS), () -> { export(client); }, mExecutionContext
-            );
-        }
+        return export(client);
     }
 
     @Security.Authenticated(Secured.class)
@@ -167,25 +159,22 @@ public class EntryController extends Controller {
         Client client = Secured.getClient(ctx());
         Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
         return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
-            if (result == 0) {
-                return badRequest2(mExportMsg);
-            }
-            return ok(mExportMsg);
+            return result;
         }, myEc);
     }
 
-    private int export(Client client) {
+    private Result export(Client client) {
         EntryPagedList entryList = new EntryPagedList(mEntryList);
         entryList.computeFilters(client);
         entryList.compute();
         EntryListWriter writer = new EntryListWriter(entryList.getList());
         File file = new File(EXPORT_FILENAME);
-        if (!writer.save(file)) {
-            mExportMsg = writer.getError();
-            return 0;
+        try {
+            writer.save(file);
+        } catch (IOException ex) {
+            return badRequest2(ex.getMessage());
         }
-        mExportMsg = file.getAbsolutePath();
-        return 1;
+        return ok(file);
     }
 
     /**

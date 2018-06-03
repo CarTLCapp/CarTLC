@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.File;
 import java.lang.StringBuilder;
+import java.io.IOException;
 
 import models.Entry;
 import play.db.ebean.Transactional;
@@ -30,72 +31,64 @@ public class EntryListWriter {
     static final String STATUS = "Status";
 
     List<Entry> mList;
-    String mError;
 
     public EntryListWriter(List<Entry> list) {
         mList = list;
     }
 
-    public boolean save(File file) {
-        try {
-            BufferedWriter br = new BufferedWriter(new FileWriter(file));
-            br.write(DATE);
+    public void save(File file) throws IOException {
+        BufferedWriter br = new BufferedWriter(new FileWriter(file));
+        br.write(DATE);
+        br.write(",");
+        br.write(TECH_NAME);
+        br.write(",");
+        br.write(PROJECT);
+        br.write(",");
+        br.write(COMPANY);
+        br.write(",");
+        br.write(STREET);
+        br.write(",");
+        br.write(CITY);
+        br.write(",");
+        br.write(STATE);
+        br.write(",");
+        br.write(ZIP);
+        br.write(",");
+        br.write(TRUCK);
+        br.write(",");
+        br.write(EQUIPMENT);
+        br.write(",");
+        br.write(NOTES);
+        br.write(",");
+        br.write(STATUS);
+        br.write("\n");
+        for (Entry entry : mList) {
+            br.write(entry.getDate());
             br.write(",");
-            br.write(TECH_NAME);
+            br.write(entry.getTechName());
             br.write(",");
-            br.write(PROJECT);
+            br.write(entry.getProjectLine());
             br.write(",");
-            br.write(COMPANY);
+            br.write(entry.getCompany());
             br.write(",");
-            br.write(STREET);
+            br.write(entry.getStreet());
             br.write(",");
-            br.write(CITY);
+            br.write(entry.getCity());
             br.write(",");
-            br.write(STATE);
+            br.write(entry.getState());
             br.write(",");
-            br.write(ZIP);
+            br.write(entry.getZipCode());
             br.write(",");
-            br.write(TRUCK);
+            br.write(entry.getTruckLine());
             br.write(",");
-            br.write(EQUIPMENT);
+            br.write(chkComma(entry.getEquipmentLine()));
             br.write(",");
-            br.write(NOTES);
+            br.write(chkComma(entry.getNoteLine()));
             br.write(",");
-            br.write(STATUS);
+            br.write(entry.getStatus());
             br.write("\n");
-            for (Entry entry : mList) {
-                br.write(entry.getDate());
-                br.write(",");
-                br.write(entry.getTechName());
-                br.write(",");
-                br.write(entry.getProjectLine());
-                br.write(",");
-                br.write(entry.getCompany());
-                br.write(",");
-                br.write(entry.getStreet());
-                br.write(",");
-                br.write(entry.getCity());
-                br.write(",");
-                br.write(entry.getState());
-                br.write(",");
-                br.write(entry.getZipCode());
-                br.write(",");
-                br.write(entry.getTruckLine());
-                br.write(",");
-                br.write(chkComma(entry.getEquipmentLine()));
-                br.write(",");
-                br.write(chkComma(entry.getNoteLine()));
-                br.write(",");
-                br.write(entry.getStatus());
-                br.write("\n");
-            }
-            br.close();
-        } catch (Exception ex) {
-            Logger.error(ex.getMessage());
-            mError = ex.getMessage();
-            return false;
         }
-        return true;
+        br.close();
     }
 
     private String chkComma(String line) {
@@ -111,10 +104,6 @@ public class EntryListWriter {
 
     private boolean hasComma(String line) {
         return line.indexOf(',') >= 0;
-    }
-
-    public String getError() {
-        return mError;
     }
 
 }
