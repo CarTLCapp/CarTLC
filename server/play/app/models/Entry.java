@@ -364,6 +364,10 @@ public class Entry extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
+    public List<EntryNoteCollection> getNotes() {
+        return EntryNoteCollection.findByCollectionId(note_collection_id);
+    }
+
     public String getNoteLine() {
         StringBuilder sbuf = new StringBuilder();
         for (EntryNoteCollection note : getNotes()) {
@@ -387,10 +391,6 @@ public class Entry extends com.avaje.ebean.Model {
 
     public List<PictureCollection> getPictures() {
         return PictureCollection.findByCollectionId(picture_collection_id);
-    }
-
-    public List<EntryNoteCollection> getNotes() {
-        return EntryNoteCollection.findByCollectionId(note_collection_id);
     }
 
     static List<Entry> findByProjectId(long project_id) {

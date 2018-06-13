@@ -5,13 +5,14 @@ package modules;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.File;
 import java.lang.StringBuilder;
 import java.io.IOException;
 
-import models.Entry;
+import models.*;
 import play.db.ebean.Transactional;
 import play.Logger;
 
@@ -27,13 +28,14 @@ public class EntryListWriter {
     static final String ZIP = "Zip";
     static final String TRUCK = "Truck";
     static final String EQUIPMENT = "Equipment";
-    static final String NOTES = "Notes";
     static final String STATUS = "Status";
 
     List<Entry> mList;
+    NoteColumns mNoteColumns;
 
     public EntryListWriter(List<Entry> list) {
         mList = list;
+        mNoteColumns = new NoteColumns();
     }
 
     public void save(File file) throws IOException {
@@ -58,9 +60,8 @@ public class EntryListWriter {
         br.write(",");
         br.write(EQUIPMENT);
         br.write(",");
-        br.write(NOTES);
-        br.write(",");
         br.write(STATUS);
+        br.write(mNoteColumns.getHeaders());
         br.write("\n");
         for (Entry entry : mList) {
             br.write(entry.getDate());
@@ -83,9 +84,8 @@ public class EntryListWriter {
             br.write(",");
             br.write(chkComma(entry.getEquipmentLine()));
             br.write(",");
-            br.write(chkComma(entry.getNoteLine()));
-            br.write(",");
             br.write(entry.getStatus());
+            br.write(mNoteColumns.getValues(entry));
             br.write("\n");
         }
         br.close();
@@ -106,4 +106,66 @@ public class EntryListWriter {
         return line.indexOf(',') >= 0;
     }
 
+    class NoteColumns {
+
+        HashMap<String, Integer> mNoteColumns = new HashMap<String, Integer>();
+        int mNextColumn;
+        String [] mColumns;
+
+        NoteColumns() {
+            prepare();
+        }
+
+        void prepare() {
+            mNextColumn = 0;
+            mNoteColumns.clear();
+            for (Entry entry : mList) {
+                prepare(entry.getNotes());
+            }
+            mColumns = new String[mNextColumn];
+        }
+
+        void prepare(List<EntryNoteCollection> notes) {
+            for (EntryNoteCollection note : notes) {
+                if (!note.getValue().isEmpty()) {
+                    if (!mNoteColumns.containsKey(note.getName())) {
+                        mNoteColumns.put(note.getName(), mNextColumn++);
+                    }
+                }
+            }
+        }
+
+        String getHeaders() {
+            for (int i = 0; i < mColumns.length; i++) {
+                mColumns[i] = null;
+            }
+            for (String key: mNoteColumns.keySet()) {
+                mColumns[mNoteColumns.get(key)] = key;
+            }
+            StringBuilder sbuf = new StringBuilder();
+            for (int i = 0; i < mColumns.length; i++) {
+                sbuf.append(",");
+                sbuf.append(mColumns[i]);
+            }
+            return sbuf.toString();
+        }
+
+        String getValues(Entry entry) {
+            for (int i = 0; i < mColumns.length; i++) {
+                mColumns[i] = null;
+            }
+            for (EntryNoteCollection note : entry.getNotes()) {
+                mColumns[mNoteColumns.get(note.getName())] = note.getValue();
+            }
+            StringBuilder sbuf = new StringBuilder();
+            for (int i = 0; i < mColumns.length; i++) {
+                sbuf.append(",");
+                if (mColumns[i] != null) {
+                    sbuf.append(mColumns[i]);
+                }
+            }
+            return sbuf.toString();
+        }
+
+    }
 }
