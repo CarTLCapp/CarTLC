@@ -79,6 +79,10 @@ public class TableCollectionNoteEntry {
     //
     // The values are stored right now in the TableNote table which is represented by the incoming
     // notes. We want them to also be stored now into this table.
+    //
+    // The reason we need two tables for the values, is that each time a new entry is created
+    // a new set of values for the notes are needed as well. This new set of values is stored
+    // in this table. The TableNote table only holds the values temporarily while they are being entered.
     public void save(long collectionId, List<DataNote> notes) {
         mDb.beginTransaction();
         try {

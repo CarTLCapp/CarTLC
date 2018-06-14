@@ -35,13 +35,50 @@ import butterknife.ButterKnife;
 
 public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdapter.CustomViewHolder> {
 
+    class ItemTextChangedWatcher implements TextWatcher {
+
+        TextView mLabel;
+        DataNote mItem;
+
+        ItemTextChangedWatcher(TextView label, DataNote item) {
+            mLabel = label;
+            mItem = item;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (mLabel.isSelected()) {
+                mItem.value = s.toString().trim();
+                TableNote.getInstance().updateValue(mItem);
+                mListener.textEntered(mItem);
+            }
+        }
+    }
+
     protected class CustomViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.label) TextView label;
         @BindView(R.id.entry) EditText entry;
+        ItemTextChangedWatcher mTextWatcherForEntry;
 
         public CustomViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+        }
+
+        void setTextWatcher(DataNote item) {
+            if (mTextWatcherForEntry != null) {
+                entry.removeTextChangedListener(mTextWatcherForEntry);
+            }
+            mTextWatcherForEntry = new ItemTextChangedWatcher(label, item);
+            entry.addTextChangedListener(mTextWatcherForEntry);
         }
     }
 
@@ -70,27 +107,10 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
 
     @Override
     public void onBindViewHolder(final CustomViewHolder holder, final int position) {
-        final DataNote item = mItems.get(position);
+        DataNote item = mItems.get(position);
         holder.label.setText(item.name);
         holder.entry.setText(item.value);
-        holder.entry.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (holder.label.isSelected()) {
-                    item.value = s.toString().trim();
-                    TableNote.getInstance().updateValue(item);
-                    mListener.textEntered(item);
-                }
-            }
-        });
+        holder.setTextWatcher(item);
         holder.entry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -140,7 +160,6 @@ public class NoteListEntryAdapter extends RecyclerView.Adapter<NoteListEntryAdap
         }
         pushToBottom("Other");
         notifyDataSetChanged();
-
     }
 
     void pushToBottom(String name) {

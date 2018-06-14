@@ -225,23 +225,23 @@ public class TableNote {
         return list;
     }
 
-    public String getName(long id) {
-        String name = null;
-        try {
-            final String[] columns = {KEY_NAME};
-            final String selection = KEY_ROWID + "=?";
-            final String[] selectionArgs = {Long.toString(id)};
-            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
-            int idxName = cursor.getColumnIndex(KEY_NAME);
-            if (cursor.moveToFirst()) {
-                name = cursor.getString(idxName);
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            Timber.e(ex);
-        }
-        return name;
-    }
+//    public String getName(long id) {
+//        String name = null;
+//        try {
+//            final String[] columns = {KEY_NAME};
+//            final String selection = KEY_ROWID + "=?";
+//            final String[] selectionArgs = {Long.toString(id)};
+//            Cursor cursor = mDb.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+//            int idxName = cursor.getColumnIndex(KEY_NAME);
+//            if (cursor.moveToFirst()) {
+//                name = cursor.getString(idxName);
+//            }
+//            cursor.close();
+//        } catch (Exception ex) {
+//            Timber.e(ex);
+//        }
+//        return name;
+//    }
 
     public void update(DataNote item) {
         mDb.beginTransaction();

@@ -43,7 +43,7 @@ Database:
 mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql
 p/w: cartcl
 
-scp -i ~/.ssh/cartlc.pem ubuntu@cartlc.arqnetworks.com:backup/somefile .
+scp -i ~/.ssh/FleetTLC.pem somefile ubuntu@fleetdev.arqnetworks.com:
 
 Restore:
 mysql -u cartlc -p

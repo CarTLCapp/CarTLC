@@ -354,27 +354,28 @@ public class MainActivity extends AppCompatActivity {
             }
 
             void display(DataNote note) {
-                if (mCurStage == Stage.NOTES) {
-                    if (note.num_digits > 0) {
-                        if (note.value != null && note.value.length() > 0) {
-                            StringBuilder sbuf = new StringBuilder();
-                            int count = note.value.length();
-                            sbuf.append(count);
-                            sbuf.append("/");
-                            sbuf.append(note.num_digits);
-                            mListEntryHint.setText(sbuf.toString());
-                            if (count > note.num_digits) {
-                                mListEntryHint.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.entry_error_color));
-                            } else {
-                                mListEntryHint.setTextColor(ContextCompat.getColor(MainActivity.this, android.R.color.white));
-                            }
+                if (mCurStage != Stage.NOTES) {
+                    return;
+                }
+                if (note.num_digits > 0) {
+                    if (note.value != null && note.value.length() > 0) {
+                        StringBuilder sbuf = new StringBuilder();
+                        int count = note.value.length();
+                        sbuf.append(count);
+                        sbuf.append("/");
+                        sbuf.append(note.num_digits);
+                        mListEntryHint.setText(sbuf.toString());
+                        if (count > note.num_digits) {
+                            mListEntryHint.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.entry_error_color));
                         } else {
-                            mListEntryHint.setText("");
+                            mListEntryHint.setTextColor(ContextCompat.getColor(MainActivity.this, android.R.color.white));
                         }
-                        mListEntryHint.setVisibility(View.VISIBLE);
                     } else {
-                        mListEntryHint.setVisibility(View.GONE);
+                        mListEntryHint.setText("");
                     }
+                    mListEntryHint.setVisibility(View.VISIBLE);
+                } else {
+                    mListEntryHint.setVisibility(View.GONE);
                 }
             }
         });
@@ -1358,7 +1359,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         PermissionHelper.getInstance().handlePermissionResult(requestCode, permissions, grantResults);
     }
 
