@@ -167,6 +167,10 @@ public class EntryPagedList {
             return Html.apply(sbuf.toString());
         }
 
+        String detectSingleQuote(String term) {
+			return term;
+        }
+
         String getPrimary() {
             return mTerms.get(0);
         }
