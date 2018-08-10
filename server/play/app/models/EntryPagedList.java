@@ -15,15 +15,15 @@ import play.twirl.api.Html;
 public class EntryPagedList {
 
     public enum PagedSortBy {
-        TECH("tech", "e.tech_id"),
+        TECH("tech", "te.last_name"),
         TIME("time", "e.entry_time"),
-        PROJECT_ID("project", "e.project_id"),
-        TRUCK_NUMBER("truck", "e.truck_id"),
-        COMPANY_NAME("company", "e.company_id"),
-        STREET("street", "e.company_id"),
-        CITY("city", "e.company_id"),
-        STATE("state", "e.company_id"),
-        ZIP("zipcode", "e.company_id");
+        PROJECT_ID("project", "p.name"),
+        TRUCK_NUMBER("truck", "tr.truck_number"),
+        COMPANY_NAME("company", "c.name"),
+        STREET("street", "c.street"),
+        CITY("city", "c.city"),
+        STATE("state", "c.state"),
+        ZIP("zipcode", "c.zipcode");
 
         String alias;
         String code;
@@ -326,6 +326,24 @@ public class EntryPagedList {
         query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
         query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
 
+        switch (mParams.mSortBy) {
+            case TECH:
+                query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
+                break;
+            case PROJECT_ID:
+                query.append(" INNER JOIN project AS p ON e.project_id = p.id");
+                break;
+            case TRUCK_NUMBER:
+                query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
+                break;
+            case COMPANY_NAME:
+            case STREET:
+            case CITY:
+            case STATE:
+            case ZIP:
+                query.append(" INNER JOIN company AS c ON e.company_id = c.id");
+                break;
+        }
         if (mByTruckId > 0) {
             query.append(" WHERE ");
             query.append("e.truck_id=");
