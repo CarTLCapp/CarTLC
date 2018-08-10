@@ -19,7 +19,7 @@ do
 	key="$1"
 	case $key in
 		-r)
-			SERVER="ubuntu@ec2-18-217-15-185.us-east-2.compute.amazonaws.com"
+			SERVER="ubuntu@fleettlc.arqnetworks.com"
     		shift
     	;;
 		-d)
