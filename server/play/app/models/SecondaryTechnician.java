@@ -7,7 +7,7 @@ import java.util.*;
 import java.lang.Long;
 
 import javax.persistence.*;
-
+import com.avaje.ebean.*;
 import play.db.ebean.*;
 import play.data.validation.*;
 import play.db.ebean.Transactional;
@@ -70,6 +70,37 @@ public class SecondaryTechnician extends com.avaje.ebean.Model {
         item.save();
 
         Logger.info("Added secondary_technician for " + entry_id + " of " + secondary_tech_id);
+    }
+
+    /**
+     * @param ids: list of tech_ids to scan for.
+     * @return list of entry id's with matches.
+     */
+    public static List<Long> findMatches(List<Long> ids) {
+        List<Long> result = new ArrayList<Long>();
+        if (ids.size() == 0) {
+            return result;
+        }
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT DISTINCT ste.entry_id, ste.secondary_tech_id");
+        query.append(" FROM secondary_technician AS ste");
+        query.append(" WHERE ste.secondary_tech_id IN (");
+        boolean first = true;
+        for (long id: ids) {
+            if (first) {
+                first = false;
+            } else {
+                query.append(", ");
+            }
+            query.append(id);
+        }
+        query.append(")");
+        List<SqlRow> entries = Ebean.createSqlQuery(query.toString()).findList();
+        long entry_id;
+        for (SqlRow row : entries) {
+            result.add(row.getLong("entry_id"));
+        }
+        return result;
     }
 
 }

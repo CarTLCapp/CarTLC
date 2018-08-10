@@ -136,5 +136,19 @@ public class Technician extends com.avaje.ebean.Model {
         return true;
     }
 
+    public static List<Long> findMatches(String name) {
+        List<Technician> technicians = find.where()
+                .disjunction()
+                .ilike("first_name", "%" + name + "%")
+                .ilike("last_name", "%" + name + "%")
+                .endJunction()
+                .findList();
+        List<Long> result = new ArrayList<Long>();
+        for (Technician tech : technicians) {
+            result.add(tech.id);
+        }
+        return result;
+    }
+
 }
 

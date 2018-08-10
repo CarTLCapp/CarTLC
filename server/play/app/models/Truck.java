@@ -358,5 +358,20 @@ public class Truck extends com.avaje.ebean.Model {
         }
         return sbuf.toString();
     }
+
+    public static List<Long> findMatches(String name) {
+        List<Truck> trucks = find.where()
+                .disjunction()
+                .ilike("truck_number", "%" + name + "%")
+                .ilike("license_plate", "%" + name + "%")
+                .endJunction()
+                .findList();
+        List<Long> result = new ArrayList<Long>();
+        for (Truck truck : trucks) {
+            result.add(truck.id);
+        }
+        return result;
+    }
+
 }
 

@@ -80,6 +80,17 @@ public class Project extends Model implements Comparable<Project> {
         return null;
     }
 
+    public static List<Long> findMatches(String name) {
+        List<Project> projects = find.where()
+                .ilike("name", "%" + name + "%")
+                .findList();
+        List<Long> result = new ArrayList<Long>();
+        for (Project project : projects) {
+            result.add(project.id);
+        }
+        return result;
+    }
+
     public String getEquipmentsLine() {
         List<Equipment> items = ProjectEquipmentCollection.findEquipments(id);
         Collections.sort(items);

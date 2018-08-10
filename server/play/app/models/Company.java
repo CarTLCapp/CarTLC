@@ -11,6 +11,7 @@ import com.avaje.ebean.Model;
 
 import play.data.format.*;
 import play.data.validation.*;
+import play.Logger;
 
 import com.avaje.ebean.*;
 
@@ -23,7 +24,7 @@ import modules.DataErrorException;
 public class Company extends Model {
 
     private static final long serialVersionUID = 1L;
-    private static final int  PAGE_SIZE        = 30;
+    private static final int PAGE_SIZE = 30;
 
     @Id
     public Long id;
@@ -241,6 +242,33 @@ public class Company extends Model {
         return find.where().eq("disabled", true).findList().size() > 0;
     }
 
+    public static List<Long> findMatches(String name) {
+        List<Company> companies = find.where()
+                .disjunction()
+                .ilike("name", "%" + name + "%")
+                .ilike("street", "%" + name + "%")
+                .ilike("city", "%" + name + "%")
+                .ilike("state", "%" + name + "%")
+                .ilike("zipcode", "%" + name + "%")
+                .endJunction()
+                .findList();
+        List<Long> result = new ArrayList<Long>();
+        for (Company company : companies) {
+            result.add(company.id);
+        }
+        return result;
+    }
 
+    public static Company findByName(String name) {
+        List<Company> companies = find.where()
+                .eq("name", name)
+                .findList();
+        if (companies.size() == 0) {
+            return null;
+        } else if (companies.size() > 1) {
+            Logger.error("Too many companies named: " + name);
+        }
+        return companies.get(0);
+    }
 }
 

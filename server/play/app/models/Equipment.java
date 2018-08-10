@@ -240,5 +240,17 @@ public class Equipment extends Model implements Comparable<Equipment> {
         sbuf.append(getCreatedBy());
         return sbuf.toString();
     }
+
+    public static List<Long> findMatches(String name) {
+        List<Equipment> equipments = find.where()
+                .ilike("name", "%" + name + "%")
+                .findList();
+        List<Long> result = new ArrayList<Long>();
+        for (Equipment equip : equipments) {
+            result.add(equip.id);
+        }
+        return result;
+    }
+
 }
 

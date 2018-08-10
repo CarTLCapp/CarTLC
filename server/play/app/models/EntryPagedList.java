@@ -15,15 +15,15 @@ import play.twirl.api.Html;
 public class EntryPagedList {
 
     public enum PagedSortBy {
-        TECH("tech_name", "te.last_name"),
+        TECH("tech", "e.tech_id"),
         TIME("time", "e.entry_time"),
-        PROJECT("project_name", "p.name"),
-        TRUCK_NUMBER("truck_number", "tr.truck_number"),
-        COMPANY_NAME("company_name", "c.name"),
-        STREET("street", "c.street"),
-        CITY("city", "c.city"),
-        STATE("state", "c.state"),
-        ZIP("zipcode", "c.zipcode");
+        PROJECT_ID("project", "e.project_id"),
+        TRUCK_NUMBER("truck", "e.truck_id"),
+        COMPANY_NAME("company", "e.company_id"),
+        STREET("street", "e.company_id"),
+        CITY("city", "e.company_id"),
+        STATE("state", "e.company_id"),
+        ZIP("zipcode", "e.company_id");
 
         String alias;
         String code;
@@ -168,7 +168,7 @@ public class EntryPagedList {
         }
 
         String detectSingleQuote(String term) {
-			return term;
+            return term;
         }
 
         String getPrimary() {
@@ -218,6 +218,7 @@ public class EntryPagedList {
     SearchTerms mSearch = new SearchTerms();
     List<Long> mLimitByProject = new ArrayList<Long>();
     List<String> mLimitByCompanyName = new ArrayList<String>();
+    List<Long> mSearchFilterByProject = new ArrayList<Long>();
     long mByTruckId;
     int mRowNumber;
     boolean mAllEntries;
@@ -321,69 +322,40 @@ public class EntryPagedList {
         query.append(", e.picture_collection_id");
         query.append(", e.note_collection_id");
         query.append(", e.truck_id, e.status, e.time_zone");
-        for (PagedSortBy sortBy : PagedSortBy.values()) {
-            query.append(", ");
-            query.append(sortBy.code);
-        }
         query.append(" FROM entry AS e");
-        query.append(" INNER JOIN company AS c ON e.company_id = c.id");
-        query.append(" INNER JOIN project AS p ON e.project_id = p.id");
-        query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
-        query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
         query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
         query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
-        query.append(" LEFT JOIN secondary_technician AS ste ON e.id = ste.entry_id");
-        query.append(" LEFT JOIN technician AS te2 ON ste.secondary_tech_id = te2.id");
 
         if (mByTruckId > 0) {
             query.append(" WHERE ");
             query.append("e.truck_id=");
             query.append(mByTruckId);
-        } else if (mSearch.hasSearch()) {
-            query.append(" WHERE (");
-            query.append(appendSearch("c.name"));
-            query.append(" OR ");
-            query.append(appendSearch("c.city"));
-            query.append(" OR ");
-            query.append(appendSearch("c.street"));
-            query.append(" OR ");
-            query.append(appendSearch("c.state"));
-            query.append(" OR ");
-            query.append(appendSearch("c.zipcode"));
-            query.append(" OR ");
-            query.append(appendSearch("p.name"));
-            query.append(" OR ");
-            query.append(appendSearch("te.first_name"));
-            query.append(" OR ");
-            query.append(appendSearch("te.last_name"));
-            query.append(" OR ");
-            query.append(appendSearch("tr.truck_number"));
-            query.append(" OR ");
-            query.append(appendSearch("tr.license_plate"));
-            query.append(" OR ");
-            query.append(appendSearch("te2.first_name"));
-            query.append(" OR ");
-            query.append(appendSearch("te2.last_name"));
-            query.append(" OR ");
-            query.append(appendSearch("eq.name"));
-            query.append(")");
-            if (mLimitByProject.size() > 0 || mLimitByCompanyName.size() > 0) {
-                query.append(" AND ");
-                query.append("(");
-                addFilters(query);
-                query.append(")");
-            }
         } else {
-            if (mLimitByProject.size() > 0 || mLimitByCompanyName.size() > 0) {
+            StringBuilder whereQuery = new StringBuilder();
+            String search = getWhereSearch();
+            if (search.length() > 0) {
+                whereQuery.append("(");
+                whereQuery.append(search);
+                whereQuery.append(")");
+            }
+            String limit = getLimitFilters();
+            if (limit.length() > 0) {
+                if (whereQuery.length() > 0) {
+                    whereQuery.append(" AND ");
+                }
+                whereQuery.append("(");
+                whereQuery.append(limit);
+                whereQuery.append(")");
+            }
+            if (whereQuery.length() > 0) {
                 query.append(" WHERE ");
-                addFilters(query);
+                query.append(whereQuery.toString());
             }
         }
         query.append(" ORDER BY ");
         query.append(getSortBy());
         query.append(" ");
         query.append(getOrder());
-
         if (useLimit) {
             int start = mParams.mPage * mParams.mPageSize;
             query.append(" LIMIT ");
@@ -394,7 +366,96 @@ public class EntryPagedList {
         return query.toString();
     }
 
-    void addFilters(StringBuilder query) {
+
+    private String getWhereSearch() {
+        StringBuilder query = new StringBuilder();
+        appendSearch(query, "e.project_id", getSearchByProject());
+        appendSearch(query, "e.company_id", getSearchByCompany());
+        appendSearch(query, "e.truck_id", getSearchByTruck());
+        appendSearch(query, "eq.id", getSearchByEquipment());
+        List<Long> techs = getSearchByTechnician();
+        appendSearch(query, "e.tech_id", techs);
+        if (techs.size() > 0) {
+            List<Long> entries_ids = SecondaryTechnician.findMatches(techs);
+            appendSearch(query, "e.id", entries_ids);
+        }
+        return query.toString();
+    }
+
+    private void appendSearch(StringBuilder query, String prefix, List<Long> items) {
+        if (items.size() == 0) {
+            return;
+        }
+        if (query.length() > 0) {
+            query.append(" OR ");
+        }
+        query.append(prefix);
+        query.append(" IN ");
+        query.append("(");
+        boolean first = true;
+        for (long id : items) {
+            if (first) {
+                first = false;
+            } else {
+                query.append(", ");
+            }
+            query.append(id);
+        }
+        query.append(")");
+    }
+
+    private List<Long> getSearchByProject() {
+        HashSet<Long> set = new HashSet<Long>();
+        for (String term : mSearch.mTerms) {
+            set.addAll(Project.findMatches(term));
+        }
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(set);
+        return list;
+    }
+
+    private List<Long> getSearchByCompany() {
+        HashSet<Long> set = new HashSet<Long>();
+
+        for (String term : mSearch.mTerms) {
+            set.addAll(Company.findMatches(term));
+        }
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(set);
+        return list;
+    }
+
+    private List<Long> getSearchByTechnician() {
+        HashSet<Long> set = new HashSet<Long>();
+        for (String term : mSearch.mTerms) {
+            set.addAll(Technician.findMatches(term));
+        }
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(set);
+        return list;
+    }
+
+    private List<Long> getSearchByTruck() {
+        HashSet<Long> set = new HashSet<Long>();
+        for (String term : mSearch.mTerms) {
+            set.addAll(Truck.findMatches(term));
+        }
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(set);
+        return list;
+    }
+
+    private List<Long> getSearchByEquipment() {
+        HashSet<Long> set = new HashSet<Long>();
+        for (String term : mSearch.mTerms) {
+            set.addAll(Equipment.findMatches(term));
+        }
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(set);
+        return list;
+    }
+
+    private String getLimitFilters() {
         StringBuilder projects = new StringBuilder();
         boolean first = true;
         for (long project_id : mLimitByProject) {
@@ -403,21 +464,24 @@ public class EntryPagedList {
             } else {
                 projects.append(" OR ");
             }
-            projects.append("p.id = ");
+            projects.append("e.project_id = ");
             projects.append(project_id);
         }
         StringBuilder companies = new StringBuilder();
         first = true;
         for (String companyName : mLimitByCompanyName) {
-            if (first) {
-                first = false;
-            } else {
-                companies.append(" OR ");
+            Company company = Company.findByName(companyName);
+            if (company != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    companies.append(" OR ");
+                }
+                companies.append("e.company_id = '");
+                companies.append(company.id);
             }
-            companies.append("c.name = '");
-            companies.append(companyName);
-            companies.append("'");
         }
+        StringBuilder query = new StringBuilder();
         if (projects.length() > 0 && companies.length() > 0) {
             query.append("(");
             query.append(projects.toString());
@@ -429,10 +493,7 @@ public class EntryPagedList {
         } else if (companies.length() > 0) {
             query.append(companies.toString());
         }
-    }
-
-    String appendSearch(String column) {
-        return column + " LIKE '%" + mSearch.getPrimary() + "%'";
+        return query.toString();
     }
 
     public InputSearch getInputSearch() {
@@ -446,11 +507,8 @@ public class EntryPagedList {
     public void compute() {
         List<SqlRow> entries;
         String query;
-        if (mSearch.hasMultipleTerms() || mAllEntries) {
-            query = buildQuery(false);
-        } else {
-            query = buildQuery(true);
-        }
+        query = buildQuery(!mAllEntries);
+        Logger.debug("Query: " + query);
         entries = Ebean.createSqlQuery(query).findList();
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
