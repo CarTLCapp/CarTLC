@@ -317,11 +317,24 @@ public class EntryPagedList {
     String buildQuery(boolean useLimit) {
         StringBuilder query = new StringBuilder();
 
-        query.append("SELECT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
+        query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
         query.append(", e.equipment_collection_id");
         query.append(", e.picture_collection_id");
         query.append(", e.note_collection_id");
         query.append(", e.truck_id, e.status, e.time_zone");
+
+        switch (mParams.mSortBy) {
+            case TECH:
+            case PROJECT_ID:
+            case TRUCK_NUMBER:
+            case COMPANY_NAME:
+            case STREET:
+            case CITY:
+            case STATE:
+            case ZIP:
+                query.append(" , " + getSortBy());
+                break;
+        }
         query.append(" FROM entry AS e");
         query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
         query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
