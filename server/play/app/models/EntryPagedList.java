@@ -508,7 +508,7 @@ public class EntryPagedList {
                 } else {
                     companies.append(" OR ");
                 }
-                companies.append("e.company_id = '");
+                companies.append("e.company_id = ");
                 companies.append(company.id);
             }
         }
