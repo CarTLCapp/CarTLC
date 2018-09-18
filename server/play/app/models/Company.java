@@ -260,15 +260,7 @@ public class Company extends Model {
     }
 
     public static List<Company> findByName(String name) {
-        List<Company> companies = find.where()
-                .eq("name", name)
-                .findList();
-        if (companies.size() == 0) {
-            return null;
-        } else if (companies.size() > 1) {
-            Logger.error("Too many companies named: " + name);
-        }
-        return companies;
+        return find.where().eq("name", name).findList();
     }
 }
 
