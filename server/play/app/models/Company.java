@@ -259,7 +259,7 @@ public class Company extends Model {
         return result;
     }
 
-    public static Company findByName(String name) {
+    public static List<Company> findByName(String name) {
         List<Company> companies = find.where()
                 .eq("name", name)
                 .findList();
@@ -268,7 +268,7 @@ public class Company extends Model {
         } else if (companies.size() > 1) {
             Logger.error("Too many companies named: " + name);
         }
-        return companies.get(0);
+        return companies;
     }
 }
 

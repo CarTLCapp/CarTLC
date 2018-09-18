@@ -501,8 +501,8 @@ public class EntryPagedList {
         StringBuilder companies = new StringBuilder();
         first = true;
         for (String companyName : mLimitByCompanyName) {
-            Company company = Company.findByName(companyName);
-            if (company != null) {
+            List<Company> matches = Company.findByName(companyName);
+            for (Company company : matches) {
                 if (first) {
                     first = false;
                 } else {
