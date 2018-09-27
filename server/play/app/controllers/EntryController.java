@@ -148,7 +148,8 @@ public class EntryController extends Controller {
         }, myEc);
     }
 
-    public Result exportSlow() {
+    public Result export() {
+        Logger.info("export() BEGIN");
         Client client = Secured.getClient(ctx());
         return export(client);
     }
@@ -171,8 +172,8 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public CompletionStage<Result> export() {
-        Logger.info("export() BEGIN");
+    public CompletionStage<Result> exportBackground() {
+        Logger.info("export() BACKGROUND BEGIN");
         Client client = Secured.getClient(ctx());
         Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
         return CompletableFuture.supplyAsync(() -> export(client), myEc);

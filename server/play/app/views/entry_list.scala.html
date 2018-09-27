@@ -139,7 +139,7 @@
         }
 
         <script type="text/javascript">
-            function export() {
+            function myExport() {
                 console.log("export()")
                 document.getElementById("export").innerHTML = "..."
                 var xhttp = new XMLHttpRequest();
@@ -149,7 +149,7 @@
                 xhttp.open("GET", "@routes.EntryController.export()", true);
                 xhttp.send();
             }
-            document.getElementById("export").onclick = export
+            document.getElementById("export").onclick = myExport
             document.getElementById("export").innerHTML = "Export"
        </script>
     }
