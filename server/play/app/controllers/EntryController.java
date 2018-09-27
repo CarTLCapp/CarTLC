@@ -149,7 +149,7 @@ public class EntryController extends Controller {
     }
 
     public Result export() {
-        Logger.info("export() BEGIN");
+        Logger.info("export() NORMAL BEGIN");
         Client client = Secured.getClient(ctx());
         return export(client);
     }
@@ -168,19 +168,24 @@ public class EntryController extends Controller {
             return badRequest2(ex.getMessage());
         }
         Logger.info("export() END");
-        return ok(file);
+        return ok(file.getName());
     }
 
-    @Security.Authenticated(Secured.class)
-    public CompletionStage<Result> exportBackground() {
-        Logger.info("export() BACKGROUND BEGIN");
-        Client client = Secured.getClient(ctx());
-        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
-        return CompletableFuture.supplyAsync(() -> export(client), myEc);
+    public Result exportDownload() {
+        File file = new File(EXPORT_FILENAME);
+        return ok(file.getName());
+    }
+
+//    @Security.Authenticated(Secured.class)
+//    public CompletionStage<Result> exportBackground() {
+//        Logger.info("export() BACKGROUND BEGIN");
+//        Client client = Secured.getClient(ctx());
+//        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
+//        return CompletableFuture.supplyAsync(() -> export(client), myEc);
 //        return CompletionStage<Result>.completedFuture(export(client)).thenApplyAsync(result -> {
 //            return result;
 //        }, myEc);
-    }
+//    }
 
     /**
      * Display the picture for an entry.

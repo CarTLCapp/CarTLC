@@ -35,7 +35,10 @@
         @helper.form(action = routes.EntryController.search()) {
             <h1 id="homeTitle">
                 <span id="homeCount">...</span>
-                <span style="float:right;font-size:16px;padding-left:10px"><button id="export">...</button></span>
+                <span style="float:right;font-size:16px">
+                    <a id="export_download" href="@routes.EntryController.exportDownload()"></a>
+                </span>
+                <span style="float:right;font-size:16px;padding-left:10px"><a id="export">...</a></span>
                 <span style="float:right;font-size:16px">
                        <a href="@routes.EntryController.searchClear()" class="btn">Clear</a>
                 </span>
@@ -140,17 +143,21 @@
 
         <script type="text/javascript">
             function myExport() {
-                console.log("export()")
-                document.getElementById("export").innerHTML = "..."
+                document.getElementById("export_result").innerHTML = "...";
+                document.getElementById("export_download").innerHTML = "";
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
-                    document.getElementById("export").innerHTML = "Exported"
+                    if (this.responseText.length > 0 && this.status == 0) {
+                        document.getElementById("export").innerHTML = "Export";
+                        document.getElementById("export_download").innerHTML = this.responseText;
+                    }
                 };
                 xhttp.open("GET", "@routes.EntryController.export()", true);
                 xhttp.send();
             }
-            document.getElementById("export").onclick = myExport
-            document.getElementById("export").innerHTML = "Export"
+            document.getElementById("export").onclick = myExport;
+            document.getElementById("export").innerHTML = "Export";
+            document.getElementById("export_download").innerHTML = "";
        </script>
     }
 
