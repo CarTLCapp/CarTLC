@@ -149,7 +149,6 @@ public class EntryController extends Controller {
     }
 
     public Result export() {
-        Logger.info("export() NORMAL BEGIN");
         Client client = Secured.getClient(ctx());
         return export(client);
     }
@@ -173,7 +172,6 @@ public class EntryController extends Controller {
 
     public Result exportDownload() {
         File file = new File(EXPORT_FILENAME);
-        Logger.info("exportDownload():" + file.getAbsolutePath());
         return ok(file);
     }
 
