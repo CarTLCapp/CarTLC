@@ -35,7 +35,7 @@
         @helper.form(action = routes.EntryController.search()) {
             <h1 id="homeTitle">
                 <span id="homeCount">...</span>
-                <span style="float:right;font-size:16px;padding-left:10px"><button id="export" onclick="export()">Export</button></span>
+                <span style="float:right;font-size:16px;padding-left:10px"><button id="export">...</button></span>
                 <span style="float:right;font-size:16px">
                        <a href="@routes.EntryController.searchClear()" class="btn">Clear</a>
                 </span>
@@ -140,6 +140,7 @@
 
         <script type="text/javascript">
             function export() {
+                console.log("export()")
                 document.getElementById("export").innerHTML = "..."
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
@@ -148,6 +149,8 @@
                 xhttp.open("GET", "@routes.EntryController.export()", true);
                 xhttp.send();
             }
+            document.getElementById("export").onclick = export
+            document.getElementById("export").innerHTML = "Export"
        </script>
     }
 
