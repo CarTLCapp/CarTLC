@@ -149,11 +149,10 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result export() {
+    public Result exportSlow() {
         Client client = Secured.getClient(ctx());
         return export(client);
     }
-
 
     private Result export(Client client) {
         EntryPagedList entryList = new EntryPagedList(mEntryList);
@@ -170,7 +169,7 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public CompletionStage<Result> export2() {
+    public CompletionStage<Result> export() {
         Client client = Secured.getClient(ctx());
         Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
         return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
