@@ -136,19 +136,19 @@
                 xhttp.open("GET", "@routes.EntryController.computeTotalNumRows()", true);
                 xhttp.send();
             </script>
-
-            <script type="text/javascript">
-                function export() {
-                    document.getElementById("export").innerHTML = "..."
-                    var xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function() {
-                        document.getElementById("export").innerHTML = "Exported"
-                    };
-                    xhttp.open("GET", "@routes.EntryController.export()", true);
-                    xhttp.send();
-                }
-            </script>
         }
+
+        <script type="text/javascript">
+            function export() {
+                document.getElementById("export").innerHTML = "..."
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    document.getElementById("export").innerHTML = "Exported"
+                };
+                xhttp.open("GET", "@routes.EntryController.export()", true);
+                xhttp.send();
+            }
+       </script>
     }
 
 }

@@ -148,7 +148,13 @@ public class EntryController extends Controller {
         }, myEc);
     }
 
+    public Result exportSlow() {
+        Client client = Secured.getClient(ctx());
+        return export(client);
+    }
+
     private Result export(Client client) {
+        Logger.info("export() START");
         EntryPagedList entryList = new EntryPagedList(mEntryList);
         entryList.computeFilters(client);
         entryList.compute();
@@ -157,13 +163,16 @@ public class EntryController extends Controller {
         try {
             writer.save(file);
         } catch (IOException ex) {
+            Logger.error("export() ERROR: " + ex.getMessage());
             return badRequest2(ex.getMessage());
         }
+        Logger.info("export() END");
         return ok(file);
     }
 
     @Security.Authenticated(Secured.class)
     public CompletionStage<Result> export() {
+        Logger.info("export() BEGIN");
         Client client = Secured.getClient(ctx());
         Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
         return CompletableFuture.supplyAsync(() -> export(client), myEc);
