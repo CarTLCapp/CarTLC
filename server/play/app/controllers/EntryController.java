@@ -173,7 +173,8 @@ public class EntryController extends Controller {
 
     public Result exportDownload() {
         File file = new File(EXPORT_FILENAME);
-        return ok(file.getName());
+        Logger.info("exportDownload():" + file.getAbsolutePath());
+        return ok(file);
     }
 
 //    @Security.Authenticated(Secured.class)
