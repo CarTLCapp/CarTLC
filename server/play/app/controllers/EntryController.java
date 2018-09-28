@@ -7,7 +7,9 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import play.mvc.*;
 import play.data.*;
+
 import static play.data.Form.*;
+
 import akka.actor.*;
 import scala.concurrent.duration.Duration;
 
@@ -33,7 +35,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import modules.AmazonHelper;
 import modules.Globals;
 import modules.EntryListWriter;
+
 import java.io.File;
+
 import play.db.ebean.Transactional;
 import play.libs.Json;
 import play.Logger;
@@ -148,12 +152,23 @@ public class EntryController extends Controller {
         }, myEc);
     }
 
-    public Result export() {
+//    public Result exportSimple() {
+//        Client client = Secured.getClient(ctx());
+//        return export(client);
+//    }
+
+    public CompletionStage<Result> export() {
         Client client = Secured.getClient(ctx());
-        return export(client);
+        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
+        return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
+            if (result.startsWith("ERROR:")) {
+                return badRequest2(result);
+            }
+            return ok(result);
+        }, myEc);
     }
 
-    private Result export(Client client) {
+    private String export(Client client) {
         Logger.info("export() START");
         EntryPagedList entryList = new EntryPagedList(mEntryList);
         entryList.computeFilters(client);
@@ -163,11 +178,10 @@ public class EntryController extends Controller {
         try {
             writer.save(file);
         } catch (IOException ex) {
-            Logger.error("export() ERROR: " + ex.getMessage());
-            return badRequest2(ex.getMessage());
+            return "ERROR: " + ex.getMessage();
         }
         Logger.info("export() END");
-        return ok(file.getName());
+        return file.getName();
     }
 
     public Result exportDownload() {
@@ -566,7 +580,7 @@ public class EntryController extends Controller {
     String pickOutTimeZone(String value, char sp) {
         int pos = value.indexOf(sp);
         if (pos >= 0) {
-            return value.substring(pos+1);
+            return value.substring(pos + 1);
         }
         return null;
     }
@@ -575,8 +589,7 @@ public class EntryController extends Controller {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("Missing fields:");
         boolean comma = false;
-        for (String field : missing)
-        {
+        for (String field : missing) {
             if (comma) {
                 sbuf.append(", ");
             }
