@@ -60,6 +60,7 @@ public class EntryController extends Controller {
     private WorkerExecutionContext mExecutionContext;
     private ActorSystem mActorSystem;
     private String mExportMsg;
+    private boolean mExporting;
 
     @Inject
     public EntryController(AmazonHelper amazonHelper,
@@ -158,9 +159,14 @@ public class EntryController extends Controller {
 //    }
 
     public CompletionStage<Result> export() {
+        if (mExporting) {
+            return ok("...");
+        }
+        mExporting = true;
         Client client = Secured.getClient(ctx());
         Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
         return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
+            mExporting = false;
             if (result.startsWith("ERROR:")) {
                 return badRequest2(result);
             }
