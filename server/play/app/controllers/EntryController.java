@@ -153,28 +153,28 @@ public class EntryController extends Controller {
         }, myEc);
     }
 
-//    public Result exportSimple() {
-//        Client client = Secured.getClient(ctx());
-//        return export(client);
-//    }
-
-    public CompletionStage<Result> export() {
-        if (mExporting) {
-            return ok("...");
-        }
-        mExporting = true;
+    public Result export() {
         Client client = Secured.getClient(ctx());
-        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
-        return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
-            mExporting = false;
-            if (result.startsWith("ERROR:")) {
-                return badRequest2(result);
-            }
-            return ok(result);
-        }, myEc);
+        return export(client);
     }
 
-    private String export(Client client) {
+//    public CompletionStage<Result> exportBackground() {
+//        if (mExporting) {
+//            return ok("...");
+//        }
+//        mExporting = true;
+//        Client client = Secured.getClient(ctx());
+//        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
+//        return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
+//            mExporting = false;
+//            if (result.startsWith("ERROR:")) {
+//                return badRequest2(result);
+//            }
+//            return ok(result);
+//        }, myEc);
+//    }
+
+    private Result export(Client client) {
         Logger.info("export() START");
         EntryPagedList entryList = new EntryPagedList(mEntryList);
         entryList.computeFilters(client);
@@ -184,15 +184,14 @@ public class EntryController extends Controller {
         try {
             writer.save(file);
         } catch (IOException ex) {
-            return "ERROR: " + ex.getMessage();
+            return badRequest2(ex.getMessage());
         }
         Logger.info("export() END");
-        return file.getName();
+        return ok(file.getName());
     }
 
     public Result exportDownload() {
-        File file = new File(EXPORT_FILENAME);
-        return ok(file);
+        return ok(new File(EXPORT_FILENAME));
     }
 
 //    @Security.Authenticated(Secured.class)

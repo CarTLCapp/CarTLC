@@ -38,7 +38,7 @@
                 <span style="float:right;font-size:16px;padding-left:20px">
                     <a id="export_download" href="@routes.EntryController.exportDownload()"></a>
                 </span>
-                <span style="float:right;font-size:16px;padding-left:10px"><a id="export" href="javascript:myExport()">Export</a></span>
+                <span style="float:right;font-size:16px;padding-left:10px"><a id="export">Export</a></span>
                 <span style="float:right;font-size:16px">
                        <a href="@routes.EntryController.searchClear()" class="btn">Clear</a>
                 </span>
@@ -155,6 +155,8 @@
                 xhttp.open("GET", "@routes.EntryController.export()", true);
                 xhttp.send();
             }
+            document.getElementById("export").onclick = myExport;
+            document.getElementById("export").innerHTML = "Export";
             document.getElementById("export_download").innerHTML = "";
        </script>
     }
