@@ -60,7 +60,9 @@ public class EntryController extends Controller {
     private WorkerExecutionContext mExecutionContext;
     private ActorSystem mActorSystem;
     private String mExportMsg;
+    private EntryListWriter mExportWriter;
     private boolean mExporting;
+    private boolean mAborted;
 
     @Inject
     public EntryController(AmazonHelper amazonHelper,
@@ -154,8 +156,61 @@ public class EntryController extends Controller {
     }
 
     public Result export() {
+        if (mExporting) {
+            mAborted = true;
+            mExporting = false;
+            Logger.info("export() ABORT INITIATED");
+            return ok("R");
+        }
+        mExporting = true;
+        mAborted = false;
         Client client = Secured.getClient(ctx());
-        return export(client);
+        Logger.info("export() START");
+        EntryPagedList entryList = new EntryPagedList(mEntryList);
+        entryList.computeFilters(client);
+        entryList.compute();
+        entryList.computeTotalNumRows();
+        mExportWriter = new EntryListWriter(entryList);
+        File file = new File(EXPORT_FILENAME);
+        int count = 0;
+        try {
+            mExportWriter.open(file);
+            count = mExportWriter.writeNext();
+        } catch (IOException ex) {
+            mExporting = false;
+            return badRequest2(ex.getMessage());
+        }
+        Logger.info("export(): " + entryList.getTotalRowCount() + ", " + entryList.getDisplayingXtoYofZ());
+        return ok("#" + Integer.toString(count) + "...");
+    }
+
+    public Result exportNext() {
+        try {
+            if (mAborted) {
+                mExportWriter.abort();
+                mAborted = false;
+                mExporting = false;
+                Logger.info("exportNext(): ABORT");
+                return ok("R");
+            }
+            if (mExportWriter.computeNext()) {
+                int count = mExportWriter.writeNext();
+                Logger.info("exportNext() " + count);
+                return ok("#" + Integer.toString(count) + "...");
+            } else {
+                Logger.info("exportNext() DONE!");
+                mExporting = false;
+                return ok("E" + mExportWriter.getFile().getName());
+            }
+        } catch (IOException ex) {
+            mExporting = false;
+            mAborted = false;
+            return badRequest2(ex.getMessage());
+        }
+    }
+
+    public Result exportDownload() {
+        return ok(mExportWriter.getFile());
     }
 
 //    public CompletionStage<Result> exportBackground() {
@@ -173,26 +228,6 @@ public class EntryController extends Controller {
 //            return ok(result);
 //        }, myEc);
 //    }
-
-    private Result export(Client client) {
-        Logger.info("export() START");
-        EntryPagedList entryList = new EntryPagedList(mEntryList);
-        entryList.computeFilters(client);
-        entryList.compute();
-        EntryListWriter writer = new EntryListWriter(entryList.getList());
-        File file = new File(EXPORT_FILENAME);
-        try {
-            writer.save(file);
-        } catch (IOException ex) {
-            return badRequest2(ex.getMessage());
-        }
-        Logger.info("export() END");
-        return ok(file.getName());
-    }
-
-    public Result exportDownload() {
-        return ok(new File(EXPORT_FILENAME));
-    }
 
 //    @Security.Authenticated(Secured.class)
 //    public CompletionStage<Result> exportBackground() {

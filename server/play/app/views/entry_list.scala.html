@@ -148,8 +148,20 @@
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.responseText.length > 0 && this.status == 200) {
-                        document.getElementById("export").innerHTML = "Export";
-                        document.getElementById("export_download").innerHTML = this.responseText;
+                        var line = this.responseText;
+                        var key = line.substring(0, 1);
+                        var value = line.substring(1);
+                        if (key == "E") {
+                            document.getElementById("export").innerHTML = "Export";
+                            document.getElementById("export_download").innerHTML = value;
+                        } else if (key == "#") {
+                            document.getElementById("export").innerHTML = value;
+                            xhttp.open("GET", "@routes.EntryController.exportNext()", true);
+                            xhttp.send();
+                        } else if (key == "R") {
+                            document.getElementById("export").innerHTML = "Export";
+                            document.getElementById("export_download").innerHTML = "";
+                        }
                     }
                 };
                 xhttp.open("GET", "@routes.EntryController.export()", true);

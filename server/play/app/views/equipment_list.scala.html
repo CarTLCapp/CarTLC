@@ -112,6 +112,7 @@
                     var pos = line.indexOf("|");
                     var tag = line.substring(0, pos);
                     var value = line.substring(pos+1);
+
                     document.getElementById(tag).innerHTML = value;
                     xhttp.open("GET", "@routes.EquipmentController.fillNext()", true);
                     xhttp.send();

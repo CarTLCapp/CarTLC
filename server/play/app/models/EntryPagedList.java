@@ -226,7 +226,6 @@ public class EntryPagedList {
     public EntryPagedList() {
     }
 
-    // Used by export(), so no paging.
     public EntryPagedList(EntryPagedList other) {
         mParams.mSortBy = other.mParams.mSortBy;
         mParams.mOrder = other.mParams.mOrder;
@@ -234,8 +233,12 @@ public class EntryPagedList {
         mLimitByProject = new ArrayList<>(other.mLimitByProject);
         mLimitByCompanyName = new ArrayList<>(other.mLimitByCompanyName);
         mByTruckId = other.mByTruckId;
+        mResult.mNumTotalRows = other.mResult.mNumTotalRows;
         mRowNumber = 0;
-        mAllEntries = true;
+    }
+
+    public void setAllEntries(boolean flag) {
+        mAllEntries = flag;
     }
 
     public void setPage(int page) {

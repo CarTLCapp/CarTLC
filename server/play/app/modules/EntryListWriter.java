@@ -30,65 +30,97 @@ public class EntryListWriter {
     static final String EQUIPMENT = "Equipment";
     static final String STATUS = "Status";
 
-    List<Entry> mList;
+    EntryPagedList mList;
     NoteColumns mNoteColumns;
+    BufferedWriter mBR;
+    File mFile;
+    int mPage;
+    int mCount;
 
-    public EntryListWriter(List<Entry> list) {
+    public EntryListWriter(EntryPagedList list) {
         mList = list;
         mNoteColumns = new NoteColumns();
     }
 
-    public void save(File file) throws IOException {
-        BufferedWriter br = new BufferedWriter(new FileWriter(file));
-        br.write(DATE);
-        br.write(",");
-        br.write(TECH_NAME);
-        br.write(",");
-        br.write(PROJECT);
-        br.write(",");
-        br.write(COMPANY);
-        br.write(",");
-        br.write(STREET);
-        br.write(",");
-        br.write(CITY);
-        br.write(",");
-        br.write(STATE);
-        br.write(",");
-        br.write(ZIP);
-        br.write(",");
-        br.write(TRUCK);
-        br.write(",");
-        br.write(EQUIPMENT);
-        br.write(",");
-        br.write(STATUS);
-        br.write(mNoteColumns.getHeaders());
-        br.write("\n");
-        for (Entry entry : mList) {
-            br.write(entry.getDate());
-            br.write(",");
-            br.write(entry.getTechName());
-            br.write(",");
-            br.write(entry.getProjectLine());
-            br.write(",");
-            br.write(entry.getCompany());
-            br.write(",");
-            br.write(entry.getStreet());
-            br.write(",");
-            br.write(entry.getCity());
-            br.write(",");
-            br.write(entry.getState());
-            br.write(",");
-            br.write(entry.getZipCode());
-            br.write(",");
-            br.write(entry.getTruckLine());
-            br.write(",");
-            br.write(chkComma(entry.getEquipmentLine()));
-            br.write(",");
-            br.write(entry.getStatus());
-            br.write(mNoteColumns.getValues(entry));
-            br.write("\n");
+    public void open(File file) throws IOException {
+        mNoteColumns.prepare();
+        mFile = file;
+        mBR = new BufferedWriter(new FileWriter(file));
+        mBR.write(DATE);
+        mBR.write(",");
+        mBR.write(TECH_NAME);
+        mBR.write(",");
+        mBR.write(PROJECT);
+        mBR.write(",");
+        mBR.write(COMPANY);
+        mBR.write(",");
+        mBR.write(STREET);
+        mBR.write(",");
+        mBR.write(CITY);
+        mBR.write(",");
+        mBR.write(STATE);
+        mBR.write(",");
+        mBR.write(ZIP);
+        mBR.write(",");
+        mBR.write(TRUCK);
+        mBR.write(",");
+        mBR.write(EQUIPMENT);
+        mBR.write(",");
+        mBR.write(STATUS);
+        mBR.write(mNoteColumns.getHeaders());
+        mBR.write("\n");
+        mPage = 0;
+        mCount = 0;
+    }
+
+    public boolean computeNext() throws IOException {
+        if (mList.hasNext()) {
+            mList.setPage(++mPage);
+            mList.compute();
+            mNoteColumns.prepare();
+            return true;
+        } else {
+            mBR.close();
+            return false;
         }
-        br.close();
+    }
+
+    public int writeNext() throws IOException {
+        for (Entry entry : mList.getList()) {
+            mBR.write(entry.getDate());
+            mBR.write(",");
+            mBR.write(entry.getTechName());
+            mBR.write(",");
+            mBR.write(entry.getProjectLine());
+            mBR.write(",");
+            mBR.write(entry.getCompany());
+            mBR.write(",");
+            mBR.write(entry.getStreet());
+            mBR.write(",");
+            mBR.write(entry.getCity());
+            mBR.write(",");
+            mBR.write(entry.getState());
+            mBR.write(",");
+            mBR.write(entry.getZipCode());
+            mBR.write(",");
+            mBR.write(entry.getTruckLine());
+            mBR.write(",");
+            mBR.write(chkComma(entry.getEquipmentLine()));
+            mBR.write(",");
+            mBR.write(entry.getStatus());
+            mBR.write(mNoteColumns.getValues(entry));
+            mBR.write("\n");
+            mCount++;
+        }
+        return mCount;
+    }
+
+    public File getFile() {
+        return mFile;
+    }
+
+    public void abort() throws IOException {
+        mBR.close();
     }
 
     private String chkComma(String line) {
@@ -112,14 +144,12 @@ public class EntryListWriter {
         int mNextColumn;
         String [] mColumns;
 
-        NoteColumns() {
-            prepare();
-        }
+        NoteColumns() {}
 
         void prepare() {
             mNextColumn = 0;
             mNoteColumns.clear();
-            for (Entry entry : mList) {
+            for (Entry entry : mList.getList()) {
                 prepare(entry.getNotes());
             }
             mColumns = new String[mNextColumn];
