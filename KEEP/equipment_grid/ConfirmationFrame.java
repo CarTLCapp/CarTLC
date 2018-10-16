@@ -1,4 +1,4 @@
-package com.cartlc.tracker.act;
+package com.cartlc.tracker.ui;
 
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;

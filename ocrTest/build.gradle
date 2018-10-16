@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "com.squareup.picasso:picasso:$rootProject.ext.picasso"
+    implementation "com.squareup.picasso:picasso:$picasso_version"
 }
 
 sourceCompatibility = "1.8"

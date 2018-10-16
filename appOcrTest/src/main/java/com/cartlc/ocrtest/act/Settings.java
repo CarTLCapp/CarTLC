@@ -3,12 +3,13 @@ package com.cartlc.ocrtest.act;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.cartlc.ocrtest.R;
 import com.google.android.gms.plus.PlusOneButton;
+
+import androidx.fragment.app.Fragment;
 
 /**
  * A fragment with a Google +1 button.

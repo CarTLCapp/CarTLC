@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_centerHorizontal="true"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                tools:context="com.cartlc.tracker.act.MainActivity"
-                tools:showIn="@layout/activity_main">
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contentRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerHorizontal="true"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.cartlc.tracker.ui.act.MainActivity"
+    tools:showIn="@layout/activity_main">
 
     <ImageView
         android:id="@+id/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
-        android:src="@drawable/logo"/>
+        android:src="@drawable/logo"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:id="@+id/main_title"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/logo"
         android:layout_marginTop="20dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logo">
 
         <TextView
             android:id="@+id/main_title_text"
@@ -39,26 +44,28 @@
             style="@style/SubTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_marginTop="2dp"
+            android:gravity="center"
             android:visibility="gone"/>
 
         <View
             android:id="@+id/main_title_separator"
-            android:background="@android:color/white"
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginTop="3dp"
+            android:background="@android:color/white"
             android:visibility="gone"/>
 
     </LinearLayout>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/buttons"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dp">
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
 
         <Button
             android:id="@+id/prev"
@@ -67,20 +74,20 @@
             android:layout_height="wrap_content"
             android:text="@string/btn_prev"
             android:textAllCaps="false"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/new_entry"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintRight_toLeftOf="@id/btn_center"/>
 
         <Button
-            android:id="@+id/new_entry"
+            android:id="@+id/btn_center"
             style="@style/ControlButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_add"
             android:textAllCaps="false"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/prev"
-            app:layout_constraintRight_toLeftOf="@id/next"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintRight_toLeftOf="@id/next"/>
 
         <Button
             android:id="@+id/next"
@@ -89,95 +96,162 @@
             android:layout_height="wrap_content"
             android:text="@string/btn_next"
             android:textAllCaps="false"
-            app:layout_constraintLeft_toRightOf="@id/new_entry"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/btn_center"
+            app:layout_constraintRight_toRightOf="parent"/>
 
         <Button
             android:id="@+id/change"
             style="@style/ControlButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:text="@string/btn_change"
             android:layout_marginBottom="10dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
+            android:text="@string/btn_change"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/btn_center"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/new_entry"/>
+            app:layout_constraintRight_toRightOf="parent"/>
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <include layout="@layout/frame_login"/>
-
-    <include layout="@layout/frame_entry"/>
-
-    <include layout="@layout/frame_status"/>
-
-    <include layout="@layout/frame_confirmation"/>
-
-    <View
-        android:id="@+id/separator"
-        android:background="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"/>
-
-    <FrameLayout
-        android:id="@+id/main_list_frame"
+    <fragment
+        android:id="@+id/login_fragment"
+        android:name="com.cartlc.tracker.ui.frag.LoginFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/buttons"
-        android:layout_below="@id/main_title"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="5dp"
-        android:focusable="true"
-        android:visibility="gone">
+        android:layout_marginTop="20dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_title"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/main_list"
-            android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/frame_entry"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_title">
+
+        <EditText
+            android:id="@+id/entry_simple"
+            style="@style/EntryText"
+            android:layout_width="@dimen/setup_frame_width"
             android:layout_height="wrap_content"
-            android:layout_margin="2dp"
-            android:focusable="true"
-            android:background="@drawable/background_shadow"
-            android:elevation="3dp"/>
+            android:layout_centerHorizontal="true"
+            android:inputType="textCapWords"
+            android:maxLines="1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
-            android:id="@+id/empty"
+            android:id="@+id/entry_hint"
+            style="@style/HintText"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/error_empty"
-            android:textSize="25sp"
-            android:visibility="gone"/>
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/entry_simple"/>
 
-    </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/frame_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_title">
+
+        <RadioGroup
+            android:id="@+id/status_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <RadioButton
+                android:id="@+id/status_complete"
+                style="@style/StatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onStatusButtonClicked"
+                android:text="@string/status_complete"/>
+
+            <RadioButton
+                android:id="@+id/status_partial"
+                style="@style/StatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onStatusButtonClicked"
+                android:text="@string/status_partial_install"/>
+
+            <RadioButton
+                android:id="@+id/status_needs_repair"
+                style="@style/StatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onStatusButtonClicked"
+                android:text="@string/status_needs_repair"/>
+        </RadioGroup>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <fragment
+        android:id="@+id/frame_confirmation_fragment"
+        android:name="com.cartlc.tracker.ui.frag.ConfirmationFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/buttons"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_title"/>
+
+    <fragment
+        android:id="@+id/main_list_fragment"
+        android:name="com.cartlc.tracker.ui.frag.MainListFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="20dp"
+        android:focusable="true"
+        app:layout_constraintBottom_toTopOf="@id/buttons"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frame_entry"/>
 
     <TextView
         android:id="@+id/list_entry_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/main_list_frame"
-        android:layout_alignRight="@id/main_list_frame"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/main_list_fragment"
+        app:layout_constraintRight_toRightOf="@id/main_list_fragment"/>
 
     <RelativeLayout
         android:id="@+id/frame_pictures"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/buttons"
-        android:layout_below="@id/main_title"
-        android:layout_centerHorizontal="true"
+        android:layout_height="0dp"
         android:layout_marginBottom="20dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="20dp"
-        android:visibility="gone">
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@id/buttons"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_title">
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_pictures"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -185,4 +259,4 @@
 
     </RelativeLayout>
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -52,7 +52,7 @@ public class TablePendingPictures extends TableString {
 
     public DataPictureCollectionItem createCollection() {
         DataPictureCollectionItem collection = new DataPictureCollectionItem(
-                PrefHelper.getInstance().getNextPictureCollectionID());
+                PrefHelper.instance.getNextPictureCollectionID());
         collection.pictures = queryPictures();
         return collection;
     }

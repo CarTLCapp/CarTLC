@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="viewModel"
+            type="com.cartlc.tracker.viewmodel.LoginViewModel"/>
+    </data>
+
+    <FrameLayout
+        android:id="@+id/frame_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="@{viewModel.showing ? View.VISIBLE : View.GONE}">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="@dimen/setup_frame_width"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/first_name"
+                style="@style/EntryText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:autofillHints="first name"
+                android:hint="@string/entry_hint_first_name"
+                android:inputType="textCapWords"
+                android:maxLines="1"
+                android:afterTextChanged="@{(editable)->viewModel.afterFirstNameChanged(editable)}"
+                android:text="@{viewModel.firstName}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <EditText
+                android:id="@+id/last_name"
+                style="@style/EntryText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:autofillHints="last name"
+                android:hint="@string/entry_hint_last_name"
+                android:inputType="textCapWords"
+                android:maxLines="1"
+                android:afterTextChanged="@{(editable)->viewModel.afterLastNameChanged(editable)}"
+                android:text="@{viewModel.lastName}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/first_name"/>
+
+            <CheckBox
+                android:id="@+id/secondary_login"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/title_secondary_login"
+                android:onCheckedChanged="@{(_, isChecked)->viewModel.onSecondaryLoginChecked(isChecked)}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/last_name"/>
+
+            <EditText
+                android:id="@+id/secondary_first_name"
+                style="@style/EntryText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:enabled="@{viewModel.secondaryPromptsEnabled}"
+                android:hint="@string/entry_hint_first_name"
+                android:inputType="textCapWords"
+                android:maxLines="1"
+                android:afterTextChanged="@{(editable)->viewModel.afterSecondaryFirstNameChanged(editable)}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/secondary_login"/>
+
+            <EditText
+                android:id="@+id/secondary_last_name"
+                style="@style/EntryText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:enabled="@{viewModel.secondaryPromptsEnabled}"
+                android:hint="@string/entry_hint_last_name"
+                android:inputType="textCapWords"
+                android:maxLines="1"
+                android:afterTextChanged="@{(editable)->viewModel.afterSecondaryLastNameChanged(editable)}"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/secondary_first_name"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+</layout>

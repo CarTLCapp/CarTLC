@@ -29,7 +29,7 @@ class EntryStatus {
     final boolean             isCompletePicture;
 
     public EntryStatus(DataEntry entry) {
-        this.allEquipment = removeOther(TableCollectionEquipmentProject.getInstance().queryForProject(entry.projectAddressCombo.projectNameId).getEquipment());
+        this.allEquipment = removeOther(TableCollectionEquipmentProject.instance.queryForProject(entry.projectAddressCombo.projectNameId).getEquipment());
         this.checkedEquipment = removeOther(entry.getEquipment());
         this.status = entry.status;
         countPictures = entry.getPictures().size();
@@ -39,17 +39,17 @@ class EntryStatus {
     }
 
     public EntryStatus() {
-        DataProjectAddressCombo curGroup = PrefHelper.getInstance().getCurrentProjectGroup();
+        DataProjectAddressCombo curGroup = PrefHelper.instance.getCurrentProjectGroup();
         if (curGroup != null) {
-            DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.getInstance().queryForProject(curGroup.projectNameId);
+            DataCollectionEquipmentProject collection = TableCollectionEquipmentProject.instance.queryForProject(curGroup.projectNameId);
             allEquipment = removeOther(collection.getEquipment());
         } else {
             allEquipment = new ArrayList<>();
         }
-        checkedEquipment = removeOther(TableEquipment.getInstance().queryChecked());
-        long picture_collection_id = PrefHelper.getInstance().getCurrentPictureCollectionId();
-        countPictures = TablePictureCollection.getInstance().countPictures(picture_collection_id);
-        status = PrefHelper.getInstance().getStatus();
+        checkedEquipment = removeOther(TableEquipment.instance.queryChecked());
+        long picture_collection_id = PrefHelper.instance.getCurrentPictureCollectionId();
+        countPictures = TablePictureCollection.instance.countPictures(picture_collection_id);
+        status = PrefHelper.instance.getStatus();
         isCompletePicture = countPictures >= allEquipment.size();
         isCompleteEquip = checkedEquipment.size() >= allEquipment.size();
         isComplete = isCompleteEquip && isCompletePicture;

@@ -7,10 +7,11 @@
 package com.cartlc.ocrlib;
 
 import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
 import net.sourceforge.javaocr.scanner.DocumentScanner;
 import net.sourceforge.javaocr.scanner.DocumentScannerListenerAdaptor;
 import net.sourceforge.javaocr.scanner.PixelImage;
+
+import androidx.annotation.NonNull;
 import timber.log.Timber;
 
 import java.io.IOException;
