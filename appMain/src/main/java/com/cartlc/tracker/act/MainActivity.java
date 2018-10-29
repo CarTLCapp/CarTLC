@@ -723,7 +723,7 @@ public class MainActivity extends AppCompatActivity {
         mEntryFrame.setVisibility(View.GONE);
         mStatusFrame.setVisibility(View.GONE);
         mMainListFrame.setVisibility(View.GONE);
-        mAdd.setVisibility(View.GONE);
+        mAdd.hide();
         mNext.setVisibility(View.INVISIBLE);
         mNext.setText(R.string.btn_next);
         mPrev.setVisibility(View.INVISIBLE);
@@ -940,7 +940,7 @@ public class MainActivity extends AppCompatActivity {
                     mPrev.setVisibility(View.VISIBLE);
                     mPrev.setText(R.string.btn_edit);
                     if (TableProjectAddressCombo.getInstance().count() > 0) {
-                        mAdd.setVisibility(View.VISIBLE);
+                        mAdd.show();
                     }
                     mCurKey = null;
                     mCenter.setText(R.string.btn_new_project);

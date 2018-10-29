@@ -936,9 +936,9 @@ public class DCPing extends DCPost {
         } catch (Exception ex) {
             String msg = "Whle sending to " + target + "\n" + ex.getMessage();
             if (sendErrors) {
-                Timber.e(TAG, msg);
+                Timber.e(TAG + ":" + msg);
             } else {
-                Log.e(TAG, msg);
+                Timber.e(TAG + ":"+ msg);
             }
             return null;
         }
