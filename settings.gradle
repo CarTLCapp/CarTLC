@@ -1,5 +1,5 @@
-include ':ocrTest', ':testplay'
+//include ':ocrTest', ':testplay'
 include ':supportLib'
-include ':ocrLib'
-include ':appOcrTest'
+//include ':ocrLib'
+//include ':appOcrTest'
 include ':appMain'

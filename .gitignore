@@ -20,6 +20,7 @@ GCResample/obj
 GCResample/jni/frameworks
 GCResample/jni/system
 appMain/release
+captures/
 
 # Gradle files
 .gradle/

@@ -1,13 +1,13 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 project.ext {
-    compileSdkVersion = 27
-    targetSdkVersion = 27
-    android = '27.1.0'
+    compileSdkVersion = 28
+    targetSdkVersion = 28
+    android = '28.0.0'
     picasso = '2.71828'
     butterknife = '8.8.1'
-    timber = '4.5.1'
-    constraint_layout = '1.1.0'
-    play_services = '15.0.0'
+    timber = '4.7.1'
+    constraint_layout = '1.1.3'
+    play_services = '16.0.0'
     aws = '2.4.3'
 }
 
@@ -17,7 +17,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.3'
+        classpath 'com.android.tools.build:gradle:3.2.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
