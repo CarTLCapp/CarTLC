@@ -74,9 +74,9 @@ class ConfirmationFragment : BaseFragment() {
         noteAdapter.setItems(entry.notesWithValuesOnly)
         val truck = entry.truck
         if (truck == null) {
-            trcukcNumberValue!!.visibility = View.GONE
+            trcukcNumberValue.visibility = View.GONE
         } else {
-            trcukcNumberValue!!.text = truck.toString()
+            trcukcNumberValue.text = truck.toString()
             trcukcNumberValue.visibility = View.VISIBLE
         }
         simpleAdapter.setList(entry.equipmentNames!!)
