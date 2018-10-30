@@ -71,7 +71,7 @@ class MainListViewModel(
                 Stage.PROJECT,
                 Stage.CITY,
                 Stage.STATE,
-                Stage.STREET -> tmpActivity.next.visibility = View.VISIBLE
+                Stage.STREET -> tmpActivity.btn_next.visibility = View.VISIBLE
                 Stage.COMPANY -> tmpActivity.checkCenterButtonIsEdit()
                 Stage.TRUCK -> tmpActivity.entry_simple.setText(text)
                 else -> {

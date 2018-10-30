@@ -1,6 +1,1 @@
-//include ':ocrTest'
-//include ':testplay'
-//include ':supportLib'
-//include ':ocrLib'
-//include ':appOcrTest'
 include ':appMain'

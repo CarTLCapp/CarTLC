@@ -260,8 +260,8 @@ class MainActivity : AppCompatActivity() {
         root.viewTreeObserver.addOnGlobalLayoutListener(mSoftKeyboardDetect)
         mInputMM = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
-        next.setOnClickListener({ this.doBtnNextFromUser(it) })
-        prev.setOnClickListener({ this.doBtnPrevFromUser(it) })
+        btn_next.setOnClickListener({ this.doBtnNextFromUser(it) })
+        btn_prev.setOnClickListener({ this.doBtnPrevFromUser(it) })
         change.setOnClickListener({ _ -> doBtnChangeCompany() })
         mDialogHelper = DialogHelper(this)
         btn_center.setOnClickListener({ _ -> doBtnCenter() })
@@ -414,10 +414,10 @@ class MainActivity : AppCompatActivity() {
         sub_title.visibility = View.GONE
         main_title_separator.visibility = View.GONE
 
-        next.visibility = if (flow.next == null) View.INVISIBLE else View.VISIBLE
-        next.setText(R.string.btn_next)
-        prev.visibility = if (flow.prev == null) View.INVISIBLE else View.VISIBLE
-        prev.setText(R.string.btn_prev)
+        btn_next.visibility = if (flow.next == null) View.INVISIBLE else View.VISIBLE
+        btn_next.setText(R.string.btn_next)
+        btn_prev.visibility = if (flow.prev == null) View.INVISIBLE else View.VISIBLE
+        btn_prev.setText(R.string.btn_prev)
 
         when (flow.stage) {
             Stage.LOGIN -> {
@@ -428,7 +428,7 @@ class MainActivity : AppCompatActivity() {
                 showMainListFrame()
                 showSubTitleHint(flow.stage)
                 if (prefHelper.projectName == null) {
-                    next.visibility = View.INVISIBLE
+                    btn_next.visibility = View.INVISIBLE
                 }
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, db.projects.query(true))
                 getLocation()
@@ -463,7 +463,7 @@ class MainActivity : AppCompatActivity() {
                 showEntryHint(flow.stage)
                 showSubTitleHint(flow.stage)
                 showMainListFrame()
-                next.visibility = View.INVISIBLE
+                btn_next.visibility = View.INVISIBLE
                 val company = prefHelper.company
                 val zipcode = prefHelper.zipCode
                 var states: MutableList<String> = db.address.queryStates(company!!, zipcode).toMutableList()
@@ -488,7 +488,7 @@ class MainActivity : AppCompatActivity() {
                         vm.skip()
                     } else {
                         if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
-                            next.visibility = View.VISIBLE
+                            btn_next.visibility = View.VISIBLE
                         }
                         btn_center.visibility = View.VISIBLE
                         checkChangeCompanyButtonVisible()
@@ -498,7 +498,7 @@ class MainActivity : AppCompatActivity() {
             Stage.CITY, Stage.ADD_CITY -> {
                 showEntryHint(flow.stage)
                 showSubTitleHint(flow.stage)
-                next.visibility = View.INVISIBLE
+                btn_next.visibility = View.INVISIBLE
                 val company = prefHelper.company
                 val zipcode = prefHelper.zipCode
                 val state = prefHelper.state
@@ -527,14 +527,14 @@ class MainActivity : AppCompatActivity() {
                         showMainListFrame()
                         btn_center.visibility = View.VISIBLE
                         if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
-                            next.visibility = View.VISIBLE
+                            btn_next.visibility = View.VISIBLE
                         }
                         checkChangeCompanyButtonVisible()
                     }
                 }
             }
             Stage.STREET, Stage.ADD_STREET -> {
-                next.visibility = View.INVISIBLE
+                btn_next.visibility = View.INVISIBLE
                 showEntryHint(flow.stage)
                 showSubTitleHint(flow.stage)
                 val streets = db.address.queryStreets(
@@ -562,7 +562,7 @@ class MainActivity : AppCompatActivity() {
                         vm.skip()
                     } else {
                         if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
-                            next.visibility = View.VISIBLE
+                            btn_next.visibility = View.VISIBLE
                         }
                         checkChangeCompanyButtonVisible()
                     }
@@ -584,7 +584,7 @@ class MainActivity : AppCompatActivity() {
                 showMainListFrame()
                 main_title_separator.visibility = View.VISIBLE
                 btn_center.visibility = View.VISIBLE
-                prev.setText(R.string.btn_edit)
+                btn_prev.setText(R.string.btn_edit)
                 if (db.projectAddressCombo.count() > 0) {
                     fab_add.show()
                 }
@@ -640,7 +640,7 @@ class MainActivity : AppCompatActivity() {
                     vm.wasNext = false
                 }
                 setPhotoTitleCount(pictureCount)
-                next.visibility = View.INVISIBLE
+                btn_next.visibility = View.INVISIBLE
                 btn_center.visibility = View.VISIBLE
                 btn_center.setText(R.string.btn_another)
                 frame_pictures.visibility = View.VISIBLE
@@ -651,7 +651,7 @@ class MainActivity : AppCompatActivity() {
                         showError(getString(R.string.error_cannot_take_picture))
                     }
                 } else {
-                    next.visibility = View.VISIBLE
+                    btn_next.visibility = View.VISIBLE
                     mPictureAdapter.setList(
                             db.pictureCollection.removeNonExistant(
                                     db.pictureCollection.queryPictures(prefHelper.currentPictureCollectionId
@@ -660,14 +660,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             Stage.STATUS -> {
-                next.setText(R.string.btn_done)
+                btn_next.setText(R.string.btn_done)
                 frame_status.visibility = View.VISIBLE
                 main_title_text.setText(R.string.title_status)
                 setStatusButton()
                 vm.curEntry = null
             }
             Stage.CONFIRM -> {
-                next.setText(R.string.btn_confirm)
+                btn_next.setText(R.string.btn_confirm)
                 confirmationFragment.showing = true
                 vm.curEntry = prefHelper.saveEntry()
                 vm.curEntry?.let {
