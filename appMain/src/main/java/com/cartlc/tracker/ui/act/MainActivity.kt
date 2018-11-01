@@ -46,8 +46,6 @@ import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.PictureFlow
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
-import com.cartlc.tracker.ui.frag.LoginFragment
-import com.cartlc.tracker.ui.frag.MainListFragment
 import com.cartlc.tracker.ui.list.*
 import com.cartlc.tracker.ui.util.BitmapHelper
 import com.cartlc.tracker.ui.util.DialogHelper
@@ -55,8 +53,7 @@ import com.cartlc.tracker.ui.util.LocationHelper
 import com.cartlc.tracker.ui.util.PermissionHelper
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.ErrorMessage
-import com.cartlc.tracker.ui.frag.ConfirmationFragment
-import com.cartlc.tracker.ui.frag.TitleFragment
+import com.cartlc.tracker.ui.frag.*
 import com.cartlc.tracker.viewmodel.MainViewModel
 
 import java.io.File
@@ -91,7 +88,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var mHandler = MyHandler()
-    private var mSoftKeyboardDetect = SoftKeyboardDetect()
     lateinit private var mApp: TBApplication
     lateinit private var mPictureAdapter: PictureListAdapter
     lateinit private var mInputMM: InputMethodManager
@@ -101,7 +97,6 @@ class MainActivity : AppCompatActivity() {
     private var mTakingPictureFile: File? = null
     private var mShowServerError = true
     private var fab_addressConfirmOkay = false
-    private var mAutoNarrowOkay = true
     private lateinit var vm: MainViewModel
 
     @Inject
@@ -115,6 +110,8 @@ class MainActivity : AppCompatActivity() {
         get() = frame_confirmation_fragment as ConfirmationFragment
     val titleFragment: TitleFragment
         get() = frame_title as TitleFragment
+    val buttonsFragment: ButtonsFragment
+        get() = frame_buttons as ButtonsFragment
     val prefHelper: PrefHelper
         get() = vm.prefHelper
     val db: DatabaseTable
@@ -141,7 +138,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     private val isAutoNarrowOkay: Boolean
-        get() = vm.wasNext && mAutoNarrowOkay
+        get() = vm.wasNext && vm.autoNarrowOkay
 
     private val statusHint: String
         get() {
@@ -203,39 +200,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private inner class SoftKeyboardDetect : ViewTreeObserver.OnGlobalLayoutListener {
-
-        val ratio = 0.15
-
-        fun clear() {
-            buttons.visibility = View.VISIBLE
-        }
-
-        override fun onGlobalLayout() {
-            val rect = Rect()
-            root.rootView.getWindowVisibleDisplayFrame(rect)
-            val screenHeight = root.rootView.height
-            val keypadHeight = screenHeight - rect.bottom
-            if (keypadHeight > screenHeight * ratio) {
-                hideButtons()
-            } else {
-                restoreButtons()
-            }
-        }
-
-        fun hideButtons() {
-            if (buttons.getVisibility() == View.VISIBLE) {
-                buttons.visibility = View.GONE
-            }
-        }
-
-        fun restoreButtons() {
-            if (buttons.getVisibility() != View.VISIBLE) {
-                buttons.visibility = View.VISIBLE
-            }
-        }
-    }
-
     private inner class ZipCodeWatcher : TextWatcher {
         override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
         }
@@ -265,14 +229,11 @@ class MainActivity : AppCompatActivity() {
         mApp.setUncaughtExceptionHandler(this)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        root.viewTreeObserver.addOnGlobalLayoutListener(mSoftKeyboardDetect)
+        buttonsFragment.root = root
+        buttonsFragment.tmpMainViewModel = vm
         mInputMM = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
-        btn_next.setOnClickListener({ this.doBtnNextFromUser(it) })
-        btn_prev.setOnClickListener({ this.doBtnPrevFromUser(it) })
-        change.setOnClickListener({ _ -> doBtnChangeCompany() })
         mDialogHelper = DialogHelper(this)
-        btn_center.setOnClickListener({ _ -> doBtnCenter() })
         fab_add.setOnClickListener({ _: View -> doBtnPlus() })
         mPictureAdapter = PictureListAdapter(this, { newCount: Int -> setPhotoTitleCount(newCount) })
         val linearLayoutManager = AutoLinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -368,12 +329,6 @@ class MainActivity : AppCompatActivity() {
         return text.text.toString().trim { it <= ' ' }
     }
 
-    private fun doBtnNextFromUser(v: View) {
-        vm.btnNext()
-        mSoftKeyboardDetect.clear()
-        TBApplication.hideKeyboard(this@MainActivity, v)
-    }
-
     private fun doBtnPlus() {
         if (prefHelper.currentEditEntryId != 0L) {
             prefHelper.clearLastEntry()
@@ -381,20 +336,6 @@ class MainActivity : AppCompatActivity() {
         vm.btnPlus()
     }
 
-    private fun doBtnPrevFromUser(v: View) {
-        vm.btnPrev()
-        mSoftKeyboardDetect.clear()
-        TBApplication.hideKeyboard(this@MainActivity, v)
-    }
-
-    private fun doBtnCenter() {
-        vm.btnCenter()
-    }
-
-    private fun doBtnChangeCompany() {
-        mAutoNarrowOkay = false
-        vm.btnChangeCompany()
-    }
 
     private fun doViewProject() {
         val intent = Intent(this, ListEntryActivity::class.java)
@@ -412,9 +353,8 @@ class MainActivity : AppCompatActivity() {
         frame_entry.visibility = View.GONE
         frame_status.visibility = View.GONE
         fab_add.hide()
-        change.visibility = View.GONE
-        btn_center.visibility = View.INVISIBLE
-        btn_center.setText(R.string.btn_add)
+        buttonsFragment.reset(flow)
+
         entry_simple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS)
         entry_simple.removeTextChangedListener(mZipCodeWatcher)
         confirmationFragment.showing = false
@@ -425,21 +365,16 @@ class MainActivity : AppCompatActivity() {
         titleFragment.vm.showSeparator = false
         titleFragment.vm.subTitle = null
 
-        btn_next.visibility = if (flow.next == null) View.INVISIBLE else View.VISIBLE
-        btn_next.setText(R.string.btn_next)
-        btn_prev.visibility = if (flow.prev == null) View.INVISIBLE else View.VISIBLE
-        btn_prev.setText(R.string.btn_prev)
-
         when (flow.stage) {
             Stage.LOGIN -> {
                 loginFragment.showing = true
-                btn_center.visibility = View.VISIBLE
+                buttonsFragment.vm.showCenterButton = true
             }
             Stage.PROJECT -> {
                 showMainListFrame()
                 showSubTitleHint(flow.stage)
                 if (prefHelper.projectName == null) {
-                    btn_next.visibility = View.INVISIBLE
+                    buttonsFragment.vm.showNextButton = false
                 }
                 setList(R.string.title_project, PrefHelper.KEY_PROJECT, db.projects.query(true))
                 getLocation()
@@ -447,11 +382,11 @@ class MainActivity : AppCompatActivity() {
             Stage.COMPANY -> {
                 showSubTitleHint(flow.stage)
                 showMainListFrame()
-                btn_center.visibility = View.VISIBLE
+                buttonsFragment.vm.showCenterButton = true
                 val companies = db.address.query()
                 autoNarrowCompanies(companies.toMutableList())
                 val companyNames = getNames(companies)
-                if (companyNames.size == 1 && mAutoNarrowOkay) {
+                if (companyNames.size == 1 && vm.autoNarrowOkay) {
                     prefHelper.company = companyNames[0]
                     vm.skip()
                 } else {
@@ -475,7 +410,7 @@ class MainActivity : AppCompatActivity() {
                 showEntryHint(flow.stage)
                 showSubTitleHint(flow.stage)
                 showMainListFrame()
-                btn_next.visibility = View.INVISIBLE
+                buttonsFragment.vm.showNextButton = false
                 val company = prefHelper.company
                 val zipcode = prefHelper.zipCode
                 var states: MutableList<String> = db.address.queryStates(company!!, zipcode).toMutableList()
@@ -495,14 +430,14 @@ class MainActivity : AppCompatActivity() {
                     setList(R.string.title_state, PrefHelper.KEY_STATE, states)
                 } else {
                     autoNarrowStates(states)
-                    if (states.size == 1 && mAutoNarrowOkay) {
+                    if (states.size == 1 && vm.autoNarrowOkay) {
                         prefHelper.state = states[0]
                         vm.skip()
                     } else {
                         if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
-                            btn_next.visibility = View.VISIBLE
+                            buttonsFragment.vm.showNextButton = true
                         }
-                        btn_center.visibility = View.VISIBLE
+                        buttonsFragment.vm.showCenterButton = true
                         checkChangeCompanyButtonVisible()
                     }
                 }
@@ -510,7 +445,7 @@ class MainActivity : AppCompatActivity() {
             Stage.CITY, Stage.ADD_CITY -> {
                 showEntryHint(flow.stage)
                 showSubTitleHint(flow.stage)
-                btn_next.visibility = View.INVISIBLE
+                buttonsFragment.vm.showNextButton = false
                 val company = prefHelper.company
                 val zipcode = prefHelper.zipCode
                 val state = prefHelper.state
@@ -533,21 +468,21 @@ class MainActivity : AppCompatActivity() {
                     entry_simple.setText("")
                 } else {
                     autoNarrowCities(cities)
-                    if (cities.size == 1 && mAutoNarrowOkay) {
+                    if (cities.size == 1 && vm.autoNarrowOkay) {
                         prefHelper.city = cities[0]
                         vm.skip()
                     } else {
                         showMainListFrame()
-                        btn_center.visibility = View.VISIBLE
                         if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
-                            btn_next.visibility = View.VISIBLE
+                            buttonsFragment.vm.showNextButton = true
                         }
+                        buttonsFragment.vm.showCenterButton = true
                         checkChangeCompanyButtonVisible()
                     }
                 }
             }
             Stage.STREET, Stage.ADD_STREET -> {
-                btn_next.visibility = View.INVISIBLE
+                buttonsFragment.vm.showNextButton = false
                 showEntryHint(flow.stage)
                 showSubTitleHint(flow.stage)
                 val streets = db.address.queryStreets(
@@ -567,15 +502,15 @@ class MainActivity : AppCompatActivity() {
                     entry_simple.setInputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS or InputType.TYPE_TEXT_FLAG_CAP_WORDS)
                 } else {
                     autoNarrowStreets(streets)
-                    btn_center.visibility = View.VISIBLE
+                    buttonsFragment.vm.showCenterButton = true
                     showMainListFrame()
-                    if (streets.size == 1 && mAutoNarrowOkay) {
+                    if (streets.size == 1 && vm.autoNarrowOkay) {
                         prefHelper.street = streets[0]
                         fab_addressConfirmOkay = true
                         vm.skip()
                     } else {
                         if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
-                            btn_next.visibility = View.VISIBLE
+                            buttonsFragment.vm.showNextButton = true
                         }
                         checkChangeCompanyButtonVisible()
                     }
@@ -596,19 +531,18 @@ class MainActivity : AppCompatActivity() {
                 vm.editProject = false
                 showMainListFrame()
                 titleFragment.vm.showSeparator = true
-//                main_title_separator.visibility = View.VISIBLE
-                btn_center.visibility = View.VISIBLE
-                btn_prev.setText(R.string.btn_edit)
+                buttonsFragment.vm.showCenterButton = true
+                buttonsFragment.vm.prevText = getString(R.string.btn_edit)
                 if (db.projectAddressCombo.count() > 0) {
                     fab_add.show()
                 }
-                btn_center.setText(R.string.btn_new_project)
+                buttonsFragment.vm.centerText = getString(R.string.btn_new_project)
                 titleFragment.vm.title = getString(R.string.title_current_project)
                 mainListFragment.setAdapter(flow.stage)
                 checkErrors()
             }
             Stage.NEW_PROJECT -> {
-                mAutoNarrowOkay = true
+                vm.autoNarrowOkay = true
                 vm.onNewProject()
             }
             Stage.VIEW_PROJECT -> {
@@ -626,13 +560,10 @@ class MainActivity : AppCompatActivity() {
                 showSubTitleHint(flow.stage)
             }
             Stage.EQUIPMENT -> {
-                if (isNewEquipmentOkay) {
-                    btn_center.visibility = View.VISIBLE
-                }
                 titleFragment.vm.title = getString(R.string.title_equipment_installed)
                 showMainListFrame()
                 mainListFragment.setAdapter(flow.stage)
-                btn_center.visibility = View.VISIBLE
+                buttonsFragment.vm.showCenterButton = true
             }
             Stage.ADD_EQUIPMENT -> {
                 frame_entry.visibility = View.VISIBLE
@@ -654,9 +585,9 @@ class MainActivity : AppCompatActivity() {
                     vm.wasNext = false
                 }
                 setPhotoTitleCount(pictureCount)
-                btn_next.visibility = View.INVISIBLE
-                btn_center.visibility = View.VISIBLE
-                btn_center.setText(R.string.btn_another)
+                buttonsFragment.vm.showNextButton = false
+                buttonsFragment.vm.showCenterButton = true
+                buttonsFragment.vm.centerText = getString(R.string.btn_another)
                 frame_pictures.visibility = View.VISIBLE
                 list_pictures.visibility = View.VISIBLE
                 val pictureFlow = flow as PictureFlow
@@ -665,7 +596,7 @@ class MainActivity : AppCompatActivity() {
                         showError(getString(R.string.error_cannot_take_picture))
                     }
                 } else {
-                    btn_next.visibility = View.VISIBLE
+                    buttonsFragment.vm.showNextButton = true
                     mPictureAdapter.setList(
                             db.pictureCollection.removeNonExistant(
                                     db.pictureCollection.queryPictures(prefHelper.currentPictureCollectionId
@@ -674,14 +605,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             Stage.STATUS -> {
-                btn_next.setText(R.string.btn_done)
+                buttonsFragment.vm.nextText = getString(R.string.btn_done)
                 frame_status.visibility = View.VISIBLE
                 titleFragment.vm.title = getString(R.string.title_status)
                 setStatusButton()
                 vm.curEntry = null
             }
             Stage.CONFIRM -> {
-                btn_next.setText(R.string.btn_confirm)
+                buttonsFragment.vm.nextText = getString(R.string.btn_confirm)
                 confirmationFragment.showing = true
                 vm.curEntry = prefHelper.saveEntry()
                 vm.curEntry?.let {
@@ -946,15 +877,15 @@ class MainActivity : AppCompatActivity() {
 
     fun checkCenterButtonIsEdit() {
         if (vm.isCenterButtonEdit) {
-            btn_center.setText(R.string.btn_edit)
+            buttonsFragment.vm.centerText = getString(R.string.btn_edit)
         } else {
-            btn_center.setText(R.string.btn_add)
+            buttonsFragment.vm.centerText = getString(R.string.btn_add)
         }
     }
 
     private fun checkChangeCompanyButtonVisible() {
         if (vm.didAutoSkip) {
-            change.visibility = View.VISIBLE
+            buttonsFragment.vm.showCenterButton = true
         }
     }
 

@@ -5,10 +5,7 @@ import com.cartlc.tracker.model.server.DCService
 import com.cartlc.tracker.ui.act.ListEntryActivity
 import com.cartlc.tracker.ui.act.MainActivity
 import com.cartlc.tracker.ui.list.ListEntryAdapter
-import com.cartlc.tracker.viewmodel.ConfirmationViewModel
-import com.cartlc.tracker.viewmodel.LoginViewModel
-import com.cartlc.tracker.viewmodel.MainListViewModel
-import com.cartlc.tracker.viewmodel.TitleViewModel
+import com.cartlc.tracker.viewmodel.*
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -36,4 +33,5 @@ interface CarRepositoryComponent {
     fun inject(vm: MainListViewModel)
     fun inject(vm: ConfirmationViewModel)
     fun inject(vm: TitleViewModel)
+    fun inject(vm: ButtonsViewModel)
 }

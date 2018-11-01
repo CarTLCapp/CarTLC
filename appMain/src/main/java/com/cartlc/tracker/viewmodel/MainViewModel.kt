@@ -55,6 +55,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     var detectLoginError: () -> Boolean = { false }
     var curEntry: DataEntry? = null
     var editProject: Boolean = false
+    var autoNarrowOkay = true
 
     private val _handleConfirmDialogEvent: MutableLiveData<ConfirmDialogEvent> by lazy {
         MutableLiveData<ConfirmDialogEvent>()
