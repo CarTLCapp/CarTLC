@@ -25,9 +25,9 @@ class ProjectListAdapter(
         private val vm: MainListViewModel
 ) : RecyclerView.Adapter<ProjectListAdapter.CustomViewHolder>() {
 
-    internal val mLayoutInflater: LayoutInflater
-    internal var mProjectGroups: List<DataProjectAddressCombo> = emptyList()
-    internal var mCurProjectGroupId: Long? = null
+    private val mLayoutInflater: LayoutInflater
+    private var mProjectGroups: List<DataProjectAddressCombo> = emptyList()
+    private var mCurProjectGroupId: Long? = null
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 

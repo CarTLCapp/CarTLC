@@ -36,7 +36,7 @@ open class PictureListAdapter(
         protected val mListener: (Int) -> Unit?
 ) : RecyclerView.Adapter<PictureListAdapter.CustomViewHolder>() {
     protected val mLayoutInflater: LayoutInflater
-    internal var mRotation: HashMap<String, Int> = HashMap()
+    private var mRotation: HashMap<String, Int> = HashMap()
     protected var mItems: MutableList<DataPicture> = ArrayList()
     protected val mDecHeight: Int by lazy {
         mContext.resources.getDimension(R.dimen.image_dec_size).toInt()

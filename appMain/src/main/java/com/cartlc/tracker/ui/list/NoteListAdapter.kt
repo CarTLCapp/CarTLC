@@ -18,8 +18,9 @@ import kotlinx.android.synthetic.main.entry_item_note.view.*
  */
 
 class NoteListAdapter(mContext: Context) : RecyclerView.Adapter<NoteListAdapter.CustomViewHolder>() {
-    protected val mLayoutInflater: LayoutInflater
-    protected var mItems: List<DataNote> = mutableListOf()
+
+    private val mLayoutInflater: LayoutInflater
+    private var mItems: List<DataNote> = mutableListOf()
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
 

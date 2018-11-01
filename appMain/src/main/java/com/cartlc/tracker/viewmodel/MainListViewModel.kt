@@ -3,21 +3,25 @@ package com.cartlc.tracker.viewmodel
 import android.app.Activity
 import android.view.View
 import androidx.lifecycle.MutableLiveData
+import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragMainListBinding
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.LoginFlow
 import com.cartlc.tracker.model.flow.Stage
+import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.act.MainActivity
 import com.cartlc.tracker.ui.app.TBApplication
 import kotlinx.android.synthetic.main.content_main.*
+import timber.log.Timber
 import javax.inject.Inject
 
 class MainListViewModel(
         private val act: Activity,
-        private val binding: FragMainListBinding
+        private val binding: FragMainListBinding,
+        private val buttonsViewModel: ButtonsViewModel
 ) : BaseViewModel() {
 
     @Inject
@@ -64,6 +68,9 @@ class MainListViewModel(
     val isInNotes: Boolean
         get() = curFlowValue.stage == Stage.NOTES
 
+    val status: String?
+        get() = prefHelper.status?.getStringNull(act)
+
     fun onKeySelected(text: String) {
         curKey?.let {
             prefHelper.setKeyValue(it, text)
@@ -71,13 +78,17 @@ class MainListViewModel(
                 Stage.PROJECT,
                 Stage.CITY,
                 Stage.STATE,
-                Stage.STREET -> tmpActivity.buttonsFragment.vm.showNextButton = true
+                Stage.STREET -> buttonsViewModel.showNextButton = true
                 Stage.COMPANY -> tmpActivity.checkCenterButtonIsEdit()
-                Stage.TRUCK -> tmpActivity.entry_simple.setText(text)
+                Stage.TRUCK -> tmpActivity.entrySimpleFragment.vm.simpleText = text
                 else -> {
                 }
             }
         }
+    }
+
+    fun onStatusButtonClicked(status: TruckStatus) {
+        prefHelper.status = status
     }
 
 }

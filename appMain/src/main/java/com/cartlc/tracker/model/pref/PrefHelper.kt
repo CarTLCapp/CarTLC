@@ -406,7 +406,7 @@ class PrefHelper internal constructor(
         }
         val zipcode = zipCode
         var addressId: Long
-        addressId = db.address.queryAddressId(company!!, street!!, city!!, state!!, zipcode)
+        addressId = db.address.queryAddressId(company, street, city, state, zipcode)
         if (addressId < 0) {
             val address = DataAddress(company, street, city, state, zipcode)
             address.isLocal = true
@@ -416,7 +416,7 @@ class PrefHelper internal constructor(
                 return false
             }
         }
-        val projectNameId = db.projects.queryProjectName(project ?: "")
+        val projectNameId = db.projects.queryProjectName(project)
         if (projectNameId < 0) {
             Timber.e("saveProjectAndAddressCombo(): could not find project: $project")
             return false

@@ -18,17 +18,17 @@ import kotlinx.android.synthetic.main.entry_item_simple.view.*
 
 class SimpleListAdapter : RecyclerView.Adapter<SimpleListAdapter.CustomViewHolder> {
 
-    internal val mContext: Context
-    internal val mLayoutInflater: LayoutInflater
-    internal val mEntryItemLayoutId: Int
-    internal var mListener: OnItemSelectedListener? = null
-    internal var mItems: List<String> = emptyList()
-    internal var mSelectedPos = -1
-    internal var mSelectedOkay = false
-
     interface OnItemSelectedListener {
         fun onSelectedItem(position: Int, text: String)
     }
+
+    private val mContext: Context
+    private val mLayoutInflater: LayoutInflater
+    private val mEntryItemLayoutId: Int
+    private var mListener: OnItemSelectedListener? = null
+    private var mItems: List<String> = emptyList()
+    private var mSelectedPos = -1
+    private var mSelectedOkay = false
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 

@@ -1,20 +1,29 @@
 package com.cartlc.tracker.ui.frag
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import android.widget.TextView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragMainListBinding
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.ui.list.*
 import com.cartlc.tracker.model.misc.EntryHint
+import com.cartlc.tracker.model.misc.TruckStatus
+import com.cartlc.tracker.model.pref.PrefHelper
+import com.cartlc.tracker.ui.act.MainActivity
+import com.cartlc.tracker.ui.act.MainActivity_MembersInjector
+import com.cartlc.tracker.viewmodel.ButtonsViewModel
 import com.cartlc.tracker.viewmodel.MainListViewModel
+import kotlinx.android.synthetic.main.content_main.view.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -42,15 +51,25 @@ class MainListFragment : BaseFragment() {
         get() = binding.mainList
     val empty: TextView
         get() = binding.empty
+    val ctx: Context
+        get() = context!!
+    val buttonsViewModel: ButtonsViewModel?
+        get() {
+            if (activity is MainActivity) {
+                (activity as MainActivity).buttonsFragment.vm
+            }
+            return null
+        }
 
     lateinit private var simpleAdapter: SimpleListAdapter
     lateinit private var projectAdapter: ProjectListAdapter
     lateinit private var equipmentSelectAdapter: EquipmentSelectListAdapter
     lateinit private var noteEntryAdapter: NoteListEntryAdapter
+    lateinit private var radioAdapter: RadioListAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragMainListBinding.inflate(layoutInflater, container, false)
-        baseVM = MainListViewModel(activity!!, binding)
+        baseVM = MainListViewModel(activity!!, binding, buttonsViewModel)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
 
@@ -65,7 +84,8 @@ class MainListFragment : BaseFragment() {
         })
         projectAdapter = ProjectListAdapter(mainList.context, vm)
         equipmentSelectAdapter = EquipmentSelectListAdapter(vm)
-
+        radioAdapter = RadioListAdapter(mainList.context)
+        radioAdapter.listener = { pos, text -> vm.onStatusButtonClicked(TruckStatus.from(ctx, text)) }
         noteEntryAdapter = NoteListEntryAdapter(mainList.context, vm, object : NoteListEntryAdapter.EntryListener {
             var currentFocus: DataNote? = null
 
@@ -127,6 +147,15 @@ class MainListFragment : BaseFragment() {
                     empty.visibility = View.GONE
                 }
             }
+            Stage.STATUS -> {
+                mainList.adapter = radioAdapter
+                radioAdapter.list = listOf(
+                        TruckStatus.COMPLETE.getString(ctx),
+                        TruckStatus.PARTIAL.getString(ctx),
+                        TruckStatus.NEEDS_REPAIR.getString(ctx)
+                )
+                radioAdapter.selectedText = vm.status
+            }
             else -> mainList.adapter = simpleAdapter
         }
     }
@@ -168,4 +197,6 @@ class MainListFragment : BaseFragment() {
     fun onEvent(event: EventRefreshProjects) {
         projectAdapter.onDataChanged()
     }
+
+
 }

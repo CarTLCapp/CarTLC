@@ -23,11 +23,11 @@ import javax.inject.Inject
  */
 
 class ListEntryAdapter(
-        internal val mContext: Context,
-        internal val mListener: OnItemSelectedListener
+        private val mContext: Context,
+        private val mListener: OnItemSelectedListener
 ) : RecyclerView.Adapter<ListEntryAdapter.CustomViewHolder>() {
-    internal val mLayoutInflater: LayoutInflater
-    internal var mItems: List<DataEntry> = emptyList()
+    private val mLayoutInflater: LayoutInflater
+    private var mItems: List<DataEntry> = emptyList()
 
     @Inject
     lateinit var repo: CarRepository

@@ -20,6 +20,13 @@ enum class TruckStatus constructor(internal var displayResId: Int) {
         return ctx.getString(displayResId)
     }
 
+    fun getStringNull(ctx: Context): String? {
+        if (this == UNKNOWN) {
+            return null
+        }
+        return getString(ctx)
+    }
+
     companion object {
 
         fun from(ord: Int?): TruckStatus {
@@ -28,6 +35,15 @@ enum class TruckStatus constructor(internal var displayResId: Int) {
                     if (status.ordinal == ord) {
                         return status
                     }
+                }
+            }
+            return UNKNOWN
+        }
+
+        fun from(ctx: Context, text: String): TruckStatus {
+            for (status in values()) {
+                if (status.getString(ctx) == text) {
+                    return status
                 }
             }
             return UNKNOWN

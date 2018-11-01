@@ -62,7 +62,6 @@ class CheckError {
     internal inner class CheckErrorEntry {
 
         fun showTruckError(act: Activity,  pref: PrefHelper, entry: DataEntry, callback: CheckErrorResult) {
-            val app = act.applicationContext as TBApplication
             val builder = AlertDialog.Builder(act)
             builder.setTitle(R.string.title_error)
             builder.setMessage(getMissingTruckError(act, entry))

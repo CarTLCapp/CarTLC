@@ -75,11 +75,6 @@ class MainActivity : AppCompatActivity() {
         private val REQUEST_IMAGE_CAPTURE = 1
         private val REQUEST_EDIT_ENTRY = 2
 
-        private val MSG_SET_HINT = 2
-        private val NUM_MSGS = 4
-
-        private val KEY_HINT = "hint"
-
         val RESULT_EDIT_ENTRY = 2
         val RESULT_EDIT_PROJECT = 3
         val RESULT_DELETE_PROJECT = 4
@@ -87,11 +82,9 @@ class MainActivity : AppCompatActivity() {
         private val KEY_TAKING_PICTURE = "picture"
     }
 
-    private var mHandler = MyHandler()
     lateinit private var mApp: TBApplication
     lateinit private var mPictureAdapter: PictureListAdapter
     lateinit private var mInputMM: InputMethodManager
-    lateinit private var mZipCodeWatcher: ZipCodeWatcher
     lateinit private var mDialogHelper: DialogHelper
     private var fab_address: Address? = null
     private var mTakingPictureFile: File? = null
@@ -112,6 +105,8 @@ class MainActivity : AppCompatActivity() {
         get() = frame_title as TitleFragment
     val buttonsFragment: ButtonsFragment
         get() = frame_buttons as ButtonsFragment
+    val entrySimpleFragment: EntrySimpleFragment
+        get() = frame_entry_simple as EntrySimpleFragment
     val prefHelper: PrefHelper
         get() = vm.prefHelper
     val db: DatabaseTable
@@ -192,29 +187,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    inner class MyHandler : Handler() {
-        override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                MSG_SET_HINT -> entry_hint.text = msg.data.getString(KEY_HINT)
-            }
-        }
-    }
-
-    private inner class ZipCodeWatcher : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-        }
-
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-        }
-
-        override fun afterTextChanged(s: Editable) {
-            val value = s.toString().trim { it <= ' ' }
-            if (isZipCode(value)) {
-                mApp.requestZipCode(value)
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -239,14 +211,6 @@ class MainActivity : AppCompatActivity() {
         val linearLayoutManager = AutoLinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         list_pictures.layoutManager = linearLayoutManager
         list_pictures.adapter = mPictureAdapter
-        val autoNext = object : OnEditorActionListener {
-            override fun onEditorAction(p0: TextView?, p1: Int, p2: KeyEvent?): Boolean {
-                vm.doSimpleEntryReturn(getEditText(entry_simple))
-                return false
-            }
-        }
-        entry_simple.setOnEditorActionListener(autoNext)
-        mZipCodeWatcher = ZipCodeWatcher()
 
         prefHelper.setFromCurrentProjectId()
 
@@ -264,8 +228,12 @@ class MainActivity : AppCompatActivity() {
             it.executeIfNotHandled { dispatchPictureRequest() }
         })
         vm.detectNoteError = this::detectNoteError
-        vm.entryTextValue = { getEditText(entry_simple) }
+        vm.entryTextValue = { entrySimpleFragment.entryTextValue }
         vm.detectLoginError = this::detectLoginError
+
+        entrySimpleFragment.vm.handleEntrySimpleReturnEvent().observe(this, Observer { event ->
+            vm.doSimpleEntryReturn(event.peekContent())
+        })
 
         EventBus.getDefault().register(this)
         title = versionedTitle
@@ -312,9 +280,6 @@ class MainActivity : AppCompatActivity() {
         CheckError.instance.cleanup()
         mDialogHelper.clearDialog()
         LocationHelper.instance.onDestroy()
-        for (what in 0 until NUM_MSGS) {
-            mHandler.removeMessages(what)
-        }
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -323,10 +288,6 @@ class MainActivity : AppCompatActivity() {
         if (mShowServerError) {
             showServerError(event.toString())
         }
-    }
-
-    private fun getEditText(text: EditText): String {
-        return text.text.toString().trim { it <= ' ' }
     }
 
     private fun doBtnPlus() {
@@ -350,20 +311,17 @@ class MainActivity : AppCompatActivity() {
         loginFragment.showing = false
         mainListFragment.showing = false
         mainListFragment.showEmpty = false
-        frame_entry.visibility = View.GONE
-        frame_status.visibility = View.GONE
-        fab_add.hide()
         buttonsFragment.reset(flow)
-
-        entry_simple.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS)
-        entry_simple.removeTextChangedListener(mZipCodeWatcher)
         confirmationFragment.showing = false
+        titleFragment.vm.showSeparator = false
+        titleFragment.vm.subTitle = null
+        entrySimpleFragment.reset()
+
+//        frame_status.visibility = View.GONE
+        fab_add.hide()
         frame_pictures.visibility = View.GONE
         list_pictures.visibility = View.GONE
         list_entry_hint.visibility = View.GONE
-        entry_hint.visibility = View.GONE
-        titleFragment.vm.showSeparator = false
-        titleFragment.vm.subTitle = null
 
         when (flow.stage) {
             Stage.LOGIN -> {
@@ -371,8 +329,8 @@ class MainActivity : AppCompatActivity() {
                 buttonsFragment.vm.showCenterButton = true
             }
             Stage.PROJECT -> {
-                showMainListFrame()
-                showSubTitleHint(flow.stage)
+                mainListFragment.showing = true
+                titleFragment.vm.subTitle = curProjectHint
                 if (prefHelper.projectName == null) {
                     buttonsFragment.vm.showNextButton = false
                 }
@@ -380,8 +338,8 @@ class MainActivity : AppCompatActivity() {
                 getLocation()
             }
             Stage.COMPANY -> {
-                showSubTitleHint(flow.stage)
-                showMainListFrame()
+                titleFragment.vm.subTitle = editProjectHint
+                mainListFragment.showing = true
                 buttonsFragment.vm.showCenterButton = true
                 val companies = db.address.query()
                 autoNarrowCompanies(companies.toMutableList())
@@ -396,25 +354,27 @@ class MainActivity : AppCompatActivity() {
             }
             Stage.ADD_COMPANY -> {
                 titleFragment.vm.title = getString(R.string.title_company)
-//                main_title_text.setText(R.string.title_company)
-                frame_entry.visibility = View.VISIBLE
-                entry_simple.setHint(R.string.title_company)
+                entrySimpleFragment.vm.showing = true
+                entrySimpleFragment.vm.simpleHint = getString(R.string.title_company)
                 if (vm.isLocalCompany) {
                     vm.companyEditing = prefHelper.company
-                    entry_simple.setText(vm.companyEditing)
+                    entrySimpleFragment.vm.simpleText = vm.companyEditing ?: ""
                 } else {
-                    entry_simple.setText("")
+                    entrySimpleFragment.vm.simpleText = ""
                 }
             }
             Stage.STATE, Stage.ADD_STATE -> {
-                showEntryHint(flow.stage)
-                showSubTitleHint(flow.stage)
-                showMainListFrame()
+                var editing = flow.stage == Stage.ADD_STATE
+                titleFragment.vm.subTitle = if (editing) editProjectHint else curProjectHint
+                if (!editing) {
+                    entrySimpleFragment.vm.helpText = prefHelper.address
+                    entrySimpleFragment.vm.showing = true
+                }
+                mainListFragment.showing = true
                 buttonsFragment.vm.showNextButton = false
                 val company = prefHelper.company
                 val zipcode = prefHelper.zipCode
                 var states: MutableList<String> = db.address.queryStates(company!!, zipcode).toMutableList()
-                var editing = flow.stage == Stage.ADD_STATE
                 if (states.size == 0) {
                     val state = zipcode?.let { db.zipCode.queryState(it) }
                     if (state != null) {
@@ -443,14 +403,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             Stage.CITY, Stage.ADD_CITY -> {
-                showEntryHint(flow.stage)
-                showSubTitleHint(flow.stage)
+                var editing = flow.stage == Stage.ADD_CITY
+                titleFragment.vm.subTitle = if (editing) editProjectHint else curProjectHint
                 buttonsFragment.vm.showNextButton = false
+                if (!editing) {
+                    entrySimpleFragment.vm.helpText = prefHelper.address
+                }
                 val company = prefHelper.company
                 val zipcode = prefHelper.zipCode
                 val state = prefHelper.state
                 var cities: MutableList<String> = db.address.queryCities(company!!, zipcode, state!!).toMutableList()
-                var editing = flow.stage == Stage.ADD_CITY
                 if (cities.isEmpty()) {
                     val city = zipcode?.let { db.zipCode.queryCity(zipcode) }
                     if (city != null) {
@@ -461,18 +423,17 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 if (editing) {
-                    frame_entry.visibility = View.VISIBLE
+                    entrySimpleFragment.vm.showing = true
                     titleFragment.vm.title = getString(R.string.title_city)
-//                    main_title_text.setText(R.string.title_city)
-                    entry_simple.setHint(R.string.title_city)
-                    entry_simple.setText("")
+                    entrySimpleFragment.vm.simpleText = ""
+                    entrySimpleFragment.vm.simpleHint = getString(R.string.title_city)
                 } else {
                     autoNarrowCities(cities)
                     if (cities.size == 1 && vm.autoNarrowOkay) {
                         prefHelper.city = cities[0]
                         vm.skip()
                     } else {
-                        showMainListFrame()
+                        mainListFragment.showing = true
                         if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
                             buttonsFragment.vm.showNextButton = true
                         }
@@ -482,28 +443,30 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             Stage.STREET, Stage.ADD_STREET -> {
+                var editing = flow.stage == Stage.ADD_STREET
                 buttonsFragment.vm.showNextButton = false
-                showEntryHint(flow.stage)
-                showSubTitleHint(flow.stage)
+                if (!editing) {
+                    entrySimpleFragment.vm.helpText = prefHelper.address
+                }
+                titleFragment.vm.subTitle = if (editing) editProjectHint else curProjectHint
                 val streets = db.address.queryStreets(
                         prefHelper.company!!,
                         prefHelper.city!!,
                         prefHelper.state!!,
                         prefHelper.zipCode)
-                var editing = flow.stage == Stage.ADD_STREET
                 if (streets.isEmpty()) {
                     editing = true
                 }
                 if (editing) {
                     titleFragment.vm.title = getString(R.string.title_street)
-                    frame_entry.visibility = View.VISIBLE
-                    entry_simple.setHint(R.string.title_street)
-                    entry_simple.setText("")
-                    entry_simple.setInputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS or InputType.TYPE_TEXT_FLAG_CAP_WORDS)
+                    entrySimpleFragment.vm.showing = true
+                    entrySimpleFragment.vm.simpleText = ""
+                    entrySimpleFragment.vm.simpleHint = getString(R.string.title_street)
+                    entrySimpleFragment.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS or InputType.TYPE_TEXT_FLAG_CAP_WORDS
                 } else {
                     autoNarrowStreets(streets)
                     buttonsFragment.vm.showCenterButton = true
-                    showMainListFrame()
+                    mainListFragment.showing = true
                     if (streets.size == 1 && vm.autoNarrowOkay) {
                         prefHelper.street = streets[0]
                         fab_addressConfirmOkay = true
@@ -519,7 +482,7 @@ class MainActivity : AppCompatActivity() {
             Stage.CONFIRM_ADDRESS -> {
                 if (fab_addressConfirmOkay) {
                     fab_addressConfirmOkay = false
-                    showSubTitleHint(flow.stage)
+                    titleFragment.vm.subTitle = curProjectHint
                     checkChangeCompanyButtonVisible()
                 } else {
                     vm.skip()
@@ -529,7 +492,7 @@ class MainActivity : AppCompatActivity() {
                 mApp.ping()
                 prefHelper.saveProjectAndAddressCombo(vm.editProject)
                 vm.editProject = false
-                showMainListFrame()
+                mainListFragment.showing = true
                 titleFragment.vm.showSeparator = true
                 buttonsFragment.vm.showCenterButton = true
                 buttonsFragment.vm.prevText = getString(R.string.btn_edit)
@@ -549,31 +512,34 @@ class MainActivity : AppCompatActivity() {
                 doViewProject()
             }
             Stage.TRUCK -> {
-                frame_entry.visibility = View.VISIBLE
-                entry_simple.setHint(R.string.title_truck)
-                entry_simple.setText(prefHelper.truckValue)
-                entry_simple.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
-                showMainListFrame()
+                entrySimpleFragment.vm.showing = true
+                entrySimpleFragment.vm.simpleHint = getString(R.string.title_truck)
+                entrySimpleFragment.vm.simpleText = prefHelper.truckValue
+                entrySimpleFragment.vm.helpText = getString(R.string.entry_hint_truck)
+                entrySimpleFragment.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+
+                mainListFragment.showing = true
                 setList(R.string.title_truck, PrefHelper.KEY_TRUCK,
                         db.truck.queryStrings(prefHelper.currentProjectGroup))
-                showEntryHint(flow.stage)
-                showSubTitleHint(flow.stage)
+                if (prefHelper.currentProjectGroup != null) {
+                    titleFragment.vm.subTitle = prefHelper.currentProjectGroup!!.hintLine
+                }
             }
             Stage.EQUIPMENT -> {
                 titleFragment.vm.title = getString(R.string.title_equipment_installed)
-                showMainListFrame()
+                mainListFragment.showing = true
                 mainListFragment.setAdapter(flow.stage)
                 buttonsFragment.vm.showCenterButton = true
             }
             Stage.ADD_EQUIPMENT -> {
-                frame_entry.visibility = View.VISIBLE
                 titleFragment.vm.title = getString(R.string.title_equipment)
-                entry_simple.setHint(R.string.title_equipment)
-                entry_simple.setText("")
+                entrySimpleFragment.vm.showing = true
+                entrySimpleFragment.vm.simpleHint = getString(R.string.title_equipment)
+                entrySimpleFragment.vm.simpleText = ""
             }
             Stage.NOTES -> {
                 titleFragment.vm.title = getString(R.string.title_notes)
-                showMainListFrame()
+                mainListFragment.showing = true
                 mainListFragment.setAdapter(flow.stage)
             }
             Stage.PICTURE_1,
@@ -606,9 +572,10 @@ class MainActivity : AppCompatActivity() {
             }
             Stage.STATUS -> {
                 buttonsFragment.vm.nextText = getString(R.string.btn_done)
-                frame_status.visibility = View.VISIBLE
+                mainListFragment.showing = true
+                mainListFragment.setAdapter(flow.stage)
                 titleFragment.vm.title = getString(R.string.title_status)
-                setStatusButton()
+                titleFragment.vm.subTitle = statusHint
                 vm.curEntry = null
             }
             Stage.CONFIRM -> {
@@ -911,51 +878,9 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
-    private fun isZipCode(zipCode: String?): Boolean {
-        return zipCode != null && zipCode.length == 5 && zipCode.matches("^[0-9]*$".toRegex())
-    }
-
-    private fun showEntryHint(stage: Stage) {
-        var hint: String? = null
-        when (stage) {
-            Stage.STATE, Stage.CITY, Stage.STREET, Stage.CONFIRM_ADDRESS -> hint = prefHelper.address
-            Stage.STATUS -> hint = statusHint
-            Stage.TRUCK -> hint = getString(R.string.entry_hint_truck)
-            else -> {
-            }
-        }
-        if (hint != null && hint.length > 0) {
-            entry_hint.setText(hint)
-            entry_hint.visibility = View.VISIBLE
-        }
-    }
-
-    private fun showSubTitleHint(stage: Stage) {
-        var hint: String? = null
-        when (stage) {
-            Stage.PROJECT,
-            Stage.COMPANY,
-            Stage.STATE,
-            Stage.CITY,
-            Stage.STREET,
-            Stage.CONFIRM_ADDRESS ->
-                hint = curProjectHint
-            Stage.ADD_COMPANY,
-            Stage.ADD_STATE,
-            Stage.ADD_CITY,
-            Stage.ADD_STREET ->
-                hint = editProjectHint
-            Stage.TRUCK ->
-                if (prefHelper.currentProjectGroup != null) {
-                    hint = prefHelper.currentProjectGroup!!.hintLine
-                }
-            else -> {
-            }
-        }
-        if (hint != null && hint.length > 0) {
-            titleFragment.vm.subTitle = hint
-        }
-    }
+//    private fun isZipCode(zipCode: String?): Boolean {
+//        return zipCode != null && zipCode.length == 5 && zipCode.matches("^[0-9]*$".toRegex())
+//    }
 
     private fun showPictureToast(pictureCount: Int) {
         val msgId: Int
@@ -975,44 +900,6 @@ class MainActivity : AppCompatActivity() {
             view.textSize = resources.getDimension(R.dimen.picture_toast_size)
         }
         toast.show()
-    }
-
-    private fun showMainListFrame() {
-        mainListFragment.showing = true
-    }
-
-    fun onStatusButtonClicked(view: View) {
-        val checked = (view as RadioButton).isChecked
-        if (checked) {
-            when (view.getId()) {
-                R.id.status_complete -> prefHelper.status = TruckStatus.COMPLETE
-                R.id.status_partial -> prefHelper.status = TruckStatus.PARTIAL
-                R.id.status_needs_repair -> prefHelper.status = TruckStatus.NEEDS_REPAIR
-            }
-        }
-    }
-
-    private fun setStatusButton() {
-        val status = prefHelper.status
-        if (status != null) {
-            if (status === TruckStatus.NEEDS_REPAIR) {
-                status_needs_repair.setChecked(true)
-            } else if (status === TruckStatus.COMPLETE) {
-                status_complete.setChecked(true)
-            } else if (status === TruckStatus.PARTIAL) {
-                status_partial.setChecked(true)
-            } else {
-                status_needs_repair.setChecked(false)
-                status_complete.setChecked(false)
-                status_partial.setChecked(false)
-                status_select.clearCheck()
-            }
-        } else {
-            status_needs_repair.setChecked(false)
-            status_complete.setChecked(false)
-            status_partial.setChecked(false)
-            status_select.clearCheck()
-        }
     }
 
     private fun setPhotoTitleCount(count: Int) {

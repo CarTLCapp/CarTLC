@@ -33,8 +33,8 @@ class NoteListEntryAdapter(
         private val vm: MainListViewModel,
         private val mListener: EntryListener
 ) : RecyclerView.Adapter<NoteListEntryAdapter.CustomViewHolder>() {
-    protected val mLayoutInflater: LayoutInflater
-    protected var mItems: MutableList<DataNote> = mutableListOf()
+    private val mLayoutInflater: LayoutInflater
+    private var mItems: MutableList<DataNote> = mutableListOf()
 
     val isNotesComplete: Boolean
         get() {
