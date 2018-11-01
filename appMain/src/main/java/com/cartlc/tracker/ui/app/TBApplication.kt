@@ -18,6 +18,8 @@ import androidx.multidex.MultiDex
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
+import com.cartlc.tracker.model.CarRepositoryComponent
+import com.cartlc.tracker.model.CarRepositoryModule
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.event.EventError
@@ -32,12 +34,9 @@ import com.cartlc.tracker.ui.util.PermissionHelper.PermissionListener
 import timber.log.Timber
 
 import com.cartlc.tracker.ui.util.PermissionHelper
-import com.cartlc.tracker.viewmodel.MainViewModel
-import com.cartlc.tracker.viewmodel.MainViewModelComponent
-import com.cartlc.tracker.viewmodel.MainViewModelModule
 import com.squareup.leakcanary.LeakCanary
 
-import com.cartlc.tracker.viewmodel.DaggerMainViewModelComponent
+import com.cartlc.tracker.model.DaggerCarRepositoryComponent
 import org.greenrobot.eventbus.EventBus
 
 import java.io.File
@@ -56,7 +55,7 @@ class TBApplication : Application() {
         internal val DEBUG_TREE = false
         internal val LEAK_CANARY = false
 
-        val REPORT_LOCATION = true // BuildConfig.DEBUG;
+        val REPORT_LOCATION = BuildConfig.DEBUG;
 
         val OTHER = "Other"
 
@@ -100,14 +99,13 @@ class TBApplication : Application() {
         }
     }
 
-    lateinit var appComponent: MainViewModelComponent
-    @Inject
-    lateinit var vm: MainViewModel
+    lateinit var carRepoComponent: CarRepositoryComponent
 
-    val prefHelper: PrefHelper
-        get() = vm.prefHelper
-    val db: DatabaseTable
-        get() = vm.db
+    private lateinit var carRepo: CarRepository
+    private val prefHelper: PrefHelper
+        get() = carRepo.prefHelper
+    private val db: DatabaseTable
+        get() = carRepo.db
 
     val version: String
         @Throws(PackageManager.NameNotFoundException::class)
@@ -125,10 +123,10 @@ class TBApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        appComponent = DaggerMainViewModelComponent.builder()
-                .mainViewModelModule(MainViewModelModule(CarRepository(this)))
+        carRepo = CarRepository(this)
+        carRepoComponent = DaggerCarRepositoryComponent.builder()
+                .carRepositoryModule(CarRepositoryModule(carRepo))
                 .build()
-        appComponent.inject(this)
 
         if (LEAK_CANARY) {
             if (LeakCanary.isInAnalyzerProcess(this)) {
@@ -147,9 +145,9 @@ class TBApplication : Application() {
         AmazonHelper.Init(db, prefHelper)
         PermissionHelper.Init()
         CheckError.Init()
+        LocationHelper.Init(this, db)
 
         prefHelper.detectSpecialUpdateCheck()
-        LocationHelper.Init(this)
     }
 
     fun ping() {

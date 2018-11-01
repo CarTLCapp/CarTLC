@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 
 import com.cartlc.tracker.R
+import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.pref.PrefHelper
@@ -18,16 +19,20 @@ import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.ListEntryAdapter
 import com.cartlc.tracker.model.table.DatabaseTable
 import kotlinx.android.synthetic.main.activity_list_entries.*
+import javax.inject.Inject
 
 class ListEntryActivity : AppCompatActivity(), ListEntryAdapter.OnItemSelectedListener {
 
     lateinit var app: TBApplication
     lateinit var mEntryListAdapter: ListEntryAdapter
 
+    @Inject
+    lateinit var repo: CarRepository
+
     val db: DatabaseTable
-        get() = app.db
+        get() = repo.db
     val prefHelper: PrefHelper
-        get() = app.prefHelper
+        get() = repo.prefHelper
 
     internal val titleString: String
         get() {
@@ -47,6 +52,7 @@ class ListEntryActivity : AppCompatActivity(), ListEntryAdapter.OnItemSelectedLi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list_entries)
         app = applicationContext as TBApplication
+        app.carRepoComponent.inject(this)
         app.setUncaughtExceptionHandler(this)
         mEntryListAdapter = ListEntryAdapter(this, this)
         edit_address!!.setOnClickListener {

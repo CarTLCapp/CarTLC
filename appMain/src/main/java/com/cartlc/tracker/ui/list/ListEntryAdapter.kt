@@ -11,10 +11,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
+import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.app.TBApplication
 import kotlinx.android.synthetic.main.entry_item_full.view.*
+import javax.inject.Inject
 
 /**
  * Created by dug on 5/12/17.
@@ -26,10 +28,14 @@ class ListEntryAdapter(
 ) : RecyclerView.Adapter<ListEntryAdapter.CustomViewHolder>() {
     internal val mLayoutInflater: LayoutInflater
     internal var mItems: List<DataEntry> = emptyList()
+
+    @Inject
+    lateinit var repo: CarRepository
+
     private val app: TBApplication
         get() = mContext.applicationContext as TBApplication
     private val prefHelper: PrefHelper
-        get() = app.prefHelper
+        get() = repo.prefHelper
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
 
@@ -55,6 +61,7 @@ class ListEntryAdapter(
 
     init {
         mLayoutInflater = LayoutInflater.from(mContext)
+        app.carRepoComponent.inject(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {

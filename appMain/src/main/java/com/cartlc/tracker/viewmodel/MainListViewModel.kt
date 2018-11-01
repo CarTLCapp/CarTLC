@@ -35,7 +35,7 @@ class MainListViewModel(
         get() = repo.db
 
     init {
-        app.appComponent.inject(this)
+        app.carRepoComponent.inject(this)
     }
 
     var showing: Boolean = false

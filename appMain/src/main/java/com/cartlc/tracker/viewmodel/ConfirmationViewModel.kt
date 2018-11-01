@@ -38,7 +38,7 @@ class ConfirmationViewModel(
         get() = act.applicationContext as TBApplication
 
     init {
-        app.appComponent.inject(this)
+        app.carRepoComponent.inject(this)
     }
 
     var showing: Boolean = false

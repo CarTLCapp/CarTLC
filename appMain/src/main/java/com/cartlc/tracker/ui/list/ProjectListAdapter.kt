@@ -25,14 +25,9 @@ class ProjectListAdapter(
         private val vm: MainListViewModel
 ) : RecyclerView.Adapter<ProjectListAdapter.CustomViewHolder>() {
 
-    companion object {
-        var sInstanceId = 0
-    }
-
     internal val mLayoutInflater: LayoutInflater
     internal var mProjectGroups: List<DataProjectAddressCombo> = emptyList()
     internal var mCurProjectGroupId: Long? = null
-    val instanceId = sInstanceId++
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
@@ -49,7 +44,6 @@ class ProjectListAdapter(
         val projectGroup = mProjectGroups[position]
         holder.view.project_name.text = projectGroup.projectName
         val count = vm.tmpDb.entry.countProjectAddressCombo(projectGroup.id)
-        Timber.d("MYDEBUG: onBindViewHolder($instanceId): " + count.toString())
         if (count.totalEntries > 0) {
             val sbuf = StringBuilder()
             sbuf.append(mContext.getString(R.string.title_entries_))
@@ -100,7 +94,6 @@ class ProjectListAdapter(
     fun onDataChanged() {
         mProjectGroups = vm.tmpDb.projectAddressCombo.query()
         mCurProjectGroupId = vm.tmpPrefHelper.currentProjectGroupId
-        Timber.d("MYDEBUG: onDataChanged($instanceId)" + getItemCount())
         notifyDataSetChanged()
     }
 

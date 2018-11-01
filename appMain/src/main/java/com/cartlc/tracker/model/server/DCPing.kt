@@ -89,7 +89,7 @@ class DCPing(internal val context: Context) : DCPost() {
         }
 
     init {
-        app.appComponent.inject(this)
+        app.carRepoComponent.inject(this)
 
         if (prefHelper.isDevelopment) {
             SERVER_URL = SERVER_URL_DEVELOPMENT

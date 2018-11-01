@@ -109,4 +109,7 @@
     <string name="confirm_question_6">Do you have all your tools?</string>
     <string name="confirm_question_7">Did you remember to pick up trash around the truck?!!</string>
 
+    <!-- Fleet Vehicles -->
+    <string name="title_vehicles">Fleet Vehicles</string>
+
 </resources>

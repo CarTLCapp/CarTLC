@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.event.EventRefreshProjects
+import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.app.TBApplication
 import org.greenrobot.eventbus.EventBus
 
@@ -18,6 +19,16 @@ import org.greenrobot.eventbus.EventBus
  */
 
 class CheckError {
+
+    companion object {
+
+        lateinit var instance: CheckError
+            internal set
+
+        fun Init() {
+            CheckError()
+        }
+    }
 
     internal var mDialog: AlertDialog? = null
     internal var mErrorEntry: CheckErrorEntry
@@ -44,20 +55,19 @@ class CheckError {
         mDialog = null
     }
 
-    fun showTruckError(act: Activity, entry: DataEntry, callback: CheckErrorResult) {
-        mErrorEntry.showTruckError(act, entry, callback)
+    fun showTruckError(act: Activity, pref: PrefHelper, entry: DataEntry, callback: CheckErrorResult) {
+        mErrorEntry.showTruckError(act, pref, entry, callback)
     }
 
     internal inner class CheckErrorEntry {
 
-        fun showTruckError(act: Activity, entry: DataEntry, callback: CheckErrorResult) {
+        fun showTruckError(act: Activity,  pref: PrefHelper, entry: DataEntry, callback: CheckErrorResult) {
             val app = act.applicationContext as TBApplication
-            val prefHelper = app.prefHelper
             val builder = AlertDialog.Builder(act)
             builder.setTitle(R.string.title_error)
             builder.setMessage(getMissingTruckError(act, entry))
             builder.setPositiveButton(R.string.btn_edit) { dialog, _ ->
-                prefHelper.setFromEntry(entry)
+                pref.setFromEntry(entry)
                 cleanup(dialog)
                 callback.doEdit()
             }
@@ -112,15 +122,6 @@ class CheckError {
         }
     }
 
-    companion object {
-
-        lateinit var instance: CheckError
-            internal set
-
-        fun Init() {
-            CheckError()
-        }
-    }
 
 
 }

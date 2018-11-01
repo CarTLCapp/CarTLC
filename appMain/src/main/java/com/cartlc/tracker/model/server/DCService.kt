@@ -5,11 +5,14 @@ package com.cartlc.tracker.model.server
 
 import android.app.IntentService
 import android.content.Intent
+import com.cartlc.tracker.model.CarRepository
 
 import com.cartlc.tracker.model.pref.PrefHelper
+import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication
 
 import timber.log.Timber
+import javax.inject.Inject
 
 /**
  * Created by dug on 5/22/17.
@@ -19,14 +22,25 @@ class DCService : IntentService(SERVER_NAME) {
     private lateinit var mPing: DCPing
     private lateinit var mZip: DCZip
 
+    @Inject
+    lateinit var repo: CarRepository
+
+    private val db: DatabaseTable
+        get() = repo.db
+    private val prefHelper: PrefHelper
+        get() = repo.prefHelper
+
     init {
         Timber.tag(DCService::class.java.simpleName)
     }
 
     override fun onHandleIntent(intent: Intent?) {
         val app = applicationContext as TBApplication
+
+        app.carRepoComponent.inject(this)
+
         mPing = DCPing(this)
-        mZip = DCZip(app.db)
+        mZip = DCZip(db)
         ServerHelper.Init(this)
         if (!ServerHelper.instance.hasConnection(this)) {
             Timber.i("No connection -- service aborted")
@@ -37,8 +51,8 @@ class DCService : IntentService(SERVER_NAME) {
             val zipCode = intent.getStringExtra(DATA_ZIP_CODE)
             mZip.findZipCode(zipCode)
         } else {
-            if (app.prefHelper.techID == 0 || app.prefHelper.hasRegistrationChanged()) {
-                if (app.prefHelper.hasName()) {
+            if (prefHelper.techID == 0 || prefHelper.hasRegistrationChanged()) {
+                if (prefHelper.hasName()) {
                     mPing.sendRegistration()
                 }
             }

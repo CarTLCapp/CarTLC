@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.cartlc.tracker.BuildConfig
 
 import com.cartlc.tracker.R
+import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.data.DataAddress
@@ -55,6 +56,7 @@ import com.cartlc.tracker.ui.util.PermissionHelper
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.ErrorMessage
 import com.cartlc.tracker.ui.frag.ConfirmationFragment
+import com.cartlc.tracker.ui.frag.TitleFragment
 import com.cartlc.tracker.viewmodel.MainViewModel
 
 import java.io.File
@@ -66,6 +68,7 @@ import kotlinx.android.synthetic.main.content_main.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import timber.log.Timber
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
@@ -99,9 +102,10 @@ class MainActivity : AppCompatActivity() {
     private var mShowServerError = true
     private var fab_addressConfirmOkay = false
     private var mAutoNarrowOkay = true
+    private lateinit var vm: MainViewModel
 
     @Inject
-    lateinit var vm: MainViewModel
+    lateinit var repo: CarRepository
 
     val loginFragment: LoginFragment
         get() = login_fragment as LoginFragment
@@ -109,6 +113,8 @@ class MainActivity : AppCompatActivity() {
         get() = main_list_fragment as MainListFragment
     val confirmationFragment: ConfirmationFragment
         get() = frame_confirmation_fragment as ConfirmationFragment
+    val titleFragment: TitleFragment
+        get() = frame_title as TitleFragment
     val prefHelper: PrefHelper
         get() = vm.prefHelper
     val db: DatabaseTable
@@ -250,7 +256,9 @@ class MainActivity : AppCompatActivity() {
 
         mApp = applicationContext as TBApplication
 
-        mApp.appComponent.inject(this)
+        mApp.carRepoComponent.inject(this)
+
+        vm = MainViewModel(repo)
 
         setContentView(R.layout.activity_main)
 
@@ -322,6 +330,9 @@ class MainActivity : AppCompatActivity() {
             R.id.upload -> {
                 prefHelper.reloadFromServer()
                 mApp.ping()
+            }
+            R.id.fleet_vehicles -> {
+
             }
         }
         return super.onOptionsItemSelected(item)
@@ -411,8 +422,8 @@ class MainActivity : AppCompatActivity() {
         list_pictures.visibility = View.GONE
         list_entry_hint.visibility = View.GONE
         entry_hint.visibility = View.GONE
-        sub_title.visibility = View.GONE
-        main_title_separator.visibility = View.GONE
+        titleFragment.vm.showSeparator = false
+        titleFragment.vm.subTitle = null
 
         btn_next.visibility = if (flow.next == null) View.INVISIBLE else View.VISIBLE
         btn_next.setText(R.string.btn_next)
@@ -449,7 +460,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             Stage.ADD_COMPANY -> {
-                main_title_text.setText(R.string.title_company)
+                titleFragment.vm.title = getString(R.string.title_company)
+//                main_title_text.setText(R.string.title_company)
                 frame_entry.visibility = View.VISIBLE
                 entry_simple.setHint(R.string.title_company)
                 if (vm.isLocalCompany) {
@@ -515,7 +527,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 if (editing) {
                     frame_entry.visibility = View.VISIBLE
-                    main_title_text.setText(R.string.title_city)
+                    titleFragment.vm.title = getString(R.string.title_city)
+//                    main_title_text.setText(R.string.title_city)
                     entry_simple.setHint(R.string.title_city)
                     entry_simple.setText("")
                 } else {
@@ -547,7 +560,7 @@ class MainActivity : AppCompatActivity() {
                     editing = true
                 }
                 if (editing) {
-                    main_title_text.setText(R.string.title_street)
+                    titleFragment.vm.title = getString(R.string.title_street)
                     frame_entry.visibility = View.VISIBLE
                     entry_simple.setHint(R.string.title_street)
                     entry_simple.setText("")
@@ -582,14 +595,15 @@ class MainActivity : AppCompatActivity() {
                 prefHelper.saveProjectAndAddressCombo(vm.editProject)
                 vm.editProject = false
                 showMainListFrame()
-                main_title_separator.visibility = View.VISIBLE
+                titleFragment.vm.showSeparator = true
+//                main_title_separator.visibility = View.VISIBLE
                 btn_center.visibility = View.VISIBLE
                 btn_prev.setText(R.string.btn_edit)
                 if (db.projectAddressCombo.count() > 0) {
                     fab_add.show()
                 }
                 btn_center.setText(R.string.btn_new_project)
-                main_title_text.setText(R.string.title_current_project)
+                titleFragment.vm.title = getString(R.string.title_current_project)
                 mainListFragment.setAdapter(flow.stage)
                 checkErrors()
             }
@@ -615,19 +629,19 @@ class MainActivity : AppCompatActivity() {
                 if (isNewEquipmentOkay) {
                     btn_center.visibility = View.VISIBLE
                 }
-                main_title_text.setText(R.string.title_equipment_installed)
+                titleFragment.vm.title = getString(R.string.title_equipment_installed)
                 showMainListFrame()
                 mainListFragment.setAdapter(flow.stage)
                 btn_center.visibility = View.VISIBLE
             }
             Stage.ADD_EQUIPMENT -> {
                 frame_entry.visibility = View.VISIBLE
-                main_title_text.setText(R.string.title_equipment)
+                titleFragment.vm.title = getString(R.string.title_equipment)
                 entry_simple.setHint(R.string.title_equipment)
                 entry_simple.setText("")
             }
             Stage.NOTES -> {
-                main_title_text.setText(R.string.title_notes)
+                titleFragment.vm.title = getString(R.string.title_notes)
                 showMainListFrame()
                 mainListFragment.setAdapter(flow.stage)
             }
@@ -662,7 +676,7 @@ class MainActivity : AppCompatActivity() {
             Stage.STATUS -> {
                 btn_next.setText(R.string.btn_done)
                 frame_status.visibility = View.VISIBLE
-                main_title_text.setText(R.string.title_status)
+                titleFragment.vm.title = getString(R.string.title_status)
                 setStatusButton()
                 vm.curEntry = null
             }
@@ -673,7 +687,7 @@ class MainActivity : AppCompatActivity() {
                 vm.curEntry?.let {
                     confirmationFragment.fill(it)
                 }
-                main_title_text.setText(R.string.title_confirmation)
+                titleFragment.vm.title = getString(R.string.title_confirmation)
                 storeCommonRotation()
             }
         }
@@ -765,12 +779,14 @@ class MainActivity : AppCompatActivity() {
     // Return false if NoneSelected situation has occurred.
     private fun setList(titleId: Int, key: String, list: List<String>): Boolean {
         val title = getString(titleId)
-        main_title_text.setText(title)
+        titleFragment.vm.title = title
         if (list.isEmpty()) {
+            Timber.d("MYDEBUG: EMPTY LIST! $key")
             mainListFragment.vm.curKey = key
             mainListFragment.showing = false
             vm.onEmptyList()
         } else {
+            Timber.d("MYDEBUG: LIST->$key = ${list.size}")
             return mainListFragment.setList(key, list)
         }
         return true
@@ -879,7 +895,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showServerError(message: String?) {
-        mDialogHelper.showServerError(message ?: "server error", object : DialogHelper.DialogListener {
+        mDialogHelper.showServerError(message
+                ?: "server error", object : DialogHelper.DialogListener {
             override fun onOkay() {}
 
             override fun onCancel() {
@@ -1005,8 +1022,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         if (hint != null && hint.length > 0) {
-            sub_title.setText(hint)
-            sub_title.visibility = View.VISIBLE
+            titleFragment.vm.subTitle = hint
         }
     }
 
@@ -1070,9 +1086,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setPhotoTitleCount(count: Int) {
         if (count == 1) {
-            main_title_text.setText(getString(R.string.title_photo))
+            titleFragment.vm.title = getString(R.string.title_photo)
         } else {
-            main_title_text.setText(getString(R.string.title_photos, count))
+            titleFragment.vm.title = getString(R.string.title_photos, count)
         }
     }
 
@@ -1080,7 +1096,7 @@ class MainActivity : AppCompatActivity() {
         if (prefHelper.doErrorCheck) {
             val entry = vm.checkEntryErrors()
             if (entry != null) {
-                CheckError.instance.showTruckError(this, entry,
+                CheckError.instance.showTruckError(this, prefHelper, entry,
                         object : CheckError.CheckErrorResult {
                             override fun doEdit() {
                                 this@MainActivity.doEditEntry()

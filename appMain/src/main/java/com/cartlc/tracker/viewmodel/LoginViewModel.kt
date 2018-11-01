@@ -22,7 +22,7 @@ class LoginViewModel(
         get() = act.applicationContext as TBApplication
 
     init {
-        app.appComponent.inject(this)
+        app.carRepoComponent.inject(this)
     }
 
     var firstName: String = prefHelper.firstName ?: ""

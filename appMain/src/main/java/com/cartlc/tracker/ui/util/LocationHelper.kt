@@ -16,7 +16,7 @@ import android.util.Log
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.data.DataAddress
 import com.cartlc.tracker.model.data.DataStates
-import com.cartlc.tracker.model.sql.SqlTableCrash
+import com.cartlc.tracker.model.table.DatabaseTable
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -35,8 +35,9 @@ import java.util.Locale
  * Created by dug on 3/12/18.
  */
 class LocationHelper(
-        private var mApp: TBApplication
-) {
+        private val mApp: TBApplication,
+        private val db: DatabaseTable
+        ) {
 
     companion object {
 
@@ -48,8 +49,8 @@ class LocationHelper(
         lateinit var instance: LocationHelper
             private set
 
-        fun Init(app: TBApplication) {
-            LocationHelper(app)
+        fun Init(app: TBApplication, db: DatabaseTable) {
+            LocationHelper(app, db)
         }
     }
 
@@ -351,7 +352,7 @@ class LocationHelper(
             code += address.locality.hashCode().toLong()
             if (!mReportMap.contains(code)) {
                 mReportMap.add(code)
-                mApp.db.crash.info("LOCATION: " + address.toString())
+                db.crash.info("LOCATION: " + address.toString())
             }
             Log.i(TAG, address.toString())
         }
