@@ -1,6 +1,5 @@
 package com.cartlc.tracker.viewmodel
 
-import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.BuildConfig
@@ -9,10 +8,7 @@ import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.model.data.DataProjectAddressCombo
 import com.cartlc.tracker.model.flow.*
-import com.cartlc.tracker.model.misc.ConfirmDialogEvent
-import com.cartlc.tracker.model.misc.DispatchPictureRequestEvent
-import com.cartlc.tracker.model.misc.ErrorMessage
-import com.cartlc.tracker.model.misc.TruckStatus
+import com.cartlc.tracker.model.misc.*
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import java.util.ArrayList
@@ -21,7 +17,6 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
 
     companion object {
         private val ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG // true=Debugging only
-        private val KEY_STAGE = "stage"
     }
 
     val db: DatabaseTable
@@ -57,24 +52,12 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     var editProject: Boolean = false
     var autoNarrowOkay = true
 
-    private val _handleConfirmDialogEvent: MutableLiveData<ConfirmDialogEvent> by lazy {
-        MutableLiveData<ConfirmDialogEvent>()
-    }
-
-    fun handleConfirmDialogEvent(): LiveData<ConfirmDialogEvent> = _handleConfirmDialogEvent
-
     private fun showConfirmDialog() {
-        _handleConfirmDialogEvent.value = ConfirmDialogEvent()
+        dispatchActionEvent(Action.CONFIRM_DIALOG)
     }
 
-    private val _handleDispatchPictureRequest: MutableLiveData<DispatchPictureRequestEvent> by lazy {
-        MutableLiveData<DispatchPictureRequestEvent>()
-    }
-
-    fun handleDispatchPictureRequestEvent(): LiveData<DispatchPictureRequestEvent> = _handleDispatchPictureRequest
-
-    fun dispatchPictureRequest() {
-        _handleDispatchPictureRequest.value = DispatchPictureRequestEvent()
+    private fun dispatchPictureRequest() {
+        dispatchActionEvent(Action.PICTURE_REQUEST)
     }
 
     fun checkProjectErrors(): Boolean = repo.checkProjectErrors()
@@ -87,16 +70,15 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         if (confirmPrev()) {
             wasNext = false
             companyEditing = null
-            curFlowValue = curFlowValue.previous()
+            process(curFlowValue.prev)
         }
     }
 
     fun btnNext(wasAutoSkip: Boolean = false) {
         if (confirmNext()) {
-            wasNext = true
             didAutoSkip = wasAutoSkip
             companyEditing = null
-            curFlowValue = curFlowValue.advance()
+            advance()
         }
     }
 
@@ -117,17 +99,25 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
 
     fun advance() {
         wasNext = true
-        curFlowValue = curFlowValue.advance()
+        process(curFlowValue.next)
+    }
+
+    private fun process(action: ActionBundle?) {
+        when(action) {
+            is StageArg -> curFlowValue = Flow.from(action.stage)
+            is ActionArg -> dispatchActionEvent(action.action)
+        }
     }
 
     fun btnCenter() {
         if (confirmCenter()) {
             wasNext = false
-            curFlowValue = curFlowValue.center()
+            process(curFlowValue.center)
         }
     }
 
     fun btnChangeCompany() {
+        autoNarrowOkay = false
         wasNext = false
         curFlowValue = CompanyFlow()
         prefHelper.state = null
@@ -169,23 +159,28 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         curFlowValue = CurrentProjectFlow()
     }
 
-    fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null) {
-            curFlowValue = Flow.from(savedInstanceState.getInt(KEY_STAGE))
-        }
-    }
-
-    fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt(KEY_STAGE, curFlowValue.stage.ordinal)
-    }
+//    fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+//        if (savedInstanceState != null) {
+//            curFlowValue = Flow.from(savedInstanceState.getInt(KEY_STAGE))
+//        }
+//    }
+//
+//    fun onSaveInstanceState(outState: Bundle) {
+//        outState.putInt(KEY_STAGE, curFlowValue.stage.ordinal)
+//    }
 
     fun onNewProject() {
+        autoNarrowOkay = true
         prefHelper.clearCurProject()
         curFlowValue = ProjectFlow()
     }
 
     fun onDeletedProject() {
         prefHelper.clearCurProject()
+        curFlowValue = CurrentProjectFlow()
+    }
+
+    fun onAbort() {
         curFlowValue = CurrentProjectFlow()
     }
 
@@ -196,6 +191,10 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     fun onEditProject() {
         editProject = true
         curFlowValue = ProjectFlow()
+    }
+
+    fun onVehiclesPressed() {
+        dispatchActionEvent(Action.VEHICLES)
     }
 
     fun onErrorDialogOkay() {

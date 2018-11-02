@@ -13,8 +13,6 @@ enum class Stage {
     ADD_STREET,
     CONFIRM_ADDRESS,
     CURRENT_PROJECT,
-    NEW_PROJECT,
-    VIEW_PROJECT,
     TRUCK,
     EQUIPMENT,
     ADD_EQUIPMENT,

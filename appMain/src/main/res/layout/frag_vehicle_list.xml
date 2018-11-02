@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.cartlc.tracker.viewmodel.VehicleViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:visibility="@{viewModel.showList ? View.VISIBLE : View.GONE}">
+
+        <TextView
+            android:id="@+id/list_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@{viewModel.title}"
+            android:textSize="25sp"
+            android:visibility="@{viewModel.title != null ? View.VISIBLE : View.GONE}"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:background="@drawable/background_shadow"
+            android:focusable="true"
+            app:layout_constraintTop_toBottomOf="@id/list_title"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/list_title_2"/>
+
+        <TextView
+            android:id="@+id/list_title_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@{viewModel.title2}"
+            android:textSize="25sp"
+            android:visibility="@{viewModel.title2 != null ? View.VISIBLE : View.GONE}"
+            app:layout_constraintTop_toBottomOf="@id/list"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list_2"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:background="@drawable/background_shadow"
+            android:focusable="true"
+            android:visibility="@{viewModel.showList2 ? View.VISIBLE : View.GONE}"
+            app:layout_constraintTop_toBottomOf="@id/list_title_2"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

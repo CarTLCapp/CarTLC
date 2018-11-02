@@ -1,4 +1,4 @@
-package com.cartlc.tracker.model.misc
+package com.cartlc.tracker.model.event
 
 /**
  * Used as a wrapper for data that is exposed via a LiveData that represents an event.

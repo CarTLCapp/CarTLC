@@ -1,22 +1,18 @@
 package com.cartlc.tracker.viewmodel
 
 import android.app.Activity
-import com.cartlc.tracker.databinding.FragButtonsBinding
+import androidx.databinding.ObservableBoolean
+import androidx.databinding.ObservableField
 import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.pref.PrefHelper
+import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.ui.app.TBApplication
 import javax.inject.Inject
 
-class ButtonsViewModel(
-        private val act: Activity,
-        private val binding: FragButtonsBinding
-) : BaseViewModel() {
+class ButtonsViewModel(private val act: Activity) : BaseViewModel() {
 
     @Inject
     lateinit var repo: CarRepository
 
-    private val prefHelper: PrefHelper
-        get() = repo.prefHelper
     private val app: TBApplication
         get() = act.applicationContext as TBApplication
 
@@ -24,45 +20,41 @@ class ButtonsViewModel(
         app.carRepoComponent.inject(this)
     }
 
-    var showing: Boolean = true
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
-    var prevText: String = ""
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
-    var nextText: String = ""
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
-    var centerText: String = ""
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
-    var showPrevButton: Boolean = false
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
-    var showNextButton: Boolean = false
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
-    var showCenterButton: Boolean = false
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
-    var showChangeButton: Boolean = false
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
+    var showing = ObservableBoolean(true)
+    var prevText = ObservableField<String>("")
+    var nextText = ObservableField<String>("")
+    var centerText = ObservableField<String>("")
+    var showPrevButton = ObservableBoolean(false)
+    var showNextButton = ObservableBoolean(false)
+    var showCenterButton = ObservableBoolean(false)
+    var showChangeButton = ObservableBoolean(false)
 
+    var showingValue: Boolean
+        get() = showing.get()
+        set(value) = showing.set(value)
+    var prevTextValue: String?
+        get() = prevText.get()
+        set(value) = prevText.set(value)
+    var nextTextValue: String?
+        get() = nextText.get()
+        set(value) = nextText.set(value)
+    var centerTextValue: String?
+        get() = centerText.get()
+        set(value) = centerText.set(value)
+    var showPrevButtonValue: Boolean
+        get() = showPrevButton.get()
+        set(value) = showPrevButton.set(value)
+    var showNextButtonValue: Boolean
+        get() = showNextButton.get()
+        set(value) = showNextButton.set(value)
+    var showCenterButtonValue: Boolean
+        get() = showCenterButton.get()
+        set(value) = showCenterButton.set(value)
+    var showChangeButtonValue: Boolean
+        get() = showChangeButton.get()
+        set(value) = showChangeButton.set(value)
+
+    fun dispatchButtonEvent(action: Action) {
+        dispatchActionEvent(action)
+    }
 }

@@ -26,14 +26,14 @@ class ConfirmationFragment : BaseFragment() {
         get() = baseVM as ConfirmationViewModel
 
     var showing: Boolean
-        get() = vm.showing
+        get() = vm.showing.get()
         set(value) {
-            vm.showing = value
+            vm.showing.set(value)
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragConfirmationBinding.inflate(layoutInflater, container, false)
-        baseVM = ConfirmationViewModel(activity!!, binding)
+        baseVM = ConfirmationViewModel(activity!!)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
 

@@ -1,30 +1,39 @@
 package com.cartlc.tracker.model.flow
 
+import timber.log.Timber
+
+sealed class ActionBundle
+data class ActionArg(val action: Action) : ActionBundle()
+data class StageArg(val stage: Stage) : ActionBundle()
+
 open class Flow(
         val stage: Stage,
-        val prev: Stage?,
-        val center: Stage?,
-        val next: Stage?
+        val prev: ActionBundle?,
+        val center: ActionBundle?,
+        val next: ActionBundle?
 ) {
+
+    constructor(
+            stage: Stage,
+            prev: Stage?,
+            center: Stage?,
+            next: Stage?
+    ) : this(stage, prev?.let { StageArg(prev) }, center?.let { StageArg(center) }, next?.let { StageArg(next) })
+
+    constructor(
+            stage: Stage,
+            prev: Action?,
+            center: Action?,
+            next: Action?
+    ) : this(stage, prev?.let { ActionArg(prev) }, center?.let { ActionArg(center) }, next?.let { ActionArg(next) })
+
     open val isPictureStage = false
-
-    fun previous(): Flow {
-        return from(this, prev)
-    }
-
-    fun advance(): Flow {
-        return from(this, next)
-    }
-
-    fun center(): Flow {
-        return from(this, center)
-    }
 
     companion object {
 
-        fun from(ord: Int): Flow = from(null, Stage.from(ord))
+        fun from(ord: Int): Flow = from(Stage.from(ord))
 
-        fun from(from: Flow?, stage: Stage?): Flow =
+        fun from(stage: Stage?): Flow =
                 when (stage) {
                     Stage.LOGIN -> LoginFlow()
                     Stage.PROJECT -> ProjectFlow()
@@ -38,8 +47,6 @@ open class Flow(
                     Stage.ADD_STREET -> AddStreetFlow()
                     Stage.CONFIRM_ADDRESS -> ConfirmAddressFlow()
                     Stage.CURRENT_PROJECT -> CurrentProjectFlow()
-                    Stage.NEW_PROJECT -> NewProjectFlow()
-                    Stage.VIEW_PROJECT -> ViewProjectFlow()
                     Stage.TRUCK -> TruckFlow()
                     Stage.EQUIPMENT -> EquipmentFlow()
                     Stage.NOTES -> NotesFlow()
@@ -48,10 +55,14 @@ open class Flow(
                     Stage.PICTURE_2 -> Picture2Flow()
                     Stage.PICTURE_3 -> Picture3Flow()
                     Stage.CONFIRM -> ConfirmFlow()
-                    else -> LoginFlow()
+                    else -> {
+                        Timber.e("UNKNOWN stage")
+                        LoginFlow()
+                    }
                 }
     }
 }
+
 
 open class PictureFlow(
         stage: Stage,
@@ -75,9 +86,7 @@ class StreetFlow : Flow(Stage.STREET, Stage.CITY, Stage.ADD_STREET, Stage.CONFIR
 class AddStreetFlow : Flow(Stage.ADD_STREET, Stage.CITY, null, Stage.CONFIRM_ADDRESS)
 class ConfirmAddressFlow : Flow(Stage.CONFIRM_ADDRESS, Stage.STREET, null, Stage.CURRENT_PROJECT)
 
-class CurrentProjectFlow : Flow(Stage.CURRENT_PROJECT, Stage.VIEW_PROJECT, Stage.NEW_PROJECT, null)
-class NewProjectFlow : Flow(Stage.NEW_PROJECT, Stage.CURRENT_PROJECT, null, Stage.PROJECT)
-class ViewProjectFlow : Flow(Stage.VIEW_PROJECT, null, null, null)
+class CurrentProjectFlow : Flow(Stage.CURRENT_PROJECT, Action.VIEW_PROJECT, Action.NEW_PROJECT, null)
 
 class TruckFlow : Flow(Stage.TRUCK, Stage.CURRENT_PROJECT, null, Stage.PICTURE_1)
 class Picture1Flow : PictureFlow(Stage.PICTURE_1, Stage.TRUCK, Stage.ADD_PICTURE, Stage.EQUIPMENT, 1)

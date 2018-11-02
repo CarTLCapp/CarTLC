@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
 import android.widget.TextView
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragMainListBinding
+import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.model.event.EventRefreshProjects
@@ -22,6 +24,7 @@ import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.act.MainActivity
 import com.cartlc.tracker.ui.act.MainActivity_MembersInjector
 import com.cartlc.tracker.viewmodel.ButtonsViewModel
+import com.cartlc.tracker.viewmodel.EntrySimpleViewModel
 import com.cartlc.tracker.viewmodel.MainListViewModel
 import kotlinx.android.synthetic.main.content_main.view.*
 import org.greenrobot.eventbus.EventBus
@@ -36,30 +39,33 @@ class MainListFragment : BaseFragment() {
         get() = baseVM as MainListViewModel
 
     var showing: Boolean
-        get() = vm.showing
+        get() = vm.showing.get()
         set(value) {
-            vm.showing = value
+            vm.showing.set(value)
         }
 
     var showEmpty: Boolean
-        get() = vm.showEmpty
+        get() = vm.showEmpty.get()
         set(value) {
-            vm.showEmpty = value
+            vm.showEmpty.set(value)
         }
 
     val mainList: RecyclerView
         get() = binding.mainList
     val empty: TextView
         get() = binding.empty
+
     val ctx: Context
         get() = context!!
+
+    val mainActivity: MainActivity?
+        get() = activity as? MainActivity
+
     val buttonsViewModel: ButtonsViewModel?
-        get() {
-            if (activity is MainActivity) {
-                (activity as MainActivity).buttonsFragment.vm
-            }
-            return null
-        }
+        get() = mainActivity?.buttonsFragment?.vm
+
+    val entrySimpleViewModel: EntrySimpleViewModel?
+        get() = mainActivity?.entrySimpleFragment?.vm
 
     lateinit private var simpleAdapter: SimpleListAdapter
     lateinit private var projectAdapter: ProjectListAdapter
@@ -69,7 +75,7 @@ class MainListFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragMainListBinding.inflate(layoutInflater, container, false)
-        baseVM = MainListViewModel(activity!!, binding, buttonsViewModel)
+        baseVM = MainListViewModel(ctx)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
 
@@ -79,13 +85,25 @@ class MainListFragment : BaseFragment() {
         mainList.addItemDecoration(divider)
         simpleAdapter = SimpleListAdapter(mainList.context, object : SimpleListAdapter.OnItemSelectedListener {
             override fun onSelectedItem(position: Int, text: String) {
-                vm.onKeySelected(text)
+                vm.key.value = text
+            }
+        })
+        vm.key.observe(this, Observer { value ->
+            when (vm.curFlowValue) {
+                Stage.PROJECT,
+                Stage.CITY,
+                Stage.STATE,
+                Stage.STREET -> buttonsViewModel?.showNextButtonValue = true
+                Stage.COMPANY -> mainActivity?.checkCenterButtonIsEdit()
+                Stage.TRUCK -> entrySimpleViewModel?.simpleText?.set(value)
+                else -> {
+                }
             }
         })
         projectAdapter = ProjectListAdapter(mainList.context, vm)
         equipmentSelectAdapter = EquipmentSelectListAdapter(vm)
         radioAdapter = RadioListAdapter(mainList.context)
-        radioAdapter.listener = { pos, text -> vm.onStatusButtonClicked(TruckStatus.from(ctx, text)) }
+        radioAdapter.listener = { _, text -> vm.onStatusButtonClicked(TruckStatus.from(ctx, text)) }
         noteEntryAdapter = NoteListEntryAdapter(mainList.context, vm, object : NoteListEntryAdapter.EntryListener {
             var currentFocus: DataNote? = null
 
@@ -154,7 +172,7 @@ class MainListFragment : BaseFragment() {
                         TruckStatus.PARTIAL.getString(ctx),
                         TruckStatus.NEEDS_REPAIR.getString(ctx)
                 )
-                radioAdapter.selectedText = vm.status
+                radioAdapter.selectedText = vm.status?.getStringNull(ctx)
             }
             else -> mainList.adapter = simpleAdapter
         }

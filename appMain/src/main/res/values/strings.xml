@@ -111,5 +111,54 @@
 
     <!-- Fleet Vehicles -->
     <string name="title_vehicles">Fleet Vehicles</string>
+    <string name="vehicle_title">Preventative Maintenance Checks and Services</string>
+    <string name="vehicle_email_address">Email Address</string>
+    <string name="vehicle_inspecting">What vehicle are you inspecting?</string>
+    <string name="vehicle_type">Type of Inspection</string>
+    <string name="vehicle_mileage">Current Mileage</string>
+    <string name="vehicle_lights">Lights</string>
+    <string name="vehicle_lights_description">Head/Tail/Brake Lights\nCheck the boxes when the item has been inspected\nAny issues with the exterior lights please write below.</string>
+    <string name="vehicle_lights_head">Head Lights</string>
+    <string name="vehicle_lights_tail">Tail Lights</string>
+    <string name="vehicle_lights_exterior">Any ssues with exterior lights?</string>
+    <string name="vehicle_fluids">Fluids</string>
+    <string name="vehicle_fluids_desciption">Check the boxes when the item has been inspected.\nAny issues with any fluids please write below.</string>
+    <string name="vehicle_fluids_isseus">Any fluids low or leaks detected?</string>
+    <string name="vehicle_exterior">Exterior of Vehicle</string>
+    <string name="vehicle_exterior_description">Please check exterios of Vehicle and note any NEW damage. Also inspect wiper blades, tires, and pressure.</string>
+    <string name="vehicle_tire_inspection">Tire Inspection (including pressure, uneven wear)</string>
+    <string name="vehicle_tire_damage">Any damage to vehicle exterior to include tires?</string>
+    <string name="vehicle_other_title">Any other issues to report?</string>
+    <string name="vehicle_other_description">Are there any other issues to report with the vehicle? (Shelf falling apart, strange noise or vibration at a certain speed, camera not working, cracked windshield?)</string>
+    <string name="vehicle_submit">Submit</string>
+
+    <!-- Arrays -->
+    <string-array name="type_of_inspection">
+        <item>Pre-Trip</item>
+        <item>Weekly</item>
+        <item>Post-Trip</item>
+    </string-array>
+    <string-array name="head_lights">
+        <item>Low Beams</item>
+        <item>High Beams</item>
+        <item>Turn Signals</item>
+    </string-array>
+    <string-array name="tail_lights">
+        <item>Rear Lights</item>
+        <item>Brake Lights</item>
+        <item>Turn Signals</item>
+    </string-array>
+    <string-array name="fluid_checks">
+        <item>Oil</item>
+        <item>Coolant</item>
+        <item>Powersteering</item>
+        <item>Transmission</item>
+        <item>Brake</item>
+        <item>Washer</item>
+    </string-array>
+    <string-array name="tire_inspection">
+        <item>Front</item>
+        <item>Rear</item>
+    </string-array>
 
 </resources>

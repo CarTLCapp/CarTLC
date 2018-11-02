@@ -2,10 +2,14 @@ package com.cartlc.tracker.viewmodel
 
 import androidx.databinding.Observable
 import androidx.databinding.PropertyChangeRegistry
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.cartlc.tracker.model.flow.Action
+import com.cartlc.tracker.model.event.ActionEvent
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.ErrorMessage
+import com.cartlc.tracker.model.event.GenericEvent
 
 open class BaseViewModel : ViewModel(), Observable {
 
@@ -47,6 +51,30 @@ open class BaseViewModel : ViewModel(), Observable {
      */
     fun notifyPropertyChanged(fieldId: Int) {
         callbacks.notifyCallbacks(this, fieldId, null)
+    }
+
+    // ActionEvent
+
+    protected val _handleAction: MutableLiveData<ActionEvent> by lazy {
+        MutableLiveData<ActionEvent>()
+    }
+
+    fun handleActionEvent(): LiveData<ActionEvent> = _handleAction
+
+    protected fun dispatchActionEvent(action: Action) {
+        _handleAction.value = ActionEvent(action)
+    }
+
+    // Generic Event
+
+    protected val _handleGeneric: MutableLiveData<GenericEvent> by lazy {
+        MutableLiveData<GenericEvent>()
+    }
+
+    fun handleGenericEvent(): LiveData<GenericEvent> = _handleGeneric
+
+    protected fun dispatchGenericEvent(arg: String) {
+        _handleGeneric.value = GenericEvent(arg)
     }
 
 }

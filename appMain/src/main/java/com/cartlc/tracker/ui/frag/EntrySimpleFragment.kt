@@ -29,12 +29,12 @@ class EntrySimpleFragment: BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragEntrySimpleBinding.inflate(layoutInflater, container, false)
-        baseVM = EntrySimpleViewModel(activity!!, binding)
+        baseVM = EntrySimpleViewModel(activity!!)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
         val autoNext = object : TextView.OnEditorActionListener {
             override fun onEditorAction(p0: TextView?, p1: Int, p2: KeyEvent?): Boolean {
-                vm.invokeEntrySimpleReturnEvent(getEditText(binding.entrySimpleEditText))
+                vm.dispatchReturnPressedEvent(getEditText(binding.entrySimpleEditText))
                 return false
             }
         }
@@ -47,8 +47,8 @@ class EntrySimpleFragment: BaseFragment() {
     }
 
     fun reset() {
-        vm.showing = false
-        vm.helpText = null
+        vm.showing.set(false)
+        vm.helpText.set(null)
         binding.entrySimpleEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS)
     }
 

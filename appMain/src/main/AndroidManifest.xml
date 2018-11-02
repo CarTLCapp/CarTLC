@@ -43,6 +43,14 @@
             android:windowSoftInputMode="adjustResize">
         </activity>
 
+        <activity
+            android:name=".ui.act.VehicleActivity"
+            android:label="@string/title_vehicles"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.cartcl.tracker.fileprovider"

@@ -1,6 +1,8 @@
 package com.cartlc.tracker.viewmodel
 
 import android.app.Activity
+import androidx.databinding.ObservableBoolean
+import androidx.databinding.ObservableField
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.app.TBApplication
@@ -8,10 +10,7 @@ import com.cartlc.tracker.databinding.FragLoginBinding
 import com.cartlc.tracker.model.misc.ErrorMessage
 import javax.inject.Inject
 
-class LoginViewModel(
-        private val act: Activity,
-        private val binding: FragLoginBinding
-) : BaseViewModel() {
+class LoginViewModel(private val act: Activity) : BaseViewModel() {
 
     @Inject
     lateinit var repo: CarRepository
@@ -25,53 +24,50 @@ class LoginViewModel(
         app.carRepoComponent.inject(this)
     }
 
-    var firstName: String = prefHelper.firstName ?: ""
-    var lastName: String = prefHelper.lastName ?: ""
-    var secondaryFirstName: String = prefHelper.secondaryFirstName ?: ""
-    var secondaryLastName: String = prefHelper.secondaryLastName ?: ""
-    var showing: Boolean = false
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
-    var isSecondaryPromptsEnabled: Boolean = prefHelper.isSecondaryEnabled
-        set(value) {
-            field = value
-            binding.invalidateAll()
-        }
+    private var firstNameEdit = prefHelper.firstName ?: ""
+    private var lastNameEdit = prefHelper.lastName ?: ""
+    private var secondaryFirstNameEdit = prefHelper.secondaryFirstName ?: ""
+    private var secondaryLastNameEdit = prefHelper.secondaryLastName ?: ""
+
+    var showing = ObservableBoolean(false)
+    var firstName = ObservableField<String>(firstNameEdit)
+    var lastName = ObservableField<String>(lastNameEdit)
+    var secondaryFirstName = ObservableField<String>(secondaryFirstNameEdit)
+    var secondaryLastName = ObservableField<String>(secondaryLastNameEdit)
+    var isSecondaryPromptsEnabled = ObservableBoolean(prefHelper.isSecondaryEnabled)
 
     fun afterFirstNameChanged(s: CharSequence) {
-        firstName = s.toString()
+        firstNameEdit = s.toString()
     }
 
     fun afterLastNameChanged(s: CharSequence) {
-        lastName = s.toString()
+        lastNameEdit = s.toString()
     }
 
     fun onSecondaryLoginChecked(isChecked: Boolean) {
-        isSecondaryPromptsEnabled = isChecked
+        isSecondaryPromptsEnabled.set(isChecked)
     }
 
     fun afterSecondaryFirstNameChanged(s: CharSequence) {
-        secondaryFirstName = s.toString()
+        secondaryFirstNameEdit = s.toString()
     }
 
     fun afterSecondaryLastNameChanged(s: CharSequence) {
-        secondaryLastName = s.toString()
+        secondaryLastNameEdit = s.toString()
     }
 
     fun detectLoginError(): Boolean {
-        if (firstName.isBlank() || lastName.isBlank()) {
+        if (firstNameEdit.isBlank() || lastNameEdit.isBlank()) {
             error.value = ErrorMessage.ENTER_YOUR_NAME
             return true
         }
-        prefHelper.firstName = firstName
-        prefHelper.lastName = lastName
-        prefHelper.isSecondaryEnabled = isSecondaryPromptsEnabled
+        prefHelper.firstName = firstNameEdit
+        prefHelper.lastName = lastNameEdit
+        prefHelper.isSecondaryEnabled = isSecondaryPromptsEnabled.get()
 
         if (prefHelper.isSecondaryEnabled) {
-            prefHelper.secondaryFirstName = secondaryFirstName
-            prefHelper.secondaryLastName = secondaryLastName
+            prefHelper.secondaryFirstName = secondaryFirstNameEdit
+            prefHelper.secondaryLastName = secondaryLastNameEdit
         }
         prefHelper.setRegistrationChanged(true)
         app.ping()

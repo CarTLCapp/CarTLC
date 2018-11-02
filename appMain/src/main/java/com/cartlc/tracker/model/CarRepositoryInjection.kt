@@ -24,13 +24,12 @@ class CarRepositoryModule(
 @Singleton
 @Component(modules = [CarRepositoryModule::class])
 interface CarRepositoryComponent {
-    fun inject(act: MainActivity)
     fun inject(act: ListEntryActivity)
     fun inject(view: ListEntryAdapter)
     fun inject(obj: DCPing)
     fun inject(obj: DCService)
-    fun inject(vm: LoginViewModel)
     fun inject(vm: MainListViewModel)
+    fun inject(vm: LoginViewModel)
     fun inject(vm: ConfirmationViewModel)
     fun inject(vm: TitleViewModel)
     fun inject(vm: ButtonsViewModel)

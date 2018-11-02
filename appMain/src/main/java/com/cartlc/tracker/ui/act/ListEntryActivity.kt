@@ -21,7 +21,7 @@ import com.cartlc.tracker.model.table.DatabaseTable
 import kotlinx.android.synthetic.main.activity_list_entries.*
 import javax.inject.Inject
 
-class ListEntryActivity : AppCompatActivity(), ListEntryAdapter.OnItemSelectedListener {
+class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListener {
 
     lateinit var app: TBApplication
     lateinit var mEntryListAdapter: ListEntryAdapter
@@ -71,7 +71,8 @@ class ListEntryActivity : AppCompatActivity(), ListEntryAdapter.OnItemSelectedLi
         val linearLayoutManager = AutoLinearLayoutManager(this)
         list_entries!!.layoutManager = linearLayoutManager
         list_entries!!.adapter = mEntryListAdapter
-        setSupportActionBar(toolbar)
+
+        setSupportActionBar(toolbar_list)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
 

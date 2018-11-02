@@ -17,9 +17,7 @@ import androidx.multidex.MultiDex
 
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.CarRepositoryComponent
-import com.cartlc.tracker.model.CarRepositoryModule
+import com.cartlc.tracker.model.*
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.event.EventError
@@ -34,9 +32,9 @@ import com.cartlc.tracker.ui.util.PermissionHelper.PermissionListener
 import timber.log.Timber
 
 import com.cartlc.tracker.ui.util.PermissionHelper
+import com.cartlc.tracker.viewmodel.*
 import com.squareup.leakcanary.LeakCanary
 
-import com.cartlc.tracker.model.DaggerCarRepositoryComponent
 import org.greenrobot.eventbus.EventBus
 
 import java.io.File
@@ -99,9 +97,29 @@ class TBApplication : Application() {
         }
     }
 
-    lateinit var carRepoComponent: CarRepositoryComponent
+    val versionedTitle: String
+        get() {
+            val sbuf = StringBuilder()
+            sbuf.append(getString(R.string.app_name))
+            sbuf.append(" - ")
+            try {
+                sbuf.append(version)
+            } catch (ex: Exception) {
+                TBApplication.ReportError(ex, TBApplication::class.java, "versionedTitle", "main")
+            }
+            return sbuf.toString()
+        }
 
+    lateinit var carRepoComponent: CarRepositoryComponent
     private lateinit var carRepo: CarRepository
+
+    lateinit var mainViewModelComponent: MainViewModelComponent
+    private lateinit var mainViewModel: MainViewModel
+
+    lateinit var vehicleComponent: VehicleViewModelComponent
+    private lateinit var vehicleViewModel: VehicleViewModel
+    private lateinit var vehicleRepository: VehicleRepository
+
     private val prefHelper: PrefHelper
         get() = carRepo.prefHelper
     private val db: DatabaseTable
@@ -126,6 +144,16 @@ class TBApplication : Application() {
         carRepo = CarRepository(this)
         carRepoComponent = DaggerCarRepositoryComponent.builder()
                 .carRepositoryModule(CarRepositoryModule(carRepo))
+                .build()
+        mainViewModel = MainViewModel(carRepo)
+        mainViewModel.computeCurStage()
+        mainViewModelComponent = DaggerMainViewModelComponent.builder()
+                .mainViewModelModule(MainViewModelModule(mainViewModel))
+                .build()
+        vehicleRepository = VehicleRepository(this)
+        vehicleViewModel = VehicleViewModel(vehicleRepository)
+        vehicleComponent = DaggerVehicleViewModelComponent.builder()
+                .vehicleViewModelModule(VehicleViewModelModule(vehicleViewModel))
                 .build()
 
         if (LEAK_CANARY) {
@@ -156,18 +184,18 @@ class TBApplication : Application() {
         }
     }
 
-    fun requestZipCode(zipCode: String) {
-        val data = db.zipCode.query(zipCode)
-        if (data != null) {
-            data.check()
-            EventBus.getDefault().post(data)
-        } else if (ServerHelper.instance.hasConnection(this)) {
-            val intent = Intent(this, DCService::class.java)
-            intent.action = DCService.ACTION_ZIP_CODE
-            intent.putExtra(DCService.DATA_ZIP_CODE, zipCode)
-            startService(intent)
-        }
-    }
+//    fun requestZipCode(zipCode: String) {
+//        val data = db.zipCode.query(zipCode)
+//        if (data != null) {
+//            data.check()
+//            EventBus.getDefault().post(data)
+//        } else if (ServerHelper.instance.hasConnection(this)) {
+//            val intent = Intent(this, DCService::class.java)
+//            intent.action = DCService.ACTION_ZIP_CODE
+//            intent.putExtra(DCService.DATA_ZIP_CODE, zipCode)
+//            startService(intent)
+//        }
+//    }
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)

@@ -15,16 +15,16 @@ class LoginFragment : BaseFragment() {
         get() = baseVM as LoginViewModel
 
     var showing: Boolean
-        get() = vm.showing
+        get() = vm.showing.get()
         set(value) {
-            vm.showing = value
+            vm.showing.set(value)
         }
 
     fun detectLoginError(): Boolean = vm.detectLoginError()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragLoginBinding.inflate(layoutInflater, container, false)
-        baseVM = LoginViewModel(activity!!, binding)
+        baseVM = LoginViewModel(activity!!)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
         return binding.root

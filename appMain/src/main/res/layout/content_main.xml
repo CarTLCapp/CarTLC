@@ -33,7 +33,7 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <fragment
-        android:id="@+id/login_fragment"
+        android:id="@+id/frame_login"
         android:name="com.cartlc.tracker.ui.frag.LoginFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,56 +47,9 @@
         android:name="com.cartlc.tracker.ui.frag.EntrySimpleFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frame_title"/>
-
-    <!--<androidx.constraintlayout.widget.ConstraintLayout-->
-        <!--android:id="@+id/frame_status"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginTop="20dp"-->
-        <!--app:layout_constraintLeft_toLeftOf="parent"-->
-        <!--app:layout_constraintRight_toRightOf="parent"-->
-        <!--app:layout_constraintTop_toBottomOf="@id/frame_title">-->
-
-        <!--<RadioGroup-->
-            <!--android:id="@+id/status_select"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:orientation="vertical"-->
-            <!--app:layout_constraintLeft_toLeftOf="parent"-->
-            <!--app:layout_constraintRight_toRightOf="parent"-->
-            <!--app:layout_constraintTop_toTopOf="parent">-->
-
-            <!--<RadioButton-->
-                <!--android:id="@+id/status_complete"-->
-                <!--style="@style/StatusText"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:onClick="onStatusButtonClicked"-->
-                <!--android:text="@string/status_complete"/>-->
-
-            <!--<RadioButton-->
-                <!--android:id="@+id/status_partial"-->
-                <!--style="@style/StatusText"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:onClick="onStatusButtonClicked"-->
-                <!--android:text="@string/status_partial_install"/>-->
-
-            <!--<RadioButton-->
-                <!--android:id="@+id/status_needs_repair"-->
-                <!--style="@style/StatusText"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:onClick="onStatusButtonClicked"-->
-                <!--android:text="@string/status_needs_repair"/>-->
-        <!--</RadioGroup>-->
-
-    <!--</androidx.constraintlayout.widget.ConstraintLayout>-->
 
     <fragment
         android:id="@+id/frame_confirmation_fragment"
@@ -111,9 +64,9 @@
         app:layout_constraintTop_toBottomOf="@id/frame_title"/>
 
     <fragment
-        android:id="@+id/main_list_fragment"
+        android:id="@+id/frame_main_list"
         android:name="com.cartlc.tracker.ui.frag.MainListFragment"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="20dp"
         android:focusable="true"
@@ -127,8 +80,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/main_list_fragment"
-        app:layout_constraintRight_toRightOf="@id/main_list_fragment"/>
+        app:layout_constraintBottom_toTopOf="@id/frame_main_list"
+        app:layout_constraintRight_toRightOf="@id/frame_main_list"/>
 
     <RelativeLayout
         android:id="@+id/frame_pictures"

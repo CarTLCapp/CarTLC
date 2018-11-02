@@ -45,7 +45,7 @@ class RadioListAdapter(ctx: Context) : RecyclerView.Adapter<RadioListAdapter.Cus
             field = value
             notifyDataSetChanged()
         }
-    var listener: (seletectedPos: Int, selectedText: String) -> Unit = { pos, text -> }
+    var listener: (seletectedPos: Int, selectedText: String) -> Unit = { _, _ -> }
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
@@ -57,12 +57,15 @@ class RadioListAdapter(ctx: Context) : RecyclerView.Adapter<RadioListAdapter.Cus
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
         val text = list[position]
         holder.view.item.text = text
-        holder.view.item.setOnClickListener {
-            lastSelectedPos = holder.adapterPosition
-            lastSelectedText = text
-            listener.invoke(lastSelectedPos, text)
-        }
+        holder.view.item.setOnClickListener {onItemSelected(holder.adapterPosition, text) }
         holder.view.item.isChecked = lastSelectedPos == position
+    }
+
+    private fun onItemSelected(pos: Int, text: String) {
+        lastSelectedPos = pos
+        lastSelectedText = text
+        listener.invoke(lastSelectedPos, text)
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {

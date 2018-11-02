@@ -13,26 +13,14 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <!--android:background="?android:attr/colorPrimary"-->
-
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_main"
+            android:id="@+id/toolbar_vehicle"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
             app:popupTheme="@style/AppTheme.PopupOverlay"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_main"/>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:visibility="gone"
-        app:backgroundTint="#dbe6e5"
-        app:srcCompat="@android:drawable/ic_input_add"/>
+    <include layout="@layout/content_vehicles"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -8,10 +8,10 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragButtonsBinding
+import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.viewmodel.ButtonsViewModel
-import com.cartlc.tracker.viewmodel.MainViewModel
 
 class ButtonsFragment: BaseFragment() {
 
@@ -20,7 +20,7 @@ class ButtonsFragment: BaseFragment() {
         val ratio = 0.15
 
         fun clear() {
-            vm.showing = true
+            vm.showingValue = true
         }
 
         override fun onGlobalLayout() {
@@ -38,14 +38,14 @@ class ButtonsFragment: BaseFragment() {
         }
 
         fun hideButtons() {
-            if (vm.showing) {
-                vm.showing = false
+            if (vm.showingValue) {
+                vm.showingValue = false
             }
         }
 
         fun restoreButtons() {
-            if (!vm.showing) {
-                vm.showing = true
+            if (!vm.showingValue) {
+                vm.showingValue = true
             }
         }
     }
@@ -60,51 +60,49 @@ class ButtonsFragment: BaseFragment() {
 
     val vm: ButtonsViewModel
         get() = baseVM as ButtonsViewModel
-    var tmpMainViewModel: MainViewModel? = null
 
     private var softKeyboardDetect = SoftKeyboardDetect()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragButtonsBinding.inflate(layoutInflater, container, false)
-        baseVM = ButtonsViewModel(activity!!, binding)
+        baseVM = ButtonsViewModel(activity!!)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
-        binding.btnNext.setOnClickListener({ this.doBtnNextFromUser(it) })
-        binding.btnPrev.setOnClickListener({ this.doBtnPrevFromUser(it) })
-        binding.change.setOnClickListener({ _ -> doBtnChangeCompany() })
-        binding.btnCenter.setOnClickListener({ _ -> doBtnCenter() })
+        binding.btnNext.setOnClickListener { this.doBtnNextFromUser(it) }
+        binding.btnPrev.setOnClickListener { this.doBtnPrevFromUser(it) }
+        binding.change.setOnClickListener { _ -> doBtnChangeCompany() }
+        binding.btnCenter.setOnClickListener { _ -> doBtnCenter() }
         return binding.root
     }
 
     fun reset(flow: Flow) {
-        vm.showChangeButton = false
-        vm.showCenterButton = false
-        vm.centerText = getString(R.string.btn_add)
-        vm.showNextButton = flow.next != null
-        vm.nextText = getString(R.string.btn_next)
-        vm.showPrevButton = flow.prev != null
-        vm.prevText = getString(R.string.btn_prev)
+        vm.showChangeButtonValue = false
+        vm.showCenterButtonValue = false
+        vm.centerTextValue = getString(R.string.btn_add)
+        vm.showNextButtonValue = flow.next != null
+        vm.nextTextValue = getString(R.string.btn_next)
+        vm.showPrevButtonValue = flow.prev != null
+        vm.prevTextValue = getString(R.string.btn_prev)
     }
 
     private fun doBtnNextFromUser(v: View) {
-        tmpMainViewModel?.btnNext()
+        vm.dispatchButtonEvent(Action.BTN_NEXT)
         softKeyboardDetect.clear()
         activity?.let { TBApplication.hideKeyboard(it, v) }
     }
 
     private fun doBtnPrevFromUser(v: View) {
-        tmpMainViewModel?.btnPrev()
+        vm.dispatchButtonEvent(Action.BTN_PREV)
         softKeyboardDetect.clear()
         activity?.let { TBApplication.hideKeyboard(it, v) }
     }
 
     private fun doBtnCenter() {
-        tmpMainViewModel?.btnCenter()
+        vm.dispatchButtonEvent(Action.BTN_CENTER)
     }
 
     private fun doBtnChangeCompany() {
-        tmpMainViewModel?.autoNarrowOkay = false
-        tmpMainViewModel?.btnChangeCompany()
+        vm.dispatchButtonEvent(Action.BTN_CHANGE)
     }
 
 }
