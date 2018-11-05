@@ -79,7 +79,7 @@ class ConfirmationFragment : BaseFragment() {
             trcukcNumberValue.text = truck.toString()
             trcukcNumberValue.visibility = View.VISIBLE
         }
-        simpleAdapter.setList(entry.equipmentNames!!)
+        simpleAdapter.items = entry.equipmentNames!!
         pictureAdapter.setList(entry.pictures.toMutableList())
         statusValue.text = entry.getStatus(ctx)
         picturesLabel.text = ctx.getString(R.string.title_pictures_, entry.pictures.size)

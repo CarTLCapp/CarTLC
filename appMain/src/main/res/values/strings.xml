@@ -111,19 +111,23 @@
 
     <!-- Fleet Vehicles -->
     <string name="title_vehicles">Fleet Vehicles</string>
-    <string name="vehicle_title">Preventative Maintenance Checks and Services</string>
+    <string name="vehicle_title">Preventative Maintenance</string>
     <string name="vehicle_email_address">Email Address</string>
+    <string name="vehicle_email_hint">Enter email here</string>
     <string name="vehicle_inspecting">What vehicle are you inspecting?</string>
     <string name="vehicle_type">Type of Inspection</string>
     <string name="vehicle_mileage">Current Mileage</string>
+    <string name="vehicle_mileage_hint">Enter mileage here</string>
     <string name="vehicle_lights">Lights</string>
     <string name="vehicle_lights_description">Head/Tail/Brake Lights\nCheck the boxes when the item has been inspected\nAny issues with the exterior lights please write below.</string>
     <string name="vehicle_lights_head">Head Lights</string>
     <string name="vehicle_lights_tail">Tail Lights</string>
     <string name="vehicle_lights_exterior">Any ssues with exterior lights?</string>
+    <string name="vehicle_entry_general_hint">Enter here</string>
     <string name="vehicle_fluids">Fluids</string>
-    <string name="vehicle_fluids_desciption">Check the boxes when the item has been inspected.\nAny issues with any fluids please write below.</string>
-    <string name="vehicle_fluids_isseus">Any fluids low or leaks detected?</string>
+    <string name="vehicle_fluids_checks">Fluid Checks</string>
+    <string name="vehicle_fluids_description">Check the boxes when the item has been inspected.\nAny issues with any fluids please write below.</string>
+    <string name="vehicle_fluids_detected">Any fluids low or leaks detected?</string>
     <string name="vehicle_exterior">Exterior of Vehicle</string>
     <string name="vehicle_exterior_description">Please check exterios of Vehicle and note any NEW damage. Also inspect wiper blades, tires, and pressure.</string>
     <string name="vehicle_tire_inspection">Tire Inspection (including pressure, uneven wear)</string>

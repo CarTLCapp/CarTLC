@@ -83,11 +83,9 @@ class MainListFragment : BaseFragment() {
         mainList.layoutManager = linearLayoutManager
         val divider = DividerItemDecoration(mainList.context, linearLayoutManager.orientation)
         mainList.addItemDecoration(divider)
-        simpleAdapter = SimpleListAdapter(mainList.context, object : SimpleListAdapter.OnItemSelectedListener {
-            override fun onSelectedItem(position: Int, text: String) {
-                vm.key.value = text
-            }
-        })
+        simpleAdapter = SimpleListAdapter(mainList.context) {
+            pos, text -> vm.key.value = text
+        }
         vm.key.observe(this, Observer { value ->
             when (vm.curFlowValue) {
                 Stage.PROJECT,
@@ -181,7 +179,7 @@ class MainListFragment : BaseFragment() {
     fun setList(key: String, list: List<String>): Boolean {
         showing = true
         mainList.adapter = simpleAdapter
-        simpleAdapter.setList(list)
+        simpleAdapter.items = list
         vm.curKey = key
         val curValue = vm.tmpPrefHelper.getKeyValue(key)
         if (curValue == null) {

@@ -10,50 +10,41 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
-import kotlinx.android.synthetic.main.entry_item_simple.view.*
+import kotlinx.android.synthetic.main.entry_item_check_box.view.*
 
-typealias SimpleListListener = (position: Int, text: String) -> Unit
+typealias CheckBoxListListener = (position: Int, text: String, isSelected: Boolean) -> Unit
 
 /**
  * Created by dug on 10/10/18.
  */
-class SimpleListAdapter : RecyclerView.Adapter<SimpleListAdapter.CustomViewHolder> {
+class CheckBoxListAdapter : RecyclerView.Adapter<CheckBoxListAdapter.CustomViewHolder> {
 
     private val ctx: Context
     private val layoutInflater: LayoutInflater
-    private val entryItemLayoutId: Int
-    private var listener: SimpleListListener = { _, _ -> }
-    private var selectedOkay = false
+    private var listener: CheckBoxListListener = { _, _, _ -> }
 
     var items: List<String> = emptyList()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
-    var selectedPos: Int = -1
-        set(value) {
-            field = value
-            selectedOkay = true
-            notifyDataSetChanged()
-        }
+    private var selectedItems: HashSet<Int> = HashSet()
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
-    constructor(context: Context, listener: SimpleListListener) {
+    constructor(context: Context, listener: CheckBoxListListener) {
         ctx = context
         this.listener = listener
-        entryItemLayoutId = R.layout.entry_item_simple
         layoutInflater = LayoutInflater.from(ctx)
     }
 
-    constructor(context: Context, entryItemLayoutId: Int) {
+    constructor(context: Context) {
         ctx = context
-        this.entryItemLayoutId = entryItemLayoutId
         layoutInflater = LayoutInflater.from(ctx)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
-        val view = layoutInflater.inflate(entryItemLayoutId, parent, false)
+        val view = layoutInflater.inflate(R.layout.entry_item_check_box, parent, false)
         return CustomViewHolder(view)
     }
 
@@ -61,17 +52,10 @@ class SimpleListAdapter : RecyclerView.Adapter<SimpleListAdapter.CustomViewHolde
         val text = items[position]
         holder.view.item.text = text
 
-        if (selectedOkay) {
-            if (position == selectedPos) {
-                holder.itemView.setBackgroundResource(R.color.list_item_selected)
-            } else {
-                holder.itemView.setBackgroundResource(android.R.color.transparent)
-            }
-        }
         holder.view.item.setOnClickListener {
             val pos = holder.adapterPosition
-            selectedPos = pos
-            listener.invoke(pos, text)
+            toggle(pos)
+            listener.invoke(pos, text, isSelected(pos))
         }
     }
 
@@ -79,12 +63,28 @@ class SimpleListAdapter : RecyclerView.Adapter<SimpleListAdapter.CustomViewHolde
         return items.size
     }
 
-    fun setSelected(value: String): Int {
-        selectedPos = items.indexOf(value)
-        return selectedPos
+    fun toggle(value: String): Int {
+        return toggle(items.indexOf(value))
+    }
+
+    fun toggle(value: Int): Int {
+        if (value >= 0 && value < items.size) {
+            if (selectedItems.contains(value)) {
+                selectedItems.remove(value)
+            } else {
+                selectedItems.add(value)
+            }
+            notifyDataSetChanged()
+        }
+        return value
+    }
+
+    fun isSelected(value: Int): Boolean {
+        return selectedItems.contains(value)
     }
 
     fun setNoneSelected() {
-        selectedPos = -1
+        selectedItems.clear()
+        notifyDataSetChanged()
     }
 }

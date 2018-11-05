@@ -1,7 +1,6 @@
 package com.cartlc.tracker.viewmodel
 
 import com.cartlc.tracker.ui.act.VehicleActivity
-import com.cartlc.tracker.ui.frag.VehicleListFragment
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -21,5 +20,4 @@ class VehicleViewModelModule(
 @Component(modules = [VehicleViewModelModule::class])
 interface VehicleViewModelComponent {
     fun inject(act: VehicleActivity)
-    fun inject(frag: VehicleListFragment)
 }

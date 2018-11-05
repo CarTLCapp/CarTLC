@@ -3,37 +3,50 @@ package com.cartlc.tracker.viewmodel
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import com.cartlc.tracker.model.VehicleRepository
+import com.cartlc.tracker.model.flow.Action
+import com.cartlc.tracker.model.flow.VehicleStage
 
 class VehicleViewModel(
         val repo: VehicleRepository
 ) : BaseViewModel() {
 
-    var showList = ObservableBoolean(true)
-    var showList2 = ObservableBoolean(true)
-    var title = ObservableField<String>()
-    var title2 = ObservableField<String>()
+    var showFrame1 = ObservableBoolean(true)
+    var showFrame2 = ObservableBoolean(false)
+    var showFrame3 = ObservableBoolean(false)
+    var stage3ListTitle = ObservableField<String>()
+    var stage3List2Title = ObservableField<String>()
 
-    var showListValue: Boolean
-        get() = showList.get()
-        set(value) = showList.set(value)
-    var showList2Value: Boolean
-        get() = showList2.get()
-        set(value) = showList2.set(value)
-    var titleValue: String?
-        get() = title.get()
-        set(value) = title.set(value)
-    var titleValue2: String?
-        get() = title2.get()
-        set(value) = title2.set(value)
+    var showFrame1Value: Boolean
+        get() = showFrame1.get()
+        set(value) = showFrame1.set(value)
+    var showFrame2Value: Boolean
+        get() = showFrame2.get()
+        set(value) = showFrame2.set(value)
+    var showFrame3Value: Boolean
+        get() = showFrame3.get()
+        set(value) = showFrame3.set(value)
+    var stage3ListTitleValue: String?
+        get() = stage3ListTitle.get()
+        set(value) = stage3ListTitle.set(value)
+    var stage3List2TitleValue: String?
+        get() = stage3List2Title.get()
+        set(value) = stage3List2Title.set(value)
 
-    fun doSimpleEntryAboveReturn(value: String) {
+    fun doSimpleEntryEmailReturn(value: String) {
     }
 
-    fun doSimpleEntryBelowReturn(value: String) {
+    fun doSimpleEntryMileageReturn(value: String) {
+    }
+
+    fun doSimpleEntryReturn(value: String) {
     }
 
     fun onBtnNext() {
-        repo.stage.value = repo.stage.value?.advance()
+        if (repo.stage.value == VehicleStage.STAGE_6) {
+            dispatchActionEvent(Action.SUBMIT)
+        } else {
+            repo.stage.value = repo.stage.value?.advance()
+        }
     }
 
     fun onBtnPrev() {

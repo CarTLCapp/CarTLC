@@ -9,6 +9,7 @@ enum class Action {
     PICTURE_REQUEST,
     NEW_PROJECT,
     RETURN_PRESSED,
+    SUBMIT,
     VIEW_PROJECT,
     VEHICLES,
 }

@@ -3,9 +3,11 @@ package com.cartlc.tracker.viewmodel
 import android.app.Activity
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
+import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.ui.app.TBApplication
+import kotlinx.android.synthetic.main.frag_buttons.view.*
 import javax.inject.Inject
 
 class ButtonsViewModel(private val act: Activity) : BaseViewModel() {
@@ -21,9 +23,9 @@ class ButtonsViewModel(private val act: Activity) : BaseViewModel() {
     }
 
     var showing = ObservableBoolean(true)
-    var prevText = ObservableField<String>("")
-    var nextText = ObservableField<String>("")
-    var centerText = ObservableField<String>("")
+    var prevText = ObservableField<String>(act.getString(R.string.btn_prev))
+    var nextText = ObservableField<String>(act.getString(R.string.btn_next))
+    var centerText = ObservableField<String>(act.getString(R.string.btn_add))
     var showPrevButton = ObservableBoolean(false)
     var showNextButton = ObservableBoolean(false)
     var showCenterButton = ObservableBoolean(false)

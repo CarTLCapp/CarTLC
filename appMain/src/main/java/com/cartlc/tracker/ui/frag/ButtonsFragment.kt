@@ -68,10 +68,10 @@ class ButtonsFragment: BaseFragment() {
         baseVM = ButtonsViewModel(activity!!)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
-        binding.btnNext.setOnClickListener { this.doBtnNextFromUser(it) }
-        binding.btnPrev.setOnClickListener { this.doBtnPrevFromUser(it) }
-        binding.change.setOnClickListener { _ -> doBtnChangeCompany() }
-        binding.btnCenter.setOnClickListener { _ -> doBtnCenter() }
+        binding.btnNext.setOnClickListener { btnNext(it) }
+        binding.btnPrev.setOnClickListener { btnPrev(it) }
+        binding.change.setOnClickListener { _ -> btnChangeCompany() }
+        binding.btnCenter.setOnClickListener { _ -> btnCenter() }
         return binding.root
     }
 
@@ -85,23 +85,23 @@ class ButtonsFragment: BaseFragment() {
         vm.prevTextValue = getString(R.string.btn_prev)
     }
 
-    private fun doBtnNextFromUser(v: View) {
+    private fun btnNext(v: View) {
         vm.dispatchButtonEvent(Action.BTN_NEXT)
         softKeyboardDetect.clear()
         activity?.let { TBApplication.hideKeyboard(it, v) }
     }
 
-    private fun doBtnPrevFromUser(v: View) {
+    private fun btnPrev(v: View) {
         vm.dispatchButtonEvent(Action.BTN_PREV)
         softKeyboardDetect.clear()
         activity?.let { TBApplication.hideKeyboard(it, v) }
     }
 
-    private fun doBtnCenter() {
+    private fun btnCenter() {
         vm.dispatchButtonEvent(Action.BTN_CENTER)
     }
 
-    private fun doBtnChangeCompany() {
+    private fun btnChangeCompany() {
         vm.dispatchButtonEvent(Action.BTN_CHANGE)
     }
 

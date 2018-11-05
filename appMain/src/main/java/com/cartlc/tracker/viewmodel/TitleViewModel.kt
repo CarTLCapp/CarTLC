@@ -21,7 +21,7 @@ class TitleViewModel(private val act: Activity) : BaseViewModel() {
         app.carRepoComponent.inject(this)
     }
 
-    var title = ObservableField<String>("")
+    var title = ObservableField<String>()
     var subTitle = ObservableField<String>()
     var showSeparator = ObservableBoolean(false)
 
