@@ -117,7 +117,7 @@
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp"
                         android:text="@string/vehicle_type"
-                        android:textSize="25sp" />
+                        android:textSize="25sp"/>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/stage2_list"
@@ -126,14 +126,14 @@
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp"
                         android:background="@drawable/background_shadow"
-                        android:focusable="true" />
+                        android:focusable="true"/>
 
                     <fragment
                         android:id="@+id/stage2_entry_mileage"
                         android:name="com.cartlc.tracker.ui.frag.EntrySimpleFragment"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp" />
+                        android:layout_marginTop="10dp"/>
 
                 </LinearLayout>
 
@@ -190,13 +190,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
-                            android:layout_marginTop="10dp"
                             android:background="@drawable/background_shadow"
                             android:focusable="true"
                             android:visibility="@{viewModel.stage3List2Title != null ? View.VISIBLE : View.GONE}"
                             app:layout_constraintLeft_toRightOf="@id/stage3_list"
                             app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/stage3_list2_title" />
+                            app:layout_constraintTop_toTopOf="@id/stage3_list" />
 
                         <fragment
                             android:id="@+id/stage3_entry_simple"

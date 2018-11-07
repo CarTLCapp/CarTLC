@@ -65,7 +65,7 @@ class SqlTableCollectionNoteEntry(
     }
 
     // There are TWO note tables. One is TableCollectionnNoteProject which stores the
-    // defined notes for each project. The other is this one which stores the values.
+    // defined notes for each project. The enteredOther is this one which stores the values.
     //
     // The values are stored right now in the SqlTableNote table which is represented by the incoming
     // notes. We want them to also be stored now into this table.

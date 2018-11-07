@@ -191,7 +191,7 @@ class SqlTableProjects(
             TBApplication.ReportError(ex, SqlTableProjects::class.java, "query()", "db")
         }
 
-        // Move other to bottom of the list.
+        // Move enteredOther to bottom of the list.
         if (list.contains(TBApplication.OTHER)) {
             list.remove(TBApplication.OTHER)
             list.add(TBApplication.OTHER)

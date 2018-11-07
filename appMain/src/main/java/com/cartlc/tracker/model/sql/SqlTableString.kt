@@ -121,7 +121,7 @@ abstract class SqlTableString protected constructor(protected val mDb: SQLiteDat
             TBApplication.ReportError(ex, SqlTableString::class.java, "query()", "db")
         }
 
-        // Move other to bottom of the list.
+        // Move enteredOther to bottom of the list.
         if (list.contains(TBApplication.OTHER)) {
             list.remove(TBApplication.OTHER)
             list.add(TBApplication.OTHER)

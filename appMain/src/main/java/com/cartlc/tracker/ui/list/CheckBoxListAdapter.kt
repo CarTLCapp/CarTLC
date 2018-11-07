@@ -7,9 +7,11 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
+import com.cartlc.tracker.model.misc.HashList
 import kotlinx.android.synthetic.main.entry_item_check_box.view.*
 
 typealias CheckBoxListListener = (position: Int, text: String, isSelected: Boolean) -> Unit
@@ -17,30 +19,33 @@ typealias CheckBoxListListener = (position: Int, text: String, isSelected: Boole
 /**
  * Created by dug on 10/10/18.
  */
-class CheckBoxListAdapter : RecyclerView.Adapter<CheckBoxListAdapter.CustomViewHolder> {
+class CheckBoxListAdapter(
+        private val ctx: Context,
+        private val listener: CheckBoxListListener
+) : RecyclerView.Adapter<CheckBoxListAdapter.CustomViewHolder>() {
 
-    private val ctx: Context
     private val layoutInflater: LayoutInflater
-    private var listener: CheckBoxListListener = { _, _, _ -> }
+
+    init {
+        layoutInflater = LayoutInflater.from(ctx)
+    }
 
     var items: List<String> = emptyList()
         set(value) {
             field = value
+            selectedItems.clear()
             notifyDataSetChanged()
         }
-    private var selectedItems: HashSet<Int> = HashSet()
 
-    inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)
+    var selectedItems = HashList()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
-    constructor(context: Context, listener: CheckBoxListListener) {
-        ctx = context
-        this.listener = listener
-        layoutInflater = LayoutInflater.from(ctx)
-    }
-
-    constructor(context: Context) {
-        ctx = context
-        layoutInflater = LayoutInflater.from(ctx)
+    inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        val box: CheckBox
+            get() = view as CheckBox
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
@@ -51,11 +56,11 @@ class CheckBoxListAdapter : RecyclerView.Adapter<CheckBoxListAdapter.CustomViewH
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
         val text = items[position]
         holder.view.item.text = text
+        holder.box.isChecked = isSelected(text)
 
         holder.view.item.setOnClickListener {
-            val pos = holder.adapterPosition
-            toggle(pos)
-            listener.invoke(pos, text, isSelected(pos))
+            toggle(text)
+            listener.invoke(position, text, isSelected(text))
         }
     }
 
@@ -63,28 +68,17 @@ class CheckBoxListAdapter : RecyclerView.Adapter<CheckBoxListAdapter.CustomViewH
         return items.size
     }
 
-    fun toggle(value: String): Int {
-        return toggle(items.indexOf(value))
-    }
-
-    fun toggle(value: Int): Int {
-        if (value >= 0 && value < items.size) {
-            if (selectedItems.contains(value)) {
-                selectedItems.remove(value)
-            } else {
-                selectedItems.add(value)
-            }
-            notifyDataSetChanged()
+    fun toggle(value: String) {
+        if (selectedItems.contains(value)) {
+            selectedItems.remove(value)
+        } else {
+            selectedItems.add(value)
         }
-        return value
-    }
-
-    fun isSelected(value: Int): Boolean {
-        return selectedItems.contains(value)
-    }
-
-    fun setNoneSelected() {
-        selectedItems.clear()
         notifyDataSetChanged()
+
+    }
+
+    fun isSelected(value: String): Boolean {
+        return selectedItems.contains(value)
     }
 }

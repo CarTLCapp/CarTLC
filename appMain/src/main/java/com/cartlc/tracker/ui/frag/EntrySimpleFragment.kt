@@ -39,6 +39,7 @@ class EntrySimpleFragment: BaseFragment() {
             }
         }
         binding.entrySimpleEditText.setOnEditorActionListener(autoNext)
+        binding.entrySimpleEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER)
         return binding.root
     }
 
@@ -51,6 +52,5 @@ class EntrySimpleFragment: BaseFragment() {
         vm.helpText.set(null)
         binding.entrySimpleEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS)
     }
-
 
 }

@@ -98,8 +98,8 @@ class SqlTableProjectAddressCombo(
     }
 
     /**
-     * If there are other project groups that are exactly the same as the passed,
-     * then merge all entries into this one and delete the other.
+     * If there are enteredOther project groups that are exactly the same as the passed,
+     * then merge all entries into this one and delete the enteredOther.
      *
      * @param projectGroup
      */

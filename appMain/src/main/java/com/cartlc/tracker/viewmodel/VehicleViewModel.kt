@@ -5,6 +5,7 @@ import androidx.databinding.ObservableField
 import com.cartlc.tracker.model.VehicleRepository
 import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.VehicleStage
+import java.lang.NumberFormatException
 
 class VehicleViewModel(
         val repo: VehicleRepository
@@ -32,24 +33,76 @@ class VehicleViewModel(
         get() = stage3List2Title.get()
         set(value) = stage3List2Title.set(value)
 
+    var emailTextValue: () -> String = { "" }
+    var mileageTextValue: () -> String = { "" }
+    var entryTextValue: () -> String = { "" }
+
     fun doSimpleEntryEmailReturn(value: String) {
+        store(value)
     }
 
     fun doSimpleEntryMileageReturn(value: String) {
+        store(value)
     }
 
     fun doSimpleEntryReturn(value: String) {
+        store(value)
     }
 
     fun onBtnNext() {
-        if (repo.stage.value == VehicleStage.STAGE_6) {
+        save()
+        if (repo.stageValue == VehicleStage.STAGE_6) {
             dispatchActionEvent(Action.SUBMIT)
         } else {
-            repo.stage.value = repo.stage.value?.advance()
+            repo.stageValue = repo.stageValue?.advance()
         }
     }
 
     fun onBtnPrev() {
-        repo.stage.value = repo.stage.value?.previous()
+        save()
+        repo.stageValue = repo.stageValue?.previous()
+    }
+
+    private fun save() {
+        when (repo.stageValue) {
+            VehicleStage.STAGE_1 -> store(emailTextValue())
+            VehicleStage.STAGE_2 -> store(mileageTextValue())
+            else -> store(entryTextValue())
+        }
+    }
+
+    private fun store(value: String) {
+        try {
+            when (repo.stageValue) {
+                VehicleStage.STAGE_1 -> repo.entered.email = value
+                VehicleStage.STAGE_2 -> repo.entered.mileage = value.toInt()
+                VehicleStage.STAGE_3 -> repo.entered.exteriorLights = value
+                VehicleStage.STAGE_4 -> repo.entered.fluidsOrLeaks = value
+                VehicleStage.STAGE_5 -> repo.entered.damage = value
+                VehicleStage.STAGE_6 -> repo.entered.other = value
+            }
+        } catch (ex: NumberFormatException) {
+        }
+    }
+
+    fun onRadioSelect(text: String) {
+        when (repo.stageValue) {
+            VehicleStage.STAGE_1 -> repo.entered.inspecting = text
+            VehicleStage.STAGE_2 -> repo.entered.inspectionType = text
+        }
+    }
+
+    fun onListSelect(text: String, selected: Boolean) {
+        when (repo.stageValue) {
+            VehicleStage.STAGE_3 -> repo.entered.headLights.set(text, selected)
+            VehicleStage.STAGE_4 -> repo.entered.fluid.set(text, selected)
+            VehicleStage.STAGE_5 -> repo.entered.tireInspection.set(text, selected)
+        }
+    }
+
+    fun onList2Select(text: String, selected: Boolean) {
+        when (repo.stageValue) {
+            VehicleStage.STAGE_3 -> repo.entered.tailLights.set(text, selected)
+        }
     }
 }

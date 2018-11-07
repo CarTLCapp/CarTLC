@@ -3,8 +3,6 @@ package com.cartlc.tracker.ui.act
 import android.os.Bundle
 import android.text.InputType
 import android.view.MenuItem
-import android.view.ViewGroup
-import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -69,12 +67,10 @@ class VehicleActivity : BaseActivity() {
         setup(binding.stage3List2)
 
         radioAdapter = RadioListAdapter(this)
-        radioAdapter.listener = { _, text -> }
+        radioAdapter.listener = { _, text -> vm.onRadioSelect(text) }
 
-        checkboxAdapter = CheckBoxListAdapter(this) { pos, text, selected ->
-        }
-        checkboxAdapter2 = CheckBoxListAdapter(this) { pos, text, selected ->
-        }
+        checkboxAdapter = CheckBoxListAdapter(this) { pos, text, selected -> vm.onListSelect(text, selected) }
+        checkboxAdapter2 = CheckBoxListAdapter(this) { pos, text, selected -> vm.onList2Select(text, selected) }
 
         binding.stage1List.adapter = radioAdapter
         binding.stage2List.adapter = radioAdapter
@@ -114,6 +110,9 @@ class VehicleActivity : BaseActivity() {
         vm.handleActionEvent().observe(this, Observer { event ->
             event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
         })
+        vm.emailTextValue = { stage1EntryEmail.entryTextValue }
+        vm.mileageTextValue = { stage2EntryMileage.entryTextValue }
+        vm.entryTextValue = { stage3Entry.entryTextValue }
     }
 
     private fun setup(list: RecyclerView) {
@@ -151,28 +150,37 @@ class VehicleActivity : BaseActivity() {
         when (stage) {
             VehicleStage.STAGE_1 -> {
                 vm.showFrame1Value = true
-                radioAdapter.list = vm.repo.inspecting
+                stage1EntryEmail.vm.simpleTextValue = vm.repo.entered.email
+                radioAdapter.list = vm.repo.inspectingList
+                radioAdapter.selectedText = vm.repo.entered.inspecting
             }
             VehicleStage.STAGE_2 -> {
                 vm.showFrame2Value = true
+                stage2EntryMileage.vm.simpleTextValue = vm.repo.entered.mileageValue
                 radioAdapter.list = vm.repo.typeOfInspection.toList()
+                radioAdapter.selectedText = vm.repo.entered.inspectionType
             }
             VehicleStage.STAGE_3 -> {
                 vm.showFrame3Value = true
                 titleFragment.vm.titleValue = getString(R.string.vehicle_lights)
                 titleFragment.vm.subTitleValue = getString(R.string.vehicle_lights_description)
                 stage3Entry.vm.titleValue = getString(R.string.vehicle_lights_exterior)
+                stage3Entry.vm.simpleTextValue = vm.repo.entered.exteriorLights
                 vm.stage3ListTitleValue = getString(R.string.vehicle_lights_head)
                 vm.stage3List2TitleValue = getString(R.string.vehicle_lights_tail)
                 checkboxAdapter.items = vm.repo.headLights.toList()
+                checkboxAdapter.selectedItems = vm.repo.entered.headLights
                 checkboxAdapter2.items = vm.repo.tailLights.toList()
+                checkboxAdapter2.selectedItems = vm.repo.entered.tailLights
             }
             VehicleStage.STAGE_4 -> {
                 vm.showFrame3Value = true
                 titleFragment.vm.titleValue = getString(R.string.vehicle_fluids)
                 titleFragment.vm.subTitleValue = getString(R.string.vehicle_fluids_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_fluids_checks)
+                stage3Entry.vm.simpleTextValue = vm.repo.entered.fluidsOrLeaks
                 checkboxAdapter.items = vm.repo.fluidChecks.toList()
+                checkboxAdapter.selectedItems = vm.repo.entered.fluid
                 stage3Entry.vm.titleValue = getString(R.string.vehicle_fluids_detected)
             }
             VehicleStage.STAGE_5 -> {
@@ -180,7 +188,9 @@ class VehicleActivity : BaseActivity() {
                 titleFragment.vm.titleValue = getString(R.string.vehicle_exterior)
                 titleFragment.vm.subTitleValue = getString(R.string.vehicle_exterior_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_tire_inspection)
+                stage3Entry.vm.simpleTextValue = vm.repo.entered.damage
                 checkboxAdapter.items = vm.repo.tireInspection.toList()
+                checkboxAdapter.selectedItems = vm.repo.entered.tireInspection
                 stage3Entry.vm.titleValue = getString(R.string.vehicle_tire_damage)
             }
             VehicleStage.STAGE_6 -> {
@@ -188,6 +198,7 @@ class VehicleActivity : BaseActivity() {
                 titleFragment.vm.titleValue = getString(R.string.vehicle_other_title)
                 titleFragment.vm.subTitleValue = getString(R.string.vehicle_other_description)
                 buttonsFragment.vm.nextTextValue = getString(R.string.vehicle_submit)
+                stage3Entry.vm.simpleTextValue = vm.repo.entered.other
             }
         }
     }
