@@ -36,6 +36,7 @@ class VehicleViewModel(
     var emailTextValue: () -> String = { "" }
     var mileageTextValue: () -> String = { "" }
     var entryTextValue: () -> String = { "" }
+    var btnNextVisible: (flag: Boolean) -> Unit = {}
 
     fun doSimpleEntryEmailReturn(value: String) {
         store(value)
@@ -52,6 +53,7 @@ class VehicleViewModel(
     fun onBtnNext() {
         save()
         if (repo.stageValue == VehicleStage.STAGE_6) {
+            repo.submit()
             dispatchActionEvent(Action.SUBMIT)
         } else {
             repo.stageValue = repo.stageValue?.advance()
@@ -75,11 +77,11 @@ class VehicleViewModel(
         try {
             when (repo.stageValue) {
                 VehicleStage.STAGE_1 -> repo.entered.email = value
-                VehicleStage.STAGE_2 -> repo.entered.mileage = value.toInt()
-                VehicleStage.STAGE_3 -> repo.entered.exteriorLights = value
-                VehicleStage.STAGE_4 -> repo.entered.fluidsOrLeaks = value
-                VehicleStage.STAGE_5 -> repo.entered.damage = value
-                VehicleStage.STAGE_6 -> repo.entered.other = value
+                VehicleStage.STAGE_2 -> repo.entered.vehicle.mileage = value.toInt()
+                VehicleStage.STAGE_3 -> repo.entered.vehicle.exteriorLightIssues = value
+                VehicleStage.STAGE_4 -> repo.entered.vehicle.fluidProblemsDetected = value
+                VehicleStage.STAGE_5 -> repo.entered.vehicle.exteriorDamage = value
+                VehicleStage.STAGE_6 -> repo.entered.vehicle.other = value
             }
         } catch (ex: NumberFormatException) {
         }
@@ -87,22 +89,70 @@ class VehicleViewModel(
 
     fun onRadioSelect(text: String) {
         when (repo.stageValue) {
-            VehicleStage.STAGE_1 -> repo.entered.inspecting = text
-            VehicleStage.STAGE_2 -> repo.entered.inspectionType = text
+            VehicleStage.STAGE_1 -> {
+                repo.entered.vehicle.inspectingValue = text
+                btnNextVisible(repo.isValidStage1)
+            }
+            VehicleStage.STAGE_2 -> {
+                repo.entered.vehicle.typeOfInspectionValue = text
+                btnNextVisible(repo.isValidStage2)
+            }
         }
     }
 
     fun onListSelect(text: String, selected: Boolean) {
         when (repo.stageValue) {
-            VehicleStage.STAGE_3 -> repo.entered.headLights.set(text, selected)
-            VehicleStage.STAGE_4 -> repo.entered.fluid.set(text, selected)
-            VehicleStage.STAGE_5 -> repo.entered.tireInspection.set(text, selected)
+            VehicleStage.STAGE_3 -> repo.entered.vehicle.headLights.set(text, selected)
+            VehicleStage.STAGE_4 -> repo.entered.vehicle.fluidChecks.set(text, selected)
+            VehicleStage.STAGE_5 -> repo.entered.vehicle.tireInspection.set(text, selected)
         }
     }
 
     fun onList2Select(text: String, selected: Boolean) {
         when (repo.stageValue) {
-            VehicleStage.STAGE_3 -> repo.entered.tailLights.set(text, selected)
+            VehicleStage.STAGE_3 -> repo.entered.vehicle.tailLights.set(text, selected)
+        }
+    }
+
+    fun onEmailChanged(text: String) {
+        store(text)
+        onStageChanged()
+    }
+
+    fun onMileageChanged(text: String) {
+        store(text)
+        onStageChanged()
+    }
+
+    fun onEntryChanged(text: String) {
+        store(text)
+        onStageChanged()
+    }
+
+    private fun onStageChanged() {
+        repo.stageValue?.let { onStageChanged(it) }
+    }
+
+    fun onStageChanged(stage: VehicleStage) {
+        when (stage) {
+            VehicleStage.STAGE_1 -> {
+                btnNextVisible(repo.isValidStage1)
+            }
+            VehicleStage.STAGE_2 -> {
+                btnNextVisible(repo.isValidStage2)
+            }
+            VehicleStage.STAGE_3 -> {
+                btnNextVisible(repo.isValidStage3)
+            }
+            VehicleStage.STAGE_4 -> {
+                btnNextVisible(repo.isValidStage4)
+            }
+            VehicleStage.STAGE_5 -> {
+                btnNextVisible(repo.isValidStage5)
+            }
+            VehicleStage.STAGE_6 -> {
+                btnNextVisible(repo.isValidStage6)
+            }
         }
     }
 }

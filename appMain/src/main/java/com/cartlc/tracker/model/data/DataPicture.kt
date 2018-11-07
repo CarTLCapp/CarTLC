@@ -97,7 +97,7 @@ class DataPicture(
             sbuf.append(scaledFilename)
         }
         if (!note.isNullOrEmpty()) {
-            sbuf.append(", note=")
+            sbuf.append(", tableNote=")
             sbuf.append(note)
         }
         if (uploaded) {

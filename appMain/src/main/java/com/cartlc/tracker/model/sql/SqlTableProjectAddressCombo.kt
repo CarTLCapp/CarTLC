@@ -110,12 +110,12 @@ class SqlTableProjectAddressCombo(
         }
         identicals.remove(projectGroup.id)
         for (other_id in identicals) {
-            val entries = db.entry.queryForProjectAddressCombo(other_id)
+            val entries = db.tableEntry.queryForProjectAddressCombo(other_id)
             Timber.i("Found " + entries.size + " entries with matching combo id " + other_id + " to " + projectGroup.id)
             for (entry in entries) {
                 entry.projectAddressCombo = projectGroup
                 entry.uploadedMaster = false
-                db.entry.saveProjectAddressCombo(entry)
+                db.tableEntry.saveProjectAddressCombo(entry)
             }
             remove(other_id)
         }
@@ -173,7 +173,7 @@ class SqlTableProjectAddressCombo(
             var item: DataProjectAddressCombo
             while (cursor.moveToNext()) {
                 val projectId = cursor.getLong(idxProjectId)
-                if (!db.projects.isDisabled(projectId)) {
+                if (!db.tableProjects.isDisabled(projectId)) {
                     val id = cursor.getLong(idxRowId)
                     val addressId = cursor.getLong(idxAddressId)
                     item = DataProjectAddressCombo(db, id, projectId, addressId)
@@ -233,7 +233,7 @@ class SqlTableProjectAddressCombo(
             }
             cursor.close()
         } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableProjectAddressCombo::class.java, "query(project,address)", "sqlDb")
+            TBApplication.ReportError(ex, SqlTableProjectAddressCombo::class.java, "query(project,tableAddress)", "sqlDb")
         }
         return ids
     }

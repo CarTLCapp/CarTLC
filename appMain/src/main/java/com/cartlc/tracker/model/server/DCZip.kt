@@ -62,7 +62,7 @@ class DCZip(
                     .appendPath("api")
                     .appendPath("geocode")
                     .appendPath("json")
-                    .appendQueryParameter("address", zipcode)
+                    .appendQueryParameter("tableAddress", zipcode)
                     .appendQueryParameter("sensor", "true")
             val url = URL(builder.build().toString())
             val result = post(url) ?: return
@@ -90,7 +90,7 @@ class DCZip(
             data.check()
 
             if (data.isValid) {
-                db.zipCode.add(data)
+                db.tableZipCode.add(data)
             } else {
                 Timber.e("Invalid zipcode response: $result")
             }

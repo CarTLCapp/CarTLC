@@ -215,7 +215,7 @@ class SqlTableNote constructor(
     //            Cursor cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
     //            int idxName = cursor.getColumnIndex(KEY_NAME);
     //            if (cursor.moveToFirst()) {
-    //                name = cursor.getString(idxName);
+    //                name = cursor.getTableString(idxName);
     //            }
     //            cursor.close();
     //        } catch (Exception ex) {
@@ -268,11 +268,11 @@ class SqlTableNote constructor(
     }
 
     override fun removeIfUnused(note: DataNote) {
-        if (db.collectionNoteEntry.countNotes(note.id) == 0) {
+        if (db.tableCollectionNoteEntry.countNotes(note.id) == 0) {
             Timber.i("remove(" + note.id + ", " + note.name + ")")
             remove(note.id)
         } else {
-            Timber.i("Did not remove unused note because some entries are using it: " + note.toString())
+            Timber.i("Did not remove unused tableNote because some entries are using it: " + note.toString())
         }
     }
 

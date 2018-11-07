@@ -83,7 +83,7 @@ class SqlTableCrash(
                 val cursor = dbSql.query(TABLE_NAME, null, null, null, null, null, null, null)
                 if (cursor != null) {
                     if (cursor.moveToFirst() && cursor.count > 0) {
-                        Timber.e("SqlTableCrash.clearUploaded(): Unable to update crash entries")
+                        Timber.e("SqlTableCrash.clearUploaded(): Unable to update tableCrash entries")
                     }
                     cursor.close()
                 }
@@ -150,7 +150,7 @@ class SqlTableCrash(
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(java.lang.Long.toString(line.id))
             if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
-                Timber.e("Unable to update crash entry")
+                Timber.e("Unable to update tableCrash tableEntry")
             }
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {

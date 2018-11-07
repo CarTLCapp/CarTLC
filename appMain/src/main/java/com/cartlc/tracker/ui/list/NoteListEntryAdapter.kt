@@ -15,10 +15,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.data.DataNote
-import com.cartlc.tracker.model.data.DataProjectAddressCombo
-import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.viewmodel.MainListViewModel
 import kotlinx.android.synthetic.main.entry_item_entry_note.view.*
 
@@ -60,7 +57,7 @@ class NoteListEntryAdapter(
         override fun afterTextChanged(s: Editable) {
             if (mLabel.isSelected) {
                 mItem.value = s.toString().trim { it <= ' ' }
-                vm.tmpDb.note.updateValue(mItem)
+                vm.tmpDb.tableNote.updateValue(mItem)
                 mListener.textEntered(mItem)
             }
         }
@@ -141,7 +138,7 @@ class NoteListEntryAdapter(
             mItems = currentEditEntry.notesAllWithValuesOverlaid.toMutableList()
         } else {
             if (currentProjectGroup != null) {
-                mItems = vm.tmpDb.collectionNoteProject.getNotes(currentProjectGroup.projectNameId).toMutableList()
+                mItems = vm.tmpDb.tableCollectionNoteProject.getNotes(currentProjectGroup.projectNameId).toMutableList()
             } else {
                 mItems = ArrayList()
             }

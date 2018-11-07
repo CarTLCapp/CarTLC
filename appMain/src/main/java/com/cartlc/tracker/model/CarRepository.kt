@@ -5,18 +5,17 @@ import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.LoginFlow
-import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.sql.DatabaseManager
 import com.cartlc.tracker.model.table.DatabaseTable
 
 class CarRepository(
-        val context: Context
+        val context: Context,
+        private val dm: DatabaseManager,
+        val prefHelper: PrefHelper
 ) {
-    private val dm: DatabaseManager = DatabaseManager(context)
     val db: DatabaseTable
         get() = dm
-    val prefHelper: PrefHelper = PrefHelper(context, db)
     val curFlow: MutableLiveData<Flow> by lazy {
         MutableLiveData<Flow>()
     }
@@ -25,12 +24,12 @@ class CarRepository(
     }
 
     fun checkProjectErrors(): Boolean {
-        val entries = db.projectAddressCombo.query()
+        val entries = db.tableProjectAddressCombo.query()
         for (combo in entries) {
             if (!combo.hasValidState) {
                 val address = combo.fix()
                 if (address != null) {
-                    db.address.update(address)
+                    db.tableAddress.update(address)
                 }
             }
         }
@@ -38,7 +37,7 @@ class CarRepository(
     }
 
     fun checkEntryErrors(): DataEntry? {
-        val entries = db.entry.query()
+        val entries = db.tableEntry.query()
         for (entry in entries) {
             if (entry.hasError) {
                 return entry
@@ -53,7 +52,7 @@ class CarRepository(
     }
 
     fun add(entry: DataEntry) {
-        if (db.entry.add(entry)) {
+        if (db.tableEntry.add(entry)) {
             prefHelper.incNextEquipmentCollectionID()
             prefHelper.incNextPictureCollectionID()
             prefHelper.incNextNoteCollectionID()

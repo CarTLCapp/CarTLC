@@ -100,7 +100,7 @@ class DataTruck : Comparable<DataTruck> {
             if (sbuf.length > 0) {
                 sbuf.append(", ")
             }
-            sbuf.append(db.projects.queryProjectName(projectNameId))
+            sbuf.append(db.tableProjects.queryProjectName(projectNameId))
             sbuf.append("(")
             sbuf.append(projectNameId)
             sbuf.append(")")

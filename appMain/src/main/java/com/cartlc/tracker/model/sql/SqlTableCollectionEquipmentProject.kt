@@ -32,9 +32,9 @@ class SqlTableCollectionEquipmentProject(
     }
 
     fun addByName(projectName: String, equipments: List<String>) {
-        var projectNameId = db.projects.queryProjectName(projectName)
+        var projectNameId = db.tableProjects.queryProjectName(projectName)
         if (projectNameId < 0) {
-            projectNameId = db.projects.addTest(projectName)
+            projectNameId = db.tableProjects.addTest(projectName)
         }
         addByNameTest(projectNameId, equipments)
     }
@@ -42,9 +42,9 @@ class SqlTableCollectionEquipmentProject(
     fun addByNameTest(collectionId: Long, names: List<String>) {
         val list = ArrayList<Long>()
         for (name in names) {
-            var id = db.equipment.query(name)
+            var id = db.tableEquipment.query(name)
             if (id < 0) {
-                id = db.equipment.addTest(name)
+                id = db.tableEquipment.addTest(name)
             }
             list.add(id)
         }
@@ -52,13 +52,13 @@ class SqlTableCollectionEquipmentProject(
     }
 
     override fun addLocal(name: String, projectNameId: Long) {
-        val equipId = db.equipment.addLocal(name)
+        val equipId = db.tableEquipment.addLocal(name)
         add(projectNameId, equipId)
     }
 
     override fun removeIfGone(item: DataCollectionItem) {
         if (item.isBootstrap) {
-            if (db.equipment.query(item.value_id) == null) {
+            if (db.tableEquipment.query(item.value_id) == null) {
                 Timber.i("remove(" + item.id + ", " + item.toString() + ")")
                 remove(item.id)
             }

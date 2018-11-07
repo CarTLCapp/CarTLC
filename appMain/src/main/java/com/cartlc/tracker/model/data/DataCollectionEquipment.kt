@@ -18,7 +18,7 @@ abstract class DataCollectionEquipment(
         get() {
             val list = mutableListOf<DataEquipment>()
             for (e in equipmentListIds) {
-                val item = db.equipment.query(e)
+                val item = db.tableEquipment.query(e)
                 if (item != null) {
                     list.add(item)
                 }

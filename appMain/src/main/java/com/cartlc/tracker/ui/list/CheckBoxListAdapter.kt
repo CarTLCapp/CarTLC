@@ -11,7 +11,7 @@ import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.misc.HashList
+import com.cartlc.tracker.model.misc.HashStringList
 import kotlinx.android.synthetic.main.entry_item_check_box.view.*
 
 typealias CheckBoxListListener = (position: Int, text: String, isSelected: Boolean) -> Unit
@@ -37,7 +37,7 @@ class CheckBoxListAdapter(
             notifyDataSetChanged()
         }
 
-    var selectedItems = HashList()
+    var selectedItems = HashStringList()
         set(value) {
             field = value
             notifyDataSetChanged()

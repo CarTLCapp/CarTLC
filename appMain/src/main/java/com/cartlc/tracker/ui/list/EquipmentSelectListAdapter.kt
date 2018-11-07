@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.data.DataEquipment
 import com.cartlc.tracker.model.data.DataProjectAddressCombo
-import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.viewmodel.MainListViewModel
 
 import kotlinx.android.synthetic.main.entry_item_equipment.view.*
@@ -35,7 +34,7 @@ class EquipmentSelectListAdapter(
                 check_button!!.isChecked = item.isChecked
                 check_button!!.setOnCheckedChangeListener { _, isChecked ->
                     item.isChecked = isChecked
-                    vm.tmpDb.equipment.setChecked(item, isChecked)
+                    vm.tmpDb.tableEquipment.setChecked(item, isChecked)
                 }
             }
         }
@@ -56,7 +55,7 @@ class EquipmentSelectListAdapter(
 
     fun onDataChanged(currentProjectGroup: DataProjectAddressCombo?) {
         if (currentProjectGroup != null) {
-            val collection = vm.tmpDb.collectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
+            val collection = vm.tmpDb.tableCollectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
             mItems = collection.equipment.toMutableList()
             mItems.sort()
             notifyDataSetChanged()
@@ -65,7 +64,7 @@ class EquipmentSelectListAdapter(
 
     fun hasChecked(currentProjectGroup: DataProjectAddressCombo?): Boolean {
         if (currentProjectGroup != null) {
-            val collection = vm.tmpDb.collectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
+            val collection = vm.tmpDb.tableCollectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
             for (item in collection.equipment) {
                 if (item.isChecked) {
                     return true

@@ -51,7 +51,13 @@ class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
         get() = title.get()
         set(value) = title.set(value)
 
+    var afterTextChangedListener: (value: String) -> Unit = {}
+
     init {
         simpleEmsValue = act.resources.getInteger(R.integer.entry_simple_ems)
+    }
+
+    fun afterTextChanged(s: CharSequence) {
+        afterTextChangedListener(s.toString())
     }
 }

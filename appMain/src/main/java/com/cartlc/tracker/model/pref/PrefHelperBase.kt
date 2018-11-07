@@ -10,14 +10,14 @@ import android.content.SharedPreferences
  * Created by dug on 4/14/17.
  */
 
-open class PrefHelperBase internal constructor(protected val mCtx: Context) {
+open class PrefHelperBase constructor(protected val ctx: Context) {
 
     internal val prefs: SharedPreferences by lazy {
-        mCtx.getSharedPreferences(prefFile, 0)
+        ctx.getSharedPreferences(prefFile, 0)
     }
 
     private val prefFile: String
-        get() = mCtx.packageName + "_preferences"
+        get() = ctx.packageName + "_preferences"
 
     fun getString(key: String, defaultValue: String?): String? {
         return prefs.getString(key, defaultValue)

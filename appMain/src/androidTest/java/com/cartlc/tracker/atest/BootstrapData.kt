@@ -35,8 +35,8 @@ class BootstrapData {
 
     fun init() {
         DaggerDatabaseTableComponent.builder().build().inject(this)
-        if (db.address.count() == 0) {
-            db.address.add(Arrays.asList(*ADDRESSES))
+        if (db.tableAddress.count() == 0) {
+            db.tableAddress.add(Arrays.asList(*ADDRESSES))
         }
         if (SqlTableProjects.instance.count() == 0) {
             AddCollections()

@@ -91,7 +91,7 @@ class SqlTableEntry(
                 } else {
                     licensePlateNumber = null
                 }
-                val projectGroup = db.projectAddressCombo.query(projectAddressComboId)
+                val projectGroup = db.tableProjectAddressCombo.query(projectAddressComboId)
                 val projectNameId: Long
                 val companyName: String?
                 if (projectGroup != null) {
@@ -105,7 +105,7 @@ class SqlTableEntry(
                 if (truck != null) {
                     truck.companyName = companyName
                     truck.projectNameId = projectNameId
-                    truck.id = db.truck.save(truck)
+                    truck.id = db.tableTruck.save(truck)
                 } else {
                     truck = DataTruck()
                     truck.projectNameId = projectNameId
@@ -113,7 +113,7 @@ class SqlTableEntry(
                     truck.licensePlateNumber = licensePlateNumber
                     truck.truckNumber = Integer.toString(truckNumber)
                 }
-                entry.truckId = db.truck.save(truck)
+                entry.truckId = db.tableTruck.save(truck)
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster).toInt() != 0
                 entry.uploadedAws = cursor.getShort(idxUploadedAws).toInt() != 0
 
@@ -144,7 +144,7 @@ class SqlTableEntry(
         var truck: DataTruck? = null
         var trucks: List<DataTruck>
         license_plate?.let {
-            trucks = db.truck.queryByLicensePlate(license_plate)
+            trucks = db.tableTruck.queryByLicensePlate(license_plate)
             if (trucks.size == 1) {
                 truck = trucks[0]
                 truck?.let {
@@ -157,7 +157,7 @@ class SqlTableEntry(
             }
         }
         if (truck == null) {
-            trucks = db.truck.queryByTruckNumber(truckNumber)
+            trucks = db.tableTruck.queryByTruckNumber(truckNumber)
             if (trucks.size == 1) {
                 truck = trucks[0]
                 truck?.let {
@@ -283,15 +283,15 @@ class SqlTableEntry(
                 }
                 if (!cursor.isNull(idxProjectAddressCombo)) {
                     val projectAddressComboId = cursor.getLong(idxProjectAddressCombo)
-                    entry.projectAddressCombo = db.projectAddressCombo.query(projectAddressComboId)
+                    entry.projectAddressCombo = db.tableProjectAddressCombo.query(projectAddressComboId)
                 }
                 if (!cursor.isNull(idxEquipmentCollectionId)) {
                     val equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId)
-                    entry.equipmentCollection = db.collectionEquipmentEntry.queryForCollectionId(equipmentCollectionId)
+                    entry.equipmentCollection = db.tableCollectionEquipmentEntry.queryForCollectionId(equipmentCollectionId)
                 }
                 if (!cursor.isNull(idxPictureCollectionId)) {
                     val pictureCollectionId = cursor.getLong(idxPictureCollectionId)
-                    entry.pictureCollection = db.pictureCollection.query(pictureCollectionId)
+                    entry.pictureCollection = db.tablePictureCollection.query(pictureCollectionId)
                 }
                 if (!cursor.isNull(idxNotetCollectionId)) {
                     entry.noteCollectionId = cursor.getLong(idxNotetCollectionId)
@@ -364,7 +364,7 @@ class SqlTableEntry(
             var projectAddressCombo: DataProjectAddressCombo?
             while (cursor.moveToNext()) {
                 val projectAddressComboId = cursor.getLong(idxProjectAddressCombo)
-                projectAddressCombo = db.projectAddressCombo.query(projectAddressComboId)
+                projectAddressCombo = db.tableProjectAddressCombo.query(projectAddressComboId)
                 if (projectAddressCombo!!.addressId == addressId) {
                     count++
                 }
@@ -400,7 +400,7 @@ class SqlTableEntry(
             var projectAddressCombo: DataProjectAddressCombo?
             while (cursor.moveToNext()) {
                 val projectAddressComboId = cursor.getLong(idxProjectAddressCombo)
-                projectAddressCombo = db.projectAddressCombo.query(projectAddressComboId)
+                projectAddressCombo = db.tableProjectAddressCombo.query(projectAddressComboId)
                 if (projectAddressCombo!!.projectNameId == projectId) {
                     count++
                 }
@@ -430,9 +430,9 @@ class SqlTableEntry(
         var incNextCollectionID = false
         dbSql.beginTransaction()
         try {
-            db.collectionEquipmentEntry.save(entry.equipmentCollection!!)
+            db.tableCollectionEquipmentEntry.save(entry.equipmentCollection!!)
             entry.pictureCollection?.let {
-                db.pictureCollection.add(it)
+                db.tablePictureCollection.add(it)
             }
             if (entry.id == 0L) {
                 incNextCollectionID = true
@@ -488,7 +488,7 @@ class SqlTableEntry(
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(java.lang.Long.toString(entry.id))
             if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
-                Timber.e("SqlTableEntry.saveUploaded(): Unable to update entry")
+                Timber.e("SqlTableEntry.saveUploaded(): Unable to update tableEntry")
             }
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
@@ -507,7 +507,7 @@ class SqlTableEntry(
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(java.lang.Long.toString(entry.id))
             if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
-                Timber.e("SqlTableEntry.saveProjectAddressCombo(): Unable to update entry")
+                Timber.e("SqlTableEntry.saveProjectAddressCombo(): Unable to update tableEntry")
             }
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {

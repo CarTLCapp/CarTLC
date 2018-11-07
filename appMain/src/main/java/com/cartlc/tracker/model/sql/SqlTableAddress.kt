@@ -202,7 +202,7 @@ class SqlTableAddress(
             id = dbSql.insert(TABLE_NAME, null, values)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableAddress::class.java, "add(address)", "db")
+            TBApplication.ReportError(ex, SqlTableAddress::class.java, "add(tableAddress)", "db")
         } finally {
             dbSql.endTransaction()
         }
@@ -248,7 +248,7 @@ class SqlTableAddress(
             dbSql.update(TABLE_NAME, values, where, whereArgs)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableAddress::class.java, "update(address)", "db")
+            TBApplication.ReportError(ex, SqlTableAddress::class.java, "update(tableAddress)", "db")
         } finally {
             dbSql.endTransaction()
         }
@@ -428,7 +428,7 @@ class SqlTableAddress(
     }
 
     override fun removeOrDisable(item: DataAddress) {
-        if (db.entry.countAddresses(item.id) == 0 && db.projectAddressCombo.countAddress(item.id) == 0) {
+        if (db.tableEntry.countAddresses(item.id) == 0 && db.tableProjectAddressCombo.countAddress(item.id) == 0) {
             Timber.i("remove(" + item.id + ", " + item.toString() + ")")
             remove(item.id)
         } else {

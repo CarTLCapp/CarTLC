@@ -1,6 +1,5 @@
 package com.cartlc.tracker.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.model.CarRepository
@@ -35,7 +34,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
 
     val isLocalCompany: Boolean
-        get() = db.address.isLocalCompanyOnly(prefHelper.company)
+        get() = db.tableAddress.isLocalCompanyOnly(prefHelper.company)
 
     val isCenterButtonEdit: Boolean
         get() = curFlowValue.stage == Stage.COMPANY && isLocalCompany
@@ -148,7 +147,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     }
 
     fun onConfirmOkay() {
-        db.entry.add(curEntry!!)
+        db.tableEntry.add(curEntry!!)
         prefHelper.clearLastEntry()
         curFlowValue = CurrentProjectFlow()
         curEntry = null
@@ -264,13 +263,13 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
                 if (!name.isEmpty()) {
                     val group = prefHelper.currentProjectGroup
                     if (group != null) {
-                        db.collectionEquipmentProject.addLocal(name, group.projectNameId)
+                        db.tableCollectionEquipmentProject.addLocal(name, group.projectNameId)
                     }
                 }
             }
             Stage.EQUIPMENT ->
                 if (isNext) {
-                    if (db.equipment.countChecked() == 0) {
+                    if (db.tableEquipment.countChecked() == 0) {
                         errorValue = ErrorMessage.NEED_EQUIPMENT
                         return false
                     }
@@ -284,10 +283,10 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
                     }
                     prefHelper.company = newCompanyName
                     companyEditing?.let {
-                        val companies = db.address.queryByCompanyName(it)
+                        val companies = db.tableAddress.queryByCompanyName(it)
                         for (address in companies) {
                             address.company = newCompanyName
-                            db.address.update(address)
+                            db.tableAddress.update(address)
                         }
                     }
                 }
@@ -366,7 +365,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             val items = computeNoteItems()
             val hasNotes = hasNotesEntered(items) && isNotesComplete(items)
             val hasEquip = hasChecked(prefHelper.currentProjectGroup)
-            val hasPictures = db.pictureCollection.countPictures(prefHelper.currentPictureCollectionId) > 0
+            val hasPictures = db.tablePictureCollection.countPictures(prefHelper.currentPictureCollectionId) > 0
             if (!hasTruck && !hasNotes && !hasEquip && !hasPictures) {
                 curFlowValue = CurrentProjectFlow()
             } else if (!hasTruck) {
@@ -388,7 +387,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         if (currentEditEntry != null) {
             items = currentEditEntry.notesAllWithValuesOverlaid.toMutableList()
         } else if (currentProjectGroup != null) {
-            items = db.collectionNoteProject.getNotes(currentProjectGroup.projectNameId).toMutableList()
+            items = db.tableCollectionNoteProject.getNotes(currentProjectGroup.projectNameId).toMutableList()
 
         }
         pushToBottom(items, "Other")
@@ -431,7 +430,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
 
     private fun hasChecked(currentProjectGroup: DataProjectAddressCombo?): Boolean {
         if (currentProjectGroup != null) {
-            val collection = db.collectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
+            val collection = db.tableCollectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
             for (item in collection.equipment) {
                 if (item.isChecked) {
                     return true

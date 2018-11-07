@@ -1,0 +1,84 @@
+@(currentPage: com.avaje.ebean.PagedList[Vehicle], currentSortBy: String, currentOrder: String, client : Client)
+
+@link(newPage:Int, newSortBy:String) = @{
+    var sortBy = currentSortBy
+    var order = currentOrder
+    if(newSortBy != null) {
+        sortBy = newSortBy
+        if(currentSortBy == newSortBy) {
+            if(currentOrder == "asc") {
+                order = "desc"
+            } else {
+                order = "asc"
+            }
+        } else {
+            order = "asc"
+        }
+    }
+    // Generate the link
+    routes.VehicleController.list(newPage, sortBy, order)
+}
+
+@header(key:String, title:String) = {
+    <th class="@key header @if(currentSortBy == key) @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
+        <a href="@link(0, key)">@title</a>
+    </th>
+}
+
+@main("FleetTLC - List Vehicles", client) {
+
+    <h1 id="homeTitle">@Messages("vehicles.list.title", currentPage.getTotalRowCount)
+    </h1>
+
+    @if(currentPage.getTotalRowCount == 0) {
+        
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+        
+    } else {
+        
+        <table class="techs zebra-striped">
+            <thead>
+                <tr>
+                    @header("tech_id", "Name")
+                    @header("time", "Date")
+                    @header("inspecting", "Inspecting")
+                    @header("type_of_inspection", "Type")
+                    <th>Mileage</th>
+                    <th>Head Lights</th>
+                    <th>Tail Lights</th>
+                    <th>Exterior Light Issues</th>
+                    <th>Fluid Checks</th>
+                    <th>Fluid Problems</th>
+                    <th>Tire Inspection</th>
+                    <th>Exterior Damage</th>
+                    <th>Other</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(vehicle <- currentPage.getList) {
+                    <tr>
+                        <td>@vehicle.getTechName()</td>
+                        <td>@vehicle.getDate()</td>
+                        <td>@vehicle.getInspecting()</td>
+                        <td>@vehicle.getTypeOfInspection()</td>
+                        <td>@vehicle.getMileage()</td>
+                        <td>@vehicle.getHeadLights()</td>
+                        <td>@vehicle.getTailLights()</td>
+                        <td>@vehicle.getFluidChecks()</td>
+                        <td>@vehicle.getFluidProblems()</td>
+                        <td>@vehicle.getTireInspection()</td>
+                        <td>@vehicle.getExteriorDamage()</td>
+                        <td>@vehicle.getOther()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        
+    }
+
+}
+
+            

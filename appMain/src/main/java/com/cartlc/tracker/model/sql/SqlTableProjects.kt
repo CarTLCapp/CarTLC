@@ -143,7 +143,7 @@ class SqlTableProjects(
             values.put(KEY_DISABLED, if (project.disabled) 1 else 0)
             values.put(KEY_IS_BOOT, if (project.isBootStrap) 1 else 0)
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(project.id))
+            val whereArgs = arrayOf(project.id.toString())
             if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
                 project.id = dbSql.insert(TABLE_NAME, null, values)
             }
@@ -293,7 +293,7 @@ class SqlTableProjects(
     }
 
     override fun removeOrDisable(project: DataProject) {
-        if (db.entry.countProjects(project.id) == 0 && db.projectAddressCombo.countProjects(project.id) == 0) {
+        if (db.tableEntry.countProjects(project.id) == 0 && db.tableProjectAddressCombo.countProjects(project.id) == 0) {
             // No entries for this, so just remove.
             Timber.i("remove(" + project.id + ", " + project.name + ")")
             remove(project.id)

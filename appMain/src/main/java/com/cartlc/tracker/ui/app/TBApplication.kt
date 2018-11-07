@@ -24,6 +24,7 @@ import com.cartlc.tracker.model.event.EventError
 import com.cartlc.tracker.model.server.AmazonHelper
 import com.cartlc.tracker.model.server.DCService
 import com.cartlc.tracker.model.server.ServerHelper
+import com.cartlc.tracker.model.sql.DatabaseManager
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.util.LocationHelper
 import com.cartlc.tracker.ui.util.PermissionHelper.PermissionRequest
@@ -112,6 +113,8 @@ class TBApplication : Application() {
 
     lateinit var carRepoComponent: CarRepositoryComponent
     private lateinit var carRepo: CarRepository
+    private lateinit var prefHelper: PrefHelper
+    private lateinit var dm: DatabaseManager
 
     lateinit var mainViewModelComponent: MainViewModelComponent
     private lateinit var mainViewModel: MainViewModel
@@ -120,10 +123,8 @@ class TBApplication : Application() {
     private lateinit var vehicleViewModel: VehicleViewModel
     private lateinit var vehicleRepository: VehicleRepository
 
-    private val prefHelper: PrefHelper
-        get() = carRepo.prefHelper
-    private val db: DatabaseTable
-        get() = carRepo.db
+    val db: DatabaseTable
+        get() = dm
 
     val version: String
         @Throws(PackageManager.NameNotFoundException::class)
@@ -141,7 +142,9 @@ class TBApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        carRepo = CarRepository(this)
+        dm = DatabaseManager(this)
+        prefHelper = PrefHelper(this, dm)
+        carRepo = CarRepository(this, dm, prefHelper)
         carRepoComponent = DaggerCarRepositoryComponent.builder()
                 .carRepositoryModule(CarRepositoryModule(carRepo))
                 .build()
@@ -150,7 +153,7 @@ class TBApplication : Application() {
         mainViewModelComponent = DaggerMainViewModelComponent.builder()
                 .mainViewModelModule(MainViewModelModule(mainViewModel))
                 .build()
-        vehicleRepository = VehicleRepository(this)
+        vehicleRepository = VehicleRepository(this, dm, prefHelper)
         vehicleViewModel = VehicleViewModel(vehicleRepository)
         vehicleComponent = DaggerVehicleViewModelComponent.builder()
                 .vehicleViewModelModule(VehicleViewModelModule(vehicleViewModel))
@@ -184,15 +187,15 @@ class TBApplication : Application() {
         }
     }
 
-//    fun requestZipCode(zipCode: String) {
-//        val data = db.zipCode.query(zipCode)
+//    fun requestZipCode(tableZipCode: String) {
+//        val data = db.tableZipCode.query(tableZipCode)
 //        if (data != null) {
 //            data.check()
 //            EventBus.getDefault().post(data)
 //        } else if (ServerHelper.instance.hasConnection(this)) {
 //            val intent = Intent(this, DCService::class.java)
 //            intent.action = DCService.ACTION_ZIP_CODE
-//            intent.putExtra(DCService.DATA_ZIP_CODE, zipCode)
+//            intent.putExtra(DCService.DATA_ZIP_CODE, tableZipCode)
 //            startService(intent)
 //        }
 //    }

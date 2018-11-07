@@ -1,5 +1,6 @@
 package com.cartlc.tracker.model
 
+import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.server.DCPing
 import com.cartlc.tracker.model.server.DCService
 import com.cartlc.tracker.ui.act.ListEntryActivity

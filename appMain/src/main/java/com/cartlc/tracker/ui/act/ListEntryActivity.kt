@@ -7,8 +7,6 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
@@ -63,7 +61,7 @@ class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListene
         delete!!.setOnClickListener {
             val projectGroup = prefHelper.currentProjectGroup
             if (projectGroup != null) {
-                db.projectAddressCombo.remove(projectGroup.id)
+                db.tableProjectAddressCombo.remove(projectGroup.id)
             }
             setResult(MainActivity.RESULT_DELETE_PROJECT)
             finish()

@@ -51,8 +51,8 @@ class DCService : IntentService(SERVER_NAME) {
             val zipCode = intent.getStringExtra(DATA_ZIP_CODE)
             mZip.findZipCode(zipCode)
         } else {
-            if (prefHelper.techID == 0 || prefHelper.hasRegistrationChanged()) {
-                if (prefHelper.hasName()) {
+            if (prefHelper.techID == 0 || prefHelper.registrationHasChanged) {
+                if (prefHelper.hasName) {
                     mPing.sendRegistration()
                 }
             }

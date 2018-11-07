@@ -40,6 +40,7 @@
             android:inputType="textCapWords"
             android:maxLines="1"
             android:text="@{viewModel.simpleText}"
+            android:afterTextChanged="@{(editable)->viewModel.afterTextChanged(editable)}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/entry_title" />

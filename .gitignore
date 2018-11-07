@@ -48,3 +48,6 @@ Debug/
 Release/
 
 target/
+
+# Play
+*.deb

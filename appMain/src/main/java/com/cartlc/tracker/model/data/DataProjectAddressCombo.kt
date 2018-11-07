@@ -35,7 +35,7 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
     val projectName: String?
         get() {
             if (mProjectName == null) {
-                mProjectName = db.projects.queryProjectName(projectNameId)
+                mProjectName = db.tableProjects.queryProjectName(projectNameId)
                 if (mProjectName == null) {
                     Timber.e("Could not find project ID=$projectNameId")
                 }
@@ -44,14 +44,14 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
         }
 
     val project: DataProject?
-        get() = db.projects.queryById(projectNameId)
+        get() = db.tableProjects.queryById(projectNameId)
 
     val address: DataAddress?
         get() {
             if (mAddress == null) {
-                mAddress = db.address.query(addressId)
+                mAddress = db.tableAddress.query(addressId)
                 if (mAddress == null) {
-                    Timber.e("Could not find address ID=$addressId")
+                    Timber.e("Could not find tableAddress ID=$addressId")
                 }
             }
             return mAddress
@@ -79,7 +79,7 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
         }
 
     val entries: List<DataEntry>
-        get() = db.entry.queryForProjectAddressCombo(id)
+        get() = db.tableEntry.queryForProjectAddressCombo(id)
 
     fun reset(projectNameId: Long, addressId: Long) {
         this.projectNameId = projectNameId

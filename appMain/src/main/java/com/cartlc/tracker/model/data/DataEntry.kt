@@ -7,9 +7,7 @@ import android.content.Context
 
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.misc.TruckStatus
-import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.model.table.DatabaseTable
-import org.greenrobot.eventbus.EventBus
 
 import java.text.SimpleDateFormat
 
@@ -76,7 +74,7 @@ class DataEntry(private val db: DatabaseTable) {
             for (note in allNotes) {
                 val valueNote = getNoteFrom(valueNotes, note)
                 if (valueNote != null) {
-                    db.note.update(valueNote)
+                    db.tableNote.update(valueNote)
                     result.add(valueNote)
                 } else {
                     result.add(note)
@@ -88,11 +86,11 @@ class DataEntry(private val db: DatabaseTable) {
     // Get all the notes as indicated by the project.
     // This will also include any current edits in place as well.
     val notesByProject: List<DataNote>
-        get() = db.collectionNoteProject.getNotes(projectAddressCombo!!.projectNameId)
+        get() = db.tableCollectionNoteProject.getNotes(projectAddressCombo!!.projectNameId)
 
     // Return only the notes with values.
     val notesWithValuesOnly: List<DataNote>
-        get() = db.collectionNoteEntry.query(noteCollectionId)
+        get() = db.tableCollectionNoteEntry.query(noteCollectionId)
 
     val notesLine: String
         get() {
@@ -122,7 +120,7 @@ class DataEntry(private val db: DatabaseTable) {
         get() = pictureCollection!!.pictures
 
     val truck: DataTruck?
-        get() = db.truck.query(truckId)
+        get() = db.tableTruck.query(truckId)
 
     fun getStatus(ctx: Context): String {
         return if (status != null) {
@@ -141,11 +139,11 @@ class DataEntry(private val db: DatabaseTable) {
 
     fun saveNotes(collectionId: Long) {
         noteCollectionId = collectionId
-        db.collectionNoteEntry.save(noteCollectionId, notesByProject)
+        db.tableCollectionNoteEntry.save(noteCollectionId, notesByProject)
     }
 
     fun saveNotes() {
-        db.collectionNoteEntry.save(noteCollectionId, notesByProject)
+        db.tableCollectionNoteEntry.save(noteCollectionId, notesByProject)
     }
 
     fun checkPictureUploadComplete(): Boolean {
@@ -155,7 +153,7 @@ class DataEntry(private val db: DatabaseTable) {
             }
         }
         uploadedAws = true
-        db.entry.saveUploaded(this)
+        db.tableEntry.saveUploaded(this)
         return true
     }
 

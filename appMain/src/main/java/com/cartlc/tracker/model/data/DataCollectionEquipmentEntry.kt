@@ -15,10 +15,10 @@ class DataCollectionEquipmentEntry(
 ) : DataCollectionEquipment(db, collectionId) {
 
     fun addChecked() {
-        equipmentListIds = db.equipment.queryIdsChecked().toMutableList()
+        equipmentListIds = db.tableEquipment.queryIdsChecked().toMutableList()
     }
 
     fun setChecked() {
-        db.equipment.setChecked(equipmentListIds)
+        db.tableEquipment.setChecked(equipmentListIds)
     }
 }

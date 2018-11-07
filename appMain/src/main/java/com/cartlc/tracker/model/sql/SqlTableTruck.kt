@@ -59,9 +59,9 @@ class SqlTableTruck(
         dbSql.execSQL(sbuf.toString())
     }
 
-    // Will find exact match of the truck given the parameters. Otherwise will create
-    // a new truck with these values.
-    // @Returns id of newly saved truck.
+    // Will find exact match of the tableTruck given the parameters. Otherwise will create
+    // a new tableTruck with these values.
+    // @Returns id of newly saved tableTruck.
     override fun save(truckNumber: String, licensePlate: String, projectId: Long, companyName: String): Long {
         val values = ContentValues()
         val truck: DataTruck
@@ -114,14 +114,14 @@ class SqlTableTruck(
                     values.put(KEY_ROWID, truck.id)
                     val confirm_id = dbSql.insert(TABLE_NAME, null, values)
                     if (confirm_id != truck.id) {
-                        Timber.e("Did not transfer truck properly for ID " + truck.id + "...got back " + confirm_id)
+                        Timber.e("Did not transfer tableTruck properly for ID " + truck.id + "...got back " + confirm_id)
                     }
                 }
             } else {
                 truck.id = dbSql.insert(TABLE_NAME, null, values)
             }
         } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableTruck::class.java, "save(truck)", "db")
+            TBApplication.ReportError(ex, SqlTableTruck::class.java, "save(tableTruck)", "db")
         }
         return truck.id
     }
@@ -300,7 +300,7 @@ class SqlTableTruck(
     }
 
     override fun removeIfUnused(truck: DataTruck) {
-        if (db.entry.countTrucks(truck.id) == 0) {
+        if (db.tableEntry.countTrucks(truck.id) == 0) {
             Timber.i("remove(" + truck.toString() + ")")
             remove(truck.id)
         }

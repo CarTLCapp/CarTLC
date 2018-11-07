@@ -19,7 +19,7 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
         internal val DATABASE_NAME = "cartcl.db"
-        internal val DATABASE_VERSION = 16
+        internal val DATABASE_VERSION = 17
     }
 
     private var dbHelper: DatabaseHelper
@@ -49,6 +49,8 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
         lateinit var tableTruck: SqlTableTruck
         lateinit var tableCrash: SqlTableCrash
         lateinit var tableZipCode: SqlTableZipCode
+        lateinit var tableString: SqlTableString
+        lateinit var tableVehicle: SqlTableVehicle
 
         override fun onCreate(db: SQLiteDatabase) {
             init(db)
@@ -67,6 +69,8 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
                 tableCrash.create()
                 tableZipCode.create()
                 tableTruck.create()
+                tableString.create()
+                tableVehicle.create()
             } catch (ex: Exception) {
                 Timber.e(ex)
             }
@@ -87,6 +91,8 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableCrash = SqlTableCrash(dm, db)
             tableZipCode = SqlTableZipCode(db)
             tableTruck = SqlTableTruck(dm, db)
+            tableString = SqlTableString(db)
+            tableVehicle = SqlTableVehicle(dm, db)
             SqlTableTruckV13.Init(dm, db)
         }
 
@@ -112,6 +118,9 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
             } else if (oldVersion <= 15) {
                 tableTruck.create()
                 SqlTableTruckV13.instance.transfer()
+            } else if (oldVersion <= 16) {
+                tableString.create()
+                tableVehicle.create()
             }
         }
 
@@ -137,50 +146,56 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
         dbHelper.clearUploaded()
     }
 
-    override val address: TableAddress
+    override val tableAddress: TableAddress
         get() = dbHelper.tableAddress
 
-    override val projects: TableProjects
+    override val tableProjects: TableProjects
         get() = dbHelper.tableProjects
 
-    override val equipment: TableEquipment
+    override val tableEquipment: TableEquipment
         get() = dbHelper.tableEquipment
 
-    override val note: TableNote
+    override val tableNote: TableNote
         get() = dbHelper.tableNote
 
-    override val truck: TableTruck
+    override val tableTruck: TableTruck
         get() = dbHelper.tableTruck
 
-    override val collectionNoteEntry: TableCollectionNoteEntry
+    override val tableCollectionNoteEntry: TableCollectionNoteEntry
         get() = dbHelper.tableCollectionNoteEntry
 
-    override val collectionNoteProject: TableCollectionNoteProject
+    override val tableCollectionNoteProject: TableCollectionNoteProject
         get() = dbHelper.tableCollectionNoteProject
 
-    override val entry: TableEntry
+    override val tableEntry: TableEntry
         get() = dbHelper.tableEntry
 
-    override val collectionEquipmentEntry: TableCollectionEquipmentEntry
+    override val tableCollectionEquipmentEntry: TableCollectionEquipmentEntry
         get() = dbHelper.tableCollectionEquipmentEntry
 
-    override val collectionEquipmentProject: TableCollectionEquipmentProject
+    override val tableCollectionEquipmentProject: TableCollectionEquipmentProject
         get() = dbHelper.tableCollectionEquipmentProject
 
-    override val crash: TableCrash
+    override val tableCrash: TableCrash
         get() = dbHelper.tableCrash
 
-    override val pictureCollection: TablePictureCollection
+    override val tablePictureCollection: TablePictureCollection
         get() = dbHelper.tablePictureCollection
 
-    override val projectAddressCombo: TableProjectAddressCombo
+    override val tableProjectAddressCombo: TableProjectAddressCombo
         get() = dbHelper.tableProjectAddressCombo
 
-    override val zipCode: TableZipCode
+    override val tableZipCode: TableZipCode
         get() = dbHelper.tableZipCode
 
     override val appVersion: String
         get() = (ctx.applicationContext as TBApplication).version
+
+    override val tableVehicle: TableVehicle
+        get() = dbHelper.tableVehicle
+
+    override val tableString: TableString
+        get() = dbHelper.tableString
 
     override fun reportError(ex: Exception, claz: Class<*>, function: String, type: String): String =
         TBApplication.ReportError(ex, claz, function, type)

@@ -342,7 +342,7 @@ class SqlTableEquipment(
     }
 
     override fun removeOrDisable(equip: DataEquipment) {
-        if (db.collectionEquipmentEntry.countValues(equip.id) == 0) {
+        if (db.tableCollectionEquipmentEntry.countValues(equip.id) == 0) {
             Timber.i("remove(" + equip.id + ", " + equip.name + ")")
             remove(equip.id)
         } else {

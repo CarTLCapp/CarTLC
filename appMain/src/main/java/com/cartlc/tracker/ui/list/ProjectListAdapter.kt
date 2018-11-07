@@ -14,7 +14,6 @@ import com.cartlc.tracker.model.data.DataProjectAddressCombo
 import com.cartlc.tracker.viewmodel.MainListViewModel
 
 import kotlinx.android.synthetic.main.entry_item_project.view.*
-import timber.log.Timber
 
 /**
  * Created by dug on 5/10/17.
@@ -43,7 +42,7 @@ class ProjectListAdapter(
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
         val projectGroup = mProjectGroups[position]
         holder.view.project_name.text = projectGroup.projectName
-        val count = vm.tmpDb.entry.countProjectAddressCombo(projectGroup.id)
+        val count = vm.tmpDb.tableEntry.countProjectAddressCombo(projectGroup.id)
         if (count.totalEntries > 0) {
             val sbuf = StringBuilder()
             sbuf.append(mContext.getString(R.string.title_entries_))
@@ -92,7 +91,7 @@ class ProjectListAdapter(
     }
 
     fun onDataChanged() {
-        mProjectGroups = vm.tmpDb.projectAddressCombo.query()
+        mProjectGroups = vm.tmpDb.tableProjectAddressCombo.query()
         mCurProjectGroupId = vm.tmpPrefHelper.currentProjectGroupId
         notifyDataSetChanged()
     }

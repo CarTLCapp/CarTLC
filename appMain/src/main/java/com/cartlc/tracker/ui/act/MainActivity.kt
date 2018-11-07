@@ -11,14 +11,12 @@ import android.content.pm.PackageManager
 import android.location.Address
 import android.os.*
 import android.provider.MediaStore
-import androidx.core.content.ContextCompat
 import android.text.InputType
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -44,8 +42,6 @@ import com.cartlc.tracker.ui.util.BitmapHelper
 import com.cartlc.tracker.ui.util.DialogHelper
 import com.cartlc.tracker.ui.util.LocationHelper
 import com.cartlc.tracker.ui.util.PermissionHelper
-import com.cartlc.tracker.model.misc.EntryHint
-import com.cartlc.tracker.model.misc.ErrorMessage
 import com.cartlc.tracker.ui.frag.*
 import com.cartlc.tracker.viewmodel.MainViewModel
 
@@ -117,7 +113,7 @@ class MainActivity : BaseActivity() {
             val sbuf = StringBuilder()
             val countPictures = prefHelper.numPicturesTaken
             val maxEquip = prefHelper.numEquipPossible
-            val checkedEquipment = db.equipment.queryChecked().size
+            val checkedEquipment = db.tableEquipment.queryChecked().size
             sbuf.append(getString(R.string.status_installed_equipments, checkedEquipment, maxEquip))
             sbuf.append("\n")
             sbuf.append(getString(R.string.status_installed_pictures, countPictures))
@@ -311,14 +307,14 @@ class MainActivity : BaseActivity() {
                 if (prefHelper.projectName == null) {
                     buttonsFragment.vm.showNextButtonValue = false
                 }
-                setList(R.string.title_project, PrefHelper.KEY_PROJECT, db.projects.query(true))
+                setList(R.string.title_project, PrefHelper.KEY_PROJECT, db.tableProjects.query(true))
                 getLocation()
             }
             Stage.COMPANY -> {
                 titleFragment.vm.subTitleValue = editProjectHint
                 mainListFragment.showing = true
                 buttonsFragment.vm.showCenterButtonValue = true
-                val companies = db.address.query()
+                val companies = db.tableAddress.query()
                 autoNarrowCompanies(companies.toMutableList())
                 val companyNames = getNames(companies)
                 if (companyNames.size == 1 && vm.autoNarrowOkay) {
@@ -351,9 +347,9 @@ class MainActivity : BaseActivity() {
                 buttonsFragment.vm.showNextButtonValue = false
                 val company = prefHelper.company
                 val zipcode = prefHelper.zipCode
-                var states: MutableList<String> = db.address.queryStates(company!!, zipcode).toMutableList()
+                var states: MutableList<String> = db.tableAddress.queryStates(company!!, zipcode).toMutableList()
                 if (states.size == 0) {
-                    val state = zipcode?.let { db.zipCode.queryState(it) }
+                    val state = zipcode?.let { db.tableZipCode.queryState(it) }
                     if (state != null) {
                         states = ArrayList()
                         states.add(state)
@@ -389,9 +385,9 @@ class MainActivity : BaseActivity() {
                 val company = prefHelper.company
                 val zipcode = prefHelper.zipCode
                 val state = prefHelper.state
-                var cities: MutableList<String> = db.address.queryCities(company!!, zipcode, state!!).toMutableList()
+                var cities: MutableList<String> = db.tableAddress.queryCities(company!!, zipcode, state!!).toMutableList()
                 if (cities.isEmpty()) {
-                    val city = zipcode?.let { db.zipCode.queryCity(zipcode) }
+                    val city = zipcode?.let { db.tableZipCode.queryCity(zipcode) }
                     if (city != null) {
                         cities = ArrayList()
                         cities.add(city)
@@ -426,7 +422,7 @@ class MainActivity : BaseActivity() {
                     entrySimpleFragment.vm.helpTextValue = prefHelper.address
                 }
                 titleFragment.vm.subTitleValue = if (editing) editProjectHint else curProjectHint
-                val streets = db.address.queryStreets(
+                val streets = db.tableAddress.queryStreets(
                         prefHelper.company!!,
                         prefHelper.city!!,
                         prefHelper.state!!,
@@ -473,7 +469,7 @@ class MainActivity : BaseActivity() {
                 titleFragment.vm.showSeparatorValue = true
                 buttonsFragment.vm.showCenterButtonValue = true
                 buttonsFragment.vm.prevTextValue = getString(R.string.btn_edit)
-                if (db.projectAddressCombo.count() > 0) {
+                if (db.tableProjectAddressCombo.count() > 0) {
                     fab_add.show()
                 }
                 buttonsFragment.vm.centerTextValue = getString(R.string.btn_new_project)
@@ -491,7 +487,7 @@ class MainActivity : BaseActivity() {
 
                 mainListFragment.showing = true
                 setList(R.string.title_truck, PrefHelper.KEY_TRUCK,
-                        db.truck.queryStrings(prefHelper.currentProjectGroup))
+                        db.tableTruck.queryStrings(prefHelper.currentProjectGroup))
                 if (prefHelper.currentProjectGroup != null) {
                     titleFragment.vm.subTitleValue = prefHelper.currentProjectGroup!!.hintLine
                 }
@@ -535,8 +531,8 @@ class MainActivity : BaseActivity() {
                 } else {
                     buttonsFragment.vm.showNextButtonValue = true
                     mPictureAdapter.setList(
-                            db.pictureCollection.removeNonExistant(
-                                    db.pictureCollection.queryPictures(prefHelper.currentPictureCollectionId
+                            db.tablePictureCollection.removeNonExistant(
+                                    db.tablePictureCollection.queryPictures(prefHelper.currentPictureCollectionId
                                     )).toMutableList()
                     )
                 }
@@ -679,7 +675,7 @@ class MainActivity : BaseActivity() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         if (takePictureIntent.resolveActivity(packageManager) != null) {
             val pictureFile = prefHelper.genFullPictureFile()
-            db.pictureCollection.add(pictureFile, prefHelper.currentPictureCollectionId)
+            db.tablePictureCollection.add(pictureFile, prefHelper.currentPictureCollectionId)
             val pictureUri = TBApplication.getUri(this, pictureFile)
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri)
             mTakingPictureFile = pictureFile
@@ -817,8 +813,8 @@ class MainActivity : BaseActivity() {
         super.onSaveInstanceState(outState)
     }
 
-//    private fun isZipCode(zipCode: String?): Boolean {
-//        return zipCode != null && zipCode.length == 5 && zipCode.matches("^[0-9]*$".toRegex())
+//    private fun isZipCode(tableZipCode: String?): Boolean {
+//        return tableZipCode != null && tableZipCode.length == 5 && tableZipCode.matches("^[0-9]*$".toRegex())
 //    }
 
     private fun showPictureToast(pictureCount: Int) {
@@ -860,7 +856,7 @@ class MainActivity : BaseActivity() {
                             }
 
                             override fun doDelete(entry: DataEntry) {
-                                db.entry.remove(entry)
+                                db.tableEntry.remove(entry)
                             }
                         }
                 )

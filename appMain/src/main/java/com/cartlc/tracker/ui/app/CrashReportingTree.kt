@@ -6,7 +6,6 @@ package com.cartlc.tracker.ui.app
 import android.util.Log
 
 import com.cartlc.tracker.BuildConfig
-import com.cartlc.tracker.model.sql.SqlTableCrash
 import com.cartlc.tracker.model.table.DatabaseTable
 
 import timber.log.Timber
@@ -36,9 +35,9 @@ class CrashReportingTree(private val db: DatabaseTable) : Timber.Tree() {
                 Log.wtf(tag, message)
             }
             if (t != null) {
-                db.crash.message(priority, t.message ?: "unknown", message)
+                db.tableCrash.message(priority, t.message ?: "unknown", message)
             } else {
-                db.crash.message(priority, message, null)
+                db.tableCrash.message(priority, message, null)
             }
         }
         Timber.tag("CarTLC")

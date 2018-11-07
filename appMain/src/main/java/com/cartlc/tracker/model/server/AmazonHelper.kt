@@ -134,7 +134,7 @@ class AmazonHelper(
 
     @Synchronized
     private fun uploadComplete(entry: DataEntry, item: DataPicture): Boolean {
-        db.pictureCollection.setUploaded(item)
+        db.tablePictureCollection.setUploaded(item)
         return entry.checkPictureUploadComplete()
     }
 

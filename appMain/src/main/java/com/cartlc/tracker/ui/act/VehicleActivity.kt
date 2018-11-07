@@ -82,7 +82,6 @@ class VehicleActivity : BaseActivity() {
             event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
         })
         buttonsFragment.vm.showCenterButtonValue = false
-        buttonsFragment.vm.showNextButtonValue = true
 
         stage1EntryEmail.vm.handleGenericEvent().observe(this, Observer { event ->
             vm.doSimpleEntryEmailReturn(event.peekContent())
@@ -90,20 +89,23 @@ class VehicleActivity : BaseActivity() {
         stage1EntryEmail.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
         stage1EntryEmail.vm.titleValue = getString(R.string.vehicle_email_address)
         stage1EntryEmail.vm.simpleEmsValue = resources.getInteger(R.integer.entry_simple_ems_email)
-        stage1EntryEmail.vm.simpleHintValue = getString(R.string.vehicle_email_hint)
+        stage1EntryEmail.vm.simpleHintValue = getString(R.string.vehicle_required)
+        stage1EntryEmail.vm.afterTextChangedListener = { value -> vm.onEmailChanged(value) }
 
         stage2EntryMileage.vm.handleGenericEvent().observe(this, Observer { event ->
             vm.doSimpleEntryMileageReturn(event.peekContent())
         })
         stage2EntryMileage.inputType = InputType.TYPE_CLASS_NUMBER
         stage2EntryMileage.vm.titleValue = getString(R.string.vehicle_mileage)
-        stage2EntryMileage.vm.simpleHintValue = getString(R.string.vehicle_mileage_hint)
+        stage2EntryMileage.vm.simpleHintValue = getString(R.string.vehicle_required)
+        stage2EntryMileage.vm.afterTextChangedListener = { value -> vm.onMileageChanged(value) }
 
         stage3Entry.vm.handleGenericEvent().observe(this, Observer { event ->
             vm.doSimpleEntryReturn(event.peekContent())
         })
         stage3Entry.vm.simpleEmsValue = resources.getInteger(R.integer.entry_simple_ems_lights)
-        stage3Entry.vm.simpleHintValue = getString(R.string.vehicle_entry_general_hint)
+        stage3Entry.vm.simpleHintValue = getString(R.string.vehicle_required)
+        stage3Entry.vm.afterTextChangedListener = { value -> vm.onEntryChanged(value) }
         titleFragment.vm.titleValue = null
 
         vm.repo.stage.observe(this, Observer { stage -> onStageChanged(stage) })
@@ -113,6 +115,7 @@ class VehicleActivity : BaseActivity() {
         vm.emailTextValue = { stage1EntryEmail.entryTextValue }
         vm.mileageTextValue = { stage2EntryMileage.entryTextValue }
         vm.entryTextValue = { stage3Entry.entryTextValue }
+        vm.btnNextVisible = { flag -> buttonsFragment.vm.showNextButtonValue = flag }
     }
 
     private fun setup(list: RecyclerView) {
@@ -143,44 +146,47 @@ class VehicleActivity : BaseActivity() {
         vm.stage3ListTitleValue = null
         vm.stage3List2TitleValue = null
         buttonsFragment.vm.showPrevButtonValue = stage != VehicleStage.STAGE_1
+        buttonsFragment.vm.showNextButtonValue = false
         buttonsFragment.vm.nextTextValue = getString(R.string.btn_next)
         stage3Entry.vm.titleValue = null
         checkboxAdapter.items = emptyList()
+
+        vm.onStageChanged(stage)
 
         when (stage) {
             VehicleStage.STAGE_1 -> {
                 vm.showFrame1Value = true
                 stage1EntryEmail.vm.simpleTextValue = vm.repo.entered.email
                 radioAdapter.list = vm.repo.inspectingList
-                radioAdapter.selectedText = vm.repo.entered.inspecting
+                radioAdapter.selectedText = vm.repo.entered.vehicle.inspectingValue
             }
             VehicleStage.STAGE_2 -> {
                 vm.showFrame2Value = true
                 stage2EntryMileage.vm.simpleTextValue = vm.repo.entered.mileageValue
                 radioAdapter.list = vm.repo.typeOfInspection.toList()
-                radioAdapter.selectedText = vm.repo.entered.inspectionType
+                radioAdapter.selectedText = vm.repo.entered.vehicle.typeOfInspectionValue
             }
             VehicleStage.STAGE_3 -> {
                 vm.showFrame3Value = true
                 titleFragment.vm.titleValue = getString(R.string.vehicle_lights)
                 titleFragment.vm.subTitleValue = getString(R.string.vehicle_lights_description)
                 stage3Entry.vm.titleValue = getString(R.string.vehicle_lights_exterior)
-                stage3Entry.vm.simpleTextValue = vm.repo.entered.exteriorLights
+                stage3Entry.vm.simpleTextValue = vm.repo.entered.vehicle.exteriorLightIssues
                 vm.stage3ListTitleValue = getString(R.string.vehicle_lights_head)
                 vm.stage3List2TitleValue = getString(R.string.vehicle_lights_tail)
                 checkboxAdapter.items = vm.repo.headLights.toList()
-                checkboxAdapter.selectedItems = vm.repo.entered.headLights
+                checkboxAdapter.selectedItems = vm.repo.entered.vehicle.headLightsValue
                 checkboxAdapter2.items = vm.repo.tailLights.toList()
-                checkboxAdapter2.selectedItems = vm.repo.entered.tailLights
+                checkboxAdapter2.selectedItems = vm.repo.entered.vehicle.tailLightsValue
             }
             VehicleStage.STAGE_4 -> {
                 vm.showFrame3Value = true
                 titleFragment.vm.titleValue = getString(R.string.vehicle_fluids)
                 titleFragment.vm.subTitleValue = getString(R.string.vehicle_fluids_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_fluids_checks)
-                stage3Entry.vm.simpleTextValue = vm.repo.entered.fluidsOrLeaks
+                stage3Entry.vm.simpleTextValue = vm.repo.entered.vehicle.fluidProblemsDetected
                 checkboxAdapter.items = vm.repo.fluidChecks.toList()
-                checkboxAdapter.selectedItems = vm.repo.entered.fluid
+                checkboxAdapter.selectedItems = vm.repo.entered.vehicle.fluidChecksValue
                 stage3Entry.vm.titleValue = getString(R.string.vehicle_fluids_detected)
             }
             VehicleStage.STAGE_5 -> {
@@ -188,9 +194,9 @@ class VehicleActivity : BaseActivity() {
                 titleFragment.vm.titleValue = getString(R.string.vehicle_exterior)
                 titleFragment.vm.subTitleValue = getString(R.string.vehicle_exterior_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_tire_inspection)
-                stage3Entry.vm.simpleTextValue = vm.repo.entered.damage
+                stage3Entry.vm.simpleTextValue = vm.repo.entered.vehicle.exteriorDamage
                 checkboxAdapter.items = vm.repo.tireInspection.toList()
-                checkboxAdapter.selectedItems = vm.repo.entered.tireInspection
+                checkboxAdapter.selectedItems = vm.repo.entered.vehicle.tireInspectionValue
                 stage3Entry.vm.titleValue = getString(R.string.vehicle_tire_damage)
             }
             VehicleStage.STAGE_6 -> {
@@ -198,7 +204,7 @@ class VehicleActivity : BaseActivity() {
                 titleFragment.vm.titleValue = getString(R.string.vehicle_other_title)
                 titleFragment.vm.subTitleValue = getString(R.string.vehicle_other_description)
                 buttonsFragment.vm.nextTextValue = getString(R.string.vehicle_submit)
-                stage3Entry.vm.simpleTextValue = vm.repo.entered.other
+                stage3Entry.vm.simpleTextValue = vm.repo.entered.vehicle.other
             }
         }
     }

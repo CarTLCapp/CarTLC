@@ -67,8 +67,8 @@ class SqlTableTruckV13(
             truck.serverId = cursor.getLong(idxServerId)
             truck.projectNameId = cursor.getLong(idxProjectId)
             truck.companyName = cursor.getString(idxCompanyName)
-            truck.hasEntry = db.entry.countTrucks(truck.id) > 0
-            db.truck.save(truck)
+            truck.hasEntry = db.tableEntry.countTrucks(truck.id) > 0
+            db.tableTruck.save(truck)
         }
         cursor.close()
         dbSql.delete(TABLE_NAME, null, null)

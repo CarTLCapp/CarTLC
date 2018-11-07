@@ -4,10 +4,21 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.flow.VehicleStage
-import com.cartlc.tracker.model.misc.HashList
+import android.text.TextUtils
+import com.cartlc.tracker.model.data.DataVehicle
+import com.cartlc.tracker.model.pref.PrefHelper
+import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.ui.app.TBApplication
 
-class VehicleRepository(context: Context) {
 
+class VehicleRepository(
+        private val context: Context,
+        private val dm: DatabaseTable,
+        private val prefHelper: PrefHelper
+) {
+
+    val app: TBApplication
+        get() = context.applicationContext as TBApplication
     val stage: MutableLiveData<VehicleStage> by lazy {
         MutableLiveData<VehicleStage>()
     }
@@ -39,24 +50,71 @@ class VehicleRepository(context: Context) {
             "Silverado #9",
             "Promaster #10")
 
-    class Entered {
-        var email: String = ""
-        var mileage: Int? = null
-        var exteriorLights: String = ""
-        var fluidsOrLeaks: String = ""
-        var damage: String = ""
-        var other: String = ""
-        var inspectionType: String = ""
-        var inspecting: String = ""
-        var headLights = HashList()
-        var tailLights = HashList()
-        var fluid = HashList()
-        var tireInspection = HashList()
+    inner class Entered {
+        var email: String = prefHelper.email ?: ""
+        var vehicle = DataVehicle(dm.tableString)
 
         val mileageValue: String
-            get() = mileage?.toString() ?: ""
+            get() = if (vehicle.mileage == 0) {
+                ""
+            } else {
+                vehicle.mileage.toString()
+            }
+
+        val isValidEmail: Boolean
+            get() {
+                return if (TextUtils.isEmpty(email)) {
+                    false
+                } else {
+                    android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+                }
+            }
+
+        internal val isValidMileage: Boolean
+            get() = vehicle.mileage > 0
+
+        internal val isValidExteriorLights: Boolean
+            get() = vehicle.exteriorLightIssues.isNotBlank()
+
+        internal val isValidFluids: Boolean
+            get() = vehicle.fluidProblemsDetected.isNotBlank()
+
+        internal val isValidDamage: Boolean
+            get() = vehicle.exteriorDamage.isNotBlank()
+
+        internal val isValidOther: Boolean
+            get() = vehicle.other.isNotBlank()
+
+        fun clear() {
+            vehicle = DataVehicle(dm.tableString)
+        }
     }
 
     val entered = Entered()
 
+    private val isValidInspecting: Boolean
+        get() = inspectingList.contains(entered.vehicle.inspectingValue)
+    private val isValidTypeOfInspection: Boolean
+        get() = typeOfInspection.toList().contains(entered.vehicle.typeOfInspectionValue)
+
+    val isValidStage1: Boolean
+        get() = isValidInspecting && entered.isValidEmail
+    val isValidStage2: Boolean
+        get() = entered.isValidMileage && isValidTypeOfInspection
+    val isValidStage3: Boolean
+        get() = entered.isValidExteriorLights
+    val isValidStage4: Boolean
+        get() = entered.isValidFluids
+    val isValidStage5: Boolean
+        get() = entered.isValidDamage
+    val isValidStage6: Boolean
+        get() = entered.isValidOther
+
+    fun submit() {
+        prefHelper.email = entered.email
+        prefHelper.registrationHasChanged = true
+        dm.tableVehicle.save(entered.vehicle)
+        entered.clear()
+        app.ping()
+    }
 }

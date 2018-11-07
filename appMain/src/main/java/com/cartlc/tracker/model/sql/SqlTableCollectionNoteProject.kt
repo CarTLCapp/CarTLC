@@ -27,9 +27,9 @@ class SqlTableCollectionNoteProject(
     }
 
     fun addByName(projectName: String, notes: List<DataNote>) {
-        var projectNameId = db.projects.queryProjectName(projectName)
+        var projectNameId = db.tableProjects.queryProjectName(projectName)
         if (projectNameId < 0) {
-            projectNameId = db.projects.addTest(projectName)
+            projectNameId = db.tableProjects.addTest(projectName)
         }
         addByNameTest(projectNameId, notes)
     }
@@ -37,9 +37,9 @@ class SqlTableCollectionNoteProject(
     internal fun addByNameTest(projectNameId: Long, notes: List<DataNote>) {
         val list = ArrayList<Long>()
         for (note in notes) {
-            var id = db.note.query(note.name)
+            var id = db.tableNote.query(note.name)
             if (id < 0) {
-                id = db.note.add(note)
+                id = db.tableNote.add(note)
             }
             list.add(id)
         }
@@ -51,9 +51,9 @@ class SqlTableCollectionNoteProject(
         val noteIds = query(projectNameId)
         val list = ArrayList<DataNote>()
         for (noteId in noteIds) {
-            val note = db.note.query(noteId)
+            val note = db.tableNote.query(noteId)
             if (note == null) {
-                Timber.e("Could not find note with ID $noteId")
+                Timber.e("Could not find tableNote with ID $noteId")
             } else {
                 list.add(note)
             }
@@ -63,7 +63,7 @@ class SqlTableCollectionNoteProject(
 
     override fun removeIfGone(item: DataCollectionItem) {
         if (item.isBootstrap) {
-            if (db.note.query(item.value_id) == null) {
+            if (db.tableNote.query(item.value_id) == null) {
                 Timber.i("remove(" + item.id + ", " + item.toString() + ")")
                 remove(item.id)
             }

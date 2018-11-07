@@ -3,15 +3,8 @@
  */
 package controllers;
 
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Transaction;
 import play.mvc.*;
 import play.data.*;
-
-import static play.data.Form.*;
-
-import akka.actor.*;
-import scala.concurrent.duration.Duration;
 
 import models.*;
 import modules.WorkerExecutionContext;
@@ -20,15 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 import javax.inject.Inject;
-import javax.persistence.PersistenceException;
 import java.util.concurrent.*;
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 
@@ -39,7 +28,6 @@ import modules.EntryListWriter;
 import java.io.File;
 
 import play.db.ebean.Transactional;
-import play.libs.Json;
 import play.Logger;
 import play.libs.concurrent.HttpExecution;
 
@@ -49,7 +37,7 @@ import play.libs.concurrent.HttpExecution;
 public class EntryController extends Controller {
 
     private static final int PAGE_SIZE = 100;
-    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
+    public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
     private static final String EXPORT_FILENAME = "/tmp/export.csv";
 
     private AmazonHelper mAmazonHelper;
@@ -58,8 +46,6 @@ public class EntryController extends Controller {
     private SimpleDateFormat mDateFormat;
     private Globals mGlobals;
     private WorkerExecutionContext mExecutionContext;
-    private ActorSystem mActorSystem;
-    private String mExportMsg;
     private EntryListWriter mExportWriter;
     private boolean mExporting;
     private boolean mAborted;
@@ -68,14 +54,12 @@ public class EntryController extends Controller {
     public EntryController(AmazonHelper amazonHelper,
                            FormFactory formFactory,
                            WorkerExecutionContext executionContext,
-                           ActorSystem actorSystem,
                            Globals globals) {
         mAmazonHelper = amazonHelper;
         mFormFactory = formFactory;
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
         mGlobals = globals;
         mExecutionContext = executionContext;
-        mActorSystem = actorSystem;
     }
 
     public Result list(int page, String sortBy, String order) {
@@ -617,7 +601,7 @@ public class EntryController extends Controller {
         return ok(Long.toString(ret_id));
     }
 
-    String pickOutTimeZone(String value, char sp) {
+    public static String pickOutTimeZone(String value, char sp) {
         int pos = value.indexOf(sp);
         if (pos >= 0) {
             return value.substring(pos + 1);

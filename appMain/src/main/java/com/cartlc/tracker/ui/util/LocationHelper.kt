@@ -31,7 +31,7 @@ import java.util.HashSet
 import java.util.Locale
 
 /**
- * Find the location the user is at and return the best street address we can find.
+ * Find the location the user is at and return the best street tableAddress we can find.
  * Created by dug on 3/12/18.
  */
 class LocationHelper(
@@ -79,7 +79,7 @@ class LocationHelper(
         }
 
         /**
-         * Lookup the address in private database.
+         * Lookup the tableAddress in private database.
          * The reason is that there is a limit to the number of times you can hit Google's geocacher.
          */
         @Suppress("UNUSED_PARAMETER")
@@ -168,7 +168,7 @@ class LocationHelper(
                                 continue
                             }
                             val type = types.getString(0)
-                            // String long_name = component.getString("long_name");
+                            // String long_name = component.getTableString("long_name");
                             val short_name = component.getString("short_name")
 
                             if ("street_number" == type) {
@@ -199,7 +199,7 @@ class LocationHelper(
             } catch (e: JSONException) {
                 Log.e(TAG, "TAG,Geocode parsing error: JSONException: ", e)
             } catch (e: Exception) {
-                Log.e(TAG, "Geocode parsing error for address $buildUri, ERROR: ", e)
+                Log.e(TAG, "Geocode parsing error for tableAddress $buildUri, ERROR: ", e)
             }
 
             return retList
@@ -208,7 +208,7 @@ class LocationHelper(
         override fun onPostExecute(address: Address?) {
             if (address != null) {
                 if (LOG) {
-                    Log.i(TAG, "Got address=" + address.toString())
+                    Log.i(TAG, "Got tableAddress=" + address.toString())
                 }
                 if (mCallback != null) {
                     mCallback!!.onLocationUpdate(address)
@@ -352,7 +352,7 @@ class LocationHelper(
             code += address.locality.hashCode().toLong()
             if (!mReportMap.contains(code)) {
                 mReportMap.add(code)
-                db.crash.info("LOCATION: " + address.toString())
+                db.tableCrash.info("LOCATION: " + address.toString())
             }
             Log.i(TAG, address.toString())
         }

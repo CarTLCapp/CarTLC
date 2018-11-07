@@ -70,6 +70,9 @@ public class Technician extends com.avaje.ebean.Model {
     @Constraints.Required
     public String reload_code;
 
+    @Constraints.Required
+    public String email;
+
     public String fullName() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(first_name);

@@ -95,7 +95,6 @@ public class TruckController extends Controller {
         if (value == null) {
             return badRequest("missing field: tech_id");
         }
-        int tech_id = value.intValue();
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("trucks");
         List<Truck> trucks = Truck.list();

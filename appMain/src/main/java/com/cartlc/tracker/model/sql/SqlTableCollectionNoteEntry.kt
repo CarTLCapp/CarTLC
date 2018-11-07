@@ -64,13 +64,13 @@ class SqlTableCollectionNoteEntry(
         return count
     }
 
-    // There are TWO note tables. One is TableCollectionnNoteProject which stores the
+    // There are TWO tableNote tables. One is TableCollectionnNoteProject which stores the
     // defined notes for each project. The enteredOther is this one which stores the values.
     //
     // The values are stored right now in the SqlTableNote table which is represented by the incoming
     // notes. We want them to also be stored now into this table.
     //
-    // The reason we need two tables for the values, is that each time a new entry is created
+    // The reason we need two tables for the values, is that each time a new tableEntry is created
     // a new set of values for the notes are needed as well. This new set of values is stored
     // in this table. The SqlTableNote table only holds the values temporarily while they are being entered.
     override fun save(collectionId: Long, notes: List<DataNote>) {
@@ -107,7 +107,7 @@ class SqlTableCollectionNoteEntry(
             val idxValueId = cursor.getColumnIndex(KEY_VALUE)
             var note: DataNote?
             while (cursor.moveToNext()) {
-                note = db.note.query(cursor.getLong(idxNoteId)) // Fill out with original values.
+                note = db.tableNote.query(cursor.getLong(idxNoteId)) // Fill out with original values.
                 note!!.value = cursor.getString(idxValueId) // override
                 list.add(note)
             }

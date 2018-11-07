@@ -69,7 +69,7 @@ class LoginViewModel(private val act: Activity) : BaseViewModel() {
             prefHelper.secondaryFirstName = secondaryFirstNameEdit
             prefHelper.secondaryLastName = secondaryLastNameEdit
         }
-        prefHelper.setRegistrationChanged(true)
+        prefHelper.registrationHasChanged = true
         app.ping()
         return false
     }
