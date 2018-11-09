@@ -4,12 +4,10 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.flow.VehicleStage
-import android.text.TextUtils
 import com.cartlc.tracker.model.data.DataVehicle
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication
-
 
 class VehicleRepository(
         private val context: Context,
@@ -38,20 +36,12 @@ class VehicleRepository(
         stageValue = VehicleStage.STAGE_1
     }
 
-    val inspectingList = listOf(
-            "E350 (CarTLC) #1",
-            "Promaster City #2",
-            "NV3500 #3",
-            "F150 #4",
-            "Promaster City #5",
-            "City Express #6",
-            "City Express #7",
-            "Quest #8",
-            "Silverado #9",
-            "Promaster #10")
+    val inspectingList: List<String>
+        get() {
+            return dm.tableVehicleName.vehicleNames
+        }
 
     inner class Entered {
-        var email: String = prefHelper.email ?: ""
         var vehicle = DataVehicle(dm.tableString)
 
         val mileageValue: String
@@ -59,15 +49,6 @@ class VehicleRepository(
                 ""
             } else {
                 vehicle.mileage.toString()
-            }
-
-        val isValidEmail: Boolean
-            get() {
-                return if (TextUtils.isEmpty(email)) {
-                    false
-                } else {
-                    android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-                }
             }
 
         internal val isValidMileage: Boolean
@@ -98,7 +79,7 @@ class VehicleRepository(
         get() = typeOfInspection.toList().contains(entered.vehicle.typeOfInspectionValue)
 
     val isValidStage1: Boolean
-        get() = isValidInspecting && entered.isValidEmail
+        get() = isValidInspecting
     val isValidStage2: Boolean
         get() = entered.isValidMileage && isValidTypeOfInspection
     val isValidStage3: Boolean
@@ -111,10 +92,10 @@ class VehicleRepository(
         get() = entered.isValidOther
 
     fun submit() {
-        prefHelper.email = entered.email
         prefHelper.registrationHasChanged = true
         dm.tableVehicle.save(entered.vehicle)
         entered.clear()
         app.ping()
+        stageValue = VehicleStage.STAGE_1
     }
 }

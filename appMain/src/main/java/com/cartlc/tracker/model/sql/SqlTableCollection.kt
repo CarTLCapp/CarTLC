@@ -277,9 +277,7 @@ abstract class SqlTableCollection(
         try {
             val values = ContentValues()
             values.put(KEY_SERVER_ID, 0)
-            if (mDb.update(mTableName, values, null, null) == 0) {
-                Timber.e("SqlTableCollection.clearUploaded(): Unable to update entries")
-            }
+            mDb.update(mTableName, values, null, null)
             mDb.setTransactionSuccessful()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableCollection::class.java, "clearUploaded()", "db")

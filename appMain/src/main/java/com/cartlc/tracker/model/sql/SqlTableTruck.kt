@@ -114,14 +114,14 @@ class SqlTableTruck(
                     values.put(KEY_ROWID, truck.id)
                     val confirm_id = dbSql.insert(TABLE_NAME, null, values)
                     if (confirm_id != truck.id) {
-                        Timber.e("Did not transfer tableTruck properly for ID " + truck.id + "...got back " + confirm_id)
+                        Timber.e("Did not transfer truck properly for ID " + truck.id + "...got back " + confirm_id)
                     }
                 }
             } else {
                 truck.id = dbSql.insert(TABLE_NAME, null, values)
             }
         } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableTruck::class.java, "save(tableTruck)", "db")
+            TBApplication.ReportError(ex, SqlTableTruck::class.java, "save(truck)", "db")
         }
         return truck.id
     }

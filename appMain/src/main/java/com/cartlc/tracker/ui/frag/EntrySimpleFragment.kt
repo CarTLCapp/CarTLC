@@ -53,4 +53,8 @@ class EntrySimpleFragment: BaseFragment() {
         binding.entrySimpleEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS)
     }
 
+    fun invalidateAll() {
+        binding.invalidateAll()
+    }
+
 }

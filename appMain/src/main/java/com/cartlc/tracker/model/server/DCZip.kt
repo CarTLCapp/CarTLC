@@ -62,7 +62,7 @@ class DCZip(
                     .appendPath("api")
                     .appendPath("geocode")
                     .appendPath("json")
-                    .appendQueryParameter("tableAddress", zipcode)
+                    .appendQueryParameter("address", zipcode)
                     .appendQueryParameter("sensor", "true")
             val url = URL(builder.build().toString())
             val result = post(url) ?: return

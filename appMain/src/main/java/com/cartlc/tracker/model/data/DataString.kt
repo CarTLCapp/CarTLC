@@ -10,4 +10,8 @@ class DataString {
     var id: Long = 0
     var serverId: Long = 0
     var value: String = ""
+
+    override fun toString(): String {
+        return "ID=${id}, SERVER_ID=${serverId}, VALUE=${value}"
+    }
 }

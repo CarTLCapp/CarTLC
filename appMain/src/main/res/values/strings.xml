@@ -113,7 +113,6 @@
     <string name="vehicle_required">Required</string>
     <string name="title_vehicles">Fleet Vehicles</string>
     <string name="vehicle_title">Preventative Maintenance</string>
-    <string name="vehicle_email_address">Email Address</string>
     <string name="vehicle_inspecting">What vehicle are you inspecting?</string>
     <string name="vehicle_type">Type of Inspection</string>
     <string name="vehicle_mileage">Current Mileage</string>

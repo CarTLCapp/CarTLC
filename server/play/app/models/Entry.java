@@ -9,16 +9,12 @@ import java.io.File;
 
 import javax.persistence.*;
 
-import play.db.ebean.*;
-import play.db.ebean.*;
 import play.data.validation.*;
-import play.db.ebean.Transactional;
 import play.data.format.*;
 
 import com.avaje.ebean.*;
 
 import modules.AmazonHelper;
-import modules.AmazonHelper.OnDownloadComplete;
 import play.Logger;
 
 /**
@@ -428,9 +424,9 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
 
-    public void remove(AmazonHelper amazonHelper) {
+    public void remove(AmazonHelper.DeleteAction amazonAction) {
         EntryEquipmentCollection.deleteByCollectionId(equipment_collection_id);
-        PictureCollection.deleteByCollectionId(picture_collection_id, amazonHelper);
+        PictureCollection.deleteByCollectionId(picture_collection_id, amazonAction);
         EntryNoteCollection.deleteByCollectionId(note_collection_id);
         delete();
     }
@@ -546,6 +542,30 @@ public class Entry extends com.avaje.ebean.Model {
         return items.size() > 0;
     }
 
+    public static boolean hasEntryForPicture(String filename) {
+        List<PictureCollection> pictures = PictureCollection.findByPictureName(filename);
+        if (pictures.isEmpty()) {
+            return false;
+        }
+        for (PictureCollection collection : pictures) {
+            List<Entry> list = find.where()
+                    .eq("picture_collection_id", collection.id)
+                    .findList();
+            if (!list.isEmpty()) {
+                return true;
+            }
+            // This is very interesting. A collection ID without any entries? Sounds like something to delete.
+            Logger.warn("ALERT! No entries for picture collection ID: " + collection.id + ", triggered from: " + filename);
+        }
+        return false;
+    }
+
+    public static boolean hasEntryForPictureCollectionId(long picture_collection_id) {
+        return !find.where()
+                .eq("picture_collection_id", picture_collection_id)
+                .findList().isEmpty();
+    }
+
     public static Entry getFulfilledBy(WorkOrder order) {
         List<Entry> list = find.where()
                 .eq("company_id", order.company_id)
@@ -572,15 +592,9 @@ public class Entry extends com.avaje.ebean.Model {
         for (PictureCollection picture : pictures) {
             File localFile = amazonHelper.getLocalFile(picture.picture);
             if (!localFile.exists()) {
-                try {
-                    amazonHelper.download(host, picture.picture, new OnDownloadComplete() {
-                        public void onDownloadComplete(File file) {
-                            Logger.info("COMPLETED: " + file.getAbsolutePath());
-                        }
-                    });
-                } catch (Exception ex) {
-                    Logger.error(ex.getMessage());
-                }
+                amazonHelper.download(host, picture.picture, (file) ->
+                        Logger.info("COMPLETED: " + file.getAbsolutePath())
+                );
             }
         }
     }

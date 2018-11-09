@@ -12,6 +12,7 @@ GET     /login                    controllers.HomeController.login()
 POST    /login                    controllers.HomeController.postLogin()
 GET     /logout                   controllers.HomeController.logout()
 GET     /problem                  controllers.HomeController.problem(msg : String)
+GET     /picture_cleanup          controllers.HomeController.pictureCleanup()
 
 ### TECHNICIANS ###
 
@@ -122,6 +123,8 @@ GET     /entry/compute_totals       controllers.EntryController.computeTotalNumR
 GET     /entry/export               controllers.EntryController.export()
 GET     /entry/export_next          controllers.EntryController.exportNext()
 GET     /entry/export_download      controllers.EntryController.exportDownload()
+GET     /entry/delete_entries/:rows controllers.EntryController.deleteEntries(rows:String)
+GET     /entry/page_size/:size      controllers.EntryController.pageSize(size:String)
 POST    /enter                      controllers.EntryController.enter()
 
 ### MESSAGES ###
@@ -144,9 +147,13 @@ POST    /trucks                controllers.TruckController.query()
 
 ### VEHICLES ###
 
-GET     /vehicles              controllers.VehicleController.list(p:Int ?= 0, s ?= null, o ?= null)
+GET     /vehicles/list         controllers.VehicleController.list(p:Int ?= 0, s ?= "entry_time", o ?= "desc")
+GET     /vehicles/names        controllers.VehicleController.names()
+GET     /vehicles/names/edit   controllers.VehicleController.editNames()
+POST    /vehicles/names/save   controllers.VehicleController.saveNames()
 POST    /vehicle               controllers.VehicleController.enter()
 POST    /strings               controllers.VehicleController.strings()
+POST    /vehicles              controllers.VehicleController.queryNames()
 
 ### APP SIDE MISC REQUESTS ###
 

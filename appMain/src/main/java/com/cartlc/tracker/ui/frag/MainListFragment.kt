@@ -5,31 +5,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioButton
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragMainListBinding
-import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.ui.list.*
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
-import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.act.MainActivity
-import com.cartlc.tracker.ui.act.MainActivity_MembersInjector
 import com.cartlc.tracker.viewmodel.ButtonsViewModel
 import com.cartlc.tracker.viewmodel.EntrySimpleViewModel
 import com.cartlc.tracker.viewmodel.MainListViewModel
-import kotlinx.android.synthetic.main.content_main.view.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import timber.log.Timber
 
 class MainListFragment : BaseFragment() {
 
@@ -68,7 +63,7 @@ class MainListFragment : BaseFragment() {
         get() = mainActivity?.entrySimpleFragment?.vm
 
     lateinit private var simpleAdapter: SimpleListAdapter
-    lateinit private var projectAdapter: ProjectListAdapter
+    lateinit private var projectAdapter: ProjectGroupListAdapter
     lateinit private var equipmentSelectAdapter: EquipmentSelectListAdapter
     lateinit private var noteEntryAdapter: NoteListEntryAdapter
     lateinit private var radioAdapter: RadioListAdapter
@@ -83,22 +78,29 @@ class MainListFragment : BaseFragment() {
         mainList.layoutManager = linearLayoutManager
         val divider = DividerItemDecoration(mainList.context, linearLayoutManager.orientation)
         mainList.addItemDecoration(divider)
-        simpleAdapter = SimpleListAdapter(mainList.context) {
-            pos, text -> vm.key.value = text
+        simpleAdapter = SimpleListAdapter(mainList.context) { pos, text ->
+            vm.key.value = text
         }
         vm.key.observe(this, Observer { value ->
-            when (vm.curFlowValue) {
+            val cur = vm.curFlowValue
+            when (vm.curFlowValue.stage) {
                 Stage.PROJECT,
                 Stage.CITY,
                 Stage.STATE,
-                Stage.STREET -> buttonsViewModel?.showNextButtonValue = true
-                Stage.COMPANY -> mainActivity?.checkCenterButtonIsEdit()
-                Stage.TRUCK -> entrySimpleViewModel?.simpleText?.set(value)
+                Stage.STREET -> {
+                    buttonsViewModel?.showNextButtonValue = true
+                }
+                Stage.COMPANY -> {
+                    mainActivity?.checkCenterButtonIsEdit()
+                }
+                Stage.TRUCK -> {
+                    entrySimpleViewModel?.simpleText?.set(value)
+                }
                 else -> {
                 }
             }
         })
-        projectAdapter = ProjectListAdapter(mainList.context, vm)
+        projectAdapter = ProjectGroupListAdapter(mainList.context, vm)
         equipmentSelectAdapter = EquipmentSelectListAdapter(vm)
         radioAdapter = RadioListAdapter(mainList.context)
         radioAdapter.listener = { _, text -> vm.onStatusButtonClicked(TruckStatus.from(ctx, text)) }
@@ -136,8 +138,6 @@ class MainListFragment : BaseFragment() {
                 }
             }
         })
-        EventBus.getDefault().register(this)
-
         return binding.root
     }
 
@@ -202,17 +202,4 @@ class MainListFragment : BaseFragment() {
     fun notes(): List<DataNote> {
         return noteEntryAdapter.notes
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        EventBus.getDefault().unregister(this)
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onEvent(event: EventRefreshProjects) {
-        projectAdapter.onDataChanged()
-    }
-
-
 }

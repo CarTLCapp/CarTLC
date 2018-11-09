@@ -21,10 +21,10 @@ class SqlTableString(
 ) : TableString {
 
     companion object {
-        val TABLE_NAME = "table_strings"
+        private val TABLE_NAME = "table_strings"
         private val KEY_ROWID = "_id"
         private val KEY_SERVER_ID = "server_id"
-        private val KEY_VALUE = "value"
+        private val KEY_VALUE = "string_value"
     }
 
     fun create() {
@@ -54,8 +54,8 @@ class SqlTableString(
         val selection = "$KEY_VALUE=?"
         val selectionArgs = arrayOf(text)
         val cursor = db.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null)
-        var id: Long
-        if (cursor.count > 0) {
+        val id: Long
+        if (cursor.moveToFirst() && cursor.count > 0) {
             val idxId = cursor.getColumnIndex(KEY_ROWID)
             id = cursor.getLong(idxId)
         } else {

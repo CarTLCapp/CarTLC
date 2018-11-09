@@ -233,7 +233,7 @@ class SqlTableProjectAddressCombo(
             }
             cursor.close()
         } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableProjectAddressCombo::class.java, "query(project,tableAddress)", "sqlDb")
+            TBApplication.ReportError(ex, SqlTableProjectAddressCombo::class.java, "query(project,address)", "sqlDb")
         }
         return ids
     }

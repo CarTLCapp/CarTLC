@@ -2,14 +2,12 @@
 
 # --- !Ups
 
-ALTER TABLE technician ADD email varchar(256);
-
 CREATE TABLE strings (
     id                  int auto_increment primary key,
     string_value        varchar(255)
 );
 
-CREATE TABLE vehicles (
+CREATE TABLE vehicle (
     id                      int auto_increment primary key,
     tech_id                 int,
     entry_time              datetime,
@@ -24,12 +22,18 @@ CREATE TABLE vehicles (
     fluid_problems_detected varchar(255),
     tire_inspection         text,
     exterior_damage         varchar(255),
-    other                   varchar(255)
+    other                   varchar(255),
     uploaded                bit default 0
+);
+
+CREATE TABLE vehicle_name (
+    id          int auto_increment primary key,
+    name        varchar(255),
+    number      smallint
 );
 
 # --- !Downs
 
-ALTER TABLE technician DROP email;
 DROP TABLE if exists strings;
-DROP TABLE if exists vehicles;
+DROP TABLE if exists vehicle;
+DROP TABLE if exists vehicle_name;

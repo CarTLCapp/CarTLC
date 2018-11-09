@@ -70,7 +70,7 @@ class DataAddress {
             return sbuf.toString()
         }
 
-    // Used to send tableAddress to the server.
+    // Used to send address to the server.
     val line: String
         get() {
             val sbuf = StringBuilder()

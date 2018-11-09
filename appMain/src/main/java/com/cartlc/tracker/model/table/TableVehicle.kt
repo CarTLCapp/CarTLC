@@ -7,4 +7,5 @@ interface TableVehicle {
     fun queryByServerId(id: Long): DataVehicle?
     fun queryNotUploaded(): List<DataVehicle>
     fun save(vehicle: DataVehicle): Long
+    fun saveUploaded(vehicle: DataVehicle)
 }

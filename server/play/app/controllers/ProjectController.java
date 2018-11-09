@@ -3,8 +3,6 @@
  */
 package controllers;
 
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Transaction;
 
 import play.mvc.*;
 import play.data.*;
@@ -167,7 +165,7 @@ public class ProjectController extends Controller {
     public Result createMany() {
         if (Secured.isAdmin(ctx())) {
             Form<InputLines> linesForm = formFactory.form(InputLines.class);
-            return ok(views.html.projects_createForm.render(linesForm));
+            return ok(views.html.projects_createForm.render(linesForm, Secured.getClient(ctx())));
         } else {
             return HomeController.PROBLEM("Only administrators can create projects");
         }
@@ -181,7 +179,7 @@ public class ProjectController extends Controller {
     public Result saveMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class).bindFromRequest();
         if (linesForm.hasErrors() || !Secured.isAdmin(ctx())) {
-            return badRequest(views.html.projects_createForm.render(linesForm));
+            return badRequest(views.html.projects_createForm.render(linesForm, Secured.getClient(ctx())));
         }
         String[] lines = linesForm.get().getLines();
         for (String name : lines) {

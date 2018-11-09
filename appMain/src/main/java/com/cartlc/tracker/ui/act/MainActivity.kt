@@ -32,6 +32,7 @@ import com.cartlc.tracker.model.data.DataStates
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.event.EventError
+import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.PictureFlow
@@ -558,6 +559,13 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onEvent(event: EventRefreshProjects) {
+        Timber.d("onEvent(EventRefreshProjects)")
+        vm.curFlow.value?.let { onStageChanged(it) }
+    }
+
     private fun onActionDispatch(action: Action) {
         when (action) {
             Action.NEW_PROJECT -> { vm.onNewProject() }
@@ -660,12 +668,10 @@ class MainActivity : BaseActivity() {
         val title = getString(titleId)
         titleFragment.vm.titleValue = title
         if (list.isEmpty()) {
-            Timber.d("MYDEBUG: EMPTY LIST! $key")
             mainListFragment.vm.curKey = key
             mainListFragment.showing = false
             vm.onEmptyList()
         } else {
-            Timber.d("MYDEBUG: LIST->$key = ${list.size}")
             return mainListFragment.setList(key, list)
         }
         return true

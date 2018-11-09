@@ -27,41 +27,48 @@ import java.net.URL
 
 import org.greenrobot.eventbus.EventBus
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 /**
  * Created by dug on 8/24/17.
  */
 
-class DCPing(internal val context: Context) : DCPost() {
+class DCPing(private val context: Context) : DCPost() {
 
     companion object {
 
-        internal val TAG = "DCPing"
+        private val TAG = "DCPing"
 
-        internal val SERVER_URL_DEVELOPMENT = "http://fleetdev.arqnetworks.com/"
-        internal val SERVER_URL_RELEASE = "http://fleettlc.arqnetworks.com/"
+        private val SERVER_URL_DEVELOPMENT = "http://fleetdev.arqnetworks.com/"
+        private val SERVER_URL_RELEASE = "http://fleettlc.arqnetworks.com/"
 
-        internal val UPLOAD_RESET_TRIGGER = "reset_upload"
-        internal val RE_REGISTER_TRIGGER = "re-register"
-        internal val RELOAD_CODE = "reload_code"
+        private val UPLOAD_RESET_TRIGGER = "reset_upload"
+        private val RE_REGISTER_TRIGGER = "re-register"
+        private val RELOAD_CODE = "reload_code"
 
         // After this many times indicate to the user if there is a problem that needs to be
         // addressed with the tableEntry.
-        internal val FAILED_UPLOADED_TRIGGER = 5
+        private val FAILED_UPLOADED_TRIGGER = 5
+
+        private val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
     }
 
-    internal val SERVER_URL: String
-    internal val REGISTER: String
-    internal val ENTER: String
-    internal val PING: String
-    internal val PROJECTS: String
-    internal val COMPANIES: String
-    internal val EQUIPMENTS: String
-    internal val NOTES: String
-    internal val TRUCKS: String
-    internal val MESSAGE: String
-    internal var mVersion: String? = null
+    private val SERVER_URL: String
+    private val REGISTER: String
+    private val ENTER: String
+    private val PING: String
+    private val PROJECTS: String
+    private val COMPANIES: String
+    private val EQUIPMENTS: String
+    private val NOTES: String
+    private val TRUCKS: String
+    private val MESSAGE: String
+    private val VEHICLE: String
+    private val VEHICLES: String
+    private val STRINGS: String
+    private var mVersion: String? = null
 
     @Inject
     lateinit var repo: CarRepository
@@ -75,7 +82,7 @@ class DCPing(internal val context: Context) : DCPost() {
     private val app: TBApplication
         get() = context.applicationContext as TBApplication
 
-    internal val version: String?
+    private val version: String?
         get() {
             if (mVersion == null) {
                 try {
@@ -99,12 +106,15 @@ class DCPing(internal val context: Context) : DCPost() {
         REGISTER = SERVER_URL + "register"
         ENTER = SERVER_URL + "enter"
         PING = SERVER_URL + "ping"
-        PROJECTS = SERVER_URL + "tableProjects"
+        PROJECTS = SERVER_URL + "projects"
         COMPANIES = SERVER_URL + "companies"
         EQUIPMENTS = SERVER_URL + "equipments"
         NOTES = SERVER_URL + "notes"
         MESSAGE = SERVER_URL + "message"
         TRUCKS = SERVER_URL + "trucks"
+        VEHICLE = SERVER_URL + "vehicle"
+        VEHICLES = SERVER_URL + "vehicles"
+        STRINGS = SERVER_URL + "strings"
     }
 
     fun sendRegistration() {
@@ -119,7 +129,6 @@ class DCPing(internal val context: Context) : DCPost() {
                 jsonObject.accumulate("secondary_last_name", prefHelper.secondaryLastName)
             }
             jsonObject.accumulate("device_id", deviceId)
-            jsonObject.accumulate("email", prefHelper.email)
             val result = post(REGISTER, jsonObject, true)
             if (result != null) {
                 if (parseRegistrationResult(result)) {
@@ -131,7 +140,7 @@ class DCPing(internal val context: Context) : DCPost() {
         }
     }
 
-    internal fun parseRegistrationResult(result: String): Boolean {
+    private fun parseRegistrationResult(result: String): Boolean {
         try {
             if (result.contains(":")) {
                 val pos = result.indexOf(':')
@@ -204,6 +213,9 @@ class DCPing(internal val context: Context) : DCPost() {
                     if (reload_code.contains("t")) {
                         prefHelper.versionTruck = 0
                     }
+                    if (reload_code.contains("v")) {
+                        prefHelper.versionVehicleNames = 0
+                    }
                 }
             }
             val version_project = blob.getInt(PrefHelper.VERSION_PROJECT)
@@ -211,29 +223,48 @@ class DCPing(internal val context: Context) : DCPost() {
             val version_note = blob.getInt(PrefHelper.VERSION_NOTE)
             val version_company = blob.getInt(PrefHelper.VERSION_COMPANY)
             val version_truck = blob.getInt(PrefHelper.VERSION_TRUCK)
+            val version_vehicle_names = blob.getInt(PrefHelper.VERSION_VEHICLE_NAMES)
             if (prefHelper.versionProject != version_project) {
                 Timber.i("New project version $version_project")
-                queryProjects()
+                if (!queryProjects()) {
+                    return
+                }
                 prefHelper.versionProject = version_project
+                EventBus.getDefault().post(EventRefreshProjects())
+            }
+            if (prefHelper.versionVehicleNames != version_vehicle_names) {
+                Timber.i("New vehicle name version $version_vehicle_names")
+                if (!queryVehicleNames()) {
+                    return
+                }
+                prefHelper.versionVehicleNames = version_vehicle_names
             }
             if (prefHelper.versionCompany != version_company) {
                 Timber.i("New company version $version_company")
-                queryCompanies()
+                if (!queryCompanies()) {
+                    return
+                }
                 prefHelper.versionCompany = version_company
             }
             if (prefHelper.versionEquipment != version_equipment) {
-                Timber.i("New tableEquipment version $version_equipment")
-                queryEquipments()
+                Timber.i("New equipment version $version_equipment")
+                if (!queryEquipments()) {
+                    return
+                }
                 prefHelper.versionEquipment = version_equipment
             }
             if (prefHelper.versionNote != version_note) {
-                Timber.i("New tableNote version $version_note")
-                queryNotes()
+                Timber.i("New note version $version_note")
+                if (!queryNotes()) {
+                    return
+                }
                 prefHelper.versionNote = version_note
             }
             if (prefHelper.versionTruck != version_truck) {
-                Timber.i("New tableTruck version $version_truck")
-                queryTrucks()
+                Timber.i("New truck version $version_truck")
+                if (!queryTrucks()) {
+                    return
+                }
                 prefHelper.versionTruck = version_truck
             }
             var entries = db.tableEntry.queryPendingDataToUploadToMaster()
@@ -256,27 +287,39 @@ class DCPing(internal val context: Context) : DCPost() {
             // If any entries do not yet have server-id's, try to get them.
             entries = db.tableEntry.queryServerIds()
             if (entries.isNotEmpty()) {
-                Timber.i("FOUND " + entries.size + " entries without server IDS")
+                Timber.i("FOUND " + entries.size + " entries needing to be uploaded")
                 sendEntries(entries)
             } else {
                 Timber.i("All entries have server ids")
+            }
+            val vehicles = db.tableVehicle.queryNotUploaded()
+            if (vehicles.isNotEmpty()) {
+                Timber.i("FOUND " + vehicles.size + " vehicles needing to be uploaded")
+                sendVehicles(vehicles)
+            } else {
+                Timber.i("All vehicles have uploaded")
+            }
+            val strings = db.tableString.queryNotUploaded()
+            if (strings.isNotEmpty()) {
+                Timber.i("Query strings needed.")
+                queryStrings()
             }
         } catch (ex: Exception) {
             TBApplication.ReportServerError(ex, DCPing::class.java, "ping()", "server")
         }
     }
 
-    internal fun queryProjects() {
+    private fun queryProjects(): Boolean {
         Timber.i("queryProjects()")
         try {
             val response = post(PROJECTS, true)
             if (response == null) {
                 Timber.e("queryProjects(): Unexpected NULL response from server")
-                return
+                return false
             }
             val unprocessed = db.tableProjects.query().toMutableList()
-            val `object` = parseResult(response)
-            val array = `object`.getJSONArray("tableProjects")
+            val obj = parseResult(response)
+            val array = obj.getJSONArray("projects")
             for (i in 0 until array.length()) {
                 val ele = array.getJSONObject(i)
                 val server_id = ele.getInt("id")
@@ -326,17 +369,18 @@ class DCPing(internal val context: Context) : DCPost() {
             }
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryProjects()", "server")
+            return false
         }
-
+        return true
     }
 
-    internal fun queryCompanies() {
+    private fun queryCompanies(): Boolean {
         Timber.i("queryCompanies()")
         try {
-            val response = post(COMPANIES, true) ?: return
+            val response = post(COMPANIES, true) ?: return false
             val unprocessed = db.tableAddress.query().toMutableList()
-            val `object` = parseResult(response)
-            val array = `object`.getJSONArray("companies")
+            val obj = parseResult(response)
+            val array = obj.getJSONArray("companies")
             var name: String
             var street: String?
             var city: String?
@@ -401,11 +445,12 @@ class DCPing(internal val context: Context) : DCPost() {
             }
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryCompanies()", "server")
+            return false
         }
-
+        return true
     }
 
-    internal operator fun get(items: List<DataAddress>, match: DataAddress): DataAddress? {
+    private operator fun get(items: List<DataAddress>, match: DataAddress): DataAddress? {
         for (item in items) {
             if (item.equals(match)) {
                 return item
@@ -414,11 +459,11 @@ class DCPing(internal val context: Context) : DCPost() {
         return null
     }
 
-    internal fun queryEquipments() {
+    private fun queryEquipments(): Boolean {
         val showDebug = BuildConfig.DEBUG
         Timber.i("queryEquipments()")
         try {
-            val response = post(EQUIPMENTS, true) ?: return
+            val response = post(EQUIPMENTS, true) ?: return false
             val blob = parseResult(response)
             run {
                 val unprocessed = db.tableEquipment.query().toMutableList()
@@ -441,7 +486,7 @@ class DCPing(internal val context: Context) : DCPost() {
                             unprocessed.remove(match)
                         } else {
                             // Otherwise just add the new tableEntry.
-                            Timber.i("New tableEquipment: $name")
+                            Timber.i("New equipment: $name")
                             db.tableEquipment.add(incoming)
                         }
                     } else {
@@ -478,7 +523,7 @@ class DCPing(internal val context: Context) : DCPost() {
                     val equipment = db.tableEquipment.queryByServerId(server_equipment_id)
                     if (project == null || equipment == null) {
                         if (project == null && equipment == null) {
-                            Timber.e("Can't find any project with server ID $server_project_id nor tableEquipment ID $server_equipment_id")
+                            Timber.e("Can't find any project with server ID $server_project_id nor equipment ID $server_equipment_id")
                             prefHelper.reloadProjects()
                             prefHelper.reloadEquipments()
                         } else if (project == null) {
@@ -496,7 +541,7 @@ class DCPing(internal val context: Context) : DCPost() {
                             Timber.e(sbuf.toString())
                             prefHelper.reloadProjects()
                         } else {
-                            Timber.e("Can't find any tableEquipment with server ID " + server_equipment_id + " for project " + project.name)
+                            Timber.e("Can't find any equipment with server ID " + server_equipment_id + " for project " + project.name)
                             prefHelper.reloadEquipments()
                         }
                         continue
@@ -563,11 +608,12 @@ class DCPing(internal val context: Context) : DCPost() {
             }
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryEquipments()", "server")
+            return false
         }
-
+        return true
     }
 
-    internal operator fun get(items: List<DataEquipment>, match: DataEquipment): DataEquipment? {
+    private operator fun get(items: List<DataEquipment>, match: DataEquipment): DataEquipment? {
         for (item in items) {
             if (item.equals(match)) {
                 return item
@@ -576,7 +622,7 @@ class DCPing(internal val context: Context) : DCPost() {
         return null
     }
 
-    internal operator fun get(items: List<DataCollectionItem>, match: DataCollectionItem): DataCollectionItem? {
+    private operator fun get(items: List<DataCollectionItem>, match: DataCollectionItem): DataCollectionItem? {
         for (item in items) {
             if (item.equals(match)) {
                 return item
@@ -585,14 +631,14 @@ class DCPing(internal val context: Context) : DCPost() {
         return null
     }
 
-    internal fun queryNotes() {
+    private fun queryNotes(): Boolean {
         Timber.i("queryNotes()")
         try {
-            val response = post(NOTES, true) ?: return
-            val `object` = parseResult(response)
+            val response = post(NOTES, true) ?: return false
+            val obj = parseResult(response)
             run {
                 val unprocessed = db.tableNote.query().toMutableList()
-                val array = `object`.getJSONArray("notes")
+                val array = obj.getJSONArray("notes")
                 for (i in 0 until array.length()) {
                     val ele = array.getJSONObject(i)
                     val server_id = ele.getInt("id")
@@ -614,7 +660,7 @@ class DCPing(internal val context: Context) : DCPost() {
                         } else {
                             // Otherwise just add the new tableEntry.
                             db.tableNote.add(incoming)
-                            Timber.i("New tableNote: " + incoming.toString())
+                            Timber.i("New note: " + incoming.toString())
                         }
                     } else {
                         // Change of name, type and/or num_digits
@@ -636,7 +682,7 @@ class DCPing(internal val context: Context) : DCPost() {
             }
             run {
                 val unprocessed = db.tableCollectionNoteProject.query().toMutableList()
-                val array = `object`.getJSONArray("project_note")
+                val array = obj.getJSONArray("project_note")
                 for (i in 0 until array.length()) {
                     val ele = array.getJSONObject(i)
                     val server_id = ele.getInt("id")
@@ -683,18 +729,19 @@ class DCPing(internal val context: Context) : DCPost() {
             }
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryNotes()", "server")
+            return false
         }
-
+        return true
     }
 
-    internal fun queryTrucks() {
+    private fun queryTrucks(): Boolean {
         Timber.i("queryTrucks()")
         try {
-            val response = post(TRUCKS, true) ?: return
-            val `object` = parseResult(response)
+            val response = post(TRUCKS, true) ?: return false
+            val obj = parseResult(response)
             run {
                 val unprocessed = db.tableTruck.query().toMutableList()
-                val array = `object`.getJSONArray("trucks")
+                val array = obj.getJSONArray("trucks")
                 for (i in 0 until array.length()) {
                     val ele = array.getJSONObject(i)
                     val incoming = DataTruck()
@@ -711,7 +758,7 @@ class DCPing(internal val context: Context) : DCPost() {
                         val project_server_id = ele.getInt("project_id")
                         val project = db.tableProjects.queryByServerId(project_server_id)
                         if (project == null) {
-                            Timber.e("Can't find any project with server ID " + project_server_id + " for tableTruck number " + incoming.truckNumber)
+                            Timber.e("Can't find any project with server ID " + project_server_id + " for truck number " + incoming.truckNumber)
                         } else {
                             incoming.projectNameId = project.id
                         }
@@ -728,11 +775,11 @@ class DCPing(internal val context: Context) : DCPost() {
                         if (match != null) {
                             incoming.id = match.id
                             db.tableTruck.save(incoming)
-                            Timber.i("Commandeer local: " + incoming.toLongString(db))
+                            Timber.i("Commandeer local truck: " + incoming.toLongString(db))
                             unprocessed.removeAll { it.id == match.id }
                         } else {
-                            // Otherwise just add the new tableEntry.
-                            Timber.i("New tableTruck: " + incoming.toLongString(db))
+                            // Otherwise just add the new truck.
+                            Timber.i("New truck: " + incoming.toLongString(db))
                             db.tableTruck.save(incoming)
                         }
                     } else {
@@ -754,10 +801,12 @@ class DCPing(internal val context: Context) : DCPost() {
             }
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryTrucks()", "server")
+            return false
         }
+        return true
     }
 
-    internal operator fun get(items: List<DataTruck>, match: DataTruck): DataTruck? {
+    private operator fun get(items: List<DataTruck>, match: DataTruck): DataTruck? {
         for (item in items) {
             if (item.equals(match)) {
                 return item
@@ -766,7 +815,66 @@ class DCPing(internal val context: Context) : DCPost() {
         return null
     }
 
-    internal fun sendEntries(list: List<DataEntry>): Int {
+    private fun queryVehicleNames(): Boolean {
+        Timber.i("queryVehicleNames()")
+        try {
+            val response = post(VEHICLES, true) ?: return false
+            val obj = parseResult(response)
+            run {
+                val unprocessed = db.tableVehicleName.query().toMutableList()
+                val array = obj.getJSONArray("names")
+                for (i in 0 until array.length()) {
+                    val ele = array.getJSONObject(i)
+                    val incoming = DataVehicleName()
+                    incoming.name = ele.getString("name")
+                    incoming.number = ele.getInt("number")
+                    val item = db.tableVehicleName.queryByNumber(incoming.number)
+                    if (item == null) {
+                        val match = get(unprocessed, incoming)
+                        if (match != null) {
+                            incoming.id = match.id
+                            db.tableVehicleName.save(incoming)
+                            Timber.i("Commandeer local vehicle name: " + incoming.toString())
+                            unprocessed.removeAll { it.id == match.id }
+                        } else {
+                            // Otherwise just add the new vehicle name.
+                            Timber.i("New vehicle name: " + incoming.toString())
+                            db.tableVehicleName.save(incoming)
+                        }
+                    } else {
+                        // Change of data
+                        if (incoming != item) {
+                            Timber.i("Change: [" + incoming.toString() + "] from [" + item.toString() + "]")
+                            incoming.id = item.id
+                            db.tableVehicleName.save(incoming)
+                        } else {
+                            Timber.i("No change: " + item.toString())
+                        }
+                        unprocessed.removeAll { it.id == item.id }
+                    }
+                }
+                // Remove or disable unprocessed elements
+                for (item in unprocessed) {
+                    db.tableVehicleName.remove(item)
+                }
+            }
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, DCPing::class.java, "queryTrucks()", "server")
+            return false
+        }
+        return true
+    }
+
+    private operator fun get(items: List<DataVehicleName>, match: DataVehicleName): DataVehicleName? {
+        for (item in items) {
+            if (item.name.equals(match.name)) {
+                return item
+            }
+        }
+        return null
+    }
+
+    private fun sendEntries(list: List<DataEntry>): Int {
         var count = 0
         for (entry in list) {
             if (entry.hasError) {
@@ -783,7 +891,7 @@ class DCPing(internal val context: Context) : DCPost() {
         return count
     }
 
-    internal fun sendEntry(entry: DataEntry): Boolean {
+    private fun sendEntry(entry: DataEntry): Boolean {
         var success = false
         Timber.i("sendEntry(" + entry.id + ")")
         try {
@@ -808,12 +916,12 @@ class DCPing(internal val context: Context) : DCPost() {
                 }
             } else {
                 prefHelper.doErrorCheck = true
-                Timber.e("sendEntry(): Missing tableTruck tableEntry : " + entry.toLongString(db) + " (check error enabled)")
+                Timber.e("sendEntry(): Missing truck entry : " + entry.toLongString(db) + " (check error enabled)")
                 return false
             }
             val project = entry.project
             if (project == null) {
-                Timber.e("sendEntry(): No project name for tableEntry -- abort")
+                Timber.e("sendEntry(): No project name for entry -- abort")
                 return false
             }
             if (project.serverId > 0) {
@@ -823,13 +931,13 @@ class DCPing(internal val context: Context) : DCPost() {
             }
             val address = entry.address
             if (address == null) {
-                Timber.e("sendEntry(): No tableAddress for tableEntry -- abort")
+                Timber.e("sendEntry(): No address for entry -- abort")
                 return false
             }
             if (address.serverId > 0) {
                 jsonObject.accumulate("address_id", address.serverId)
             } else {
-                jsonObject.accumulate("tableAddress", address.line)
+                jsonObject.accumulate("address", address.line)
             }
             if (entry.status != null && entry.status !== TruckStatus.UNKNOWN) {
                 jsonObject.accumulate("status", entry.status!!.toString())
@@ -846,7 +954,7 @@ class DCPing(internal val context: Context) : DCPost() {
                     }
                     jarray.put(jobj)
                 }
-                jsonObject.put("tableEquipment", jarray)
+                jsonObject.put("equipment", jarray)
             }
             val pictures = entry.pictures
             if (pictures.size > 0) {
@@ -855,7 +963,7 @@ class DCPing(internal val context: Context) : DCPost() {
                     val jobj = JSONObject()
                     jobj.put("filename", picture.tailname)
                     if (!TextUtils.isEmpty(picture.note)) {
-                        jobj.put("tableNote", picture.note)
+                        jobj.put("note", picture.note)
                     }
                     jarray.put(jobj)
                 }
@@ -889,7 +997,7 @@ class DCPing(internal val context: Context) : DCPost() {
                     Timber.i("SUCCESS, ENTRY SERVER ID is " + entry.serverId)
                 } else {
                     val sbuf = StringBuilder()
-                    sbuf.append("While trying to send tableEntry: ")
+                    sbuf.append("While trying to send entry: ")
                     sbuf.append(entry.toLongString(db))
                     sbuf.append("\nERROR: ")
                     sbuf.append(result)
@@ -904,7 +1012,87 @@ class DCPing(internal val context: Context) : DCPost() {
         return success
     }
 
-    internal operator fun get(items: List<DataNote>, match: DataNote): DataNote? {
+    private fun sendVehicles(list: List<DataVehicle>) {
+        for (vehicle in list) {
+            sendVehicle(vehicle)
+        }
+        return
+    }
+
+    private fun sendVehicle(vehicle: DataVehicle) {
+        Timber.i("sendVehicle(" + vehicle.id + ")")
+        try {
+            val dateString = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(System.currentTimeMillis()))
+            val jsonObject = JSONObject()
+            jsonObject.accumulate("tech_id", prefHelper.techID)
+            jsonObject.accumulate("date_string", dateString)
+            jsonObject.accumulate("server_id", vehicle.serverId)
+            jsonObject.accumulate("inspecting", vehicle.inspectingValue)
+            jsonObject.accumulate("type_of_inspection", vehicle.typeOfInspectionValue)
+            jsonObject.accumulate("mileage", vehicle.mileage)
+            jsonObject.accumulate("head_lights", vehicle.headLights.serverMash())
+            jsonObject.accumulate("tail_lights", vehicle.tailLights.serverMash())
+            jsonObject.accumulate("exterior_light_issues", vehicle.exteriorLightIssues)
+            jsonObject.accumulate("fluid_checks", vehicle.fluidChecks.serverMash())
+            jsonObject.accumulate("fluid_problems_detected", vehicle.fluidProblemsDetected)
+            jsonObject.accumulate("tire_inspection", vehicle.tireInspection.serverMash())
+            jsonObject.accumulate("exterior_damage", vehicle.exteriorDamage)
+            jsonObject.accumulate("other", vehicle.other)
+
+            Timber.i("SENDING " + jsonObject.toString())
+            val result = post(VEHICLE, jsonObject, true)
+            if (result != null) {
+                if (TextUtils.isDigitsOnly(result)) {
+                    vehicle.uploaded = true
+                    vehicle.serverId = result.toLong()
+                    db.tableVehicle.saveUploaded(vehicle)
+                    Timber.i("SUCCESS, VEHICLE SERVER ID is " + vehicle.serverId)
+                } else {
+                    val sbuf = StringBuilder()
+                    sbuf.append("While trying to send vehicle: ")
+                    sbuf.append(vehicle.toString())
+                    sbuf.append("\nERROR: ")
+                    sbuf.append(result)
+                    TBApplication.ShowError(sbuf.toString())
+                    Timber.e(sbuf.toString())
+                }
+            }
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, DCPing::class.java, "sendVehicle()", "server")
+        }
+    }
+
+    private fun queryStrings() {
+        Timber.i("queryStrings()")
+        try {
+            val response = post(STRINGS, true) ?: return
+            val obj = parseResult(response)
+            val array = obj.getJSONArray("strings")
+            for (i in 0 until array.length()) {
+                val ele = array.getJSONObject(i)
+                val incoming = DataString()
+                incoming.serverId = ele.getLong("id")
+                incoming.value = ele.getString("value")
+                val item = db.tableString.queryByServerId(incoming.serverId)
+                if (item == null) {
+                    db.tableString.save(incoming)
+                } else {
+                    // Change of data
+                    if (!incoming.equals(item)) {
+                        Timber.i("Change: [" + incoming.toString() + "] from [" + item.toString() + "]")
+                        incoming.id = item.id
+                        db.tableString.save(incoming)
+                    } else {
+                        Timber.i("No change: " + item.toString())
+                    }
+                }
+            }
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, DCPing::class.java, "queryTrucks()", "server")
+        }
+    }
+
+    private operator fun get(items: List<DataNote>, match: DataNote): DataNote? {
         for (item in items) {
             if (item == match) {
                 return item
@@ -913,7 +1101,7 @@ class DCPing(internal val context: Context) : DCPost() {
         return null
     }
 
-    internal fun post(target: String, sendErrors: Boolean): String? {
+    private fun post(target: String, sendErrors: Boolean): String? {
         try {
             val jsonObject = JSONObject()
             jsonObject.accumulate("device_id", ServerHelper.instance.deviceId)
@@ -928,10 +1116,9 @@ class DCPing(internal val context: Context) : DCPost() {
             }
             return null
         }
-
     }
 
-    internal fun post(target: String, json: JSONObject, sendErrors: Boolean): String? {
+    private fun post(target: String, json: JSONObject, sendErrors: Boolean): String? {
         try {
             val url = URL(target)
             val connection = url.openConnection() as HttpURLConnection
@@ -957,23 +1144,22 @@ class DCPing(internal val context: Context) : DCPost() {
         }
     }
 
-    internal fun parseResult(result: String): JSONObject {
+    private fun parseResult(result: String): JSONObject {
         try {
             return JSONObject(result)
         } catch (ex: Exception) {
             Timber.e("Got bad result back from server: " + result + "\n" + ex.message)
         }
-
         return JSONObject()
     }
 
-    internal fun sendCrashLines(lines: List<SqlTableCrash.CrashLine>) {
+    private fun sendCrashLines(lines: List<SqlTableCrash.CrashLine>) {
         for (line in lines) {
             sendCrashLine(line)
         }
     }
 
-    internal fun sendCrashLine(line: SqlTableCrash.CrashLine) {
+    private fun sendCrashLine(line: SqlTableCrash.CrashLine) {
         try {
             val jsonObject = JSONObject()
             jsonObject.accumulate("tech_id", prefHelper.techID)

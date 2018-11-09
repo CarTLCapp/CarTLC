@@ -27,7 +27,7 @@ class PrefHelper constructor(
         ctx: Context,
         private val db: DatabaseTable
 ) : PrefHelperBase(ctx) {
-    
+
     companion object {
 
         val KEY_PROJECT = "project"
@@ -36,13 +36,12 @@ class PrefHelper constructor(
         val KEY_STATE = "state"
         val KEY_CITY = "city"
         val KEY_ZIPCODE = "zipcode"
-        val KEY_TRUCK = "tableTruck" // Number & License
+        val KEY_TRUCK = "truck" // Number & License
         val KEY_STATUS = "status"
         private val KEY_CURRENT_PROJECT_GROUP_ID = "current_project_group_id"
         private val KEY_SAVED_PROJECT_GROUP_ID = "saved_project_group_id"
         private val KEY_FIRST_NAME = "first_name"
         private val KEY_LAST_NAME = "last_name"
-        private val KEY_EMAIL = "email"
         private val KEY_SECONDARY_FIRST_NAME = "secondary_first_name"
         private val KEY_SECONDARY_LAST_NAME = "secondary_last_name"
         private val KEY_HAS_SECONDARY = "has_secondary"
@@ -66,6 +65,7 @@ class PrefHelper constructor(
         val VERSION_EQUIPMENT = "version_equipment"
         val VERSION_NOTE = "version_note"
         val VERSION_TRUCK = "version_truck"
+        val VERSION_VEHICLE_NAMES = "version_vehicle_names"
 
         private val PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss"
         private val VERSION_RESET = -1
@@ -101,7 +101,7 @@ class PrefHelper constructor(
 
     var projectName: String?
         get() = getString(KEY_PROJECT, null)
-        set(value) =setString(KEY_PROJECT, value)
+        set(value) = setString(KEY_PROJECT, value)
 
     val projectId: Long?
         get() {
@@ -132,10 +132,6 @@ class PrefHelper constructor(
     var lastName: String?
         get() = getString(KEY_LAST_NAME, null)
         set(name) = setString(KEY_LAST_NAME, name)
-
-    var email: String?
-        get() = getString(KEY_EMAIL, null)
-        set(email) = setString(KEY_EMAIL, email)
 
     var secondaryFirstName: String?
         get() = getString(KEY_SECONDARY_FIRST_NAME, null)
@@ -176,6 +172,10 @@ class PrefHelper constructor(
     var versionTruck: Int
         get() = getInt(VERSION_TRUCK, VERSION_RESET)
         set(value) = setInt(VERSION_TRUCK, value)
+
+    var versionVehicleNames: Int
+        get() = getInt(VERSION_VEHICLE_NAMES, VERSION_RESET)
+        set(value) = setInt(VERSION_VEHICLE_NAMES, value)
 
     var status: TruckStatus?
         get() = TruckStatus.from(getInt(KEY_STATUS, TruckStatus.UNKNOWN.ordinal))
@@ -409,7 +409,7 @@ class PrefHelper constructor(
             address.isLocal = true
             addressId = db.tableAddress.add(address)
             if (addressId < 0) {
-                Timber.e("saveProjectAndAddressCombo(): could not find tableAddress: " + address.toString())
+                Timber.e("saveProjectAndAddressCombo(): could not find address: " + address.toString())
                 return false
             }
         }

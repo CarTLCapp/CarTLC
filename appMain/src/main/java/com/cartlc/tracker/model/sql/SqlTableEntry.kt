@@ -525,9 +525,7 @@ class SqlTableEntry(
             values.put(KEY_UPLOADED_AWS, 0)
             values.put(KEY_HAD_ERROR, 0)
             values.put(KEY_SERVER_ERROR_COUNT, 0)
-            if (dbSql.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("SqlTableEntry.clearUploaded(): Unable to update entries")
-            }
+            dbSql.update(TABLE_NAME, values, null, null)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableEntry::class.java, "clearUploaded()", "db")

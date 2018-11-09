@@ -9,6 +9,8 @@ import com.cartlc.tracker.model.data.DataVehicle
 import com.cartlc.tracker.model.misc.HashLongList
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.model.table.TableVehicle
+import com.cartlc.tracker.ui.app.TBApplication
+import timber.log.Timber
 
 /**
  * Created by dug on 8/31/17.
@@ -94,12 +96,33 @@ class SqlTableVehicle(
         if (vehicle.id > 0) {
             val where = "${KEY_ROWID}=?"
             val whereArgs = arrayOf(vehicle.id.toString())
-            saved = dbSql.update(SqlTableString.TABLE_NAME, values, where, whereArgs) != 0
+            saved = dbSql.update(TABLE_NAME, values, where, whereArgs) != 0
         }
         if (!saved) {
-            vehicle.id = dbSql.insert(SqlTableString.TABLE_NAME, null, values)
+            vehicle.id = dbSql.insert(TABLE_NAME, null, values)
         }
         return vehicle.id
+    }
+
+    // Right now only used to update a few fields.
+    // Later this will be extended to saveUploaded everything.
+    override fun saveUploaded(vehicle: DataVehicle) {
+        dbSql.beginTransaction()
+        try {
+            val values = ContentValues()
+            values.put(KEY_SERVER_ID, vehicle.serverId)
+            values.put(KEY_UPLOADED, if (vehicle.uploaded) 1 else 0)
+            val where = "$KEY_ROWID=?"
+            val whereArgs = arrayOf(java.lang.Long.toString(vehicle.id))
+            if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
+                Timber.e("SqlTableVehicle.saveUploaded(): Unable to update tableEntry")
+            }
+            dbSql.setTransactionSuccessful()
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableEntry::class.java, "saveUploaded()", "db")
+        } finally {
+            dbSql.endTransaction()
+        }
     }
 
     override fun query(id: Long): DataVehicle? {
@@ -116,7 +139,7 @@ class SqlTableVehicle(
 
     private fun query(selection: String, selectionArgs: Array<String>): DataVehicle? {
         val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
-        var vehicle: DataVehicle?
+        val vehicle: DataVehicle?
         if (cursor.moveToNext()) {
             val idxId = cursor.getColumnIndex(KEY_ROWID)
             val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
@@ -173,7 +196,7 @@ class SqlTableVehicle(
         val idxUploaded = cursor.getColumnIndex(KEY_UPLOADED)
         val list = mutableListOf<DataVehicle>()
         while (cursor.moveToNext()) {
-            var vehicle = DataVehicle(dm.tableString)
+            val vehicle = DataVehicle(dm.tableString)
             vehicle.id = cursor.getLong(idxId)
             vehicle.serverId = cursor.getLong(idxServerId)
             vehicle.inspecting = cursor.getLong(idxInspecting)
@@ -192,6 +215,21 @@ class SqlTableVehicle(
         }
         cursor.close()
         return list
+    }
+
+    fun clearUploaded() {
+        dbSql.beginTransaction()
+        try {
+            val values = ContentValues()
+            values.put(KEY_UPLOADED, 0)
+            values.put(KEY_SERVER_ID, 0)
+            dbSql.update(TABLE_NAME, values, null, null)
+            dbSql.setTransactionSuccessful()
+        } catch (ex: Exception) {
+            Timber.e(ex)
+        } finally {
+            dbSql.endTransaction()
+        }
     }
 
 }

@@ -6,6 +6,7 @@ import androidx.databinding.ObservableField
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Action
+import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.ui.app.TBApplication
 import kotlinx.android.synthetic.main.frag_buttons.view.*
 import javax.inject.Inject

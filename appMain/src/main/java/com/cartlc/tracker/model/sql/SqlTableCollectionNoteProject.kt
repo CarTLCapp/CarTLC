@@ -53,7 +53,7 @@ class SqlTableCollectionNoteProject(
         for (noteId in noteIds) {
             val note = db.tableNote.query(noteId)
             if (note == null) {
-                Timber.e("Could not find tableNote with ID $noteId")
+                Timber.e("Could not find note with ID $noteId")
             } else {
                 list.add(note)
             }

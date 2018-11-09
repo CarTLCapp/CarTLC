@@ -19,7 +19,7 @@ import timber.log.Timber
 class SqlTableCrash(
         private val db: DatabaseTable,
         private val dbSql: SQLiteDatabase
-): TableCrash {
+) : TableCrash {
 
     companion object {
 
@@ -79,15 +79,7 @@ class SqlTableCrash(
         try {
             val values = ContentValues()
             values.put(KEY_UPLOADED, 0)
-            if (dbSql.update(TABLE_NAME, values, null, null) == 0) {
-                val cursor = dbSql.query(TABLE_NAME, null, null, null, null, null, null, null)
-                if (cursor != null) {
-                    if (cursor.moveToFirst() && cursor.count > 0) {
-                        Timber.e("SqlTableCrash.clearUploaded(): Unable to update tableCrash entries")
-                    }
-                    cursor.close()
-                }
-            }
+            dbSql.update(TABLE_NAME, values, null, null)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
             Timber.e(ex)

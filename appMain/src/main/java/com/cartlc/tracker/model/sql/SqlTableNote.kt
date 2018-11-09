@@ -272,7 +272,7 @@ class SqlTableNote constructor(
             Timber.i("remove(" + note.id + ", " + note.name + ")")
             remove(note.id)
         } else {
-            Timber.i("Did not remove unused tableNote because some entries are using it: " + note.toString())
+            Timber.i("Did not remove unused note because some entries are using it: " + note.toString())
         }
     }
 
@@ -281,9 +281,7 @@ class SqlTableNote constructor(
         try {
             val values = ContentValues()
             values.put(KEY_SERVER_ID, 0)
-            if (dbSql.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("SqlTableNote.clearUploaded(): Unable to update entries")
-            }
+            dbSql.update(TABLE_NAME, values, null, null)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableNote::class.java, "clearUploaded()", "db")

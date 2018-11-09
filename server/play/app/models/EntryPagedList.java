@@ -57,11 +57,6 @@ public class EntryPagedList {
             mPos = pos;
         }
 
-        public TermMatch(TermMatch other) {
-            mTerm = other.mTerm;
-            mPos = other.mPos;
-        }
-
         @Override
         public int compareTo(TermMatch item) {
             return mPos - item.mPos;
@@ -120,8 +115,6 @@ public class EntryPagedList {
 
         boolean hasMatch(String element) {
             String elementNoCase = element.toLowerCase();
-            boolean hadFailure = false;
-            boolean hadMatch = false;
             for (String term : mTerms) {
                 int pos = elementNoCase.indexOf(term);
                 if (pos >= 0) {
@@ -167,10 +160,6 @@ public class EntryPagedList {
             return Html.apply(sbuf.toString());
         }
 
-        String detectSingleQuote(String term) {
-            return term;
-        }
-
         String getPrimary() {
             return mTerms.get(0);
         }
@@ -201,7 +190,7 @@ public class EntryPagedList {
 
     class Parameters {
         int mPage;
-        int mPageSize = PAGE_SIZE;
+        int mPageSize = mDefaultPageSize;
         PagedSortBy mSortBy = PagedSortBy.from("time");
         String mOrder = "desc";
     }
@@ -211,17 +200,16 @@ public class EntryPagedList {
         long mNumTotalRows;
     }
 
-    static final int PAGE_SIZE = 100;
+    static final int[] PAGE_SIZES = {100, 200, 300, 400, 500};
 
     Parameters mParams = new Parameters();
     Result mResult = new Result();
     SearchTerms mSearch = new SearchTerms();
     List<Long> mLimitByProject = new ArrayList<Long>();
     List<String> mLimitByCompanyName = new ArrayList<String>();
-    List<Long> mSearchFilterByProject = new ArrayList<Long>();
     long mByTruckId;
     int mRowNumber;
-    boolean mAllEntries;
+    int mDefaultPageSize = PAGE_SIZES[0];
 
     public EntryPagedList() {
     }
@@ -237,10 +225,6 @@ public class EntryPagedList {
         mRowNumber = 0;
     }
 
-    public void setAllEntries(boolean flag) {
-        mAllEntries = flag;
-    }
-
     public void setPage(int page) {
         if (page < 0) {
             page = 0;
@@ -251,6 +235,29 @@ public class EntryPagedList {
             }
         }
         mParams.mPage = page;
+    }
+
+    public void setPageSize(int pageSize) {
+        mDefaultPageSize = pageSize;
+        mParams.mPageSize = pageSize;
+    }
+
+    public static class Option {
+        public String text;
+        public String selected;
+
+        public Option(int pageSize, boolean selected) {
+            this.text = Integer.toString(pageSize);
+            this.selected = selected ? "selected" : "";
+        }
+    }
+
+    public List<Option> getPageSizes() {
+        ArrayList<Option> list = new ArrayList<>();
+        for (int pageSize : PAGE_SIZES) {
+            list.add(new Option(pageSize, pageSize == mParams.mPageSize));
+        }
+        return list;
     }
 
     public void setSortBy(String sortBy) {
@@ -339,9 +346,11 @@ public class EntryPagedList {
                 break;
         }
         query.append(" FROM entry AS e");
-        query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
-        query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
 
+        if (hasSearchByEquipment()) {
+            query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
+            query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
+        }
         switch (mParams.mSortBy) {
             case TECH:
                 query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
@@ -489,6 +498,15 @@ public class EntryPagedList {
         return list;
     }
 
+    private boolean hasSearchByEquipment() {
+        for (String term : mSearch.mTerms) {
+            if (!Equipment.findMatches(term).isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private String getLimitFilters() {
         StringBuilder projects = new StringBuilder();
         boolean first = true;
@@ -541,11 +559,12 @@ public class EntryPagedList {
     public void compute() {
         List<SqlRow> entries;
         String query;
-        query = buildQuery(!mAllEntries);
+        query = buildQuery(true);
         Logger.debug("Query: " + query);
         entries = Ebean.createSqlQuery(query).findList();
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
+            Logger.error("No entries");
             return;
         }
         for (SqlRow row : entries) {
@@ -553,10 +572,6 @@ public class EntryPagedList {
         }
         if (mSearch.hasMultipleTerms()) {
             mSearch.refine();
-            mResult.mNumTotalRows = mResult.mList.size();
-            mParams.mPageSize = mResult.mList.size();
-            mParams.mPage = 0;
-        } else if (mAllEntries) {
             mResult.mNumTotalRows = mResult.mList.size();
             mParams.mPageSize = mResult.mList.size();
             mParams.mPage = 0;
@@ -610,7 +625,7 @@ public class EntryPagedList {
         return false;
     }
 
-    Integer getInteger(SqlRow row, String column) {
+    private Integer getInteger(SqlRow row, String column) {
         if (row.get(column) == null) {
             return null;
         }
@@ -687,6 +702,6 @@ public class EntryPagedList {
         mSearch.setSearch(search);
         mByTruckId = 0;
         mParams.mPage = 0;
-        mParams.mPageSize = PAGE_SIZE;
+        mParams.mPageSize = mDefaultPageSize;
     }
 }

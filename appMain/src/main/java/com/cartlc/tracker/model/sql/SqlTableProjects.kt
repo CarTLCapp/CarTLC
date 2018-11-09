@@ -309,9 +309,7 @@ class SqlTableProjects(
         try {
             val values = ContentValues()
             values.put(KEY_SERVER_ID, 0)
-            if (dbSql.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("SqlTableProjects.clearUploaded(): Unable to update entries")
-            }
+            dbSql.update(TABLE_NAME, values, null, null)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableProjects::class.java, "clearUploaded()", "db")

@@ -4,7 +4,7 @@
 # 2. Run this script.
 #
 DATE=`date +%F`
-WRAP=~/cartlc/wrap/$DATE
+WRAP=~/fleet/wrap/$DATE
 FILE=`ls server/play/target/universal/*.zip`
 mkdir -p $WRAP
 cp $FILE $WRAP/

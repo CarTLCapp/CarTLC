@@ -268,9 +268,7 @@ class SqlTablePictureCollection(
         try {
             val values = ContentValues()
             values.put(KEY_UPLOADED, 0)
-            if (dbSql.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("SqlTablePictureCollection.clearUploaded(): Unable to update entries")
-            }
+            dbSql.update(TABLE_NAME, values, null, null)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTablePictureCollection::class.java, "clearUploaded()", "db")

@@ -43,15 +43,11 @@ class DataEquipment : Comparable<DataEquipment> {
 
     override fun equals(other: Any?): Boolean {
         return if (other is DataEquipment) {
-            equals(other as DataEquipment?)
+            return name == other.name
         } else super.equals(other)
     }
 
     override fun compareTo(other: DataEquipment): Int {
         return name.compareTo(other.name)
-    }
-
-    fun equals(item: DataEquipment): Boolean {
-        return name == item.name
     }
 }

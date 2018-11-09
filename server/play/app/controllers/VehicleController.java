@@ -12,14 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.persistence.PersistenceException;
 
-import models.CompanyName;
-import models.InputTruck;
-import models.Project;
+import models.InputLines;
 import models.Strings;
-import models.Truck;
 import models.Vehicle;
+import models.VehicleName;
 import models.Version;
 import play.Logger;
 import play.data.Form;
@@ -41,9 +38,16 @@ public class VehicleController extends Controller {
     private SimpleDateFormat mDateFormat;
     private static final String DATE_FORMAT = EntryController.DATE_FORMAT;
 
+    private FormFactory formFactory;
+
     @Inject
-    public VehicleController() {
+    public VehicleController(FormFactory formFactory) {
+        this.formFactory = formFactory;
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
+    }
+
+    public Result list() {
+        return list(0, "entry_time", "desc");
     }
 
     /**
@@ -53,18 +57,43 @@ public class VehicleController extends Controller {
         return ok(views.html.vehicle_list.render(Vehicle.list(page, PAGE_SIZE, sortBy, order), sortBy, order, Secured.getClient(ctx())));
     }
 
-    public Result strings() {
-        ObjectNode top = Json.newObject();
-        ArrayNode array = top.putArray("strings");
-        List<Strings> items = Strings.list();
-        for (Strings item : items) {
-            ObjectNode node = array.addObject();
-            node.put("id", item.id);
-            node.put("value", item.string_value);
-        }
-        return ok(top);
+    @Security.Authenticated(Secured.class)
+    public Result names() {
+        List<VehicleName> list = VehicleName.list();
+        return ok(views.html.vehicle_names_list.render(list, Secured.getClient(ctx())));
     }
 
+    @Security.Authenticated(Secured.class)
+    public Result editNames() {
+        if (Secured.isAdmin(ctx())) {
+            Form<InputLines> linesForm = formFactory.form(InputLines.class).fill(new InputLines(VehicleName.getLines()));
+            return ok(views.html.vehicle_names_edit.render(linesForm, Secured.getClient(ctx())));
+        } else {
+            return HomeController.PROBLEM("Only administrators can edit vehicle names");
+        }
+    }
+
+    /**
+     * Create many projects at once.
+     */
+    @Transactional
+    @Security.Authenticated(Secured.class)
+    public Result saveNames() {
+        Form<InputLines> linesForm = formFactory.form(InputLines.class).bindFromRequest();
+        if (linesForm.hasErrors() || !Secured.isAdmin(ctx())) {
+            if (linesForm.hasErrors()) {
+                Logger.error("Had errors");
+            }
+            if (!Secured.isAdmin(ctx())) {
+                Logger.error("Not admin");
+            }
+            return badRequest(views.html.vehicle_names_edit.render(linesForm, Secured.getClient(ctx())));
+        }
+        String[] lines = linesForm.get().getLines();
+        VehicleName.setLines(lines);
+        Version.inc(Version.VERSION_VEHICLE_NAMES);
+        return names();
+    }
 
     @Transactional
     @BodyParser.Of(BodyParser.Json.class)
@@ -73,7 +102,6 @@ public class VehicleController extends Controller {
         ArrayList<String> missing = new ArrayList<String>();
         JsonNode json = request().body().asJson();
         Logger.debug("VGOT: " + json.toString());
-        boolean retServerId = false;
         JsonNode value;
         value = json.findValue("tech_id");
         if (value == null) {
@@ -92,7 +120,6 @@ public class VehicleController extends Controller {
         value = json.findValue("server_id");
         if (value != null) {
             vehicle.id = value.longValue();
-            retServerId = true;
             Vehicle existing;
             if (vehicle.id > 0) {
                 existing = Vehicle.find.byId(vehicle.id);
@@ -137,7 +164,7 @@ public class VehicleController extends Controller {
             String mash = value.textValue();
             vehicle.tail_lights = parseMash(mash);
         } else {
-            missing.add("head_lights");
+            missing.add("tail_lights");
         }
         value = json.findValue("exterior_light_issues");
         if (value != null) {
@@ -188,12 +215,33 @@ public class VehicleController extends Controller {
             Logger.debug("Created new vehicle " + vehicle.id);
         }
         long ret_id;
-        if (retServerId) {
-            ret_id = vehicle.id;
-        } else {
-            ret_id = 0;
-        }
+        ret_id = vehicle.id;
         return ok(Long.toString(ret_id));
+    }
+
+    public Result strings() {
+        ObjectNode top = Json.newObject();
+        ArrayNode array = top.putArray("strings");
+        List<Strings> items = Strings.list();
+        for (Strings item : items) {
+            ObjectNode node = array.addObject();
+            node.put("id", item.id);
+            node.put("value", item.string_value);
+        }
+        return ok(top);
+    }
+
+    public Result queryNames() {
+        ObjectNode top = Json.newObject();
+        ArrayNode array = top.putArray("names");
+        List<VehicleName> items = VehicleName.list();
+        for (VehicleName name : items) {
+            ObjectNode node = array.addObject();
+            node.put("id", name.id);
+            node.put("name", name.name);
+            node.put("number", name.number);
+        }
+        return ok(top);
     }
 
     /**

@@ -117,15 +117,19 @@ public class Vehicle extends com.avaje.ebean.Model {
         return Long.toString(mileage);
     }
 
-    public List<String> getHeadLights() {
+    public String getHeadLights() {
         return expand(head_lights);
     }
 
-    public List<String> getTailLights() {
+    public String getTailLights() {
         return expand(tail_lights);
     }
 
-    public List<String> getFluidChecks() {
+    public String getExteriorLightIssues() {
+        return exterior_light_issues;
+    }
+
+    public String getFluidChecks() {
         return expand(fluid_checks);
     }
 
@@ -133,7 +137,7 @@ public class Vehicle extends com.avaje.ebean.Model {
         return fluid_problems_detected;
     }
 
-    public List<String> getTireInspection() {
+    public String getTireInspection() {
         return expand(tire_inspection);
     }
 
@@ -145,7 +149,7 @@ public class Vehicle extends com.avaje.ebean.Model {
         return other;
     }
 
-    private List<String> expand(String text) {
+    private String expand(String text) {
         List<String> list = new ArrayList<>();
         String[] items = text.split(",");
         for (String item : items) {
@@ -155,7 +159,7 @@ public class Vehicle extends com.avaje.ebean.Model {
                 list.add("NOT LONG '" + item + "'");
             }
         }
-        return list;
+        return String.join(",", list);
     }
 }
 

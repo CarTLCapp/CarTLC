@@ -56,9 +56,8 @@ public class PostController extends Controller {
         if (missing.size() > 0) {
             return missingRequest(missing);
         }
-        String email = json.findPath("email").textValue(); // optional
         long tech_id;
-        tech_id = saveTechnician(first_name, last_name, device_id, email);
+        tech_id = saveTechnician(first_name, last_name, device_id);
         if (tech_id == 0) {
             return badRequest("Bad technician registration.");
         }
@@ -67,7 +66,7 @@ public class PostController extends Controller {
         last_name = json.findPath("secondary_last_name").textValue();
 
         if (first_name != null && !first_name.isEmpty() && last_name != null && !last_name.isEmpty()) {
-            secondary_tech_id = saveTechnician(first_name, last_name, device_id, null);
+            secondary_tech_id = saveTechnician(first_name, last_name, device_id);
         }
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(tech_id);
@@ -78,7 +77,7 @@ public class PostController extends Controller {
         return ok(sbuf.toString());
     }
 
-    long saveTechnician(String first_name, String last_name, String device_id, String email) {
+    long saveTechnician(String first_name, String last_name, String device_id) {
         Technician tech = null;
         Transaction txn = Ebean.beginTransaction();
         try {
@@ -89,9 +88,6 @@ public class PostController extends Controller {
             tech.first_name = first_name;
             tech.last_name = last_name;
             tech.device_id = device_id;
-            if (email != null) {
-                tech.email = email;
-            }
             tech.save();
             txn.commit();
         } catch (Exception ex) {
@@ -142,6 +138,7 @@ public class PostController extends Controller {
         result.put(Version.VERSION_EQUIPMENT, Version.get(Version.VERSION_EQUIPMENT));
         result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
         result.put(Version.VERSION_TRUCK, Version.get(Version.VERSION_TRUCK));
+        result.put(Version.VERSION_VEHICLE_NAMES, Version.get(Version.VERSION_VEHICLE_NAMES));
         Technician tech = Technician.find.byId((long) tech_id);
         if (tech != null) {
             if (tech.reset_upload) {

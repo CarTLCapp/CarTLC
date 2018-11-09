@@ -39,6 +39,11 @@ PHPMyAdmin:
    User: root p/w: cartlc
    Additional: cartlc p/w: cartcl#@!
 
+Copy files from local machine to server
+cp credentials ~/.aws
+cd ~/fleet/s3/fleettlc
+aws s3 sync . s3://cartlc
+
 Database:
 --------
 mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql

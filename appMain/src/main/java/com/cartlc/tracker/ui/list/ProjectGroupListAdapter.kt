@@ -19,10 +19,10 @@ import kotlinx.android.synthetic.main.entry_item_project.view.*
  * Created by dug on 5/10/17.
  */
 
-class ProjectListAdapter(
+class ProjectGroupListAdapter(
         private val mContext: Context,
         private val vm: MainListViewModel
-) : RecyclerView.Adapter<ProjectListAdapter.CustomViewHolder>() {
+) : RecyclerView.Adapter<ProjectGroupListAdapter.CustomViewHolder>() {
 
     private val mLayoutInflater: LayoutInflater
     private var mProjectGroups: List<DataProjectAddressCombo> = emptyList()

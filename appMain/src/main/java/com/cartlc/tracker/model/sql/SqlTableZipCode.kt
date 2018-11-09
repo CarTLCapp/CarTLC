@@ -76,7 +76,7 @@ class SqlTableZipCode(
             val selection = "$KEY_ZIPCODE=?"
             val selectionArgs = arrayOf(zipCode)
             val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null)
-            if (cursor.count > 0) {
+            if (cursor.moveToFirst() && cursor.count > 0) {
                 val idxZipCode = cursor.getColumnIndex(KEY_ZIPCODE)
                 val idxStateLong = cursor.getColumnIndex(KEY_STATE_LONG)
                 val idxStateShort = cursor.getColumnIndex(KEY_STATE_SHORT)

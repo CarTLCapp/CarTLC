@@ -202,7 +202,7 @@ class SqlTableAddress(
             id = dbSql.insert(TABLE_NAME, null, values)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableAddress::class.java, "add(tableAddress)", "db")
+            TBApplication.ReportError(ex, SqlTableAddress::class.java, "add(address)", "db")
         } finally {
             dbSql.endTransaction()
         }
@@ -248,7 +248,7 @@ class SqlTableAddress(
             dbSql.update(TABLE_NAME, values, where, whereArgs)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableAddress::class.java, "update(tableAddress)", "db")
+            TBApplication.ReportError(ex, SqlTableAddress::class.java, "update(Address)", "db")
         } finally {
             dbSql.endTransaction()
         }
@@ -452,9 +452,7 @@ class SqlTableAddress(
         try {
             val values = ContentValues()
             values.put(KEY_SERVER_ID, 0)
-            if (dbSql.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.e("SqlTableAddress.clearnUploaded(): Unable to update entries")
-            }
+            dbSql.update(TABLE_NAME, values, null, null)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableAddress::class.java, "clearUploaded()", "db")

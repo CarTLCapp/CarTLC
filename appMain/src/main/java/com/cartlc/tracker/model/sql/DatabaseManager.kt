@@ -51,6 +51,7 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
         lateinit var tableZipCode: SqlTableZipCode
         lateinit var tableString: SqlTableString
         lateinit var tableVehicle: SqlTableVehicle
+        lateinit var tableVehicleName: SqlTableVehicleName
 
         override fun onCreate(db: SQLiteDatabase) {
             init(db)
@@ -71,6 +72,7 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
                 tableTruck.create()
                 tableString.create()
                 tableVehicle.create()
+                tableVehicleName.create()
             } catch (ex: Exception) {
                 Timber.e(ex)
             }
@@ -93,6 +95,7 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableTruck = SqlTableTruck(dm, db)
             tableString = SqlTableString(db)
             tableVehicle = SqlTableVehicle(dm, db)
+            tableVehicleName = SqlTableVehicleName(dm, db)
             SqlTableTruckV13.Init(dm, db)
         }
 
@@ -121,6 +124,7 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
             } else if (oldVersion <= 16) {
                 tableString.create()
                 tableVehicle.create()
+                tableVehicleName.create()
             }
         }
 
@@ -139,6 +143,7 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableCollectionEquipmentProject.clearUploaded()
             tableCollectionNoteProject.clearUploaded()
             tableCrash.clearUploaded()
+            tableVehicle.clearUploaded()
         }
     }
 
@@ -194,10 +199,13 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
     override val tableVehicle: TableVehicle
         get() = dbHelper.tableVehicle
 
+    override val tableVehicleName: TableVehicleName
+        get() = dbHelper.tableVehicleName
+
     override val tableString: TableString
         get() = dbHelper.tableString
 
     override fun reportError(ex: Exception, claz: Class<*>, function: String, type: String): String =
-        TBApplication.ReportError(ex, claz, function, type)
+            TBApplication.ReportError(ex, claz, function, type)
 
 }

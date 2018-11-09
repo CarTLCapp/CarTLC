@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Date;
 import java.util.Iterator;
 import java.text.SimpleDateFormat;
+
 import javax.inject.Inject;
+
 import java.util.concurrent.*;
 import java.io.IOException;
 
@@ -76,7 +78,7 @@ public class EntryController extends Controller {
         mEntryList.computeFilters(Secured.getClient(ctx()));
         mEntryList.compute();
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).fill(mEntryList.getInputSearch());
-        return ok(views.html.entry_list.render(mEntryList, sortBy, order, searchForm));
+        return ok(views.html.entry_list.render(mEntryList, sortBy, order, searchForm, Secured.getClient(ctx())));
     }
 
     public Result list() {
@@ -90,7 +92,7 @@ public class EntryController extends Controller {
         mEntryList.clearCache();
         mEntryList.compute();
         return ok(views.html.entry_list.render(mEntryList,
-                mEntryList.getSortBy(), mEntryList.getOrder(), searchForm));
+                mEntryList.getSortBy(), mEntryList.getOrder(), searchForm, Secured.getClient(ctx())));
     }
 
     public Result searchClear() {
@@ -99,7 +101,7 @@ public class EntryController extends Controller {
         mEntryList.compute();
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
         return ok(views.html.entry_list.render(mEntryList,
-                mEntryList.getSortBy(), mEntryList.getOrder(), searchForm));
+                mEntryList.getSortBy(), mEntryList.getOrder(), searchForm, Secured.getClient(ctx())));
     }
 
     public Result showByTruck(long truck_id) {
@@ -107,6 +109,17 @@ public class EntryController extends Controller {
         mEntryList.setSearch(null);
         mEntryList.setByTruckId(truck_id);
         return list();
+    }
+
+    public Result pageSize(String size) {
+        mEntryList.clearCache();
+        try {
+            int pageSize = Integer.parseInt(size);
+            mEntryList.setPageSize(pageSize);
+        } catch (NumberFormatException ex) {
+            Logger.error(ex.getMessage());
+        }
+        return ok("Done");
     }
 
     public CompletionStage<Result> computeTotalNumRows() {
@@ -156,7 +169,7 @@ public class EntryController extends Controller {
         entryList.computeTotalNumRows();
         mExportWriter = new EntryListWriter(entryList);
         File file = new File(EXPORT_FILENAME);
-        int count = 0;
+        int count;
         try {
             mExportWriter.open(file);
             count = mExportWriter.writeNext();
@@ -196,33 +209,6 @@ public class EntryController extends Controller {
     public Result exportDownload() {
         return ok(mExportWriter.getFile());
     }
-
-//    public CompletionStage<Result> exportBackground() {
-//        if (mExporting) {
-//            return ok("...");
-//        }
-//        mExporting = true;
-//        Client client = Secured.getClient(ctx());
-//        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
-//        return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
-//            mExporting = false;
-//            if (result.startsWith("ERROR:")) {
-//                return badRequest2(result);
-//            }
-//            return ok(result);
-//        }, myEc);
-//    }
-
-//    @Security.Authenticated(Secured.class)
-//    public CompletionStage<Result> exportBackground() {
-//        Logger.info("export() BACKGROUND BEGIN");
-//        Client client = Secured.getClient(ctx());
-//        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
-//        return CompletableFuture.supplyAsync(() -> export(client), myEc);
-//        return CompletionStage<Result>.completedFuture(export(client)).thenApplyAsync(result -> {
-//            return result;
-//        }, myEc);
-//    }
 
     /**
      * Display the picture for an entry.
@@ -275,12 +261,36 @@ public class EntryController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result delete(Long entry_id) {
+        String host = request().host();
         Entry entry = Entry.find.byId(entry_id);
         if (entry != null) {
-            entry.remove(mAmazonHelper);
-            Logger.info("Entry has been deleted: " + entry_id);
+            entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
+                Logger.info("Entry has been deleted: " + entry_id);
+            }));
         }
         return list();
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result deleteEntries(String rows) {
+        Logger.debug("Deleting entries: " + rows);
+        String[] strIds = rows.split(",");
+        try {
+            String host = request().host();
+            for (String strId : strIds) {
+                long id = Long.parseLong(strId);
+                Logger.debug("Deleting " + id);
+                Entry entry = Entry.find.byId(id);
+                if (entry != null) {
+                    entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
+                        Logger.info("Remote entry has been deleted: " + id);
+                    }));
+                }
+            }
+        } catch (NumberFormatException ex) {
+            Logger.error(ex.getMessage());
+        }
+        return ok("Done");
     }
 
     @Transactional
@@ -628,6 +638,35 @@ public class EntryController extends Controller {
         Logger.error("ERROR: " + field);
         return badRequest(field);
     }
+
+
+//    public CompletionStage<Result> exportBackground() {
+//        if (mExporting) {
+//            return ok("...");
+//        }
+//        mExporting = true;
+//        Client client = Secured.getClient(ctx());
+//        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
+//        return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
+//            mExporting = false;
+//            if (result.startsWith("ERROR:")) {
+//                return badRequest2(result);
+//            }
+//            return ok(result);
+//        }, myEc);
+//    }
+
+//    @Security.Authenticated(Secured.class)
+//    public CompletionStage<Result> exportBackground() {
+//        Logger.info("export() BACKGROUND BEGIN");
+//        Client client = Secured.getClient(ctx());
+//        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
+//        return CompletableFuture.supplyAsync(() -> export(client), myEc);
+//        return CompletionStage<Result>.completedFuture(export(client)).thenApplyAsync(result -> {
+//            return result;
+//        }, myEc);
+//    }
+
 
 }
 

@@ -16,12 +16,8 @@ class DataCollectionItem {
 
     override fun equals(other: Any?): Boolean {
         return if (other is DataCollectionItem) {
-            equals(other as DataCollectionItem?)
+            return collection_id == other.collection_id && value_id == other.value_id
         } else super.equals(other)
-    }
-
-    fun equals(other: DataCollectionItem): Boolean {
-        return collection_id == other.collection_id && value_id == other.value_id
     }
 
     override fun toString(): String {

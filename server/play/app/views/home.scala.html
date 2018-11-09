@@ -65,4 +65,33 @@
     }
 
     <h6>Server version @version</h6>
+
+    <a id="picture_cleanup" href="@routes.HomeController.index()" class="light">Picture Cleanup</a>
+
+    <p id="cleanup_result"></p>
+
+    <script type="text/javascript">
+
+        function myPictureCleanup() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    document.getElementById("cleanup_result").innerHTML = this.responseText;
+                    document.getElementById("picture_cleanup").innerHTML = "Picture Cleanup";
+                }
+            };
+            xhttp.open("GET", "@routes.HomeController.pictureCleanup()", true);
+            xhttp.send();
+            document.getElementById("picture_cleanup").innerHTML = "";
+        }
+
+        function myConfirmPictureCleanup() {
+            if (confirm('This will scan and delete all unused picture files and cannot be undone. Are you sure?')) {
+                myPictureCleanup();
+            }
+        }
+
+        document.getElementById("picture_cleanup").onclick = myConfirmPictureCleanup;
+
+    </script>
 }

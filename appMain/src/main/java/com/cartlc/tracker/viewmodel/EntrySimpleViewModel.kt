@@ -7,6 +7,7 @@ import androidx.databinding.ObservableInt
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.ui.app.TBApplication
+import timber.log.Timber
 import javax.inject.Inject
 
 class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {

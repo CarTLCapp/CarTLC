@@ -19,6 +19,7 @@ interface DatabaseTable {
     val tableZipCode: TableZipCode
     val tableString: TableString
     val tableVehicle: TableVehicle
+    val tableVehicleName: TableVehicleName
     val appVersion: String
     fun reportError(ex: Exception, claz: Class<*>, function: String, type: String): String
 }
