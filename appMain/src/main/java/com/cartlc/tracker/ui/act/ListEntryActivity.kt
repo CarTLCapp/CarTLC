@@ -51,7 +51,6 @@ class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListene
         setContentView(R.layout.activity_list_entries)
         app = applicationContext as TBApplication
         app.carRepoComponent.inject(this)
-        app.setUncaughtExceptionHandler(this)
         mEntryListAdapter = ListEntryAdapter(this, this)
         edit_address!!.setOnClickListener {
             prefHelper.setFromCurrentProjectId()

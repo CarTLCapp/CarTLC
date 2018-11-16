@@ -51,6 +51,7 @@ open class BaseActivity : AppCompatActivity() {
                 ErrorMessage.NEED_EQUIPMENT -> R.string.error_need_equipment
                 ErrorMessage.NEED_COMPANY -> R.string.error_need_company
                 ErrorMessage.NEED_STATUS -> R.string.error_need_status
+                ErrorMessage.CANNOT_TAKE_PICTURE -> R.string.error_cannot_take_picture
             })
 
     fun showEntryHint(entryHint: EntryHint) {

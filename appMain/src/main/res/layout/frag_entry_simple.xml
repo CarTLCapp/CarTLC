@@ -21,29 +21,62 @@
             android:id="@+id/entry_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:text="@{viewModel.title}"
             android:textSize="25sp"
             android:visibility="@{viewModel.title != null ? View.VISIBLE : View.GONE}"
-            android:layout_marginBottom="10dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <RadioGroup
+            android:id="@+id/entry_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:checkedButton="@{viewModel.checkedButton}"
+            android:onCheckedChanged="@{(group, id)->viewModel.onCheckedChanged(id)}"
+            android:orientation="horizontal"
+            android:visibility="@{viewModel.showChecked ? View.VISIBLE : View.GONE}"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/entry_title">
+
+            <RadioButton
+                android:id="@+id/entry_radio_no"
+                style="@style/SimpleItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/vehicle_none" />
+
+            <RadioButton
+                android:id="@+id/entry_radio_yes"
+                style="@style/SimpleItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="@string/vehicle_yes" />
+
+        </RadioGroup>
+
         <EditText
             android:id="@+id/entry_simple_edit_text"
             style="@style/EntryText"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:afterTextChanged="@{(editable)->viewModel.afterTextChanged(editable)}"
             android:ems="@{viewModel.simpleEms}"
             android:hint="@{viewModel.simpleHint}"
             android:inputType="textCapWords"
             android:maxLines="1"
             android:text="@{viewModel.simpleText}"
-            android:afterTextChanged="@{(editable)->viewModel.afterTextChanged(editable)}"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/entry_title" />
+            android:visibility="@{viewModel.showEditText ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/entry_radio_group" />
 
         <TextView
             android:id="@+id/entry_simple_help_text"
@@ -59,6 +92,5 @@
             tools:text="Hint" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </layout>

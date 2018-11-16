@@ -4,7 +4,7 @@
     <item
         android:id="@+id/fleet_vehicles"
         android:icon="@drawable/ic_interstate_truck"
-        android:title="@string/title_vehicles"
+        android:title="@string/vehicle_title_vehicles"
         app:showAsAction="always" />
     <item
         android:id="@+id/upload"

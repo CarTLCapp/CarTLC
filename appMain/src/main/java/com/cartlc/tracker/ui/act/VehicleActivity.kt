@@ -93,8 +93,12 @@ class VehicleActivity : BaseActivity() {
         })
         stage345Entry.inputType = InputType.TYPE_CLASS_TEXT
         stage345Entry.vm.simpleEmsValue = resources.getInteger(R.integer.entry_simple_ems_lights)
-        stage345Entry.vm.simpleHintValue = getString(R.string.vehicle_required)
+        stage345Entry.vm.simpleHintValue = getString(R.string.vehicle_comments)
         stage345Entry.vm.afterTextChangedListener = { value -> vm.onEntryChanged(value) }
+        stage345Entry.vm.showCheckedValue = true
+        stage345Entry.vm.handleActionEvent().observe(this, Observer { event ->
+            event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
+        })
         titleFragment.vm.titleValue = null
 
         vm.repo.stage.observe(this, Observer { stage -> onStageChanged(stage) })
@@ -103,6 +107,7 @@ class VehicleActivity : BaseActivity() {
         })
         vm.mileageTextValue = { stage2Entry.entryTextValue }
         vm.entryTextValue = { stage345Entry.entryTextValue }
+        vm.entryHasCheckedValue = { stage345Entry.vm.hasCheckedValue }
         vm.btnNextVisible = { flag -> buttonsFragment.vm.showNextButtonValue = flag }
     }
 
@@ -118,6 +123,7 @@ class VehicleActivity : BaseActivity() {
             Action.BTN_NEXT -> vm.onBtnNext()
             Action.BTN_PREV -> vm.onBtnPrev()
             Action.SUBMIT -> onSubmit()
+            is Action.BUTTON_DIALOG -> { vm.onEntryPressAction(action.button) }
         }
     }
 
@@ -137,6 +143,7 @@ class VehicleActivity : BaseActivity() {
         buttonsFragment.vm.nextTextValue = getString(R.string.btn_next)
         stage2Entry.vm.showingValue = false
         stage345Entry.vm.titleValue = null
+        stage345Entry.vm.showEditTextValue = vm.show345EditText
         checkboxAdapter.items = emptyList()
 
         vm.onStageChanged(stage)
@@ -166,6 +173,7 @@ class VehicleActivity : BaseActivity() {
                 checkboxAdapter2.selectedItems = vm.repo.entered.vehicle.tailLightsValue
                 stage345Entry.vm.titleValue = getString(R.string.vehicle_lights_exterior)
                 stage345Entry.vm.simpleTextValue = vm.repo.entered.vehicle.exteriorLightIssues
+                stage345Entry.vm.checkedButtonBooleanValue = vm.repo.entered.hasIssuesExteriorLights
                 stage345Entry.invalidateAll()
             }
             VehicleStage.STAGE_4 -> {
@@ -177,6 +185,7 @@ class VehicleActivity : BaseActivity() {
                 checkboxAdapter.selectedItems = vm.repo.entered.vehicle.fluidChecksValue
                 stage345Entry.vm.titleValue = getString(R.string.vehicle_fluids_detected)
                 stage345Entry.vm.simpleTextValue = vm.repo.entered.vehicle.fluidProblemsDetected
+                stage345Entry.vm.checkedButtonBooleanValue = vm.repo.entered.hasIssuesFluids
                 stage345Entry.invalidateAll()
             }
             VehicleStage.STAGE_5 -> {
@@ -188,6 +197,7 @@ class VehicleActivity : BaseActivity() {
                 checkboxAdapter.selectedItems = vm.repo.entered.vehicle.tireInspectionValue
                 stage345Entry.vm.titleValue = getString(R.string.vehicle_tire_damage)
                 stage345Entry.vm.simpleTextValue = vm.repo.entered.vehicle.exteriorDamage
+                stage345Entry.vm.checkedButtonBooleanValue = vm.repo.entered.hasIssuesDamage
                 stage345Entry.invalidateAll()
             }
             VehicleStage.STAGE_6 -> {
@@ -196,6 +206,7 @@ class VehicleActivity : BaseActivity() {
                 titleFragment.vm.subTitleValue = getString(R.string.vehicle_other_description)
                 buttonsFragment.vm.nextTextValue = getString(R.string.vehicle_submit)
                 stage345Entry.vm.simpleTextValue = vm.repo.entered.vehicle.other
+                stage345Entry.vm.checkedButtonBooleanValue = vm.repo.entered.hasIssuesOther
                 stage345Entry.invalidateAll()
             }
         }

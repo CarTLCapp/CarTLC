@@ -46,7 +46,7 @@
 
         <activity
             android:name=".ui.act.VehicleActivity"
-            android:label="@string/title_vehicles"
+            android:label="@string/vehicle_title_vehicles"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize">

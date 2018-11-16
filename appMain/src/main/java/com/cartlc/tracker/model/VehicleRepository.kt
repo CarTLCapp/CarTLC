@@ -26,6 +26,11 @@ class VehicleRepository(
             stage.value = value
         }
 
+    val inspectingList: List<String>
+        get() {
+            return dm.tableVehicleName.vehicleNames
+        }
+
     val typeOfInspection = context.resources.getStringArray(R.array.type_of_inspection)
     val headLights = context.resources.getStringArray(R.array.head_lights)
     val tailLights = context.resources.getStringArray(R.array.tail_lights)
@@ -35,11 +40,6 @@ class VehicleRepository(
     init {
         stageValue = VehicleStage.STAGE_1
     }
-
-    val inspectingList: List<String>
-        get() {
-            return dm.tableVehicleName.vehicleNames
-        }
 
     inner class Entered {
         var vehicle = DataVehicle(dm.tableString)
@@ -66,8 +66,26 @@ class VehicleRepository(
         internal val isValidOther: Boolean
             get() = vehicle.other.isNotBlank()
 
+        internal var hasIssuesExteriorLights: Boolean? = null
+        internal var hasIssuesFluids: Boolean? = null
+        internal var hasIssuesDamage: Boolean? = null
+        internal var hasIssuesOther: Boolean? = null
+
+        internal val noIssuesExteriorLights: Boolean
+            get() = hasIssuesExteriorLights == false
+        internal val noIssuesFluids: Boolean
+            get() = hasIssuesFluids == false
+        internal val noIssuesDamage: Boolean
+            get() = hasIssuesDamage == false
+        internal val noIssuesOther: Boolean
+            get() = hasIssuesOther == false
+
         fun clear() {
             vehicle = DataVehicle(dm.tableString)
+            hasIssuesExteriorLights = null
+            hasIssuesDamage = null
+            hasIssuesFluids = null
+            hasIssuesOther = null
         }
     }
 
@@ -83,13 +101,13 @@ class VehicleRepository(
     val isValidStage2: Boolean
         get() = entered.isValidMileage && isValidTypeOfInspection
     val isValidStage3: Boolean
-        get() = entered.isValidExteriorLights
+        get() = entered.noIssuesExteriorLights || entered.isValidExteriorLights
     val isValidStage4: Boolean
-        get() = entered.isValidFluids
+        get() = entered.noIssuesFluids || entered.isValidFluids
     val isValidStage5: Boolean
-        get() = entered.isValidDamage
+        get() = entered.noIssuesDamage || entered.isValidDamage
     val isValidStage6: Boolean
-        get() = entered.isValidOther
+        get() = entered.noIssuesOther || entered.isValidOther
 
     fun submit() {
         prefHelper.registrationHasChanged = true

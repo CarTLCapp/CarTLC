@@ -151,9 +151,14 @@
         }
 
         @if(client.is_admin) {
-            <div id="div_delete_checked" class="actions">
-                <a id="delete_checked" class="btn danger">Delete checked entries</a>
-            </div>
+            <h4>
+                <span>
+                    <div id="div_delete_checked" class="actions">
+                    <a id="delete_checked" class="btn danger">Delete checked entries</a>
+                    </div>
+                </span>
+                <span id="delete_progress"></span>
+            </h4>
         }
 
         <script type="text/javascript">
@@ -192,34 +197,66 @@
                 document.getElementById("div_delete_checked").style.display = "none";
                 var checkedValues = [];
                 var inputElements = document.getElementsByClassName('entryCheckbox');
+                var lastChecked = -10;
+                var range = false;
                 for (var i=0; inputElements[i]; ++i) {
                     if (inputElements[i].checked) {
-                        checkedValues.push(inputElements[i].value);
                         inputElements[i].checked = false;
+                        if (lastChecked != (i-1)) {
+                            checkedValues.push(i.toString());
+                            range = false;
+                        } else if (!range) {
+                            checkedValues.push("R");
+                            range = true;
+                        }
+                        lastChecked = i;
+                    } else if (range) {
+                        checkedValues.push((i-1).toString());
+                        range = false;
                     }
                 }
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.responseText.length > 0 && this.status == 200) {
-                        document.getElementById("div_delete_checked").style.display = "block";
-                        location.reload(true);
+                        var line = this.responseText;
+                        var key = line.substring(0, 1);
+                        var value = line.substring(1);
+                        if (key == "E") {
+                            location.reload(true);
+                            document.getElementById("delete_progress").innerHTML = "";
+                            document.getElementById("div_delete_checked").style.display = "block";
+                        } else if (key == "#") {
+                            document.getElementById("delete_progress").innerHTML = value;
+                            var call = "/entry/delete_entries/next";
+                            xhttp.open("GET", call, true);
+                            xhttp.send();
+                        }
                     }
                 };
                 var call = "/entry/delete_entries/" + checkedValues.join();
                 xhttp.open("GET", call, true);
                 xhttp.send();
+
             }
 
             function myConfirmDelete() {
                 var inputElements = document.getElementsByClassName('entryCheckbox');
-                var message;
-                if (inputElements.length == 1) {
-                    message = "Deleting this element cannot be undone. Are you sure?";
-                } else {
-                    message = "Deleting these " + inputElements.length + " elements cannot be undone. Are you sure?";
+                var count = 0;
+                for (var i=0; inputElements[i]; ++i) {
+                    if (inputElements[i].checked) {
+                        count++;
+                    }
                 }
-                if (confirm(message)) {
-                    myDelete();
+                if (count > 0) {
+                    var message;
+                    if (count == 1) {
+                        message = "Deleting this element cannot be undone. Are you sure?";
+                    } else {
+                        message = "Deleting these " + count + " elements cannot be undone. Are you sure?";
+                    }
+                    if (confirm(message)) {
+                        myDelete();
+                    }
                 }
             }
 

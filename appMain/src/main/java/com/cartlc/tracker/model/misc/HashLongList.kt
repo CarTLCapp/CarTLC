@@ -1,6 +1,8 @@
 package com.cartlc.tracker.model.misc
 
 import com.cartlc.tracker.model.table.TableString
+import timber.log.Timber
+import java.lang.NumberFormatException
 
 class HashLongList(private val db: TableString) : HashSet<Long>() {
 
@@ -19,6 +21,11 @@ class HashLongList(private val db: TableString) : HashSet<Long>() {
         } else {
             remove(id)
         }
+    }
+
+    fun has(text: String): Boolean {
+        val id = db.add(text)
+        return contains(id)
     }
 
     fun expand(): HashStringList {
@@ -49,7 +56,13 @@ class HashLongList(private val db: TableString) : HashSet<Long>() {
     fun unmash(text: String): HashLongList {
         clear()
         for (ele in text.split(",")) {
-            add(ele.toLong())
+            if (ele.isNotBlank()) {
+                try {
+                    add(ele.toLong())
+                } catch (ex: NumberFormatException) {
+                    Timber.e(ex.message)
+                }
+            }
         }
         return this
     }

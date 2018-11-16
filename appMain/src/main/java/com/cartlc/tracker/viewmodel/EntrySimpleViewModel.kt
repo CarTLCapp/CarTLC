@@ -1,26 +1,19 @@
 package com.cartlc.tracker.viewmodel
 
 import android.app.Activity
+import android.widget.RadioGroup
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.CarRepository
+import com.cartlc.tracker.model.flow.Action
+import com.cartlc.tracker.model.flow.ButtonDialog
 import com.cartlc.tracker.ui.app.TBApplication
-import timber.log.Timber
-import javax.inject.Inject
 
 class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
 
-    @Inject
-    lateinit var repo: CarRepository
-
     private val app: TBApplication
         get() = act.applicationContext as TBApplication
-
-    init {
-        app.carRepoComponent.inject(this)
-    }
 
     fun dispatchReturnPressedEvent(arg: String) {
         dispatchGenericEvent(arg)
@@ -32,6 +25,9 @@ class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
     var helpText = ObservableField<String>()
     var simpleEms = ObservableInt(20)
     var title = ObservableField<String>()
+    var checkedButton = ObservableInt(0)
+    var showChecked = ObservableBoolean(false)
+    var showEditText = ObservableBoolean(true)
 
     var showingValue: Boolean
         get() = showing.get()
@@ -51,6 +47,40 @@ class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
     var titleValue: String?
         get() = title.get()
         set(value) = title.set(value)
+    var showCheckedValue: Boolean
+        get() = showChecked.get()
+        set(value) { showChecked.set(value) }
+    var showEditTextValue: Boolean
+        get() = showEditText.get()
+        set(value) = showEditText.set(value)
+    private var checkedButtonValue: Int
+        get() = checkedButton.get()
+        set(value) = checkedButton.set(value)
+    var checkedButtonBooleanValue: Boolean?
+        get() {
+            if (checkedButtonValue == R.id.entry_radio_yes) {
+                return true
+            }
+            if (checkedButtonValue == R.id.entry_radio_no) {
+                return false
+            }
+            return null
+        }
+        set(value) {
+            if (value == null) {
+                checkedButtonValue = 0
+                showEditTextValue = false
+            } else if (value) {
+                checkedButtonValue = R.id.entry_radio_yes
+                showEditTextValue = true
+            } else {
+                checkedButtonValue = R.id.entry_radio_no
+                showEditTextValue = true
+            }
+        }
+
+    val hasCheckedValue: Boolean
+        get() = checkedButtonValue != 0
 
     var afterTextChangedListener: (value: String) -> Unit = {}
 
@@ -61,4 +91,17 @@ class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
     fun afterTextChanged(s: CharSequence) {
         afterTextChangedListener(s.toString())
     }
+
+    fun onCheckedChanged(id: Int) {
+        if (id == R.id.entry_radio_yes) {
+            showEditTextValue = true
+            dispatchActionEvent(Action.BUTTON_DIALOG(ButtonDialog.YES))
+        } else if (id == R.id.entry_radio_no) {
+            showEditTextValue = false
+            dispatchActionEvent(Action.BUTTON_DIALOG(ButtonDialog.NO))
+        } else {
+            showEditTextValue = false
+        }
+    }
+
 }

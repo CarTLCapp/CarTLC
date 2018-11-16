@@ -25,6 +25,10 @@ open class BaseViewModel : ViewModel(), Observable {
             error.value = value
         }
 
+    /**
+     * TODO: INVESTIGATE if the following is needed to allow ViewModel's to work
+     * within XML code. If not needed, get rid of it.
+     */
     private val callbacks: PropertyChangeRegistry = PropertyChangeRegistry()
 
     override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback) {
@@ -52,6 +56,7 @@ open class BaseViewModel : ViewModel(), Observable {
     fun notifyPropertyChanged(fieldId: Int) {
         callbacks.notifyCallbacks(this, fieldId, null)
     }
+    /** TODO INVESTIGATION END **/
 
     // ActionEvent
 

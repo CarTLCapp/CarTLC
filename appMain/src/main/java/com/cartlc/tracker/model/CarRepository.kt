@@ -19,9 +19,15 @@ class CarRepository(
     val curFlow: MutableLiveData<Flow> by lazy {
         MutableLiveData<Flow>()
     }
+
     init {
         curFlow.value = LoginFlow()
     }
+
+    val hasInsectingList: Boolean
+        get() {
+            return dm.tableVehicleName.vehicleNames.isNotEmpty()
+        }
 
     fun checkProjectErrors(): Boolean {
         val entries = db.tableProjectAddressCombo.query()

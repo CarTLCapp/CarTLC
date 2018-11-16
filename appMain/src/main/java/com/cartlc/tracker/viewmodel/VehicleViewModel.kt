@@ -4,6 +4,7 @@ import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import com.cartlc.tracker.model.VehicleRepository
 import com.cartlc.tracker.model.flow.Action
+import com.cartlc.tracker.model.flow.ButtonDialog
 import com.cartlc.tracker.model.flow.VehicleStage
 import java.lang.NumberFormatException
 
@@ -31,7 +32,20 @@ class VehicleViewModel(
 
     var mileageTextValue: () -> String = { "" }
     var entryTextValue: () -> String = { "" }
+    var entryHasCheckedValue: () -> Boolean = { false }
     var btnNextVisible: (flag: Boolean) -> Unit = {}
+
+    val show345EditText: Boolean
+        get() {
+            val hasIssues = when (repo.stageValue) {
+                VehicleStage.STAGE_3 -> repo.entered.hasIssuesExteriorLights
+                VehicleStage.STAGE_4 -> repo.entered.hasIssuesFluids
+                VehicleStage.STAGE_5 -> repo.entered.hasIssuesDamage
+                VehicleStage.STAGE_6 -> repo.entered.hasIssuesOther
+                else -> null
+            }
+            return hasIssues == true
+        }
 
     fun doSimpleEntryReturn(value: String) {
         store(value)
@@ -101,6 +115,17 @@ class VehicleViewModel(
 
     fun onEntryChanged(text: String) {
         store(text)
+        onStageChanged()
+    }
+
+    fun onEntryPressAction(button: ButtonDialog) {
+        val hasIssues = (button == ButtonDialog.YES)
+        when (repo.stageValue) {
+            VehicleStage.STAGE_3 -> repo.entered.hasIssuesExteriorLights = hasIssues
+            VehicleStage.STAGE_4 -> repo.entered.hasIssuesFluids = hasIssues
+            VehicleStage.STAGE_5 -> repo.entered.hasIssuesDamage = hasIssues
+            VehicleStage.STAGE_6 -> repo.entered.hasIssuesOther = hasIssues
+        }
         onStageChanged()
     }
 

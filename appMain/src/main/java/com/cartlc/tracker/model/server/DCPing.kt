@@ -172,140 +172,136 @@ class DCPing(private val context: Context) : DCPost() {
     @Synchronized
     fun ping() {
         Timber.i("ping()")
-        try {
-            if (prefHelper.techID == 0) {
+        if (prefHelper.techID == 0) {
+            return
+        }
+        val deviceId = ServerHelper.instance.deviceId
+        val jsonObject = JSONObject()
+        jsonObject.accumulate("device_id", deviceId)
+        jsonObject.accumulate("tech_id", prefHelper.techID)
+        jsonObject.accumulate("app_version", version)
+        val response = post(PING, jsonObject, true) ?: return
+        val blob = parseResult(response)
+        if (blob.has(UPLOAD_RESET_TRIGGER)) {
+            if (blob.getBoolean(UPLOAD_RESET_TRIGGER)) {
+                Timber.i("UPLOAD RESET!")
+                repo.clearUploaded()
+            }
+        }
+        if (blob.has(RE_REGISTER_TRIGGER)) {
+            if (blob.getBoolean(RE_REGISTER_TRIGGER)) {
+                Timber.i("RE-REGISTER DETECTED!")
+                sendRegistration()
+            }
+        }
+        if (blob.has(RELOAD_CODE)) {
+            val reload_code = blob.getString(RELOAD_CODE)
+            if (!TextUtils.isEmpty(reload_code)) {
+                if (reload_code.contains("p")) {
+                    prefHelper.versionProject = 0
+                }
+                if (reload_code.contains("e")) {
+                    prefHelper.versionEquipment = 0
+                }
+                if (reload_code.contains("n")) {
+                    prefHelper.versionNote = 0
+                }
+                if (reload_code.contains("c")) {
+                    prefHelper.versionCompany = 0
+                }
+                if (reload_code.contains("t")) {
+                    prefHelper.versionTruck = 0
+                }
+                if (reload_code.contains("v")) {
+                    prefHelper.versionVehicleNames = 0
+                }
+            }
+        }
+        val version_project = blob.getInt(PrefHelper.VERSION_PROJECT)
+        val version_equipment = blob.getInt(PrefHelper.VERSION_EQUIPMENT)
+        val version_note = blob.getInt(PrefHelper.VERSION_NOTE)
+        val version_company = blob.getInt(PrefHelper.VERSION_COMPANY)
+        val version_truck = blob.getInt(PrefHelper.VERSION_TRUCK)
+        val version_vehicle_names = blob.getInt(PrefHelper.VERSION_VEHICLE_NAMES)
+        if (prefHelper.versionProject != version_project) {
+            Timber.i("New project version $version_project")
+            if (!queryProjects()) {
                 return
             }
-            val deviceId = ServerHelper.instance.deviceId
-            val jsonObject = JSONObject()
-            jsonObject.accumulate("device_id", deviceId)
-            jsonObject.accumulate("tech_id", prefHelper.techID)
-            jsonObject.accumulate("app_version", version)
-            val response = post(PING, jsonObject, true) ?: return
-            val blob = parseResult(response)
-            if (blob.has(UPLOAD_RESET_TRIGGER)) {
-                if (blob.getBoolean(UPLOAD_RESET_TRIGGER)) {
-                    Timber.i("UPLOAD RESET!")
-                    repo.clearUploaded()
-                }
+            prefHelper.versionProject = version_project
+            EventBus.getDefault().post(EventRefreshProjects())
+        }
+        if (prefHelper.versionVehicleNames != version_vehicle_names) {
+            Timber.i("New vehicle name version $version_vehicle_names")
+            if (!queryVehicleNames()) {
+                return
             }
-            if (blob.has(RE_REGISTER_TRIGGER)) {
-                if (blob.getBoolean(RE_REGISTER_TRIGGER)) {
-                    Timber.i("RE-REGISTER DETECTED!")
-                    sendRegistration()
-                }
+            prefHelper.versionVehicleNames = version_vehicle_names
+        }
+        if (prefHelper.versionCompany != version_company) {
+            Timber.i("New company version $version_company")
+            if (!queryCompanies()) {
+                return
             }
-            if (blob.has(RELOAD_CODE)) {
-                val reload_code = blob.getString(RELOAD_CODE)
-                if (!TextUtils.isEmpty(reload_code)) {
-                    if (reload_code.contains("p")) {
-                        prefHelper.versionProject = 0
-                    }
-                    if (reload_code.contains("e")) {
-                        prefHelper.versionEquipment = 0
-                    }
-                    if (reload_code.contains("n")) {
-                        prefHelper.versionNote = 0
-                    }
-                    if (reload_code.contains("c")) {
-                        prefHelper.versionCompany = 0
-                    }
-                    if (reload_code.contains("t")) {
-                        prefHelper.versionTruck = 0
-                    }
-                    if (reload_code.contains("v")) {
-                        prefHelper.versionVehicleNames = 0
-                    }
-                }
+            prefHelper.versionCompany = version_company
+        }
+        if (prefHelper.versionEquipment != version_equipment) {
+            Timber.i("New equipment version $version_equipment")
+            if (!queryEquipments()) {
+                return
             }
-            val version_project = blob.getInt(PrefHelper.VERSION_PROJECT)
-            val version_equipment = blob.getInt(PrefHelper.VERSION_EQUIPMENT)
-            val version_note = blob.getInt(PrefHelper.VERSION_NOTE)
-            val version_company = blob.getInt(PrefHelper.VERSION_COMPANY)
-            val version_truck = blob.getInt(PrefHelper.VERSION_TRUCK)
-            val version_vehicle_names = blob.getInt(PrefHelper.VERSION_VEHICLE_NAMES)
-            if (prefHelper.versionProject != version_project) {
-                Timber.i("New project version $version_project")
-                if (!queryProjects()) {
-                    return
-                }
-                prefHelper.versionProject = version_project
+            prefHelper.versionEquipment = version_equipment
+        }
+        if (prefHelper.versionNote != version_note) {
+            Timber.i("New note version $version_note")
+            if (!queryNotes()) {
+                return
+            }
+            prefHelper.versionNote = version_note
+        }
+        if (prefHelper.versionTruck != version_truck) {
+            Timber.i("New truck version $version_truck")
+            if (!queryTrucks()) {
+                return
+            }
+            prefHelper.versionTruck = version_truck
+        }
+        var entries = db.tableEntry.queryPendingDataToUploadToMaster()
+        var count = 0
+        if (entries.isNotEmpty()) {
+            count = sendEntries(entries)
+        }
+        if (count > 0) {
+            EventBus.getDefault().post(EventRefreshProjects())
+        }
+        entries = db.tableEntry.queryPendingPicturesToUpload()
+        if (entries.size > 0) {
+            if (AmazonHelper.instance.sendPictures(context, entries)) {
                 EventBus.getDefault().post(EventRefreshProjects())
             }
-            if (prefHelper.versionVehicleNames != version_vehicle_names) {
-                Timber.i("New vehicle name version $version_vehicle_names")
-                if (!queryVehicleNames()) {
-                    return
-                }
-                prefHelper.versionVehicleNames = version_vehicle_names
-            }
-            if (prefHelper.versionCompany != version_company) {
-                Timber.i("New company version $version_company")
-                if (!queryCompanies()) {
-                    return
-                }
-                prefHelper.versionCompany = version_company
-            }
-            if (prefHelper.versionEquipment != version_equipment) {
-                Timber.i("New equipment version $version_equipment")
-                if (!queryEquipments()) {
-                    return
-                }
-                prefHelper.versionEquipment = version_equipment
-            }
-            if (prefHelper.versionNote != version_note) {
-                Timber.i("New note version $version_note")
-                if (!queryNotes()) {
-                    return
-                }
-                prefHelper.versionNote = version_note
-            }
-            if (prefHelper.versionTruck != version_truck) {
-                Timber.i("New truck version $version_truck")
-                if (!queryTrucks()) {
-                    return
-                }
-                prefHelper.versionTruck = version_truck
-            }
-            var entries = db.tableEntry.queryPendingDataToUploadToMaster()
-            var count = 0
-            if (entries.isNotEmpty()) {
-                count = sendEntries(entries)
-            }
-            if (count > 0) {
-                EventBus.getDefault().post(EventRefreshProjects())
-            }
-            entries = db.tableEntry.queryPendingPicturesToUpload()
-            if (entries.size > 0) {
-                if (AmazonHelper.instance.sendPictures(context, entries)) {
-                    EventBus.getDefault().post(EventRefreshProjects())
-                }
-            }
-            db.tablePictureCollection.clearUploadedUnscaledPhotos()
-            val lines = db.tableCrash.queryNeedsUploading()
-            sendCrashLines(lines)
-            // If any entries do not yet have server-id's, try to get them.
-            entries = db.tableEntry.queryServerIds()
-            if (entries.isNotEmpty()) {
-                Timber.i("FOUND " + entries.size + " entries needing to be uploaded")
-                sendEntries(entries)
-            } else {
-                Timber.i("All entries have server ids")
-            }
-            val vehicles = db.tableVehicle.queryNotUploaded()
-            if (vehicles.isNotEmpty()) {
-                Timber.i("FOUND " + vehicles.size + " vehicles needing to be uploaded")
-                sendVehicles(vehicles)
-            } else {
-                Timber.i("All vehicles have uploaded")
-            }
-            val strings = db.tableString.queryNotUploaded()
-            if (strings.isNotEmpty()) {
-                Timber.i("Query strings needed.")
-                queryStrings()
-            }
-        } catch (ex: Exception) {
-            TBApplication.ReportServerError(ex, DCPing::class.java, "ping()", "server")
+        }
+        db.tablePictureCollection.clearUploadedUnscaledPhotos()
+        val lines = db.tableCrash.queryNeedsUploading()
+        sendCrashLines(lines)
+        // If any entries do not yet have server-id's, try to get them.
+        entries = db.tableEntry.queryServerIds()
+        if (entries.isNotEmpty()) {
+            Timber.i("FOUND " + entries.size + " entries needing to be uploaded")
+            sendEntries(entries)
+        } else {
+            Timber.i("All entries have server ids")
+        }
+        val vehicles = db.tableVehicle.queryNotUploaded()
+        if (vehicles.isNotEmpty()) {
+            Timber.i("FOUND " + vehicles.size + " vehicles needing to be uploaded")
+            sendVehicles(vehicles)
+        } else {
+            Timber.i("All vehicles have uploaded")
+        }
+        val strings = db.tableString.queryNotUploaded()
+        if (strings.isNotEmpty()) {
+            Timber.i("Query strings needed.")
+            queryStrings()
         }
     }
 
@@ -1126,7 +1122,7 @@ class DCPing(private val context: Context) : DCPost() {
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
             val stream = OutputStreamWriter(connection.outputStream, "UTF-8")
-            val writer = BufferedWriter(stream)
+            val writer = BufferedWriter(stream!!)
             writer.write(json.toString())
             writer.close()
             val result = getResult(connection)
@@ -1175,7 +1171,7 @@ class DCPing(private val context: Context) : DCPost() {
                 Log.e(TAG, "Unable to send previously trapped message: " + line.message!!)
             }
         } catch (ex: Exception) {
-            Log.e(TAG, ex.message)
+            Log.e(TAG, "Exception: " + ex.message)
         }
     }
 

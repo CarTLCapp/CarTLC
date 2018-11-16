@@ -16,7 +16,7 @@ android {
         minSdkVersion 19
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 31
-        versionName "2.54"
+        versionName "2.55"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -43,7 +43,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Android
-    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.vectordrawable:vectordrawable-animated:1.0.0'
@@ -96,6 +96,6 @@ dependencies {
     testImplementation "com.squareup.okhttp3:mockwebserver:$mockwebserver_version"
 
     // Android Testing
-    androidTestImplementation "androidx.test:runner:1.1.0-beta02"
+    androidTestImplementation "androidx.test:runner:1.1.0"
 
 }

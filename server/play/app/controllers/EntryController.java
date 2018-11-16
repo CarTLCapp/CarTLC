@@ -51,6 +51,7 @@ public class EntryController extends Controller {
     private EntryListWriter mExportWriter;
     private boolean mExporting;
     private boolean mAborted;
+    private ArrayList<Long> mDeleting = new ArrayList<>();
 
     @Inject
     public EntryController(AmazonHelper amazonHelper,
@@ -152,6 +153,7 @@ public class EntryController extends Controller {
         }, myEc);
     }
 
+    @Security.Authenticated(Secured.class)
     public Result export() {
         if (mExporting) {
             mAborted = true;
@@ -272,25 +274,81 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result deleteEntries(String rows) {
-        Logger.debug("Deleting entries: " + rows);
-        String[] strIds = rows.split(",");
+    synchronized
+    public CompletionStage<Result> deleteEntries(String rows) {
+        if (rows.equals("next")) {
+            return deleteNext();
+        }
+        Logger.warn("Will delete these entries: " + rows);
+        String[] rowIds = rows.split(",");
         try {
-            String host = request().host();
-            for (String strId : strIds) {
-                long id = Long.parseLong(strId);
-                Logger.debug("Deleting " + id);
-                Entry entry = Entry.find.byId(id);
-                if (entry != null) {
-                    entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
-                        Logger.info("Remote entry has been deleted: " + id);
-                    }));
+            int lastRow = -1;
+            boolean range = false;
+            for (String rowId : rowIds) {
+                if (rowId.equals("R")) {
+                    range = true;
+                } else {
+                    int row = Integer.parseInt(rowId);
+                    if (range) {
+                        for (int r = lastRow+1; r <= row; r++) {
+                            mDeleting.add(mEntryList.getList().get(r).id);
+                        }
+                    } else {
+                        mDeleting.add(mEntryList.getList().get(row).id);
+                    }
+                    lastRow = row;
+                    range = false;
+                }
+            }
+            if (range) {
+                for (int r = lastRow+1; r < mEntryList.getList().size(); r++) {
+                    mDeleting.add(mEntryList.getList().get(r).id);
                 }
             }
         } catch (NumberFormatException ex) {
             Logger.error(ex.getMessage());
         }
-        return ok("Done");
+        Logger.warn("Total entries to delete now is: " + mDeleting.size());
+        CompletableFuture<Result> completableFuture = new CompletableFuture<>();
+        completableFuture.complete(deleteResult());
+        return completableFuture;
+    }
+
+    private CompletionStage<Result> deleteNext() {
+        CompletableFuture<Result> completableFuture = new CompletableFuture<>();
+        if (mDeleting.size() == 0) {
+            Logger.error("Called deleteNext() when there were no elements");
+            completableFuture.complete(deleteResult());
+        } else {
+            try {
+                String host = request().host();
+                long id = mDeleting.get(0);
+                Logger.debug("Deleting ENTRY ID " + id + ". Total left=" + mDeleting.size());
+                mDeleting.remove(0);
+                Entry entry = Entry.find.byId(id);
+                if (entry != null) {
+                    entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
+                        Logger.warn("Remote entry has been deleted: " + id);
+                        completableFuture.complete(deleteResult());
+                    }));
+                } else {
+                    Logger.error("Called deleteNext() with bad ID " + id);
+                    completableFuture.complete(deleteResult());
+                }
+            } catch (NumberFormatException ex) {
+                Logger.error(ex.getMessage());
+                completableFuture.complete(deleteResult());
+            }
+        }
+        return completableFuture;
+    }
+
+    private Result deleteResult() {
+        if (mDeleting.size() == 0) {
+            return ok("E");
+        } else {
+            return ok("#" + mDeleting.size() + "...");
+        }
     }
 
     @Transactional

@@ -34,5 +34,4 @@ interface CarRepositoryComponent {
     fun inject(vm: ConfirmationViewModel)
     fun inject(vm: TitleViewModel)
     fun inject(vm: ButtonsViewModel)
-    fun inject(vm: EntrySimpleViewModel)
 }

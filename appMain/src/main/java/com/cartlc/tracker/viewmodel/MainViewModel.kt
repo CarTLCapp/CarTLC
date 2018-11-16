@@ -1,16 +1,19 @@
 package com.cartlc.tracker.viewmodel
 
+import android.location.Address
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.model.data.DataNote
-import com.cartlc.tracker.model.data.DataProjectAddressCombo
+import com.cartlc.tracker.model.data.*
 import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.model.misc.*
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
-import java.util.ArrayList
+import com.cartlc.tracker.ui.util.BitmapHelper
+import com.cartlc.tracker.ui.util.CheckError
+import com.cartlc.tracker.ui.util.LocationHelper
+import java.io.File
+import java.util.*
 
 class MainViewModel(val repo: CarRepository) : BaseViewModel() {
 
@@ -18,10 +21,10 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         private val ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG // true=Debugging only
     }
 
-    val db: DatabaseTable
+    private val db: DatabaseTable
         get() = repo.db
 
-    val prefHelper: PrefHelper
+    private val prefHelper: PrefHelper
         get() = repo.prefHelper
 
     val curFlow: MutableLiveData<Flow>
@@ -33,35 +36,139 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             curFlow.value = value
         }
 
-    val isLocalCompany: Boolean
+    private val isLocalCompany: Boolean
         get() = db.tableAddress.isLocalCompanyOnly(prefHelper.company)
 
     val isCenterButtonEdit: Boolean
         get() = curFlowValue.stage == Stage.COMPANY && isLocalCompany
 
-    var companyEditing: String? = null
-    var wasNext: Boolean = false
+    private var companyEditing: String? = null
+    private var wasNext: Boolean = false
     var didAutoSkip: Boolean = false
     val isPictureStage: Boolean
         get() = curFlowValue.isPictureStage
     var detectNoteError: () -> Boolean = { false }
     var entryTextValue: () -> String = { "" }
     var detectLoginError: () -> Boolean = { false }
-    var curEntry: DataEntry? = null
-    var editProject: Boolean = false
-    var autoNarrowOkay = true
+    var getString: (msg: StringMessage) -> Unit = {}
+    private var curEntry: DataEntry? = null
+    private var editProject: Boolean = false
+    private var autoNarrowOkay = true
+    private var takingPictureFile: File? = null
+
+    val curProjectHint: String
+        get() {
+            val sbuf = StringBuilder()
+            val name = prefHelper.projectName
+            if (name != null) {
+                sbuf.append(name)
+                sbuf.append("\n")
+            }
+            sbuf.append(prefHelper.address)
+            return sbuf.toString()
+        }
+
+    val editProjectHint: String
+        get() {
+            val sbuf = StringBuilder()
+            sbuf.append(getString(StringMessage.entry_hint_edit_project))
+            sbuf.append("\n")
+            val name = prefHelper.projectName
+            if (name != null) {
+                sbuf.append(name)
+                sbuf.append("\n")
+            }
+            sbuf.append(prefHelper.address)
+            return sbuf.toString()
+        }
+
+    val statusHint: String
+        get() {
+            val sbuf = StringBuilder()
+            val countPictures = prefHelper.numPicturesTaken
+            val maxEquip = prefHelper.numEquipPossible
+            val checkedEquipment = db.tableEquipment.queryChecked().size
+            sbuf.append(getString(StringMessage.status_installed_equipments(checkedEquipment, maxEquip)))
+            sbuf.append("\n")
+            sbuf.append(getString(StringMessage.status_installed_pictures(countPictures)))
+            return sbuf.toString()
+        }
+
+    val hasProjectName: Boolean
+        get() = prefHelper.projectName != null
+
+    private val isAutoNarrowOkay: Boolean
+        get() = wasNext && autoNarrowOkay
+
+    var fab_address: Address? = null
+    var fab_addressConfirmOkay = false
 
     private fun showConfirmDialog() {
         dispatchActionEvent(Action.CONFIRM_DIALOG)
     }
 
-    private fun dispatchPictureRequest() {
-        dispatchActionEvent(Action.PICTURE_REQUEST)
+    fun onCreate() {
+        prefHelper.setFromCurrentProjectId()
+    }
+
+    fun dispatchPictureRequest() {
+        val pictureFile = prefHelper.genFullPictureFile()
+        db.tablePictureCollection.add(pictureFile, prefHelper.currentPictureCollectionId)
+        takingPictureFile = pictureFile
+        dispatchActionEvent(Action.PICTURE_REQUEST(pictureFile))
+    }
+
+    fun dispatchPictureRequestFailure() {
+        takingPictureFile = null
+        errorValue = ErrorMessage.CANNOT_TAKE_PICTURE
+    }
+
+    fun autoRotatePictureResult() {
+        if (takingPictureFile != null && takingPictureFile!!.exists()) {
+            val degrees = prefHelper.autoRotatePicture
+            if (degrees != 0) {
+                BitmapHelper.rotate(takingPictureFile!!, degrees)
+            }
+        }
+    }
+
+    fun onRestoreInstanceState(path: String?) {
+        if (path != null) {
+            takingPictureFile = File(path)
+        }
+    }
+
+    fun onSaveInstanceState(): String? {
+        return takingPictureFile?.absolutePath
     }
 
     fun checkProjectErrors(): Boolean = repo.checkProjectErrors()
 
-    fun checkEntryErrors(): DataEntry? = repo.checkEntryErrors()
+    private fun checkEntryErrors(): DataEntry? = repo.checkEntryErrors()
+
+    private fun checkErrors() {
+        if (!prefHelper.doErrorCheck) {
+            return
+        }
+        val entry = checkEntryErrors()
+        if (entry != null) {
+            dispatchActionEvent(Action.SHOW_TRUCK_ERROR(entry, object : CheckError.CheckErrorResult {
+                override fun doEdit() {
+                    dispatchActionEvent(Action.EDIT_ENTRY)
+                }
+
+                override fun doDelete(entry: DataEntry) {
+                    db.tableEntry.remove(entry)
+                }
+
+                override fun setFromEntry(entry: DataEntry) {
+                    prefHelper.setFromEntry(entry)
+                }
+            }))
+        } else {
+            prefHelper.doErrorCheck = false
+        }
+    }
 
     fun add(entry: DataEntry) = repo.add(entry)
 
@@ -102,7 +209,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     }
 
     private fun process(action: ActionBundle?) {
-        when(action) {
+        when (action) {
             is StageArg -> curFlowValue = Flow.from(action.stage)
             is ActionArg -> dispatchActionEvent(action.action)
         }
@@ -158,16 +265,6 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         curFlowValue = CurrentProjectFlow()
     }
 
-//    fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-//        if (savedInstanceState != null) {
-//            curFlowValue = Flow.from(savedInstanceState.getInt(KEY_STAGE))
-//        }
-//    }
-//
-//    fun onSaveInstanceState(outState: Bundle) {
-//        outState.putInt(KEY_STAGE, curFlowValue.stage.ordinal)
-//    }
-
     fun onNewProject() {
         autoNarrowOkay = true
         prefHelper.clearCurProject()
@@ -193,7 +290,11 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     }
 
     fun onVehiclesPressed() {
-        dispatchActionEvent(Action.VEHICLES)
+        if (repo.hasInsectingList) {
+            dispatchActionEvent(Action.VEHICLES)
+        } else {
+            dispatchActionEvent(Action.VEHICLES_PENDING)
+        }
     }
 
     fun onErrorDialogOkay() {
@@ -380,7 +481,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun computeNoteItems(): List<DataNote> {
+    private fun computeNoteItems(): List<DataNote> {
         val currentEditEntry: DataEntry? = prefHelper.currentEditEntry
         val currentProjectGroup: DataProjectAddressCombo? = prefHelper.currentProjectGroup
         var items = mutableListOf<DataNote>()
@@ -440,4 +541,244 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         return false
     }
 
+    fun processCompanies(action: (List<String>) -> Unit) {
+        val companies = db.tableAddress.query()
+        autoNarrowCompanies(companies.toMutableList())
+        val companyNames = getNames(companies)
+        if (companyNames.size == 1 && autoNarrowOkay) {
+            prefHelper.company = companyNames[0]
+            skip()
+        } else {
+            action(companyNames)
+        }
+    }
+
+    fun processEditCompany(action: (company: String) -> Unit) {
+        if (isLocalCompany) {
+            companyEditing = prefHelper.company
+            action(companyEditing ?: "")
+        } else {
+            action("")
+        }
+    }
+
+    fun processStates(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
+        var isEditing = editing
+        val company = prefHelper.company
+        val zipcode = prefHelper.zipCode
+        var states: MutableList<String> = db.tableAddress.queryStates(company!!, zipcode).toMutableList()
+        if (states.size == 0) {
+            val state = zipcode?.let { db.tableZipCode.queryState(it) }
+            if (state != null) {
+                states = ArrayList()
+                states.add(state)
+            } else {
+                isEditing = true
+            }
+        }
+        if (isEditing) {
+            states = DataStates.getUnusedStates(states).toMutableList()
+            prefHelper.state = null
+            action(states, null, true)
+        } else {
+            autoNarrowStates(states)
+            if (states.size == 1 && autoNarrowOkay) {
+                prefHelper.state = states[0]
+                skip()
+            } else {
+                action(states, prefHelper.address, false)
+            }
+        }
+    }
+
+    fun processCities(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
+        var isEditing = editing
+        val company = prefHelper.company
+        val zipcode = prefHelper.zipCode
+        val state = prefHelper.state
+        var cities: MutableList<String> = db.tableAddress.queryCities(company!!, zipcode, state!!).toMutableList()
+        if (cities.isEmpty()) {
+            val city = zipcode?.let { db.tableZipCode.queryCity(zipcode) }
+            if (city != null) {
+                cities = ArrayList()
+                cities.add(city)
+            } else {
+                isEditing = true
+            }
+        }
+        if (isEditing) {
+            action(emptyList(), null, true)
+        } else {
+            autoNarrowCities(cities)
+            if (cities.size == 1 && autoNarrowOkay) {
+                prefHelper.city = cities[0]
+                skip()
+            } else {
+                action(cities, prefHelper.address, false)
+            }
+        }
+    }
+
+    fun processStreets(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
+        var isEditing = editing
+        val streets = db.tableAddress.queryStreets(
+                prefHelper.company!!,
+                prefHelper.city!!,
+                prefHelper.state!!,
+                prefHelper.zipCode)
+        if (streets.isEmpty()) {
+            isEditing = true
+        }
+        if (isEditing) {
+            action(emptyList(), null, true)
+        } else {
+            autoNarrowStreets(streets)
+            if (streets.size == 1 && autoNarrowOkay) {
+                prefHelper.street = streets[0]
+                fab_addressConfirmOkay = true
+                skip()
+            } else {
+                action(streets, prefHelper.address, false)
+            }
+        }
+    }
+
+    private fun autoNarrowCompanies(companies: MutableList<DataAddress>) {
+        if (!isAutoNarrowOkay) {
+            return
+        }
+        val companyNames = getNames(companies)
+        if (companyNames.size == 1) {
+            return
+        }
+        val address = fab_address
+        if (address == null) {
+            return
+        }
+        val reduced = ArrayList<DataAddress>()
+        for (company in companies) {
+            if (LocationHelper.instance.matchCompany(address, company)) {
+                reduced.add(company)
+            }
+        }
+        if (reduced.size == 0) {
+            return
+        }
+        companies.clear()
+        companies.addAll(reduced)
+    }
+
+    private fun getNames(companies: List<DataAddress>): List<String> {
+        val list = ArrayList<String>()
+        for (address in companies) {
+            if (!list.contains(address.company)) {
+                list.add(address.company)
+            }
+        }
+        Collections.sort(list)
+        return list
+    }
+
+    private fun autoNarrowStates(states: MutableList<String>) {
+        if (!isAutoNarrowOkay) {
+            return
+        }
+        if (states.size == 1) {
+            return
+        }
+        if (fab_address == null) {
+            return
+        }
+        val state = LocationHelper.instance.matchState(fab_address!!, states)
+        if (state != null) {
+            states.clear()
+            states.add(state)
+        }
+    }
+
+    private fun autoNarrowCities(cities: MutableList<String>) {
+        if (!isAutoNarrowOkay) {
+            return
+        }
+        if (cities.size == 1) {
+            return
+        }
+        if (fab_address == null) {
+            return
+        }
+        val city = LocationHelper.instance.matchCity(fab_address!!, cities)
+        if (city != null) {
+            cities.clear()
+            cities.add(city)
+        }
+    }
+
+    private fun autoNarrowStreets(streets: List<String>) {
+        if (!isAutoNarrowOkay) {
+            return
+        }
+        if (streets.size == 1) {
+            return
+        }
+        if (fab_address == null) {
+            return
+        }
+        LocationHelper.instance.reduceStreets(fab_address!!, streets.toMutableList())
+    }
+
+    fun processProject(action: (projects: List<String>) -> Unit) {
+        action(db.tableProjects.query(true))
+    }
+
+    fun processCurrentProject(showAdd: () -> Unit) {
+        prefHelper.saveProjectAndAddressCombo(editProject)
+        editProject = false
+        checkErrors()
+        if (db.tableProjectAddressCombo.count() > 0) {
+            showAdd()
+        }
+    }
+
+    fun processTrucks(action: (trucks: List<String>, truckValue: String, hint: String?) -> Unit) {
+        var hint: String?
+        if (prefHelper.currentProjectGroup != null) {
+            hint = prefHelper.currentProjectGroup?.hintLine
+        } else {
+            hint = null
+        }
+        action(
+                db.tableTruck.queryStrings(prefHelper.currentProjectGroup),
+                prefHelper.truckValue, hint
+        )
+    }
+
+    fun processStatus() {
+        curEntry = null
+    }
+
+    fun processConfirm(action: (entry: DataEntry) -> Unit) {
+        curEntry = prefHelper.saveEntry()
+        curEntry?.let { action(it) }
+    }
+
+    fun processPictures(action: (pictures: MutableList<DataPicture>, pictureCount: Int, showToast: Boolean) -> Unit) {
+        val pictureCount = prefHelper.numPicturesTaken
+        var showToast = false
+        if (wasNext) {
+            showToast = true
+            wasNext = false
+        }
+        val pictures = db.tablePictureCollection.removeNonExistant(
+                db.tablePictureCollection.queryPictures(prefHelper.currentPictureCollectionId
+                )).toMutableList()
+        action(pictures, pictureCount, showToast)
+    }
+
+    fun incAutoRotatePicture(commonRotation: Int) {
+        prefHelper.incAutoRotatePicture(commonRotation)
+    }
+
+    fun clearAutoRotatePicture() {
+        prefHelper.clearAutoRotatePicture()
+    }
 }

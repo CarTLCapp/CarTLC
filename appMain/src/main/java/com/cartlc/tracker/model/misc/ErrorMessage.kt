@@ -6,5 +6,6 @@ enum class ErrorMessage {
     NEED_COMPANY,
     NEED_EQUIPMENT,
     NEED_NEW_COMPANY,
-    NEED_STATUS
+    NEED_STATUS,
+    CANNOT_TAKE_PICTURE
 }

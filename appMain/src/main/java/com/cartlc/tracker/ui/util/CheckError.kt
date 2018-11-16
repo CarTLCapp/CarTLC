@@ -36,6 +36,7 @@ class CheckError {
     interface CheckErrorResult {
         fun doEdit()
         fun doDelete(entry: DataEntry)
+        fun setFromEntry(entry: DataEntry)
     }
 
     init {
@@ -55,18 +56,18 @@ class CheckError {
         mDialog = null
     }
 
-    fun showTruckError(act: Activity, pref: PrefHelper, entry: DataEntry, callback: CheckErrorResult) {
-        mErrorEntry.showTruckError(act, pref, entry, callback)
+    fun showTruckError(act: Activity, entry: DataEntry, callback: CheckErrorResult) {
+        mErrorEntry.showTruckError(act, entry, callback)
     }
 
     internal inner class CheckErrorEntry {
 
-        fun showTruckError(act: Activity,  pref: PrefHelper, entry: DataEntry, callback: CheckErrorResult) {
+        fun showTruckError(act: Activity, entry: DataEntry, callback: CheckErrorResult) {
             val builder = AlertDialog.Builder(act)
             builder.setTitle(R.string.title_error)
             builder.setMessage(getMissingTruckError(act, entry))
             builder.setPositiveButton(R.string.btn_edit) { dialog, _ ->
-                pref.setFromEntry(entry)
+                callback.setFromEntry(entry)
                 cleanup(dialog)
                 callback.doEdit()
             }

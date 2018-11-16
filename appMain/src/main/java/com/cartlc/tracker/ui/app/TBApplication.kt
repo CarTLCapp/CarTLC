@@ -181,6 +181,11 @@ class TBApplication : Application() {
         prefHelper.detectSpecialUpdateCheck()
     }
 
+    fun reloadFromServer() {
+        prefHelper.reloadFromServer()
+        ping()
+    }
+
     fun ping() {
         if (ServerHelper.instance.hasConnection(this)) {
             startService(Intent(this, DCService::class.java))
@@ -203,17 +208,6 @@ class TBApplication : Application() {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         MultiDex.install(this)
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun setUncaughtExceptionHandler(act: Activity) {
-        //        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-        //            @Override
-        //            public void uncaughtException(Thread t, Throwable e) {
-        //                crashTree.log(Log.ERROR, "CarTLCarTLC", e.getMessage(), null);
-        //                act.finish();
-        //            }
-        //        });
     }
 
     fun checkPermissions(act: Activity, listener: PermissionListener) {

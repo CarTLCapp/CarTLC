@@ -110,8 +110,11 @@
     <string name="confirm_question_7">Did you remember to pick up trash around the truck?!!</string>
 
     <!-- Fleet Vehicles -->
+    <string name="vehicle_pending_dialog_title">Vehicle Inspecting List Pending</string>
+    <string name="vehicle_pending_dialog_message">Still waiting to sync up with the server. Please come back later.</string>
     <string name="vehicle_required">Required</string>
-    <string name="title_vehicles">Fleet Vehicles</string>
+    <string name="vehicle_comments">Comments</string>
+    <string name="vehicle_title_vehicles">Fleet Vehicles</string>
     <string name="vehicle_title">Preventative Maintenance</string>
     <string name="vehicle_inspecting">What vehicle are you inspecting?</string>
     <string name="vehicle_type">Type of Inspection</string>
@@ -120,7 +123,7 @@
     <string name="vehicle_lights_description">Head/Tail/Brake Lights\nCheck the boxes when the item has been inspected\nAny issues with the exterior lights please write below.</string>
     <string name="vehicle_lights_head">Head Lights</string>
     <string name="vehicle_lights_tail">Tail Lights</string>
-    <string name="vehicle_lights_exterior">Any ssues with exterior lights?</string>
+    <string name="vehicle_lights_exterior">Any issues with exterior lights?</string>
     <string name="vehicle_fluids">Fluids</string>
     <string name="vehicle_fluids_checks">Fluid Checks</string>
     <string name="vehicle_fluids_description">Check the boxes when the item has been inspected.\nAny issues with any fluids please write below.</string>
@@ -132,6 +135,8 @@
     <string name="vehicle_other_title">Any other issues to report?</string>
     <string name="vehicle_other_description">Are there any other issues to report with the vehicle? (Shelf falling apart, strange noise or vibration at a certain speed, camera not working, cracked windshield?)</string>
     <string name="vehicle_submit">Submit</string>
+    <string name="vehicle_none">No</string>
+    <string name="vehicle_yes">Yes</string>
 
     <!-- Arrays -->
     <string-array name="type_of_inspection">
@@ -140,13 +145,13 @@
         <item>Post-Trip</item>
     </string-array>
     <string-array name="head_lights">
-        <item>Low Beams</item>
-        <item>High Beams</item>
+        <item>FR Right</item>
+        <item>FR Left</item>
         <item>Turn Signals</item>
     </string-array>
     <string-array name="tail_lights">
-        <item>Rear Lights</item>
-        <item>Brake Lights</item>
+        <item>RR Right</item>
+        <item>RR Left</item>
         <item>Turn Signals</item>
     </string-array>
     <string-array name="fluid_checks">
