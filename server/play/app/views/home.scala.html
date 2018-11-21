@@ -68,9 +68,13 @@
 
     <h6>Server version @version</h6>
 
-    <a id="picture_cleanup" href="@routes.HomeController.index()" class="light">Picture Cleanup</a>
+    @if(client.is_admin) {
 
-    <p id="cleanup_result"></p>
+		<a id="picture_cleanup" href="@routes.HomeController.index()" class="light">Picture Cleanup</a>
+
+		<p id="cleanup_result"></p>
+
+	}
 
     <script type="text/javascript">
 
