@@ -262,5 +262,18 @@ public class Company extends Model {
     public static List<Company> findByName(String name) {
         return find.where().eq("name", name).findList();
     }
+
+    public static Company findByAddress(String address) {
+        for (Company company : find.where().findList()) {
+            if (company.getLine().equals(address)) {
+                return company;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isValidAddress(String address) {
+        return findByAddress(address) != null;
+    }
 }
 

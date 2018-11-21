@@ -90,7 +90,7 @@ public class Technician extends com.avaje.ebean.Model {
     }
 
     public static void AddReloadCode(long tech_id, char ch) {
-        Technician tech = Technician.find.byId(tech_id);
+        Technician tech = find.byId(tech_id);
         if (tech == null) {
             return;
         }
@@ -148,6 +148,34 @@ public class Technician extends com.avaje.ebean.Model {
             result.add(tech.id);
         }
         return result;
+    }
+
+    public static List<Long> findMatches(String first_name, String last_name) {
+        List<Technician> technicians = find.where()
+                .ilike("first_name", "%" + first_name + "%")
+                .ilike("last_name", "%" + last_name + "%")
+                .findList();
+        List<Long> result = new ArrayList<Long>();
+        for (Technician tech : technicians) {
+            result.add(tech.id);
+        }
+        return result;
+    }
+
+    public static Technician findMatch(String full_name) {
+        String[] names = full_name.split(" ");
+        if (names.length != 2) {
+            return null;
+        }
+        List<Long> ids = findMatches(names[0], names[1]);
+        if (ids.size() > 0) {
+            return find.byId(ids.get(0));
+        }
+        return null;
+    }
+
+    public static boolean isValid(String full_name) {
+        return findMatch(full_name) != null;
     }
 
 }

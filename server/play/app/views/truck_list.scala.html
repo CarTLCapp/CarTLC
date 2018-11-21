@@ -1,8 +1,10 @@
-@(currentPage: List[Truck], client : Client, filter : String)
+@(currentPage: com.avaje.ebean.PagedList[Truck], client : Client, filter : String)
+
+@link(newPage:Int) = @{routes.TruckController.list(newPage)}
 
 @main("FleetTLC - List Trucks", client) {
 
-    <h1 id="homeTitle">@Messages("trucks.list.title", currentPage.size())
+    <h1 id="homeTitle">@Messages("trucks.list.title", currentPage.getTotalRowCount())
         <span style="float:right;font-size:16px">
             <a href="@routes.TruckController.cleanup()" class="btn">Cleanup</a>
         </span>
@@ -11,7 +13,7 @@
         </span>
     </h1>
 
-    @if(currentPage.size() == 0) {
+    @if(currentPage.getTotalRowCount() == 0) {
         
         <div class="well">
             <em>Nothing to display</em>
@@ -34,7 +36,7 @@
             </thead>
             <tbody>
 
-                @for(truck <- currentPage) {
+                @for(truck <- currentPage.getList()) {
                     <tr>
                         <td>@truck.getTruckNumber()</td>
                         <td>@truck.getLicensePlate()</td>
@@ -54,7 +56,32 @@
                 }
             </tbody>
         </table>
-        
+
+        <div id="pagination" class="pagination">
+            <ul>
+                @if(currentPage.hasPrev()) {
+                <li class="prev">
+                    <a href="@link(currentPage.getPageIndex() - 1)">&larr; Previous</a>
+                </li>
+                } else {
+                <li class="prev disabled">
+                    <a>&larr; Previous</a>
+                </li>
+                }
+                <li class="current">
+                    <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
+                </li>
+                @if(currentPage.hasNext()) {
+                <li class="next">
+                    <a href="@link(currentPage.getPageIndex() + 1)">Next &rarr;</a>
+                </li>
+                } else {
+                <li class="next disabled">
+                    <a>Next &rarr;</a>
+                </li>
+                }
+            </ul>
+        </div>
     }
 
 }

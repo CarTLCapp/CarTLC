@@ -170,8 +170,6 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun add(entry: DataEntry) = repo.add(entry)
-
     fun btnPrev() {
         if (confirmPrev()) {
             wasNext = false
@@ -254,7 +252,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     }
 
     fun onConfirmOkay() {
-        db.tableEntry.add(curEntry!!)
+        repo.add(curEntry!!)
         prefHelper.clearLastEntry()
         curFlowValue = CurrentProjectFlow()
         curEntry = null

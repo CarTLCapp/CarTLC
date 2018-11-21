@@ -11,6 +11,7 @@ import com.avaje.ebean.Model;
 
 import play.data.format.*;
 import play.data.validation.*;
+import play.data.Form;
 
 import com.avaje.ebean.*;
 
@@ -255,5 +256,19 @@ public class Note extends Model implements Comparable<Note> {
         sbuf.append(getCreatedBy());
         return sbuf.toString();
     }
+
+    public static List<Note> getChecked(Form entryForm) {
+        List<Note> notes = new ArrayList<Note>();
+        for (Note note : Note.list()) {
+            try {
+                if (entryForm.field(note.name).getValue().get().equals("true")) {
+                    notes.add(note);
+                }
+            } catch (Exception ex) {
+            }
+        }
+        return notes;
+    }
+
 }
 

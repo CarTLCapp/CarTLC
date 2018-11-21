@@ -56,6 +56,22 @@ public class EntryNoteCollection extends Model {
                 .findList();
     }
 
+    public static List<Note> findNotes(long collection_id) {
+        List<EntryNoteCollection> items = find.where()
+                .eq("collection_id", collection_id)
+                .findList();
+        List<Note> list = new ArrayList<>();
+        for (EntryNoteCollection item : items) {
+            Note note = Note.find.byId(item.note_id);
+            if (note == null) {
+                Logger.error("Could not locate note ID " + item.note_id);
+            } else {
+                list.add(note);
+            }
+        }
+        return list;
+    }
+
     public static int countNotes(long note_id) {
         return find.where().eq("note_id", note_id).findList().size();
     }
@@ -85,6 +101,17 @@ public class EntryNoteCollection extends Model {
                 item.delete();
             }
             Logger.info(sbuf.toString());
+        }
+    }
+
+
+    public static void replace(long collection_id, List<Note> notes) {
+        deleteByCollectionId(collection_id);
+        for (Note note : notes) {
+            EntryNoteCollection item = new EntryNoteCollection();
+            item.collection_id = collection_id;
+            item.note_id = note.id;
+            item.save();
         }
     }
 }

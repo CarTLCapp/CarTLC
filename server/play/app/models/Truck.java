@@ -12,6 +12,7 @@ import play.db.ebean.*;
 import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
+import com.avaje.ebean.PagedList;
 
 import play.Logger;
 
@@ -22,6 +23,7 @@ import play.Logger;
 public class Truck extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
+    private static final int PAGE_SIZE = 500;
 
     @Id
     public Long id;
@@ -62,14 +64,19 @@ public class Truck extends com.avaje.ebean.Model {
                 .findList();
     }
 
-    public static List<Truck> listFiltered() {
+    public static PagedList<Truck> listFiltered(int page) {
         return find.where()
                 .disjunction()
                 .ne("project_id", 0)
                 .ne("company_name_id", 0)
                 .endJunction()
                 .orderBy("truck_number asc")
-                .findList();
+                .findPagedList(page, PAGE_SIZE);
+    }
+
+    public static PagedList<Truck> listPaged(int page) {
+        return find.where()
+                .findPagedList(page, PAGE_SIZE);
     }
 
     public static List<Truck> findByUploadId(int upload_id) {
@@ -324,6 +331,20 @@ public class Truck extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
+    public String getID() {
+        StringBuilder sbuf = new StringBuilder();
+        if (truck_number != null && !truck_number.isEmpty()) {
+            sbuf.append(truck_number);
+        }
+        if (license_plate != null && !license_plate.isEmpty()) {
+            if (sbuf.length() > 0) {
+                sbuf.append(" : ");
+            }
+            sbuf.append(license_plate);
+        }
+        return sbuf.toString();
+    }
+
     public int countEntries() {
         return Entry.countEntriesForTruck(id);
     }
@@ -371,6 +392,19 @@ public class Truck extends com.avaje.ebean.Model {
             result.add(truck.id);
         }
         return result;
+    }
+
+    public static Truck getTruckByID(String id) {
+        for (Truck truck : list()) {
+            if (truck.getID().equals(id)) {
+                return truck;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isValid(String id) {
+        return getTruckByID(id) != null;
     }
 
 }

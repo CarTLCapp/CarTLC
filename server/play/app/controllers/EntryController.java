@@ -8,7 +8,9 @@ import play.data.*;
 
 import models.*;
 import modules.WorkerExecutionContext;
+import views.formdata.EntryFormData;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
@@ -16,6 +18,7 @@ import java.util.Iterator;
 import java.text.SimpleDateFormat;
 
 import javax.inject.Inject;
+import javax.persistence.PersistenceException;
 
 import java.util.concurrent.*;
 import java.io.IOException;
@@ -38,7 +41,6 @@ import play.libs.concurrent.HttpExecution;
  */
 public class EntryController extends Controller {
 
-    private static final int PAGE_SIZE = 100;
     public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
     private static final String EXPORT_FILENAME = "/tmp/export.csv";
 
@@ -269,6 +271,81 @@ public class EntryController extends Controller {
             entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
                 Logger.info("Entry has been deleted: " + entry_id);
             }));
+        }
+        return list();
+    }
+
+    public Result edit(Long entry_id) {
+        Entry entry = Entry.find.byId(entry_id);
+        if (entry == null) {
+            return badRequest2("Could not find entry ID " + entry_id);
+        }
+        Form<EntryFormData> entryForm = mFormFactory.form(EntryFormData.class).fill(new EntryFormData(entry));
+        return ok(views.html.entry_editForm.render(entry.id, entryForm, Secured.getClient(ctx())));
+    }
+
+    public Result update(Long id) throws PersistenceException {
+        Client client = Secured.getClient(ctx());
+        Form<EntryFormData> entryForm = mFormFactory.form(EntryFormData.class).bindFromRequest();
+        if (entryForm.hasErrors()) {
+            return badRequest(views.html.entry_editForm.render(id, entryForm, client));
+        }
+        Entry entry = Entry.find.byId(id);
+        if (entry == null) {
+            return badRequest("Could not find entry with ID " + id);
+        }
+        try {
+            EntryFormData data = entryForm.get();
+            Technician tech = Technician.findMatch(data.name);
+            if (tech != null) {
+                entry.tech_id = tech.id.intValue();
+            }
+            SimpleDateFormat format = new SimpleDateFormat(Entry.DATE_FORMAT);
+            entry.entry_time = format.parse(data.date);
+            Project project = Project.findByName(data.project);
+            if (project != null) {
+                entry.project_id = project.id;
+            }
+            Company company = Company.findByAddress(data.address);
+            if (company != null) {
+                entry.company_id = company.id;
+            }
+            Truck truck = Truck.getTruckByID(data.truck);
+            if (truck != null) {
+                entry.truck_id = truck.id;
+            } else {
+                Truck previous = entry.getTruck();
+                if (previous != null) {
+                    String [] items = data.truck.split(":");
+                    if (items.length > 0) {
+                        truck = new Truck();
+                        truck.company_name_id = previous.company_name_id;
+                        truck.project_id = previous.project_id;
+                        truck.upload_id = previous.upload_id;
+                        truck.created_by = client.id.intValue();
+                        truck.created_by_client = true;
+                        truck.truck_number = items[0];
+                        if (items.length > 1) {
+                            truck.license_plate = items[1];
+                        }
+                        truck.save();
+                        Logger.info("New truck: " + truck.toString());
+                        entry.truck_id = truck.id;
+                    }
+                }
+            }
+            Entry.Status status = Entry.findStatus(data.status);
+            if (status != null) {
+                entry.status = status;
+            }
+            EntryEquipmentCollection.replace(entry.equipment_collection_id, Equipment.getChecked(entryForm));
+            EntryNoteCollection.replace(entry.note_collection_id, Note.getChecked(entryForm));
+
+            entry.update();
+            Logger.info("Entry updated: " + entry.toString());
+        } catch (ParseException ex) {
+            Logger.error(ex.getMessage());
+            return badRequest(ex.getMessage());
         }
         return list();
     }

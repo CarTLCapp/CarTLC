@@ -210,7 +210,7 @@ class SqlTablePictureCollection(
 
     override fun clearPendingPictures() {
         try {
-            val where = "$KEY_COLLECTION_ID =0"
+            val where = "$KEY_COLLECTION_ID=0"
             dbSql.delete(TABLE_NAME, where, null)
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTablePictureCollection::class.java, "clearPendingPictures()", "db")

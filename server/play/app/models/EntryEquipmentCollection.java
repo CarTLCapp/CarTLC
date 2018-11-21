@@ -4,9 +4,11 @@
 package models;
 
 import java.util.*;
+
 import javax.persistence.*;
 
 import com.avaje.ebean.Model;
+
 import play.data.format.*;
 import play.data.validation.*;
 import play.Logger;
@@ -16,23 +18,25 @@ import com.avaje.ebean.*;
 /**
  * Entry equipment collection entity managed by Ebean
  */
-@Entity 
+@Entity
 public class EntryEquipmentCollection extends Model {
 
     private static final long serialVersionUID = 1L;
 
-	@Id
+    @Id
     public Long id;
-    
+
     @Constraints.Required
     public Long collection_id;
 
     @Constraints.Required
     public Long equipment_id;
 
-    public static Finder<Long,EntryEquipmentCollection> find = new Finder<Long,EntryEquipmentCollection>(EntryEquipmentCollection.class);
+    public static Finder<Long, EntryEquipmentCollection> find = new Finder<Long, EntryEquipmentCollection>(EntryEquipmentCollection.class);
 
-    public static List<EntryEquipmentCollection> list() { return find.all(); }
+    public static List<EntryEquipmentCollection> list() {
+        return find.all();
+    }
 
     public static List<Equipment> findEquipments(long collection_id) {
         List<EntryEquipmentCollection> items = find.where()
@@ -97,6 +101,16 @@ public class EntryEquipmentCollection extends Model {
                 item.delete();
             }
             Logger.info(sbuf.toString());
+        }
+    }
+
+    public static void replace(long collection_id, List<Equipment> equipments) {
+        deleteByCollectionId(collection_id);
+        for (Equipment equipment : equipments) {
+            EntryEquipmentCollection item = new EntryEquipmentCollection();
+            item.collection_id = collection_id;
+            item.equipment_id = equipment.id;
+            item.save();
         }
     }
 }

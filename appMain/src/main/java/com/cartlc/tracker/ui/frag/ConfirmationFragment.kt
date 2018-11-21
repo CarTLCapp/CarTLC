@@ -60,7 +60,7 @@ class ConfirmationFragment : BaseFragment() {
         val ctx = context!!
         val projectNameValue = binding.projectNameValue
         val projectAddressValue = binding.projectAddressValue
-        val trcukcNumberValue = binding.truckNumberValue
+        val truckNumberValue = binding.truckNumberValue
         val statusValue = binding.statusValue
         val picturesLabel = binding.confirmPicturesLabel
         projectNameValue.text = entry.projectName
@@ -74,10 +74,10 @@ class ConfirmationFragment : BaseFragment() {
         noteAdapter.setItems(entry.notesWithValuesOnly)
         val truck = entry.truck
         if (truck == null) {
-            trcukcNumberValue.visibility = View.GONE
+            truckNumberValue.visibility = View.GONE
         } else {
-            trcukcNumberValue.text = truck.toString()
-            trcukcNumberValue.visibility = View.VISIBLE
+            truckNumberValue.text = truck.toString()
+            truckNumberValue.visibility = View.VISIBLE
         }
         simpleAdapter.items = entry.equipmentNames!!
         pictureAdapter.setList(entry.pictures.toMutableList())

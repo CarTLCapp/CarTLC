@@ -345,11 +345,6 @@ class PrefHelper constructor(
         }
     }
 
-    fun recoverProject() {
-        currentProjectGroupId = savedProjectGroupId
-        setFromCurrentProjectId()
-    }
-
     fun clearCurProject() {
         clearLastEntry()
         state = null
@@ -519,9 +514,6 @@ class PrefHelper constructor(
         truck.licensePlateNumber = licensePlate
         truck.hasEntry = true
         entry.truckId = db.tableTruck.save(truck)
-
-        Log.d("CarTLC", "SAVED TRUCK: " + db.tableTruck.query(entry.truckId)!!.toLongString(db))
-
         entry.status = status
         entry.uploadedMaster = false
         entry.uploadedAws = false
