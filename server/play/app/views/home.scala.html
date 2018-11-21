@@ -13,29 +13,31 @@
 
     <p>Display the list of uploaded entries from the technicians.</p>
 
-    <h3><a href="@routes.ProjectController.list()">Projects</a></h3>
 
-    <p>Manage the list of projects.</p>
-
-    <h3><a href="@routes.CompanyController.list()">Companies</a></h3>
-
-    <p>Manage the list of companies and their addresses.</p>
-
-    <h3><a href="@routes.EquipmentController.list()">Equipments</a></h3>
-
-    <p>Manage the list of equipments and their association with projects.</p>
-
-    <h3><a href="@routes.NoteController.list()">Notes</a></h3>
-
-    <p>Manage the list of notes and their association with projects.</p>
-
-    <h3><a href="@routes.VehicleController.list()">Vehicles</a></h3>
-
-    <p>Manage the list of FleetTLC vehicles.</p>
-
-    <h2>Administration</h2>
 
     @if(client.is_admin) {
+
+        <h2>Administration</h2>
+
+        <h3><a href="@routes.ProjectController.list()">Projects</a></h3>
+
+        <p>Manage the list of projects.</p>
+
+        <h3><a href="@routes.CompanyController.list()">Companies</a></h3>
+
+        <p>Manage the list of companies and their addresses.</p>
+
+        <h3><a href="@routes.EquipmentController.list()">Equipments</a></h3>
+
+        <p>Manage the list of equipments and their association with projects.</p>
+
+        <h3><a href="@routes.NoteController.list()">Notes</a></h3>
+
+        <p>Manage the list of notes and their association with projects.</p>
+
+        <h3><a href="@routes.VehicleController.list()">Vehicles</a></h3>
+
+        <p>Manage the list of FleetTLC vehicles.</p>
 
         <h3><a href="@routes.TechnicianController.list()">Technicians</a></h3>
 
