@@ -47,6 +47,10 @@ class VehicleViewModel(
             return hasIssues == true
         }
 
+    fun dispatchActionEvent(action: Action) = repo.dispatchActionEvent(action)
+
+    fun handleActionEvent() = repo.handleActionEvent()
+
     fun doSimpleEntryReturn(value: String) {
         store(value)
     }

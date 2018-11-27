@@ -33,10 +33,7 @@ open class BaseActivity : AppCompatActivity() {
 
     protected fun showError(error: String) {
         dialogHelper.showError(error, object : DialogHelper.DialogListener {
-            override fun onOkay() {
-                onErrorDialogOkay()
-            }
-
+            override fun onOkay() { onErrorDialogOkay() }
             override fun onCancel() {}
         })
     }

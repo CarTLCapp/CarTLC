@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import androidx.fragment.app.Fragment
 import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragButtonsBinding
 import com.cartlc.tracker.model.flow.Action
@@ -73,16 +74,6 @@ class ButtonsFragment: BaseFragment() {
         binding.change.setOnClickListener { _ -> btnChangeCompany() }
         binding.btnCenter.setOnClickListener { _ -> btnCenter() }
         return binding.root
-    }
-
-    fun reset(flow: Flow) {
-        vm.showChangeButtonValue = false
-        vm.showCenterButtonValue = false
-        vm.centerTextValue = getString(R.string.btn_add)
-        vm.showNextButtonValue = flow.next != null
-        vm.nextTextValue = getString(R.string.btn_next)
-        vm.showPrevButtonValue = flow.prev != null
-        vm.prevTextValue = getString(R.string.btn_prev)
     }
 
     private fun btnNext(v: View) {

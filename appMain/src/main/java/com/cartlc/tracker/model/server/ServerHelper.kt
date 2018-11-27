@@ -11,7 +11,6 @@ import com.google.android.gms.iid.InstanceID
 /**
  * Created by dug on 5/22/17.
  */
-
 class ServerHelper {
 
     var deviceId: String? = null

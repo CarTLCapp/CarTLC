@@ -67,38 +67,37 @@ class VehicleActivity : BaseActivity() {
         radioAdapter = RadioListAdapter(this)
         radioAdapter.listener = { _, text -> vm.onRadioSelect(text) }
 
-        checkboxAdapter = CheckBoxListAdapter(this) { pos, text, selected -> vm.onListSelect(text, selected) }
-        checkboxAdapter2 = CheckBoxListAdapter(this) { pos, text, selected -> vm.onList2Select(text, selected) }
+        checkboxAdapter = CheckBoxListAdapter(this) { _, text, selected -> vm.onListSelect(text, selected) }
+        checkboxAdapter2 = CheckBoxListAdapter(this) { _, text, selected -> vm.onList2Select(text, selected) }
 
         binding.stage12List.adapter = radioAdapter
         binding.stage345List.adapter = checkboxAdapter
         binding.stage345List2.adapter = checkboxAdapter2
 
-        buttonsFragment.root = binding.root
-        buttonsFragment.vm.handleActionEvent().observe(this, Observer { event ->
+        vm.handleActionEvent().observe(this, Observer { event ->
             event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
         })
+        buttonsFragment.root = binding.root
+        buttonsFragment.vm.dispatchButtonEvent = { action -> vm.dispatchActionEvent(action) }
         buttonsFragment.vm.showCenterButtonValue = false
 
-        stage2Entry.vm.handleGenericEvent().observe(this, Observer { event ->
-            vm.doSimpleEntryReturn(event.peekContent())
-        })
+//        stage2Entry.vm.handleGenericEvent().observe(this, Observer { event ->
+//            vm.doSimpleEntryReturn(event.peekContent())
+//        })
         stage2Entry.vm.afterTextChangedListener = { value -> vm.onEntryChanged(value) }
         stage2Entry.inputType = InputType.TYPE_CLASS_NUMBER
         stage2Entry.vm.titleValue = getString(R.string.vehicle_mileage)
         stage2Entry.vm.simpleHintValue = getString(R.string.vehicle_required)
 
-        stage345Entry.vm.handleGenericEvent().observe(this, Observer { event ->
-            vm.doSimpleEntryReturn(event.peekContent())
-        })
+//        stage345Entry.vm.handleGenericEvent().observe(this, Observer { event ->
+//            vm.doSimpleEntryReturn(event.peekContent())
+//        })
         stage345Entry.inputType = InputType.TYPE_CLASS_TEXT
         stage345Entry.vm.simpleEmsValue = resources.getInteger(R.integer.entry_simple_ems_lights)
         stage345Entry.vm.simpleHintValue = getString(R.string.vehicle_comments)
         stage345Entry.vm.afterTextChangedListener = { value -> vm.onEntryChanged(value) }
         stage345Entry.vm.showCheckedValue = true
-        stage345Entry.vm.handleActionEvent().observe(this, Observer { event ->
-            event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
-        })
+        stage345Entry.vm.dispatchActionEvent = { action -> vm.dispatchActionEvent(action) }
         titleFragment.vm.titleValue = null
 
         vm.repo.stage.observe(this, Observer { stage -> onStageChanged(stage) })

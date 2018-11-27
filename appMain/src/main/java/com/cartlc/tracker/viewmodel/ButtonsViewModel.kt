@@ -6,9 +6,9 @@ import androidx.databinding.ObservableField
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Action
-import com.cartlc.tracker.model.flow.Stage
+import com.cartlc.tracker.model.flow.Flow
+import com.cartlc.tracker.model.misc.StringMessage
 import com.cartlc.tracker.ui.app.TBApplication
-import kotlinx.android.synthetic.main.frag_buttons.view.*
 import javax.inject.Inject
 
 class ButtonsViewModel(private val act: Activity) : BaseViewModel() {
@@ -57,7 +57,16 @@ class ButtonsViewModel(private val act: Activity) : BaseViewModel() {
         get() = showChangeButton.get()
         set(value) = showChangeButton.set(value)
 
-    fun dispatchButtonEvent(action: Action) {
-        dispatchActionEvent(action)
+    var getString: (msg: StringMessage) -> String = { "" }
+    var dispatchButtonEvent: (action: Action) -> Unit = {}
+
+    fun reset(flow: Flow) {
+        showChangeButtonValue = false
+        showCenterButtonValue = false
+        centerTextValue = getString(StringMessage.btn_add)
+        showNextButtonValue = flow.next != null
+        nextTextValue = getString(StringMessage.btn_next)
+        showPrevButtonValue = flow.prev != null
+        prevTextValue = getString(StringMessage.btn_prev)
     }
 }

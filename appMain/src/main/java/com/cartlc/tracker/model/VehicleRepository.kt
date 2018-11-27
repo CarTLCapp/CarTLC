@@ -1,10 +1,13 @@
 package com.cartlc.tracker.model
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.flow.VehicleStage
 import com.cartlc.tracker.model.data.DataVehicle
+import com.cartlc.tracker.model.event.ActionEvent
+import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication
@@ -37,6 +40,18 @@ class VehicleRepository(
     val fluidChecks = context.resources.getStringArray(R.array.fluid_checks)
     val tireInspection = context.resources.getStringArray(R.array.tire_inspection)
 
+    /** ActionEvent **/
+
+    private val handleAction: MutableLiveData<ActionEvent> by lazy {
+        MutableLiveData<ActionEvent>()
+    }
+
+    fun handleActionEvent(): LiveData<ActionEvent> = handleAction
+
+    fun dispatchActionEvent(action: Action) {
+        handleAction.value = ActionEvent(action)
+    }
+    
     init {
         stageValue = VehicleStage.STAGE_1
     }

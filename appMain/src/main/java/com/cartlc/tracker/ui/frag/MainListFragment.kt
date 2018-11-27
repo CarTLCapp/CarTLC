@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.databinding.FragMainListBinding
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.data.DataNote
-import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.ui.list.*
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
@@ -21,10 +20,6 @@ import com.cartlc.tracker.ui.act.MainActivity
 import com.cartlc.tracker.viewmodel.ButtonsViewModel
 import com.cartlc.tracker.viewmodel.EntrySimpleViewModel
 import com.cartlc.tracker.viewmodel.MainListViewModel
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
-import timber.log.Timber
 
 class MainListFragment : BaseFragment() {
 
@@ -33,33 +28,22 @@ class MainListFragment : BaseFragment() {
     val vm: MainListViewModel
         get() = baseVM as MainListViewModel
 
-    var showing: Boolean
-        get() = vm.showing.get()
-        set(value) {
-            vm.showing.set(value)
-        }
-
-    var showEmpty: Boolean
-        get() = vm.showEmpty.get()
-        set(value) {
-            vm.showEmpty.set(value)
-        }
-
-    val mainList: RecyclerView
+    private val mainList: RecyclerView
         get() = binding.mainList
-    val empty: TextView
+
+    private val empty: TextView
         get() = binding.empty
 
-    val ctx: Context
+    private val ctx: Context
         get() = context!!
 
-    val mainActivity: MainActivity?
+    private val mainActivity: MainActivity?
         get() = activity as? MainActivity
 
-    val buttonsViewModel: ButtonsViewModel?
+    private val buttonsViewModel: ButtonsViewModel?
         get() = mainActivity?.buttonsFragment?.vm
 
-    val entrySimpleViewModel: EntrySimpleViewModel?
+    private val entrySimpleViewModel: EntrySimpleViewModel?
         get() = mainActivity?.entrySimpleFragment?.vm
 
     lateinit private var simpleAdapter: SimpleListAdapter
@@ -67,6 +51,12 @@ class MainListFragment : BaseFragment() {
     lateinit private var equipmentSelectAdapter: EquipmentSelectListAdapter
     lateinit private var noteEntryAdapter: NoteListEntryAdapter
     lateinit private var radioAdapter: RadioListAdapter
+
+    val isNotesComplete: Boolean
+        get() = noteEntryAdapter.isNotesComplete
+
+    val notes: List<DataNote>
+        get() = noteEntryAdapter.notes
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragMainListBinding.inflate(layoutInflater, container, false)
@@ -78,11 +68,8 @@ class MainListFragment : BaseFragment() {
         mainList.layoutManager = linearLayoutManager
         val divider = DividerItemDecoration(mainList.context, linearLayoutManager.orientation)
         mainList.addItemDecoration(divider)
-        simpleAdapter = SimpleListAdapter(mainList.context) { pos, text ->
-            vm.key.value = text
-        }
+        simpleAdapter = SimpleListAdapter(mainList.context) { _, text -> vm.key.value = text }
         vm.key.observe(this, Observer { value ->
-            val cur = vm.curFlowValue
             when (vm.curFlowValue.stage) {
                 Stage.PROJECT,
                 Stage.CITY,
@@ -100,6 +87,8 @@ class MainListFragment : BaseFragment() {
                 }
             }
         })
+        val act = activity as MainActivity
+        vm.entryHint.observe(this, Observer<EntryHint> { hint -> act.showEntryHint(hint) })
         projectAdapter = ProjectGroupListAdapter(mainList.context, vm)
         equipmentSelectAdapter = EquipmentSelectListAdapter(vm)
         radioAdapter = RadioListAdapter(mainList.context)
@@ -129,12 +118,12 @@ class MainListFragment : BaseFragment() {
                         sbuf.append(count)
                         sbuf.append("/")
                         sbuf.append(note.num_digits.toInt())
-                        vm.entryHint.value = EntryHint(sbuf.toString(), (count > note.num_digits))
+                        vm.entryHintValue = EntryHint(sbuf.toString(), (count > note.num_digits))
                     } else {
-                        vm.entryHint.value = EntryHint("", false)
+                        vm.entryHintValue = EntryHint("", false)
                     }
                 } else {
-                    vm.entryHint.value = EntryHint("", false)
+                    vm.entryHintValue = EntryHint("", false)
                 }
             }
         })
@@ -176,30 +165,18 @@ class MainListFragment : BaseFragment() {
         }
     }
 
-    fun setList(key: String, list: List<String>): Boolean {
-        showing = true
+    fun setList(list: List<String>) {
         mainList.adapter = simpleAdapter
         simpleAdapter.items = list
-        vm.curKey = key
-        val curValue = vm.tmpPrefHelper.getKeyValue(key)
+        val curValue = vm.keyValue
         if (curValue == null) {
             simpleAdapter.setNoneSelected()
-            return false
+        } else {
+            val position = simpleAdapter.setSelected(curValue)
+            if (position >= 0) {
+                mainList.scrollToPosition(position)
+            }
         }
-        val position = simpleAdapter.setSelected(curValue)
-        if (position >= 0) {
-            mainList.scrollToPosition(position)
-        }
-        return true
     }
 
-    // TODO: temporary only
-    fun isNotesComplete(): Boolean {
-        return noteEntryAdapter.isNotesComplete
-    }
-
-    // TODO: temporary only
-    fun notes(): List<DataNote> {
-        return noteEntryAdapter.notes
-    }
 }

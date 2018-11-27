@@ -14,12 +14,6 @@ class LoginFragment : BaseFragment() {
     val vm: LoginViewModel
         get() = baseVM as LoginViewModel
 
-    var showing: Boolean
-        get() = vm.showing.get()
-        set(value) {
-            vm.showing.set(value)
-        }
-
     fun detectLoginError(): Boolean = vm.detectLoginError()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

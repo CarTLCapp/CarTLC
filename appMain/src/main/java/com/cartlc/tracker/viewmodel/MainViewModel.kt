@@ -1,8 +1,10 @@
 package com.cartlc.tracker.viewmodel
 
 import android.location.Address
+import android.text.InputType
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.BuildConfig
+import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.data.*
 import com.cartlc.tracker.model.flow.*
@@ -36,6 +38,33 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             curFlow.value = value
         }
 
+    val error: MutableLiveData<ErrorMessage>
+        get() = repo.error
+
+    var errorValue: ErrorMessage
+        get() = repo.errorValue
+        set(value) {
+            repo.errorValue = value
+        }
+
+    val addButtonVisible: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
+
+    var addButtonVisibleValue: Boolean
+        get() = addButtonVisible.value ?: false
+        set(value) {
+            addButtonVisible.value = value
+        }
+
+    val framePictureVisible: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
+
+    var framePictureVisibleValue: Boolean
+        get() = framePictureVisible.value ?: false
+        set(value) {
+            framePictureVisible.value = value
+        }
+
     private val isLocalCompany: Boolean
         get() = db.tableAddress.isLocalCompanyOnly(prefHelper.company)
 
@@ -50,7 +79,8 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     var detectNoteError: () -> Boolean = { false }
     var entryTextValue: () -> String = { "" }
     var detectLoginError: () -> Boolean = { false }
-    var getString: (msg: StringMessage) -> Unit = {}
+    var getString: (msg: StringMessage) -> String = { "" }
+
     private var curEntry: DataEntry? = null
     private var editProject: Boolean = false
     private var autoNarrowOkay = true
@@ -103,6 +133,17 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     var fab_address: Address? = null
     var fab_addressConfirmOkay = false
 
+    lateinit var buttonsViewModel: ButtonsViewModel
+    lateinit var loginViewModel: LoginViewModel
+    lateinit var mainListViewModel: MainListViewModel
+    lateinit var confirmationViewModel: ConfirmationViewModel
+    lateinit var titleViewModel: TitleViewModel
+    lateinit var entrySimpleViewModel: EntrySimpleViewModel
+
+    fun dispatchActionEvent(action: Action) = repo.dispatchActionEvent(action)
+
+    fun handleActionEvent() = repo.handleActionEvent()
+
     private fun showConfirmDialog() {
         dispatchActionEvent(Action.CONFIRM_DIALOG)
     }
@@ -144,6 +185,10 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
 
     fun checkProjectErrors(): Boolean = repo.checkProjectErrors()
 
+    fun dispatchGetLocation() {
+        dispatchActionEvent(Action.GET_LOCATION)
+    }
+
     private fun checkEntryErrors(): DataEntry? = repo.checkEntryErrors()
 
     private fun checkErrors() {
@@ -154,7 +199,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         if (entry != null) {
             dispatchActionEvent(Action.SHOW_TRUCK_ERROR(entry, object : CheckError.CheckErrorResult {
                 override fun doEdit() {
-                    dispatchActionEvent(Action.EDIT_ENTRY)
+                    onEditEntry()
                 }
 
                 override fun doDelete(entry: DataEntry) {
@@ -257,6 +302,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         curFlowValue = CurrentProjectFlow()
         curEntry = null
         curFlowValue = CurrentProjectFlow()
+        dispatchActionEvent(Action.PING)
     }
 
     fun onProfileUpdated() {
@@ -479,6 +525,238 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
+    private fun setList(msg: StringMessage, key: String, list: List<String>) {
+        titleViewModel.titleValue = getString(msg)
+        mainListViewModel.curKey = key
+        if (list.isEmpty()) {
+            mainListViewModel.showingValue = false
+            onEmptyList()
+        } else {
+            mainListViewModel.showingValue = true
+            dispatchActionEvent(Action.SET_MAIN_LIST(list))
+        }
+    }
+
+    private fun setList(list: List<DataPicture>) {
+        dispatchActionEvent(Action.SET_PICTURE_LIST(list))
+    }
+
+    private fun checkCenterButtonIsEdit() {
+        if (isCenterButtonEdit) {
+            buttonsViewModel.centerTextValue = getString(StringMessage.btn_edit)
+        } else {
+            buttonsViewModel.centerTextValue = getString(StringMessage.btn_add)
+        }
+    }
+
+    private fun checkChangeCompanyButtonVisible() {
+        if (didAutoSkip) {
+            buttonsViewModel.showCenterButtonValue = true
+        }
+    }
+
+    fun setPhotoTitleCount(count: Int) {
+        if (count == 1) {
+            titleViewModel.titleValue = getString(StringMessage.title_photo)
+        } else {
+            titleViewModel.titleValue = getString(StringMessage.title_photos(count))
+        }
+    }
+
+    fun onStageChanged(flow: Flow) {
+        addButtonVisibleValue = false
+        framePictureVisibleValue = false
+        buttonsViewModel.reset(flow)
+        loginViewModel.showingValue = false
+        mainListViewModel.entryHintValue = EntryHint("", false)
+        mainListViewModel.showingValue = false
+        mainListViewModel.showEmptyValue = false
+        confirmationViewModel.showingValue = false
+        titleViewModel.showSeparatorValue = false
+        titleViewModel.subTitleValue = null
+        entrySimpleViewModel.reset()
+
+        when (flow.stage) {
+            Stage.LOGIN -> {
+                loginViewModel.showingValue = true
+                buttonsViewModel.showCenterButtonValue = true
+                buttonsViewModel.centerTextValue = getString(StringMessage.title_login)
+            }
+            Stage.PROJECT -> {
+                mainListViewModel.showingValue = true
+                titleViewModel.subTitleValue = curProjectHint
+                buttonsViewModel.showNextButtonValue = hasProjectName
+                processProject { projects -> setList(StringMessage.title_project, PrefHelper.KEY_PROJECT, projects) }
+                dispatchGetLocation()
+            }
+            Stage.COMPANY -> {
+                titleViewModel.subTitleValue = editProjectHint
+                mainListViewModel.showingValue = true
+                buttonsViewModel.showCenterButtonValue = true
+                processCompanies { companyNames ->
+                    setList(StringMessage.title_company, PrefHelper.KEY_COMPANY, companyNames)
+                    checkCenterButtonIsEdit()
+                }
+            }
+            Stage.ADD_COMPANY -> {
+                titleViewModel.titleValue = getString(StringMessage.title_company)
+                entrySimpleViewModel.showingValue = true
+                entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_company)
+                processEditCompany { companyName ->
+                    entrySimpleViewModel.simpleTextValue = companyName
+                }
+            }
+            Stage.STATE, Stage.ADD_STATE -> {
+                val editing = flow.stage == Stage.ADD_STATE
+                titleViewModel.subTitleValue = if (editing) editProjectHint else curProjectHint
+                mainListViewModel.showingValue = true
+                buttonsViewModel.showNextButtonValue = false
+                processStates(editing) { states, hint, edit ->
+                    if (edit) {
+                        setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
+                    } else {
+                        entrySimpleViewModel.helpTextValue = hint
+                        entrySimpleViewModel.showingValue = true
+                        setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
+
+                        if (mainListViewModel.keyValue == null) {
+                            buttonsViewModel.showNextButtonValue = true
+                        }
+                        buttonsViewModel.showCenterButtonValue = true
+                        checkChangeCompanyButtonVisible()
+                    }
+                }
+            }
+            Stage.CITY, Stage.ADD_CITY -> {
+                val editing = flow.stage == Stage.ADD_CITY
+                titleViewModel.subTitleValue = if (editing) editProjectHint else curProjectHint
+                buttonsViewModel.showNextButtonValue = false
+                processCities(editing) { cities, hint, edit ->
+                    if (edit) {
+                        entrySimpleViewModel.showingValue = true
+                        titleViewModel.titleValue = getString(StringMessage.title_city)
+                        entrySimpleViewModel.simpleTextValue = ""
+                        entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_city)
+                    } else {
+                        entrySimpleViewModel.helpTextValue = hint
+                        mainListViewModel.showingValue = true
+                        setList(StringMessage.title_city, PrefHelper.KEY_CITY, cities)
+                        if (mainListViewModel.keyValue == null) {
+                            buttonsViewModel.showNextButtonValue = true
+                        }
+                        buttonsViewModel.showCenterButtonValue = true
+                        checkChangeCompanyButtonVisible()
+                    }
+                }
+            }
+            Stage.STREET, Stage.ADD_STREET -> {
+                var editing = flow.stage == Stage.ADD_STREET
+                buttonsViewModel.showNextButtonValue = false
+                titleViewModel.subTitleValue = if (editing) editProjectHint else curProjectHint
+                processStreets(editing) { streets, hint, edit ->
+                    if (edit) {
+                        titleViewModel.titleValue = getString(StringMessage.title_street)
+                        entrySimpleViewModel.showingValue = true
+                        entrySimpleViewModel.simpleTextValue = ""
+                        entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_street)
+                        entrySimpleViewModel.inputTypeValue = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS or InputType.TYPE_TEXT_FLAG_CAP_WORDS
+                    } else {
+                        entrySimpleViewModel.helpTextValue = hint
+                        buttonsViewModel.showCenterButtonValue = true
+                        mainListViewModel.showingValue = true
+                        setList(StringMessage.title_street, PrefHelper.KEY_STREET, streets)
+                        if (mainListViewModel.keyValue == null) {
+                            buttonsViewModel.showNextButtonValue = true
+                        }
+                        checkChangeCompanyButtonVisible()
+                    }
+                }
+            }
+            Stage.CONFIRM_ADDRESS -> {
+                if (fab_addressConfirmOkay) {
+                    fab_addressConfirmOkay = false
+                    titleViewModel.subTitleValue = curProjectHint
+                    checkChangeCompanyButtonVisible()
+                } else {
+                    skip()
+                }
+            }
+            Stage.CURRENT_PROJECT -> {
+                dispatchActionEvent(Action.PING)
+                processCurrentProject()
+                mainListViewModel.showingValue = true
+                titleViewModel.showSeparatorValue = true
+                buttonsViewModel.showCenterButtonValue = true
+                buttonsViewModel.prevTextValue = getString(StringMessage.btn_edit)
+                buttonsViewModel.centerTextValue = getString(StringMessage.btn_new_project)
+                titleViewModel.titleValue = getString(StringMessage.title_current_project)
+            }
+            Stage.TRUCK -> {
+                entrySimpleViewModel.showingValue = true
+                entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_truck)
+                entrySimpleViewModel.helpTextValue = getString(StringMessage.entry_hint_truck)
+                entrySimpleViewModel.inputTypeValue = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+                mainListViewModel.showingValue = true
+
+                processTrucks { trucks, truckValue, hint ->
+                    entrySimpleViewModel.simpleTextValue = truckValue
+                    setList(StringMessage.title_truck, PrefHelper.KEY_TRUCK, trucks)
+                    titleViewModel.subTitleValue = hint
+                }
+            }
+            Stage.EQUIPMENT -> {
+                titleViewModel.titleValue = getString(StringMessage.title_equipment_installed)
+                mainListViewModel.showingValue = true
+                buttonsViewModel.showCenterButtonValue = true
+            }
+            Stage.ADD_EQUIPMENT -> {
+                titleViewModel.titleValue = getString(StringMessage.title_equipment)
+                entrySimpleViewModel.showingValue = true
+                entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_equipment)
+                entrySimpleViewModel.simpleTextValue = ""
+            }
+            Stage.NOTES -> {
+                titleViewModel.titleValue = getString(StringMessage.title_notes)
+                mainListViewModel.showingValue = true
+            }
+            Stage.PICTURE_1,
+            Stage.PICTURE_2,
+            Stage.PICTURE_3 -> {
+                processPictures { pictures, pictureCount, showToast ->
+                    if (showToast) {
+                        dispatchActionEvent(Action.SHOW_PICTURE_TOAST(pictureCount))
+                    }
+                    setPhotoTitleCount(pictureCount)
+                    buttonsViewModel.showNextButtonValue = false
+                    buttonsViewModel.showCenterButtonValue = true
+                    buttonsViewModel.centerTextValue = getString(StringMessage.btn_another)
+                    framePictureVisibleValue = true
+                    val pictureFlow = flow as PictureFlow
+                    if (pictureCount < pictureFlow.expected) {
+                        dispatchPictureRequest()
+                    } else {
+                        buttonsViewModel.showNextButtonValue = true
+                        setList(pictures)
+                    }
+                }
+            }
+            Stage.STATUS -> {
+                buttonsViewModel.nextTextValue = getString(StringMessage.btn_done)
+                mainListViewModel.showingValue = true
+                titleViewModel.titleValue = getString(StringMessage.title_status)
+                titleViewModel.subTitleValue = statusHint
+                processStatus()
+            }
+            Stage.CONFIRM -> {
+                buttonsViewModel.nextTextValue = getString(StringMessage.btn_confirm)
+                confirmationViewModel.showingValue = true
+                titleViewModel.titleValue = getString(StringMessage.title_confirmation)
+                processConfirm { entry -> dispatchActionEvent(Action.CONFIRMATION_FILL(entry)) }
+                dispatchActionEvent(Action.STORE_ROTATION)
+            }
+        }
+    }
+
     private fun computeNoteItems(): List<DataNote> {
         val currentEditEntry: DataEntry? = prefHelper.currentEditEntry
         val currentProjectGroup: DataProjectAddressCombo? = prefHelper.currentProjectGroup
@@ -539,7 +817,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         return false
     }
 
-    fun processCompanies(action: (List<String>) -> Unit) {
+    private fun processCompanies(action: (List<String>) -> Unit) {
         val companies = db.tableAddress.query()
         autoNarrowCompanies(companies.toMutableList())
         val companyNames = getNames(companies)
@@ -551,7 +829,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun processEditCompany(action: (company: String) -> Unit) {
+    private fun processEditCompany(action: (company: String) -> Unit) {
         if (isLocalCompany) {
             companyEditing = prefHelper.company
             action(companyEditing ?: "")
@@ -560,7 +838,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun processStates(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
+    private fun processStates(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
         var isEditing = editing
         val company = prefHelper.company
         val zipcode = prefHelper.zipCode
@@ -589,7 +867,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun processCities(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
+    private fun processCities(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
         var isEditing = editing
         val company = prefHelper.company
         val zipcode = prefHelper.zipCode
@@ -617,7 +895,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun processStreets(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
+    private fun processStreets(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
         var isEditing = editing
         val streets = db.tableAddress.queryStreets(
                 prefHelper.company!!,
@@ -724,20 +1002,20 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         LocationHelper.instance.reduceStreets(fab_address!!, streets.toMutableList())
     }
 
-    fun processProject(action: (projects: List<String>) -> Unit) {
+    private fun processProject(action: (projects: List<String>) -> Unit) {
         action(db.tableProjects.query(true))
     }
 
-    fun processCurrentProject(showAdd: () -> Unit) {
+    private fun processCurrentProject() {
         prefHelper.saveProjectAndAddressCombo(editProject)
         editProject = false
         checkErrors()
         if (db.tableProjectAddressCombo.count() > 0) {
-            showAdd()
+            addButtonVisibleValue = true
         }
     }
 
-    fun processTrucks(action: (trucks: List<String>, truckValue: String, hint: String?) -> Unit) {
+    private fun processTrucks(action: (trucks: List<String>, truckValue: String, hint: String?) -> Unit) {
         var hint: String?
         if (prefHelper.currentProjectGroup != null) {
             hint = prefHelper.currentProjectGroup?.hintLine
@@ -750,16 +1028,16 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         )
     }
 
-    fun processStatus() {
+    private fun processStatus() {
         curEntry = null
     }
 
-    fun processConfirm(action: (entry: DataEntry) -> Unit) {
+    private fun processConfirm(action: (entry: DataEntry) -> Unit) {
         curEntry = prefHelper.saveEntry()
         curEntry?.let { action(it) }
     }
 
-    fun processPictures(action: (pictures: MutableList<DataPicture>, pictureCount: Int, showToast: Boolean) -> Unit) {
+    private fun processPictures(action: (pictures: MutableList<DataPicture>, pictureCount: Int, showToast: Boolean) -> Unit) {
         val pictureCount = prefHelper.numPicturesTaken
         var showToast = false
         if (wasNext) {

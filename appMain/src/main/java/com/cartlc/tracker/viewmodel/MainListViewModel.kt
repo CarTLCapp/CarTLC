@@ -7,6 +7,7 @@ import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.LoginFlow
 import com.cartlc.tracker.model.flow.Stage
+import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
@@ -30,7 +31,20 @@ class MainListViewModel(ctx: Context) : BaseViewModel() {
         get() = repo.db
 
     var showing = ObservableBoolean(false)
+
+    var showingValue: Boolean
+        get() = showing.get()
+        set(value) {
+            showing.set(value)
+        }
+
     var showEmpty = ObservableBoolean(false)
+
+    var showEmptyValue: Boolean
+        get() = showEmpty.get()
+        set(value) {
+            showEmpty.set(value)
+        }
 
     var curKey: String? = null
 
@@ -52,6 +66,17 @@ class MainListViewModel(ctx: Context) : BaseViewModel() {
     val key: MutableLiveData<String> by lazy {
         MutableLiveData<String>()
     }
+
+    val keyValue: String?
+        get() = curKey?.let { prefHelper.getKeyValue(it) }
+
+    val entryHint: MutableLiveData<EntryHint> by lazy {
+        MutableLiveData<EntryHint>()
+    }
+
+    var entryHintValue: EntryHint
+        get() = entryHint.value ?: EntryHint("", false)
+        set(value) { entryHint.value = value }
 
     fun onStatusButtonClicked(status: TruckStatus) {
         prefHelper.status = status

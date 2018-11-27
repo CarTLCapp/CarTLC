@@ -198,8 +198,8 @@ open class PictureListAdapter(
         return mItems.size
     }
 
-    fun setList(list: MutableList<DataPicture>) {
-        mItems = list
+    fun setList(list: List<DataPicture>) {
+        mItems = list.toMutableList()
         maxHeight = 0
         notifyDataSetChanged()
     }

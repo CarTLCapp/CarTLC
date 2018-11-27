@@ -1122,7 +1122,7 @@ class DCPing(private val context: Context) : DCPost() {
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
             val stream = OutputStreamWriter(connection.outputStream, "UTF-8")
-            val writer = BufferedWriter(stream!!)
+            val writer = BufferedWriter(stream)
             writer.write(json.toString())
             writer.close()
             val result = getResult(connection)

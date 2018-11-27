@@ -3,10 +3,10 @@ package com.cartlc.tracker.viewmodel
 import android.app.Activity
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
+import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.app.TBApplication
-import com.cartlc.tracker.databinding.FragLoginBinding
 import com.cartlc.tracker.model.misc.ErrorMessage
 import javax.inject.Inject
 
@@ -35,6 +35,14 @@ class LoginViewModel(private val act: Activity) : BaseViewModel() {
     var secondaryFirstName = ObservableField<String>(secondaryFirstNameEdit)
     var secondaryLastName = ObservableField<String>(secondaryLastNameEdit)
     var isSecondaryPromptsEnabled = ObservableBoolean(prefHelper.isSecondaryEnabled)
+
+    lateinit var error: MutableLiveData<ErrorMessage>
+
+    var showingValue: Boolean
+        get() = showing.get()
+        set(value) {
+            showing.set(value)
+        }
 
     fun afterFirstNameChanged(s: CharSequence) {
         firstNameEdit = s.toString()

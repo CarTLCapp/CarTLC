@@ -1,10 +1,11 @@
 package com.cartlc.tracker.viewmodel
 
 import android.app.Activity
-import android.widget.RadioGroup
+import android.text.InputType
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
+import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.ButtonDialog
@@ -16,7 +17,7 @@ class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
         get() = act.applicationContext as TBApplication
 
     fun dispatchReturnPressedEvent(arg: String) {
-        dispatchGenericEvent(arg)
+        dispatchActionEvent(Action.RETURN_PRESSED(arg))
     }
 
     var showing = ObservableBoolean(true)
@@ -84,6 +85,17 @@ class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
 
     var afterTextChangedListener: (value: String) -> Unit = {}
 
+    val inputType: MutableLiveData<Int> by lazy {
+        MutableLiveData<Int>()
+    }
+    var inputTypeValue: Int
+        get() = inputType.value ?: InputType.TYPE_CLASS_TEXT
+        set(value) {
+            inputType.value = value
+        }
+
+    var dispatchActionEvent: (action: Action) -> Unit = {}
+
     init {
         simpleEmsValue = act.resources.getInteger(R.integer.entry_simple_ems)
     }
@@ -102,6 +114,12 @@ class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
         } else {
             showEditTextValue = false
         }
+    }
+
+    fun reset() {
+        showing.set(false)
+        helpText.set(null)
+        inputTypeValue = InputType.TYPE_TEXT_FLAG_CAP_WORDS
     }
 
 }

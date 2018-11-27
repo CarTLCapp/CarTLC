@@ -2,11 +2,7 @@ package com.cartlc.tracker.viewmodel
 
 import android.app.Activity
 import androidx.databinding.ObservableBoolean
-import androidx.lifecycle.MutableLiveData
-import com.cartlc.tracker.databinding.FragConfirmationBinding
 import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.LoginFlow
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication
@@ -31,5 +27,11 @@ class ConfirmationViewModel(private val act: Activity) : BaseViewModel() {
     }
 
     var showing = ObservableBoolean(false)
+
+    var showingValue: Boolean
+        get() = showing.get()
+        set(value) {
+            showing.set(value)
+        }
 
 }

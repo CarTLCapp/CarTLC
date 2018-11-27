@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import androidx.lifecycle.Observer
 import com.cartlc.tracker.databinding.FragEntrySimpleBinding
 import com.cartlc.tracker.viewmodel.EntrySimpleViewModel
 
@@ -39,18 +40,15 @@ class EntrySimpleFragment: BaseFragment() {
             }
         }
         binding.entrySimpleEditText.setOnEditorActionListener(autoNext)
-        binding.entrySimpleEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER)
+        binding.entrySimpleEditText.setRawInputType(InputType.TYPE_CLASS_TEXT)
+
+        vm.inputType.observe(this, Observer { type -> binding.entrySimpleEditText.inputType = type })
+
         return binding.root
     }
 
     private fun getEditText(text: EditText): String {
         return text.text.toString().trim { it <= ' ' }
-    }
-
-    fun reset() {
-        vm.showing.set(false)
-        vm.helpText.set(null)
-        binding.entrySimpleEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS)
     }
 
     fun invalidateAll() {

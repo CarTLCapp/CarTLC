@@ -12,6 +12,7 @@ import android.location.Address
 import android.os.*
 import android.provider.MediaStore
 import android.text.InputType
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
@@ -34,6 +35,8 @@ import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.PictureFlow
+import com.cartlc.tracker.model.misc.EntryHint
+import com.cartlc.tracker.model.misc.ErrorMessage
 import com.cartlc.tracker.model.misc.StringMessage
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.*
@@ -111,21 +114,26 @@ class MainActivity : BaseActivity() {
         setSupportActionBar(findViewById<Toolbar>(R.id.toolbar_main))
 
         buttonsFragment.root = root
-        buttonsFragment.vm.handleActionEvent().observe(this, Observer { event ->
-            event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
-        })
         mInputMM = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         fab_add.setOnClickListener { _: View -> vm.btnPlus() }
 
-        mPictureAdapter = PictureListAdapter(this) { newCount: Int -> setPhotoTitleCount(newCount) }
+        mPictureAdapter = PictureListAdapter(this) { newCount: Int -> vm.setPhotoTitleCount(newCount) }
         val linearLayoutManager = AutoLinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         list_pictures.layoutManager = linearLayoutManager
         list_pictures.adapter = mPictureAdapter
 
         vm.onCreate()
+        vm.buttonsViewModel = buttonsFragment.vm
+        vm.loginViewModel = loginFragment.vm
+        vm.confirmationViewModel = confirmationFragment.vm
+        vm.mainListViewModel = mainListFragment.vm
+        vm.titleViewModel = titleFragment.vm
+        vm.entrySimpleViewModel = entrySimpleFragment.vm
         vm.curFlow.observe(this, Observer { stage -> onStageChanged(stage) })
         vm.error.observe(this, Observer { message -> showError(message) })
+        vm.addButtonVisible.observe(this, Observer { visible -> onAddButtonVisibleChanged(visible) })
+        vm.framePictureVisible.observe(this, Observer { visible -> onFramePictureVisibleChanged(visible) })
         vm.handleActionEvent().observe(this, Observer { event ->
             event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
         })
@@ -133,19 +141,51 @@ class MainActivity : BaseActivity() {
         vm.entryTextValue = { entrySimpleFragment.entryTextValue }
         vm.detectLoginError = this::detectLoginError
         vm.getString = { msg -> getStringMessage(msg) }
-
-        entrySimpleFragment.vm.handleGenericEvent().observe(this, Observer { event ->
-            vm.doSimpleEntryReturn(event.peekContent())
-        })
-
+        vm.error.observe(this, Observer<ErrorMessage> { message -> showError(message) })
+        buttonsFragment.vm.getString = vm.getString
+        buttonsFragment.vm.dispatchButtonEvent = { action -> vm.dispatchActionEvent(action) }
+        loginFragment.vm.error = vm.error
+        entrySimpleFragment.vm.dispatchActionEvent = { action -> vm.dispatchActionEvent(action) }
         EventBus.getDefault().register(this)
         title = mApp.versionedTitle
         getLocation()
     }
 
+    private fun detectNoteError(): Boolean {
+        if (!mainListFragment.isNotesComplete) {
+            showNoteError(mainListFragment.notes)
+            return true
+        }
+        return false
+    }
+
     private fun getStringMessage(msg: StringMessage): String =
             when (msg) {
                 StringMessage.entry_hint_edit_project -> getString(R.string.entry_hint_edit_project)
+                StringMessage.entry_hint_truck -> getString(R.string.entry_hint_truck)
+                StringMessage.btn_add -> getString(R.string.btn_add)
+                StringMessage.btn_prev -> getString(R.string.btn_prev)
+                StringMessage.btn_next -> getString(R.string.btn_next)
+                StringMessage.btn_edit -> getString(R.string.btn_edit)
+                StringMessage.btn_new_project -> getString(R.string.btn_new_project)
+                StringMessage.btn_another -> getString(R.string.btn_another)
+                StringMessage.btn_done -> getString(R.string.btn_done)
+                StringMessage.btn_confirm -> getString(R.string.btn_confirm)
+                StringMessage.title_current_project -> getString(R.string.title_current_project)
+                StringMessage.title_login -> getString(R.string.title_login)
+                StringMessage.title_project -> getString(R.string.title_project)
+                StringMessage.title_company -> getString(R.string.title_company)
+                StringMessage.title_state -> getString(R.string.title_state)
+                StringMessage.title_city -> getString(R.string.title_city)
+                StringMessage.title_street -> getString(R.string.title_street)
+                StringMessage.title_truck -> getString(R.string.title_truck)
+                StringMessage.title_equipment -> getString(R.string.title_equipment)
+                StringMessage.title_equipment_installed -> getString(R.string.title_equipment_installed)
+                StringMessage.title_notes -> getString(R.string.title_notes)
+                StringMessage.title_status -> getString(R.string.title_status)
+                StringMessage.title_confirmation -> getString(R.string.title_confirmation)
+                StringMessage.title_photo -> getString(R.string.title_photo)
+                is StringMessage.title_photos -> getString(R.string.title_photos, msg.count)
                 is StringMessage.status_installed_equipments -> getString(R.string.status_installed_equipments, msg.checkedEquipment, msg.maxEquip)
                 is StringMessage.status_installed_pictures -> getString(R.string.status_installed_pictures, msg.countPictures)
             }
@@ -165,7 +205,7 @@ class MainActivity : BaseActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.profile -> onBtnProfile()
+            R.id.profile -> vm.btnProfile()
             R.id.upload -> {
                 mApp.reloadFromServer()
             }
@@ -186,6 +226,7 @@ class MainActivity : BaseActivity() {
         EventBus.getDefault().unregister(this)
         CheckError.instance.cleanup()
         LocationHelper.instance.onDestroy()
+        Log.d("MYDEBUG", "onDestroy()")
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -213,206 +254,25 @@ class MainActivity : BaseActivity() {
         builder.create().show()
     }
 
-    private fun onBtnProfile() {
-        vm.btnProfile()
+    private fun onAddButtonVisibleChanged(visible: Boolean) {
+        if (visible) {
+            fab_add.show()
+        } else {
+            fab_add.hide()
+        }
+    }
+
+    private fun onFramePictureVisibleChanged(visible: Boolean) {
+        if (visible) {
+            frame_pictures.visibility = View.VISIBLE
+        } else {
+            frame_pictures.visibility = View.GONE
+        }
     }
 
     private fun onStageChanged(flow: Flow) {
-        loginFragment.showing = false
-        mainListFragment.showing = false
-        mainListFragment.showEmpty = false
-        buttonsFragment.reset(flow)
-        confirmationFragment.showing = false
-        titleFragment.vm.showSeparatorValue = false
-        titleFragment.vm.subTitleValue = null
-        entrySimpleFragment.reset()
-
-        fab_add.hide()
-        frame_pictures.visibility = View.GONE
-        list_pictures.visibility = View.GONE
-        list_entry_hint.visibility = View.GONE
-
-        when (flow.stage) {
-            Stage.LOGIN -> {
-                loginFragment.showing = true
-                buttonsFragment.vm.showCenterButtonValue = true
-                buttonsFragment.vm.centerTextValue = getString(R.string.title_login)
-            }
-            Stage.PROJECT -> {
-                mainListFragment.showing = true
-                titleFragment.vm.subTitleValue = vm.curProjectHint
-                buttonsFragment.vm.showNextButtonValue = vm.hasProjectName
-                vm.processProject { projects -> setList(R.string.title_project, PrefHelper.KEY_PROJECT, projects) }
-                getLocation()
-            }
-            Stage.COMPANY -> {
-                titleFragment.vm.subTitleValue = vm.editProjectHint
-                mainListFragment.showing = true
-                buttonsFragment.vm.showCenterButtonValue = true
-                vm.processCompanies { companyNames ->
-                    setList(R.string.title_company, PrefHelper.KEY_COMPANY, companyNames)
-                    checkCenterButtonIsEdit()
-                }
-            }
-            Stage.ADD_COMPANY -> {
-                titleFragment.vm.titleValue = getString(R.string.title_company)
-                entrySimpleFragment.vm.showingValue = true
-                entrySimpleFragment.vm.simpleHintValue = getString(R.string.title_company)
-                vm.processEditCompany { companyName ->
-                    entrySimpleFragment.vm.simpleTextValue = companyName
-                }
-            }
-            Stage.STATE, Stage.ADD_STATE -> {
-                val editing = flow.stage == Stage.ADD_STATE
-                titleFragment.vm.subTitleValue = if (editing) vm.editProjectHint else vm.curProjectHint
-                mainListFragment.showing = true
-                buttonsFragment.vm.showNextButtonValue = false
-                vm.processStates(editing) { states, hint, edit ->
-                    if (edit) {
-                        setList(R.string.title_state, PrefHelper.KEY_STATE, states)
-                    } else {
-                        entrySimpleFragment.vm.helpTextValue = hint
-                        entrySimpleFragment.vm.showingValue = true
-                        if (setList(R.string.title_state, PrefHelper.KEY_STATE, states)) {
-                            buttonsFragment.vm.showNextButtonValue = true
-                        }
-                        buttonsFragment.vm.showCenterButtonValue = true
-                        checkChangeCompanyButtonVisible()
-                    }
-                }
-            }
-            Stage.CITY, Stage.ADD_CITY -> {
-                val editing = flow.stage == Stage.ADD_CITY
-                titleFragment.vm.subTitleValue = if (editing) vm.editProjectHint else vm.curProjectHint
-                buttonsFragment.vm.showNextButtonValue = false
-                vm.processCities(editing) { cities, hint, edit ->
-                    if (edit) {
-                        entrySimpleFragment.vm.showingValue = true
-                        titleFragment.vm.titleValue = getString(R.string.title_city)
-                        entrySimpleFragment.vm.simpleTextValue = ""
-                        entrySimpleFragment.vm.simpleHintValue = getString(R.string.title_city)
-                    } else {
-                        entrySimpleFragment.vm.helpTextValue = hint
-                        mainListFragment.showing = true
-                        if (setList(R.string.title_city, PrefHelper.KEY_CITY, cities)) {
-                            buttonsFragment.vm.showNextButtonValue = true
-                        }
-                        buttonsFragment.vm.showCenterButtonValue = true
-                        checkChangeCompanyButtonVisible()
-                    }
-                }
-            }
-            Stage.STREET, Stage.ADD_STREET -> {
-                var editing = flow.stage == Stage.ADD_STREET
-                buttonsFragment.vm.showNextButtonValue = false
-                titleFragment.vm.subTitleValue = if (editing) vm.editProjectHint else vm.curProjectHint
-
-                vm.processStreets(editing) { streets, hint, edit ->
-                    if (edit) {
-                        titleFragment.vm.titleValue = getString(R.string.title_street)
-                        entrySimpleFragment.vm.showingValue = true
-                        entrySimpleFragment.vm.simpleTextValue = ""
-                        entrySimpleFragment.vm.simpleHintValue = getString(R.string.title_street)
-                        entrySimpleFragment.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS or InputType.TYPE_TEXT_FLAG_CAP_WORDS
-                    } else {
-                        entrySimpleFragment.vm.helpTextValue = hint
-                        buttonsFragment.vm.showCenterButtonValue = true
-                        mainListFragment.showing = true
-                        if (setList(R.string.title_street, PrefHelper.KEY_STREET, streets)) {
-                            buttonsFragment.vm.showNextButtonValue = true
-                        }
-                        checkChangeCompanyButtonVisible()
-                    }
-                }
-            }
-            Stage.CONFIRM_ADDRESS -> {
-                if (vm.fab_addressConfirmOkay) {
-                    vm.fab_addressConfirmOkay = false
-                    titleFragment.vm.subTitleValue = vm.curProjectHint
-                    checkChangeCompanyButtonVisible()
-                } else {
-                    vm.skip()
-                }
-            }
-            Stage.CURRENT_PROJECT -> {
-                mApp.ping()
-                vm.processCurrentProject { fab_add.show() }
-                mainListFragment.showing = true
-                titleFragment.vm.showSeparatorValue = true
-                buttonsFragment.vm.showCenterButtonValue = true
-                buttonsFragment.vm.prevTextValue = getString(R.string.btn_edit)
-                buttonsFragment.vm.centerTextValue = getString(R.string.btn_new_project)
-                titleFragment.vm.titleValue = getString(R.string.title_current_project)
-                mainListFragment.setAdapter(flow.stage)
-            }
-            Stage.TRUCK -> {
-                entrySimpleFragment.vm.showingValue = true
-                entrySimpleFragment.vm.simpleHintValue = getString(R.string.title_truck)
-                entrySimpleFragment.vm.helpTextValue = getString(R.string.entry_hint_truck)
-                entrySimpleFragment.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
-                mainListFragment.showing = true
-
-                vm.processTrucks { trucks, truckValue, hint ->
-                    entrySimpleFragment.vm.simpleTextValue = truckValue
-                    setList(R.string.title_truck, PrefHelper.KEY_TRUCK, trucks)
-                    titleFragment.vm.subTitleValue = hint
-                }
-            }
-            Stage.EQUIPMENT -> {
-                titleFragment.vm.titleValue = getString(R.string.title_equipment_installed)
-                mainListFragment.showing = true
-                mainListFragment.setAdapter(flow.stage)
-                buttonsFragment.vm.showCenterButtonValue = true
-            }
-            Stage.ADD_EQUIPMENT -> {
-                titleFragment.vm.titleValue = getString(R.string.title_equipment)
-                entrySimpleFragment.vm.showingValue = true
-                entrySimpleFragment.vm.simpleHintValue = getString(R.string.title_equipment)
-                entrySimpleFragment.vm.simpleTextValue = ""
-            }
-            Stage.NOTES -> {
-                titleFragment.vm.titleValue = getString(R.string.title_notes)
-                mainListFragment.showing = true
-                mainListFragment.setAdapter(flow.stage)
-            }
-            Stage.PICTURE_1,
-            Stage.PICTURE_2,
-            Stage.PICTURE_3 -> {
-                vm.processPictures { pictures, pictureCount, showToast ->
-                    if (showToast) {
-                        showPictureToast(pictureCount)
-                    }
-                    setPhotoTitleCount(pictureCount)
-                    buttonsFragment.vm.showNextButtonValue = false
-                    buttonsFragment.vm.showCenterButtonValue = true
-                    buttonsFragment.vm.centerTextValue = getString(R.string.btn_another)
-                    frame_pictures.visibility = View.VISIBLE
-                    list_pictures.visibility = View.VISIBLE
-                    val pictureFlow = flow as PictureFlow
-                    if (pictureCount < pictureFlow.expected) {
-                        vm.dispatchPictureRequest()
-                    } else {
-                        buttonsFragment.vm.showNextButtonValue = true
-                        mPictureAdapter.setList(pictures)
-                    }
-                }
-            }
-            Stage.STATUS -> {
-                buttonsFragment.vm.nextTextValue = getString(R.string.btn_done)
-                mainListFragment.showing = true
-                mainListFragment.setAdapter(flow.stage)
-                titleFragment.vm.titleValue = getString(R.string.title_status)
-                titleFragment.vm.subTitleValue = vm.statusHint
-                vm.processStatus()
-            }
-            Stage.CONFIRM -> {
-                buttonsFragment.vm.nextTextValue = getString(R.string.btn_confirm)
-                confirmationFragment.showing = true
-                titleFragment.vm.titleValue = getString(R.string.title_confirmation)
-                vm.processConfirm { entry -> confirmationFragment.fill(entry) }
-                storeCommonRotation()
-            }
-        }
+        vm.onStageChanged(flow)
+        mainListFragment.setAdapter(flow.stage)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -438,27 +298,20 @@ class MainActivity : BaseActivity() {
             Action.BTN_CENTER -> vm.btnCenter()
             Action.BTN_NEXT -> vm.btnNext()
             Action.BTN_CHANGE -> vm.btnChangeCompany()
-            Action.EDIT_ENTRY -> doEditEntry()
+            Action.GET_LOCATION -> getLocation()
+            Action.PING -> mApp.ping()
+            Action.STORE_ROTATION -> storeCommonRotation()
+            is Action.RETURN_PRESSED -> vm.doSimpleEntryReturn(action.text)
             is Action.SHOW_TRUCK_ERROR -> showTruckError(action.entry, action.callback)
+            is Action.SET_MAIN_LIST -> mainListFragment.setList(action.list)
+            is Action.SET_PICTURE_LIST -> mPictureAdapter.setList(action.list)
+            is Action.SHOW_PICTURE_TOAST -> showPictureToast(action.count)
+            is Action.CONFIRMATION_FILL -> confirmationFragment.fill(action.entry)
         }
     }
 
     private fun showTruckError(entry: DataEntry, callback: CheckError.CheckErrorResult) {
         CheckError.instance.showTruckError(this, entry, callback)
-    }
-
-    // Return false if NoneSelected situation has occurred.
-    private fun setList(titleId: Int, key: String, list: List<String>): Boolean {
-        val title = getString(titleId)
-        titleFragment.vm.titleValue = title
-        if (list.isEmpty()) {
-            mainListFragment.vm.curKey = key
-            mainListFragment.showing = false
-            vm.onEmptyList()
-        } else {
-            return mainListFragment.setList(key, list)
-        }
-        return true
     }
 
     private fun dispatchPictureRequest(pictureFile: File) {
@@ -483,8 +336,8 @@ class MainActivity : BaseActivity() {
         when (requestCode) {
             REQUEST_EDIT_ENTRY ->
                 when (resultCode) {
-                    RESULT_EDIT_ENTRY -> doEditEntry()
-                    RESULT_EDIT_PROJECT -> doEditProject()
+                    RESULT_EDIT_ENTRY -> vm.onEditEntry()
+                    RESULT_EDIT_PROJECT -> vm.onEditProject()
                     RESULT_DELETE_PROJECT -> vm.onDeletedProject()
                     else -> vm.onAbort()
                 }
@@ -506,22 +359,6 @@ class MainActivity : BaseActivity() {
                 vm.clearAutoRotatePicture()
             }
         }
-    }
-
-    private fun doEditEntry() {
-        vm.onEditEntry()
-    }
-
-    private fun doEditProject() {
-        vm.onEditProject()
-    }
-
-    private fun detectNoteError(): Boolean {
-        if (!mainListFragment.isNotesComplete()) {
-            showNoteError(mainListFragment.notes())
-            return true
-        }
-        return false
     }
 
     private fun detectLoginError(): Boolean = loginFragment.detectLoginError()
@@ -560,12 +397,6 @@ class MainActivity : BaseActivity() {
             buttonsFragment.vm.centerTextValue = getString(R.string.btn_edit)
         } else {
             buttonsFragment.vm.centerTextValue = getString(R.string.btn_add)
-        }
-    }
-
-    private fun checkChangeCompanyButtonVisible() {
-        if (vm.didAutoSkip) {
-            buttonsFragment.vm.showCenterButtonValue = true
         }
     }
 
@@ -608,14 +439,6 @@ class MainActivity : BaseActivity() {
         toast.show()
     }
 
-    private fun setPhotoTitleCount(count: Int) {
-        if (count == 1) {
-            titleFragment.vm.titleValue = getString(R.string.title_photo)
-        } else {
-            titleFragment.vm.titleValue = getString(R.string.title_photos, count)
-        }
-    }
-
     override fun onErrorDialogOkay() {
         vm.onErrorDialogOkay()
     }
@@ -624,7 +447,6 @@ class MainActivity : BaseActivity() {
         dialogHelper.showConfirmDialog(object : DialogHelper.DialogListener {
             override fun onOkay() {
                 vm.onConfirmOkay()
-                mApp.ping()
             }
 
             override fun onCancel() {}
