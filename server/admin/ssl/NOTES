@@ -1,0 +1,27 @@
+https://lightbend.github.io/ssl-config/CertificateGeneration.html
+
+----------------
+export PW='CowboysFacelifT'
+
+# Create a self signed key pair root CA certificate.
+keytool -genkeypair -v \
+  -alias fleetca \
+  -dname "CN=fleetCA, OU=FleetTLC, O=FleetTLC, L=Chicago, ST=IL, C=US" \
+  -keystore fleet.jks \
+  -keypass:env PW \
+  -storepass:env PW \
+  -keyalg RSA \
+  -keysize 4096 \
+  -ext KeyUsage:critical="keyCertSign" \
+  -ext BasicConstraints:critical="ca:true" \
+  -validity 9999
+
+# Export the exampleCA public certificate as exampleca.crt so that it can be used in trust stores.
+keytool -export -v \
+  -alias fleetca \
+  -file fleetca.crt \
+  -keypass:env PW \
+  -storepass:env PW \
+  -keystore fleetca.jks \
+  -rfc
+----------------
