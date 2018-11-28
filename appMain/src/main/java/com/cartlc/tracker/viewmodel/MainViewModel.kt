@@ -573,14 +573,20 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
                 mainListViewModel.showingValue = true
                 titleViewModel.subTitleValue = curProjectHint
                 buttonsViewModel.showNextButtonValue = hasProjectName
-                processProject { projects -> setList(StringMessage.title_project, PrefHelper.KEY_PROJECT, projects) }
+                setList(StringMessage.title_project, PrefHelper.KEY_PROJECT, db.tableProjects.query(true))
                 dispatchGetLocation()
             }
             Stage.COMPANY -> {
                 titleViewModel.subTitleValue = editProjectHint
                 mainListViewModel.showingValue = true
                 buttonsViewModel.showCenterButtonValue = true
-                processCompanies { companyNames ->
+                val companies = db.tableAddress.query()
+                autoNarrowCompanies(companies.toMutableList())
+                val companyNames = getNames(companies)
+                if (companyNames.size == 1 && autoNarrowOkay) {
+                    prefHelper.company = companyNames[0]
+                    skip()
+                } else {
                     setList(StringMessage.title_company, PrefHelper.KEY_COMPANY, companyNames)
                     buttonsViewModel.checkCenterButtonIsEdit()
                 }
@@ -589,8 +595,11 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
                 titleViewModel.titleValue = getString(StringMessage.title_company)
                 entrySimpleViewModel.showingValue = true
                 entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_company)
-                processEditCompany { companyName ->
-                    entrySimpleViewModel.simpleTextValue = companyName
+                if (buttonsViewModel.isLocalCompany) {
+                    companyEditing = prefHelper.company
+                    entrySimpleViewModel.simpleTextValue = companyEditing ?: ""
+                } else {
+                    entrySimpleViewModel.simpleTextValue = ""
                 }
             }
             Stage.STATE, Stage.ADD_STATE -> {
@@ -670,7 +679,12 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             }
             Stage.CURRENT_PROJECT -> {
                 dispatchActionEvent(Action.PING)
-                processCurrentProject()
+                prefHelper.saveProjectAndAddressCombo(editProject)
+                editProject = false
+                checkErrors()
+                if (db.tableProjectAddressCombo.count() > 0) {
+                    addButtonVisibleValue = true
+                }
                 mainListViewModel.showingValue = true
                 titleViewModel.showSeparatorValue = true
                 buttonsViewModel.showCenterButtonValue = true
@@ -685,11 +699,16 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
                 entrySimpleViewModel.inputTypeValue = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
                 mainListViewModel.showingValue = true
 
-                processTrucks { trucks, truckValue, hint ->
-                    entrySimpleViewModel.simpleTextValue = truckValue
-                    setList(StringMessage.title_truck, PrefHelper.KEY_TRUCK, trucks)
-                    titleViewModel.subTitleValue = hint
+                var hint: String?
+                if (prefHelper.currentProjectGroup != null) {
+                    hint = prefHelper.currentProjectGroup?.hintLine
+                } else {
+                    hint = null
                 }
+                val trucks = db.tableTruck.queryStrings(prefHelper.currentProjectGroup)
+                entrySimpleViewModel.simpleTextValue = prefHelper.truckValue
+                setList(StringMessage.title_truck, PrefHelper.KEY_TRUCK, trucks)
+                titleViewModel.subTitleValue = hint
             }
             Stage.EQUIPMENT -> {
                 titleViewModel.titleValue = getString(StringMessage.title_equipment_installed)
@@ -709,22 +728,29 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             Stage.PICTURE_1,
             Stage.PICTURE_2,
             Stage.PICTURE_3 -> {
-                processPictures { pictures, pictureCount, showToast ->
-                    if (showToast) {
-                        dispatchActionEvent(Action.SHOW_PICTURE_TOAST(pictureCount))
-                    }
-                    setPhotoTitleCount(pictureCount)
-                    buttonsViewModel.showNextButtonValue = false
-                    buttonsViewModel.showCenterButtonValue = true
-                    buttonsViewModel.centerTextValue = getString(StringMessage.btn_another)
-                    framePictureVisibleValue = true
-                    val pictureFlow = flow as PictureFlow
-                    if (pictureCount < pictureFlow.expected) {
-                        dispatchPictureRequest()
-                    } else {
-                        buttonsViewModel.showNextButtonValue = true
-                        setList(pictures)
-                    }
+                val pictureCount = prefHelper.numPicturesTaken
+                var showToast = false
+                if (wasNext) {
+                    showToast = true
+                    wasNext = false
+                }
+                val pictures = db.tablePictureCollection.removeNonExistant(
+                        db.tablePictureCollection.queryPictures(prefHelper.currentPictureCollectionId
+                        )).toMutableList()
+                if (showToast) {
+                    dispatchActionEvent(Action.SHOW_PICTURE_TOAST(pictureCount))
+                }
+                setPhotoTitleCount(pictureCount)
+                buttonsViewModel.showNextButtonValue = false
+                buttonsViewModel.showCenterButtonValue = true
+                buttonsViewModel.centerTextValue = getString(StringMessage.btn_another)
+                framePictureVisibleValue = true
+                val pictureFlow = flow as PictureFlow
+                if (pictureCount < pictureFlow.expected) {
+                    dispatchPictureRequest()
+                } else {
+                    buttonsViewModel.showNextButtonValue = true
+                    setList(pictures)
                 }
             }
             Stage.STATUS -> {
@@ -732,13 +758,14 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
                 mainListViewModel.showingValue = true
                 titleViewModel.titleValue = getString(StringMessage.title_status)
                 titleViewModel.subTitleValue = statusHint
-                processStatus()
+                curEntry = null
             }
             Stage.CONFIRM -> {
                 buttonsViewModel.nextTextValue = getString(StringMessage.btn_confirm)
                 confirmationViewModel.showingValue = true
                 titleViewModel.titleValue = getString(StringMessage.title_confirmation)
-                processConfirm { entry -> dispatchActionEvent(Action.CONFIRMATION_FILL(entry)) }
+                curEntry = prefHelper.saveEntry()
+                curEntry?.let { entry -> dispatchActionEvent(Action.CONFIRMATION_FILL(entry)) }
                 dispatchActionEvent(Action.STORE_ROTATION)
             }
         }
@@ -802,27 +829,6 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             }
         }
         return false
-    }
-
-    private fun processCompanies(action: (List<String>) -> Unit) {
-        val companies = db.tableAddress.query()
-        autoNarrowCompanies(companies.toMutableList())
-        val companyNames = getNames(companies)
-        if (companyNames.size == 1 && autoNarrowOkay) {
-            prefHelper.company = companyNames[0]
-            skip()
-        } else {
-            action(companyNames)
-        }
-    }
-
-    private fun processEditCompany(action: (company: String) -> Unit) {
-        if (buttonsViewModel.isLocalCompany) {
-            companyEditing = prefHelper.company
-            action(companyEditing ?: "")
-        } else {
-            action("")
-        }
     }
 
     private fun processStates(editing: Boolean, action: (List<String>, hint: String?, edit: Boolean) -> Unit) {
@@ -987,54 +993,6 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             return
         }
         LocationHelper.instance.reduceStreets(fab_address!!, streets.toMutableList())
-    }
-
-    private fun processProject(action: (projects: List<String>) -> Unit) {
-        action(db.tableProjects.query(true))
-    }
-
-    private fun processCurrentProject() {
-        prefHelper.saveProjectAndAddressCombo(editProject)
-        editProject = false
-        checkErrors()
-        if (db.tableProjectAddressCombo.count() > 0) {
-            addButtonVisibleValue = true
-        }
-    }
-
-    private fun processTrucks(action: (trucks: List<String>, truckValue: String, hint: String?) -> Unit) {
-        var hint: String?
-        if (prefHelper.currentProjectGroup != null) {
-            hint = prefHelper.currentProjectGroup?.hintLine
-        } else {
-            hint = null
-        }
-        action(
-                db.tableTruck.queryStrings(prefHelper.currentProjectGroup),
-                prefHelper.truckValue, hint
-        )
-    }
-
-    private fun processStatus() {
-        curEntry = null
-    }
-
-    private fun processConfirm(action: (entry: DataEntry) -> Unit) {
-        curEntry = prefHelper.saveEntry()
-        curEntry?.let { action(it) }
-    }
-
-    private fun processPictures(action: (pictures: MutableList<DataPicture>, pictureCount: Int, showToast: Boolean) -> Unit) {
-        val pictureCount = prefHelper.numPicturesTaken
-        var showToast = false
-        if (wasNext) {
-            showToast = true
-            wasNext = false
-        }
-        val pictures = db.tablePictureCollection.removeNonExistant(
-                db.tablePictureCollection.queryPictures(prefHelper.currentPictureCollectionId
-                )).toMutableList()
-        action(pictures, pictureCount, showToast)
     }
 
     fun incAutoRotatePicture(commonRotation: Int) {
