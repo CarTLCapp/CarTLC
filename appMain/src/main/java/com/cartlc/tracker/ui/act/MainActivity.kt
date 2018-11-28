@@ -11,8 +11,6 @@ import android.content.pm.PackageManager
 import android.location.Address
 import android.os.*
 import android.provider.MediaStore
-import android.text.InputType
-import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
@@ -21,21 +19,16 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.cartlc.tracker.BuildConfig
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.ui.util.CheckError
-import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.event.EventError
 import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.PictureFlow
-import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.ErrorMessage
 import com.cartlc.tracker.model.misc.StringMessage
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
@@ -226,7 +219,6 @@ class MainActivity : BaseActivity() {
         EventBus.getDefault().unregister(this)
         CheckError.instance.cleanup()
         LocationHelper.instance.onDestroy()
-        Log.d("MYDEBUG", "onDestroy()")
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -284,24 +276,13 @@ class MainActivity : BaseActivity() {
 
     private fun onActionDispatch(action: Action) {
         when (action) {
-            Action.NEW_PROJECT -> {
-                vm.onNewProject()
-            }
-            Action.VIEW_PROJECT -> {
-                doViewProject()
-            }
+            Action.VIEW_PROJECT -> { doViewProject() }
             is Action.PICTURE_REQUEST -> dispatchPictureRequest(action.file)
             Action.CONFIRM_DIALOG -> showConfirmDialog()
             Action.VEHICLES -> doVehicles()
             Action.VEHICLES_PENDING -> doVehiclesPendingDialog()
-            Action.BTN_PREV -> vm.btnPrev()
-            Action.BTN_CENTER -> vm.btnCenter()
-            Action.BTN_NEXT -> vm.btnNext()
-            Action.BTN_CHANGE -> vm.btnChangeCompany()
             Action.GET_LOCATION -> getLocation()
-            Action.PING -> mApp.ping()
             Action.STORE_ROTATION -> storeCommonRotation()
-            is Action.RETURN_PRESSED -> vm.doSimpleEntryReturn(action.text)
             is Action.SHOW_TRUCK_ERROR -> showTruckError(action.entry, action.callback)
             is Action.SET_MAIN_LIST -> mainListFragment.setList(action.list)
             is Action.SET_PICTURE_LIST -> mPictureAdapter.setList(action.list)
@@ -384,11 +365,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showNoteErrorOk(dialog: DialogInterface) {
-        if (BuildConfig.DEBUG) {
-            vm.advance()
-        } else {
-            vm.btnNext()
-        }
+        vm.showNoteErrorOk()
         dialog.dismiss()
     }
 
@@ -406,10 +383,6 @@ class MainActivity : BaseActivity() {
         outState.putString(KEY_TAKING_PICTURE, vm.onSaveInstanceState())
         super.onSaveInstanceState(outState)
     }
-
-//    private fun isZipCode(tableZipCode: String?): Boolean {
-//        return tableZipCode != null && tableZipCode.length == 5 && tableZipCode.matches("^[0-9]*$".toRegex())
-//    }
 
     private fun showPictureToast(pictureCount: Int) {
         val msgId: Int
@@ -435,7 +408,7 @@ class MainActivity : BaseActivity() {
         vm.onErrorDialogOkay()
     }
 
-    fun showConfirmDialog() {
+    private fun showConfirmDialog() {
         dialogHelper.showConfirmDialog(object : DialogHelper.DialogListener {
             override fun onOkay() {
                 vm.onConfirmOkay()

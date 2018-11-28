@@ -42,7 +42,7 @@ class ProjectGroupListAdapter(
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
         val projectGroup = mProjectGroups[position]
         holder.view.project_name.text = projectGroup.projectName
-        val count = vm.tmpDb.tableEntry.countProjectAddressCombo(projectGroup.id)
+        val count = vm.countProjectAddressCombo(projectGroup.id)
         if (count.totalEntries > 0) {
             val sbuf = StringBuilder()
             sbuf.append(mContext.getString(R.string.title_entries_))
@@ -82,7 +82,7 @@ class ProjectGroupListAdapter(
 
     private fun setSelected(group: DataProjectAddressCombo) {
         mCurProjectGroupId = group.id
-        vm.tmpPrefHelper.currentProjectGroup = group
+        vm.currentProjectGroup = group
         notifyDataSetChanged()
     }
 
@@ -91,8 +91,8 @@ class ProjectGroupListAdapter(
     }
 
     fun onDataChanged() {
-        mProjectGroups = vm.tmpDb.tableProjectAddressCombo.query()
-        mCurProjectGroupId = vm.tmpPrefHelper.currentProjectGroupId
+        mProjectGroups = vm.projectGroups
+        mCurProjectGroupId = vm.currentProjectGroupId
         notifyDataSetChanged()
     }
 

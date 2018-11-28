@@ -70,6 +70,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     var didAutoSkip: Boolean = false
     val isPictureStage: Boolean
         get() = curFlowValue.isPictureStage
+
     var detectNoteError: () -> Boolean = { false }
     var entryTextValue: () -> String = { "" }
     var detectLoginError: () -> Boolean = { false }
@@ -80,7 +81,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     private var autoNarrowOkay = true
     private var takingPictureFile: File? = null
 
-    val curProjectHint: String
+    private val curProjectHint: String
         get() {
             val sbuf = StringBuilder()
             val name = prefHelper.projectName
@@ -92,7 +93,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             return sbuf.toString()
         }
 
-    val editProjectHint: String
+    private val editProjectHint: String
         get() {
             val sbuf = StringBuilder()
             sbuf.append(getString(StringMessage.entry_hint_edit_project))
@@ -106,7 +107,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             return sbuf.toString()
         }
 
-    val statusHint: String
+    private val statusHint: String
         get() {
             val sbuf = StringBuilder()
             val countPictures = prefHelper.numPicturesTaken
@@ -118,7 +119,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             return sbuf.toString()
         }
 
-    val hasProjectName: Boolean
+    private val hasProjectName: Boolean
         get() = prefHelper.projectName != null
 
     private val isAutoNarrowOkay: Boolean
@@ -146,7 +147,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         prefHelper.setFromCurrentProjectId()
     }
 
-    fun dispatchPictureRequest() {
+    private fun dispatchPictureRequest() {
         val pictureFile = prefHelper.genFullPictureFile()
         db.tablePictureCollection.add(pictureFile, prefHelper.currentPictureCollectionId)
         takingPictureFile = pictureFile
@@ -177,9 +178,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         return takingPictureFile?.absolutePath
     }
 
-    fun checkProjectErrors(): Boolean = repo.checkProjectErrors()
-
-    fun dispatchGetLocation() {
+    private fun dispatchGetLocation() {
         dispatchActionEvent(Action.GET_LOCATION)
     }
 
@@ -209,7 +208,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun btnPrev() {
+    private fun btnPrev() {
         if (confirmPrev()) {
             wasNext = false
             companyEditing = null
@@ -217,7 +216,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun btnNext(wasAutoSkip: Boolean = false) {
+    private fun btnNext(wasAutoSkip: Boolean = false) {
         if (confirmNext()) {
             didAutoSkip = wasAutoSkip
             companyEditing = null
@@ -232,7 +231,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         curFlowValue = TruckFlow()
     }
 
-    fun skip() {
+    private fun skip() {
         if (wasNext) {
             btnNext(true)
         } else {
@@ -240,26 +239,47 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun advance() {
+    private fun advance() {
         wasNext = true
         process(curFlowValue.next)
+    }
+
+    fun showNoteErrorOk() {
+        if (BuildConfig.DEBUG) {
+            advance()
+        } else {
+            btnNext()
+        }
     }
 
     private fun process(action: ActionBundle?) {
         when (action) {
             is StageArg -> curFlowValue = Flow.from(action.stage)
-            is ActionArg -> dispatchActionEvent(action.action)
+            is ActionArg -> processActionEvent(action.action)
         }
     }
 
-    fun btnCenter() {
+    private fun processActionEvent(action: Action) {
+        when (action) {
+            Action.NEW_PROJECT -> { onNewProject() }
+            Action.BTN_PREV -> btnPrev()
+            Action.BTN_CENTER -> btnCenter()
+            Action.BTN_NEXT -> btnNext()
+            Action.BTN_CHANGE -> btnChangeCompany()
+            Action.PING -> dispatchActionEvent(Action.PING)
+            is Action.RETURN_PRESSED -> doSimpleEntryReturn(action.text)
+            else -> dispatchActionEvent(action)
+        }
+    }
+
+    private fun btnCenter() {
         if (confirmCenter()) {
             wasNext = false
             process(curFlowValue.center)
         }
     }
 
-    fun btnChangeCompany() {
+    private fun btnChangeCompany() {
         autoNarrowOkay = false
         wasNext = false
         curFlowValue = CompanyFlow()
@@ -275,7 +295,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         curFlowValue = LoginFlow()
     }
 
-    fun doSimpleEntryReturn(value: String) {
+    private fun doSimpleEntryReturn(value: String) {
         when (curFlowValue.stage) {
             Stage.LOGIN -> {
                 btnCenter()
@@ -303,7 +323,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         curFlowValue = CurrentProjectFlow()
     }
 
-    fun onNewProject() {
+    private fun onNewProject() {
         autoNarrowOkay = true
         prefHelper.clearCurProject()
         curFlowValue = ProjectFlow()
@@ -348,7 +368,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         }
     }
 
-    fun onEmptyList() {
+    private fun onEmptyList() {
         when (curFlowValue.stage) {
             Stage.COMPANY,
             Stage.STREET,

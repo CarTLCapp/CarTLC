@@ -57,7 +57,7 @@ class NoteListEntryAdapter(
         override fun afterTextChanged(s: Editable) {
             if (mLabel.isSelected) {
                 mItem.value = s.toString().trim { it <= ' ' }
-                vm.tmpDb.tableNote.updateValue(mItem)
+                vm.updateNoteValue(mItem)
                 mListener.textEntered(mItem)
             }
         }
@@ -132,16 +132,11 @@ class NoteListEntryAdapter(
     }
 
     fun onDataChanged() {
-        val currentEditEntry = vm.tmpPrefHelper.currentEditEntry
-        val currentProjectGroup = vm.tmpPrefHelper.currentProjectGroup
+        val currentEditEntry = vm.currentEditEntry
         if (currentEditEntry != null) {
             mItems = currentEditEntry.notesAllWithValuesOverlaid.toMutableList()
         } else {
-            if (currentProjectGroup != null) {
-                mItems = vm.tmpDb.tableCollectionNoteProject.getNotes(currentProjectGroup.projectNameId).toMutableList()
-            } else {
-                mItems = ArrayList()
-            }
+            mItems = vm.queryNotes().toMutableList()
         }
         pushToBottom("Other")
         notifyDataSetChanged()

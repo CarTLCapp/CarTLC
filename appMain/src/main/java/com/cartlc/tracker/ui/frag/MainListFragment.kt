@@ -139,7 +139,7 @@ class MainListFragment : BaseFragment() {
             }
             Stage.EQUIPMENT -> {
                 mainList.adapter = equipmentSelectAdapter
-                equipmentSelectAdapter.onDataChanged(vm.tmpPrefHelper.currentProjectGroup)
+                equipmentSelectAdapter.onDataChanged(vm.currentProjectGroup)
             }
             Stage.NOTES -> {
                 // TODO: Push visibility logic to VM

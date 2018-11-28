@@ -34,7 +34,7 @@ class EquipmentSelectListAdapter(
                 check_button!!.isChecked = item.isChecked
                 check_button!!.setOnCheckedChangeListener { _, isChecked ->
                     item.isChecked = isChecked
-                    vm.tmpDb.tableEquipment.setChecked(item, isChecked)
+                    vm.setItemChecked(item, isChecked)
                 }
             }
         }
@@ -55,7 +55,7 @@ class EquipmentSelectListAdapter(
 
     fun onDataChanged(currentProjectGroup: DataProjectAddressCombo?) {
         if (currentProjectGroup != null) {
-            val collection = vm.tmpDb.tableCollectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
+            val collection = vm.queryForProject(currentProjectGroup)
             mItems = collection.equipment.toMutableList()
             mItems.sort()
             notifyDataSetChanged()
@@ -64,7 +64,7 @@ class EquipmentSelectListAdapter(
 
     fun hasChecked(currentProjectGroup: DataProjectAddressCombo?): Boolean {
         if (currentProjectGroup != null) {
-            val collection = vm.tmpDb.tableCollectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
+            val collection = vm.queryForProject(currentProjectGroup)
             for (item in collection.equipment) {
                 if (item.isChecked) {
                     return true
