@@ -7,12 +7,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.lifecycle.Observer
+import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragEntrySimpleBinding
 import com.cartlc.tracker.viewmodel.EntrySimpleViewModel
+import com.cartlc.tracker.viewmodel.EntrySimpleViewModel.Checked
 
-class EntrySimpleFragment: BaseFragment() {
+class EntrySimpleFragment : BaseFragment() {
 
     lateinit var binding: FragEntrySimpleBinding
 
@@ -43,6 +46,19 @@ class EntrySimpleFragment: BaseFragment() {
         binding.entrySimpleEditText.setRawInputType(InputType.TYPE_CLASS_TEXT)
 
         vm.inputType.observe(this, Observer { type -> binding.entrySimpleEditText.inputType = type })
+        vm.checkedButton.observe(this, Observer { value -> binding.entryRadioGroup.check(value) })
+
+        binding.entryRadioGroup.setOnCheckedChangeListener(object : RadioGroup.OnCheckedChangeListener {
+            override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
+                if (checkedId == R.id.entry_radio_yes && binding.entryRadioYes.isChecked) {
+                    vm.onCheckedChanged(Checked.CHECKED_YES)
+                } else if (checkedId == R.id.entry_radio_no && binding.entryRadioNo.isChecked) {
+                    vm.onCheckedChanged(Checked.CHECKED_NO)
+                } else {
+                    vm.onCheckedChanged(Checked.CHECKED_NONE)
+                }
+            }
+        })
 
         return binding.root
     }

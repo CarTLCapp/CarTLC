@@ -35,8 +35,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:checkedButton="@{viewModel.checkedButton}"
-            android:onCheckedChanged="@{(group, id)->viewModel.onCheckedChanged(id)}"
             android:orientation="horizontal"
             android:visibility="@{viewModel.showChecked ? View.VISIBLE : View.GONE}"
             app:layout_constraintLeft_toLeftOf="parent"
