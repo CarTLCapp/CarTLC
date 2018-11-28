@@ -3,11 +3,16 @@ package com.cartlc.tracker.viewmodel
 import android.app.Activity
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
+import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.Flow
+import com.cartlc.tracker.model.flow.LoginFlow
+import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.misc.StringMessage
+import com.cartlc.tracker.model.pref.PrefHelper
+import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication
 import javax.inject.Inject
 
@@ -57,6 +62,27 @@ class ButtonsViewModel(private val act: Activity) : BaseViewModel() {
         get() = showChangeButton.get()
         set(value) = showChangeButton.set(value)
 
+    private val db: DatabaseTable
+        get() = repo.db
+
+    private val prefHelper: PrefHelper
+        get() = repo.prefHelper
+
+    private val curFlow: MutableLiveData<Flow>
+        get() = repo.curFlow
+
+    private var curFlowValue: Flow
+        get() = curFlow.value ?: LoginFlow()
+        set(value) {
+            curFlow.value = value
+        }
+
+    val isLocalCompany: Boolean
+        get() = db.tableAddress.isLocalCompanyOnly(prefHelper.company)
+
+    val isCenterButtonEdit: Boolean
+        get() = curFlowValue.stage == Stage.COMPANY && isLocalCompany
+
     var getString: (msg: StringMessage) -> String = { "" }
     var dispatchButtonEvent: (action: Action) -> Unit = {}
 
@@ -68,5 +94,13 @@ class ButtonsViewModel(private val act: Activity) : BaseViewModel() {
         nextTextValue = getString(StringMessage.btn_next)
         showPrevButtonValue = flow.prev != null
         prevTextValue = getString(StringMessage.btn_prev)
+    }
+
+    fun checkCenterButtonIsEdit() {
+        if (isCenterButtonEdit) {
+            centerTextValue = getString(StringMessage.btn_edit)
+        } else {
+            centerTextValue = getString(StringMessage.btn_add)
+        }
     }
 }

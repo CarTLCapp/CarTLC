@@ -78,7 +78,7 @@ class MainListFragment : BaseFragment() {
                     buttonsViewModel?.showNextButtonValue = true
                 }
                 Stage.COMPANY -> {
-                    mainActivity?.checkCenterButtonIsEdit()
+                    buttonsViewModel?.checkCenterButtonIsEdit()
                 }
                 Stage.TRUCK -> {
                     entrySimpleViewModel?.simpleText?.set(value)

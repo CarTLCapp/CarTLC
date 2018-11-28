@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.lifecycle.Observer
-import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragEntrySimpleBinding
 import com.cartlc.tracker.viewmodel.EntrySimpleViewModel
 import com.cartlc.tracker.viewmodel.EntrySimpleViewModel.Checked
@@ -50,16 +49,15 @@ class EntrySimpleFragment : BaseFragment() {
 
         binding.entryRadioGroup.setOnCheckedChangeListener(object : RadioGroup.OnCheckedChangeListener {
             override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
-                if (checkedId == R.id.entry_radio_yes && binding.entryRadioYes.isChecked) {
+                if (binding.entryRadioYes.isChecked) {
                     vm.onCheckedChanged(Checked.CHECKED_YES)
-                } else if (checkedId == R.id.entry_radio_no && binding.entryRadioNo.isChecked) {
+                } else if (binding.entryRadioNo.isChecked) {
                     vm.onCheckedChanged(Checked.CHECKED_NO)
                 } else {
                     vm.onCheckedChanged(Checked.CHECKED_NONE)
                 }
             }
         })
-
         return binding.root
     }
 

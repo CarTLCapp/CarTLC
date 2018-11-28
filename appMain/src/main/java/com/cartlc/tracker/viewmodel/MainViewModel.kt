@@ -65,12 +65,6 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
             framePictureVisible.value = value
         }
 
-    private val isLocalCompany: Boolean
-        get() = db.tableAddress.isLocalCompanyOnly(prefHelper.company)
-
-    val isCenterButtonEdit: Boolean
-        get() = curFlowValue.stage == Stage.COMPANY && isLocalCompany
-
     private var companyEditing: String? = null
     private var wasNext: Boolean = false
     var didAutoSkip: Boolean = false
@@ -541,13 +535,6 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
         dispatchActionEvent(Action.SET_PICTURE_LIST(list))
     }
 
-    private fun checkCenterButtonIsEdit() {
-        if (isCenterButtonEdit) {
-            buttonsViewModel.centerTextValue = getString(StringMessage.btn_edit)
-        } else {
-            buttonsViewModel.centerTextValue = getString(StringMessage.btn_add)
-        }
-    }
 
     private fun checkChangeCompanyButtonVisible() {
         if (didAutoSkip) {
@@ -595,7 +582,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
                 buttonsViewModel.showCenterButtonValue = true
                 processCompanies { companyNames ->
                     setList(StringMessage.title_company, PrefHelper.KEY_COMPANY, companyNames)
-                    checkCenterButtonIsEdit()
+                    buttonsViewModel.checkCenterButtonIsEdit()
                 }
             }
             Stage.ADD_COMPANY -> {
@@ -830,7 +817,7 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     }
 
     private fun processEditCompany(action: (company: String) -> Unit) {
-        if (isLocalCompany) {
+        if (buttonsViewModel.isLocalCompany) {
             companyEditing = prefHelper.company
             action(companyEditing ?: "")
         } else {

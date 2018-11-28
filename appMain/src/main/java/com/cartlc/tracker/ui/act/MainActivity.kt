@@ -392,14 +392,6 @@ class MainActivity : BaseActivity() {
         dialog.dismiss()
     }
 
-    fun checkCenterButtonIsEdit() {
-        if (vm.isCenterButtonEdit) {
-            buttonsFragment.vm.centerTextValue = getString(R.string.btn_edit)
-        } else {
-            buttonsFragment.vm.centerTextValue = getString(R.string.btn_add)
-        }
-    }
-
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         vm.onRestoreInstanceState(savedInstanceState.getString(KEY_TAKING_PICTURE, null))
         super.onRestoreInstanceState(savedInstanceState)
