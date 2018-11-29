@@ -91,7 +91,7 @@ class MainActivity : BaseActivity() {
         }
 
         override fun onPostExecute(result: Boolean?) {
-            if (result!! && !isDestroyed && !isFinishing && vm.isPictureStage) {
+            if (!isDestroyed && !isFinishing && vm.isPictureStage) {
                 mPictureAdapter.notifyDataSetChanged()
             }
         }
@@ -111,7 +111,7 @@ class MainActivity : BaseActivity() {
 
         fab_add.setOnClickListener { _: View -> vm.btnPlus() }
 
-        mPictureAdapter = PictureListAdapter(this) { newCount: Int -> vm.setPhotoTitleCount(newCount) }
+        mPictureAdapter = PictureListAdapter(this) { newCount: Int -> titleFragment.vm.setPhotoTitleCount(newCount) }
         val linearLayoutManager = AutoLinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         list_pictures.layoutManager = linearLayoutManager
         list_pictures.adapter = mPictureAdapter
@@ -138,7 +138,14 @@ class MainActivity : BaseActivity() {
         buttonsFragment.vm.getString = vm.getString
         buttonsFragment.vm.dispatchButtonEvent = { action -> vm.dispatchActionEvent(action) }
         loginFragment.vm.error = vm.error
-        entrySimpleFragment.vm.dispatchActionEvent = { action -> vm.dispatchActionEvent(action) }
+        loginFragment.vm.buttonsViewModel = buttonsFragment.vm
+        loginFragment.vm.getString = vm.getString
+        entrySimpleFragment.vm.dispatchActionEvent = buttonsFragment.vm.dispatchButtonEvent
+        confirmationFragment.vm.dispatchActionEvent = entrySimpleFragment.vm.dispatchActionEvent
+        confirmationFragment.vm.buttonsViewModel = buttonsFragment.vm
+        confirmationFragment.vm.titleViewModel = titleFragment.vm
+        confirmationFragment.vm.getString = vm.getString
+        titleFragment.vm.getString = vm.getString
         EventBus.getDefault().register(this)
         title = mApp.versionedTitle
         getLocation()
@@ -411,7 +418,7 @@ class MainActivity : BaseActivity() {
     private fun showConfirmDialog() {
         dialogHelper.showConfirmDialog(object : DialogHelper.DialogListener {
             override fun onOkay() {
-                vm.onConfirmOkay()
+                confirmationFragment.vm.onConfirmOkay()
             }
 
             override fun onCancel() {}

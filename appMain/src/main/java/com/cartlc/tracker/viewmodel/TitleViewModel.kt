@@ -5,6 +5,7 @@ import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import com.cartlc.tracker.databinding.FragTitleBinding
 import com.cartlc.tracker.model.CarRepository
+import com.cartlc.tracker.model.misc.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.app.TBApplication
 import javax.inject.Inject
@@ -34,4 +35,16 @@ class TitleViewModel(private val act: Activity) : BaseViewModel() {
     var showSeparatorValue: Boolean
         get() = showSeparator.get()
         set(value) = showSeparator.set(value)
+
+    var getString: (msg: StringMessage) -> String = { "" }
+
+    fun setPhotoTitleCount(count: Int) {
+        if (count == 1) {
+            titleValue = getString(StringMessage.title_photo)
+        } else {
+            titleValue = getString(StringMessage.title_photos(count))
+        }
+    }
+
+
 }

@@ -5,9 +5,12 @@ import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.model.CarRepository
+import com.cartlc.tracker.model.flow.Flow
+import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.misc.ErrorMessage
+import com.cartlc.tracker.model.misc.StringMessage
 import javax.inject.Inject
 
 class LoginViewModel(private val act: Activity) : BaseViewModel() {
@@ -37,6 +40,9 @@ class LoginViewModel(private val act: Activity) : BaseViewModel() {
     var isSecondaryPromptsEnabled = ObservableBoolean(prefHelper.isSecondaryEnabled)
 
     lateinit var error: MutableLiveData<ErrorMessage>
+    lateinit var buttonsViewModel: ButtonsViewModel
+
+    var getString: (msg: StringMessage) -> String = { "" }
 
     var showingValue: Boolean
         get() = showing.get()
@@ -80,5 +86,18 @@ class LoginViewModel(private val act: Activity) : BaseViewModel() {
         prefHelper.registrationHasChanged = true
         app.ping()
         return false
+    }
+
+    fun onStageChanged(flow: Flow) {
+        when (flow.stage) {
+            Stage.LOGIN -> {
+                showingValue = true
+                buttonsViewModel.showCenterButtonValue = true
+                buttonsViewModel.centerTextValue = getString(StringMessage.title_login)
+            }
+            else -> {
+                showingValue = false
+            }
+        }
     }
 }

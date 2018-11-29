@@ -65,6 +65,7 @@ class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
     var showEditTextValue: Boolean
         get() = showEditText.get()
         set(value) = showEditText.set(value)
+
     private var checkedButtonValue: Int
         get() = checkedButton.value ?: -1
         set(value) {
