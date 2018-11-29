@@ -32,7 +32,7 @@ import com.cartlc.tracker.ui.util.PermissionHelper.PermissionListener
 
 import com.cartlc.tracker.ui.util.PermissionHelper
 import com.cartlc.tracker.viewmodel.main.DaggerMainViewModelComponent
-import com.cartlc.tracker.viewmodel.main.MainViewModel
+import com.cartlc.tracker.viewmodel.main.MainVMHolder
 import com.cartlc.tracker.viewmodel.main.MainViewModelComponent
 import com.cartlc.tracker.viewmodel.main.MainViewModelModule
 import com.cartlc.tracker.viewmodel.vehicle.DaggerVehicleViewModelComponent
@@ -121,7 +121,7 @@ class TBApplication : Application() {
     private lateinit var dm: DatabaseManager
 
     lateinit var mainViewModelComponent: MainViewModelComponent
-    private lateinit var mainViewModel: MainViewModel
+    private lateinit var mainVMHolder: MainVMHolder
 
     lateinit var vehicleComponent: VehicleViewModelComponent
     private lateinit var vehicleViewModel: VehicleViewModel
@@ -153,9 +153,9 @@ class TBApplication : Application() {
         carRepoComponent = DaggerCarRepositoryComponent.builder()
                 .carRepositoryModule(CarRepositoryModule(carRepo))
                 .build()
-        mainViewModel = MainViewModel(carRepo)
+        mainVMHolder = MainVMHolder(carRepo)
         mainViewModelComponent = DaggerMainViewModelComponent.builder()
-                .mainViewModelModule(MainViewModelModule(mainViewModel))
+                .mainViewModelModule(MainViewModelModule(mainVMHolder))
                 .build()
         vehicleRepository = VehicleRepository(this, dm, prefHelper)
         vehicleViewModel = VehicleViewModel(vehicleRepository)

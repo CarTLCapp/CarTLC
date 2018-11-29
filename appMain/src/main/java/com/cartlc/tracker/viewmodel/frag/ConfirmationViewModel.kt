@@ -78,6 +78,7 @@ class ConfirmationViewModel(private val act: Activity) : BaseViewModel() {
                 curEntry?.let { entry -> dispatchActionEvent(Action.CONFIRMATION_FILL(entry)) }
                 dispatchActionEvent(Action.STORE_ROTATION)
             }
+            else -> {}
         }
     }
 }

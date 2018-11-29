@@ -86,6 +86,7 @@ class VehicleViewModel(
                 VehicleStage.STAGE_4 -> repo.entered.vehicle.fluidProblemsDetected = value
                 VehicleStage.STAGE_5 -> repo.entered.vehicle.exteriorDamage = value
                 VehicleStage.STAGE_6 -> repo.entered.vehicle.other = value
+                else -> {}
             }
         } catch (ex: NumberFormatException) {
         }
@@ -101,6 +102,7 @@ class VehicleViewModel(
                 repo.entered.vehicle.typeOfInspectionValue = text
                 btnNextVisible(repo.isValidStage2)
             }
+            else -> {}
         }
     }
 
@@ -109,12 +111,14 @@ class VehicleViewModel(
             VehicleStage.STAGE_3 -> repo.entered.vehicle.headLights.set(text, selected)
             VehicleStage.STAGE_4 -> repo.entered.vehicle.fluidChecks.set(text, selected)
             VehicleStage.STAGE_5 -> repo.entered.vehicle.tireInspection.set(text, selected)
+            else -> {}
         }
     }
 
     fun onList2Select(text: String, selected: Boolean) {
         when (repo.stageValue) {
             VehicleStage.STAGE_3 -> repo.entered.vehicle.tailLights.set(text, selected)
+            else -> {}
         }
     }
 
@@ -130,6 +134,7 @@ class VehicleViewModel(
             VehicleStage.STAGE_4 -> repo.entered.hasIssuesFluids = hasIssues
             VehicleStage.STAGE_5 -> repo.entered.hasIssuesDamage = hasIssues
             VehicleStage.STAGE_6 -> repo.entered.hasIssuesOther = hasIssues
+            else -> {}
         }
         onStageChanged()
     }

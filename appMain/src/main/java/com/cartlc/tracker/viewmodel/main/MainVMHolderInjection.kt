@@ -8,12 +8,12 @@ import javax.inject.Singleton
 
 @Module
 class MainViewModelModule(
-        private val mainViewModel: MainViewModel
+        private val mainVMHolder: MainVMHolder
 ) {
 
     @Provides
     @Singleton
-    fun providesMainViewModel(): MainViewModel = mainViewModel
+    fun providesMainViewModel(): MainVMHolder = mainVMHolder
 }
 
 @Singleton
