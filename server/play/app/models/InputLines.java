@@ -3,40 +3,33 @@
  */
 package models;
 
-import java.util.*;
-import javax.persistence.*;
-
 import com.avaje.ebean.Model;
-import play.data.format.*;
-import play.data.validation.*;
-
-import com.avaje.ebean.*;
 
 /**
  * Input many lines at once
  */
 public class InputLines extends Model {
 
-    private static final long serialVersionUID = 1L;
+    public String [] lines;
 
-    private String mLines = "";
+    public String line;
 
     public InputLines() {
     }
 
-    public InputLines(String lines) {
-        if (lines == null) {
-            mLines = "";
+    public InputLines(String input) {
+        if (input == null) {
+            line = "";
+        } else {
+            line = input;
         }
-        mLines = lines;
+        lines = line.split("\\n");
     }
 
     public String [] getLines() {
-        return mLines.split("\\n");
+        lines = line.split("\\n");
+        return lines;
     }
 
-    public void setLines(String lines) {
-        mLines = lines;
-    }
 }
 

@@ -112,7 +112,7 @@ public class ProjectNoteCollection extends Model {
         }
     }
 
-    public static void addNew(long project_id, List<Note> notes) {
+    public static void replace(long project_id, List<Note> notes) {
         deleteByProjectId(project_id);
         for (Note note : notes) {
             ProjectNoteCollection entry = new ProjectNoteCollection();

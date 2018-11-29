@@ -13,7 +13,7 @@ root/cartlc
 
 Web Access:
 ------------
-http://cartlc.arqnetworks.com/
+http://fleetdev.arqnetworks.com/
 
 Starting Play:
 ------------
@@ -38,6 +38,11 @@ PHPMyAdmin:
    http://cartlc.arqnetworks.com/phpmyadmin
    User: root p/w: cartlc
    Additional: cartlc p/w: cartcl#@!
+
+Copy files from local machine to server
+cp credentials ~/.aws
+cd ~/fleet/s3/fleettlc
+aws s3 sync . s3://cartlc
 
 Database:
 --------

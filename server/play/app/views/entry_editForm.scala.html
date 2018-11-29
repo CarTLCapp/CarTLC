@@ -1,0 +1,82 @@
+@(id: Long, entryForm: Form[views.formdata.EntryFormData], client : Client)
+
+@import helper._
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - Edit Entry", client, "/entry/list") {
+    
+    <h1>Edit entry</h1>
+    
+    @b3.form(routes.EntryController.update(id)) {
+
+        @CSRF.formField
+
+        <fieldset>
+        
+            @b3.select(
+                entryForm("name"),
+                options(Entry.optionsTech),
+                '_label -> "Name", '_default -> "-- Choose Tech --",
+                '_showConstraints -> false
+            )
+            @b3.text(entryForm("date"), '_label -> "Date", '_help -> "")
+            @b3.select(
+                entryForm("project"),
+                options(Entry.optionsProject),
+                '_label -> "Project", '_default -> "-- Choose Project --",
+                '_showConstraints -> false
+            )
+            @b3.text(entryForm("address"), '_label -> "Address", '_help -> "")
+            @b3.text(entryForm("truck"), '_label -> "Truck", '_help -> "")
+            @b3.select(
+                entryForm("status"),
+                options(Entry.optionsStatus),
+                '_label -> "Status", '_default -> "-- Choose Status --",
+                '_showConstraints -> false
+            )
+        </fieldset>
+
+        <h3>Equipment</h3>
+
+        <div class="checkbox-container-columns">
+
+            @for(equipment <- Equipment.list()) {
+                <div class="checkbox-item">
+                    @if(Entry.hasEquipment(id, equipment.id)) {
+                        @b3.checkbox(entryForm(equipment.name), '_label -> equipment.name, 'checked -> true)
+                    } else {
+                        @b3.checkbox(entryForm(equipment.name), '_label -> equipment.name)
+                    }
+                </div>
+                <div style="clear:both;"></div>
+            }
+
+        </div>
+
+        <h3>Notes</h3>
+
+        <div class="checkbox-container-columns">
+
+            @for(note <- Note.list()) {
+                <div class="checkbox-item">
+                    @if(Entry.hasNote(id, note.id)) {
+                        @b3.checkbox(entryForm(note.name), '_label -> note.name, 'checked -> true)
+                    } else {
+                        @b3.checkbox(entryForm(note.name), '_label -> note.name)
+                    }
+                </div>
+                <div style="clear:both;"></div>
+            }
+
+        </div>
+
+
+        <div class="actions">
+            <input type="submit" value="Save this entry" class="btn primary"> or
+            <a href="/entry/@id/view"" class="btn">Cancel</a>
+        </div>
+
+    }
+
+}

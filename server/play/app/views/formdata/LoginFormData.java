@@ -13,26 +13,33 @@ import models.Client;
 @Validate
 public class LoginFormData implements Validatable<String> {
 
-  /** The submitted username. */
-  public String username = "";
-  /** The submitted password. */
-  public String password = "";
+    /**
+     * The submitted username.
+     */
+    public String username = "";
+    /**
+     * The submitted password.
+     */
+    public String password = "";
 
-  /** Required for form instantiation. */
-  public LoginFormData() {
-  }
-
-  /**
-   * Validates Form<LoginFormData>.
-   * Called automatically in the controller by bindFromRequest().
-   * Checks to see that email and password are valid credentials.
-   * @return Null if valid, or a List[ValidationError] if problems found.
-   */
-  public String validate() {
-    if (!Client.isValid(username, password)) {
-      return "Invalid username or password";
+    /**
+     * Required for form instantiation.
+     */
+    public LoginFormData() {
     }
-    return null;
-  }
+
+    /**
+     * Validates Form<LoginFormData>.
+     * Called automatically in the controller by bindFromRequest().
+     * Checks to see that email and password are valid credentials.
+     *
+     * @return Null if valid, or a List[ValidationError] if problems found.
+     */
+    public String validate() {
+      if (!Client.isValid(username, password)) {
+          return "Invalid username or password";
+      }
+      return null;
+    }
 
 }

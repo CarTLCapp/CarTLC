@@ -6,14 +6,8 @@ package models;
 import java.util.*;
 import javax.persistence.*;
 
-import play.db.ebean.*;
 import play.data.validation.*;
-import play.db.ebean.Transactional;
 import play.data.format.*;
-
-import com.avaje.ebean.*;
-import modules.AmazonHelper;
-import play.Logger;
 
 /**
  * Entry entity managed by Ebean

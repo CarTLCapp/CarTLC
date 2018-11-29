@@ -9,16 +9,12 @@ import java.io.File;
 
 import javax.persistence.*;
 
-import play.db.ebean.*;
-import play.db.ebean.*;
 import play.data.validation.*;
-import play.db.ebean.Transactional;
 import play.data.format.*;
 
 import com.avaje.ebean.*;
 
 import modules.AmazonHelper;
-import modules.AmazonHelper.OnDownloadComplete;
 import play.Logger;
 
 /**
@@ -267,7 +263,7 @@ public class Entry extends com.avaje.ebean.Model {
         return status.getCellColor();
     }
 
-    static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a z";
+    public static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a z";
 
     public String getDate() {
         SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
@@ -285,22 +281,16 @@ public class Entry extends com.avaje.ebean.Model {
         return format.format(entry_time);
     }
 
+    public Truck getTruck() {
+        return Truck.find.ref(truck_id);
+    }
+
     public String getTruckLine() {
         Truck truck = Truck.find.ref(truck_id);
         if (truck == null) {
             return null;
         }
-        StringBuilder sbuf = new StringBuilder();
-        if (truck.truck_number != null && !truck.truck_number.isEmpty()) {
-            sbuf.append(truck.truck_number);
-        }
-        if (truck.license_plate != null && !truck.license_plate.isEmpty()) {
-            if (sbuf.length() > 0) {
-                sbuf.append(" : ");
-            }
-            sbuf.append(truck.license_plate);
-        }
-        return sbuf.toString();
+        return truck.getID();
     }
 
     public int truckCompareTo(Entry other) {
@@ -408,8 +398,18 @@ public class Entry extends com.avaje.ebean.Model {
         return null;
     }
 
-    public static boolean hasEquipment(long project_id, long equipment_id) {
+    public static boolean hasEquipmentByProject(long project_id, long equipment_id) {
         for (Entry entry : findByProjectId(project_id)) {
+            if (entry.hasEquipment(equipment_id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasEquipment(long entry_id, long equipment_id) {
+        Entry entry = find.ref(entry_id);
+        if (entry != null) {
             if (entry.hasEquipment(equipment_id)) {
                 return true;
             }
@@ -427,10 +427,29 @@ public class Entry extends com.avaje.ebean.Model {
         return false;
     }
 
+    public static boolean hasNote(long entry_id, long note_id) {
+        Entry entry = find.ref(entry_id);
+        if (entry != null) {
+            if (entry.hasNote(note_id)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    public void remove(AmazonHelper amazonHelper) {
+    public boolean hasNote(long note_id) {
+        List<Note> items = EntryNoteCollection.findNotes(note_collection_id);
+        for (Note item : items) {
+            if (item.id == note_id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void remove(AmazonHelper.DeleteAction amazonAction) {
         EntryEquipmentCollection.deleteByCollectionId(equipment_collection_id);
-        PictureCollection.deleteByCollectionId(picture_collection_id, amazonHelper);
+        PictureCollection.deleteByCollectionId(picture_collection_id, amazonAction);
         EntryNoteCollection.deleteByCollectionId(note_collection_id);
         delete();
     }
@@ -546,6 +565,30 @@ public class Entry extends com.avaje.ebean.Model {
         return items.size() > 0;
     }
 
+    public static boolean hasEntryForPicture(String filename) {
+        List<PictureCollection> pictures = PictureCollection.findByPictureName(filename);
+        if (pictures.isEmpty()) {
+            return false;
+        }
+        for (PictureCollection collection : pictures) {
+            List<Entry> list = find.where()
+                    .eq("picture_collection_id", collection.id)
+                    .findList();
+            if (!list.isEmpty()) {
+                return true;
+            }
+            // This is very interesting. A collection ID without any entries? Sounds like something to delete.
+            Logger.warn("ALERT! No entries for picture collection ID: " + collection.id + ", triggered from: " + filename);
+        }
+        return false;
+    }
+
+    public static boolean hasEntryForPictureCollectionId(long picture_collection_id) {
+        return !find.where()
+                .eq("picture_collection_id", picture_collection_id)
+                .findList().isEmpty();
+    }
+
     public static Entry getFulfilledBy(WorkOrder order) {
         List<Entry> list = find.where()
                 .eq("company_id", order.company_id)
@@ -572,15 +615,9 @@ public class Entry extends com.avaje.ebean.Model {
         for (PictureCollection picture : pictures) {
             File localFile = amazonHelper.getLocalFile(picture.picture);
             if (!localFile.exists()) {
-                try {
-                    amazonHelper.download(host, picture.picture, new OnDownloadComplete() {
-                        public void onDownloadComplete(File file) {
-                            Logger.info("COMPLETED: " + file.getAbsolutePath());
-                        }
-                    });
-                } catch (Exception ex) {
-                    Logger.error(ex.getMessage());
-                }
+                amazonHelper.download(host, picture.picture, (file) ->
+                        Logger.info("COMPLETED: " + file.getAbsolutePath())
+                );
             }
         }
     }
@@ -599,5 +636,43 @@ public class Entry extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
+    public static Map<String, String> optionsTech() {
+        LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
+        for (Technician tech : Technician.list()) {
+            options.put(tech.fullName(), tech.fullName());
+        }
+        return options;
+    }
+
+    public static Map<String, String> optionsProject() {
+        LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
+        for (Project proj : Project.list()) {
+            options.put(proj.name, proj.name);
+        }
+        return options;
+    }
+
+    public static Map<String, String> optionsStatus() {
+        LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
+        for (Status status : Status.values()) {
+            if (status != Status.UNKNOWN) {
+                options.put(status.name, status.name);
+            }
+        }
+        return options;
+    }
+
+    public static Status findStatus(String match) {
+        for (Status status : Status.values()) {
+            if (status.name.equals(match)) {
+                return status;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isValidStatus(String match) {
+        return findStatus(match) != null;
+    }
 }
 

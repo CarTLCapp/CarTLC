@@ -12,8 +12,9 @@ clients.list.title={0,choice,0#No clients|1#One client|1<{0,number,integer} clie
 workorder.list.title={0,choice,0#No work orders|1#One Work Order|1<{0,number,integer} work orders} found
 workordersummary.list.title={0,choice,0#No work orders|1#One Project|1<{0,number,integer} work order projects} found
 trucks.list.title={0,choice,0#No trucks|1#One Truck|1<{0,number,integer} trucks} found
+vehicles.list.title={0,choice,0#No vehicles|1#One Vehicle|1<{0,number,integer} vehicles} found
+vehicle_names.list.title={0,choice,0#No vehicles names|1#One Vehicle Name|1<{0,number,integer} vehicle names} found
 
-project.list.header=Show {0} Projects
-
+project.list.header={0} Projects
 
 

@@ -45,12 +45,16 @@ public class TruckController extends Controller {
     /**
      * Display the list of trucks.
      */
-    public Result list() {
+    public Result list(int page) {
         if (mFilter) {
-            return ok(views.html.truck_list.render(Truck.listFiltered(), Secured.getClient(ctx()), FILTER_HIDE));
+            return ok(views.html.truck_list.render(Truck.listFiltered(page), Secured.getClient(ctx()), FILTER_HIDE));
         } else {
-            return ok(views.html.truck_list.render(Truck.list(), Secured.getClient(ctx()), FILTER_SHOW));
+            return ok(views.html.truck_list.render(Truck.listPaged(page), Secured.getClient(ctx()), FILTER_SHOW));
         }
+    }
+
+    public Result list() {
+        return list(0);
     }
 
     @Security.Authenticated(Secured.class)
@@ -95,7 +99,6 @@ public class TruckController extends Controller {
         if (value == null) {
             return badRequest("missing field: tech_id");
         }
-        int tech_id = value.intValue();
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("trucks");
         List<Truck> trucks = Truck.list();

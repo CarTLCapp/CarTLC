@@ -1,0 +1,39 @@
+@(currentPage: List[VehicleName], client : Client)
+
+@main("FleetTLC - List Vehicle Names", client, "/vehicles/list") {
+
+    <h1 id="homeTitle">@Messages("vehicle_names.list.title", currentPage.size())
+        <span style="float:right;font-size:16px"><a href="@routes.VehicleController.editNames()">Edit</a></span>
+    </h1>
+
+    @if(currentPage.size() == 0) {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+    } else {
+
+        <table class="techs zebra-striped">
+            <thead>
+                <tr>
+                    <th>Number</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(name <- currentPage) {
+                    <tr>
+                        <td>@name.getOrder()</td>
+                        <td>@name.getName()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    }
+
+}
+
+            

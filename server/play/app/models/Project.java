@@ -80,6 +80,10 @@ public class Project extends Model implements Comparable<Project> {
         return null;
     }
 
+    public static boolean isValid(String name) {
+        return findByName(name) != null;
+    }
+
     public static List<Long> findMatches(String name) {
         List<Project> projects = find.where()
                 .ilike("name", "%" + name + "%")

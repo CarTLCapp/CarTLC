@@ -9,14 +9,10 @@ import javax.persistence.*;
 
 import com.avaje.ebean.Model;
 
-import play.data.format.*;
 import play.data.validation.*;
-import play.Logger;
 import modules.AmazonHelper;
 
 import java.io.File;
-
-import com.avaje.ebean.*;
 
 /**
  * Groups of pictures entity managed by Ebean
@@ -50,22 +46,48 @@ public class PictureCollection extends Model {
                 .findList();
     }
 
-    public static void deleteByCollectionId(long collection_id, AmazonHelper amazonHelper) {
+    public static List<PictureCollection> findByPictureName(String picture) {
+        return find.where()
+                .like("picture", picture)
+                .findList();
+    }
+
+    public static void deleteByCollectionId(long collection_id, AmazonHelper.DeleteAction amazonAction) {
         List<PictureCollection> items = find.where()
                 .eq("collection_id", collection_id)
                 .findList();
+        ArrayList<String> files = new ArrayList<>();
         for (PictureCollection item : items) {
-            if (amazonHelper != null) {
-                File file = amazonHelper.getLocalFile(item.picture);
-                file.delete();
-            }
+            files.add(item.picture);
             item.delete();
         }
+        if (amazonAction != null) {
+            amazonAction.deleteLocalFile(true).delete(files);
+        }
+    }
+
+    public static List<PictureCollection> findNoEntries() {
+        List<PictureCollection> missing = new ArrayList<>();
+        for (PictureCollection collection : list()) {
+            if (!Entry.hasEntryForPictureCollectionId(collection.id)) {
+                missing.add(collection);
+            }
+        }
+        return missing;
     }
 
     public boolean hasNote() {
         return note != null && !note.isEmpty();
     }
 
+    @Override
+    public String toString() {
+        return "PictureCollection{" +
+                "id=" + id +
+                ", collection_id=" + collection_id +
+                ", picture='" + picture + '\'' +
+                ", note='" + note + '\'' +
+                '}';
+    }
 }
 

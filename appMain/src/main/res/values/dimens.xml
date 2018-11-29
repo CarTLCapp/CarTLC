@@ -7,9 +7,12 @@
     <dimen name="image_full_max_height">500dp</dimen>
     <dimen name="image_thumbnail_max_height">150dp</dimen>
     <dimen name="image_dec_size">50dp</dimen>
+    <dimen name="button_buffer">10dp</dimen>
 
     <integer name="note_label_width">5</integer>
     <integer name="note_value_width">8</integer>
+    <integer name="entry_simple_ems">10</integer>
+    <integer name="entry_simple_ems_lights">17</integer>
 
     <dimen name="text_margin">16dp</dimen>
     <dimen name="picture_toast_size">10sp</dimen>

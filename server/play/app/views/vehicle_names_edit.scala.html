@@ -1,0 +1,27 @@
+@(linesForm: Form[InputLines], client : Client)
+
+@import helper._
+
+@import b3.vertical.fieldConstructor
+
+@main("Fleet TLC - Edit Vehicle Names", home = "/vehicles/names") {
+    
+    <h1>Edit Vehicle Names</h1>
+
+    <p>Replace the vehicle name list with what is specified here.<br>Optionally use #1 notation to indcate it's order. One vehicle name per line.</p>
+
+    @helper.form(routes.VehicleController.saveNames()) {
+
+        @CSRF.formField
+
+        <fieldset>
+            @helper.textarea(linesForm("line"), 'rows -> 10, 'cols -> 80, '_label -> "")
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Save these vehicle names" class="btn primary"> or
+            <a href="@routes.VehicleController.names()" class="btn">Cancel</a>
+        </div>
+    }
+
+}

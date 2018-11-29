@@ -3,8 +3,6 @@
  */
 package controllers;
 
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Transaction;
 
 import play.mvc.*;
 import play.data.*;
@@ -16,7 +14,6 @@ import models.*;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
-import play.db.ebean.Transactional;
 import play.libs.Json;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -89,8 +86,8 @@ public class ProjectController extends Controller {
                 savedProject.name = newProjectData.name;
                 savedProject.update();
 
-                ProjectEquipmentCollection.addNew(id, getCheckedEquipments(projectForm));
-                ProjectNoteCollection.addNew(id, getCheckedNotes(projectForm));
+                ProjectEquipmentCollection.replace(id, Equipment.getChecked(projectForm));
+                ProjectNoteCollection.replace(id, Note.getChecked(projectForm));
 
                 Logger.info("Project " + savedProject.name + " has been updated");
 
@@ -100,32 +97,6 @@ public class ProjectController extends Controller {
             Logger.error(ex.getMessage());
         }
         return list();
-    }
-
-    List<Equipment> getCheckedEquipments(Form<InputProject> projectForm) {
-        List<Equipment> equipments = new ArrayList<Equipment>();
-        for (Equipment equipment : Equipment.list()) {
-            try {
-                if (projectForm.field(equipment.name).getValue().get().equals("true")) {
-                    equipments.add(equipment);
-                }
-            } catch (Exception ex) {
-            }
-        }
-        return equipments;
-    }
-
-    List<Note> getCheckedNotes(Form<InputProject> projectForm) {
-        List<Note> notes = new ArrayList<Note>();
-        for (Note note : Note.list()) {
-            try {
-                if (projectForm.field(note.name).getValue().get().equals("true")) {
-                    notes.add(note);
-                }
-            } catch (Exception ex) {
-            }
-        }
-        return notes;
     }
 
     /**
@@ -167,7 +138,7 @@ public class ProjectController extends Controller {
     public Result createMany() {
         if (Secured.isAdmin(ctx())) {
             Form<InputLines> linesForm = formFactory.form(InputLines.class);
-            return ok(views.html.projects_createForm.render(linesForm));
+            return ok(views.html.projects_createForm.render(linesForm, Secured.getClient(ctx())));
         } else {
             return HomeController.PROBLEM("Only administrators can create projects");
         }
@@ -181,7 +152,7 @@ public class ProjectController extends Controller {
     public Result saveMany() {
         Form<InputLines> linesForm = formFactory.form(InputLines.class).bindFromRequest();
         if (linesForm.hasErrors() || !Secured.isAdmin(ctx())) {
-            return badRequest(views.html.projects_createForm.render(linesForm));
+            return badRequest(views.html.projects_createForm.render(linesForm, Secured.getClient(ctx())));
         }
         String[] lines = linesForm.get().getLines();
         for (String name : lines) {

@@ -12,6 +12,7 @@ GET     /login                    controllers.HomeController.login()
 POST    /login                    controllers.HomeController.postLogin()
 GET     /logout                   controllers.HomeController.logout()
 GET     /problem                  controllers.HomeController.problem(msg : String)
+GET     /picture_cleanup          controllers.HomeController.pictureCleanup()
 
 ### TECHNICIANS ###
 
@@ -33,6 +34,7 @@ GET     /project/:id                controllers.ProjectController.edit(id:Long)
 POST    /project/:id                controllers.ProjectController.update(id:Long)
 POST    /project/:id/delete         controllers.ProjectController.delete(id:Long)
 GET     /project/:id/enable         controllers.ProjectController.enable(id:Long)
+POST    /projects                   controllers.ProjectController.query()
 
 ### COMPANIES ###
 
@@ -45,6 +47,7 @@ GET     /company/:id                controllers.CompanyController.edit(id:Long)
 POST    /company/:id                controllers.CompanyController.update(id:Long)
 POST    /company/:id/delete         controllers.CompanyController.delete(id:Long)
 GET     /company/:id/enable         controllers.CompanyController.enable(id:Long)
+POST    /companies                  controllers.CompanyController.query()
 
 ### EQUIPMENTS ###
 
@@ -60,6 +63,7 @@ GET     /equipment/:id/project/:projectId/remove    controllers.EquipmentControl
 POST    /equipment/:id/delete       controllers.EquipmentController.delete(id:Long)
 GET     /equipment/:id/enable       controllers.EquipmentController.enable(id:Long)
 GET     /equipment/num_entries/next controllers.EquipmentController.fillNext()
+POST    /equipments                 controllers.EquipmentController.query()
 
 ### NOTES ###
 
@@ -75,6 +79,7 @@ GET     /note/:id/project/:projectId/add       controllers.NoteController.addPro
 GET     /note/:id/project/:projectId/remove    controllers.NoteController.removeProject(id:Long, projectId:Long)
 POST    /note/:id/delete       controllers.NoteController.delete(id:Long)
 GET     /note/:id/enable       controllers.NoteController.enable(id:Long)
+POST    /notes                 controllers.NoteController.query()
 
 ### CLIENTS ###
 
@@ -110,6 +115,8 @@ GET     /entry/:id/pictures         controllers.EntryController.pictures(id:Long
 GET     /entry/:filename/picture    controllers.EntryController.getImage(filename:String)
 GET     /entry/:id/notes            controllers.EntryController.notes(id:Long)
 GET     /entry/:id/view             controllers.EntryController.view(id:Long)
+GET     /entry/:id/edit             controllers.EntryController.edit(id:Long)
+GET     /entry/:id/update           controllers.EntryController.update(id:Long)
 GET     /entry/:id/delete           controllers.EntryController.delete(id:Long)
 GET     /entry/search               controllers.EntryController.search()
 GET     /entry/search/clear         controllers.EntryController.searchClear()
@@ -118,6 +125,9 @@ GET     /entry/compute_totals       controllers.EntryController.computeTotalNumR
 GET     /entry/export               controllers.EntryController.export()
 GET     /entry/export_next          controllers.EntryController.exportNext()
 GET     /entry/export_download      controllers.EntryController.exportDownload()
+GET     /entry/delete_entries/:rows controllers.EntryController.deleteEntries(rows:String)
+GET     /entry/page_size/:size      controllers.EntryController.pageSize(size:String)
+POST    /enter                      controllers.EntryController.enter()
 
 ### MESSAGES ###
 
@@ -125,24 +135,29 @@ GET     /messages              controllers.MessageController.list(p:Int ?= 0, s 
 GET     /messages/:id/view     controllers.MessageController.view(id:Long)
 GET     /messages/:id/delete   controllers.MessageController.delete(id:Long)
 GET     /messages/delete_all   controllers.MessageController.deleteAll()
+POST    /message               controllers.MessageController.message()
 
 ### TRUCKS ###
 
-GET     /truck                 controllers.TruckController.list()
+GET     /truck                 controllers.TruckController.list(p:Int ?= 0)
 GET     /truck/cleanup         controllers.TruckController.cleanup()
 GET     /truck/toggle_filter   controllers.TruckController.toggleFilter()
 GET     /truck/:id/delete      controllers.TruckController.delete(id:Long)
 GET     /truck/:id             controllers.TruckController.edit(id:Long)
 POST    /truck/:id             controllers.TruckController.update(id:Long)
+POST    /trucks                controllers.TruckController.query()
 
-### EXTERNAL: APP REQUESTS & ENTRIES ###
+### VEHICLES ###
+
+GET     /vehicles/list         controllers.VehicleController.list(p:Int ?= 0, s ?= "entry_time", o ?= "desc")
+GET     /vehicles/names        controllers.VehicleController.names()
+GET     /vehicles/names/edit   controllers.VehicleController.editNames()
+POST    /vehicles/names/save   controllers.VehicleController.saveNames()
+POST    /vehicle               controllers.VehicleController.enter()
+POST    /strings               controllers.VehicleController.strings()
+POST    /vehicles              controllers.VehicleController.queryNames()
+
+### APP SIDE MISC REQUESTS ###
 
 POST    /register              controllers.PostController.register()
 POST    /ping                  controllers.PostController.ping()
-POST    /projects              controllers.ProjectController.query()
-POST    /companies             controllers.CompanyController.query()
-POST    /equipments            controllers.EquipmentController.query()
-POST    /notes                 controllers.NoteController.query()
-POST    /trucks                controllers.TruckController.query()
-POST    /enter                 controllers.EntryController.enter()
-POST    /message               controllers.MessageController.message()

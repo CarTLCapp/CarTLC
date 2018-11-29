@@ -12,6 +12,7 @@ import com.avaje.ebean.Model;
 
 import play.data.format.*;
 import play.data.validation.*;
+import play.data.Form;
 
 import com.avaje.ebean.*;
 
@@ -250,6 +251,19 @@ public class Equipment extends Model implements Comparable<Equipment> {
             result.add(equip.id);
         }
         return result;
+    }
+
+    public static List<Equipment> getChecked(Form entryForm) {
+        List<Equipment> equipments = new ArrayList<Equipment>();
+        for (Equipment equipment : Equipment.list()) {
+            try {
+                if (entryForm.field(equipment.name).getValue().get().equals("true")) {
+                    equipments.add(equipment);
+                }
+            } catch (Exception ex) {
+            }
+        }
+        return equipments;
     }
 
 }

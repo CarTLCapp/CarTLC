@@ -54,27 +54,20 @@ table.progress {
     vertical-align: middle
 }
 
-#actions {
-    position: relative;
+.light {
+    font-size:10pxl;
+    color:#bfbfbf;
+    text-transform:uppercase;
 }
 
-#actions #add {
-    position: absolute;
-    right: 0;
-    top: 0;
+#entryCheckbox {
+    margin-right: 10px
 }
 
-#pagination {
-    position: relative;
+#entryCheckboxALL {
+    margin-right: 10px;
+    width: 60px
 }
 
-#pagination ul {
-    position: absolute;
-    right: 0;
-}
-
-#pagination ul .current a {
-    color: #666;
-}
 
 

@@ -113,7 +113,7 @@ public class ProjectEquipmentCollection extends Model {
         }
     }
 
-    public static void addNew(long project_id, List<Equipment> equipments) {
+    public static void replace(long project_id, List<Equipment> equipments) {
         deleteByProjectId(project_id);
         for (Equipment equipment : equipments) {
             ProjectEquipmentCollection item = new ProjectEquipmentCollection();
