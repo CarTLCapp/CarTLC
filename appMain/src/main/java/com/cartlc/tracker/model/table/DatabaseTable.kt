@@ -22,4 +22,5 @@ interface DatabaseTable {
     val tableVehicleName: TableVehicleName
     val appVersion: String
     fun reportError(ex: Exception, claz: Class<*>, function: String, type: String): String
+    fun clearUploaded()
 }

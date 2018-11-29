@@ -1,5 +1,7 @@
 package com.cartlc.tracker.model.flow
 
+import androidx.annotation.VisibleForTesting
+import com.cartlc.tracker.model.event.Action
 import timber.log.Timber
 
 sealed class ActionBundle
@@ -8,9 +10,9 @@ data class StageArg(val stage: Stage) : ActionBundle()
 
 open class Flow(
         val stage: Stage,
-        val prev: ActionBundle?,
-        val center: ActionBundle?,
-        val next: ActionBundle?
+        private val prev: ActionBundle?,
+        private val center: ActionBundle?,
+        private val next: ActionBundle?
 ) {
 
     constructor(
@@ -31,9 +33,17 @@ open class Flow(
 
     companion object {
 
-        fun from(ord: Int): Flow = from(Stage.from(ord))
+        fun checkNull(flow: Flow?): Flow {
+            if (flow == null) {
+                Timber.e("UNKNOWN stage")
+                return LoginFlow()
+            }
+            return flow
+        }
 
-        fun from(stage: Stage?): Flow =
+        fun from(ord: Int): Flow = checkNull(from(Stage.from(ord)))
+
+        fun from(stage: Stage?): Flow? =
                 when (stage) {
                     Stage.LOGIN -> LoginFlow()
                     Stage.PROJECT -> ProjectFlow()
@@ -49,32 +59,84 @@ open class Flow(
                     Stage.CURRENT_PROJECT -> CurrentProjectFlow()
                     Stage.TRUCK -> TruckFlow()
                     Stage.EQUIPMENT -> EquipmentFlow()
+                    Stage.ADD_EQUIPMENT -> AddEquipmentFlow()
                     Stage.NOTES -> NotesFlow()
                     Stage.STATUS -> StatusFlow()
                     Stage.PICTURE_1 -> Picture1Flow()
                     Stage.PICTURE_2 -> Picture2Flow()
                     Stage.PICTURE_3 -> Picture3Flow()
                     Stage.CONFIRM -> ConfirmFlow()
-                    else -> {
-                        Timber.e("UNKNOWN stage")
-                        LoginFlow()
-                    }
+                    else -> null
                 }
+
+        var processStageEvent: (next: Flow) -> Unit = {}
+        var processActionEvent: (act: Action) -> Unit = {}
     }
+
+    private fun process(action: ActionBundle?) {
+        when (action) {
+            is StageArg -> processStageEvent(checkNull(Flow.from(action.stage)))
+            is ActionArg -> processActionEvent(action.action)
+        }
+    }
+
+    fun next() {
+        process(next)
+    }
+
+    fun center() {
+        process(center)
+    }
+
+    fun prev() {
+        process(prev)
+    }
+
+    val hasNext: Boolean
+        get() = next != null
+
+    val hasPrev: Boolean
+        get() = prev != null
+
+    val hasCenter: Boolean
+        get() = center != null
+
+    @VisibleForTesting
+    val nextStage: Stage?
+        get() = (next as? StageArg)?.stage
+
+    @VisibleForTesting
+    val prevStage: Stage?
+        get() = (prev as? StageArg)?.stage
+
+    @VisibleForTesting
+    val centerStage: Stage?
+        get() = (center as? StageArg)?.stage
+
+    @VisibleForTesting
+    val nextAction: Action?
+        get() = (next as? ActionArg)?.action
+
+    @VisibleForTesting
+    val prevAction: Action?
+        get() = (prev as? ActionArg)?.action
+
+    @VisibleForTesting
+    val centerAction: Action?
+        get() = (center as? ActionArg)?.action
 }
 
 
 open class PictureFlow(
         stage: Stage,
-        prev: Stage?,
-        center: Stage?,
-        next: Stage?,
+        prev: Stage,
+        next: Stage,
         val expected: Int
-) : Flow(stage, prev, center, next) {
+) : Flow(stage, StageArg(prev), ActionArg(Action.ADD_PICTURE), StageArg(next)) {
     override val isPictureStage = true
 }
 
-class LoginFlow : Flow(Stage.LOGIN, null, Stage.PROJECT, null)
+class LoginFlow : Flow(Stage.LOGIN, null, Action.PREVIOUS_FLOW, null)
 class ProjectFlow : Flow(Stage.PROJECT, Stage.CURRENT_PROJECT, null, Stage.COMPANY)
 class CompanyFlow : Flow(Stage.COMPANY, Stage.PROJECT, Stage.ADD_COMPANY, Stage.STATE)
 class AddCompanyFlow : Flow(Stage.ADD_COMPANY, Stage.PROJECT, null, Stage.STATE)
@@ -89,10 +151,11 @@ class ConfirmAddressFlow : Flow(Stage.CONFIRM_ADDRESS, Stage.STREET, null, Stage
 class CurrentProjectFlow : Flow(Stage.CURRENT_PROJECT, Action.VIEW_PROJECT, Action.NEW_PROJECT, null)
 
 class TruckFlow : Flow(Stage.TRUCK, Stage.CURRENT_PROJECT, null, Stage.PICTURE_1)
-class Picture1Flow : PictureFlow(Stage.PICTURE_1, Stage.TRUCK, Stage.ADD_PICTURE, Stage.EQUIPMENT, 1)
+class Picture1Flow : PictureFlow(Stage.PICTURE_1, Stage.TRUCK, Stage.EQUIPMENT, 1)
 class EquipmentFlow : Flow(Stage.EQUIPMENT, Stage.PICTURE_1, Stage.ADD_EQUIPMENT, Stage.NOTES)
+class AddEquipmentFlow : Flow(Stage.ADD_EQUIPMENT, Stage.PICTURE_1, null, Stage.NOTES)
 class NotesFlow : Flow(Stage.NOTES, Stage.EQUIPMENT, null, Stage.PICTURE_2)
-class Picture2Flow : PictureFlow(Stage.PICTURE_2, Stage.NOTES, Stage.ADD_PICTURE, Stage.STATUS, 2)
+class Picture2Flow : PictureFlow(Stage.PICTURE_2, Stage.NOTES, Stage.STATUS, 2)
 class StatusFlow : Flow(Stage.STATUS, Stage.PICTURE_2, null, Stage.PICTURE_3)
-class Picture3Flow : PictureFlow(Stage.PICTURE_3, Stage.STATUS, Stage.ADD_PICTURE, Stage.CONFIRM, 3)
+class Picture3Flow : PictureFlow(Stage.PICTURE_3, Stage.STATUS, Stage.CONFIRM, 3)
 class ConfirmFlow : Flow(Stage.CONFIRM, Stage.PICTURE_3, null, Stage.CURRENT_PROJECT)

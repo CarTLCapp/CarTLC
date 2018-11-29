@@ -1,10 +1,14 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.viewmodel.vehicle
 
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import com.cartlc.tracker.model.VehicleRepository
-import com.cartlc.tracker.model.flow.Action
-import com.cartlc.tracker.model.flow.ButtonDialog
+import com.cartlc.tracker.model.event.Action
+import com.cartlc.tracker.model.event.Button
+import com.cartlc.tracker.model.event.ButtonDialog
 import com.cartlc.tracker.model.flow.VehicleStage
 import com.cartlc.tracker.viewmodel.BaseViewModel
 import java.lang.NumberFormatException
@@ -56,7 +60,14 @@ class VehicleViewModel(
         store(value)
     }
 
-    fun onBtnNext() {
+    fun onButtonDispatch(button: Button) {
+        when(button) {
+            Button.BTN_NEXT -> onBtnNext()
+            Button.BTN_PREV -> onBtnPrev()
+        }
+    }
+
+    private fun onBtnNext() {
         save()
         if (repo.stageValue == VehicleStage.STAGE_6) {
             repo.submit()
@@ -66,7 +77,7 @@ class VehicleViewModel(
         }
     }
 
-    fun onBtnPrev() {
+    private fun onBtnPrev() {
         save()
         repo.stageValue = repo.stageValue?.previous()
     }

@@ -59,7 +59,6 @@
     <string name="title_elements">%d entries</string>
     <string name="title_element">one entry</string>
 
-    <string name="error_enter_your_name">Please enter your name</string>
     <string name="error_need_a_truck_number">Need a truck number</string>
     <string name="error_cannot_take_picture">Cannot take picture</string>
     <string name="error_while_loading_picture">Out of Memory</string>

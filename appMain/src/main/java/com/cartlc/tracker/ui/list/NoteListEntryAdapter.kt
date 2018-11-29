@@ -30,20 +30,9 @@ class NoteListEntryAdapter(
         private val vm: MainListViewModel,
         private val mListener: EntryListener
 ) : RecyclerView.Adapter<NoteListEntryAdapter.CustomViewHolder>() {
+
     private val mLayoutInflater: LayoutInflater
     private var mItems: MutableList<DataNote> = mutableListOf()
-
-    val isNotesComplete: Boolean
-        get() {
-            for (note in mItems) {
-                if (!TextUtils.isEmpty(note.value)) {
-                    if (note.num_digits > 0 && note.value!!.length != note.num_digits.toInt()) {
-                        return false
-                    }
-                }
-            }
-            return true
-        }
 
     val notes: List<DataNote>
         get() = mItems
@@ -154,14 +143,5 @@ class NoteListEntryAdapter(
             mItems.remove(item)
             mItems.add(item)
         }
-    }
-
-    fun hasNotesEntered(): Boolean {
-        for (note in mItems) {
-            if (!TextUtils.isEmpty(note.value)) {
-                return true
-            }
-        }
-        return false
     }
 }

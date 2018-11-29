@@ -1,3 +1,6 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.viewmodel.frag
 
 import android.app.Activity
@@ -7,21 +10,17 @@ import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.flow.Action
-import com.cartlc.tracker.model.flow.ButtonDialog
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.model.event.Action
+import com.cartlc.tracker.model.event.ButtonDialog
 import com.cartlc.tracker.viewmodel.BaseViewModel
 
-class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
+class EntrySimpleViewModel : BaseViewModel() {
 
     enum class Checked {
         CHECKED_NO,
         CHECKED_YES,
         CHECKED_NONE
     }
-
-    private val app: TBApplication
-        get() = act.applicationContext as TBApplication
 
     fun dispatchReturnPressedEvent(arg: String) {
         dispatchActionEvent(Action.RETURN_PRESSED(arg))
@@ -110,10 +109,6 @@ class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
         }
 
     var dispatchActionEvent: (action: Action) -> Unit = {}
-
-    init {
-        simpleEmsValue = act.resources.getInteger(R.integer.entry_simple_ems)
-    }
 
     fun afterTextChanged(s: CharSequence) {
         afterTextChangedListener(s.toString())

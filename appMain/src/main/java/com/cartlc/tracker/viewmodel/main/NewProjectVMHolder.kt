@@ -1,20 +1,18 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.viewmodel.main
 
 import android.location.Address
 import android.text.InputType
-import androidx.lifecycle.MutableLiveData
-import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.data.DataAddress
-import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.model.data.DataPicture
 import com.cartlc.tracker.model.data.DataStates
-import com.cartlc.tracker.model.flow.Action
+import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.misc.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
-import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.ui.util.LocationHelper
 import java.util.*
 
@@ -58,7 +56,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
     internal var autoNarrowOkay = true
 
     private val isAutoNarrowOkay: Boolean
-        get() = vm.wasNext && autoNarrowOkay
+        get() = vm.buttonsViewModel.wasNext && autoNarrowOkay
 
     var fab_address: Address? = null
     var fab_addressConfirmOkay = false
@@ -82,7 +80,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                     val companyNames = getNames(companies)
                     if (companyNames.size == 1 && autoNarrowOkay) {
                         prefHelper.company = companyNames[0]
-                        skip()
+                        buttonsViewModel.skip()
                     } else {
                         setList(StringMessage.title_company, PrefHelper.KEY_COMPANY, companyNames)
                         buttonsViewModel.checkCenterButtonIsEdit()
@@ -93,8 +91,8 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                     entrySimpleViewModel.showingValue = true
                     entrySimpleViewModel.simpleHintValue = vm.getString(StringMessage.title_company)
                     if (buttonsViewModel.isLocalCompany) {
-                        companyEditing = prefHelper.company
-                        entrySimpleViewModel.simpleTextValue = companyEditing ?: ""
+                        buttonsViewModel.companyEditing = prefHelper.company
+                        entrySimpleViewModel.simpleTextValue = buttonsViewModel.companyEditing ?: ""
                     } else {
                         entrySimpleViewModel.simpleTextValue = ""
                     }
@@ -114,7 +112,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                         titleViewModel.subTitleValue = curProjectHint
                         checkChangeCompanyButtonVisible()
                     } else {
-                        skip()
+                        buttonsViewModel.skip()
                     }
                 }
                 else -> {}
@@ -150,7 +148,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                 autoNarrowStates(states)
                 if (states.size == 1 && autoNarrowOkay) {
                     prefHelper.state = states[0]
-                    skip()
+                    buttonsViewModel.skip()
                     return
                 } else {
                     hint = prefHelper.address
@@ -198,7 +196,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                 autoNarrowCities(cities)
                 if (cities.size == 1 && autoNarrowOkay) {
                     prefHelper.city = cities[0]
-                    skip()
+                    buttonsViewModel.skip()
                     return
                 } else {
                     hint = prefHelper.address
@@ -244,7 +242,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                 if (streets.size == 1 && autoNarrowOkay) {
                     prefHelper.street = streets[0]
                     fab_addressConfirmOkay = true
-                    skip()
+                    buttonsViewModel.skip()
                     return
                 } else {
                     hint = prefHelper.address
@@ -354,7 +352,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
 
 
     private fun checkChangeCompanyButtonVisible() {
-        if (vm.didAutoSkip) {
+        if (vm.buttonsViewModel.didAutoSkip) {
             vm.buttonsViewModel.showCenterButtonValue = true
         }
     }

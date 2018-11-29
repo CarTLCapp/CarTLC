@@ -21,7 +21,6 @@ enum class Stage {
     PICTURE_1,
     PICTURE_2,
     PICTURE_3,
-    ADD_PICTURE,
     CONFIRM;
 
     companion object {

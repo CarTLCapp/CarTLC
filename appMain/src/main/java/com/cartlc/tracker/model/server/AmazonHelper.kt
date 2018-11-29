@@ -46,7 +46,7 @@ class AmazonHelper(
     internal val BUCKET_NAME: String
     internal val IDENTITY_POOL_ID: String
     internal var mCred: CognitoCachingCredentialsProvider? = null
-    lateinit internal var mClient: AmazonS3
+    internal lateinit var mClient: AmazonS3
     internal var mTrans: TransferUtility? = null
 
     init {

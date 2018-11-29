@@ -37,7 +37,7 @@ class HashLongList(private val db: TableString) : HashSet<Long>() {
     }
 
     /**
-     * Return a comma separated list of the numbers.
+     * Return a comma separated list of the number strings.
      */
     fun mash(): String {
         val sbuf = StringBuilder()
@@ -105,7 +105,7 @@ class HashLongList(private val db: TableString) : HashSet<Long>() {
     private fun serverMashStrings(): String {
         val sbuf = StringBuilder()
         var comma = false
-        for (ele in expand()) {
+        for (ele in expand().sorted()) {
             if (comma) {
                 sbuf.append(",")
             } else {
@@ -115,6 +115,5 @@ class HashLongList(private val db: TableString) : HashSet<Long>() {
         }
         return sbuf.toString()
     }
-
 
 }

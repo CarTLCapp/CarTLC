@@ -5,7 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.cartlc.tracker.databinding.FragLoginBinding
+import com.cartlc.tracker.model.CarRepository
+import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.viewmodel.frag.LoginViewModel
+import javax.inject.Inject
 
 class LoginFragment : BaseFragment() {
 
@@ -14,11 +17,16 @@ class LoginFragment : BaseFragment() {
     val vm: LoginViewModel
         get() = baseVM as LoginViewModel
 
-    fun detectLoginError(): Boolean = vm.detectLoginError()
+    private val app: TBApplication
+        get() = activity!!.applicationContext as TBApplication
+
+    @Inject
+    lateinit var repo: CarRepository
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragLoginBinding.inflate(layoutInflater, container, false)
-        baseVM = LoginViewModel(activity!!)
+        app.carRepoComponent.inject(this)
+        baseVM = LoginViewModel(repo)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
         return binding.root

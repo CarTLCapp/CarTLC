@@ -10,8 +10,8 @@ import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.model.table.DatabaseTable
 
 import java.text.SimpleDateFormat
-
-import java.util.*
+import java.util.Locale
+import java.util.Date
 
 /**
  * Created by dug on 5/13/17.

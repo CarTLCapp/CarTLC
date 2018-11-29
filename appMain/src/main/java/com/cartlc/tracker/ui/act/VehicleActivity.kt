@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.ActivityVehicleBinding
-import com.cartlc.tracker.model.flow.Action
+import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.flow.VehicleStage
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.ui.frag.ButtonsFragment
@@ -77,20 +77,19 @@ class VehicleActivity : BaseActivity() {
             event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
         })
         buttonsFragment.root = binding.root
-        buttonsFragment.vm.dispatchButtonEvent = { action -> vm.dispatchActionEvent(action) }
+        buttonsFragment.vm.getString = { msg -> getStringMessage(msg) }
+        buttonsFragment.vm.handleButtonEvent().observe(this, Observer { event ->
+            event.executeIfNotHandled { vm.onButtonDispatch(event.peekContent()) }
+        })
         buttonsFragment.vm.showCenterButtonValue = false
+        buttonsFragment.vm.reset()
 
-//        stage2Entry.vm.handleGenericEvent().observe(this, Observer { event ->
-//            vm.doSimpleEntryReturn(event.peekContent())
-//        })
         stage2Entry.vm.afterTextChangedListener = { value -> vm.onEntryChanged(value) }
+        stage2Entry.vm.simpleEmsValue = resources.getInteger(R.integer.entry_simple_ems)
         stage2Entry.inputType = InputType.TYPE_CLASS_NUMBER
         stage2Entry.vm.titleValue = getString(R.string.vehicle_mileage)
         stage2Entry.vm.simpleHintValue = getString(R.string.vehicle_required)
 
-//        stage345Entry.vm.handleGenericEvent().observe(this, Observer { event ->
-//            vm.doSimpleEntryReturn(event.peekContent())
-//        })
         stage345Entry.inputType = InputType.TYPE_CLASS_TEXT
         stage345Entry.vm.simpleEmsValue = resources.getInteger(R.integer.entry_simple_ems_lights)
         stage345Entry.vm.simpleHintValue = getString(R.string.vehicle_comments)
@@ -118,9 +117,8 @@ class VehicleActivity : BaseActivity() {
 
     private fun onActionDispatch(action: Action) {
         when (action) {
-            Action.BTN_NEXT -> vm.onBtnNext()
-            Action.BTN_PREV -> vm.onBtnPrev()
             Action.SUBMIT -> onSubmit()
+            is Action.RETURN_PRESSED -> vm.doSimpleEntryReturn(action.text)
             is Action.BUTTON_DIALOG -> { vm.onEntryPressAction(action.button) }
         }
     }

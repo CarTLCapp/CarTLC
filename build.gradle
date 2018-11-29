@@ -12,12 +12,13 @@ buildscript {
         leak_canary = '1.6.1'
         dagger_version = '2.15'
         mockwebserver_version = '3.11.0'
+        mockcore_version = '2.23.4'
+        mockkot_version = '1.5.0'
     }
     repositories {
         google()
         jcenter()
     }
-
     dependencies {
         classpath "com.android.tools.build:gradle:$gradle_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -31,67 +32,3 @@ allprojects {
         jcenter()
     }
 }
-
-
-
-
-//
-//buildscript {
-//    ext.kotlin_version = '1.3.0'
-//    ext {
-//        compileSdkVersion = 28
-//        targetSdkVersion = 28
-//        android = '28.0.3'
-//        gradle_version = '3.2.1'
-//        picasso_version = '2.71828'
-//        butterknife_version = '8.8.1'
-//        timber_version = '4.7.1'
-//        constraint_layout = '1.1.3'
-//        play_services = '16.0.0'
-//        aws = '2.4.3'
-//        kotlin_version = '1.2.71'
-//        leak_canary = '1.6.1'
-//        dagger_version = '2.15'
-//        mockwebserver_version = '3.11.0'
-//    }
-//    repositories {
-//        jcenter()
-//        google()
-//    }
-//    dependencies {
-//        classpath "com.android.tools.build:gradle:$gradle_version"
-//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-//        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
-//
-//        // NOTE: Do not place your application dependencies here; they belong
-//        // in the individual module build.gradle files
-//    }
-//}
-//apply plugin: 'kotlin'
-//
-//allprojects {
-//    repositories {
-//        jcenter()
-//        google()
-//    }
-//}
-//
-////task clean(type: Delete) {
-////    delete rootProject.buildDir
-////}
-//repositories {
-//    mavenCentral()
-//}
-//dependencies {
-//    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-//}
-//compileKotlin {
-//    kotlinOptions {
-//        jvmTarget = "1.8"
-//    }
-//}
-//compileTestKotlin {
-//    kotlinOptions {
-//        jvmTarget = "1.8"
-//    }
-//}

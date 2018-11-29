@@ -11,6 +11,19 @@ class DataString {
     var serverId: Long = 0
     var value: String = ""
 
+    constructor()
+
+    constructor(id: Long, text: String) {
+        this.id = id
+        this.value = text
+    }
+
+    constructor(id: Long, text: String, serverId: Long) {
+        this.id = id
+        this.value = text
+        this.serverId = serverId
+    }
+
     override fun toString(): String {
         return "ID=${id}, SERVER_ID=${serverId}, VALUE=${value}"
     }

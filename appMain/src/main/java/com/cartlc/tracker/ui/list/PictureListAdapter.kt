@@ -82,7 +82,7 @@ open class PictureListAdapter(
                     var height = maxHeight
                     height -= mDecHeight
                     if (height < mDecHeight) {
-                        height = mDecHeight;
+                        height = mDecHeight
                     }
                     maxHeight = height
                     notifyDataSetChanged()

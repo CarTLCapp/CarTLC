@@ -82,7 +82,7 @@ class DialogHelper(internal var mAct: Activity) {
 
         fun confirmAllDone(): Boolean {
             for (i in mQuestions.indices) {
-                if (!mQuestions[i]!!.isChecked()) {
+                if (!mQuestions[i]!!.isChecked) {
                     return false
                 }
             }

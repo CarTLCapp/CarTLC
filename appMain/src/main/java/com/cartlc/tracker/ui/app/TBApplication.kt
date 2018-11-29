@@ -13,6 +13,7 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.VisibleForTesting
 import androidx.multidex.MultiDex
 
 import com.cartlc.tracker.BuildConfig
@@ -49,20 +50,28 @@ class TBApplication : Application() {
 
     companion object {
 
-        internal val OVERRIDE_IS_DEVELOPMENT_SERVER: Boolean? = null
+        private val OVERRIDE_IS_DEVELOPMENT_SERVER: Boolean? = null
+
+        @VisibleForTesting
+        var DEBUG_TREE = false
+
+        private const val LEAK_CANARY = false
+
+        const val REPORT_LOCATION = false
+
+        const val OTHER = "Other"
+
+        private val PERMISSIONS = arrayOf(
+                PermissionRequest(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        R.string.perm_read_external_storage),
+                PermissionRequest(Manifest.permission.READ_EXTERNAL_STORAGE,
+                        R.string.perm_write_external_storage),
+                PermissionRequest(Manifest.permission.ACCESS_FINE_LOCATION,
+                        R.string.perm_location))
 
         fun IsDevelopmentServer(): Boolean {
             return OVERRIDE_IS_DEVELOPMENT_SERVER ?: BuildConfig.DEBUG
         }
-
-        internal val DEBUG_TREE = false
-        internal val LEAK_CANARY = false
-
-        val REPORT_LOCATION = BuildConfig.DEBUG;
-
-        val OTHER = "Other"
-
-        internal val PERMISSIONS = arrayOf(PermissionRequest(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.perm_read_external_storage), PermissionRequest(Manifest.permission.READ_EXTERNAL_STORAGE, R.string.perm_write_external_storage), PermissionRequest(Manifest.permission.ACCESS_FINE_LOCATION, R.string.perm_location))
 
         fun getUri(ctx: Context, file: File): Uri {
             return FileProvider.getUriForFile(ctx, "com.cartcl.tracker.fileprovider", file)
@@ -116,6 +125,7 @@ class TBApplication : Application() {
         }
 
     lateinit var carRepoComponent: CarRepositoryComponent
+
     private lateinit var carRepo: CarRepository
     private lateinit var prefHelper: PrefHelper
     private lateinit var dm: DatabaseManager

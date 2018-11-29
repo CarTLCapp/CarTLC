@@ -1,33 +1,27 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.viewmodel.frag
 
-import android.app.Activity
 import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.model.flow.*
+import com.cartlc.tracker.model.event.Action
+import com.cartlc.tracker.model.flow.CurrentProjectFlow
+import com.cartlc.tracker.model.flow.Flow
+import com.cartlc.tracker.model.flow.LoginFlow
+import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.misc.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.table.DatabaseTable
-import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.viewmodel.BaseViewModel
-import javax.inject.Inject
 
-class ConfirmationViewModel(private val act: Activity) : BaseViewModel() {
+class ConfirmationViewModel(private val repo: CarRepository) : BaseViewModel() {
 
-    @Inject
-    lateinit var repo: CarRepository
-
-    val db: DatabaseTable
-        get() = repo.db
-
-    val prefHelper: PrefHelper
+    private val prefHelper: PrefHelper
         get() = repo.prefHelper
 
-    private val app: TBApplication
-        get() = act.applicationContext as TBApplication
-
-    val curFlow: MutableLiveData<Flow>
+    private val curFlow: MutableLiveData<Flow>
         get() = repo.curFlow
 
     private var curFlowValue: Flow
@@ -35,10 +29,6 @@ class ConfirmationViewModel(private val act: Activity) : BaseViewModel() {
         set(value) {
             curFlow.value = value
         }
-
-    init {
-        app.carRepoComponent.inject(this)
-    }
 
     var showing = ObservableBoolean(false)
 
@@ -59,7 +49,6 @@ class ConfirmationViewModel(private val act: Activity) : BaseViewModel() {
     fun onConfirmOkay() {
         repo.add(curEntry!!)
         prefHelper.clearLastEntry()
-        curFlowValue = CurrentProjectFlow()
         curEntry = null
         curFlowValue = CurrentProjectFlow()
         dispatchActionEvent(Action.PING)

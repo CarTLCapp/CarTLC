@@ -6,12 +6,10 @@ package com.cartlc.tracker.model.pref
 import android.content.Context
 import android.os.Environment
 import android.text.TextUtils
-import android.util.Log
 import com.cartlc.tracker.model.data.*
-
-import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.ui.app.TBApplication
 
 import java.io.File
 import java.text.SimpleDateFormat
@@ -30,45 +28,46 @@ class PrefHelper constructor(
 
     companion object {
 
-        val KEY_PROJECT = "project"
-        val KEY_COMPANY = "company"
-        val KEY_STREET = "street"
-        val KEY_STATE = "state"
-        val KEY_CITY = "city"
-        val KEY_ZIPCODE = "zipcode"
-        val KEY_TRUCK = "truck" // Number & License
-        val KEY_STATUS = "status"
-        private val KEY_CURRENT_PROJECT_GROUP_ID = "current_project_group_id"
-        private val KEY_SAVED_PROJECT_GROUP_ID = "saved_project_group_id"
-        private val KEY_FIRST_NAME = "first_name"
-        private val KEY_LAST_NAME = "last_name"
-        private val KEY_SECONDARY_FIRST_NAME = "secondary_first_name"
-        private val KEY_SECONDARY_LAST_NAME = "secondary_last_name"
-        private val KEY_HAS_SECONDARY = "has_secondary"
-        private val KEY_TRUCK_NUMBER = "truck_number_string"
-        private val KEY_LICENSE_PLATE = "license_plate"
-        private val KEY_EDIT_ENTRY_ID = "edit_id"
-        private val KEY_NEXT_PICTURE_COLLECTION_ID = "next_picture_collection_id"
-        private val KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id"
-        private val KEY_NEXT_NOTE_COLLECTION_ID = "next_note_collection_id"
-        private val KEY_CURRENT_PICTURE_COLLECTION_ID = "picture_collection_id"
-        private val KEY_TECH_ID = "tech_id"
-        private val KEY_SECONDARY_TECH_ID = "secondary_tech_id"
-        private val KEY_REGISTRATION_CHANGED = "registration_changed"
-        private val KEY_IS_DEVELOPMENT = "is_development"
-        private val KEY_SPECIAL_UPDATE_CHECK = "special_update_check"
-        private val KEY_DO_ERROR_CHECK = "do_error_check"
-        private val KEY_AUTO_ROTATE_PICTURE = "auto_rotate_picture"
+        const val KEY_PROJECT = "project"
+        const val KEY_COMPANY = "company"
+        const val KEY_STREET = "street"
+        const val KEY_STATE = "state"
+        const val KEY_CITY = "city"
+        const val KEY_ZIPCODE = "zipcode"
+        const val KEY_TRUCK = "truck" // Number & License
+        const val KEY_STATUS = "status"
 
-        val VERSION_PROJECT = "version_project"
-        val VERSION_COMPANY = "version_company"
-        val VERSION_EQUIPMENT = "version_equipment"
-        val VERSION_NOTE = "version_note"
-        val VERSION_TRUCK = "version_truck"
-        val VERSION_VEHICLE_NAMES = "version_vehicle_names"
+        private const val KEY_CURRENT_PROJECT_GROUP_ID = "current_project_group_id"
+        private const val KEY_SAVED_PROJECT_GROUP_ID = "saved_project_group_id"
+        private const val KEY_FIRST_NAME = "first_name"
+        private const val KEY_LAST_NAME = "last_name"
+        private const val KEY_SECONDARY_FIRST_NAME = "secondary_first_name"
+        private const val KEY_SECONDARY_LAST_NAME = "secondary_last_name"
+        private const val KEY_HAS_SECONDARY = "has_secondary"
+        private const val KEY_TRUCK_NUMBER = "truck_number_string"
+        private const val KEY_LICENSE_PLATE = "license_plate"
+        private const val KEY_EDIT_ENTRY_ID = "edit_id"
+        private const val KEY_NEXT_PICTURE_COLLECTION_ID = "next_picture_collection_id"
+        private const val KEY_NEXT_EQUIPMENT_COLLECTION_ID = "next_equipment_collection_id"
+        private const val KEY_NEXT_NOTE_COLLECTION_ID = "next_note_collection_id"
+        private const val KEY_CURRENT_PICTURE_COLLECTION_ID = "picture_collection_id"
+        private const val KEY_TECH_ID = "tech_id"
+        private const val KEY_SECONDARY_TECH_ID = "secondary_tech_id"
+        private const val KEY_REGISTRATION_CHANGED = "registration_changed"
+        private const val KEY_IS_DEVELOPMENT = "is_development"
+        private const val KEY_SPECIAL_UPDATE_CHECK = "special_update_check"
+        private const val KEY_DO_ERROR_CHECK = "do_error_check"
+        private const val KEY_AUTO_ROTATE_PICTURE = "auto_rotate_picture"
 
-        private val PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss"
-        private val VERSION_RESET = -1
+        const val VERSION_PROJECT = "version_project"
+        const val VERSION_COMPANY = "version_company"
+        const val VERSION_EQUIPMENT = "version_equipment"
+        const val VERSION_NOTE = "version_note"
+        const val VERSION_TRUCK = "version_truck"
+        const val VERSION_VEHICLE_NAMES = "version_vehicle_names"
+
+        private const val PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss"
+        private const val VERSION_RESET = -1
     }
 
     var techID: Int
@@ -200,10 +199,7 @@ class PrefHelper constructor(
         get() = getInt(KEY_IS_DEVELOPMENT, if (TBApplication.IsDevelopmentServer()) 1 else 0) != 0
 
     var currentProjectGroup: DataProjectAddressCombo?
-        get() {
-            val projectGroupId = currentProjectGroupId
-            return db.tableProjectAddressCombo.query(projectGroupId)
-        }
+        get() = db.tableProjectAddressCombo.query(currentProjectGroupId)
         set(group) {
             group?.let {
                 currentProjectGroupId = group.id
@@ -282,15 +278,11 @@ class PrefHelper constructor(
         }
 
     val numPicturesTaken: Int
-        get() {
-            val picture_collection_id = currentPictureCollectionId
-            return db.tablePictureCollection.countPictures(picture_collection_id)
-        }
+        get() = db.tablePictureCollection.countPictures(currentPictureCollectionId)
 
     val numEquipPossible: Int
         get() {
-            val curGroup = currentProjectGroup
-            val collection = db.tableCollectionEquipmentProject.queryForProject(curGroup!!.projectNameId)
+            val collection = db.tableCollectionEquipmentProject.queryForProject(currentProjectGroup!!.projectNameId)
             return collection.equipment.size
         }
 
@@ -405,12 +397,14 @@ class PrefHelper constructor(
             addressId = db.tableAddress.add(address)
             if (addressId < 0) {
                 Timber.e("saveProjectAndAddressCombo(): could not find address: " + address.toString())
+                clearCurProject()
                 return false
             }
         }
         val projectNameId = db.tableProjects.queryProjectName(project)
         if (projectNameId < 0) {
             Timber.e("saveProjectAndAddressCombo(): could not find project: $project")
+            clearCurProject()
             return false
         }
         var projectGroupId: Long

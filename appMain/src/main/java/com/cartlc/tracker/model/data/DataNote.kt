@@ -3,6 +3,7 @@
  */
 package com.cartlc.tracker.model.data
 
+import androidx.annotation.VisibleForTesting
 import java.util.Locale
 
 /**
@@ -25,7 +26,6 @@ class DataNote {
         ALPHANUMERIC,
         NUMERIC_WITH_SPACES,
         MULTILINE;
-
 
         companion object {
 
@@ -50,7 +50,7 @@ class DataNote {
         }
     }
 
-    constructor() {}
+    constructor()
 
     constructor(name: String) {
         this.name = name
@@ -67,6 +67,14 @@ class DataNote {
         this.type = type
         this.num_digits = num_digits
         this.serverId = server_id
+    }
+
+    @VisibleForTesting
+    constructor(id: Long, name: String, type: Type, value: String) {
+        this.id = id
+        this.name = name
+        this.type = type
+        this.value = value
     }
 
     override fun toString(): String {

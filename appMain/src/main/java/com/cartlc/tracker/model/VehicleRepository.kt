@@ -6,8 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.flow.VehicleStage
 import com.cartlc.tracker.model.data.DataVehicle
+import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.event.ActionEvent
-import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication

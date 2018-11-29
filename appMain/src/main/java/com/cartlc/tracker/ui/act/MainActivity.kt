@@ -24,19 +24,19 @@ import com.cartlc.tracker.R
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.data.DataNote
+import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.event.EventError
 import com.cartlc.tracker.model.event.EventRefreshProjects
-import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.misc.ErrorMessage
-import com.cartlc.tracker.model.misc.StringMessage
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.*
 import com.cartlc.tracker.ui.util.DialogHelper
 import com.cartlc.tracker.ui.util.LocationHelper
 import com.cartlc.tracker.ui.util.PermissionHelper
 import com.cartlc.tracker.ui.frag.*
+import com.cartlc.tracker.viewmodel.main.MainButtonsViewModel
 import com.cartlc.tracker.viewmodel.main.MainVMHolder
 
 import kotlinx.android.synthetic.main.activity_main.*
@@ -116,79 +116,34 @@ class MainActivity : BaseActivity() {
         list_pictures.layoutManager = linearLayoutManager
         list_pictures.adapter = mPictureAdapter
 
-        vm.onCreate()
-        vm.buttonsViewModel = buttonsFragment.vm
+        vm.buttonsViewModel = buttonsFragment.vm as MainButtonsViewModel
         vm.loginViewModel = loginFragment.vm
         vm.confirmationViewModel = confirmationFragment.vm
         vm.mainListViewModel = mainListFragment.vm
         vm.titleViewModel = titleFragment.vm
         vm.entrySimpleViewModel = entrySimpleFragment.vm
+
+        vm.handleActionEvent().observe(this, Observer { event ->
+            event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
+        })
         vm.curFlow.observe(this, Observer { stage -> onStageChanged(stage) })
         vm.error.observe(this, Observer { message -> showError(message) })
         vm.addButtonVisible.observe(this, Observer { visible -> onAddButtonVisibleChanged(visible) })
         vm.framePictureVisible.observe(this, Observer { visible -> onFramePictureVisibleChanged(visible) })
-        vm.handleActionEvent().observe(this, Observer { event ->
-            event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
-        })
-        vm.detectNoteError = this::detectNoteError
-        vm.entryTextValue = { entrySimpleFragment.entryTextValue }
-        vm.detectLoginError = this::detectLoginError
         vm.getString = { msg -> getStringMessage(msg) }
         vm.error.observe(this, Observer<ErrorMessage> { message -> showError(message) })
-        buttonsFragment.vm.getString = vm.getString
-        buttonsFragment.vm.dispatchButtonEvent = { action -> vm.dispatchActionEvent(action) }
-        loginFragment.vm.error = vm.error
-        loginFragment.vm.buttonsViewModel = buttonsFragment.vm
-        loginFragment.vm.getString = vm.getString
-        entrySimpleFragment.vm.dispatchActionEvent = buttonsFragment.vm.dispatchButtonEvent
-        confirmationFragment.vm.dispatchActionEvent = entrySimpleFragment.vm.dispatchActionEvent
-        confirmationFragment.vm.buttonsViewModel = buttonsFragment.vm
-        confirmationFragment.vm.titleViewModel = titleFragment.vm
-        confirmationFragment.vm.getString = vm.getString
-        titleFragment.vm.getString = vm.getString
+        vm.buttonsViewModel.handleButtonEvent().observe(this, Observer { event ->
+            event.executeIfNotHandled { vm.onButtonDispatch(event.peekContent()) }
+        })
+        vm.buttonsViewModel.entryTextValue = { entrySimpleFragment.entryTextValue }
+        vm.buttonsViewModel.notes = { mainListFragment.notes }
+        vm.entrySimpleViewModel.simpleEmsValue = resources.getInteger(R.integer.entry_simple_ems)
+        vm.onCreate()
+
         EventBus.getDefault().register(this)
         title = mApp.versionedTitle
         getLocation()
     }
-
-    private fun detectNoteError(): Boolean {
-        if (!mainListFragment.isNotesComplete) {
-            showNoteError(mainListFragment.notes)
-            return true
-        }
-        return false
-    }
-
-    private fun getStringMessage(msg: StringMessage): String =
-            when (msg) {
-                StringMessage.entry_hint_edit_project -> getString(R.string.entry_hint_edit_project)
-                StringMessage.entry_hint_truck -> getString(R.string.entry_hint_truck)
-                StringMessage.btn_add -> getString(R.string.btn_add)
-                StringMessage.btn_prev -> getString(R.string.btn_prev)
-                StringMessage.btn_next -> getString(R.string.btn_next)
-                StringMessage.btn_edit -> getString(R.string.btn_edit)
-                StringMessage.btn_new_project -> getString(R.string.btn_new_project)
-                StringMessage.btn_another -> getString(R.string.btn_another)
-                StringMessage.btn_done -> getString(R.string.btn_done)
-                StringMessage.btn_confirm -> getString(R.string.btn_confirm)
-                StringMessage.title_current_project -> getString(R.string.title_current_project)
-                StringMessage.title_login -> getString(R.string.title_login)
-                StringMessage.title_project -> getString(R.string.title_project)
-                StringMessage.title_company -> getString(R.string.title_company)
-                StringMessage.title_state -> getString(R.string.title_state)
-                StringMessage.title_city -> getString(R.string.title_city)
-                StringMessage.title_street -> getString(R.string.title_street)
-                StringMessage.title_truck -> getString(R.string.title_truck)
-                StringMessage.title_equipment -> getString(R.string.title_equipment)
-                StringMessage.title_equipment_installed -> getString(R.string.title_equipment_installed)
-                StringMessage.title_notes -> getString(R.string.title_notes)
-                StringMessage.title_status -> getString(R.string.title_status)
-                StringMessage.title_confirmation -> getString(R.string.title_confirmation)
-                StringMessage.title_photo -> getString(R.string.title_photo)
-                is StringMessage.title_photos -> getString(R.string.title_photos, msg.count)
-                is StringMessage.status_installed_equipments -> getString(R.string.status_installed_equipments, msg.checkedEquipment, msg.maxEquip)
-                is StringMessage.status_installed_pictures -> getString(R.string.status_installed_pictures, msg.countPictures)
-            }
 
     private fun getLocation() {
         LocationHelper.instance.requestLocation(this, object : LocationHelper.OnLocationCallback {
@@ -205,7 +160,7 @@ class MainActivity : BaseActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.profile -> vm.btnProfile()
+            R.id.profile -> vm.buttonsViewModel.btnProfile()
             R.id.upload -> {
                 mApp.reloadFromServer()
             }
@@ -216,24 +171,11 @@ class MainActivity : BaseActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    public override fun onResume() {
-        super.onResume()
-        mApp.ping()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
         CheckError.instance.cleanup()
         LocationHelper.instance.onDestroy()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onEvent(event: EventError) {
-        if (showServerError) {
-            showServerError(event.toString())
-        }
     }
 
     private fun doViewProject() {
@@ -278,18 +220,32 @@ class MainActivity : BaseActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onEvent(event: EventRefreshProjects) {
         Timber.d("onEvent(EventRefreshProjects)")
-        vm.curFlow.value?.let { onStageChanged(it) }
+        vm.curFlow.value?.let {
+            vm.refresh(it)
+            mainListFragment.setAdapter(it.stage)
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onEvent(event: EventError) {
+        if (showServerError) {
+            showServerError(event.toString())
+        }
     }
 
     private fun onActionDispatch(action: Action) {
         when (action) {
-            Action.VIEW_PROJECT -> { doViewProject() }
+            Action.PING -> mApp.ping()
+            Action.VIEW_PROJECT -> doViewProject()
             is Action.PICTURE_REQUEST -> dispatchPictureRequest(action.file)
             Action.CONFIRM_DIALOG -> showConfirmDialog()
             Action.VEHICLES -> doVehicles()
             Action.VEHICLES_PENDING -> doVehiclesPendingDialog()
             Action.GET_LOCATION -> getLocation()
             Action.STORE_ROTATION -> storeCommonRotation()
+            Action.SAVE_LOGIN_INFO -> loginFragment.vm.save()
+            Action.SHOW_NOTE_ERROR -> showNoteError(mainListFragment.notes)
             is Action.SHOW_TRUCK_ERROR -> showTruckError(action.entry, action.callback)
             is Action.SET_MAIN_LIST -> mainListFragment.setList(action.list)
             is Action.SET_PICTURE_LIST -> mPictureAdapter.setList(action.list)
@@ -349,8 +305,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun detectLoginError(): Boolean = loginFragment.detectLoginError()
-
     private fun showNoteError(notes: List<DataNote>) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.title_notes)
@@ -372,7 +326,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showNoteErrorOk(dialog: DialogInterface) {
-        vm.showNoteErrorOk()
+        vm.buttonsViewModel.showNoteErrorOk()
         dialog.dismiss()
     }
 

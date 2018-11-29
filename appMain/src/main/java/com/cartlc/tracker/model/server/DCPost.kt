@@ -28,7 +28,6 @@ open class DCPost {
             showError(connection)
             return null
         }
-
         if (inputStream == null) {
             showError(connection)
             return null

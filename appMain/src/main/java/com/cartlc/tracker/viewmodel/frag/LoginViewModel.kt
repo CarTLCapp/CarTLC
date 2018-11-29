@@ -1,32 +1,24 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.viewmodel.frag
 
-import android.app.Activity
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.model.CarRepository
+import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.misc.ErrorMessage
 import com.cartlc.tracker.model.misc.StringMessage
 import com.cartlc.tracker.viewmodel.BaseViewModel
-import javax.inject.Inject
 
-class LoginViewModel(private val act: Activity) : BaseViewModel() {
-
-    @Inject
-    lateinit var repo: CarRepository
+class LoginViewModel(private val repo: CarRepository) : BaseViewModel() {
 
     private val prefHelper: PrefHelper
         get() = repo.prefHelper
-    private val app: TBApplication
-        get() = act.applicationContext as TBApplication
-
-    init {
-        app.carRepoComponent.inject(this)
-    }
 
     private var firstNameEdit = prefHelper.firstName ?: ""
     private var lastNameEdit = prefHelper.lastName ?: ""
@@ -44,6 +36,17 @@ class LoginViewModel(private val act: Activity) : BaseViewModel() {
     lateinit var buttonsViewModel: ButtonsViewModel
 
     var getString: (msg: StringMessage) -> String = { "" }
+    var dispatchActionEvent: (action: Action) -> Unit = {}
+
+    private val loginValid: Boolean
+        get() {
+            if (isSecondaryPromptsEnabled.get()) {
+                if (secondaryFirstNameEdit.isBlank() || secondaryLastNameEdit.isBlank()) {
+                    return false
+                }
+            }
+            return firstNameEdit.isNotBlank() && lastNameEdit.isNotBlank()
+        }
 
     var showingValue: Boolean
         get() = showing.get()
@@ -53,29 +56,34 @@ class LoginViewModel(private val act: Activity) : BaseViewModel() {
 
     fun afterFirstNameChanged(s: CharSequence) {
         firstNameEdit = s.toString()
+        detectShowNext()
     }
 
     fun afterLastNameChanged(s: CharSequence) {
         lastNameEdit = s.toString()
+        detectShowNext()
     }
 
     fun onSecondaryLoginChecked(isChecked: Boolean) {
         isSecondaryPromptsEnabled.set(isChecked)
+        detectShowNext()
     }
 
     fun afterSecondaryFirstNameChanged(s: CharSequence) {
         secondaryFirstNameEdit = s.toString()
+        detectShowNext()
     }
 
     fun afterSecondaryLastNameChanged(s: CharSequence) {
         secondaryLastNameEdit = s.toString()
+        detectShowNext()
     }
 
-    fun detectLoginError(): Boolean {
-        if (firstNameEdit.isBlank() || lastNameEdit.isBlank()) {
-            error.value = ErrorMessage.ENTER_YOUR_NAME
-            return true
-        }
+    private fun detectShowNext() {
+        buttonsViewModel.showCenterButtonValue = loginValid
+    }
+
+    fun save() {
         prefHelper.firstName = firstNameEdit
         prefHelper.lastName = lastNameEdit
         prefHelper.isSecondaryEnabled = isSecondaryPromptsEnabled.get()
@@ -85,8 +93,7 @@ class LoginViewModel(private val act: Activity) : BaseViewModel() {
             prefHelper.secondaryLastName = secondaryLastNameEdit
         }
         prefHelper.registrationHasChanged = true
-        app.ping()
-        return false
+        dispatchActionEvent(Action.PING)
     }
 
     fun onStageChanged(flow: Flow) {

@@ -152,6 +152,20 @@ class SqlTableCrash(
         }
     }
 
+    override fun delete(line: CrashLine) {
+        dbSql.beginTransaction()
+        try {
+            val where = "$KEY_ROWID=?"
+            val whereArgs = arrayOf(java.lang.Long.toString(line.id))
+            dbSql.delete(TABLE_NAME, where, whereArgs)
+            dbSql.setTransactionSuccessful()
+        } catch (ex: Exception) {
+            Log.e("SqlTableCrash", ex.message)
+        } finally {
+            dbSql.endTransaction()
+        }
+    }
+
     override fun info(message: String) {
         message(Log.INFO, message, null)
     }

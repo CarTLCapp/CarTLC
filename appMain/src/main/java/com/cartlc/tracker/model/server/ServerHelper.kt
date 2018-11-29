@@ -11,9 +11,17 @@ import com.google.android.gms.iid.InstanceID
 /**
  * Created by dug on 5/22/17.
  */
-class ServerHelper {
+class ServerHelper(var deviceId: String? = null) {
 
-    var deviceId: String? = null
+    companion object {
+
+        lateinit var instance: ServerHelper
+            internal set
+
+        fun Init(ctx: Context) {
+            ServerHelper(InstanceID.getInstance(ctx).id)
+        }
+    }
 
     init {
         instance = this
@@ -25,15 +33,5 @@ class ServerHelper {
         return ni != null && ni.isConnectedOrConnecting
     }
 
-    companion object {
-
-        lateinit var instance: ServerHelper
-            internal set
-
-        fun Init(ctx: Context) {
-            ServerHelper()
-            instance.deviceId = InstanceID.getInstance(ctx).id
-        }
-    }
 }
 

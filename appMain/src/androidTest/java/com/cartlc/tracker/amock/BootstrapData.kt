@@ -1,17 +1,11 @@
 /**
  * Copyright 2018, FleetTLC. All rights reserved
  */
-package com.cartlc.tracker.atest
+package com.cartlc.tracker.amock
 
 import com.cartlc.tracker.model.data.DataAddress
-import com.cartlc.tracker.model.data.DataNote
-import com.cartlc.tracker.model.sql.SqlTableCollectionEquipmentProject
-import com.cartlc.tracker.model.sql.SqlTableCollectionNoteProject
-import com.cartlc.tracker.model.sql.SqlTableProjects
 import com.cartlc.tracker.model.table.DatabaseTable
-import com.cartlc.tracker.ui.app.TBApplication
 
-import java.util.Arrays
 import javax.inject.Inject
 
 /**

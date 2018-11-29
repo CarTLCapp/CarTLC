@@ -1,27 +1,29 @@
 package com.cartlc.tracker.model
 
 import android.content.Context
+import android.os.Looper
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.model.data.DataProjectAddressCombo
+import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.event.ActionEvent
 import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.model.misc.ErrorMessage
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.sql.DatabaseManager
 import com.cartlc.tracker.model.table.DatabaseTable
 import java.util.ArrayList
 
-class CarRepository(
+@VisibleForTesting
+open class CarRepository(
         val context: Context,
-        private val dm: DatabaseManager,
+        val db: DatabaseTable,
         val prefHelper: PrefHelper
 ) {
-    val db: DatabaseTable
-        get() = dm
-
+    open val isDevelopment: Boolean
+        get() = prefHelper.isDevelopment
 
     /** Current Flow **/
 
@@ -29,11 +31,26 @@ class CarRepository(
         MutableLiveData<Flow>()
     }
 
+    private var previousFlowValue: Flow? = null
+
     var curFlowValue: Flow
         get() = curFlow.value ?: LoginFlow()
         set(value) {
+            previousFlowValue = curFlow.value ?: LoginFlow()
             curFlow.value = value
         }
+
+    fun onPreviousFlow() {
+        previousFlowValue?.let {
+            if (it.stage == Stage.LOGIN) {
+                computeCurStage()
+            } else {
+                curFlowValue = it
+            }
+        } ?: run {
+            computeCurStage()
+        }
+    }
 
     /** ErrorEvent **/
 
@@ -43,7 +60,9 @@ class CarRepository(
 
     var errorValue: ErrorMessage
         get() = error.value!!
-        set(value) { error.value = value }
+        set(value) {
+            error.value = value
+        }
 
     /** ActionEvent **/
 
@@ -58,12 +77,14 @@ class CarRepository(
     }
 
     init {
-        curFlow.value = LoginFlow()
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            curFlow.value = LoginFlow()
+        }
     }
 
     val hasInsectingList: Boolean
         get() {
-            return dm.tableVehicleName.vehicleNames.isNotEmpty()
+            return db.tableVehicleName.vehicleNames.isNotEmpty()
         }
 
     fun checkProjectErrors(): Boolean {
@@ -89,8 +110,10 @@ class CarRepository(
         return null
     }
 
+    @VisibleForTesting
+    open
     fun clearUploaded() {
-        dm.clearUploaded()
+        db.clearUploaded()
         prefHelper.clearUploaded()
     }
 
@@ -187,7 +210,7 @@ class CarRepository(
         return false
     }
 
-    private fun isNotesComplete(items: List<DataNote>): Boolean {
+    fun isNotesComplete(items: List<DataNote>): Boolean {
         for (note in items) {
             if (!note.value.isNullOrBlank()) {
                 if (note.num_digits > 0 && note.value!!.length != note.num_digits.toInt()) {

@@ -6,8 +6,6 @@
           android:layout_height="wrap_content"
           android:ellipsize="marquee"
           android:singleLine="true"
-          android:paddingLeft="20dp"
-          android:paddingRight="20dp"
-          android:paddingTop="10dp"
-          android:paddingBottom="10dp"
+          android:layout_margin="2dp"
+          android:padding="10dp"
           android:textAlignment="inherit"/>

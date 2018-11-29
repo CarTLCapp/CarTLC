@@ -1,3 +1,6 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.mock.model.data
 
 import com.cartlc.tracker.model.data.DataTruck

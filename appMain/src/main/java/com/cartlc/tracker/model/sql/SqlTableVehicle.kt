@@ -5,6 +5,7 @@ package com.cartlc.tracker.model.sql
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
+import androidx.annotation.VisibleForTesting
 import com.cartlc.tracker.model.data.DataVehicle
 import com.cartlc.tracker.model.misc.HashLongList
 import com.cartlc.tracker.model.table.DatabaseTable
@@ -16,7 +17,8 @@ import timber.log.Timber
  * Created by dug on 8/31/17.
  */
 
-class SqlTableVehicle(
+@VisibleForTesting
+open class SqlTableVehicle(
         private val dm: DatabaseTable,
         private val dbSql: SQLiteDatabase
 ) : TableVehicle {

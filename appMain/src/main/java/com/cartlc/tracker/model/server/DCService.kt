@@ -39,7 +39,7 @@ class DCService : IntentService(SERVER_NAME) {
 
         app.carRepoComponent.inject(this)
 
-        mPing = DCPing(this)
+        mPing = DCPing(this, repo)
         mZip = DCZip(db)
         ServerHelper.Init(this)
         if (!ServerHelper.instance.hasConnection(this)) {

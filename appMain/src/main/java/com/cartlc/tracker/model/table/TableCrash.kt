@@ -7,4 +7,5 @@ interface TableCrash {
     fun info(message: String)
     fun message(code: Int, message: String, trace: String?)
     fun setUploaded(line: SqlTableCrash.CrashLine)
+    fun delete(line: SqlTableCrash.CrashLine)
 }

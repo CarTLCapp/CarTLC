@@ -1,25 +1,15 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.viewmodel.frag
 
-import android.app.Activity
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.misc.StringMessage
-import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.viewmodel.BaseViewModel
-import javax.inject.Inject
 
-class TitleViewModel(private val act: Activity) : BaseViewModel() {
-
-    @Inject
-    lateinit var repo: CarRepository
-
-    private val app: TBApplication
-        get() = act.applicationContext as TBApplication
-
-    init {
-        app.carRepoComponent.inject(this)
-    }
+class TitleViewModel(private val repo: CarRepository) : BaseViewModel() {
 
     var title = ObservableField<String>()
     var subTitle = ObservableField<String>()
@@ -44,6 +34,5 @@ class TitleViewModel(private val act: Activity) : BaseViewModel() {
             titleValue = getString(StringMessage.title_photos(count))
         }
     }
-
 
 }

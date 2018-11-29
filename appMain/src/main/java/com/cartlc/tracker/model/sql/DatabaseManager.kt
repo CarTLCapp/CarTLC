@@ -6,6 +6,7 @@ package com.cartlc.tracker.model.sql
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import androidx.annotation.VisibleForTesting
 
 import com.cartlc.tracker.model.table.*
 import com.cartlc.tracker.ui.app.TBApplication
@@ -15,7 +16,8 @@ import timber.log.Timber
 /**
  * Created by dug on 4/17/17.
  */
-class DatabaseManager(private val ctx: Context) : DatabaseTable {
+@VisibleForTesting
+open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
         internal val DATABASE_NAME = "cartcl.db"
@@ -147,7 +149,7 @@ class DatabaseManager(private val ctx: Context) : DatabaseTable {
         }
     }
 
-    fun clearUploaded() {
+    override fun clearUploaded() {
         dbHelper.clearUploaded()
     }
 

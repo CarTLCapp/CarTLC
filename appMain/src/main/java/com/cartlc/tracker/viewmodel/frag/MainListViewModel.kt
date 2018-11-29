@@ -1,3 +1,6 @@
+/**
+ * Copyright 2018, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.viewmodel.frag
 
 import android.content.Context
@@ -16,14 +19,7 @@ import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.viewmodel.BaseViewModel
 import javax.inject.Inject
 
-class MainListViewModel(ctx: Context) : BaseViewModel() {
-
-    @Inject
-    lateinit var repo: CarRepository
-
-    init {
-        (ctx.applicationContext as TBApplication).carRepoComponent.inject(this)
-    }
+class MainListViewModel(private val repo: CarRepository) : BaseViewModel() {
 
     private val prefHelper: PrefHelper
         get() = repo.prefHelper
@@ -67,7 +63,12 @@ class MainListViewModel(ctx: Context) : BaseViewModel() {
 
     var currentProjectGroup: DataProjectAddressCombo?
         get() = prefHelper.currentProjectGroup
-        set(value) { prefHelper.currentProjectGroup = value }
+        set(value) {
+            prefHelper.currentProjectGroup = value
+            onCurrentProjectGroupChanged()
+        }
+
+    var onCurrentProjectGroupChanged: () -> Unit = {}
 
     val currentProjectGroupId: Long
         get() = prefHelper.currentProjectGroupId

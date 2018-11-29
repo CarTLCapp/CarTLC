@@ -6,6 +6,7 @@ package com.cartlc.tracker.model.server
 import android.content.Context
 import android.text.TextUtils
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.model.CarRepository
@@ -29,17 +30,20 @@ import org.greenrobot.eventbus.EventBus
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.inject.Inject
 
 /**
  * Created by dug on 8/24/17.
  */
 
-class DCPing(private val context: Context) : DCPost() {
+class DCPing(
+        private val context: Context,
+        private val repo: CarRepository
+) : DCPost() {
 
     companion object {
 
         private val TAG = "DCPing"
+        private val LOG = true
 
         private val SERVER_URL_DEVELOPMENT = "http://fleetdev.arqnetworks.com/"
         private val SERVER_URL_RELEASE = "http://fleettlc.arqnetworks.com/"
@@ -70,17 +74,11 @@ class DCPing(private val context: Context) : DCPost() {
     private val STRINGS: String
     private var mVersion: String? = null
 
-    @Inject
-    lateinit var repo: CarRepository
-
     private val prefHelper: PrefHelper
         get() = repo.prefHelper
 
     private val db: DatabaseTable
         get() = repo.db
-
-    private val app: TBApplication
-        get() = context.applicationContext as TBApplication
 
     private val version: String?
         get() {
@@ -90,15 +88,15 @@ class DCPing(private val context: Context) : DCPost() {
                 } catch (ex: Exception) {
                     TBApplication.ReportError(ex, DCPing::class.java, "getVersion()", "server")
                 }
-
             }
             return mVersion
         }
 
-    init {
-        app.carRepoComponent.inject(this)
+    @VisibleForTesting
+    var openConnection: (target: String) -> HttpURLConnection = { target -> openTargetConnection(target) }
 
-        if (prefHelper.isDevelopment) {
+    init {
+        if (repo.isDevelopment) {
             SERVER_URL = SERVER_URL_DEVELOPMENT
         } else {
             SERVER_URL = SERVER_URL_RELEASE
@@ -1114,10 +1112,16 @@ class DCPing(private val context: Context) : DCPost() {
         }
     }
 
+    private fun openTargetConnection(target: String): HttpURLConnection {
+        return URL(target).openConnection() as HttpURLConnection
+    }
+
     private fun post(target: String, json: JSONObject, sendErrors: Boolean): String? {
         try {
-            val url = URL(target)
-            val connection = url.openConnection() as HttpURLConnection
+            if (LOG) {
+                Log.d(TAG, "POST: $target: $json")
+            }
+            val connection = openConnection(target)
             connection.doOutput = true
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
@@ -1127,6 +1131,9 @@ class DCPing(private val context: Context) : DCPost() {
             writer.close()
             val result = getResult(connection)
             connection.disconnect()
+            if (LOG) {
+                Log.d(TAG, "GOT RESULT: $result")
+            }
             return result
         } catch (ex: Exception) {
             if (sendErrors) {
@@ -1144,7 +1151,7 @@ class DCPing(private val context: Context) : DCPost() {
         try {
             return JSONObject(result)
         } catch (ex: Exception) {
-            Timber.e("Got bad result back from server: " + result + "\n" + ex.message)
+            Timber.e("Got bad result back from server: $result\n$ex.message")
         }
         return JSONObject()
     }
@@ -1166,7 +1173,7 @@ class DCPing(private val context: Context) : DCPost() {
             jsonObject.accumulate("app_version", line.version)
             val result = post(MESSAGE, jsonObject, false)
             if (result != null && Integer.parseInt(result) == 0) {
-                db.tableCrash.setUploaded(line)
+                db.tableCrash.delete(line)
             } else {
                 Log.e(TAG, "Unable to send previously trapped message: " + line.message!!)
             }

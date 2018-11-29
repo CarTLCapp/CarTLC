@@ -23,7 +23,7 @@
         android:layout_centerInParent="true"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:scaleType="fitCenter"/>
+        android:scaleType="fitStart"/>
 
     <TextView
         android:id="@+id/note"

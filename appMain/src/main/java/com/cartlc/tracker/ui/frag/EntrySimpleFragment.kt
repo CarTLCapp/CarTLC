@@ -32,7 +32,7 @@ class EntrySimpleFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragEntrySimpleBinding.inflate(layoutInflater, container, false)
-        baseVM = EntrySimpleViewModel(activity!!)
+        baseVM = EntrySimpleViewModel()
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
         val autoNext = object : TextView.OnEditorActionListener {

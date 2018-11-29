@@ -11,15 +11,18 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.databinding.FragMainListBinding
+import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.ui.list.*
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.ui.act.MainActivity
-import com.cartlc.tracker.viewmodel.frag.ButtonsViewModel
+import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.viewmodel.frag.EntrySimpleViewModel
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel
+import com.cartlc.tracker.viewmodel.main.MainButtonsViewModel
+import javax.inject.Inject
 
 class MainListFragment : BaseFragment() {
 
@@ -40,27 +43,31 @@ class MainListFragment : BaseFragment() {
     private val mainActivity: MainActivity?
         get() = activity as? MainActivity
 
-    private val buttonsViewModel: ButtonsViewModel?
-        get() = mainActivity?.buttonsFragment?.vm
+    private val buttonsViewModel: MainButtonsViewModel?
+        get() = mainActivity?.vm?.buttonsViewModel
 
     private val entrySimpleViewModel: EntrySimpleViewModel?
         get() = mainActivity?.entrySimpleFragment?.vm
 
-    lateinit private var simpleAdapter: SimpleListAdapter
-    lateinit private var projectAdapter: ProjectGroupListAdapter
-    lateinit private var equipmentSelectAdapter: EquipmentSelectListAdapter
-    lateinit private var noteEntryAdapter: NoteListEntryAdapter
-    lateinit private var radioAdapter: RadioListAdapter
-
-    val isNotesComplete: Boolean
-        get() = noteEntryAdapter.isNotesComplete
+    private lateinit var simpleAdapter: SimpleListAdapter
+    private lateinit var projectAdapter: ProjectGroupListAdapter
+    private lateinit var equipmentSelectAdapter: EquipmentSelectListAdapter
+    private lateinit var noteEntryAdapter: NoteListEntryAdapter
+    private lateinit var radioAdapter: RadioListAdapter
 
     val notes: List<DataNote>
         get() = noteEntryAdapter.notes
 
+    private val app: TBApplication
+        get() = activity!!.applicationContext as TBApplication
+
+    @Inject
+    lateinit var repo: CarRepository
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragMainListBinding.inflate(layoutInflater, container, false)
-        baseVM = MainListViewModel(ctx)
+        app.carRepoComponent.inject(this)
+        baseVM = MainListViewModel(repo)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
 
