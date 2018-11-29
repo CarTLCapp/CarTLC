@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.data.DataNote
-import com.cartlc.tracker.viewmodel.MainListViewModel
+import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 import kotlinx.android.synthetic.main.entry_item_entry_note.view.*
 
 import java.util.ArrayList

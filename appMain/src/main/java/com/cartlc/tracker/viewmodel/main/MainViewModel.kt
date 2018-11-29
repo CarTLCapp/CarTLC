@@ -1,10 +1,9 @@
-package com.cartlc.tracker.viewmodel
+package com.cartlc.tracker.viewmodel.main
 
 import android.location.Address
 import android.text.InputType
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.BuildConfig
-import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.data.*
 import com.cartlc.tracker.model.flow.*
@@ -14,10 +13,11 @@ import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.util.BitmapHelper
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.ui.util.LocationHelper
+import com.cartlc.tracker.viewmodel.frag.*
 import java.io.File
 import java.util.*
 
-class MainViewModel(val repo: CarRepository) : BaseViewModel() {
+class MainViewModel(val repo: CarRepository) {
 
     companion object {
         private val ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG // true=Debugging only
@@ -432,7 +432,6 @@ class MainViewModel(val repo: CarRepository) : BaseViewModel() {
     }
 
     // BUTTON CENTER END
-
 
     // PICTURE
 

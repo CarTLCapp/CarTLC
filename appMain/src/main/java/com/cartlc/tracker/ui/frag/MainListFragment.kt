@@ -17,9 +17,9 @@ import com.cartlc.tracker.ui.list.*
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.ui.act.MainActivity
-import com.cartlc.tracker.viewmodel.ButtonsViewModel
-import com.cartlc.tracker.viewmodel.EntrySimpleViewModel
-import com.cartlc.tracker.viewmodel.MainListViewModel
+import com.cartlc.tracker.viewmodel.frag.ButtonsViewModel
+import com.cartlc.tracker.viewmodel.frag.EntrySimpleViewModel
+import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 
 class MainListFragment : BaseFragment() {
 

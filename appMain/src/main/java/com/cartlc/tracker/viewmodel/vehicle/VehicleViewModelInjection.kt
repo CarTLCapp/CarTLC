@@ -1,4 +1,4 @@
-package com.cartlc.tracker.viewmodel
+package com.cartlc.tracker.viewmodel.vehicle
 
 import com.cartlc.tracker.ui.act.VehicleActivity
 import dagger.Component

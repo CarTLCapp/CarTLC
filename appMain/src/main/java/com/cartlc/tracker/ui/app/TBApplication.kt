@@ -30,16 +30,20 @@ import com.cartlc.tracker.ui.util.LocationHelper
 import com.cartlc.tracker.ui.util.PermissionHelper.PermissionRequest
 import com.cartlc.tracker.ui.util.PermissionHelper.PermissionListener
 
-import timber.log.Timber
-
 import com.cartlc.tracker.ui.util.PermissionHelper
-import com.cartlc.tracker.viewmodel.*
+import com.cartlc.tracker.viewmodel.main.DaggerMainViewModelComponent
+import com.cartlc.tracker.viewmodel.main.MainViewModel
+import com.cartlc.tracker.viewmodel.main.MainViewModelComponent
+import com.cartlc.tracker.viewmodel.main.MainViewModelModule
+import com.cartlc.tracker.viewmodel.vehicle.DaggerVehicleViewModelComponent
+import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
+import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModelComponent
+import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModelModule
 import com.squareup.leakcanary.LeakCanary
 
 import org.greenrobot.eventbus.EventBus
-
+import timber.log.Timber
 import java.io.File
-import javax.inject.Inject
 
 class TBApplication : Application() {
 

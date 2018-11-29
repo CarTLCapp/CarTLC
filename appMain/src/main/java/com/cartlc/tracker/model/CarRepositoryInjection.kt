@@ -1,12 +1,14 @@
 package com.cartlc.tracker.model
 
-import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.server.DCPing
 import com.cartlc.tracker.model.server.DCService
 import com.cartlc.tracker.ui.act.ListEntryActivity
-import com.cartlc.tracker.ui.act.MainActivity
 import com.cartlc.tracker.ui.list.ListEntryAdapter
-import com.cartlc.tracker.viewmodel.*
+import com.cartlc.tracker.viewmodel.frag.ButtonsViewModel
+import com.cartlc.tracker.viewmodel.frag.ConfirmationViewModel
+import com.cartlc.tracker.viewmodel.frag.LoginViewModel
+import com.cartlc.tracker.viewmodel.frag.TitleViewModel
+import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 import dagger.Component
 import dagger.Module
 import dagger.Provides

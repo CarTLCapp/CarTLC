@@ -1,13 +1,12 @@
-package com.cartlc.tracker.viewmodel
+package com.cartlc.tracker.viewmodel.frag
 
 import android.app.Activity
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
-import com.cartlc.tracker.databinding.FragTitleBinding
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.misc.StringMessage
-import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.viewmodel.BaseViewModel
 import javax.inject.Inject
 
 class TitleViewModel(private val act: Activity) : BaseViewModel() {

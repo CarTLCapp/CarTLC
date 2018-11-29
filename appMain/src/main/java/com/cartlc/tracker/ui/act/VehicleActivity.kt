@@ -18,8 +18,7 @@ import com.cartlc.tracker.ui.frag.EntrySimpleFragment
 import com.cartlc.tracker.ui.frag.TitleFragment
 import com.cartlc.tracker.ui.list.CheckBoxListAdapter
 import com.cartlc.tracker.ui.list.RadioListAdapter
-import com.cartlc.tracker.viewmodel.VehicleViewModel
-import timber.log.Timber
+import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 import javax.inject.Inject
 
 class VehicleActivity : BaseActivity() {

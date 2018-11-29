@@ -1,4 +1,4 @@
-package com.cartlc.tracker.viewmodel
+package com.cartlc.tracker.viewmodel.frag
 
 import android.content.Context
 import androidx.databinding.ObservableBoolean
@@ -12,8 +12,8 @@ import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.sql.SqlTableEntry
-import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.viewmodel.BaseViewModel
 import javax.inject.Inject
 
 class MainListViewModel(ctx: Context) : BaseViewModel() {

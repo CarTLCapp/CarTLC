@@ -11,8 +11,8 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import com.cartlc.tracker.databinding.FragEntrySimpleBinding
-import com.cartlc.tracker.viewmodel.EntrySimpleViewModel
-import com.cartlc.tracker.viewmodel.EntrySimpleViewModel.Checked
+import com.cartlc.tracker.viewmodel.frag.EntrySimpleViewModel
+import com.cartlc.tracker.viewmodel.frag.EntrySimpleViewModel.Checked
 
 class EntrySimpleFragment : BaseFragment() {
 

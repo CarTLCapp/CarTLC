@@ -37,7 +37,7 @@ import com.cartlc.tracker.ui.util.DialogHelper
 import com.cartlc.tracker.ui.util.LocationHelper
 import com.cartlc.tracker.ui.util.PermissionHelper
 import com.cartlc.tracker.ui.frag.*
-import com.cartlc.tracker.viewmodel.MainViewModel
+import com.cartlc.tracker.viewmodel.main.MainViewModel
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*

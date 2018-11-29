@@ -9,7 +9,7 @@
 
         <variable
             name="viewModel"
-            type="com.cartlc.tracker.viewmodel.VehicleViewModel" />
+            type="com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

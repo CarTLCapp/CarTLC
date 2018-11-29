@@ -7,7 +7,7 @@
 
         <variable
             name="viewModel"
-            type="com.cartlc.tracker.viewmodel.ConfirmationViewModel"/>
+            type="com.cartlc.tracker.viewmodel.frag.ConfirmationViewModel"/>
     </data>
 
     <ScrollView

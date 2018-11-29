@@ -9,7 +9,7 @@
 
         <variable
             name="viewModel"
-            type="com.cartlc.tracker.viewmodel.TitleViewModel" />
+            type="com.cartlc.tracker.viewmodel.frag.TitleViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

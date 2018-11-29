@@ -6,13 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import androidx.fragment.app.Fragment
-import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragButtonsBinding
 import com.cartlc.tracker.model.flow.Action
-import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.ui.app.TBApplication
-import com.cartlc.tracker.viewmodel.ButtonsViewModel
+import com.cartlc.tracker.viewmodel.frag.ButtonsViewModel
 
 class ButtonsFragment: BaseFragment() {
 

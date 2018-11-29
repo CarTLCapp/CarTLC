@@ -8,7 +8,7 @@
 
         <variable
             name="viewModel"
-            type="com.cartlc.tracker.viewmodel.MainListViewModel" />
+            type="com.cartlc.tracker.viewmodel.frag.MainListViewModel" />
     </data>
 
     <RelativeLayout

@@ -1,4 +1,4 @@
-package com.cartlc.tracker.viewmodel
+package com.cartlc.tracker.viewmodel.frag
 
 import android.app.Activity
 import android.text.InputType
@@ -10,6 +10,7 @@ import com.cartlc.tracker.R
 import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.ButtonDialog
 import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.viewmodel.BaseViewModel
 
 class EntrySimpleViewModel(private val act: Activity) : BaseViewModel() {
 

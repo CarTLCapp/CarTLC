@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.cartlc.tracker.viewmodel.TitleViewModel
+import com.cartlc.tracker.viewmodel.frag.TitleViewModel
 import com.cartlc.tracker.databinding.FragTitleBinding
 
 class TitleFragment: BaseFragment() {

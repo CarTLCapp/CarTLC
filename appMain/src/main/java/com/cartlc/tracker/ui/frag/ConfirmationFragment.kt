@@ -13,7 +13,7 @@ import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.NoteListAdapter
 import com.cartlc.tracker.ui.list.PictureThumbnailListAdapter
 import com.cartlc.tracker.ui.list.SimpleListAdapter
-import com.cartlc.tracker.viewmodel.ConfirmationViewModel
+import com.cartlc.tracker.viewmodel.frag.ConfirmationViewModel
 
 class ConfirmationFragment : BaseFragment() {
 

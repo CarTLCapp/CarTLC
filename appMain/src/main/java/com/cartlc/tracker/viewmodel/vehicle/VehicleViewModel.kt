@@ -1,4 +1,4 @@
-package com.cartlc.tracker.viewmodel
+package com.cartlc.tracker.viewmodel.vehicle
 
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
@@ -6,6 +6,7 @@ import com.cartlc.tracker.model.VehicleRepository
 import com.cartlc.tracker.model.flow.Action
 import com.cartlc.tracker.model.flow.ButtonDialog
 import com.cartlc.tracker.model.flow.VehicleStage
+import com.cartlc.tracker.viewmodel.BaseViewModel
 import java.lang.NumberFormatException
 
 class VehicleViewModel(

@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.cartlc.tracker.databinding.FragLoginBinding
-import com.cartlc.tracker.viewmodel.LoginViewModel
+import com.cartlc.tracker.viewmodel.frag.LoginViewModel
 
 class LoginFragment : BaseFragment() {
 
