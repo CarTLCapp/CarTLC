@@ -5,6 +5,7 @@ package controllers;
 
 import play.mvc.*;
 import play.data.*;
+import play.data.validation.ValidationError;
 
 import models.*;
 import modules.WorkerExecutionContext;
@@ -290,9 +291,13 @@ public class EntryController extends Controller {
     public Result update(Long id) throws PersistenceException {
         Client client = Secured.getClient(ctx());
         Form<EntryFormData> entryForm = mFormFactory.form(EntryFormData.class).bindFromRequest();
-        String home = "/entry/" + id + "/view";
         if (entryForm.hasErrors()) {
-            return badRequest(home);
+            StringBuffer sbuf = new StringBuffer();
+            for (ValidationError error : entryForm.allErrors()) {
+                sbuf.append(error.message());
+                sbuf.append("\n");
+            }
+            return badRequest(sbuf.toString());
         }
         Entry entry = Entry.find.byId(id);
         if (entry == null) {
@@ -351,7 +356,7 @@ public class EntryController extends Controller {
             Logger.error(ex.getMessage());
             return badRequest(ex.getMessage());
         }
-        return ok(home);
+        return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
     }
 
     @Security.Authenticated(Secured.class)
