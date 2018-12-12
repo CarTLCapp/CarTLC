@@ -37,7 +37,7 @@ import com.typesafe.config.Config;
 @Singleton
 public class AmazonHelper {
 
-    static final String BUCKET_NAME_DEVELOP = "cartlc";
+    static final String BUCKET_NAME_DEVELOP = "fleetdev2";
     static final String BUCKET_NAME_RELEASE = "fleettlc";
     static final String REGION = "us-east-2";
 

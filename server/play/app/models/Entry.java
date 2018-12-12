@@ -11,6 +11,7 @@ import javax.persistence.*;
 
 import play.data.validation.*;
 import play.data.format.*;
+import play.data.Form;
 
 import com.avaje.ebean.*;
 
@@ -369,6 +370,31 @@ public class Entry extends com.avaje.ebean.Model {
             sbuf.append(note.getValue());
         }
         return sbuf.toString();
+    }
+
+    public HashMap<String, Object> getNoteValues() {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        for (EntryNoteCollection note : getNotes()) {
+            String valueName = "value_" + note.getName();
+            map.put(valueName, note.getValue());
+        }
+        return map;
+    }
+
+    static public List<EntryNoteCollection> getNotesForId(long id) {
+        Entry entry = find.byId(id);
+        if (entry == null) {
+            return new ArrayList<EntryNoteCollection>();
+        }
+        return entry.getNotes();
+    }
+
+    public void applyToNotes(Form entryForm) {
+        for (EntryNoteCollection note: getNotes()) {
+            String valueName = "value_" + note.getName();
+            String value = entryForm.field(valueName).getValue().get();
+            note.setValue(value);
+        }
     }
 
     public boolean hasPictures() {

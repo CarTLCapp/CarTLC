@@ -1,9 +1,5 @@
 Login To Server: 
 ------------
-ssh -i ~/.ssh/cartlc.pem ubuntu@cartlc.arqnetworks.com
-
-
-# ssh -i ~/.ssh/FleetTLC.pem ubuntu@ec2-18-219-26-13.us-east-2.compute.amazonaws.com
 ssh -i ~/.ssh/FleetTLC.pem ubuntu@ec2-18-216-214-167.us-east-2.compute.amazonaws.com
 ssh -i ~/.ssh/FleetTLC.pem ubuntu@fleetdev.arqnetworks.com
 
@@ -43,6 +39,12 @@ Copy files from local machine to server
 cp credentials ~/.aws
 cd ~/fleet/s3/fleettlc
 aws s3 sync . s3://cartlc
+
+Buckets:
+https://s3.console.aws.amazon.com/s3/buckets/cartlc/?region=us-east-1&tab=overview
+
+Update Security Credentials (feel free to do this often):
+https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_RotateAccessKey
 
 Database:
 --------

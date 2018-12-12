@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Date;
 import java.util.Iterator;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -280,15 +281,18 @@ public class EntryController extends Controller {
         if (entry == null) {
             return badRequest2("Could not find entry ID " + entry_id);
         }
+        String home = "/entry/" + entry_id + "/view";
         Form<EntryFormData> entryForm = mFormFactory.form(EntryFormData.class).fill(new EntryFormData(entry));
-        return ok(views.html.entry_editForm.render(entry.id, entryForm, Secured.getClient(ctx())));
+        DynamicForm noteValues = mFormFactory.form().fill(entry.getNoteValues());
+        return ok(views.html.entry_editForm.render(entry.id, entryForm, noteValues, home, Secured.getClient(ctx())));
     }
 
     public Result update(Long id) throws PersistenceException {
         Client client = Secured.getClient(ctx());
         Form<EntryFormData> entryForm = mFormFactory.form(EntryFormData.class).bindFromRequest();
+        String home = "/entry/" + id + "/view";
         if (entryForm.hasErrors()) {
-            return badRequest(views.html.entry_editForm.render(id, entryForm, client));
+            return badRequest(home);
         }
         Entry entry = Entry.find.byId(id);
         if (entry == null) {
@@ -340,14 +344,14 @@ public class EntryController extends Controller {
             }
             EntryEquipmentCollection.replace(entry.equipment_collection_id, Equipment.getChecked(entryForm));
             EntryNoteCollection.replace(entry.note_collection_id, Note.getChecked(entryForm));
-
+            entry.applyToNotes(entryForm);
             entry.update();
             Logger.info("Entry updated: " + entry.toString());
         } catch (ParseException ex) {
             Logger.error(ex.getMessage());
             return badRequest(ex.getMessage());
         }
-        return list();
+        return ok(home);
     }
 
     @Security.Authenticated(Secured.class)

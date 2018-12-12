@@ -37,10 +37,10 @@ class AmazonHelper(
             AmazonHelper(db, prefHelper)
         }
 
-        internal val BUCKET_NAME_DEVELOP = "cartlc"
-        internal val BUCKET_NAME_RELEASE = "fleettlc"
-        internal val IDENTITY_POOL_ID_DEVELOP = "us-east-2:38d2f2a2-9454-4472-9fec-9468f3700ba5"
-        internal val IDENTITY_POOL_ID_RELEASE = "us-east-2:389282dd-de71-4849-a68b-2b126b3de5f3"
+        private val BUCKET_NAME_DEVELOP = "fleetdev2"
+        private val BUCKET_NAME_RELEASE = "fleettlc"
+        //        internal val IDENTITY_POOL_ID_DEVELOP = "us-east-2:38d2f2a2-9454-4472-9fec-9468f3700ba5"
+        private val IDENTITY_POOL_ID_RELEASE = "us-east-2:389282dd-de71-4849-a68b-2b126b3de5f3"
     }
 
     internal val BUCKET_NAME: String
@@ -53,11 +53,10 @@ class AmazonHelper(
         instance = this
         if (prefHelper.isDevelopment) {
             BUCKET_NAME = BUCKET_NAME_DEVELOP
-            IDENTITY_POOL_ID = IDENTITY_POOL_ID_DEVELOP
         } else {
             BUCKET_NAME = BUCKET_NAME_RELEASE
-            IDENTITY_POOL_ID = IDENTITY_POOL_ID_RELEASE
         }
+        IDENTITY_POOL_ID = IDENTITY_POOL_ID_RELEASE
     }
 
     private fun init(context: Context) {

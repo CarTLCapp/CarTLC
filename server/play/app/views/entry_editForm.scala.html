@@ -1,19 +1,19 @@
-@(id: Long, entryForm: Form[views.formdata.EntryFormData], client : Client)
+@(id: Long, entryForm: Form[views.formdata.EntryFormData], noteValues: DynamicForm, home : String, client : Client)
 
 @import helper._
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - Edit Entry", client, "/entry/entry/@id/view") {
-    
+@main("FleetTLC - Edit Entry", client, home) {
+
     <h1>Edit entry</h1>
-    
+
     @b3.form(routes.EntryController.update(id)) {
 
         @CSRF.formField
 
         <fieldset>
-        
+
             @b3.select(
                 entryForm("name"),
                 options(Entry.optionsTech),
@@ -71,10 +71,23 @@
 
         </div>
 
+        <h3>Note Values</h3>
+
+        <div>
+
+            @for(note <- Entry.getNotesForId(id)) {
+                @{
+                    val name = note.getName()
+                    val valueName = "value_" + name
+                    b3.text(noteValues(valueName), '_label -> name, '_help -> "")
+                }
+            }
+
+        </div>
 
         <div class="actions">
             <input type="submit" value="Save this entry" class="btn primary"> or
-            <a href="/entry/@id/view"" class="btn">Cancel</a>
+            <a href=@home class="btn">Cancel</a>
         </div>
 
     }
