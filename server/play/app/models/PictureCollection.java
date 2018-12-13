@@ -69,7 +69,7 @@ public class PictureCollection extends Model {
     public static List<PictureCollection> findNoEntries() {
         List<PictureCollection> missing = new ArrayList<>();
         for (PictureCollection collection : list()) {
-            if (!Entry.hasEntryForPictureCollectionId(collection.id)) {
+            if (!Entry.hasEntryForPictureCollectionId(collection.collection_id)) {
                 missing.add(collection);
             }
         }

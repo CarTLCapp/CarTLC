@@ -36,9 +36,7 @@ PHPMyAdmin:
    Additional: cartlc p/w: cartcl#@!
 
 Copy files from local machine to server
-cp credentials ~/.aws
-cd ~/fleet/s3/fleettlc
-aws s3 sync . s3://cartlc
+aws s3 sync . s3://fleetdev2
 
 Buckets:
 https://s3.console.aws.amazon.com/s3/buckets/cartlc/?region=us-east-1&tab=overview

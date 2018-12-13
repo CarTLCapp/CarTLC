@@ -598,13 +598,13 @@ public class Entry extends com.avaje.ebean.Model {
         }
         for (PictureCollection collection : pictures) {
             List<Entry> list = find.where()
-                    .eq("picture_collection_id", collection.id)
+                    .eq("picture_collection_id", collection.collection_id)
                     .findList();
             if (!list.isEmpty()) {
                 return true;
             }
             // This is very interesting. A collection ID without any entries? Sounds like something to delete.
-            Logger.warn("ALERT! No entries for picture collection ID: " + collection.id + ", triggered from: " + filename);
+            Logger.warn("ALERT! No entries for picture collection ID: " + collection.collection_id + ", triggered from: " + filename);
         }
         return false;
     }
