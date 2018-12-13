@@ -227,7 +227,7 @@ public class EntryController extends Controller {
         if (mDownloading) {
             mDownloadStatusRequests.add(completableFuture);
         } else {
-            completableFuture.complete(ok("Done"));
+            completableFuture.complete(ok("0"));
         }
         return completableFuture;
     }
@@ -254,7 +254,7 @@ public class EntryController extends Controller {
         mDownloading = false;
         if (mDownloadStatusRequests.size() > 0) {
             for (CompletableFuture<Result> completableFuture : mDownloadStatusRequests) {
-                completableFuture.complete(ok("Done"));
+                completableFuture.complete(ok("1"));
             }
             mDownloadStatusRequests.clear();
         }

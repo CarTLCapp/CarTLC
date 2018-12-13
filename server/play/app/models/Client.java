@@ -160,6 +160,9 @@ public class Client extends com.avaje.ebean.Model {
     }
 
     public List<String> getCompanyNames() {
+        if (id == null) {
+            return new ArrayList<>();
+        }
         return ClientCompanyNameAssociation.findCompaniesFor(id);
     }
 }

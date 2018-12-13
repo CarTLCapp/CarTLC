@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import play.Logger;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -109,26 +110,18 @@ public class AmazonHelper {
         private void next(File targetFile) {
             Logger.warn("DOWNLOAD: BUCKET=" + bucketName + ", KEY=" + targetFile.getName() + " TARGET=" + targetFile.getAbsolutePath());
             try {
-                TransferManager xferManager = TransferManagerBuilder.defaultTransferManager();
-                GetObjectRequest obj = new GetObjectRequest(bucketName, targetFile.getName());
-                curDownload = xferManager.download(obj, targetFile, new S3SyncProgressListener() {
-                    public void onPersistableTransfer(PersistableTransfer persistableTransfer) {
-                        if (curDownload.getState() == TransferState.Completed) {
-                            Logger.info("COMPLETED: " + targetFile.getAbsolutePath());
-                            scheduleNext();
-                        } else if (curDownload.getState() == TransferState.Canceled) {
-                            Logger.info("CANCELED: " + targetFile.getAbsolutePath());
-                            scheduleNext();
-                        } else if (curDownload.getState() == TransferState.Failed) {
-                            Logger.info("FAILED: " + targetFile.getAbsolutePath());
-                            scheduleNext();
-                        }
-                    }
-                });
+                TransferManager xferManager = TransferManagerBuilder.standard().build();
+                Download download = xferManager.download(bucketName, targetFile.getName(), targetFile);
+                download.waitForCompletion();
+                Logger.info("COMPLETED: " + targetFile.getAbsolutePath());
             } catch (AmazonServiceException e) {
-                Logger.error("ERROR: " + e.getMessage());
-                scheduleNext();
+                Logger.error("Amazon service error: " + e.getMessage());
+            } catch (AmazonClientException e) {
+                Logger.error("Amazon client error: " + e.getMessage());
+            } catch (InterruptedException e) {
+                Logger.error("Transfer interrupted: " + e.getMessage());
             }
+            scheduleNext();
         }
     }
 

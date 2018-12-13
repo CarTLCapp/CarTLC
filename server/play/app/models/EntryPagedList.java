@@ -400,6 +400,9 @@ public class EntryPagedList {
         query.append(" ");
         query.append(getOrder());
         if (useLimit) {
+            if (mParams.mPageSize == 0) {
+                mParams.mPageSize = mDefaultPageSize;
+            }
             int start = mParams.mPage * mParams.mPageSize;
             query.append(" LIMIT ");
             query.append(start);
