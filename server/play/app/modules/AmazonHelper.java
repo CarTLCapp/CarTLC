@@ -42,7 +42,7 @@ public class AmazonHelper {
     static final String REGION = "us-east-2";
 
     public interface OnDownloadComplete {
-        void onDownloadComplete(File file);
+        void onDownloadComplete();
     }
 
     class CommonActivity {
@@ -83,38 +83,63 @@ public class AmazonHelper {
     // --------------
 
     class DownloadActivity extends CommonActivity implements Runnable {
-        final String key;
+        final List<File> files;
         final OnDownloadComplete listener;
-        final File targetFile;
-        Download download;
+        Download curDownload;
+        int curPos;
 
-        DownloadActivity(String host, String filename, OnDownloadComplete listener) {
+        DownloadActivity(String host, List<File> files, OnDownloadComplete listener) {
             super(host);
-            this.key = filename;
+            this.files = files;
             this.listener = listener;
-            this.targetFile = getLocalFile(filename);
         }
 
         public void run() {
-            Logger.warn("DOWNLOAD: BUCKET=" + bucketName + ", KEY=" + key + " TARGET=" + targetFile.getAbsolutePath());
+            scheduleNext();
+        }
+
+        private void scheduleNext() {
+            if (curPos >= files.size()) {
+                listener.onDownloadComplete();
+            } else {
+                next(files.get(curPos++));
+            }
+        }
+
+        private void next(File targetFile) {
+            Logger.warn("DOWNLOAD: BUCKET=" + bucketName + ", KEY=" + targetFile.getName() + " TARGET=" + targetFile.getAbsolutePath());
             try {
                 TransferManager xferManager = TransferManagerBuilder.defaultTransferManager();
-                GetObjectRequest obj = new GetObjectRequest(bucketName, key);
-                download = xferManager.download(obj, targetFile, new S3SyncProgressListener() {
+                GetObjectRequest obj = new GetObjectRequest(bucketName, targetFile.getName());
+                curDownload = xferManager.download(obj, targetFile, new S3SyncProgressListener() {
                     public void onPersistableTransfer(PersistableTransfer persistableTransfer) {
-                        if (download.getState() == TransferState.Completed) {
-                            listener.onDownloadComplete(targetFile);
+                        if (curDownload.getState() == TransferState.Completed) {
+                            Logger.info("COMPLETED: " + targetFile.getAbsolutePath());
+                            scheduleNext();
+                        } else if (curDownload.getState() == TransferState.Canceled) {
+                            Logger.info("CANCELED: " + targetFile.getAbsolutePath());
+                            scheduleNext();
+                        } else if (curDownload.getState() == TransferState.Failed) {
+                            Logger.info("FAILED: " + targetFile.getAbsolutePath());
+                            scheduleNext();
                         }
                     }
                 });
             } catch (AmazonServiceException e) {
                 Logger.error("ERROR: " + e.getMessage());
+                scheduleNext();
             }
         }
     }
 
+    public void download(String host, List<File> files, OnDownloadComplete listener) {
+        executor.execute(new DownloadActivity(host, files, listener));
+    }
+
     public void download(String host, String filename, OnDownloadComplete listener) {
-        executor.execute(new DownloadActivity(host, filename, listener));
+        ArrayList<File> files = new ArrayList<File>();
+        files.add(getLocalFile(filename));
+        download(host, files, listener);
     }
 
     // ------------

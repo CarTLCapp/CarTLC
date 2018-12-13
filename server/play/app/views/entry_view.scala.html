@@ -78,6 +78,20 @@
         </div>
     }
 
+    <script type="text/javascript">
+        function checkLoadingPictures() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    location.reload(true);
+                }
+            };
+            xhttp.open("GET", "@routes.EntryController.checkLoadingPictures()", true);
+            xhttp.send();
+        }
+        checkLoadingPictures();
+    </script>
+
 }
 
             

@@ -179,7 +179,9 @@ public class WorkOrderController extends Controller {
         if (entry == null) {
             return badRequest("No fulfilled entry for this work order");
         }
-        entry.loadPictures(request().host(), amazonHelper);
+        entry.loadPictures(request().host(), amazonHelper, () -> {
+            Logger.info("Picture loading done");
+        });
         return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
     }
 

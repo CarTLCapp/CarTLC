@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 import modules.AmazonHelper;
+import modules.AmazonHelper.OnDownloadComplete;
 import modules.Globals;
 import modules.EntryListWriter;
 
@@ -55,7 +56,9 @@ public class EntryController extends Controller {
     private EntryListWriter mExportWriter;
     private boolean mExporting;
     private boolean mAborted;
+    private boolean mDownloading;
     private ArrayList<Long> mDeleting = new ArrayList<>();
+    private ArrayList<CompletableFuture<Result>> mDownloadStatusRequests = new ArrayList<>();
 
     @Inject
     public EntryController(AmazonHelper amazonHelper,
@@ -217,6 +220,19 @@ public class EntryController extends Controller {
     }
 
     /**
+     * Load pictures in background
+     */
+    public CompletionStage<Result> checkLoadingPictures() {
+        CompletableFuture<Result> completableFuture = new CompletableFuture<>();
+        if (mDownloading) {
+            mDownloadStatusRequests.add(completableFuture);
+        } else {
+            completableFuture.complete(ok("Done"));
+        }
+        return completableFuture;
+    }
+
+    /**
      * Display the picture for an entry.
      */
     public Result pictures(Long entry_id) {
@@ -225,12 +241,23 @@ public class EntryController extends Controller {
             return badRequest2("Could not find entry ID " + entry_id);
         }
         loadPictures(entry);
-        List<PictureCollection> pictures = entry.getPictures();
-        return ok(views.html.entry_list_picture.render(pictures));
+        return ok(views.html.entry_list_picture.render(entry.getPictures()));
     }
 
-    void loadPictures(Entry entry) {
-        entry.loadPictures(request().host(), mAmazonHelper);
+    private void loadPictures(Entry entry) {
+        if (entry.loadPictures(request().host(), mAmazonHelper, () -> loadPicturesDone())) {
+            mDownloading = true;
+        }
+    }
+
+    private void loadPicturesDone() {
+        mDownloading = false;
+        if (mDownloadStatusRequests.size() > 0) {
+            for (CompletableFuture<Result> completableFuture : mDownloadStatusRequests) {
+                completableFuture.complete(ok("Done"));
+            }
+            mDownloadStatusRequests.clear();
+        }
     }
 
     public Result getImage(String picture) {
@@ -243,17 +270,6 @@ public class EntryController extends Controller {
     }
 
     /**
-     * Display the notes for an entry.
-     */
-    public Result notes(Long entry_id) {
-        Entry entry = Entry.find.byId(entry_id);
-        if (entry == null) {
-            return badRequest2("Could not find entry ID " + entry_id);
-        }
-        return ok(views.html.entry_list_note.render(entry.getNotes()));
-    }
-
-    /**
      * Display details for the entry including delete button.
      */
     public Result view(Long entry_id) {
@@ -263,6 +279,17 @@ public class EntryController extends Controller {
         }
         loadPictures(entry);
         return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
+    }
+
+    /**
+     * Display the notes for an entry.
+     */
+    public Result notes(Long entry_id) {
+        Entry entry = Entry.find.byId(entry_id);
+        if (entry == null) {
+            return badRequest2("Could not find entry ID " + entry_id);
+        }
+        return ok(views.html.entry_list_note.render(entry.getNotes()));
     }
 
     @Security.Authenticated(Secured.class)
@@ -325,7 +352,7 @@ public class EntryController extends Controller {
             } else {
                 Truck previous = entry.getTruck();
                 if (previous != null) {
-                    String [] items = data.truck.split(":");
+                    String[] items = data.truck.split(":");
                     if (items.length > 0) {
                         truck = new Truck();
                         truck.company_name_id = previous.company_name_id;
@@ -376,7 +403,7 @@ public class EntryController extends Controller {
                 } else {
                     int row = Integer.parseInt(rowId);
                     if (range) {
-                        for (int r = lastRow+1; r <= row; r++) {
+                        for (int r = lastRow + 1; r <= row; r++) {
                             mDeleting.add(mEntryList.getList().get(r).id);
                         }
                     } else {
@@ -387,7 +414,7 @@ public class EntryController extends Controller {
                 }
             }
             if (range) {
-                for (int r = lastRow+1; r < mEntryList.getList().size(); r++) {
+                for (int r = lastRow + 1; r < mEntryList.getList().size(); r++) {
                     mDeleting.add(mEntryList.getList().get(r).id);
                 }
             }

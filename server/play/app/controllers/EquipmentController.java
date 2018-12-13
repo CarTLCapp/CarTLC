@@ -326,6 +326,5 @@ public class EquipmentController extends Controller {
         return ok(top);
     }
 
-
 }
 

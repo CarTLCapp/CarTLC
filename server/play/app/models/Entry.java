@@ -16,6 +16,7 @@ import play.data.Form;
 import com.avaje.ebean.*;
 
 import modules.AmazonHelper;
+import modules.AmazonHelper.OnDownloadComplete;
 import play.Logger;
 
 /**
@@ -636,16 +637,20 @@ public class Entry extends com.avaje.ebean.Model {
         return list.get(0);
     }
 
-    public void loadPictures(String host, AmazonHelper amazonHelper) {
+    public boolean loadPictures(String host, AmazonHelper amazonHelper, OnDownloadComplete listener) {
         List<PictureCollection> pictures = getPictures();
+        List<File> files = new ArrayList<File>();
         for (PictureCollection picture : pictures) {
             File localFile = amazonHelper.getLocalFile(picture.picture);
             if (!localFile.exists()) {
-                amazonHelper.download(host, picture.picture, (file) ->
-                        Logger.info("COMPLETED: " + file.getAbsolutePath())
-                );
+                files.add(localFile);
             }
         }
+        if (files.size() > 0) {
+            amazonHelper.download(host, files, listener);
+            return true;
+        }
+        return false;
     }
 
     public String toString() {
