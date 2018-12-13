@@ -12,7 +12,6 @@ import play.data.*;
 
 import com.typesafe.config.Config;
 
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +50,7 @@ public class HomeController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result index() {
+        mGlobals.checkInit();
         mGlobals.setClearSearch(true);
         return ok(views.html.home.render(Secured.getClient(ctx()), mVersion));
     }

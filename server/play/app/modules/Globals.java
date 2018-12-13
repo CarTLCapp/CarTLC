@@ -4,6 +4,8 @@
 package modules;
 
 import javax.inject.*;
+import java.util.Calendar;
+
 import models.*;
 import play.*;
 
@@ -11,15 +13,31 @@ import play.*;
 public class Globals {
 
     boolean mClearSearch;
+    boolean mDidInit = false;
 
     public Globals() {
+    }
+
+    public void checkInit() {
+        if (mDidInit) {
+            return;
+        }
+        mDidInit = true;
         Client.initClient();
-        EntryV2.transfer();
         Company.saveNames();
+        Calendar c1 = Calendar.getInstance();
+        if (c1.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+            superInit();
+        }
+    }
+
+    private void superInit() {
+        EntryV2.transfer();
         EntryEquipmentCollection.removeUnused();
         EntryNoteCollection.removeUnused();
         TruckV6.transfer();
         WorkOrder.fixTrucks();
+        Logger.info("SUPER INIT DONE");
     }
 
     public boolean isClearSearch() {
