@@ -291,5 +291,14 @@ public class VehicleController extends Controller {
         Logger.error("ERROR: " + field);
         return badRequest(field);
     }
+
+    public Result delete(Long vehicle_id) {
+        Vehicle vehicle = Vehicle.find.byId(vehicle_id);
+        if (vehicle == null) {
+            return badRequest2("Could not find vehicle ID " + vehicle_id);
+        }
+        vehicle.delete();
+        return list();
+    }
 }
             

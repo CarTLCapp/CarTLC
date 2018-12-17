@@ -1,5 +1,7 @@
 @(currentPage: com.avaje.ebean.PagedList[Vehicle], currentSortBy: String, currentOrder: String, client : Client)
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 @link(newPage:Int, newSortBy:String) = @{
     var sortBy = currentSortBy
     var order = currentOrder
@@ -74,6 +76,7 @@
                         <td>@vehicle.getTireInspection()</td>
                         <td>@vehicle.getExteriorDamage()</td>
                         <td>@vehicle.getOther()</td>
+                        <td><a href="@routes.VehicleController.delete(vehicle.id)" class="fa fa-trash" onclick="return confirm('Are you sure?');"></a></td>
                     </tr>
                 }
             </tbody>
