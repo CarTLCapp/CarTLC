@@ -13,6 +13,7 @@ import play.Logger;
 import models.*;
 
 import java.util.List;
+import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import play.db.ebean.Transactional;
@@ -145,9 +146,45 @@ public class CompanyController extends Controller {
             return badRequest("missing field: tech_id");
         }
         int tech_id = value.intValue();
+        value = json.findValue("page");
+        int page;
+        if (value != null) {
+            page = value.intValue();
+        } else {
+            page = -1;
+        }
+        int pageSize;
+        value = json.findValue("page_size");
+        if (value != null) {
+            pageSize = value.intValue();
+        } else {
+            pageSize = -1;
+        }
+        return query(tech_id, page, pageSize);
+    }
+
+    private Result query(int tech_id, int page, int pageSize) {
+        List<Company> list = Company.appList(tech_id);
+        List<Company> subList;
+        int numPages = list.size() / pageSize + ((list.size() % pageSize) == 0 ? 0 : 1);
+        if (pageSize > 0 && page >= 0) {
+            try {
+                int fromIndex = page * pageSize;
+                int toIndex = fromIndex + pageSize;
+                if (toIndex > list.size()) {
+                    toIndex = list.size();
+                }
+                subList = list.subList(fromIndex, toIndex);
+            } catch (IndexOutOfBoundsException ex) {
+                Logger.error(ex.getMessage());
+                subList = new ArrayList<Company>();
+            }
+        } else {
+            subList = list;
+        }
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("companies");
-        for (Company item : Company.appList(tech_id)) {
+        for (Company item : subList) {
             ObjectNode node = array.addObject();
             node.put("id", item.id);
             node.put("name", item.getName());
@@ -167,6 +204,8 @@ public class CompanyController extends Controller {
                 node.put("is_local", true);
             }
         }
+        top.put("numPages", numPages);
+        top.put("page", page);
         return ok(top);
     }
 

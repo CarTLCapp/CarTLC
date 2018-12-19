@@ -99,10 +99,45 @@ public class TruckController extends Controller {
         if (value == null) {
             return badRequest("missing field: tech_id");
         }
+        value = json.findValue("page");
+        int page;
+        if (value != null) {
+            page = value.intValue();
+        } else {
+            page = -1;
+        }
+        int pageSize;
+        value = json.findValue("page_size");
+        if (value != null) {
+            pageSize = value.intValue();
+        } else {
+            pageSize = -1;
+        }
+        return query(page, pageSize);
+    }
+
+    private Result query(int page, int pageSize) {
+        List<Truck> list = Truck.list();
+        List<Truck> subList;
+        int numPages = list.size() / pageSize + ((list.size() % pageSize) == 0 ? 0 : 1);
+        if (pageSize > 0 && page >= 0) {
+            try {
+                int fromIndex = page * pageSize;
+                int toIndex = fromIndex + pageSize;
+                if (toIndex > list.size()) {
+                    toIndex = list.size();
+                }
+                subList = list.subList(fromIndex, toIndex);
+            } catch (IndexOutOfBoundsException ex) {
+                Logger.error(ex.getMessage());
+                subList = new ArrayList<Truck>();
+            }
+        } else {
+            subList = list;
+        }
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("trucks");
-        List<Truck> trucks = Truck.list();
-        for (Truck item : trucks) {
+        for (Truck item : subList) {
             ObjectNode node = array.addObject();
             node.put("id", item.id);
             if (item.truck_number != null) {
@@ -127,6 +162,9 @@ public class TruckController extends Controller {
             int count = item.countEntries();
             node.put("has_entries", (count > 0));
         }
+        top.put("numPages", numPages);
+        top.put("page", page);
+
         return ok(top);
     }
 

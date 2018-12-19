@@ -16,8 +16,9 @@ import java.net.HttpURLConnection
 /**
  * Created by dug on 8/24/17.
  */
-
 open class DCPost {
+
+    val MAX_SIZE = 65536
 
     @Throws(IOException::class)
     protected fun getResult(connection: HttpURLConnection): String? {
@@ -40,18 +41,19 @@ open class DCPost {
         if (inputStream == null) {
             return null
         }
+        val buffer = CharArray(1024)
         val reader = BufferedReader(InputStreamReader(inputStream))
-        val sbuf = StringBuilder()
-        var inputLine: String?
+        var count: Int
+        val sbuf = StringBuffer()
         while (true) {
-            inputLine = reader.readLine()
-            if (inputLine == null) {
+            count = reader.read(buffer, 0, buffer.size)
+            if (count < 0) {
                 break
             }
-            if (sbuf.length > 0) {
-                sbuf.append("\n")
+            sbuf.append(buffer.copyOfRange(0, count))
+            if (sbuf.length > MAX_SIZE) {
+                break
             }
-            sbuf.append(inputLine)
         }
         reader.close()
         return sbuf.toString()

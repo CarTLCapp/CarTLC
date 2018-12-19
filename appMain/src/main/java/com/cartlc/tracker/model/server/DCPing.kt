@@ -4,6 +4,7 @@
 package com.cartlc.tracker.model.server
 
 import android.content.Context
+import android.nfc.tech.MifareUltralight.PAGE_SIZE
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -57,6 +58,9 @@ class DCPing(
         private val FAILED_UPLOADED_TRIGGER = 5
 
         private val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
+
+        private val COMPANY_PAGE_SIZE = 100
+        private val TRUCK_PAGE_SIZE = 500
     }
 
     private val SERVER_URL: String
@@ -369,11 +373,32 @@ class DCPing(
     }
 
     private fun queryCompanies(): Boolean {
+        val unprocessed = db.tableAddress.query().toMutableList()
+        val numPages = queryCompanies(0, unprocessed)
+        if (numPages == 0) {
+            return false
+        }
+        if (numPages > 1) {
+            for (page in 1..numPages-1) {
+                if (queryCompanies(page, unprocessed) == 0) {
+                    return false
+                }
+            }
+        }
+        // Remaining unprocessed elements are disabled if they have entries.
+        for (item in unprocessed) {
+            db.tableAddress.removeOrDisable(item)
+        }
+        return true
+    }
+
+    private fun queryCompanies(page: Int, unprocessed: MutableList<DataAddress>): Int {
         Timber.i("queryCompanies()")
+        var numPages: Int
         try {
-            val response = post(COMPANIES, true) ?: return false
-            val unprocessed = db.tableAddress.query().toMutableList()
+            val response = post(COMPANIES, page, COMPANY_PAGE_SIZE,true) ?: return 0
             val obj = parseResult(response)
+            numPages = obj.getInt("numPages")
             val array = obj.getJSONArray("companies")
             var name: String
             var street: String?
@@ -384,7 +409,6 @@ class DCPing(
                 val ele = array.getJSONObject(i)
                 val server_id = ele.getInt("id")
                 name = ele.getString("name")
-
                 if (name.isBlank()) {
                     TBApplication.ReportError("Got empty company name", DCPing::class.java, "queryCompanies()", "server")
                     continue
@@ -433,15 +457,12 @@ class DCPing(
                     unprocessed.remove(item)
                 }
             }
-            // Remaining unprocessed elements are disabled if they have entries.
-            for (item in unprocessed) {
-                db.tableAddress.removeOrDisable(item)
-            }
+
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryCompanies()", "server")
-            return false
+            return 0
         }
-        return true
+        return numPages
     }
 
     private operator fun get(items: List<DataAddress>, match: DataAddress): DataAddress? {
@@ -729,13 +750,34 @@ class DCPing(
     }
 
     private fun queryTrucks(): Boolean {
+        val unprocessed = db.tableTruck.query().toMutableList()
+        val numPages = queryTrucks(0, unprocessed)
+        if (numPages == 0) {
+            return false
+        }
+        if (numPages > 1) {
+            for (page in 1..numPages-1) {
+                if (queryTrucks(page, unprocessed) == 0) {
+                    return false
+                }
+            }
+        }
+        // Remove or disable unprocessed elements
+        for (truck in unprocessed) {
+            db.tableTruck.removeIfUnused(truck)
+        }
+        return true
+    }
+
+    private fun queryTrucks(page: Int, unprocessed: MutableList<DataTruck> ): Int {
         Timber.i("queryTrucks()")
+        val numPages: Int
         try {
-            val response = post(TRUCKS, true) ?: return false
+            val response = post(TRUCKS, page, TRUCK_PAGE_SIZE, true) ?: return 0
             val obj = parseResult(response)
             run {
-                val unprocessed = db.tableTruck.query().toMutableList()
                 val array = obj.getJSONArray("trucks")
+                numPages = obj.getInt("numPages")
                 for (i in 0 until array.length()) {
                     val ele = array.getJSONObject(i)
                     val incoming = DataTruck()
@@ -788,16 +830,12 @@ class DCPing(
                         unprocessed.removeAll { it.id == item.id }
                     }
                 }
-                // Remove or disable unprocessed elements
-                for (truck in unprocessed) {
-                    db.tableTruck.removeIfUnused(truck)
-                }
             }
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryTrucks()", "server")
-            return false
+            return 0
         }
-        return true
+        return numPages
     }
 
     private operator fun get(items: List<DataTruck>, match: DataTruck): DataTruck? {
@@ -1096,10 +1134,18 @@ class DCPing(
     }
 
     private fun post(target: String, sendErrors: Boolean): String? {
+        return post(target, -1, 0, sendErrors)
+    }
+
+    private fun post(target: String, page: Int, pageSize: Int, sendErrors: Boolean): String? {
         try {
             val jsonObject = JSONObject()
             jsonObject.accumulate("device_id", ServerHelper.instance.deviceId)
             jsonObject.accumulate("tech_id", prefHelper.techID)
+            if (page >= 0 && pageSize > 0) {
+                jsonObject.accumulate("page", page)
+                jsonObject.accumulate("page_size", pageSize)
+            }
             return post(target, jsonObject, sendErrors)
         } catch (ex: Exception) {
             val msg = "While sending to " + target + "\n" + ex.message
