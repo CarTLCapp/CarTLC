@@ -62,6 +62,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
     var fab_addressConfirmOkay = false
 
     fun onStageChanged(flow: Flow) {
+
         with(vm) {
             when (flow.stage) {
                 Stage.PROJECT -> {
@@ -139,11 +140,11 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                     isEditing = true
                 }
             }
-            val hint: String?
+//            val hint: String?
             if (isEditing) {
                 states = DataStates.getUnusedStates(states).toMutableList()
                 prefHelper.state = null
-                hint = null
+//                hint = null
             } else {
                 autoNarrowStates(states)
                 if (states.size == 1 && autoNarrowOkay) {
@@ -151,14 +152,14 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                     buttonsViewModel.skip()
                     return
                 } else {
-                    hint = prefHelper.address
+//                    hint = prefHelper.address
                 }
             }
             if (isEditing) {
                 setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
             } else {
-                entrySimpleViewModel.helpTextValue = hint
-                entrySimpleViewModel.showingValue = true
+//                entrySimpleViewModel.helpTextValue = hint
+//                entrySimpleViewModel.showingValue = true
                 setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
 
                 if (mainListViewModel.keyValue == null) {

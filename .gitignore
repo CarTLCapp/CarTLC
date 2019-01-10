@@ -28,7 +28,6 @@ captures/
 .idea/
 build/
 gradle/
-gradlew
 gradlew.bat
 *.iml
 
