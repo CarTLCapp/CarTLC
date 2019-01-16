@@ -8,6 +8,8 @@ import android.text.InputType
 import com.cartlc.tracker.model.data.DataAddress
 import com.cartlc.tracker.model.data.DataStates
 import com.cartlc.tracker.model.event.Action
+import com.cartlc.tracker.model.flow.AddCityFlow
+import com.cartlc.tracker.model.flow.AddStreetFlow
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.misc.StringMessage
@@ -93,9 +95,11 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                     entrySimpleViewModel.simpleHintValue = vm.getString(StringMessage.title_company)
                     if (buttonsViewModel.isLocalCompany) {
                         buttonsViewModel.companyEditing = prefHelper.company
-                        entrySimpleViewModel.simpleTextValue = buttonsViewModel.companyEditing ?: ""
+                        buttonsViewModel.companyEditing?.let {
+                            entrySimpleViewModel.simpleTextValue = it
+                        } ?: entrySimpleViewModel.simpleTextClear()
                     } else {
-                        entrySimpleViewModel.simpleTextValue = ""
+                        entrySimpleViewModel.simpleTextClear()
                     }
                 }
                 Stage.STATE, Stage.ADD_STATE -> {
@@ -204,10 +208,13 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                 }
             }
             if (isEditing) {
-                entrySimpleViewModel.showingValue = true
                 titleViewModel.titleValue = getString(StringMessage.title_city)
-                entrySimpleViewModel.simpleTextValue = ""
+                entrySimpleViewModel.showingValue = true
+                entrySimpleViewModel.simpleTextClear()
                 entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_city)
+                if (flow.stage == Stage.CITY) {
+                    curFlowValue = AddCityFlow()
+                }
             } else {
                 entrySimpleViewModel.helpTextValue = hint
                 mainListViewModel.showingValue = true
@@ -252,9 +259,13 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
             if (isEditing) {
                 titleViewModel.titleValue = getString(StringMessage.title_street)
                 entrySimpleViewModel.showingValue = true
-                entrySimpleViewModel.simpleTextValue = ""
+                entrySimpleViewModel.simpleTextClear()
                 entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_street)
                 entrySimpleViewModel.inputTypeValue = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS or InputType.TYPE_TEXT_FLAG_CAP_WORDS
+                fab_addressConfirmOkay = true
+                if (flow.stage == Stage.STREET) {
+                    curFlowValue = AddStreetFlow()
+                }
             } else {
                 entrySimpleViewModel.helpTextValue = hint
                 buttonsViewModel.showCenterButtonValue = true
@@ -286,7 +297,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                 reduced.add(company)
             }
         }
-        if (reduced.size == 0) {
+        if (reduced.isEmpty()) {
             return
         }
         companies.clear()

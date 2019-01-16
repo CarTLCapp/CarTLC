@@ -134,4 +134,9 @@ class EntrySimpleViewModel : BaseViewModel() {
         inputTypeValue = InputType.TYPE_TEXT_FLAG_CAP_WORDS
     }
 
+    fun simpleTextClear() {
+        simpleTextValue = " "
+        simpleTextValue = ""
+    }
+
 }

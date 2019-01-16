@@ -31,7 +31,7 @@ class MainVMHolder(val repo: CarRepository) {
     val curFlow: MutableLiveData<Flow>
         get() = repo.curFlow
 
-    private var curFlowValue: Flow
+    var curFlowValue: Flow
         get() = repo.curFlowValue
         set(value) {
             repo.curFlowValue = value
@@ -110,6 +110,7 @@ class MainVMHolder(val repo: CarRepository) {
         loginViewModel.getString = getString
         loginViewModel.dispatchActionEvent = { event -> dispatchActionEvent(event) }
         entrySimpleViewModel.dispatchActionEvent = { event -> dispatchActionEvent(event) }
+        entrySimpleViewModel.afterTextChangedListener = { value -> onEntryValueChanged(value) }
         confirmationViewModel.dispatchActionEvent = entrySimpleViewModel.dispatchActionEvent
         confirmationViewModel.buttonsViewModel = buttonsViewModel
         confirmationViewModel.titleViewModel = titleViewModel
@@ -202,7 +203,7 @@ class MainVMHolder(val repo: CarRepository) {
     // BUTTONS
 
     fun onButtonDispatch(button: Button) {
-        when(button) {
+        when (button) {
             Button.BTN_CHANGE -> btnChangeCompany()
             else -> buttonsViewModel.onButtonDispatch(button)
         }
@@ -344,7 +345,7 @@ class MainVMHolder(val repo: CarRepository) {
                 titleViewModel.titleValue = getString(StringMessage.title_equipment)
                 entrySimpleViewModel.showingValue = true
                 entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_equipment)
-                entrySimpleViewModel.simpleTextValue = ""
+                entrySimpleViewModel.simpleTextClear()
             }
             Stage.NOTES -> {
                 titleViewModel.titleValue = getString(StringMessage.title_notes)
@@ -384,7 +385,8 @@ class MainVMHolder(val repo: CarRepository) {
                 titleViewModel.titleValue = getString(StringMessage.title_status)
                 titleViewModel.subTitleValue = statusHint
             }
-            else -> {}
+            else -> {
+            }
         }
     }
 
@@ -452,4 +454,19 @@ class MainVMHolder(val repo: CarRepository) {
     }
 
     // SET LIST END
+
+    private fun onEntryValueChanged(value: String) {
+        when (curFlowValue.stage) {
+            Stage.STREET,
+            Stage.COMPANY,
+            Stage.CITY,
+            Stage.ADD_COMPANY,
+            Stage.ADD_STREET,
+            Stage.ADD_CITY,
+            Stage.ADD_EQUIPMENT,
+            Stage.ADD_STATE -> buttonsViewModel.showNextButtonValue = value.isNotBlank()
+            else -> {
+            }
+        }
+    }
 }
