@@ -81,7 +81,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                     val companies = db.tableAddress.query()
                     autoNarrowCompanies(companies.toMutableList())
                     val companyNames = getNames(companies)
-                    if (companyNames.size == 1 && autoNarrowOkay) {
+                    if (companyNames.size == 1 && isAutoNarrowOkay) {
                         prefHelper.company = companyNames[0]
                         buttonsViewModel.skip()
                     } else {
@@ -151,7 +151,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
 //                hint = null
             } else {
                 autoNarrowStates(states)
-                if (states.size == 1 && autoNarrowOkay) {
+                if (states.size == 1 && isAutoNarrowOkay) {
                     prefHelper.state = states[0]
                     buttonsViewModel.skip()
                     return
@@ -199,7 +199,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                 hint = null
             } else {
                 autoNarrowCities(cities)
-                if (cities.size == 1 && autoNarrowOkay) {
+                if (cities.size == 1 && isAutoNarrowOkay) {
                     prefHelper.city = cities[0]
                     buttonsViewModel.skip()
                     return
@@ -247,7 +247,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                 hint = null
             } else {
                 autoNarrowStreets(streets)
-                if (streets.size == 1 && autoNarrowOkay) {
+                if (streets.size == 1 && isAutoNarrowOkay) {
                     prefHelper.street = streets[0]
                     fab_addressConfirmOkay = true
                     buttonsViewModel.skip()
