@@ -101,9 +101,16 @@ public class Company extends Model {
     }
 
     public static List<Company> appList(int tech_id) {
-        List<Company> items = find.where().eq("disabled", false).findList();
+        List<Company> items = find.where()
+                .eq("disabled", false)
+                .findList();
         List<Company> result = new ArrayList<Company>();
         for (Company item : items) {
+            if (item.street == null || item.street.trim().isEmpty() ||
+                item.city == null || item.city.trim().isEmpty() ||
+                item.state == null || item.state.trim().isEmpty()) {
+                continue;
+            }
             if (item.created_by == 0 || item.created_by == tech_id || item.created_by_client) {
                 result.add(item);
             } else if (Entry.hasEntryForCompany(tech_id, item.id)) {

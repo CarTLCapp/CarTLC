@@ -589,8 +589,6 @@ public class EntryPagedList {
         if (mResult.mNumTotalRows == 0) {
             if (mSearch.hasMultipleTerms()) {
                 mResult.mNumTotalRows = mResult.mList.size();
-            } else if (!mSearch.hasSearch() && mLimitByProject.size() == 0) {
-                mResult.mNumTotalRows = Entry.find.where().findPagedList(0, 10).getTotalRowCount();
             } else {
                 String query = buildQuery(false);
                 List<SqlRow> entries = Ebean.createSqlQuery(query).findList();
