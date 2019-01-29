@@ -81,7 +81,10 @@ class MainListFragment : BaseFragment() {
                 Stage.PROJECT,
                 Stage.CITY,
                 Stage.STATE,
-                Stage.STREET -> {
+                Stage.STREET ,
+                Stage.ADD_CITY,
+                Stage.ADD_STATE,
+                Stage.ADD_STREET -> {
                     buttonsViewModel?.showNextButtonValue = true
                 }
                 Stage.COMPANY -> {

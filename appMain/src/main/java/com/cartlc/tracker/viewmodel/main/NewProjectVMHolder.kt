@@ -144,26 +144,20 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                     isEditing = true
                 }
             }
-//            val hint: String?
             if (isEditing) {
                 states = DataStates.getUnusedStates(states).toMutableList()
                 prefHelper.state = null
-//                hint = null
             } else {
                 autoNarrowStates(states)
                 if (states.size == 1 && isAutoNarrowOkay) {
                     prefHelper.state = states[0]
                     buttonsViewModel.skip()
                     return
-                } else {
-//                    hint = prefHelper.address
                 }
             }
             if (isEditing) {
                 setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
             } else {
-//                entrySimpleViewModel.helpTextValue = hint
-//                entrySimpleViewModel.showingValue = true
                 setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
 
                 if (mainListViewModel.keyValue == null) {

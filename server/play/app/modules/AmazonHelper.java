@@ -38,9 +38,9 @@ import com.typesafe.config.Config;
 @Singleton
 public class AmazonHelper {
 
-    static final String BUCKET_NAME_DEVELOP = "fleetdev2";
-    static final String BUCKET_NAME_RELEASE = "fleettlc";
-    static final String REGION = "us-east-2";
+    static private final const String BUCKET_NAME_DEVELOP = "fleetdev2";
+    static private final const String BUCKET_NAME_RELEASE = "fleettlc";
+    static private final const String REGION = "us-east-2";
 
     public interface OnDownloadComplete {
         void onDownloadComplete();

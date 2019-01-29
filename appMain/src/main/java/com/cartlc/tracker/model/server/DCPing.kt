@@ -43,24 +43,26 @@ class DCPing(
 
     companion object {
 
-        private val TAG = "DCPing"
-        private val LOG = true
+        private const val TAG = "DCPing"
+        private const val LOG = true
 
-        private val SERVER_URL_DEVELOPMENT = "http://fleetdev.arqnetworks.com/"
-        private val SERVER_URL_RELEASE = "http://fleettlc.arqnetworks.com/"
+        private const val QUERY_TRUCKS = false
 
-        private val UPLOAD_RESET_TRIGGER = "reset_upload"
-        private val RE_REGISTER_TRIGGER = "re-register"
-        private val RELOAD_CODE = "reload_code"
+        private const val SERVER_URL_DEVELOPMENT = "http://fleetdev.arqnetworks.com/"
+        private const val SERVER_URL_RELEASE = "http://fleettlc.arqnetworks.com/"
+
+        private const val UPLOAD_RESET_TRIGGER = "reset_upload"
+        private const val RE_REGISTER_TRIGGER = "re-register"
+        private const val RELOAD_CODE = "reload_code"
 
         // After this many times indicate to the user if there is a problem that needs to be
         // addressed with the tableEntry.
-        private val FAILED_UPLOADED_TRIGGER = 5
+        private const val FAILED_UPLOADED_TRIGGER = 5
 
-        private val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
+        private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
 
-        private val COMPANY_PAGE_SIZE = 100
-        private val TRUCK_PAGE_SIZE = 500
+        private const val COMPANY_PAGE_SIZE = 100
+        private const val TRUCK_PAGE_SIZE = 500
     }
 
     private val SERVER_URL: String
@@ -261,12 +263,14 @@ class DCPing(
             }
             prefHelper.versionNote = version_note
         }
-        if (prefHelper.versionTruck != version_truck) {
-            Timber.i("New truck version $version_truck")
-            if (!queryTrucks()) {
-                return
+        if (QUERY_TRUCKS) {
+            if (prefHelper.versionTruck != version_truck) {
+                Timber.i("New truck version $version_truck")
+                if (!queryTrucks()) {
+                    return
+                }
+                prefHelper.versionTruck = version_truck
             }
-            prefHelper.versionTruck = version_truck
         }
         var entries = db.tableEntry.queryPendingDataToUploadToMaster()
         var count = 0
@@ -379,7 +383,7 @@ class DCPing(
             return false
         }
         if (numPages > 1) {
-            for (page in 1..numPages-1) {
+            for (page in 1..numPages - 1) {
                 if (queryCompanies(page, unprocessed) == 0) {
                     return false
                 }
@@ -396,7 +400,7 @@ class DCPing(
         Timber.i("queryCompanies()")
         var numPages: Int
         try {
-            val response = post(COMPANIES, page, COMPANY_PAGE_SIZE,true) ?: return 0
+            val response = post(COMPANIES, page, COMPANY_PAGE_SIZE, true) ?: return 0
             val obj = parseResult(response)
             numPages = obj.getInt("numPages")
             val array = obj.getJSONArray("companies")
@@ -756,7 +760,7 @@ class DCPing(
             return false
         }
         if (numPages > 1) {
-            for (page in 1..numPages-1) {
+            for (page in 1..numPages - 1) {
                 if (queryTrucks(page, unprocessed) == 0) {
                     return false
                 }
@@ -769,7 +773,7 @@ class DCPing(
         return true
     }
 
-    private fun queryTrucks(page: Int, unprocessed: MutableList<DataTruck> ): Int {
+    private fun queryTrucks(page: Int, unprocessed: MutableList<DataTruck>): Int {
         Timber.i("queryTrucks()")
         val numPages: Int
         try {

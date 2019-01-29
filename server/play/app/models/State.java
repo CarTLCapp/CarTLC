@@ -50,7 +50,7 @@ public class State {
             new State("Oregon", "OR"),
             new State("Pennslyvania", "PA"),
             new State("Rhode Island", "RI"),
-            new State("South Caroline", "SC"),
+            new State("South Carolina", "SC"),
             new State("South Dakota", "SD"),
             new State("Tennessee", "TN"),
             new State("Texas", "TX"),
