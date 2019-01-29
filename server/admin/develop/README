@@ -1,6 +1,5 @@
 Login To Server: 
 ------------
-ssh -i ~/.ssh/FleetTLC.pem ubuntu@ec2-18-216-214-167.us-east-2.compute.amazonaws.com
 ssh -i ~/.ssh/FleetTLC.pem ubuntu@fleetdev.arqnetworks.com
 
 fleetdev.arqnetworks.com/phpmyadmin
@@ -30,8 +29,6 @@ Amazon:
 https://aws.amazon.com/
 
 PHPMyAdmin:
-   http://52.14.73.217/phpmyadmin OR
-   http://cartlc.arqnetworks.com/phpmyadmin
    User: root p/w: cartlc
    Additional: cartlc p/w: cartcl#@!
 

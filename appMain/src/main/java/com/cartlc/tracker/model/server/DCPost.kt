@@ -18,7 +18,14 @@ import java.net.HttpURLConnection
  */
 open class DCPost {
 
-    val MAX_SIZE = 65536
+
+    companion object {
+
+        private const val TAG = "DCPost"
+        private const val MAX_SIZE = 65536
+
+    }
+
 
     @Throws(IOException::class)
     protected fun getResult(connection: HttpURLConnection): String? {
@@ -26,11 +33,11 @@ open class DCPost {
         try {
             inputStream = connection.inputStream
         } catch (ex: Exception) {
-            showError(connection)
+            showError(connection, ex.message)
             return null
         }
         if (inputStream == null) {
-            showError(connection)
+            showError(connection, null)
             return null
         }
         return getStreamString(inputStream)
@@ -42,7 +49,7 @@ open class DCPost {
             return null
         }
         val buffer = CharArray(1024)
-        val reader = BufferedReader(InputStreamReader(inputStream))
+        val reader = BufferedReader(InputStreamReader(inputStream)!!)
         var count: Int
         val sbuf = StringBuffer()
         while (true) {
@@ -60,11 +67,15 @@ open class DCPost {
     }
 
     @Throws(IOException::class)
-    protected fun showError(connection: HttpURLConnection) {
+    protected fun showError(connection: HttpURLConnection, message: String?) {
         val errorMsg = getStreamString(connection.errorStream)
         val msg: String
         if (errorMsg == null) {
-            msg = "Server might be DOWN. Try again later."
+            if (message == null) {
+                msg = "Server might be DOWN. Try again later."
+            } else {
+                msg = "Server connection error: $message"
+            }
         } else {
             msg = "Server COMPLAINT: $errorMsg"
         }
@@ -72,8 +83,4 @@ open class DCPost {
         TBApplication.ShowError(msg)
     }
 
-    companion object {
-
-        internal val TAG = "DCPost"
-    }
 }

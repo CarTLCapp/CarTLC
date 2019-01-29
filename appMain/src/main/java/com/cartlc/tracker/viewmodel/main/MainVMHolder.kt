@@ -284,7 +284,7 @@ class MainVMHolder(val repo: CarRepository) {
         onStageChanged(flow, true)
     }
 
-    fun onStageChanged(flow: Flow, pingOkay: Boolean) {
+    private fun onStageChanged(flow: Flow, pingOkay: Boolean) {
 
         addButtonVisibleValue = false
         framePictureVisibleValue = false

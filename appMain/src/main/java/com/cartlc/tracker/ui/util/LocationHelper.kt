@@ -44,7 +44,7 @@ class LocationHelper(
         val GOOGLE_LOC = "http://maps.googleapis.com/maps/api/geocode/json?"
 
         private val TAG = LocationHelper::class.java.simpleName
-        private val LOG = true
+        private val LOG = false
 
         lateinit var instance: LocationHelper
             private set

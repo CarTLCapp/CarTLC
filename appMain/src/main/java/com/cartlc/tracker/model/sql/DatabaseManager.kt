@@ -210,4 +210,6 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
     override fun reportError(ex: Exception, claz: Class<*>, function: String, type: String): String =
             TBApplication.ReportError(ex, claz, function, type)
 
+    override fun reportDebugMessage(msg: String) =
+            tableCrash.info(msg)
 }

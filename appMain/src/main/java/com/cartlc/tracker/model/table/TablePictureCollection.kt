@@ -9,6 +9,7 @@ interface TablePictureCollection {
     fun add(picture: File, collection_id: Long?): DataPicture
     fun clearPendingPictures()
     fun clearUploadedUnscaledPhotos()
+    fun countPendingPictures(): Int
     fun countPictures(collection_id: Long): Int
     fun createCollectionFromPending(nextPictureCollectionID: Long): DataPictureCollection
     fun query(collection_id: Long): DataPictureCollection

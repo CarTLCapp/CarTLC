@@ -217,6 +217,18 @@ class SqlTablePictureCollection(
         }
     }
 
+    override fun countPendingPictures(): Int {
+        var count = -1
+        try {
+            val where = "$KEY_COLLECTION_ID=0"
+            val cursor = dbSql.query(TABLE_NAME, null, where, null, null, null, null)
+            count = cursor.count
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTablePictureCollection::class.java, "countPendingPictures()", "db")
+        }
+        return count
+    }
+
     fun remove(item: DataPicture) {
         try {
             val where = "$KEY_COLLECTION_ID=?"
