@@ -37,7 +37,7 @@ import java.util.Locale
 class LocationHelper(
         private val mApp: TBApplication,
         private val db: DatabaseTable
-        ) {
+) {
 
     companion object {
 
@@ -291,9 +291,11 @@ class LocationHelper(
         return false
     }
 
-    private fun requestAddress(location: Location, callback: OnLocationCallback) {
-        val task = GetAddressTask(callback)
-        task.execute(location)
+    private fun requestAddress(location: Location?, callback: OnLocationCallback) {
+        location?.let {
+            val task = GetAddressTask(callback)
+            task.execute(it)
+        }
     }
 
     fun requestLocation(act: Activity, callback: OnLocationCallback) {
@@ -317,11 +319,11 @@ class LocationHelper(
 
     @Throws(SecurityException::class)
     private fun getLocation(act: Activity, callback: OnLocationCallback) {
-        mFusedLocationClient!!
-                .lastLocation
-                .addOnSuccessListener(act) {
-                    location -> requestAddress(location, callback)
-                }
+        mFusedLocationClient?.lastLocation?.addOnSuccessListener(act) { location ->
+            mFusedLocationClient?.let {
+                requestAddress(location, callback)
+            }
+        }
     }
 
     private fun hasState(address: Address): Boolean {
