@@ -104,12 +104,12 @@ class MainActivity : BaseActivity() {
         mApp.mainViewModelComponent.inject(this)
 
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar_main))
+        setSupportActionBar(findViewById(R.id.toolbar_main))
 
         buttonsFragment.root = root
         mInputMM = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
-        fab_add.setOnClickListener { _: View -> vm.btnPlus() }
+        fab_add.setOnClickListener { vm.btnPlus() }
 
         mPictureAdapter = PictureListAdapter(this) { newCount: Int -> titleFragment.vm.setPhotoTitleCount(newCount) }
         val linearLayoutManager = AutoLinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)

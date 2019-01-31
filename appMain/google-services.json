@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "687968608041",
+    "firebase_url": "https://cartlc.firebaseio.com",
+    "project_id": "cartlc",
+    "storage_bucket": "cartlc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:687968608041:android:b059273cac9ecab5",
+        "android_client_info": {
+          "package_name": "com.cartlc.tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "687968608041-o1b8nhqn32ta8r7denu84n02jcebsdat.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cartlc.tracker",
+            "certificate_hash": "c6a07744f8009659ae43efbb665c3f601a9648ef"
+          }
+        },
+        {
+          "client_id": "687968608041-17j2301qhrbp59nfb70uu1feu5o9t4id.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyX--sFH9XV7ciPY4bZXDJ1ZpSTYzAM5o"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "687968608041-17j2301qhrbp59nfb70uu1feu5o9t4id.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
