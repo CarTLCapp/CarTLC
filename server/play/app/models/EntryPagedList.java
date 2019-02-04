@@ -683,9 +683,9 @@ public class EntryPagedList {
         if (last >= mResult.mNumTotalRows) {
             last = mResult.mNumTotalRows - 1;
         }
-        sbuf.append(start);
+        sbuf.append(start+1);
         sbuf.append(" - ");
-        sbuf.append(last);
+        sbuf.append(last+1);
         sbuf.append(" of ");
         sbuf.append(mResult.mNumTotalRows);
         return sbuf.toString();
