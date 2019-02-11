@@ -135,11 +135,11 @@ open class PictureListAdapter(
                     builder.build()
                             .load(getUri(pictureFile))
                             .placeholder(R.drawable.loading)
-                            .memoryPolicy(MemoryPolicy.NO_CACHE)
+//                            .memoryPolicy(MemoryPolicy.NO_CACHE)
                             .centerInside()
                             .resize(0, maxHeight)
                             .into(picture)
-                    loading!!.visibility = View.GONE
+//                    loading!!.visibility = View.GONE
                     remove?.let { view ->
                         view.setOnClickListener { _ ->
                             item.remove()

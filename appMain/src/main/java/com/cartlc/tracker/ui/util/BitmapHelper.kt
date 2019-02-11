@@ -21,7 +21,7 @@ import timber.log.Timber
 
 object BitmapHelper {
 
-    internal val MAX_TMP_SIZE = 500
+    internal val MAX_TMP_SIZE = 350 // was 500
 
     fun createScaledFilename(originalFilename: String): String {
         val pos = originalFilename.lastIndexOf('.')
@@ -40,7 +40,7 @@ object BitmapHelper {
                 return false
             }
             if (!unscaledFile.exists()) {
-                Timber.e("File does not exist: " + unscaledFile.absolutePath)
+                Timber.e("File does not exist: $unscaledFile.absolutePath")
                 return false
             }
             val bitmap = loadScaledFile(unscaledFile.absolutePath, MAX_TMP_SIZE, MAX_TMP_SIZE)
@@ -62,6 +62,7 @@ object BitmapHelper {
         BitmapFactory.decodeFile(pathname, options)
         options.inJustDecodeBounds = false
         options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight)
+        // TODO: Got a out-of-memory error here:
         return BitmapFactory.decodeFile(pathname, options)
     }
 

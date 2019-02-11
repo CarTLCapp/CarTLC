@@ -10,8 +10,6 @@ import androidx.appcompat.app.AlertDialog
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.event.EventRefreshProjects
-import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.ui.app.TBApplication
 import org.greenrobot.eventbus.EventBus
 
 /**
