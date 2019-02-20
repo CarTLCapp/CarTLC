@@ -3,7 +3,6 @@
  */
 package com.cartlc.tracker.viewmodel.frag
 
-import android.app.Activity
 import android.text.InputType
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField

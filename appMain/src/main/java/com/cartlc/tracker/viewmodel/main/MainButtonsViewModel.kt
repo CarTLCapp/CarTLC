@@ -3,8 +3,6 @@
  */
 package com.cartlc.tracker.viewmodel.main
 
-import android.app.Activity
-
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.data.DataNote

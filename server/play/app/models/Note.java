@@ -261,8 +261,11 @@ public class Note extends Model implements Comparable<Note> {
         List<Note> notes = new ArrayList<Note>();
         for (Note note : Note.list()) {
             try {
-                if (entryForm.field(note.name).getValue().get().equals("true")) {
-                    notes.add(note);
+                Optional<String> value = entryForm.field(note.name).getValue();
+                if (value.isPresent()) {
+                    if (value.get().equals("true")) {
+                        notes.add(note);
+                    }
                 }
             } catch (Exception ex) {
             }

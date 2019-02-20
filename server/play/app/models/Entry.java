@@ -393,8 +393,10 @@ public class Entry extends com.avaje.ebean.Model {
     public void applyToNotes(Form entryForm) {
         for (EntryNoteCollection note: getNotes()) {
             String valueName = "value_" + note.getName();
-            String value = entryForm.field(valueName).getValue().get();
-            note.setValue(value);
+            Optional<String> value = entryForm.field(valueName).getValue();
+            if (value.isPresent()) {
+                note.setValue(value.get());
+            }
         }
     }
 

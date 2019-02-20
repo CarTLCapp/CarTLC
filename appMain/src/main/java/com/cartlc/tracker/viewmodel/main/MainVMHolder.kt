@@ -6,7 +6,6 @@ package com.cartlc.tracker.viewmodel.main
 import android.location.Address
 import android.text.InputType
 import androidx.lifecycle.MutableLiveData
-import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.data.*
 import com.cartlc.tracker.model.event.Action

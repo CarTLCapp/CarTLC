@@ -257,8 +257,11 @@ public class Equipment extends Model implements Comparable<Equipment> {
         List<Equipment> equipments = new ArrayList<Equipment>();
         for (Equipment equipment : Equipment.list()) {
             try {
-                if (entryForm.field(equipment.name).getValue().get().equals("true")) {
-                    equipments.add(equipment);
+                Optional<String> value = entryForm.field(equipment.name).getValue();
+                if (value.isPresent()) {
+                    if (value.get().equals("true")) {
+                        equipments.add(equipment);
+                    }
                 }
             } catch (Exception ex) {
             }

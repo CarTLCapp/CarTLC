@@ -4,7 +4,6 @@
 package com.cartlc.tracker.model.server
 
 import android.content.Context
-import android.nfc.tech.MifareUltralight.PAGE_SIZE
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.VisibleForTesting
