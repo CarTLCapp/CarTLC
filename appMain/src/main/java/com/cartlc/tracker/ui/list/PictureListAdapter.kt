@@ -132,6 +132,12 @@ open class PictureListAdapter(
                     picture!!.setImageResource(android.R.color.transparent)
                     loading!!.setText(R.string.error_picture_removed)
                 } else {
+                    //
+                    // TODO: WAS GETTING AN OUT-OF-MEMORY crash here on some devices.
+                    // I reduced the maxHeight value from 500 to 400 hoping that would
+                    // help. But that does not seem to be the most solid solution possible.
+                    // Needs more thought.
+                    //
                     builder.build()
                             .load(getUri(pictureFile))
                             .placeholder(R.drawable.loading)
@@ -139,7 +145,7 @@ open class PictureListAdapter(
                             .centerInside()
                             .resize(0, maxHeight)
                             .into(picture)
-//                    loading!!.visibility = View.GONE
+                    loading!!.visibility = View.GONE
                     remove?.let { view ->
                         view.setOnClickListener { _ ->
                             item.remove()
