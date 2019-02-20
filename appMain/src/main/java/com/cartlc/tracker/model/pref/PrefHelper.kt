@@ -352,6 +352,7 @@ class PrefHelper constructor(
 
     fun clearLastEntry() {
 
+        // TODO: this is debug temporary code:
         db.reportDebugMessage("clearLastEntry(): TRUCK#=$truckNumber, #PICTURES="
                 + db.tablePictureCollection.countPendingPictures())
 
