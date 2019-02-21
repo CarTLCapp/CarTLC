@@ -38,8 +38,8 @@ import com.cartlc.tracker.ui.util.PermissionHelper
 import com.cartlc.tracker.ui.frag.*
 import com.cartlc.tracker.viewmodel.main.MainButtonsViewModel
 import com.cartlc.tracker.viewmodel.main.MainVMHolder
-import com.crashlytics.android.Crashlytics
-import io.fabric.sdk.android.Fabric
+import com.crashlytics.android.Crashlytics // CRASHLYTICS
+import io.fabric.sdk.android.Fabric // CRASHLYTICS
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -102,7 +102,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Fabric.with(this, Crashlytics())
+        Fabric.with(this, Crashlytics()) // CRASHLYTICS
 
         mApp = applicationContext as TBApplication
         mApp.mainViewModelComponent.inject(this)

@@ -24,6 +24,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- CRASHLYTICS -->
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="fdf2c9c4ee8de1171d7114f9b5301d02d13abeb6" />
@@ -35,8 +36,8 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
