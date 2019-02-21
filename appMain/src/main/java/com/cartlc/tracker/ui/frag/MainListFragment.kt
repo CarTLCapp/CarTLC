@@ -76,6 +76,7 @@ class MainListFragment : BaseFragment() {
         val divider = DividerItemDecoration(mainList.context, linearLayoutManager.orientation)
         mainList.addItemDecoration(divider)
         simpleAdapter = SimpleListAdapter(mainList.context) { _, text -> vm.key.value = text }
+        // Called when an item was selected:
         vm.key.observe(this, Observer { value ->
             when (vm.curFlowValue.stage) {
                 Stage.PROJECT,
@@ -88,6 +89,7 @@ class MainListFragment : BaseFragment() {
                     buttonsViewModel?.showNextButtonValue = true
                 }
                 Stage.COMPANY -> {
+                    buttonsViewModel?.showNextButtonValue = true
                     buttonsViewModel?.checkCenterButtonIsEdit()
                 }
                 Stage.TRUCK -> {

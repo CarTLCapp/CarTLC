@@ -53,6 +53,9 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
     private val hasProjectName: Boolean
         get() = prefHelper.projectName != null
 
+    private val hasCompanyName: Boolean
+        get() = !prefHelper.company.isNullOrBlank()
+
     internal var autoNarrowOkay = true
 
     private val isAutoNarrowOkay: Boolean
@@ -75,6 +78,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                 Stage.COMPANY -> {
                     titleViewModel.subTitleValue = editProjectHint
                     mainListViewModel.showingValue = true
+                    buttonsViewModel.showNextButtonValue = hasCompanyName
                     buttonsViewModel.showCenterButtonValue = true
                     val companies = db.tableAddress.query()
                     autoNarrowCompanies(companies.toMutableList())
@@ -132,7 +136,12 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
             buttonsViewModel.showNextButtonValue = false
             val company = prefHelper.company
             val zipcode = prefHelper.zipCode
-            var states: MutableList<String> = db.tableAddress.queryStates(company!!, zipcode).toMutableList()
+            if (company == null) {
+                Timber.e("processCities(): Found unexpected NULL company")
+                curFlowValue = CompanyFlow()
+                return
+            }
+            var states: MutableList<String> = db.tableAddress.queryStates(company, zipcode).toMutableList()
             if (states.size == 0) {
                 val state = zipcode?.let { db.tableZipCode.queryState(it) }
                 if (state != null) {
@@ -176,12 +185,12 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
             val zipcode = prefHelper.zipCode
             val state = prefHelper.state
             if (company == null) {
-                Timber.e("Found unexpected NULL company")
+                Timber.e("processCities(): Found unexpected NULL company")
                 curFlowValue = CompanyFlow()
                 return
             }
             if (state == null) {
-                Timber.e("Found unexpected NULL state")
+                Timber.e("processCities(): Found unexpected NULL state")
                 curFlowValue = StateFlow()
                 return
             }
@@ -235,10 +244,28 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
             var isEditing = flow.stage == Stage.ADD_STREET
             buttonsViewModel.showNextButtonValue = false
             titleViewModel.subTitleValue = if (isEditing) editProjectHint else curProjectHint
+            val company = prefHelper.company
+            val city = prefHelper.city
+            val state = prefHelper.state
+            if (company == null) {
+                Timber.e("processStreets(): Found unexpected NULL company")
+                curFlowValue = CompanyFlow()
+                return
+            }
+            if (state == null) {
+                Timber.e("processStreets(): Found unexpected NULL state")
+                curFlowValue = StateFlow()
+                return
+            }
+            if (city == null) {
+                Timber.e("processStreets(): Found unexpected NULL city")
+                curFlowValue = StateFlow()
+                return
+            }
             var streets = db.tableAddress.queryStreets(
-                    prefHelper.company!!,
-                    prefHelper.city!!,
-                    prefHelper.state!!,
+                    company,
+                    city,
+                    state,
                     prefHelper.zipCode)
             if (streets.isEmpty()) {
                 isEditing = true
@@ -289,10 +316,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
         if (companyNames.size == 1) {
             return
         }
-        val address = fab_address
-        if (address == null) {
-            return
-        }
+        val address = fab_address ?: return
         val reduced = ArrayList<DataAddress>()
         for (company in companies) {
             if (LocationHelper.instance.matchCompany(address, company)) {
@@ -313,7 +337,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
                 list.add(address.company)
             }
         }
-        Collections.sort(list)
+        list.sort()
         return list
     }
 

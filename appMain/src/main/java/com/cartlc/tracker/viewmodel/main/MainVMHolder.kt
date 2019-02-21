@@ -456,8 +456,8 @@ class MainVMHolder(val repo: CarRepository) {
 
     private fun onEntryValueChanged(value: String) {
         when (curFlowValue.stage) {
-            Stage.STREET,
             Stage.COMPANY,
+            Stage.STREET,
             Stage.CITY,
             Stage.ADD_COMPANY,
             Stage.ADD_STREET,
