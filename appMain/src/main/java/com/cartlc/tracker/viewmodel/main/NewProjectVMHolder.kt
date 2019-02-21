@@ -8,14 +8,12 @@ import android.text.InputType
 import com.cartlc.tracker.model.data.DataAddress
 import com.cartlc.tracker.model.data.DataStates
 import com.cartlc.tracker.model.event.Action
-import com.cartlc.tracker.model.flow.AddCityFlow
-import com.cartlc.tracker.model.flow.AddStreetFlow
-import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.Stage
+import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.model.misc.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.util.LocationHelper
+import timber.log.Timber
 import java.util.*
 
 class NewProjectVMHolder(val vm: MainVMHolder) {
@@ -177,7 +175,17 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
             val company = prefHelper.company
             val zipcode = prefHelper.zipCode
             val state = prefHelper.state
-            var cities: MutableList<String> = db.tableAddress.queryCities(company!!, zipcode, state!!).toMutableList()
+            if (company == null) {
+                Timber.e("Found unexpected NULL company")
+                curFlowValue = CompanyFlow()
+                return
+            }
+            if (state == null) {
+                Timber.e("Found unexpected NULL state")
+                curFlowValue = StateFlow()
+                return
+            }
+            var cities: MutableList<String> = db.tableAddress.queryCities(company, zipcode, state).toMutableList()
             if (cities.isEmpty()) {
                 val city = zipcode?.let { db.tableZipCode.queryCity(zipcode) }
                 if (city != null) {
