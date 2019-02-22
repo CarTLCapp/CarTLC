@@ -137,7 +137,6 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
             val company = prefHelper.company
             val zipcode = prefHelper.zipCode
             if (company == null) {
-                Timber.e("processCities(): Found unexpected NULL company")
                 curFlowValue = CompanyFlow()
                 return
             }
@@ -185,12 +184,10 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
             val zipcode = prefHelper.zipCode
             val state = prefHelper.state
             if (company == null) {
-                Timber.e("processCities(): Found unexpected NULL company")
                 curFlowValue = CompanyFlow()
                 return
             }
             if (state == null) {
-                Timber.e("processCities(): Found unexpected NULL state")
                 curFlowValue = StateFlow()
                 return
             }
@@ -248,17 +245,14 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
             val city = prefHelper.city
             val state = prefHelper.state
             if (company == null) {
-                Timber.e("processStreets(): Found unexpected NULL company")
                 curFlowValue = CompanyFlow()
                 return
             }
             if (state == null) {
-                Timber.e("processStreets(): Found unexpected NULL state")
                 curFlowValue = StateFlow()
                 return
             }
             if (city == null) {
-                Timber.e("processStreets(): Found unexpected NULL city")
                 curFlowValue = CityFlow()
                 return
             }
