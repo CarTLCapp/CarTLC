@@ -259,7 +259,7 @@ class NewProjectVMHolder(val vm: MainVMHolder) {
             }
             if (city == null) {
                 Timber.e("processStreets(): Found unexpected NULL city")
-                curFlowValue = StateFlow()
+                curFlowValue = CityFlow()
                 return
             }
             var streets = db.tableAddress.queryStreets(

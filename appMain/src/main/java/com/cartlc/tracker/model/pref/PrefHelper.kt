@@ -326,15 +326,17 @@ class PrefHelper constructor(
     }
 
 
-    fun setFromCurrentProjectId() {
+    fun setFromCurrentProjectId(): Boolean {
         val projectGroup = currentProjectGroup
         if (projectGroup != null) {
             projectName = projectGroup.projectName
             val address = projectGroup.address
             if (address != null) {
                 setAddress(address)
+                return true
             }
         }
+        return false
     }
 
     fun clearCurProject() {
@@ -365,28 +367,17 @@ class PrefHelper constructor(
     fun saveProjectAndAddressCombo(modifyCurrent: Boolean): Boolean {
         val project = projectName
         if (project.isNullOrBlank()) {
-            Timber.e("project name cannot be blank")
-            return false
+            return false // Okay to have nothing selected
         }
         val company = company
-        if (company.isNullOrBlank()) {
-            Timber.e("company cannot be blank")
-            return false
-        }
         val state = state
-        if (state.isNullOrBlank()) {
-            Timber.e("state cannot be blank.")
-            return false
-        }
         val street = street
-        if (street.isNullOrBlank()) {
-            Timber.e("street cannot be blank.")
-            return false
-        }
         val city = city
-        if (city.isNullOrBlank()) {
-            Timber.e("city cannot be blank.")
-            return false
+        if (company.isNullOrBlank() || state.isNullOrBlank()|| street.isNullOrBlank() || city.isNullOrBlank()) {
+            setFromCurrentProjectId()
+            if (company.isNullOrBlank() || state.isNullOrBlank() || street.isNullOrBlank() || city.isNullOrBlank()) {
+                return false  // Okay to have nothing selected
+            }
         }
         val zipcode = zipCode
         var addressId: Long
