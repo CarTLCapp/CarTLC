@@ -211,11 +211,15 @@ public class Note extends Model implements Comparable<Note> {
                 Client client = Client.find.byId((long) created_by);
                 if (client != null) {
                     sbuf.append(client.name);
+                } else {
+                    sbuf.append(Technician.RIP);
                 }
             } else {
                 Technician tech = Technician.find.byId((long) created_by);
                 if (tech != null) {
                     sbuf.append(tech.fullName());
+                } else {
+                    sbuf.append(Technician.RIP);
                 }
             }
         }

@@ -22,10 +22,14 @@ public class Technician extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
+    public static String RIP = "R.I.P.";
+
     public static Finder<Long, Technician> find = new Finder<Long, Technician>(Technician.class);
 
-    public static List<Technician> list() {
-        return find.all();
+    public static List<Technician> listEnabled() {
+        return find.where()
+                .eq("disabled", false)
+                .findList();
     }
 
     @Transactional
@@ -106,34 +110,38 @@ public class Technician extends com.avaje.ebean.Model {
         }
     }
 
-    public static boolean canDelete(long id) {
+    public static boolean techBeingUsed(long id) {
         if (Company.find.where()
                 .eq("created_by", id)
                 .eq("created_by_client", false).findList().size() > 0) {
-            return false;
+            return true;
         }
         if (Entry.find.where().eq("tech_id", id).findList().size() > 0) {
-            return false;
+            return true;
         }
         if (Equipment.find.where()
                 .eq("created_by", id)
                 .eq("created_by_client", false).findList().size() > 0) {
-            return false;
+            return true;
         }
         if (Message.find.where().eq("tech_id", id).findList().size() > 0) {
-            return false;
+            return true;
         }
         if (Note.find.where()
                 .eq("created_by", id)
                 .eq("created_by_client", false).findList().size() > 0) {
-            return false;
+            return true;
         }
         if (Truck.find.where()
                 .eq("created_by", id)
                 .eq("created_by_client", false).findList().size() > 0) {
-            return false;
+            return true;
         }
-        return true;
+        if (Vehicle.find.where()
+                .eq("tech_id", id).findList().size() > 0) {
+            return true;
+        }
+        return false;
     }
 
     public static List<Long> findMatches(String name) {

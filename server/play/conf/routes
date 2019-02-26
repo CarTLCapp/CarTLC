@@ -19,7 +19,7 @@ GET     /picture_cleanup          controllers.HomeController.pictureCleanup()
 GET     /tech                    controllers.TechnicianController.list()
 GET     /tech/:id                controllers.TechnicianController.edit(id:Long)
 POST    /tech/:id                controllers.TechnicianController.update(id:Long)
-POST    /tech/:id/delete         controllers.TechnicianController.delete(id:Long)
+GET     /tech/:id/delete         controllers.TechnicianController.delete(id:Long)
 GET     /tech/:id/reset_upload   controllers.TechnicianController.resetUpload(id:Long)
 
 ### PROJECTS ###

@@ -55,7 +55,7 @@ public class Message extends com.avaje.ebean.Model {
     public String getTechName() {
         Technician tech = Technician.find.byId((long) tech_id);
         if (tech == null) {
-            return "NOT FOUND: " + tech_id;
+            return Technician.RIP;
         }
         return tech.fullName();
     }

@@ -230,7 +230,7 @@ public class Company extends Model {
             }
             return "Admin";
         }
-        return "";
+        return Technician.RIP;
     }
 
     public boolean hasAddress() {

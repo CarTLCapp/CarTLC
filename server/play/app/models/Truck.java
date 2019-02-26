@@ -296,11 +296,15 @@ public class Truck extends com.avaje.ebean.Model {
                 Client client = Client.find.byId((long) created_by);
                 if (client != null) {
                     name = client.name;
+                } else {
+                    name = Technician.RIP;
                 }
             } else {
                 Technician tech = Technician.find.byId((long) created_by);
                 if (tech != null) {
                     name = tech.fullName();
+                } else {
+                    name = Technician.RIP;
                 }
             }
         }

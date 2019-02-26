@@ -164,7 +164,7 @@ public class Entry extends com.avaje.ebean.Model {
     public String getTechName() {
         Technician tech = Technician.find.ref((long) tech_id);
         if (tech == null) {
-            return "NOT FOUND: " + tech_id;
+            return Technician.RIP;
         }
         Technician tech2 = SecondaryTechnician.findSecondaryTechByEntryId(id);
         if (tech2 == null) {
@@ -671,7 +671,7 @@ public class Entry extends com.avaje.ebean.Model {
 
     public static Map<String, String> optionsTech() {
         LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
-        for (Technician tech : Technician.list()) {
+        for (Technician tech : Technician.listEnabled()) {
             options.put(tech.fullName(), tech.fullName());
         }
         return options;

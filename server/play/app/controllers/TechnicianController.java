@@ -32,7 +32,7 @@ public class TechnicianController extends Controller {
      * Display the list of users.
      */
     public Result list() {
-        return ok(views.html.technician_list.render(Technician.list(), Secured.getClient(ctx())));
+        return ok(views.html.technician_list.render(Technician.listEnabled(), Secured.getClient(ctx())));
     }
 
     /**
@@ -92,14 +92,20 @@ public class TechnicianController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result delete(Long id) {
-        if (Technician.canDelete(id)) {
+        try {
             Technician.find.byId(id).delete();
-            return list();
-        } else {
-            String message = "Cannot delete this technician, it is being used.";
-            flash(message);
-            return ok(message);
+        } catch (Exception ex) {
+            Transaction txn = Ebean.beginTransaction();
+            try {
+                Technician tech = Technician.find.byId(id);
+                tech.disabled = true;
+                tech.update();
+                txn.commit();
+            } finally {
+                txn.end();
+            }
         }
+        return list();
     }
 }
             
