@@ -22,7 +22,7 @@ public class Technician extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
-    public static String RIP = "R.I.P.";
+    public static String RIP = "Inactive";
 
     public static Finder<Long, Technician> find = new Finder<Long, Technician>(Technician.class);
 
