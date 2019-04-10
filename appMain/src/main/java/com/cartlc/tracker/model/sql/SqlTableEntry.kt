@@ -29,21 +29,21 @@ class SqlTableEntry(
 
     companion object {
 
-        internal val TABLE_NAME = "table_entries"
+        private const val TABLE_NAME = "table_entries"
 
-        internal val KEY_ROWID = "_id"
-        internal val KEY_DATE = "date"
-        internal val KEY_PROJECT_ADDRESS_COMBO_ID = "combo_id"
-        internal val KEY_EQUIPMENT_COLLECTION_ID = "equipment_collection_id"
-        internal val KEY_PICTURE_COLLECTION_ID = "picture_collection_id"
-        internal val KEY_NOTE_COLLECTION_ID = "note_collection_id"
-        internal val KEY_TRUCK_ID = "truck_id"
-        internal val KEY_STATUS = "status"
-        internal val KEY_SERVER_ID = "server_id"
-        internal val KEY_SERVER_ERROR_COUNT = "server_error_count"
-        internal val KEY_UPLOADED_MASTER = "uploaded_master"
-        internal val KEY_UPLOADED_AWS = "uploaded_aws"
-        internal val KEY_HAD_ERROR = "had_error"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_DATE = "date"
+        private const val KEY_PROJECT_ADDRESS_COMBO_ID = "combo_id"
+        private const val KEY_EQUIPMENT_COLLECTION_ID = "equipment_collection_id"
+        private const val KEY_PICTURE_COLLECTION_ID = "picture_collection_id"
+        private const val KEY_NOTE_COLLECTION_ID = "note_collection_id"
+        private const val KEY_TRUCK_ID = "truck_id"
+        private const val KEY_STATUS = "status"
+        private const val KEY_SERVER_ID = "server_id"
+        private const val KEY_SERVER_ERROR_COUNT = "server_error_count"
+        private const val KEY_UPLOADED_MASTER = "uploaded_master"
+        private const val KEY_UPLOADED_AWS = "uploaded_aws"
+        private const val KEY_HAD_ERROR = "had_error"
     }
 
     data class Count(

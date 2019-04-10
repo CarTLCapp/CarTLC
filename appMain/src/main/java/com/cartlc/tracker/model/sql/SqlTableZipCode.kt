@@ -20,13 +20,13 @@ class SqlTableZipCode(
 
     companion object {
 
-        internal val TABLE_NAME = "zipcodes"
+        private const val TABLE_NAME = "zipcodes"
 
-        internal val KEY_ROWID = "_id"
-        internal val KEY_ZIPCODE = "zipcode"
-        internal val KEY_STATE_LONG = "state_long"
-        internal val KEY_STATE_SHORT = "state_short"
-        internal val KEY_CITY = "city"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_ZIPCODE = "zipcode"
+        private const val KEY_STATE_LONG = "state_long"
+        private const val KEY_STATE_SHORT = "state_short"
+        private const val KEY_CITY = "city"
     }
 
     fun create() {

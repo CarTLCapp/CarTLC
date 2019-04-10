@@ -4,7 +4,6 @@
 package models;
 
 import java.util.*;
-import java.text.SimpleDateFormat;
 import java.io.File;
 
 import javax.persistence.*;
@@ -17,6 +16,7 @@ import com.avaje.ebean.*;
 
 import modules.AmazonHelper;
 import modules.AmazonHelper.OnDownloadComplete;
+import modules.TimeHelper;
 import play.Logger;
 
 /**
@@ -128,7 +128,10 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public boolean match(String search) {
-        if (getProjectLine().toLowerCase().contains(search)) {
+        if (getRootProjectName().toLowerCase().contains(search)) {
+            return true;
+        }
+        if (getSubProjectName().toLowerCase().contains(search)) {
             return true;
         }
         if (getCity().toLowerCase().contains(search)) {
@@ -164,7 +167,7 @@ public class Entry extends com.avaje.ebean.Model {
     public String getTechName() {
         Technician tech = null;
         try {
-            tech = Technician.find.ref((long) tech_id);
+            tech = Technician.find.byId((long) tech_id);
         } catch (Exception ex) {
         }
         if (tech == null) {
@@ -185,8 +188,8 @@ public class Entry extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
-    public String getProjectLine() {
-        Project project = Project.find.ref(project_id);
+    public String getSubProjectName() {
+        Project project = Project.find.byId(project_id);
         if (project == null) {
             return "NOT FOUND: " + project_id;
         }
@@ -194,6 +197,14 @@ public class Entry extends com.avaje.ebean.Model {
             return "";
         }
         return project.name;
+    }
+
+    public String getRootProjectName() {
+        Project project = Project.find.byId(project_id);
+        if (project == null) {
+            return "NOT FOUND: " + project_id;
+        }
+        return project.getRootProjectName();
     }
 
     public String getAddressLine() {
@@ -273,30 +284,25 @@ public class Entry extends com.avaje.ebean.Model {
         return status.getCellColor();
     }
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a z";
 
     public String getDate() {
-        SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
-        if (time_zone != null) {
-            if (time_zone.startsWith("-") || time_zone.startsWith("+")) {
-                format.setTimeZone(TimeZone.getTimeZone("GMT" + time_zone));
-            } else if (time_zone.equals("CDT") || time_zone.equals("Central Daylight Time")) {
-                format.setTimeZone(TimeZone.getTimeZone("GMT-5:00"));
-            } else if (time_zone.equals("EDT")) {
-                format.setTimeZone(TimeZone.getTimeZone("GMT-4:00"));
-            } else {
-                format.setTimeZone(TimeZone.getTimeZone(time_zone));
-            }
-        }
-        return format.format(entry_time);
+        return new TimeHelper().getDate(entry_time, time_zone);
+    }
+
+    public String getTime() {
+        return new TimeHelper().getTime(entry_time, time_zone);
+    }
+
+    public String getDateTime() {
+        return new TimeHelper().getDateTime(entry_time, time_zone);
     }
 
     public Truck getTruck() {
-        return Truck.find.ref(truck_id);
+        return Truck.find.byId(truck_id);
     }
 
     public String getTruckLine() {
-        Truck truck = Truck.find.ref(truck_id);
+        Truck truck = Truck.find.byId(truck_id);
         if (truck == null) {
             return null;
         }
@@ -304,8 +310,8 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public int truckCompareTo(Entry other) {
-        Truck truck = Truck.find.ref(truck_id);
-        Truck otruck = Truck.find.ref(other.truck_id);
+        Truck truck = Truck.find.byId(truck_id);
+        Truck otruck = Truck.find.byId(other.truck_id);
         if (truck == null || otruck == null) {
             return 0;
         }
@@ -445,7 +451,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasEquipment(long entry_id, long equipment_id) {
-        Entry entry = find.ref(entry_id);
+        Entry entry = find.byId(entry_id);
         if (entry != null) {
             if (entry.hasEquipment(equipment_id)) {
                 return true;
@@ -465,7 +471,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasNote(long entry_id, long note_id) {
-        Entry entry = find.ref(entry_id);
+        Entry entry = find.byId(entry_id);
         if (entry != null) {
             if (entry.hasNote(note_id)) {
                 return true;
@@ -491,6 +497,17 @@ public class Entry extends com.avaje.ebean.Model {
         delete();
     }
 
+    public static int countEntriesForRootProject(long root_project_id) {
+        List<Project> projects = Project.listWithRoot(root_project_id);
+        int count = 0;
+        for (Project project : projects) {
+            List<Entry> items = find.where()
+                    .eq("project_id", project.id).findList();
+            count += items.size();
+        }
+        return count;
+    }
+
     public static int countEntriesForProject(long project_id) {
         return find.where().eq("project_id", project_id).findList().size();
     }
@@ -513,6 +530,18 @@ public class Entry extends com.avaje.ebean.Model {
 
     public static int countEntriesForEquipment(long equipment_id) {
         return EntryEquipmentCollection.countEquipments(equipment_id);
+    }
+
+    public static boolean hasEntryForRootProject(long root_project_id) {
+        List<Project> projects = Project.listWithRoot(root_project_id);
+        for (Project project : projects) {
+            List<Entry> items = find.where()
+                    .eq("project_id", project.id).findList();
+            if (items.size() > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean hasEntryForProject(long project_id) {
@@ -685,7 +714,16 @@ public class Entry extends com.avaje.ebean.Model {
         return options;
     }
 
-    public static Map<String, String> optionsProject() {
+    public static Map<String, String> optionsRootProject() {
+        LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
+        for (RootProject proj : RootProject.list()) {
+            options.put(proj.name, proj.name);
+        }
+        options.put("", "");
+        return options;
+    }
+
+    public static Map<String, String> optionsProject(String rootProject) {
         LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
         for (Project proj : Project.list()) {
             options.put(proj.name, proj.name);

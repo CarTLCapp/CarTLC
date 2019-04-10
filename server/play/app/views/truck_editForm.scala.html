@@ -1,4 +1,4 @@
-@(id: Long, truckForm: Form[InputTruck])
+@(id: Long, truckForm: Form[views.formdata.InputTruck])
 
 @import helper._
 
@@ -16,7 +16,8 @@
 
             @b3.text(truckForm("truck_number"), '_label -> "Truck Number", '_help -> "")
             @b3.text(truckForm("license_plate"), '_label -> "License Plate", '_help -> "")
-            @b3.select(truckForm("project_name"), options = options(Project.listNamesWithBlank()), args = '_label -> "Project:")
+            @b3.select(truckForm("root_project_name"), options = options(RootProject.listNamesWithBlank()), args = '_label -> "Root Project:")
+            @b3.select(truckForm("sub_project_name"), options = options(truckForm.get().optionsSubProject), args = '_label -> "Sub Project:")
             @b3.select(truckForm("company_name"), options = options(CompanyName.getNamesWithBlank()), args = '_label -> "Company:")
 
         </fieldset>

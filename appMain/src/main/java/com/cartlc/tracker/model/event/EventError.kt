@@ -7,7 +7,7 @@ package com.cartlc.tracker.model.event
  * Created by dug on 5/31/17.
  */
 
-class EventError(internal val mMessage: String) {
+class EventError(private val mMessage: String) : EventCommon() {
 
     override fun toString(): String {
         return mMessage

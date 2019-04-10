@@ -9,6 +9,7 @@ import org.mockito.MockitoAnnotations
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.cartlc.tracker.model.CarRepository
+import com.cartlc.tracker.model.flow.FlowUseCaseImpl
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.server.DCPing
 import com.cartlc.tracker.model.server.ServerHelper
@@ -58,7 +59,9 @@ class TestDCPing {
     @Mock
     lateinit var tablePictureCollection: TablePictureCollection
 
-    lateinit var repo: CarRepository
+    private val flowUseCase = FlowUseCaseImpl()
+
+    private lateinit var repo: CarRepository
 
     @Before
     fun onBefore() {
@@ -66,7 +69,7 @@ class TestDCPing {
         MockitoAnnotations.initMocks(this)
         context = InstrumentationRegistry.getInstrumentation().targetContext
         prefHelper = PrefHelper(context, db)
-        repo = spy(CarRepository(context, db, prefHelper))
+        repo = spy(CarRepository(db, prefHelper, flowUseCase))
         doReturn(true).`when`(repo).isDevelopment
         ping = DCPing(context, repo)
         ping.openConnection = { target -> mockHttpConnection }

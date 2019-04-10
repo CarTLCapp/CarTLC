@@ -21,10 +21,10 @@ class SqlTableString(
 ) : TableString {
 
     companion object {
-        private val TABLE_NAME = "table_strings"
-        private val KEY_ROWID = "_id"
-        private val KEY_SERVER_ID = "server_id"
-        private val KEY_VALUE = "string_value"
+        private const val TABLE_NAME = "table_strings"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_SERVER_ID = "server_id"
+        private const val KEY_VALUE = "string_value"
     }
 
     fun create() {

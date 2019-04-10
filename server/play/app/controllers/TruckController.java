@@ -14,6 +14,8 @@ import play.data.*;
 import static play.data.Form.*;
 
 import models.*;
+import views.formdata.InputTruck;
+
 import java.util.*;
 
 import javax.inject.Inject;
@@ -24,6 +26,7 @@ import play.libs.Json;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
+
 import play.Logger;
 
 /**
@@ -36,7 +39,7 @@ public class TruckController extends Controller {
 
     private FormFactory mFormFactory;
     private boolean mFilter;
-    
+
     @Inject
     public TruckController(FormFactory formFactory) {
         this.mFormFactory = formFactory;
@@ -202,15 +205,13 @@ public class TruckController extends Controller {
         }
         truck.truck_number = updateTruck.truck_number;
         truck.license_plate = updateTruck.license_plate;
-        if (updateTruck.project_name.trim().isEmpty()) {
-            truck.project_id = 0;
-        } else {
-            Project project = Project.findByName(updateTruck.project_name);
-            if (project == null) {
-                return badRequest("Cannot find project named: " + updateTruck.project_name);
-            }
-            truck.project_id = project.id;
+
+        Project project = Project.findByName(updateTruck.root_project_name, updateTruck.sub_project_name);
+        if (project == null) {
+            return badRequest("Cannot find project named: " + updateTruck.root_project_name + " - " + updateTruck.sub_project_name);
         }
+        truck.project_id = project.id;
+
         if (updateTruck.company_name.trim().isEmpty()) {
             truck.company_name_id = 0;
         } else {

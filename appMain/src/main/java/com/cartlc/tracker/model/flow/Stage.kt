@@ -2,7 +2,8 @@ package com.cartlc.tracker.model.flow
 
 enum class Stage {
     LOGIN,
-    PROJECT,
+    ROOT_PROJECT,
+    SUB_PROJECT,
     COMPANY,
     ADD_COMPANY,
     STATE,

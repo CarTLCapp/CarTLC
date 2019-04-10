@@ -5,7 +5,7 @@ package com.cartlc.tracker.model.data
 
 import com.cartlc.tracker.model.misc.HashLongList
 import com.cartlc.tracker.model.misc.HashStringList
-import com.cartlc.tracker.model.misc.StringBuilderWithComma
+import com.cartlc.tracker.model.msg.StringBuilderWithComma
 import com.cartlc.tracker.model.table.TableString
 
 /**

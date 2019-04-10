@@ -29,7 +29,8 @@
     <string name="title_upload">Upload</string>
     <string name="title_login">Login</string>
     <string name="title_secondary_login">Optional Secondary Login</string>
-    <string name="title_project">Project</string>
+    <string name="title_root_project">Root Project</string>
+    <string name="title_sub_project">Sub Project</string>
     <string name="title_project_">Project:</string>
     <string name="title_state">State</string>
     <string name="title_city">City</string>

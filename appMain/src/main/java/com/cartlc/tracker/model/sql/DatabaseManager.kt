@@ -20,8 +20,8 @@ import timber.log.Timber
 open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
-        internal val DATABASE_NAME = "cartcl.db"
-        internal val DATABASE_VERSION = 17
+        private const val DATABASE_NAME = "cartcl.db"
+        private const val DATABASE_VERSION = 18
     }
 
     private var dbHelper: DatabaseHelper
@@ -32,7 +32,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
         dbSql = dbHelper.writableDatabase
     }
 
-    internal class DatabaseHelper(
+    private class DatabaseHelper(
             ctx: Context,
             private val dm: DatabaseManager
     ) : SQLiteOpenHelper(ctx, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -127,6 +127,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
                 tableString.create()
                 tableVehicle.create()
                 tableVehicleName.create()
+            }
+            if (oldVersion <= 17) {
+                tableProjects.upgrade17()
             }
         }
 

@@ -32,11 +32,14 @@ public class Project extends Model implements Comparable<Project> {
     @Constraints.Required
     public boolean disabled;
 
+    @Constraints.Required
+    public Long root_project_id;
+
     public static Finder<Long, Project> find = new Finder<Long, Project>(Project.class);
 
     public static Project get(long id) {
         if (id > 0) {
-            return find.ref(id);
+            return find.byId(id);
         }
         return null;
     }
@@ -46,38 +49,125 @@ public class Project extends Model implements Comparable<Project> {
     }
 
     public static List<Project> list(boolean disabled) {
-        return find.where()
-                .eq("disabled", disabled)
-                .orderBy("name asc").findList();
-    }
-
-    public static ArrayList<String> listNames() {
-        ArrayList<String> names = new ArrayList<String>();
-        for (Project project : list()) {
-            names.add(project.name);
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT DISTINCT p.id, r.name, p.name, p.disabled, p.root_project_id");
+        query.append(" FROM project AS p");
+        query.append(" LEFT JOIN root_project AS r ON p.root_project_id = r.id");
+        query.append(" WHERE p.disabled=" + (disabled ? 1 : 0));
+        query.append(" ORDER BY r.name ASC, p.name ASC");
+        List<SqlRow> rows;
+        rows = Ebean.createSqlQuery(query.toString()).findList();
+        List<Project> result = new ArrayList<Project>();
+        for (SqlRow row : rows) {
+            Project project = new Project();
+            project.id = row.getLong("id");
+            project.name = row.getString("name");
+            project.disabled = row.getBoolean("disabled");
+            project.root_project_id = row.getLong("root_project_id");
+            result.add(project);
         }
-        return names;
+        return result;
     }
 
-    public static List<String> listNamesWithBlank() {
-        ArrayList<String> names = listNames();
+    public static List<Project> listWithRoot(long root_project_id) {
+        return find.where()
+                .eq("root_project_id", root_project_id)
+                .findList();
+    }
+
+    public static List<String> listSubProjectsWithBlank(String rootName) {
+        ArrayList<String> names = listSubProjects(rootName);
         names.add(0, "");
         return names;
     }
 
+    public static ArrayList<String> listSubProjects(String rootName) {
+        ArrayList<String> names = new ArrayList<String>();
+        RootProject rootProject = RootProject.findByName(rootName);
+        if (rootProject != null) {
+            List<Project> projects = find
+                    .where()
+                    .eq("disabled", false)
+                    .eq("root_project_id", rootProject.id)
+                    .findList();
+            for (Project project : projects) {
+                names.add(project.name);
+            }
+            Collections.sort(names);
+        } else {
+            List<Project> projects = find
+                    .where()
+                    .eq("disabled", false)
+                    .eq("root_project_id", null)
+                    .orderBy("name asc")
+                    .findList();
+            for (Project project : projects) {
+                names.add(project.name);
+            }
+        }
+        return names;
+    }
+
     public static Project findByName(String name) {
-        if (name == null) {
+        String[] names = split(name);
+        if (names.length > 1) {
+            return findByName(names[0], names[1]);
+        }
+        if (names.length == 0) {
+            return null;
+        }
+        return findByName(names[0]);
+    }
+
+    public static Project findByName(String root, String subproject) {
+        RootProject rootProject = RootProject.findByName(root);
+        String name;
+        if (rootProject == null) {
+            String projectName;
+            if (root != null && root.length() > 0) {
+                if (subproject != null && subproject.length() > 0) {
+                    Logger.error("Project.findByName(): Could not find project: " + root + " - " + subproject);
+                    return null;
+                }
+                projectName = root;
+            } else if (subproject != null && subproject.length() > 0) {
+                projectName = subproject;
+            } else {
+                Logger.error("Project.findByName(): Could not find NULL project");
+                return null;
+            }
+            List<Project> projects = find.where()
+                    .eq("name", projectName)
+                    .findList();
+            if (projects.size() == 1) {
+                return projects.get(0);
+            } else if (projects.size() > 1) {
+                Logger.error("Project.findByName(): Too many projects named: " + projectName);
+            }
             return null;
         }
         List<Project> projects = find.where()
-                .eq("name", name)
+                .eq("name", subproject)
+                .eq("root_project_id", rootProject.id)
                 .findList();
         if (projects.size() == 1) {
             return projects.get(0);
         } else if (projects.size() > 1) {
-            Logger.error("Too many projects named: " + name);
+            Logger.error("Project.findByName(): Too many projects named: " + root + " - " + subproject);
         }
         return null;
+    }
+
+    // Split the line into a root project and sub project separated by a dash.
+    // For example: Alamo - AMC
+    public static String[] split(String line) {
+        int pos = line.indexOf("-");
+        if (pos >= 0) {
+            String root = line.substring(0, pos).trim();
+            String sub = line.substring(pos + 1).trim();
+            return new String[]{root, sub};
+        }
+        return new String[]{line};
     }
 
     public static boolean isValid(String name) {
@@ -93,6 +183,36 @@ public class Project extends Model implements Comparable<Project> {
             result.add(project.id);
         }
         return result;
+    }
+
+    public String getProjectNameOrDash() {
+        if (name == null) {
+            return "-";
+        }
+        return name;
+    }
+
+    public String getRootProjectName() {
+        if (root_project_id == null) {
+            return null;
+        }
+        RootProject project = RootProject.find.byId(root_project_id);
+        if (project == null) {
+            return null;
+        }
+        return project.name;
+    }
+
+    public String getFullProjectName() {
+        String root = getRootProjectName();
+        if (root != null && root.length() > 0) {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(root);
+            sbuf.append(" - ");
+            sbuf.append(name);
+            return sbuf.toString();
+        }
+        return getProjectNameOrDash();
     }
 
     public String getEquipmentsLine() {
@@ -121,6 +241,22 @@ public class Project extends Model implements Comparable<Project> {
         return sbuf.toString();
     }
 
+    public Boolean isValid(boolean withRoot) {
+        if (withRoot) {
+            return root_project_id != null && root_project_id > 0;
+        } else {
+            return root_project_id == null || root_project_id == 0;
+        }
+    }
+
+    public static Boolean IsValid(long projectId, boolean withRoot) {
+        Project project = get(projectId);
+        if (project == null) {
+            return false;
+        }
+        return project.isValid(withRoot);
+    }
+
     @Override
     public int compareTo(Project project) {
         return name.compareTo(project.name);
@@ -147,7 +283,7 @@ public class Project extends Model implements Comparable<Project> {
     }
 
     public static boolean isDisabled(long id) {
-        Project project = find.ref(id);
+        Project project = find.byId(id);
         if (project == null) {
             return false;
         }

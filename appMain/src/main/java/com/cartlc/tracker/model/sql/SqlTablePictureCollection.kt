@@ -27,14 +27,14 @@ class SqlTablePictureCollection(
 
     companion object {
 
-        internal val TABLE_NAME = "picture_collection"
+        private const val TABLE_NAME = "picture_collection"
 
-        internal val KEY_ROWID = "_id"
-        internal val KEY_COLLECTION_ID = "collection_id"
-        internal val KEY_PICTURE_FILENAME = "picture_filename"
-        internal val KEY_UPLOADING_FILENAME = "uploading_filename"
-        internal val KEY_NOTE = "picture_note"
-        internal val KEY_UPLOADED = "uploaded"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_COLLECTION_ID = "collection_id"
+        private const val KEY_PICTURE_FILENAME = "picture_filename"
+        private const val KEY_UPLOADING_FILENAME = "uploading_filename"
+        private const val KEY_NOTE = "picture_note"
+        private const val KEY_UPLOADED = "uploaded"
 
         fun upgrade3(db: DatabaseTable, dbSql: SQLiteDatabase) {
             try {

@@ -45,7 +45,7 @@ class DCPing(
         private const val TAG = "DCPing"
         private const val LOG = true
 
-        private const val QUERY_TRUCKS = false
+//        private const val QUERY_TRUCKS = false
 
         private const val SERVER_URL_DEVELOPMENT = "http://fleetdev.arqnetworks.com/"
         private const val SERVER_URL_RELEASE = "http://fleettlc.arqnetworks.com/"
@@ -61,23 +61,23 @@ class DCPing(
         private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
 
         private const val COMPANY_PAGE_SIZE = 100
-        private const val TRUCK_PAGE_SIZE = 500
+//        private const val TRUCK_PAGE_SIZE = 500
     }
 
-    private val SERVER_URL: String
-    private val REGISTER: String
-    private val ENTER: String
-    private val PING: String
-    private val PROJECTS: String
-    private val COMPANIES: String
-    private val EQUIPMENTS: String
-    private val NOTES: String
-    private val TRUCKS: String
-    private val MESSAGE: String
-    private val VEHICLE: String
-    private val VEHICLES: String
-    private val STRINGS: String
-    private var mVersion: String? = null
+    private val serverUrl: String
+    private val registerUrl: String
+    private val enterUrl: String
+    private val pingUrl: String
+    private val projectsUrl: String
+    private val companiesUrl: String
+    private val equipmentsUrl: String
+    private val notesUrl: String
+    private val trucksUrl: String
+    private val messageUrl: String
+    private val vehicleUrl: String
+    private val vehiclesUrl: String
+    private val stringsUrl: String
+    private var appVersion: String? = null
 
     private val prefHelper: PrefHelper
         get() = repo.prefHelper
@@ -85,39 +85,42 @@ class DCPing(
     private val db: DatabaseTable
         get() = repo.db
 
+    private val app: TBApplication
+        get() = context.applicationContext as TBApplication
+
     private val version: String?
         get() {
-            if (mVersion == null) {
+            if (appVersion == null) {
                 try {
-                    mVersion = (context.applicationContext as TBApplication).version
+                    appVersion = app.version
                 } catch (ex: Exception) {
                     TBApplication.ReportError(ex, DCPing::class.java, "getVersion()", "server")
                 }
             }
-            return mVersion
+            return appVersion
         }
 
     @VisibleForTesting
     var openConnection: (target: String) -> HttpURLConnection = { target -> openTargetConnection(target) }
 
     init {
-        if (repo.isDevelopment) {
-            SERVER_URL = SERVER_URL_DEVELOPMENT
+        serverUrl = if (repo.isDevelopment) {
+            SERVER_URL_DEVELOPMENT
         } else {
-            SERVER_URL = SERVER_URL_RELEASE
+            SERVER_URL_RELEASE
         }
-        REGISTER = SERVER_URL + "register"
-        ENTER = SERVER_URL + "enter"
-        PING = SERVER_URL + "ping"
-        PROJECTS = SERVER_URL + "projects"
-        COMPANIES = SERVER_URL + "companies"
-        EQUIPMENTS = SERVER_URL + "equipments"
-        NOTES = SERVER_URL + "notes"
-        MESSAGE = SERVER_URL + "message"
-        TRUCKS = SERVER_URL + "trucks"
-        VEHICLE = SERVER_URL + "vehicle"
-        VEHICLES = SERVER_URL + "vehicles"
-        STRINGS = SERVER_URL + "strings"
+        registerUrl = serverUrl + "register"
+        enterUrl = serverUrl + "enter"
+        pingUrl = serverUrl + "ping"
+        projectsUrl = serverUrl + "projects/root"
+        companiesUrl = serverUrl + "companies"
+        equipmentsUrl = serverUrl + "equipments/root"
+        notesUrl = serverUrl + "notes/root"
+        messageUrl = serverUrl + "message"
+        trucksUrl = serverUrl + "trucks"
+        vehicleUrl = serverUrl + "vehicle"
+        vehiclesUrl = serverUrl + "vehicles"
+        stringsUrl = serverUrl + "strings"
     }
 
     fun sendRegistration() {
@@ -132,7 +135,7 @@ class DCPing(
                 jsonObject.accumulate("secondary_last_name", prefHelper.secondaryLastName)
             }
             jsonObject.accumulate("device_id", deviceId)
-            val result = post(REGISTER, jsonObject, true)
+            val result = post(registerUrl, jsonObject, true)
             if (result != null) {
                 if (parseRegistrationResult(result)) {
                     prefHelper.registrationHasChanged = false
@@ -148,14 +151,14 @@ class DCPing(
             if (result.contains(":")) {
                 val pos = result.indexOf(':')
                 var word = result.substring(0, pos)
-                var tech_id = Integer.parseInt(word)
-                prefHelper.techID = tech_id
-                Timber.i("TECH ID=$tech_id")
+                var techId = Integer.parseInt(word)
+                prefHelper.techID = techId
+                Timber.i("TECH ID=$techId")
 
                 word = result.substring(pos + 1)
-                tech_id = Integer.parseInt(word)
-                prefHelper.secondaryTechID = tech_id
-                Timber.i("SECONDARY TECH ID=$tech_id")
+                techId = Integer.parseInt(word)
+                prefHelper.secondaryTechID = techId
+                Timber.i("SECONDARY TECH ID=$techId")
                 return true
             }
             if (TextUtils.isDigitsOnly(result)) {
@@ -183,7 +186,7 @@ class DCPing(
         jsonObject.accumulate("device_id", deviceId)
         jsonObject.accumulate("tech_id", prefHelper.techID)
         jsonObject.accumulate("app_version", version)
-        val response = post(PING, jsonObject, true) ?: return
+        val response = post(pingUrl, jsonObject, true) ?: return
         val blob = parseResult(response)
         if (blob.has(UPLOAD_RESET_TRIGGER)) {
             if (blob.getBoolean(UPLOAD_RESET_TRIGGER)) {
@@ -198,24 +201,24 @@ class DCPing(
             }
         }
         if (blob.has(RELOAD_CODE)) {
-            val reload_code = blob.getString(RELOAD_CODE)
-            if (!TextUtils.isEmpty(reload_code)) {
-                if (reload_code.contains("p")) {
+            val reloadCode = blob.getString(RELOAD_CODE)
+            if (!TextUtils.isEmpty(reloadCode)) {
+                if (reloadCode.contains("p")) {
                     prefHelper.versionProject = 0
                 }
-                if (reload_code.contains("e")) {
+                if (reloadCode.contains("e")) {
                     prefHelper.versionEquipment = 0
                 }
-                if (reload_code.contains("n")) {
+                if (reloadCode.contains("n")) {
                     prefHelper.versionNote = 0
                 }
-                if (reload_code.contains("c")) {
+                if (reloadCode.contains("c")) {
                     prefHelper.versionCompany = 0
                 }
-                if (reload_code.contains("t")) {
+                if (reloadCode.contains("t")) {
                     prefHelper.versionTruck = 0
                 }
-                if (reload_code.contains("v")) {
+                if (reloadCode.contains("v")) {
                     prefHelper.versionVehicleNames = 0
                 }
             }
@@ -224,7 +227,7 @@ class DCPing(
         val version_equipment = blob.getInt(PrefHelper.VERSION_EQUIPMENT)
         val version_note = blob.getInt(PrefHelper.VERSION_NOTE)
         val version_company = blob.getInt(PrefHelper.VERSION_COMPANY)
-        val version_truck = blob.getInt(PrefHelper.VERSION_TRUCK)
+//        val version_truck = blob.getInt(PrefHelper.VERSION_TRUCK)
         val version_vehicle_names = blob.getInt(PrefHelper.VERSION_VEHICLE_NAMES)
         if (prefHelper.versionProject != version_project) {
             Timber.i("New project version $version_project")
@@ -262,15 +265,15 @@ class DCPing(
             }
             prefHelper.versionNote = version_note
         }
-        if (QUERY_TRUCKS) {
-            if (prefHelper.versionTruck != version_truck) {
-                Timber.i("New truck version $version_truck")
-                if (!queryTrucks()) {
-                    return
-                }
-                prefHelper.versionTruck = version_truck
-            }
-        }
+//        if (QUERY_TRUCKS) {
+//            if (prefHelper.versionTruck != version_truck) {
+//                Timber.i("New truck version $version_truck")
+//                if (!queryTrucks()) {
+//                    return
+//                }
+//                prefHelper.versionTruck = version_truck
+//            }
+//        }
         var entries = db.tableEntry.queryPendingDataToUploadToMaster()
         var count = 0
         if (entries.isNotEmpty()) {
@@ -280,8 +283,8 @@ class DCPing(
             EventBus.getDefault().post(EventRefreshProjects())
         }
         entries = db.tableEntry.queryPendingPicturesToUpload()
-        if (entries.size > 0) {
-            if (AmazonHelper.instance.sendPictures(context, entries)) {
+        if (entries.isNotEmpty()) {
+            if (app.amazonHelper.sendPictures(context, entries)) {
                 EventBus.getDefault().post(EventRefreshProjects())
             }
         }
@@ -291,14 +294,14 @@ class DCPing(
         // If any entries do not yet have server-id's, try to get them.
         entries = db.tableEntry.queryServerIds()
         if (entries.isNotEmpty()) {
-            Timber.i("FOUND " + entries.size + " entries needing to be uploaded")
+            Timber.i("FOUND ${entries.size} entries needing to be uploaded")
             sendEntries(entries)
         } else {
             Timber.i("All entries have server ids")
         }
         val vehicles = db.tableVehicle.queryNotUploaded()
         if (vehicles.isNotEmpty()) {
-            Timber.i("FOUND " + vehicles.size + " vehicles needing to be uploaded")
+            Timber.i("FOUND ${vehicles.size} vehicles needing to be uploaded")
             sendVehicles(vehicles)
         } else {
             Timber.i("All vehicles have uploaded")
@@ -313,61 +316,66 @@ class DCPing(
     private fun queryProjects(): Boolean {
         Timber.i("queryProjects()")
         try {
-            val response = post(PROJECTS, true)
+            val response = post(projectsUrl, true)
             if (response == null) {
                 Timber.e("queryProjects(): Unexpected NULL response from server")
                 return false
             }
-            val unprocessed = db.tableProjects.query().toMutableList()
+            val unprocessed = ProjectProcessed(db)
             val obj = parseResult(response)
             val array = obj.getJSONArray("projects")
             for (i in 0 until array.length()) {
                 val ele = array.getJSONObject(i)
-                val server_id = ele.getInt("id")
-                val name = ele.getString("name")
+                val serverId = ele.getInt("id")
+                val rootProject = ele.getString("root_project")
+                val subProject = ele.getString("sub_project")
+                if (rootProject.isNullOrEmpty()) {
+                    TBApplication.ReportError("Got empty root project name from server", DCPing::class.java, "queryProjects()", "server")
+                    continue
+                }
+                if (subProject.isNullOrEmpty()) {
+                    TBApplication.ReportError("Got empty sub project name from server", DCPing::class.java, "queryProjects()", "server")
+                    continue
+                }
                 val disabled = ele.getBoolean("disabled")
-                val project = db.tableProjects.queryByServerId(server_id)
+                val project = db.tableProjects.queryByServerId(serverId)
                 if (project == null) {
-                    if (TextUtils.isEmpty(name)) {
-                        TBApplication.ReportError("Got empty project name from server", DCPing::class.java, "queryProjects()", "server")
-                    } else if (unprocessed.contains(name)) {
+                    if (unprocessed.contains(rootProject, subProject)) {
                         // If this name already exists, convert the existing one by simply giving it the server_id.
-                        val existing = db.tableProjects.queryByName(name)
-                        existing!!.serverId = server_id
+                        val existing = db.tableProjects.queryByName(rootProject, subProject)
+                        existing!!.serverId = serverId
                         existing.isBootStrap = false
                         existing.disabled = disabled
                         db.tableProjects.update(existing)
-                        Timber.i("Commandeer local: $name")
+
+                        unprocessed.delete(rootProject, subProject)
                     } else {
                         // Otherwise just add the new project.
-                        Timber.i("New project: $name")
-                        db.tableProjects.add(name, server_id, disabled)
+                        db.tableProjects.add(rootProject, subProject, serverId, disabled)
                     }
                 } else {
                     // Name change?
-                    if (name != project.name) {
-                        Timber.i("New name: $name")
-                        project.name = name
-                        project.disabled = disabled
-                        db.tableProjects.update(project)
-                    } else if (project.disabled != disabled) {
-                        Timber.i("Project " + name + " " + if (disabled) "disabled" else "enabled")
-                        project.disabled = disabled
-                        db.tableProjects.update(project)
-                    } else {
-                        Timber.i("No change: $name")
+                    when {
+                        subProject != project.name || rootProject != project.rootProject -> {
+                            Timber.i("New name. Root: $rootProject Sub: $subProject")
+                            unprocessed.delete(project.name, project.rootProject)
+
+                            project.name = subProject
+                            project.rootProject = rootProject
+                            project.disabled = disabled
+                            db.tableProjects.update(project)
+                        }
+                        project.disabled != disabled -> {
+                            Timber.i("Disable flag change. Root: $rootProject Sub: $subProject Disabled now: $disabled")
+                            project.disabled = disabled
+                            db.tableProjects.update(project)
+                        }
+                        else -> Timber.i("No change to project: $rootProject - $subProject")
                     }
                 }
-                unprocessed.remove(name)
             }
             // Remaining unprocessed elements are disabled if they have entries.
-            for (name in unprocessed) {
-                val existing = db.tableProjects.queryByName(name)
-                if (existing != null) {
-                    Timber.i("Project disable or delete: $name")
-                    db.tableProjects.removeOrDisable(existing)
-                }
-            }
+            unprocessed.disableRemaining()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryProjects()", "server")
             return false
@@ -375,17 +383,16 @@ class DCPing(
         return true
     }
 
+
     private fun queryCompanies(): Boolean {
         val unprocessed = db.tableAddress.query().toMutableList()
         val numPages = queryCompanies(0, unprocessed)
         if (numPages == 0) {
             return false
         }
-        if (numPages > 1) {
-            for (page in 1..numPages - 1) {
-                if (queryCompanies(page, unprocessed) == 0) {
-                    return false
-                }
+        for (page in 1 until numPages) {
+            if (queryCompanies(page, unprocessed) == 0) {
+                return false
             }
         }
         // Remaining unprocessed elements are disabled if they have entries.
@@ -397,9 +404,9 @@ class DCPing(
 
     private fun queryCompanies(page: Int, unprocessed: MutableList<DataAddress>): Int {
         Timber.i("queryCompanies()")
-        var numPages: Int
+        val numPages: Int
         try {
-            val response = post(COMPANIES, page, COMPANY_PAGE_SIZE, true) ?: return 0
+            val response = post(companiesUrl, page, COMPANY_PAGE_SIZE, true) ?: return 0
             val obj = parseResult(response)
             numPages = obj.getInt("numPages")
             val array = obj.getJSONArray("companies")
@@ -410,7 +417,7 @@ class DCPing(
             var zipcode: String?
             for (i in 0 until array.length()) {
                 val ele = array.getJSONObject(i)
-                val server_id = ele.getInt("id")
+                val serverId = ele.getInt("id")
                 name = ele.getString("name")
                 if (name.isBlank()) {
                     TBApplication.ReportError("Got empty company name", DCPing::class.java, "queryCompanies()", "server")
@@ -421,7 +428,7 @@ class DCPing(
                     city = ele.getString("city")
                     state = ele.getString("state")
                 } else {
-                    TBApplication.ReportError("Missing street, city, or state for company $name, server id $server_id", DCPing::class.java, "queryCompanies()", "server")
+                    TBApplication.ReportError("Missing street, city, or state for company $name, server id $serverId", DCPing::class.java, "queryCompanies()", "server")
                     continue
                 }
                 if (ele.has("zipcode")) {
@@ -429,22 +436,22 @@ class DCPing(
                 } else {
                     zipcode = null
                 }
-                val incoming = DataAddress(server_id, name, street, city, state, zipcode)
-                val item = db.tableAddress.queryByServerId(server_id)
+                val incoming = DataAddress(serverId, name, street, city, state, zipcode)
+                val item = db.tableAddress.queryByServerId(serverId)
                 if (item == null) {
                     val match = get(unprocessed, incoming)
                     if (match != null) {
                         // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
-                        match.serverId = server_id
+                        match.serverId = serverId
                         match.isLocal = false
                         match.isBootStrap = false
                         db.tableAddress.update(match)
-                        Timber.i("Commandeer local: " + match.toString())
+                        Timber.i("Commandeer local: $match")
                         unprocessed.remove(match)
                     } else {
                         // Otherwise just add the new tableEntry.
                         db.tableAddress.add(incoming)
-                        Timber.i("New company: " + incoming.toString())
+                        Timber.i("New company: $incoming")
                     }
                 } else {
                     // Change of name, street, city or state?
@@ -452,10 +459,10 @@ class DCPing(
                         incoming.id = item.id
                         incoming.serverId = item.serverId
                         incoming.isLocal = false
-                        Timber.i("Change: " + incoming.toString())
+                        Timber.i("Change: $incoming")
                         db.tableAddress.update(incoming)
                     } else {
-                        Timber.i("No change: " + incoming.toString())
+                        Timber.i("No change: $incoming")
                     }
                     unprocessed.remove(item)
                 }
@@ -481,22 +488,22 @@ class DCPing(
         val showDebug = BuildConfig.DEBUG
         Timber.i("queryEquipments()")
         try {
-            val response = post(EQUIPMENTS, true) ?: return false
+            val response = post(equipmentsUrl, true) ?: return false
             val blob = parseResult(response)
             run {
                 val unprocessed = db.tableEquipment.query().toMutableList()
                 val array = blob.getJSONArray("equipments")
                 for (i in 0 until array.length()) {
                     val ele = array.getJSONObject(i)
-                    val server_id = ele.getInt("id")
+                    val serverId = ele.getInt("id")
                     val name = ele.getString("name")
-                    val incoming = DataEquipment(name, server_id)
-                    val item = db.tableEquipment.queryByServerId(server_id)
+                    val incoming = DataEquipment(name, serverId)
+                    val item = db.tableEquipment.queryByServerId(serverId)
                     if (item == null) {
                         val match = get(unprocessed, incoming)
                         if (match != null) {
                             // If this name already exists, convert the existing one by simply giving it the server_id.
-                            match.serverId = server_id.toLong()
+                            match.serverId = serverId.toLong()
                             match.isBootStrap = false
                             match.isLocal = false
                             db.tableEquipment.update(match)
@@ -509,7 +516,7 @@ class DCPing(
                         }
                     } else {
                         // Change of name
-                        if (!incoming.equals(item)) {
+                        if (incoming != item) {
                             Timber.i("Change: $name")
                             incoming.id = item.id
                             incoming.serverId = item.serverId
@@ -531,23 +538,23 @@ class DCPing(
                 val array = blob.getJSONArray("project_equipment")
                 for (i in 0 until array.length()) {
                     val ele = array.getJSONObject(i)
-                    val server_id = ele.getInt("id")
-                    val server_project_id = ele.getInt("project_id")
-                    val server_equipment_id = ele.getInt("equipment_id")
+                    val serverId = ele.getInt("id")
+                    val serverProjectId = ele.getInt("project_id")
+                    val serverEquipmentId = ele.getInt("equipment_id")
                     val incoming = DataCollectionItem()
-                    incoming.server_id = server_id
+                    incoming.server_id = serverId
                     // Note: project ID is from the perspective of the server, not the APP.
-                    val project = db.tableProjects.queryByServerId(server_project_id)
-                    val equipment = db.tableEquipment.queryByServerId(server_equipment_id)
+                    val project = db.tableProjects.queryByServerId(serverProjectId)
+                    val equipment = db.tableEquipment.queryByServerId(serverEquipmentId)
                     if (project == null || equipment == null) {
                         if (project == null && equipment == null) {
-                            Timber.e("Can't find any project with server ID $server_project_id nor equipment ID $server_equipment_id")
+                            Timber.e("Can't find any project with server ID $serverProjectId nor equipment ID $serverEquipmentId")
                             prefHelper.reloadProjects()
                             prefHelper.reloadEquipments()
                         } else if (project == null) {
                             val sbuf = StringBuilder()
                             sbuf.append("Can't find any project with server ID ")
-                            sbuf.append(server_project_id)
+                            sbuf.append(serverProjectId)
                             sbuf.append(" for tableEquipment ")
                             sbuf.append(equipment!!.name)
                             sbuf.append(". Projects=")
@@ -559,19 +566,19 @@ class DCPing(
                             Timber.e(sbuf.toString())
                             prefHelper.reloadProjects()
                         } else {
-                            Timber.e("Can't find any equipment with server ID " + server_equipment_id + " for project " + project.name)
+                            Timber.e("Can't find any equipment with server ID $serverEquipmentId for project ${project.name}")
                             prefHelper.reloadEquipments()
                         }
                         continue
                     }
                     incoming.collection_id = project.id
                     incoming.value_id = equipment.id
-                    val item = db.tableCollectionEquipmentProject.queryByServerId(server_id)
+                    val item = db.tableCollectionEquipmentProject.queryByServerId(serverId)
                     if (item == null) {
                         val match = get(unprocessed, incoming)
                         if (match != null) {
                             // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
-                            match.server_id = server_id
+                            match.server_id = serverId
                             match.isBootstrap = false
                             db.tableCollectionEquipmentProject.update(match)
                             if (showDebug) {
@@ -591,7 +598,7 @@ class DCPing(
                         }
                     } else {
                         // Change of IDs. A little weird, but we will allow it.
-                        if (!incoming.equals(item)) {
+                        if (incoming != item) {
                             if (showDebug) {
                                 val projectName = db.tableProjects.queryProjectName(item.collection_id)
                                 val equipmentName = db.tableEquipment.queryEquipmentName(item.value_id)
@@ -633,7 +640,7 @@ class DCPing(
 
     private operator fun get(items: List<DataEquipment>, match: DataEquipment): DataEquipment? {
         for (item in items) {
-            if (item.equals(match)) {
+            if (item == match) {
                 return item
             }
         }
@@ -642,7 +649,7 @@ class DCPing(
 
     private operator fun get(items: List<DataCollectionItem>, match: DataCollectionItem): DataCollectionItem? {
         for (item in items) {
-            if (item.equals(match)) {
+            if (item == match) {
                 return item
             }
         }
@@ -652,33 +659,33 @@ class DCPing(
     private fun queryNotes(): Boolean {
         Timber.i("queryNotes()")
         try {
-            val response = post(NOTES, true) ?: return false
+            val response = post(notesUrl, true) ?: return false
             val obj = parseResult(response)
             run {
                 val unprocessed = db.tableNote.query().toMutableList()
                 val array = obj.getJSONArray("notes")
                 for (i in 0 until array.length()) {
                     val ele = array.getJSONObject(i)
-                    val server_id = ele.getInt("id")
+                    val serverId = ele.getInt("id")
                     val name = ele.getString("name")
                     val typeStr = ele.getString("type")
-                    val num_digits = ele.getInt("num_digits").toShort()
+                    val numDigits = ele.getInt("num_digits").toShort()
                     val type = DataNote.Type.from(typeStr)
-                    val incoming = DataNote(name, type, num_digits, server_id)
-                    val item = db.tableNote.queryByServerId(server_id)
+                    val incoming = DataNote(name, type, numDigits, serverId)
+                    val item = db.tableNote.queryByServerId(serverId)
                     if (item == null) {
                         val match = get(unprocessed, incoming)
                         if (match != null) {
                             // If this name already exists, convert the existing one by simply giving it the server_id.
-                            match.serverId = server_id
-                            match.num_digits = num_digits
+                            match.serverId = serverId
+                            match.num_digits = numDigits
                             db.tableNote.update(match)
-                            Timber.i("Commandeer local: " + match.toString())
+                            Timber.i("Commandeer local: $match")
                             unprocessed.remove(match)
                         } else {
                             // Otherwise just add the new tableEntry.
                             db.tableNote.add(incoming)
-                            Timber.i("New note: " + incoming.toString())
+                            Timber.i("New note: $incoming")
                         }
                     } else {
                         // Change of name, type and/or num_digits
@@ -686,9 +693,9 @@ class DCPing(
                             incoming.id = item.id
                             incoming.serverId = item.serverId
                             db.tableNote.update(incoming)
-                            Timber.i("Change: " + incoming.toString())
+                            Timber.i("Change: $incoming")
                         } else {
-                            Timber.i("No change: " + item.toString())
+                            Timber.i("No change: $item")
                         }
                         unprocessed.remove(item)
                     }
@@ -703,38 +710,38 @@ class DCPing(
                 val array = obj.getJSONArray("project_note")
                 for (i in 0 until array.length()) {
                     val ele = array.getJSONObject(i)
-                    val server_id = ele.getInt("id")
-                    val server_project_id = ele.getInt("project_id")
-                    val server_note_id = ele.getInt("note_id")
+                    val serverId = ele.getInt("id")
+                    val serverProjectId = ele.getInt("project_id")
+                    val serverNoteId = ele.getInt("note_id")
                     val incoming = DataCollectionItem()
-                    incoming.server_id = server_id
+                    incoming.server_id = serverId
                     // Note: project ID is from the perspective of the server, not the APP.
-                    val project = db.tableProjects.queryByServerId(server_project_id) ?: continue
+                    val project = db.tableProjects.queryByServerId(serverProjectId) ?: continue
                     incoming.collection_id = project.id
-                    val note = db.tableNote.queryByServerId(server_note_id)
+                    val note = db.tableNote.queryByServerId(serverNoteId)
                     if (note == null) {
-                        Timber.e("queryNotes(): Can't find picture_note with ID $server_note_id")
+                        Timber.e("queryNotes(): Can't find picture_note with ID $serverNoteId")
                         continue
                     }
                     incoming.value_id = note.id
-                    val item = db.tableCollectionNoteProject.queryByServerId(server_id)
+                    val item = db.tableCollectionNoteProject.queryByServerId(serverId)
                     if (item == null) {
                         val match = get(unprocessed, incoming)
                         if (match != null) {
                             // If this name already existsUnscaled, convert the existing one by simply giving it the server_id.
-                            match.server_id = server_id
+                            match.server_id = serverId
                             db.tableCollectionNoteProject.update(match)
-                            Timber.i("Commandeer local: NOTE COLLECTION " + match.collection_id + ", " + match.value_id)
+                            Timber.i("Commandeer local: NOTE COLLECTION ${match.collection_id}, ${match.value_id}")
                             unprocessed.remove(match)
                         } else {
                             // Otherwise just add the new tableEntry.
-                            Timber.i("New picture_note collection. " + incoming.collection_id + ", " + incoming.value_id)
+                            Timber.i("New picture_note collection. ${incoming.collection_id}, ${incoming.value_id}")
                             db.tableCollectionNoteProject.add(incoming)
                         }
                     } else {
                         // Change of IDs. A little weird, but we will allow it.
-                        if (!incoming.equals(item)) {
-                            Timber.i("Change? " + item.collection_id + ", " + item.value_id)
+                        if (incoming != item) {
+                            Timber.i("Change? ${item.collection_id}, ${item.value_id}")
                             incoming.id = item.id
                             incoming.server_id = item.server_id
                             db.tableCollectionNoteProject.update(incoming)
@@ -752,108 +759,106 @@ class DCPing(
         return true
     }
 
-    private fun queryTrucks(): Boolean {
-        val unprocessed = db.tableTruck.query().toMutableList()
-        val numPages = queryTrucks(0, unprocessed)
-        if (numPages == 0) {
-            return false
-        }
-        if (numPages > 1) {
-            for (page in 1..numPages - 1) {
-                if (queryTrucks(page, unprocessed) == 0) {
-                    return false
-                }
-            }
-        }
-        // Remove or disable unprocessed elements
-        for (truck in unprocessed) {
-            db.tableTruck.removeIfUnused(truck)
-        }
-        return true
-    }
+//    private fun queryTrucks(): Boolean {
+//        val unprocessed = db.tableTruck.query().toMutableList()
+//        val numPages = queryTrucks(0, unprocessed)
+//        if (numPages == 0) {
+//            return false
+//        }
+//        for (page in 1 until numPages) {
+//            if (queryTrucks(page, unprocessed) == 0) {
+//                return false
+//            }
+//        }
+//        // Remove or disable unprocessed elements
+//        for (truck in unprocessed) {
+//            db.tableTruck.removeIfUnused(truck)
+//        }
+//        return true
+//    }
 
-    private fun queryTrucks(page: Int, unprocessed: MutableList<DataTruck>): Int {
-        Timber.i("queryTrucks()")
-        val numPages: Int
-        try {
-            val response = post(TRUCKS, page, TRUCK_PAGE_SIZE, true) ?: return 0
-            val obj = parseResult(response)
-            run {
-                val array = obj.getJSONArray("trucks")
-                numPages = obj.getInt("numPages")
-                for (i in 0 until array.length()) {
-                    val ele = array.getJSONObject(i)
-                    val incoming = DataTruck()
-                    incoming.serverId = ele.getLong("id")
-                    if (ele.has("truck_number_string")) {
-                        incoming.truckNumber = ele.getString("truck_number_string")
-                    } else if (ele.has("truck_number")) {
-                        incoming.truckNumber = Integer.toString(ele.getInt("truck_number"))
-                    }
-                    if (ele.has("license_plate")) {
-                        incoming.licensePlateNumber = ele.getString("license_plate")
-                    }
-                    if (ele.has("project_id")) {
-                        val project_server_id = ele.getInt("project_id")
-                        val project = db.tableProjects.queryByServerId(project_server_id)
-                        if (project == null) {
-                            Timber.e("Can't find any project with server ID " + project_server_id + " for truck number " + incoming.truckNumber)
-                        } else {
-                            incoming.projectNameId = project.id
-                        }
-                    }
-                    if (ele.has("company_name")) {
-                        incoming.companyName = ele.getString("company_name")
-                    }
-                    if (ele.has("has_entries")) {
-                        incoming.hasEntry = ele.getBoolean("has_entries")
-                    }
-                    val item = db.tableTruck.queryByServerId(incoming.serverId)
-                    if (item == null) {
-                        val match = get(unprocessed, incoming)
-                        if (match != null) {
-                            incoming.id = match.id
-                            db.tableTruck.save(incoming)
-                            Timber.i("Commandeer local truck: " + incoming.toLongString(db))
-                            unprocessed.removeAll { it.id == match.id }
-                        } else {
-                            // Otherwise just add the new truck.
-                            Timber.i("New truck: " + incoming.toLongString(db))
-                            db.tableTruck.save(incoming)
-                        }
-                    } else {
-                        // Change of data
-                        if (!incoming.equals(item)) {
-                            Timber.i("Change: [" + incoming.toLongString(db) + "] from [" + item.toLongString(db) + "]")
-                            incoming.id = item.id
-                            db.tableTruck.save(incoming)
-                        } else {
-                            Timber.i("No change: " + item.toLongString(db))
-                        }
-                        unprocessed.removeAll { it.id == item.id }
-                    }
-                }
-            }
-        } catch (ex: Exception) {
-            TBApplication.ReportError(ex, DCPing::class.java, "queryTrucks()", "server")
-            return 0
-        }
-        return numPages
-    }
+//    private fun queryTrucks(page: Int, unprocessed: MutableList<DataTruck>): Int {
+//        Timber.i("queryTrucks()")
+//        val numPages: Int
+//        try {
+//            val response = post(trucksUrl, page, TRUCK_PAGE_SIZE, true) ?: return 0
+//            val obj = parseResult(response)
+//            run {
+//                val array = obj.getJSONArray("trucks")
+//                numPages = obj.getInt("numPages")
+//                for (i in 0 until array.length()) {
+//                    val ele = array.getJSONObject(i)
+//                    val incoming = DataTruck()
+//                    incoming.serverId = ele.getLong("id")
+//                    if (ele.has("truck_number_string")) {
+//                        incoming.truckNumber = ele.getString("truck_number_string")
+//                    } else if (ele.has("truck_number")) {
+//                        incoming.truckNumber = Integer.toString(ele.getInt("truck_number"))
+//                    }
+//                    if (ele.has("license_plate")) {
+//                        incoming.licensePlateNumber = ele.getString("license_plate")
+//                    }
+//                    if (ele.has("project_id")) {
+//                        val projectServerId = ele.getInt("project_id")
+//                        val project = db.tableProjects.queryByServerId(projectServerId)
+//                        if (project == null) {
+//                            Timber.e("Can't find any project with server ID $projectServerId for truck number ${incoming.truckNumber}")
+//                        } else {
+//                            incoming.projectNameId = project.id
+//                        }
+//                    }
+//                    if (ele.has("company_name")) {
+//                        incoming.companyName = ele.getString("company_name")
+//                    }
+//                    if (ele.has("has_entries")) {
+//                        incoming.hasEntry = ele.getBoolean("has_entries")
+//                    }
+//                    val item = db.tableTruck.queryByServerId(incoming.serverId)
+//                    if (item == null) {
+//                        val match = get(unprocessed, incoming)
+//                        if (match != null) {
+//                            incoming.id = match.id
+//                            db.tableTruck.save(incoming)
+//                            Timber.i("Commandeer local truck: ${incoming.toLongString(db)}")
+//                            unprocessed.removeAll { it.id == match.id }
+//                        } else {
+//                            // Otherwise just add the new truck.
+//                            Timber.i("New truck: ${incoming.toLongString(db)}")
+//                            db.tableTruck.save(incoming)
+//                        }
+//                    } else {
+//                        // Change of data
+//                        if (!incoming.equals(item)) {
+//                            Timber.i("Change: [${incoming.toLongString(db)}] from [${item.toLongString(db)}]")
+//                            incoming.id = item.id
+//                            db.tableTruck.save(incoming)
+//                        } else {
+//                            Timber.i("No change: ${item.toLongString(db)}")
+//                        }
+//                        unprocessed.removeAll { it.id == item.id }
+//                    }
+//                }
+//            }
+//        } catch (ex: Exception) {
+//            TBApplication.ReportError(ex, DCPing::class.java, "queryTrucks()", "server")
+//            return 0
+//        }
+//        return numPages
+//    }
 
-    private operator fun get(items: List<DataTruck>, match: DataTruck): DataTruck? {
-        for (item in items) {
-            if (item.equals(match)) {
-                return item
-            }
-        }
-        return null
-    }
+//    private operator fun get(items: List<DataTruck>, match: DataTruck): DataTruck? {
+//        for (item in items) {
+//            if (item.equals(match)) {
+//                return item
+//            }
+//        }
+//        return null
+//    }
 
     private fun queryVehicleNames(): Boolean {
         Timber.i("queryVehicleNames()")
         try {
-            val response = post(VEHICLES, true) ?: return false
+            val response = post(vehiclesUrl, true) ?: return false
             val obj = parseResult(response)
             run {
                 val unprocessed = db.tableVehicleName.query().toMutableList()
@@ -869,21 +874,21 @@ class DCPing(
                         if (match != null) {
                             incoming.id = match.id
                             db.tableVehicleName.save(incoming)
-                            Timber.i("Commandeer local vehicle name: " + incoming.toString())
+                            Timber.i("Commandeer local vehicle name: $incoming")
                             unprocessed.removeAll { it.id == match.id }
                         } else {
                             // Otherwise just add the new vehicle name.
-                            Timber.i("New vehicle name: " + incoming.toString())
+                            Timber.i("New vehicle name: $incoming")
                             db.tableVehicleName.save(incoming)
                         }
                     } else {
                         // Change of data
                         if (incoming != item) {
-                            Timber.i("Change: [" + incoming.toString() + "] from [" + item.toString() + "]")
+                            Timber.i("Change: [$incoming] from [$item]")
                             incoming.id = item.id
                             db.tableVehicleName.save(incoming)
                         } else {
-                            Timber.i("No change: " + item.toString())
+                            Timber.i("No change: $item")
                         }
                         unprocessed.removeAll { it.id == item.id }
                     }
@@ -902,7 +907,7 @@ class DCPing(
 
     private operator fun get(items: List<DataVehicleName>, match: DataVehicleName): DataVehicleName? {
         for (item in items) {
-            if (item.name.equals(match.name)) {
+            if (item.name == match.name) {
                 return item
             }
         }
@@ -928,7 +933,7 @@ class DCPing(
 
     private fun sendEntry(entry: DataEntry): Boolean {
         var success = false
-        Timber.i("sendEntry(" + entry.id + ")")
+        Timber.i("sendEntry(${entry.id})")
         try {
             val jsonObject = JSONObject()
             jsonObject.accumulate("tech_id", prefHelper.techID)
@@ -951,7 +956,7 @@ class DCPing(
                 }
             } else {
                 prefHelper.doErrorCheck = true
-                Timber.e("sendEntry(): Missing truck entry : " + entry.toLongString(db) + " (check error enabled)")
+                Timber.e("sendEntry(): Missing truck entry : ${entry.toLongString(db)} (check error enabled)")
                 return false
             }
             val project = entry.project
@@ -977,8 +982,8 @@ class DCPing(
             if (entry.status != null && entry.status !== TruckStatus.UNKNOWN) {
                 jsonObject.accumulate("status", entry.status!!.toString())
             }
-            val equipments = entry.equipment
-            if (equipments!!.size > 0) {
+            val equipments = entry.equipment ?: emptyList()
+            if (equipments.isNotEmpty()) {
                 val jarray = JSONArray()
                 for (equipment in equipments) {
                     val jobj = JSONObject()
@@ -992,7 +997,7 @@ class DCPing(
                 jsonObject.put("equipment", jarray)
             }
             val pictures = entry.pictures
-            if (pictures.size > 0) {
+            if (pictures.isNotEmpty()) {
                 val jarray = JSONArray()
                 for (picture in pictures) {
                     val jobj = JSONObject()
@@ -1005,7 +1010,7 @@ class DCPing(
                 jsonObject.put("picture", jarray)
             }
             val notes = entry.notesWithValuesOnly
-            if (notes.size > 0) {
+            if (notes.isNotEmpty()) {
                 val jarray = JSONArray()
                 for (note in notes) {
                     val jobj = JSONObject()
@@ -1019,8 +1024,8 @@ class DCPing(
                 }
                 jsonObject.put("notes", jarray)
             }
-            Timber.i("SENDING " + jsonObject.toString())
-            val result = post(ENTER, jsonObject, true)
+            Timber.i("SENDING $jsonObject")
+            val result = post(enterUrl, jsonObject, true)
             if (result != null) {
                 if (TextUtils.isDigitsOnly(result)) {
                     entry.uploadedMaster = true
@@ -1029,7 +1034,7 @@ class DCPing(
                     entry.serverId = Integer.parseInt(result)
                     db.tableEntry.saveUploaded(entry)
                     success = true
-                    Timber.i("SUCCESS, ENTRY SERVER ID is " + entry.serverId)
+                    Timber.i("SUCCESS, ENTRY SERVER ID is ${entry.serverId}")
                 } else {
                     val sbuf = StringBuilder()
                     sbuf.append("While trying to send entry: ")
@@ -1055,7 +1060,7 @@ class DCPing(
     }
 
     private fun sendVehicle(vehicle: DataVehicle) {
-        Timber.i("sendVehicle(" + vehicle.id + ")")
+        Timber.i("sendVehicle(${vehicle.id})")
         try {
             val dateString = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(System.currentTimeMillis()))
             val jsonObject = JSONObject()
@@ -1074,14 +1079,14 @@ class DCPing(
             jsonObject.accumulate("exterior_damage", vehicle.exteriorDamage)
             jsonObject.accumulate("other", vehicle.other)
 
-            Timber.i("SENDING " + jsonObject.toString())
-            val result = post(VEHICLE, jsonObject, true)
+            Timber.i("SENDING $jsonObject")
+            val result = post(vehicleUrl, jsonObject, true)
             if (result != null) {
                 if (TextUtils.isDigitsOnly(result)) {
                     vehicle.uploaded = true
                     vehicle.serverId = result.toLong()
                     db.tableVehicle.saveUploaded(vehicle)
-                    Timber.i("SUCCESS, VEHICLE SERVER ID is " + vehicle.serverId)
+                    Timber.i("SUCCESS, VEHICLE SERVER ID is ${vehicle.serverId}")
                 } else {
                     val sbuf = StringBuilder()
                     sbuf.append("While trying to send vehicle: ")
@@ -1100,7 +1105,7 @@ class DCPing(
     private fun queryStrings() {
         Timber.i("queryStrings()")
         try {
-            val response = post(STRINGS, true) ?: return
+            val response = post(stringsUrl, true) ?: return
             val obj = parseResult(response)
             val array = obj.getJSONArray("strings")
             for (i in 0 until array.length()) {
@@ -1113,12 +1118,12 @@ class DCPing(
                     db.tableString.save(incoming)
                 } else {
                     // Change of data
-                    if (!incoming.equals(item)) {
-                        Timber.i("Change: [" + incoming.toString() + "] from [" + item.toString() + "]")
+                    if (incoming != item) {
+                        Timber.i("Change: [$incoming] from [$item")
                         incoming.id = item.id
                         db.tableString.save(incoming)
                     } else {
-                        Timber.i("No change: " + item.toString())
+                        Timber.i("No change: $item")
                     }
                 }
             }
@@ -1220,7 +1225,7 @@ class DCPing(
             jsonObject.accumulate("message", line.message)
             jsonObject.accumulate("trace", line.trace)
             jsonObject.accumulate("app_version", line.version)
-            val result = post(MESSAGE, jsonObject, false)
+            val result = post(messageUrl, jsonObject, false)
             if (result != null && Integer.parseInt(result) == 0) {
                 db.tableCrash.delete(line)
             } else {
@@ -1230,5 +1235,44 @@ class DCPing(
             Log.e(TAG, "Exception: " + ex.message)
         }
     }
+
+    // region support classes
+
+    private inner class ProjectProcessed(private val db: DatabaseTable) {
+
+        val unprocessed = db.tableProjects.query().toMutableList()
+
+        fun contains(rootName: String, subProject: String): Boolean {
+            return find(rootName, subProject) != null
+        }
+
+        fun delete(rootName: String?, subProject: String?) {
+            if (rootName != null && subProject != null) {
+                val ele = find(rootName, subProject)
+                if (ele != null) {
+                    unprocessed.remove(ele)
+                }
+            }
+        }
+
+        fun disableRemaining() {
+            Timber.i("MYDEBUG Disable remaining")
+            for (project in unprocessed) {
+                Timber.i("Project disable or delete: ${project.dashName}")
+                db.tableProjects.removeOrDisable(project)
+                prefHelper.clearCurProjectIfMatching(project.rootProject, project.subProject)
+            }
+        }
+
+        private fun find(rootName: String, subProject: String): DataProject? {
+            for (ele in unprocessed) {
+                if (ele.name == subProject && ele.rootProject == rootName) {
+                    return ele
+                }
+            }
+            return null
+        }
+    }
+    // endregion support classes
 
 }

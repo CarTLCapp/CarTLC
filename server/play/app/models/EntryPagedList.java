@@ -11,13 +11,15 @@ import play.db.ebean.*;
 import play.Logger;
 
 import play.twirl.api.Html;
+import views.formdata.InputSearch;
 
 public class EntryPagedList {
 
     public enum PagedSortBy {
         TECH("tech", "te.last_name"),
+        DATE("date", "e.entry_time"),
         TIME("time", "e.entry_time"),
-        PROJECT_ID("project", "p.name"),
+        SUB_PROJECT_ID("sub_project", "p.name"),
         TRUCK_NUMBER("truck", "tr.truck_number"),
         COMPANY_NAME("company", "c.name"),
         STREET("street", "c.street"),
@@ -324,7 +326,7 @@ public class EntryPagedList {
         return "";
     }
 
-    String buildQuery(boolean useLimit) {
+    private String buildQuery(boolean useLimit) {
         StringBuilder query = new StringBuilder();
 
         query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
@@ -335,7 +337,7 @@ public class EntryPagedList {
 
         switch (mParams.mSortBy) {
             case TECH:
-            case PROJECT_ID:
+            case SUB_PROJECT_ID:
             case TRUCK_NUMBER:
             case COMPANY_NAME:
             case STREET:
@@ -355,7 +357,7 @@ public class EntryPagedList {
             case TECH:
                 query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
                 break;
-            case PROJECT_ID:
+            case SUB_PROJECT_ID:
                 query.append(" INNER JOIN project AS p ON e.project_id = p.id");
                 break;
             case TRUCK_NUMBER:
@@ -411,7 +413,6 @@ public class EntryPagedList {
         }
         return query.toString();
     }
-
 
     private String getWhereSearch() {
         StringBuilder query = new StringBuilder();
@@ -598,7 +599,7 @@ public class EntryPagedList {
         return mResult.mNumTotalRows;
     }
 
-    Entry parseEntry(SqlRow row) {
+    private Entry parseEntry(SqlRow row) {
         Entry entry = new Entry();
         entry.id = row.getLong("id");
         entry.tech_id = row.getInteger("tech_id");
@@ -616,7 +617,7 @@ public class EntryPagedList {
         return entry;
     }
 
-    boolean hasEquipmentMatch(List<Entry> entries) {
+    private boolean hasEquipmentMatch(List<Entry> entries) {
         for (Entry entry : entries) {
             String line = entry.getEquipmentLine();
             if (mSearch.hasMatch(line)) {

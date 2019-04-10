@@ -22,9 +22,10 @@ class DCService : IntentService(SERVER_NAME) {
     private lateinit var mPing: DCPing
     private lateinit var mZip: DCZip
 
-    @Inject
-    lateinit var repo: CarRepository
+    private lateinit var app: TBApplication
 
+    private val repo: CarRepository
+        get() = app.repo
     private val db: DatabaseTable
         get() = repo.db
     private val prefHelper: PrefHelper
@@ -35,10 +36,7 @@ class DCService : IntentService(SERVER_NAME) {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        val app = applicationContext as TBApplication
-
-        app.carRepoComponent.inject(this)
-
+        app = applicationContext as TBApplication
         mPing = DCPing(this, repo)
         mZip = DCZip(db)
         ServerHelper.Init(this)

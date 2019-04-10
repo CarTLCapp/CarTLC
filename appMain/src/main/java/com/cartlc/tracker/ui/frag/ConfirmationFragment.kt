@@ -11,12 +11,12 @@ import com.cartlc.tracker.databinding.FragConfirmationBinding
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.ui.base.BaseFragment
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.NoteListAdapter
 import com.cartlc.tracker.ui.list.PictureThumbnailListAdapter
 import com.cartlc.tracker.ui.list.SimpleListAdapter
 import com.cartlc.tracker.viewmodel.frag.ConfirmationViewModel
-import javax.inject.Inject
 
 class ConfirmationFragment : BaseFragment() {
 
@@ -28,16 +28,13 @@ class ConfirmationFragment : BaseFragment() {
     val vm: ConfirmationViewModel
         get() = baseVM as ConfirmationViewModel
 
-    private val app: TBApplication
-        get() = activity!!.applicationContext as TBApplication
-
-    @Inject
-    lateinit var repo: CarRepository
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragConfirmationBinding.inflate(layoutInflater, container, false)
-        app.carRepoComponent.inject(this)
-        baseVM = ConfirmationViewModel(repo)
+        val componentRoot = app.componentRoot
+        baseVM = ConfirmationViewModel(
+                boundFrag,
+                componentRoot.messageHandler
+        )
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
 
@@ -67,7 +64,7 @@ class ConfirmationFragment : BaseFragment() {
         val truckNumberValue = binding.truckNumberValue
         val statusValue = binding.statusValue
         val picturesLabel = binding.confirmPicturesLabel
-        projectNameValue.text = entry.projectName
+        projectNameValue.text = entry.projectDashName
         val address = entry.addressBlock
         if (address.isNullOrBlank()) {
             projectAddressValue.visibility = View.GONE

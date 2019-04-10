@@ -55,14 +55,17 @@ public class ClientProjectAssociation extends Model {
         return list;
     }
 
-    public static List<String> findProjectNames(long client_id) {
+    public static List<String> findRootProjectNames(long client_id) {
         List<Project> projects = findProjects(client_id);
         ArrayList<String> names = new ArrayList<String>();
         for (Project project : projects) {
-            names.add(project.name);
+            String name = project.getRootProjectName();
+            if (!names.contains(name)) {
+                names.add(name);
+            }
         }
         if (names.size() == 0) {
-            return Project.listNames();
+            return RootProject.listNames();
         }
         return names;
     }

@@ -8,7 +8,7 @@ import com.cartlc.tracker.viewmodel.frag.TitleViewModel
 import com.cartlc.tracker.databinding.FragTitleBinding
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.ui.app.TBApplication
-import javax.inject.Inject
+import com.cartlc.tracker.ui.base.BaseFragment
 
 class TitleFragment: BaseFragment() {
 
@@ -17,16 +17,10 @@ class TitleFragment: BaseFragment() {
     val vm: TitleViewModel
         get() = baseVM as TitleViewModel
 
-    private val app: TBApplication
-        get() = activity!!.applicationContext as TBApplication
-
-    @Inject
-    lateinit var repo: CarRepository
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragTitleBinding.inflate(layoutInflater, container, false)
-        app.carRepoComponent.inject(this)
-        baseVM = TitleViewModel(repo)
+        val componentRoot = app.componentRoot
+        baseVM = TitleViewModel(boundFrag)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
         binding.mainTitleSeparator.visibility = View.GONE

@@ -114,6 +114,7 @@ open class PictureListAdapter(
                     loading?.setText(R.string.error_while_loading_picture)
                     picture?.setImageResource(android.R.color.transparent)
 
+                    // TODO: Need to get rid of adjustViewBounds since I am getting way too many errors!
                     mHandler.sendEmptyMessageDelayed(MSG_DECREASE_SIZE, DELAY_DECREASE_SIZE.toLong())
                 }
                 val pictureFile: File?

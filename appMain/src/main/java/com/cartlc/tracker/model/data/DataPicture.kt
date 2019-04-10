@@ -3,7 +3,7 @@
  */
 package com.cartlc.tracker.model.data
 
-import com.cartlc.tracker.ui.util.BitmapHelper
+import com.cartlc.tracker.ui.util.helper.BitmapHelper
 
 import java.io.File
 

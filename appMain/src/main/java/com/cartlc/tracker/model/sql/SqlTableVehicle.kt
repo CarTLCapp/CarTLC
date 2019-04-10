@@ -25,22 +25,22 @@ open class SqlTableVehicle(
 
     companion object {
 
-        private val TABLE_NAME = "table_vehicle"
+        private const val TABLE_NAME = "table_vehicle"
 
-        private val KEY_ROWID = "_id"
-        private val KEY_SERVER_ID = "server_id"
-        private val KEY_INSPECTING = "inspecting"
-        private val KEY_TYPE_OF_INSPECTION = "type_of_inspection"
-        private val KEY_MILEAGE = "mileage"
-        private val KEY_HEAD_LIGHTS = "head_lights"
-        private val KEY_TAIL_LIGHTS = "tail_lights"
-        private val KEY_EXTERIOR_LIGHTS = "exterior_lights"
-        private val KEY_FLUID_CHECKS = "fluid_checks"
-        private val KEY_FLUID_PROBLEMS_DETECTED = "fluid_problems_detected"
-        private val KEY_TIRE_INSPECTION = "tire_inspection"
-        private val KEY_EXTERIOR_DAMAGE = "exterior_damage"
-        private val KEY_OTHER = "other"
-        private val KEY_UPLOADED = "uploaded"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_SERVER_ID = "server_id"
+        private const val KEY_INSPECTING = "inspecting"
+        private const val KEY_TYPE_OF_INSPECTION = "type_of_inspection"
+        private const val KEY_MILEAGE = "mileage"
+        private const val KEY_HEAD_LIGHTS = "head_lights"
+        private const val KEY_TAIL_LIGHTS = "tail_lights"
+        private const val KEY_EXTERIOR_LIGHTS = "exterior_lights"
+        private const val KEY_FLUID_CHECKS = "fluid_checks"
+        private const val KEY_FLUID_PROBLEMS_DETECTED = "fluid_problems_detected"
+        private const val KEY_TIRE_INSPECTION = "tire_inspection"
+        private const val KEY_EXTERIOR_DAMAGE = "exterior_damage"
+        private const val KEY_OTHER = "other"
+        private const val KEY_UPLOADED = "uploaded"
     }
 
     fun create() {

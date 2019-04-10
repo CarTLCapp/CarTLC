@@ -24,12 +24,12 @@ class SqlTableCollectionNoteEntry(
 ): TableCollectionNoteEntry {
 
     companion object {
-        internal val TABLE_NAME = "note_entry_collection"
+        internal const val TABLE_NAME = "note_entry_collection"
 
-        internal val KEY_ROWID = "_id"
-        internal val KEY_COLLECTION_ID = "collection_id"
-        internal val KEY_NOTE_ID = "note_id"
-        internal val KEY_VALUE = "value"
+        internal const val KEY_ROWID = "_id"
+        internal const val KEY_COLLECTION_ID = "collection_id"
+        internal const val KEY_NOTE_ID = "note_id"
+        internal const val KEY_VALUE = "value"
     }
 
     fun create() {

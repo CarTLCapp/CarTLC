@@ -94,9 +94,8 @@
                         android:background="@drawable/background_shadow"
                         android:focusable="true" />
 
-                    <fragment
+                    <com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleView
                         android:id="@+id/stage2_entry"
-                        android:name="com.cartlc.tracker.ui.frag.EntrySimpleFragment"
                         android:layout_gravity="center_horizontal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -164,9 +163,8 @@
                             app:layout_constraintRight_toRightOf="parent"
                             app:layout_constraintTop_toTopOf="@id/stage345_list" />
 
-                        <fragment
+                        <com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleView
                             android:id="@+id/stage345_entry_simple"
-                            android:name="com.cartlc.tracker.ui.frag.EntrySimpleFragment"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             app:layout_constraintTop_toBottomOf="@id/stage345_list"

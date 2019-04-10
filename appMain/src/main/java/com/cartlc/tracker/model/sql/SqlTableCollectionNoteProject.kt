@@ -23,28 +23,28 @@ class SqlTableCollectionNoteProject(
 ) : SqlTableCollection(sqlDb, TABLE_NAME), TableCollectionNoteProject {
 
     companion object {
-        internal val TABLE_NAME = "note_project_collection"
+        internal const val TABLE_NAME = "note_project_collection"
     }
 
-    fun addByName(projectName: String, notes: List<DataNote>) {
-        var projectNameId = db.tableProjects.queryProjectName(projectName)
-        if (projectNameId < 0) {
-            projectNameId = db.tableProjects.addTest(projectName)
-        }
-        addByNameTest(projectNameId, notes)
-    }
+//    fun addByName(projectName: String, notes: List<DataNote>) {
+//        var projectNameId = db.tableProjects.queryProjectName(projectName)
+//        if (projectNameId < 0) {
+//            projectNameId = db.tableProjects.addTest(projectName)
+//        }
+//        addByNameTest(projectNameId, notes)
+//    }
 
-    internal fun addByNameTest(projectNameId: Long, notes: List<DataNote>) {
-        val list = ArrayList<Long>()
-        for (note in notes) {
-            var id = db.tableNote.query(note.name)
-            if (id < 0) {
-                id = db.tableNote.add(note)
-            }
-            list.add(id)
-        }
-        addTest(projectNameId, list)
-    }
+//    internal fun addByNameTest(projectNameId: Long, notes: List<DataNote>) {
+//        val list = ArrayList<Long>()
+//        for (note in notes) {
+//            var id = db.tableNote.query(note.name)
+//            if (id < 0) {
+//                id = db.tableNote.add(note)
+//            }
+//            list.add(id)
+//        }
+//        addTest(projectNameId, list)
+//    }
 
     // Get the list of notes associated with the project.
     override fun getNotes(projectNameId: Long): List<DataNote> {
@@ -64,7 +64,7 @@ class SqlTableCollectionNoteProject(
     override fun removeIfGone(item: DataCollectionItem) {
         if (item.isBootstrap) {
             if (db.tableNote.query(item.value_id) == null) {
-                Timber.i("remove(" + item.id + ", " + item.toString() + ")")
+                Timber.i("remove(${item.id}, $item)")
                 remove(item.id)
             }
         }

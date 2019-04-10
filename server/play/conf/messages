@@ -1,7 +1,8 @@
 # Messages
 
 technicians.list.title={0,choice,0#No technicians|1#One technician|1<{0,number,integer} technicians} found
-project.list.title={0,choice,0#No projects|1#One project|1<{0,number,integer} projects} found
+project.list.title={0,choice,0#No sub sub projects|1#One project|1<{0,number,integer} sub projects} found
+root_project.list.title={0,choice,0#No root projects|1#One root project|1<{0,number,integer} root projects} found
 company.list.title={0,choice,0#No companies|1#One company|1<{0,number,integer} companies} found
 equipment.list.title={0,choice,0#No equipments|1#One equipment|1<{0,number,integer} equipments} found
 note.list.title={0,choice,0#No notes|1#One note|1<{0,number,integer} notes} found
@@ -15,6 +16,7 @@ trucks.list.title={0,choice,0#No trucks|1#One Truck|1<{0,number,integer} trucks}
 vehicles.list.title={0,choice,0#No vehicles|1#One Vehicle|1<{0,number,integer} vehicles} found
 vehicle_names.list.title={0,choice,0#No vehicles names|1#One Vehicle Name|1<{0,number,integer} vehicle names} found
 
-project.list.header={0} Projects
+project.list.header={0} Sub Projects
+root_project.list.header={0} Root Projects
 
 

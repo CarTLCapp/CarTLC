@@ -28,20 +28,17 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
     var projectNameId: Long
     var addressId: Long
 
-    private var mProjectName: String? = null
     private var mAddress: DataAddress? = null
     private var db: DatabaseTable
 
-    val projectName: String?
+    val projectDashName: String
         get() {
-            if (mProjectName == null) {
-                mProjectName = db.tableProjects.queryProjectName(projectNameId)
-                if (mProjectName == null) {
-                    Timber.e("Could not find project ID=$projectNameId")
-                }
-            }
-            return mProjectName
+            val name = db.tableProjects.queryProjectName(projectNameId)
+            return name?.let {"${name.first} - ${name.second}" } ?: "-"
         }
+
+    val projectName: Pair<String, String>?
+        get() = db.tableProjects.queryProjectName(projectNameId)
 
     val project: DataProject?
         get() = db.tableProjects.queryById(projectNameId)
@@ -84,32 +81,27 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
     fun reset(projectNameId: Long, addressId: Long) {
         this.projectNameId = projectNameId
         this.addressId = addressId
-        mProjectName = null
+//        mProjectName = null
         mAddress = null
     }
 
     override fun compareTo(other: DataProjectAddressCombo): Int {
-        val name = projectName
-        val otherName = other.projectName
-        if (name != null && otherName != null) {
-            return name.compareTo(otherName)
-        }
-        return if (name == null && otherName == null) {
-            0
-        } else 1
+        val name = projectDashName
+        val otherName = other.projectDashName
+        return name.compareTo(otherName)
     }
 
-    val hasValidState: Boolean
-        get() = address?.hasValidState() ?: false
-
-    fun fix(): DataAddress? {
-        address?.let {
-            if (it.fix()) {
-                return it
-            }
-        }
-        return null
-    }
+//    val hasValidState: Boolean
+//        get() = address?.hasValidState() ?: false
+//
+//    fun fix(): DataAddress? {
+//        address?.let {
+//            if (it.fix()) {
+//                return it
+//            }
+//        }
+//        return null
+//    }
 
     override fun toString(): String {
         val sbuf = StringBuilder()

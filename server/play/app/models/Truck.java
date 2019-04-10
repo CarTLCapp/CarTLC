@@ -53,7 +53,7 @@ public class Truck extends com.avaje.ebean.Model {
 
     public static Truck get(long id) {
         if (id > 0) {
-            return find.ref(id);
+            return find.byId(id);
         }
         return null;
     }
@@ -104,7 +104,7 @@ public class Truck extends com.avaje.ebean.Model {
         List<Truck> list = find.all();
         int count = 0;
         for (Truck truck : list) {
-            if (truck.getProjectName().length() > 0) {
+            if (truck.getSubProjectName().length() > 0) {
                 continue;
             }
             if (truck.getCompanyName().length() > 0) {
@@ -260,11 +260,22 @@ public class Truck extends com.avaje.ebean.Model {
         return "";
     }
 
-    public String getProjectName() {
+    public String getRootProjectName() {
         if (project_id == 0) {
             return "";
         }
-        Project project = Project.find.ref(project_id);
+        Project project = Project.find.byId(project_id);
+        if (project == null) {
+            return Long.toString(project_id) + "?";
+        }
+        return project.getRootProjectName();
+    }
+
+    public String getSubProjectName() {
+        if (project_id == 0) {
+            return "";
+        }
+        Project project = Project.find.byId(project_id);
         if (project == null) {
             return Long.toString(project_id) + "?";
         }
@@ -322,10 +333,21 @@ public class Truck extends com.avaje.ebean.Model {
             sbuf.append(" : ");
             sbuf.append(bit);
         }
-        bit = getProjectName();
+        bit = getRootProjectName();
         if (bit.length() > 0) {
             sbuf.append(", ");
             sbuf.append(bit);
+            bit = getSubProjectName();
+            if (bit.length() > 0) {
+                sbuf.append(" - ");
+                sbuf.append(bit);
+            }
+        } else {
+            bit = getSubProjectName();
+            if (bit.length() > 0) {
+                sbuf.append(", ");
+                sbuf.append(bit);
+            }
         }
         bit = getCompanyName();
         if (bit.length() > 0) {
@@ -375,7 +397,9 @@ public class Truck extends com.avaje.ebean.Model {
         }
         if (project_id > 0) {
             sbuf.append(", PROJECT ");
-            sbuf.append(getProjectName());
+            sbuf.append(getRootProjectName());
+            sbuf.append(" - ");
+            sbuf.append(getSubProjectName());
         }
         if (company_name_id > 0) {
             sbuf.append(", COMPANY ");

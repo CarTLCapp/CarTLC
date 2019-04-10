@@ -16,26 +16,26 @@ import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.ListEntryAdapter
 import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.ui.base.BaseActivity
 import kotlinx.android.synthetic.main.activity_list_entries.*
 import javax.inject.Inject
 
 class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListener {
 
     lateinit var app: TBApplication
-    lateinit var mEntryListAdapter: ListEntryAdapter
+    private lateinit var mEntryListAdapter: ListEntryAdapter
 
-    @Inject
-    lateinit var repo: CarRepository
-
+    val repo: CarRepository
+        get() = app.repo
     val db: DatabaseTable
         get() = repo.db
     val prefHelper: PrefHelper
         get() = repo.prefHelper
 
-    internal val titleString: String
+    private val titleString: String
         get() {
             val sbuf = StringBuilder()
-            sbuf.append(prefHelper.projectName)
+            sbuf.append(prefHelper.projectDashName)
             sbuf.append(" - ")
             val count = mEntryListAdapter.itemCount
             if (count == 1) {
@@ -50,7 +50,6 @@ class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListene
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list_entries)
         app = applicationContext as TBApplication
-        app.carRepoComponent.inject(this)
         mEntryListAdapter = ListEntryAdapter(this, this)
         edit_address!!.setOnClickListener {
             prefHelper.setFromCurrentProjectId()
@@ -86,13 +85,13 @@ class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListene
         }
     }
 
-    protected fun setProjectDisplay() {
+    private fun setProjectDisplay() {
         val combo = prefHelper.currentProjectGroup
         if (combo == null) {
             project_name!!.text = ""
             project_address!!.text = ""
         } else {
-            project_name!!.text = combo.projectName
+            project_name!!.text = combo.projectDashName
             project_address!!.text = combo.addressLine
         }
     }

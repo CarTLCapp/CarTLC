@@ -27,15 +27,12 @@ import com.cartlc.tracker.model.server.DCService
 import com.cartlc.tracker.model.server.ServerHelper
 import com.cartlc.tracker.model.sql.DatabaseManager
 import com.cartlc.tracker.model.table.DatabaseTable
-import com.cartlc.tracker.ui.util.LocationHelper
-import com.cartlc.tracker.ui.util.PermissionHelper.PermissionRequest
-import com.cartlc.tracker.ui.util.PermissionHelper.PermissionListener
+import com.cartlc.tracker.ui.app.dependencyinjection.ComponentRoot
+import com.cartlc.tracker.ui.util.helper.LocationHelper
+import com.cartlc.tracker.ui.util.helper.PermissionHelper.PermissionRequest
+import com.cartlc.tracker.ui.util.helper.PermissionHelper.PermissionListener
 
-import com.cartlc.tracker.ui.util.PermissionHelper
-import com.cartlc.tracker.viewmodel.main.DaggerMainViewModelComponent
-import com.cartlc.tracker.viewmodel.main.MainVMHolder
-import com.cartlc.tracker.viewmodel.main.MainViewModelComponent
-import com.cartlc.tracker.viewmodel.main.MainViewModelModule
+import com.cartlc.tracker.ui.util.helper.PermissionHelper
 import com.cartlc.tracker.viewmodel.vehicle.DaggerVehicleViewModelComponent
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModelComponent
@@ -118,21 +115,24 @@ class TBApplication : Application() {
             try {
                 sbuf.append(version)
             } catch (ex: Exception) {
-                TBApplication.ReportError(ex, TBApplication::class.java, "versionedTitle", "main")
+                ReportError(ex, TBApplication::class.java, "versionedTitle", "main")
             }
             return sbuf.toString()
         }
 
-    lateinit var carRepoComponent: CarRepositoryComponent
+//    lateinit var carRepoComponent: CarRepositoryComponent
 
     private lateinit var carRepo: CarRepository
     private lateinit var prefHelper: PrefHelper
     private lateinit var dm: DatabaseManager
 
-    lateinit var mainViewModelComponent: MainViewModelComponent
-    private lateinit var mainVMHolder: MainVMHolder
+    val repo: CarRepository
+        get() = carRepo
 
+    lateinit var componentRoot: ComponentRoot
     lateinit var vehicleComponent: VehicleViewModelComponent
+    lateinit var amazonHelper: AmazonHelper
+
     private lateinit var vehicleViewModel: VehicleViewModel
     private lateinit var vehicleRepository: VehicleRepository
 
@@ -155,17 +155,16 @@ class TBApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        componentRoot = ComponentRoot(this)
         dm = DatabaseManager(this)
         prefHelper = PrefHelper(this, dm)
-        carRepo = CarRepository(this, dm, prefHelper)
+        carRepo = CarRepository(
+                dm,
+                prefHelper,
+                componentRoot.flowUseCase
+        )
         carRepo.computeCurStage()
-        carRepoComponent = DaggerCarRepositoryComponent.builder()
-                .carRepositoryModule(CarRepositoryModule(carRepo))
-                .build()
-        mainVMHolder = MainVMHolder(carRepo)
-        mainViewModelComponent = DaggerMainViewModelComponent.builder()
-                .mainViewModelModule(MainViewModelModule(mainVMHolder))
-                .build()
+
         vehicleRepository = VehicleRepository(this, dm, prefHelper)
         vehicleViewModel = VehicleViewModel(vehicleRepository)
         vehicleComponent = DaggerVehicleViewModelComponent.builder()
@@ -186,12 +185,14 @@ class TBApplication : Application() {
             Timber.plant(CrashReportingTree(db))
         }
         ServerHelper.Init(this)
-        AmazonHelper.Init(db, prefHelper)
+        amazonHelper = AmazonHelper(db, prefHelper, componentRoot.eventController)
         PermissionHelper.Init()
         CheckError.Init()
         LocationHelper.Init(this, db)
 
-        prefHelper.detectSpecialUpdateCheck()
+        if (prefHelper.detectOneTimeReloadFromServerCheck()) {
+            reloadFromServer()
+        }
     }
 
     fun reloadFromServer() {

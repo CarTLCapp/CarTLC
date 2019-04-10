@@ -26,15 +26,15 @@ class SqlTableTruck(
 
     companion object {
 
-        internal val TABLE_NAME = "table_trucks_v14"
+        private const val TABLE_NAME = "table_trucks_v14"
 
-        internal val KEY_ROWID = "_id"
-        internal val KEY_TRUCK_NUMBER = "truck_number"
-        internal val KEY_LICENSE_PLATE = "license_plate"
-        internal val KEY_SERVER_ID = "server_id"
-        internal val KEY_PROJECT_ID = "project_id"
-        internal val KEY_COMPANY_NAME = "company_name"
-        internal val KEY_HAS_ENTRY = "has_entry"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_TRUCK_NUMBER = "truck_number"
+        private const val KEY_LICENSE_PLATE = "license_plate"
+        private const val KEY_SERVER_ID = "server_id"
+        private const val KEY_PROJECT_ID = "project_id"
+        private const val KEY_COMPANY_NAME = "company_name"
+        private const val KEY_HAS_ENTRY = "has_entry"
     }
 
     fun create() {

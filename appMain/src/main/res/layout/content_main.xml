@@ -32,9 +32,8 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <fragment
-        android:id="@+id/frame_login"
-        android:name="com.cartlc.tracker.ui.frag.LoginFragment"
+    <FrameLayout
+        android:id="@+id/frame_fragment"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
@@ -42,15 +41,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frame_title"
         app:layout_constraintBottom_toTopOf="@id/frame_buttons"/>
-
-    <fragment
-        android:id="@+id/frame_entry_simple"
-        android:name="com.cartlc.tracker.ui.frag.EntrySimpleFragment"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/frame_title"/>
 
     <fragment
         android:id="@+id/frame_confirmation_fragment"
@@ -63,6 +53,23 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/frame_title"/>
+
+    <com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleView
+        android:id="@+id/frame_entry_simple"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frame_title"/>
+
+    <!--<fragment-->
+        <!--android:id="@+id/frag_entry_simple"-->
+        <!--android:name="com.cartlc.tracker.ui.frag.EntrySimpleFragment"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--app:layout_constraintRight_toRightOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@id/frame_title"/>-->
 
     <fragment
         android:id="@+id/frame_main_list"
@@ -81,7 +88,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
         app:layout_constraintBottom_toTopOf="@id/frame_main_list"
         app:layout_constraintRight_toRightOf="@id/frame_main_list"/>
 

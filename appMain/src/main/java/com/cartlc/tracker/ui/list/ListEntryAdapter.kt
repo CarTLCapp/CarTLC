@@ -26,14 +26,13 @@ class ListEntryAdapter(
         private val mContext: Context,
         private val mListener: OnItemSelectedListener
 ) : RecyclerView.Adapter<ListEntryAdapter.CustomViewHolder>() {
-    private val mLayoutInflater: LayoutInflater
+    private val mLayoutInflater: LayoutInflater = LayoutInflater.from(mContext)
     private var mItems: List<DataEntry> = emptyList()
-
-    @Inject
-    lateinit var repo: CarRepository
 
     private val app: TBApplication
         get() = mContext.applicationContext as TBApplication
+    val repo: CarRepository
+        get() = app.repo
     private val prefHelper: PrefHelper
         get() = repo.prefHelper
 
@@ -57,11 +56,6 @@ class ListEntryAdapter(
 
     interface OnItemSelectedListener {
         fun onEdit(entry: DataEntry)
-    }
-
-    init {
-        mLayoutInflater = LayoutInflater.from(mContext)
-        app.carRepoComponent.inject(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {

@@ -1,47 +1,36 @@
 package com.cartlc.tracker.model
 
-import android.content.Context
 import android.os.Looper
-import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.model.data.DataProjectAddressCombo
 import com.cartlc.tracker.model.event.Action
-import com.cartlc.tracker.model.event.ActionEvent
 import com.cartlc.tracker.model.flow.*
-import com.cartlc.tracker.model.misc.ErrorMessage
+import com.cartlc.tracker.model.msg.ErrorMessage
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import java.util.ArrayList
 
-@VisibleForTesting
+// Open class for testing
 open class CarRepository(
-        val context: Context,
         val db: DatabaseTable,
-        val prefHelper: PrefHelper
+        val prefHelper: PrefHelper,
+        val flowUseCase: FlowUseCase
 ) {
     open val isDevelopment: Boolean
         get() = prefHelper.isDevelopment
 
-    /** Current Flow **/
+    var companyEditing: String? = null
 
-    val curFlow: MutableLiveData<Flow> by lazy {
-        MutableLiveData<Flow>()
-    }
-
-    private var previousFlowValue: Flow? = null
+    // region Current Flow
 
     var curFlowValue: Flow
-        get() = curFlow.value ?: LoginFlow()
-        set(value) {
-            previousFlowValue = curFlow.value ?: LoginFlow()
-            curFlow.value = value
-        }
+        get() = flowUseCase.curFlow
+        set(value) { flowUseCase.curFlow = value }
 
     fun onPreviousFlow() {
-        previousFlowValue?.let {
+        flowUseCase.previousFlowValue?.let {
             if (it.stage == Stage.LOGIN) {
                 computeCurStage()
             } else {
@@ -52,7 +41,9 @@ open class CarRepository(
         }
     }
 
-    /** ErrorEvent **/
+    // endregion Current Flow
+
+    // region ErrorEvent
 
     val error: MutableLiveData<ErrorMessage> by lazy {
         MutableLiveData<ErrorMessage>()
@@ -64,21 +55,21 @@ open class CarRepository(
             error.value = value
         }
 
-    /** ActionEvent **/
+    // endregion ErrorEvent
 
-    private val handleAction: MutableLiveData<ActionEvent> by lazy {
-        MutableLiveData<ActionEvent>()
-    }
+    // region Action
 
-    fun handleActionEvent(): LiveData<ActionEvent> = handleAction
+    val actionUseCase: ActionUseCase = ActionUseCaseImpl()
 
     fun dispatchActionEvent(action: Action) {
-        handleAction.value = ActionEvent(action)
+        actionUseCase.dispatchActionEvent(action)
     }
+
+    // endregion Action
 
     init {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            curFlow.value = LoginFlow()
+            curFlowValue = LoginFlow()
         }
     }
 
@@ -87,18 +78,18 @@ open class CarRepository(
             return db.tableVehicleName.vehicleNames.isNotEmpty()
         }
 
-    fun checkProjectErrors(): Boolean {
-        val entries = db.tableProjectAddressCombo.query()
-        for (combo in entries) {
-            if (!combo.hasValidState) {
-                val address = combo.fix()
-                if (address != null) {
-                    db.tableAddress.update(address)
-                }
-            }
-        }
-        return false
-    }
+//    fun checkProjectErrors(): Boolean {
+//        val entries = db.tableProjectAddressCombo.query()
+//        for (combo in entries) {
+//            if (!combo.hasValidState) {
+//                val address = combo.fix()
+//                if (address != null) {
+//                    db.tableAddress.update(address)
+//                }
+//            }
+//        }
+//        return false
+//    }
 
     fun checkEntryErrors(): DataEntry? {
         val entries = db.tableEntry.query()
@@ -110,9 +101,7 @@ open class CarRepository(
         return null
     }
 
-    @VisibleForTesting
-    open
-    fun clearUploaded() {
+    open fun clearUploaded() {
         db.clearUploaded()
         prefHelper.clearUploaded()
     }
@@ -134,27 +123,24 @@ open class CarRepository(
         prefHelper.zipCode = null
     }
 
-    // COMPUTE
+    // endregion ActionEvent
+
+    // region COMPUTE
 
     fun computeCurStage() {
         var inEntry = false
-        if (prefHelper.lastName.isNullOrBlank()) {
-            curFlowValue = LoginFlow()
-        } else if (prefHelper.projectName.isNullOrBlank()) {
-            curFlowValue = ProjectFlow()
-        } else if (prefHelper.company.isNullOrBlank()) {
-            curFlowValue = CompanyFlow()
-        } else if (prefHelper.state.isNullOrBlank()) {
-            curFlowValue = StateFlow()
-        } else if (prefHelper.city.isNullOrBlank()) {
-            curFlowValue = CityFlow()
-        } else if (prefHelper.street.isNullOrBlank()) {
-            curFlowValue = StreetFlow()
-        } else {
-            inEntry = true
+        when {
+            prefHelper.lastName.isNullOrBlank() -> curFlowValue = LoginFlow()
+            prefHelper.projectRootName.isNullOrBlank() -> curFlowValue = RootProjectFlow()
+            prefHelper.projectSubName.isNullOrBlank() -> curFlowValue = SubProjectFlow()
+            prefHelper.company.isNullOrBlank() -> curFlowValue = CompanyFlow()
+            prefHelper.state.isNullOrBlank() -> curFlowValue = StateFlow()
+            prefHelper.city.isNullOrBlank() -> curFlowValue = CityFlow()
+            prefHelper.street.isNullOrBlank() -> curFlowValue = StreetFlow()
+            else -> inEntry = true
         }
         if (inEntry) {
-            val hasTruck = !prefHelper.truckValue.isEmpty()
+            val hasTruck = prefHelper.truckValue.isNotEmpty()
             val items = computeNoteItems()
             val hasNotes = hasNotesEntered(items) && isNotesComplete(items)
             val hasEquip = hasChecked(prefHelper.currentProjectGroup)
@@ -233,5 +219,5 @@ open class CarRepository(
         return false
     }
 
-    // COMPUTE END
+    // endregion COMPUTE
 }

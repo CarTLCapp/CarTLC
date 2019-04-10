@@ -78,13 +78,13 @@ class CheckError {
             mDialog!!.show()
         }
 
-        fun getMissingTruckError(act: Activity, entry: DataEntry): String {
+        private fun getMissingTruckError(act: Activity, entry: DataEntry): String {
             val sbuf = StringBuilder()
             sbuf.append(act.getString(R.string.error_missing_truck_long))
             sbuf.append("\n  ")
             sbuf.append(act.getString(R.string.title_project_))
             sbuf.append(" ")
-            sbuf.append(entry.projectName)
+            sbuf.append(entry.projectDashName)
             sbuf.append("\n  ")
             sbuf.append(entry.addressLine)
             sbuf.append("\n  ")

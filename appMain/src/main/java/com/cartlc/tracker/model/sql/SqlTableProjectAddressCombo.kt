@@ -24,12 +24,12 @@ class SqlTableProjectAddressCombo(
 
     companion object {
 
-        internal val TABLE_NAME = "list_project_address_combo"
+        private const val TABLE_NAME = "list_project_address_combo"
 
-        internal val KEY_ROWID = "_id"
-        internal val KEY_PROJECT_ID = "project_id"
-        internal val KEY_ADDRESS_ID = "address_id"
-        internal val KEY_LAST_USED = "last_used"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_PROJECT_ID = "project_id"
+        private const val KEY_ADDRESS_ID = "address_id"
+        private const val KEY_LAST_USED = "last_used"
     }
 
     fun clear() {

@@ -102,7 +102,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
 
     public static Equipment get(long id) {
         if (id > 0) {
-            return find.ref(id);
+            return find.byId(id);
         }
         return null;
     }
@@ -123,7 +123,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
             if (sbuf.length() > 0) {
                 sbuf.append(", ");
             }
-            sbuf.append(project.name);
+            sbuf.append(project.getFullProjectName());
         }
         return sbuf.toString();
     }
@@ -198,7 +198,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
     }
 
     public static boolean isDisabled(Long id) {
-        Equipment equipment = find.ref(id);
+        Equipment equipment = find.byId(id);
         if (equipment == null) {
             return false;
         }

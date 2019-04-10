@@ -13,11 +13,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import models.InputLines;
 import models.Strings;
 import models.Vehicle;
 import models.VehicleName;
 import models.Version;
+import views.formdata.InputLines;
+
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -36,7 +37,7 @@ public class VehicleController extends Controller {
     private static final int PAGE_SIZE = 100;
 
     private SimpleDateFormat mDateFormat;
-    private static final String DATE_FORMAT = EntryController.DATE_FORMAT;
+    private static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a z";
 
     private FormFactory formFactory;
 

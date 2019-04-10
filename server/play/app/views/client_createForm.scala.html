@@ -1,4 +1,4 @@
-@(techForm: Form[InputClient])
+@(techForm: Form[views.formdata.InputClient])
 
 @import helper._
 
@@ -21,7 +21,7 @@
             <div class="checkbox-container">
 
                 @for(project <- Project.list()) {
-                    @b3.checkbox(techForm(project.name), '_label -> project.name)
+                    @b3.checkbox(techForm(project.getFullProjectName()), '_label -> project.getFullProjectName())
                     <div style="clear:both;"></div>
                 }
 

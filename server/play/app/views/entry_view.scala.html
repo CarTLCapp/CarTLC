@@ -13,7 +13,9 @@
             <tr>
                 <th>Name</th>
                 <th>Date</th>
-                <th>Project</th>
+                <th>Time</th>
+                <th>Root Project</th>
+                <th>Sub Project</th>
                 <th>Address</th>
                 <th>Truck</th>
                 <th>Equipment</th>
@@ -24,8 +26,10 @@
         <tbody>
             <tr>
                 <td>@entry.getTechName()</td>
-                <td>@entry.entry_time.format("yyyy-MM-dd kk:mm")</td>
-                <td>@entry.getProjectLine()</td>
+                <td>@entry.getDate()</td>
+                <td>@entry.getTime()</td>
+                <td>@entry.getRootProjectName()</td>
+                <td>@entry.getSubProjectName()</td>
                 <td>@entry.getAddressLine()</td>
                 <td>@entry.getTruckLine()</td>
                 <td>@entry.getEquipmentLine()</td>

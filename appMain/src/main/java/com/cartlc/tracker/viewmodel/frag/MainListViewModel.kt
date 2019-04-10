@@ -4,19 +4,26 @@
 package com.cartlc.tracker.viewmodel.frag
 
 import androidx.databinding.ObservableBoolean
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.MutableLiveData
-import com.cartlc.tracker.model.CarRepository
+import androidx.lifecycle.OnLifecycleEvent
 import com.cartlc.tracker.model.data.*
 import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.LoginFlow
+import com.cartlc.tracker.model.flow.FlowUseCase
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.sql.SqlTableEntry
+import com.cartlc.tracker.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.viewmodel.BaseViewModel
 
-class MainListViewModel(private val repo: CarRepository) : BaseViewModel() {
+class MainListViewModel(
+        private val boundFrag: BoundFrag
+) : BaseViewModel(), LifecycleObserver, FlowUseCase.Listener {
+
+    private val repo = boundFrag.repo
 
     private val prefHelper: PrefHelper
         get() = repo.prefHelper
@@ -39,14 +46,9 @@ class MainListViewModel(private val repo: CarRepository) : BaseViewModel() {
 
     var curKey: String? = null
 
-    val curFlow: MutableLiveData<Flow>
-        get() = repo.curFlow
-
     var curFlowValue: Flow
-        get() = curFlow.value ?: LoginFlow()
-        set(value) {
-            curFlow.value = value
-        }
+        get() = repo.curFlowValue
+        set(value) { repo.curFlowValue = value }
 
     val isInNotes: Boolean
         get() = curFlowValue.stage == Stage.NOTES
@@ -88,6 +90,37 @@ class MainListViewModel(private val repo: CarRepository) : BaseViewModel() {
         set(value) {
             entryHint.value = value
         }
+
+    init {
+        boundFrag.bindObserver(this)
+        repo.flowUseCase.registerListener(this)
+    }
+
+    // region lifecycle
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun onCreate() {
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun onDestroy() {
+        repo.flowUseCase.unregisterListener(this)
+    }
+
+    // endregion lifecycle
+
+    // region FlowUseCase.Listener
+
+    override fun onStageChangedAboutTo(flow: Flow) {
+        entryHintValue = EntryHint("", false)
+        showingValue = false
+        showEmptyValue = false
+    }
+
+    override fun onStageChanged(flow: Flow) {
+    }
+
+    /// endregion FlowUseCase.Listener
 
     fun onStatusButtonClicked(status: TruckStatus) {
         prefHelper.status = status

@@ -46,7 +46,8 @@ open class Flow(
         fun from(stage: Stage?): Flow? =
                 when (stage) {
                     Stage.LOGIN -> LoginFlow()
-                    Stage.PROJECT -> ProjectFlow()
+                    Stage.ROOT_PROJECT -> RootProjectFlow()
+                    Stage.SUB_PROJECT -> SubProjectFlow()
                     Stage.COMPANY -> CompanyFlow()
                     Stage.ADD_COMPANY -> AddCompanyFlow()
                     Stage.STATE -> StateFlow()
@@ -75,7 +76,7 @@ open class Flow(
 
     private fun process(action: ActionBundle?) {
         when (action) {
-            is StageArg -> processStageEvent(checkNull(Flow.from(action.stage)))
+            is StageArg -> processStageEvent(checkNull(from(action.stage)))
             is ActionArg -> processActionEvent(action.action)
         }
     }
@@ -137,9 +138,10 @@ open class PictureFlow(
 }
 
 class LoginFlow : Flow(Stage.LOGIN, null, Action.PREVIOUS_FLOW, null)
-class ProjectFlow : Flow(Stage.PROJECT, Stage.CURRENT_PROJECT, null, Stage.COMPANY)
-class CompanyFlow : Flow(Stage.COMPANY, Stage.PROJECT, Stage.ADD_COMPANY, Stage.STATE)
-class AddCompanyFlow : Flow(Stage.ADD_COMPANY, Stage.PROJECT, null, Stage.STATE)
+class RootProjectFlow : Flow(Stage.ROOT_PROJECT, Stage.CURRENT_PROJECT, null, Stage.SUB_PROJECT)
+class SubProjectFlow : Flow(Stage.SUB_PROJECT, Stage.ROOT_PROJECT, null, Stage.COMPANY)
+class CompanyFlow : Flow(Stage.COMPANY, Stage.SUB_PROJECT, Stage.ADD_COMPANY, Stage.STATE)
+class AddCompanyFlow : Flow(Stage.ADD_COMPANY, Stage.SUB_PROJECT, null, Stage.STATE)
 class StateFlow : Flow(Stage.STATE, Stage.COMPANY, Stage.ADD_STATE, Stage.CITY)
 class AddStateFlow : Flow(Stage.ADD_STATE, Stage.COMPANY, null, Stage.CITY)
 class CityFlow : Flow(Stage.CITY, Stage.STATE, Stage.ADD_CITY, Stage.STREET)

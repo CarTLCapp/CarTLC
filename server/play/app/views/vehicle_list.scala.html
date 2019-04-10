@@ -45,7 +45,8 @@
             <thead>
                 <tr>
                     @header("tech_id", "Name")
-                    @header("time", "Date")
+                    @header("date", "Date")
+                    @header("time", "Time")
                     @header("inspecting", "Inspecting")
                     @header("type_of_inspection", "Type")
                     <th>Mileage</th>
@@ -65,6 +66,7 @@
                     <tr>
                         <td>@vehicle.getTechName()</td>
                         <td>@vehicle.getDate()</td>
+                        <td>@vehicle.getTime()</td>
                         <td>@vehicle.getInspecting()</td>
                         <td>@vehicle.getTypeOfInspection()</td>
                         <td>@vehicle.getMileage()</td>

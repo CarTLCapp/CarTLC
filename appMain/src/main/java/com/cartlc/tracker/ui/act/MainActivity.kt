@@ -17,11 +17,11 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 
 import com.cartlc.tracker.R
+import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.data.DataNote
@@ -29,75 +29,86 @@ import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.event.EventError
 import com.cartlc.tracker.model.event.EventRefreshProjects
+import com.cartlc.tracker.model.flow.ActionUseCase
 import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.misc.ErrorMessage
+import com.cartlc.tracker.model.msg.ErrorMessage
+import com.cartlc.tracker.ui.base.BaseActivity
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
+import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
 import com.cartlc.tracker.ui.list.*
-import com.cartlc.tracker.ui.util.DialogHelper
-import com.cartlc.tracker.ui.util.LocationHelper
-import com.cartlc.tracker.ui.util.PermissionHelper
+import com.cartlc.tracker.ui.util.helper.DialogHelper
+import com.cartlc.tracker.ui.util.helper.LocationHelper
+import com.cartlc.tracker.ui.util.helper.PermissionHelper
 import com.cartlc.tracker.ui.frag.*
-import com.cartlc.tracker.viewmodel.main.MainButtonsViewModel
-import com.cartlc.tracker.viewmodel.main.MainVMHolder
+import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleView
+import com.cartlc.tracker.ui.stage.StageNavigator
+import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
+import com.cartlc.tracker.viewmodel.main.*
 import com.crashlytics.android.Crashlytics // CRASHLYTICS
 import io.fabric.sdk.android.Fabric // CRASHLYTICS
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import timber.log.Timber
 import java.io.File
-import javax.inject.Inject
+import java.lang.ref.WeakReference
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(), ActionUseCase.Listener {
 
     companion object {
 
-        private val REQUEST_IMAGE_CAPTURE = 1
-        private val REQUEST_EDIT_ENTRY = 2
+        private const val REQUEST_IMAGE_CAPTURE = 1
+        private const val REQUEST_EDIT_ENTRY = 2
 
-        val RESULT_EDIT_ENTRY = 2
-        val RESULT_EDIT_PROJECT = 3
-        val RESULT_DELETE_PROJECT = 4
-
-        private val KEY_TAKING_PICTURE = "picture"
+        const val RESULT_EDIT_ENTRY = 2
+        const val RESULT_EDIT_PROJECT = 3
+        const val RESULT_DELETE_PROJECT = 4
 
         private const val PRIVACY_POLICY_URL = "https://www.iubenda.com/privacy-policy/10260978"
+        private const val KEY_TAKING_PICTURE = "picture"
     }
 
-    private lateinit var mApp: TBApplication
+    private lateinit var app: TBApplication
     private lateinit var mPictureAdapter: PictureListAdapter
     private lateinit var mInputMM: InputMethodManager
     private var showServerError = true
 
-    @Inject
-    lateinit var vm: MainVMHolder
+    private val repo: CarRepository
+        get() = app.repo
 
-    val loginFragment: LoginFragment
-        get() = frame_login as LoginFragment
-    val mainListFragment: MainListFragment
+    lateinit var vm: MainVMHolder
+    private lateinit var stageNavigator: StageNavigator
+    private lateinit var buttonsViewModel: MainButtonsViewModel
+
+    private val mainListFragment: MainListFragment
         get() = frame_main_list as MainListFragment
     val confirmationFragment: ConfirmationFragment
         get() = frame_confirmation_fragment as ConfirmationFragment
-    val titleFragment: TitleFragment
+    private val titleFragment: TitleFragment
         get() = frame_title as TitleFragment
-    val buttonsFragment: ButtonsFragment
+    private val buttonsFragment: ButtonsFragment
         get() = frame_buttons as ButtonsFragment
-    val entrySimpleFragment: EntrySimpleFragment
-        get() = frame_entry_simple as EntrySimpleFragment
+    val entrySimpleView: EntrySimpleView
+        get() = frame_entry_simple as EntrySimpleView
 
-    private inner class RotatePictureTask : AsyncTask<Void, Void, Boolean>() {
+    private class RotatePictureTask(act: MainActivity) : AsyncTask<Void, Void, Boolean>() {
+
+        private val ref = WeakReference<MainActivity>(act)
+        private val main: MainActivity?
+            get() = ref.get()
 
         override fun doInBackground(vararg voids: Void): Boolean? {
-            vm.autoRotatePictureResult()
+            main?.vm?.autoRotatePictureResult()
             return true
         }
 
         override fun onPostExecute(result: Boolean?) {
-            if (!isDestroyed && !isFinishing && vm.isPictureStage) {
-                mPictureAdapter.notifyDataSetChanged()
+            main?.let {
+                if (!it.isDestroyed && !it.isFinishing && it.vm.isPictureStage) {
+                    it.mPictureAdapter.notifyDataSetChanged()
+                }
             }
         }
     }
@@ -107,13 +118,36 @@ class MainActivity : BaseActivity() {
 
         Fabric.with(this, Crashlytics()) // CRASHLYTICS
 
-        mApp = applicationContext as TBApplication
-        mApp.mainViewModelComponent.inject(this)
+        app = applicationContext as TBApplication
 
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar_main))
 
-        buttonsFragment.root = root
+        buttonsFragment.softKeyboardDetect = SoftKeyboardDetect(root)
+        buttonsViewModel = buttonsFragment.vm as MainButtonsViewModel
+        stageNavigator = StageNavigator(boundAct, buttonsViewModel)
+
+        val confirmationViewModel = confirmationFragment.vm
+        val mainListViewModel = mainListFragment.vm
+        val titleViewModel = titleFragment.vm
+        val entrySimpleControl = entrySimpleView.control
+
+        val newProjectHolder = NewProjectVMHolder(
+                boundAct,
+                buttonsViewModel,
+                mainListViewModel,
+                titleViewModel,
+                entrySimpleControl
+        )
+        vm = MainVMHolder(
+                boundAct,
+                newProjectHolder,
+                buttonsViewModel,
+                mainListViewModel,
+                confirmationViewModel,
+                titleViewModel,
+                entrySimpleControl
+        )
         mInputMM = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         fab_add.setOnClickListener { vm.btnPlus() }
@@ -123,39 +157,27 @@ class MainActivity : BaseActivity() {
         list_pictures.layoutManager = linearLayoutManager
         list_pictures.adapter = mPictureAdapter
 
-        vm.buttonsViewModel = buttonsFragment.vm as MainButtonsViewModel
-        vm.loginViewModel = loginFragment.vm
-        vm.confirmationViewModel = confirmationFragment.vm
-        vm.mainListViewModel = mainListFragment.vm
-        vm.titleViewModel = titleFragment.vm
-        vm.entrySimpleViewModel = entrySimpleFragment.vm
-
-        vm.handleActionEvent().observe(this, Observer { event ->
-            event.executeIfNotHandled { onActionDispatch(event.peekContent()) }
-        })
-        vm.curFlow.observe(this, Observer { stage -> onStageChanged(stage) })
+        repo.actionUseCase.registerListener(this)
         vm.error.observe(this, Observer { message -> showError(message) })
         vm.addButtonVisible.observe(this, Observer { visible -> onAddButtonVisibleChanged(visible) })
         vm.framePictureVisible.observe(this, Observer { visible -> onFramePictureVisibleChanged(visible) })
-        vm.getString = { msg -> getStringMessage(msg) }
         vm.error.observe(this, Observer<ErrorMessage> { message -> showError(message) })
-        vm.buttonsViewModel.handleButtonEvent().observe(this, Observer { event ->
-            event.executeIfNotHandled { vm.onButtonDispatch(event.peekContent()) }
-        })
-        vm.buttonsViewModel.entryTextValue = { entrySimpleFragment.entryTextValue }
-        vm.buttonsViewModel.notes = { mainListFragment.notes }
-        vm.entrySimpleViewModel.simpleEmsValue = resources.getInteger(R.integer.entry_simple_ems)
-        vm.onCreate()
+        vm.notes = { mainListFragment.notes }
 
-        EventBus.getDefault().register(this)
-        title = mApp.versionedTitle
+        buttonsViewModel.save = { isNext -> vm.save(isNext) }
+        entrySimpleControl.emsValue = resources.getInteger(R.integer.entry_simple_ems)
+
+        componentRoot.eventController.register(this)
+        title = app.versionedTitle
         getLocation()
+
+        repo.flowUseCase.notifyListeners()
     }
 
     private fun getLocation() {
         LocationHelper.instance.requestLocation(this, object : LocationHelper.OnLocationCallback {
             override fun onLocationUpdate(address: Address) {
-                vm.fab_address = address
+                vm.fabAddress = address
             }
         })
     }
@@ -167,9 +189,9 @@ class MainActivity : BaseActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.profile -> vm.buttonsViewModel.btnProfile()
+            R.id.profile -> buttonsViewModel.btnProfile()
             R.id.upload -> {
-                mApp.reloadFromServer()
+                app.reloadFromServer()
             }
             R.id.fleet_vehicles -> {
                 vm.onVehiclesPressed()
@@ -182,16 +204,17 @@ class MainActivity : BaseActivity() {
     }
 
     private fun onPrivacyPolicy() {
-        val i = Intent (Intent.ACTION_VIEW)
+        val i = Intent(Intent.ACTION_VIEW)
         i.data = Uri.parse(PRIVACY_POLICY_URL)
         startActivity(i)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        EventBus.getDefault().unregister(this)
+        componentRoot.eventController.unregister(this)
         CheckError.instance.cleanup()
         LocationHelper.instance.onDestroy()
+        repo.actionUseCase.unregisterListener(this)
     }
 
     private fun doViewProject() {
@@ -227,19 +250,11 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun onStageChanged(flow: Flow) {
-        vm.onStageChanged(flow)
-        mainListFragment.setAdapter(flow.stage)
-    }
-
     @Suppress("UNUSED_PARAMETER")
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onEvent(event: EventRefreshProjects) {
         Timber.d("onEvent(EventRefreshProjects)")
-        vm.curFlow.value?.let {
-            vm.refresh(it)
-            mainListFragment.setAdapter(it.stage)
-        }
+        repo.flowUseCase.notifyListeners()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -250,9 +265,9 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun onActionDispatch(action: Action) {
+    override fun onActionChanged(action: Action) {
         when (action) {
-            Action.PING -> mApp.ping()
+            Action.PING -> app.ping()
             Action.VIEW_PROJECT -> doViewProject()
             is Action.PICTURE_REQUEST -> dispatchPictureRequest(action.file)
             Action.CONFIRM_DIALOG -> showConfirmDialog()
@@ -260,13 +275,13 @@ class MainActivity : BaseActivity() {
             Action.VEHICLES_PENDING -> doVehiclesPendingDialog()
             Action.GET_LOCATION -> getLocation()
             Action.STORE_ROTATION -> storeCommonRotation()
-            Action.SAVE_LOGIN_INFO -> loginFragment.vm.save()
             Action.SHOW_NOTE_ERROR -> showNoteError(mainListFragment.notes)
             is Action.SHOW_TRUCK_ERROR -> showTruckError(action.entry, action.callback)
             is Action.SET_MAIN_LIST -> mainListFragment.setList(action.list)
             is Action.SET_PICTURE_LIST -> mPictureAdapter.setList(action.list)
             is Action.SHOW_PICTURE_TOAST -> showPictureToast(action.count)
             is Action.CONFIRMATION_FILL -> confirmationFragment.fill(action.entry)
+//            else -> stageNavigator.onActionDispatch(action)
         }
     }
 
@@ -303,7 +318,7 @@ class MainActivity : BaseActivity() {
                 }
             REQUEST_IMAGE_CAPTURE ->
                 if (resultCode == Activity.RESULT_OK) {
-                    RotatePictureTask().execute()
+                    RotatePictureTask(this).execute()
                     vm.onPictureRequestComplete()
                 }
             else -> vm.onAbort()
@@ -342,7 +357,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showNoteErrorOk(dialog: DialogInterface) {
-        vm.buttonsViewModel.showNoteErrorOk()
+        buttonsViewModel.showNoteErrorOk()
         dialog.dismiss()
     }
 
@@ -362,15 +377,11 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showPictureToast(pictureCount: Int) {
-        val msgId: Int
-        if (pictureCount <= 0) {
-            msgId = R.string.picture_help_1
-        } else if (pictureCount <= 1) {
-            msgId = R.string.picture_help_2
-        } else if (pictureCount <= 2) {
-            msgId = R.string.picture_help_3
-        } else {
-            return
+        val msgId = when {
+            pictureCount <= 0 -> R.string.picture_help_1
+            pictureCount <= 1 -> R.string.picture_help_2
+            pictureCount <= 2 -> R.string.picture_help_3
+            else -> return
         }
         val toast = Toast.makeText(this, msgId, Toast.LENGTH_LONG)
         val top = toast.view as ViewGroup

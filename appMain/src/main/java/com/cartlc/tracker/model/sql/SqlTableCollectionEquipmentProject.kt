@@ -9,8 +9,6 @@ import com.cartlc.tracker.model.data.DataCollectionItem
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.model.table.TableCollectionEquipmentProject
 
-import java.util.ArrayList
-
 import timber.log.Timber
 
 /**
@@ -22,7 +20,7 @@ class SqlTableCollectionEquipmentProject(
 ) : SqlTableCollection(sqlDb, TABLE_NAME), TableCollectionEquipmentProject {
 
     companion object {
-        internal val TABLE_NAME = "project_equipment_collection"
+        internal const val TABLE_NAME = "project_equipment_collection"
     }
 
     override fun queryForProject(projectNameId: Long): DataCollectionEquipmentProject {
@@ -31,25 +29,25 @@ class SqlTableCollectionEquipmentProject(
         return collection
     }
 
-    fun addByName(projectName: String, equipments: List<String>) {
-        var projectNameId = db.tableProjects.queryProjectName(projectName)
-        if (projectNameId < 0) {
-            projectNameId = db.tableProjects.addTest(projectName)
-        }
-        addByNameTest(projectNameId, equipments)
-    }
-
-    fun addByNameTest(collectionId: Long, names: List<String>) {
-        val list = ArrayList<Long>()
-        for (name in names) {
-            var id = db.tableEquipment.query(name)
-            if (id < 0) {
-                id = db.tableEquipment.addTest(name)
-            }
-            list.add(id)
-        }
-        addTest(collectionId, list)
-    }
+//    fun addByName(projectName: String, equipments: List<String>) {
+//        var projectNameId = db.tableProjects.queryProjectId(projectName)
+//        if (projectNameId < 0) {
+//            projectNameId = db.tableProjects.addTest(projectName)
+//        }
+//        addByNameTest(projectNameId, equipments)
+//    }
+//
+//    fun addByNameTest(collectionId: Long, names: List<String>) {
+//        val list = ArrayList<Long>()
+//        for (name in names) {
+//            var id = db.tableEquipment.query(name)
+//            if (id < 0) {
+//                id = db.tableEquipment.addTest(name)
+//            }
+//            list.add(id)
+//        }
+//        addTest(collectionId, list)
+//    }
 
     override fun addLocal(name: String, projectNameId: Long) {
         val equipId = db.tableEquipment.addLocal(name)
@@ -59,7 +57,7 @@ class SqlTableCollectionEquipmentProject(
     override fun removeIfGone(item: DataCollectionItem) {
         if (item.isBootstrap) {
             if (db.tableEquipment.query(item.value_id) == null) {
-                Timber.i("remove(" + item.id + ", " + item.toString() + ")")
+                Timber.i("remove(${item.id}, $item)")
                 remove(item.id)
             }
         }

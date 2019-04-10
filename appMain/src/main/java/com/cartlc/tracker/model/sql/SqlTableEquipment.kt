@@ -24,15 +24,15 @@ class SqlTableEquipment(
 ): TableEquipment {
 
     companion object {
-        private val TABLE_NAME = "list_equipment"
+        private const val TABLE_NAME = "list_equipment"
 
-        private val KEY_ROWID = "_id"
-        private val KEY_NAME = "name"
-        private val KEY_SERVER_ID = "server_id"
-        private val KEY_CHECKED = "is_checked"
-        private val KEY_LOCAL = "is_local"
-        private val KEY_IS_BOOT = "is_boot_strap"
-        private val KEY_DISABLED = "disabled"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_NAME = "name"
+        private const val KEY_SERVER_ID = "server_id"
+        private const val KEY_CHECKED = "is_checked"
+        private const val KEY_LOCAL = "is_local"
+        private const val KEY_IS_BOOT = "is_boot_strap"
+        private const val KEY_DISABLED = "disabled"
     }
 
     fun clear() {

@@ -40,8 +40,8 @@ class DataEntry(private val db: DatabaseTable) {
     val dateString: String
         get() = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(date))
 
-    val projectName: String
-        get() = projectAddressCombo?.projectName ?: ""
+    val projectDashName: String
+        get() = projectAddressCombo?.projectDashName ?: ""
 
     val project: DataProject?
         get() = projectAddressCombo?.project

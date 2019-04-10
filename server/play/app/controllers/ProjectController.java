@@ -3,13 +3,15 @@
  */
 package controllers;
 
-
 import play.mvc.*;
 import play.data.*;
 
 import static play.data.Form.*;
 
 import models.*;
+import views.formdata.InputLines;
+import views.formdata.ProjectData;
+import views.formdata.InputProject;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -83,6 +85,12 @@ public class ProjectController extends Controller {
             Project savedProject = Project.find.byId(id);
             if (savedProject != null) {
                 InputProject newProjectData = projectForm.get();
+
+                RootProject rootProject = RootProject.findByName(newProjectData.rootProject);
+                if (rootProject == null) {
+                    return badRequest("could not find root project: " + newProjectData.rootProject);
+                }
+                savedProject.root_project_id = rootProject.id;
                 savedProject.name = newProjectData.name;
                 savedProject.update();
 
@@ -105,7 +113,7 @@ public class ProjectController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result create() {
         if (Secured.isAdmin(ctx())) {
-            Form<Project> projectForm = formFactory.form(Project.class);
+            Form<ProjectData> projectForm = formFactory.form(ProjectData.class);
             return ok(views.html.project_createForm.render(projectForm));
         } else {
             return HomeController.PROBLEM("Only administators can create projects");
@@ -118,16 +126,24 @@ public class ProjectController extends Controller {
     @Security.Authenticated(Secured.class)
     @Transactional
     public Result save() {
-        Form<Project> projectForm = formFactory.form(Project.class).bindFromRequest();
+        Form<ProjectData> projectForm = formFactory.form(ProjectData.class).bindFromRequest();
         if (projectForm.hasErrors() || !Secured.isAdmin(ctx())) {
             return badRequest(views.html.project_createForm.render(projectForm));
         }
-        Project project = projectForm.get();
-        if (Project.findByName(project.name) != null) {
-            return badRequest("Already a project named: " + project.name);
+        ProjectData projectData = projectForm.get();
+        if (Project.findByName(projectData.rootProject, projectData.name) != null) {
+            return badRequest("Already a project named: " + projectData.rootProject + " - " + projectData.name);
         }
+        RootProject rootProject = RootProject.findByName(projectData.rootProject);
+        if (rootProject == null) {
+            return badRequest("Could not find root project named: " + projectData.rootProject);
+        }
+        Project project = new Project();
+        project.name = projectData.name;
+        project.root_project_id = rootProject.id;
         project.save();
-        flash("success", "Project " + projectForm.get().name + " has been created");
+        flash("success", "Project " + rootProject.name + "-" + project.name + " has been created");
+        Version.inc(Version.VERSION_PROJECT);
         return list();
     }
 
@@ -159,8 +175,17 @@ public class ProjectController extends Controller {
             name = name.trim();
             if (!name.isEmpty()) {
                 if (Project.findByName(name) == null) {
+                    String [] names = Project.split(name);
+                    if (names.length != 2) {
+                        return badRequest("Malformed project pair: " + name);
+                    }
+                    RootProject rootProject = RootProject.findByName(names[0]);
+                    if (rootProject == null) {
+                        return badRequest("Could not find root project named: " + names[0]);
+                    }
                     Project newProject = new Project();
-                    newProject.name = name;
+                    newProject.root_project_id = rootProject.id;
+                    newProject.name = names[1];
                     newProject.save();
                 } else {
                     Logger.info("Already created: " + name);
@@ -205,10 +230,14 @@ public class ProjectController extends Controller {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("projects");
         for (Project project : Project.find.all()) {
-            ObjectNode node = array.addObject();
-            node.put("id", project.id);
-            node.put("name", project.name);
-            node.put("disabled", project.disabled);
+            String rootProject = project.getRootProjectName();
+            if (rootProject == null) {
+                String name = project.name;
+                ObjectNode node = array.addObject();
+                node.put("id", project.id);
+                node.put("disabled", project.disabled);
+                node.put("name", name);
+            }
         }
         return ok(top);
     }

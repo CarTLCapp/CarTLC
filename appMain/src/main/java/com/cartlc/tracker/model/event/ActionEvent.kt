@@ -5,8 +5,6 @@ import com.cartlc.tracker.model.data.DataPicture
 import com.cartlc.tracker.ui.util.CheckError
 import java.io.File
 
-class ActionEvent(value: Action) : LiveEvent<Action>(value)
-
 enum class ButtonDialog {
     YES,
     NO

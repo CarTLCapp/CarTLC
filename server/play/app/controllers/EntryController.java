@@ -10,6 +10,7 @@ import play.data.validation.ValidationError;
 import models.*;
 import modules.WorkerExecutionContext;
 import views.formdata.EntryFormData;
+import views.formdata.InputSearch;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import modules.AmazonHelper;
 import modules.AmazonHelper.OnDownloadComplete;
 import modules.Globals;
 import modules.EntryListWriter;
+import modules.TimeHelper;
 
 import java.io.File;
 
@@ -336,9 +338,9 @@ public class EntryController extends Controller {
             if (tech != null) {
                 entry.tech_id = tech.id.intValue();
             }
-            SimpleDateFormat format = new SimpleDateFormat(Entry.DATE_FORMAT);
+            SimpleDateFormat format = new SimpleDateFormat(TimeHelper.DATE_TIME_FORMAT);
             entry.entry_time = format.parse(data.date);
-            Project project = Project.findByName(data.project);
+            Project project = Project.findByName(data.rootProject, data.subProject);
             if (project != null) {
                 entry.project_id = project.id;
             }

@@ -1,4 +1,4 @@
-@(importForm: Form[ImportWorkOrder], client : Client, message : String = "")
+@(importForm: Form[views.formdata.ImportWorkOrder], client : Client, message : String = "")
 
 @import helper._
 
@@ -6,7 +6,7 @@
 
 @import play.twirl.api.HtmlFormat;
 
-@main("FleetTLC - Import Work Orders", client, "/work/list") {
+@main("FleetTLC - Import Work Orders", client, "/work/summary/list") {
     
     <h1>Import Work Orders</h1>
 
@@ -31,7 +31,8 @@
         <fieldset>
 
             <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>
-            @helper.select(importForm("project"), options = options(ClientProjectAssociation.findProjectNames(client.id)), args = '_label -> "Project:")
+            @helper.select(importForm("rootProject"), options = options(ClientProjectAssociation.findRootProjectNames(client.id)), args = '_label -> "Root Project:")
+            @helper.select(importForm("subProject"), options = options(importForm.get().optionsSubProject), args = '_label -> "Sub Project:")
             @helper.select(importForm("company"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
 
         </fieldset>

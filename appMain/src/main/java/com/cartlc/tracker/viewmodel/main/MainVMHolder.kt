@@ -1,36 +1,47 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.viewmodel.main
 
 import android.location.Address
 import android.text.InputType
-import androidx.lifecycle.MutableLiveData
-import com.cartlc.tracker.model.CarRepository
+import androidx.lifecycle.*
+import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.model.data.*
-import com.cartlc.tracker.model.event.Action
-import com.cartlc.tracker.model.event.Button
+import com.cartlc.tracker.model.event.*
 import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.model.misc.*
+import com.cartlc.tracker.model.msg.ErrorMessage
+import com.cartlc.tracker.model.msg.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
-import com.cartlc.tracker.ui.util.BitmapHelper
+import com.cartlc.tracker.ui.app.dependencyinjection.BoundAct
+import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleController
+import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
+import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.viewmodel.frag.*
+import timber.log.Timber
 import java.io.File
 
-class MainVMHolder(val repo: CarRepository) {
+class MainVMHolder(
+        boundAct: BoundAct,
+        private val newProjectHolder: NewProjectVMHolder,
+        val buttonsViewModel: MainButtonsViewModel,
+        private val mainListViewModel: MainListViewModel,
+        private val confirmationViewModel: ConfirmationViewModel,
+        private val titleViewModel: TitleViewModel,
+        private val entrySimpleControl: EntrySimpleController
+) : LifecycleObserver, FlowUseCase.Listener {
 
-    private val db: DatabaseTable
-        get() = repo.db
+    companion object {
+        private val ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG // true=Debugging only
+    }
 
-    private val prefHelper: PrefHelper
-        get() = repo.prefHelper
+    private val repo = boundAct.repo
+    private val messageHandler = boundAct.componentRoot.messageHandler
 
-    val curFlow: MutableLiveData<Flow>
-        get() = repo.curFlow
-
-    var curFlowValue: Flow
+    private var curFlowValue: Flow
         get() = repo.curFlowValue
         set(value) {
             repo.curFlowValue = value
@@ -42,11 +53,27 @@ class MainVMHolder(val repo: CarRepository) {
     val error: MutableLiveData<ErrorMessage>
         get() = repo.error
 
-    var fab_address: Address?
-        get() = newProjectHolder.fab_address
+    var fabAddress: Address?
+        get() = newProjectHolder.fabAddress
         set(value) {
-            newProjectHolder.fab_address = value
+            newProjectHolder.fabAddress = value
         }
+
+    val addButtonVisible: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
+
+    val framePictureVisible: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
+
+    var notes: () -> List<DataNote> = { emptyList() }
+
+    // Private
+
+    private val db: DatabaseTable
+        get() = repo.db
+
+    private val prefHelper: PrefHelper
+        get() = repo.prefHelper
 
     private var errorValue: ErrorMessage
         get() = repo.errorValue
@@ -54,25 +81,17 @@ class MainVMHolder(val repo: CarRepository) {
             repo.errorValue = value
         }
 
-    val addButtonVisible: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
-
     private var addButtonVisibleValue: Boolean
         get() = addButtonVisible.value ?: false
         set(value) {
             addButtonVisible.value = value
         }
 
-    val framePictureVisible: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
-
     private var framePictureVisibleValue: Boolean
         get() = framePictureVisible.value ?: false
         set(value) {
             framePictureVisible.value = value
         }
-
-    var getString: (msg: StringMessage) -> String = { "" }
 
     private var editProject: Boolean = false
     private var takingPictureFile: File? = null
@@ -83,41 +102,40 @@ class MainVMHolder(val repo: CarRepository) {
             val countPictures = prefHelper.numPicturesTaken
             val maxEquip = prefHelper.numEquipPossible
             val checkedEquipment = db.tableEquipment.queryChecked().size
-            sbuf.append(getString(StringMessage.status_installed_equipments(checkedEquipment, maxEquip)))
+            sbuf.append(messageHandler.getString(StringMessage.status_installed_equipments(checkedEquipment, maxEquip)))
             sbuf.append("\n")
-            sbuf.append(getString(StringMessage.status_installed_pictures(countPictures)))
+            sbuf.append(messageHandler.getString(StringMessage.status_installed_pictures(countPictures)))
             return sbuf.toString()
         }
 
-    lateinit var buttonsViewModel: MainButtonsViewModel
-    lateinit var loginViewModel: LoginViewModel
-    lateinit var mainListViewModel: MainListViewModel
-    lateinit var confirmationViewModel: ConfirmationViewModel
-    lateinit var titleViewModel: TitleViewModel
-    lateinit var entrySimpleViewModel: EntrySimpleViewModel
-
-    private val newProjectHolder = NewProjectVMHolder(this)
-
     init {
+        boundAct.bindObserver(this)
+
         Flow.processActionEvent = { action -> processActionEvent(action) }
         Flow.processStageEvent = { flow -> curFlowValue = flow }
+
+        buttonsViewModel.handleButtonEvent().observe(boundAct.lifecycleOwner, Observer { event ->
+            event.executeIfNotHandled { onButtonDispatch(event.peekContent()) }
+        })
+        repo.flowUseCase.registerListener(this)
     }
 
+    // region lifecycle & Setup
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
-        loginViewModel.error = error
-        loginViewModel.buttonsViewModel = buttonsViewModel
-        loginViewModel.getString = getString
-        loginViewModel.dispatchActionEvent = { event -> dispatchActionEvent(event) }
-        entrySimpleViewModel.dispatchActionEvent = { event -> dispatchActionEvent(event) }
-        entrySimpleViewModel.afterTextChangedListener = { value -> onEntryValueChanged(value) }
-        confirmationViewModel.dispatchActionEvent = entrySimpleViewModel.dispatchActionEvent
+        entrySimpleControl.dispatchActionEvent = { event -> dispatchActionEvent(event) }
+        entrySimpleControl.afterTextChangedListener = { value -> onEntryValueChanged(value) }
+        confirmationViewModel.dispatchActionEvent = entrySimpleControl.dispatchActionEvent
         confirmationViewModel.buttonsViewModel = buttonsViewModel
         confirmationViewModel.titleViewModel = titleViewModel
-        confirmationViewModel.getString = getString
-        titleViewModel.getString = getString
-        buttonsViewModel.getString = getString
         mainListViewModel.onCurrentProjectGroupChanged = { checkAddButtonVisible() }
         prefHelper.setFromCurrentProjectId()
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun onDestroy() {
+        repo.flowUseCase.unregisterListener(this)
     }
 
     fun onRestoreInstanceState(path: String?) {
@@ -130,13 +148,13 @@ class MainVMHolder(val repo: CarRepository) {
         return takingPictureFile?.absolutePath
     }
 
-    // ACTION OBJECT
+    // endregion lifecycle & setup
+
+    // region ACTION OBJECT
 
     fun dispatchActionEvent(action: Action) = repo.dispatchActionEvent(action)
 
-    fun handleActionEvent() = repo.handleActionEvent()
-
-    fun btnChangeCompany() {
+    private fun btnChangeCompany() {
         newProjectHolder.autoNarrowOkay = false
         buttonsViewModel.wasNext = false
         repo.onCompanyChanged()
@@ -157,9 +175,9 @@ class MainVMHolder(val repo: CarRepository) {
         buttonsViewModel.onButtonDispatch(Button.BTN_NEXT)
     }
 
-    // ACTION OBJECT END
+    // endregion ACTION OBJECT
 
-    // OUTSIDE EVENT
+    // region OUTSIDE EVENT
 
     fun onDeletedProject() {
         prefHelper.clearCurProject()
@@ -176,7 +194,7 @@ class MainVMHolder(val repo: CarRepository) {
 
     fun onEditProject() {
         editProject = true
-        curFlowValue = ProjectFlow()
+        curFlowValue = RootProjectFlow()
     }
 
     fun onVehiclesPressed() {
@@ -197,11 +215,11 @@ class MainVMHolder(val repo: CarRepository) {
         }
     }
 
-    // OUTSIDE EVENT END
+    // endregion OUTSIDE EVENT
 
-    // BUTTONS
+    // region BUTTONS
 
-    fun onButtonDispatch(button: Button) {
+    private fun onButtonDispatch(button: Button) {
         when (button) {
             Button.BTN_CHANGE -> btnChangeCompany()
             else -> buttonsViewModel.onButtonDispatch(button)
@@ -222,7 +240,7 @@ class MainVMHolder(val repo: CarRepository) {
     private fun onNewProject() {
         newProjectHolder.autoNarrowOkay = true
         prefHelper.clearCurProject()
-        curFlowValue = ProjectFlow()
+        curFlowValue = RootProjectFlow()
     }
 
     fun btnPlus() {
@@ -232,10 +250,9 @@ class MainVMHolder(val repo: CarRepository) {
         curFlowValue = TruckFlow()
     }
 
-    // BUTTONS END
+    // endregion BUTTONS
 
-
-    // PICTURE
+    // region PICTURE
 
     fun incAutoRotatePicture(commonRotation: Int) {
         prefHelper.incAutoRotatePicture(commonRotation)
@@ -255,8 +272,7 @@ class MainVMHolder(val repo: CarRepository) {
     }
 
     fun onPictureRequestComplete() {
-        // TODO: Find better way to trigger onStageChanged()
-        curFlowValue = curFlowValue
+        repo.flowUseCase.notifyListeners()
     }
 
     private fun dispatchPictureRequest() {
@@ -271,38 +287,20 @@ class MainVMHolder(val repo: CarRepository) {
         errorValue = ErrorMessage.CANNOT_TAKE_PICTURE
     }
 
-    // END PICTURE
+    // endregion PICTURE
 
-    // ON STAGE CHANGED
+    // region FlowUseCase.Listener
 
-    fun refresh(flow: Flow) {
-        onStageChanged(flow, false)
-    }
-
-    fun onStageChanged(flow: Flow) {
-        onStageChanged(flow, true)
-    }
-
-    private fun onStageChanged(flow: Flow, pingOkay: Boolean) {
-
+    override fun onStageChangedAboutTo(flow: Flow) {
         addButtonVisibleValue = false
         framePictureVisibleValue = false
-        buttonsViewModel.reset(flow)
-        mainListViewModel.entryHintValue = EntryHint("", false)
-        mainListViewModel.showingValue = false
-        mainListViewModel.showEmptyValue = false
-        confirmationViewModel.showingValue = false
-        titleViewModel.showSeparatorValue = false
-        titleViewModel.subTitleValue = null
-        entrySimpleViewModel.reset()
+    }
 
-        loginViewModel.onStageChanged(flow)
-        confirmationViewModel.onStageChanged(flow)
-        newProjectHolder.onStageChanged(flow)
-
+    override fun onStageChanged(flow: Flow) {
+        Timber.i("MYDEBUG: VM FLOW=${flow.stage}")
         when (flow.stage) {
             Stage.CURRENT_PROJECT -> {
-                if (pingOkay) {
+                if (!repo.flowUseCase.wasFromNotify) {
                     dispatchActionEvent(Action.PING)
                 }
                 prefHelper.saveProjectAndAddressCombo(editProject)
@@ -313,41 +311,41 @@ class MainVMHolder(val repo: CarRepository) {
                 mainListViewModel.showingValue = true
                 titleViewModel.showSeparatorValue = true
                 buttonsViewModel.showCenterButtonValue = true
-                buttonsViewModel.prevTextValue = getString(StringMessage.btn_edit)
-                buttonsViewModel.centerTextValue = getString(StringMessage.btn_new_project)
-                titleViewModel.titleValue = getString(StringMessage.title_current_project)
+                buttonsViewModel.prevTextValue = messageHandler.getString(StringMessage.btn_edit)
+                buttonsViewModel.centerTextValue = messageHandler.getString(StringMessage.btn_new_project)
+                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_current_project)
             }
             Stage.TRUCK -> {
-                entrySimpleViewModel.showingValue = true
-                entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_truck)
-                entrySimpleViewModel.helpTextValue = getString(StringMessage.entry_hint_truck)
-                entrySimpleViewModel.inputTypeValue = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+                entrySimpleControl.showing = true
+                entrySimpleControl.hintValue = messageHandler.getString(StringMessage.title_truck)
+                entrySimpleControl.helpValue = messageHandler.getString(StringMessage.entry_hint_truck)
+                entrySimpleControl.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
                 mainListViewModel.showingValue = true
 
-                var hint: String?
+                val hint: String?
                 if (prefHelper.currentProjectGroup != null) {
                     hint = prefHelper.currentProjectGroup?.hintLine
                 } else {
                     hint = null
                 }
                 val trucks = db.tableTruck.queryStrings(prefHelper.currentProjectGroup)
-                entrySimpleViewModel.simpleTextValue = prefHelper.truckValue
+                entrySimpleControl.entryTextValue = prefHelper.truckValue
                 setList(StringMessage.title_truck, PrefHelper.KEY_TRUCK, trucks)
                 titleViewModel.subTitleValue = hint
             }
             Stage.EQUIPMENT -> {
-                titleViewModel.titleValue = getString(StringMessage.title_equipment_installed)
+                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_equipment_installed)
                 mainListViewModel.showingValue = true
                 buttonsViewModel.showCenterButtonValue = true
             }
             Stage.ADD_EQUIPMENT -> {
-                titleViewModel.titleValue = getString(StringMessage.title_equipment)
-                entrySimpleViewModel.showingValue = true
-                entrySimpleViewModel.simpleHintValue = getString(StringMessage.title_equipment)
-                entrySimpleViewModel.simpleTextClear()
+                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_equipment)
+                entrySimpleControl.showing = true
+                entrySimpleControl.hintValue = messageHandler.getString(StringMessage.title_equipment)
+                entrySimpleControl.simpleTextClear()
             }
             Stage.NOTES -> {
-                titleViewModel.titleValue = getString(StringMessage.title_notes)
+                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_notes)
                 mainListViewModel.showingValue = true
             }
             Stage.PICTURE_1,
@@ -368,7 +366,7 @@ class MainVMHolder(val repo: CarRepository) {
                 titleViewModel.setPhotoTitleCount(pictureCount)
                 buttonsViewModel.showNextButtonValue = false
                 buttonsViewModel.showCenterButtonValue = true
-                buttonsViewModel.centerTextValue = getString(StringMessage.btn_another)
+                buttonsViewModel.centerTextValue = messageHandler.getString(StringMessage.btn_another)
                 framePictureVisibleValue = true
                 val pictureFlow = flow as PictureFlow
                 if (pictureCount < pictureFlow.expected) {
@@ -379,9 +377,9 @@ class MainVMHolder(val repo: CarRepository) {
                 }
             }
             Stage.STATUS -> {
-                buttonsViewModel.nextTextValue = getString(StringMessage.btn_done)
+                buttonsViewModel.nextTextValue = messageHandler.getString(StringMessage.btn_done)
                 mainListViewModel.showingValue = true
-                titleViewModel.titleValue = getString(StringMessage.title_status)
+                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_status)
                 titleViewModel.subTitleValue = statusHint
             }
             else -> {
@@ -415,16 +413,16 @@ class MainVMHolder(val repo: CarRepository) {
 
     private fun checkEntryErrors(): DataEntry? = repo.checkEntryErrors()
 
-    fun checkAddButtonVisible() {
+    private fun checkAddButtonVisible() {
         addButtonVisibleValue = prefHelper.currentProjectGroup != null && db.tableProjectAddressCombo.count() > 0
     }
 
-    // ON STAGE CHANGED END
+    // endregion FlowUseCase.Listener
 
-    // SET LIST
+    // region SET LIST
 
-    internal fun setList(msg: StringMessage, key: String, list: List<String>) {
-        titleViewModel.titleValue = getString(msg)
+    private fun setList(msg: StringMessage, key: String, list: List<String>) {
+        titleViewModel.titleValue = messageHandler.getString(msg)
         mainListViewModel.curKey = key
         if (list.isEmpty()) {
             mainListViewModel.showingValue = false
@@ -434,7 +432,6 @@ class MainVMHolder(val repo: CarRepository) {
             dispatchActionEvent(Action.SET_MAIN_LIST(list))
         }
     }
-
 
     private fun onEmptyList() {
         when (curFlowValue.stage) {
@@ -452,7 +449,7 @@ class MainVMHolder(val repo: CarRepository) {
         dispatchActionEvent(Action.SET_PICTURE_LIST(list))
     }
 
-    // SET LIST END
+    // endregion SET LIST
 
     private fun onEntryValueChanged(value: String) {
         when (curFlowValue.stage) {
@@ -468,4 +465,91 @@ class MainVMHolder(val repo: CarRepository) {
             }
         }
     }
+
+    // region save
+
+    fun save(isNext: Boolean): Boolean {
+        val entryText = entrySimpleControl.entryTextValue ?: ""
+        when (curFlowValue.stage) {
+            Stage.TRUCK ->
+                if (entryText.isEmpty()) {
+                    if (isNext) {
+                        errorValue = ErrorMessage.NEED_A_TRUCK
+                    }
+                    if (!ALLOW_EMPTY_TRUCK) {
+                        return false
+                    }
+                    // For debugging purposes only.
+                    prefHelper.truckNumber = null
+                    prefHelper.licensePlate = null
+                    prefHelper.doErrorCheck = true
+                } else {
+                    prefHelper.parseTruckValue(entryText)
+                }
+            Stage.ADD_CITY -> prefHelper.city = entryText
+            Stage.ADD_STREET -> prefHelper.street = entryText
+            Stage.ADD_EQUIPMENT -> {
+                if (entryText.isNotEmpty()) {
+                    val group = prefHelper.currentProjectGroup
+                    if (group != null) {
+                        db.tableCollectionEquipmentProject.addLocal(entryText, group.projectNameId)
+                    }
+                }
+            }
+            Stage.EQUIPMENT ->
+                if (isNext) {
+                    if (db.tableEquipment.countChecked() == 0) {
+                        errorValue = ErrorMessage.NEED_EQUIPMENT
+                        return false
+                    }
+                }
+            Stage.ADD_COMPANY -> {
+                val newCompanyName = entryText.trim { it <= ' ' }
+                if (isNext) {
+                    if (newCompanyName.isEmpty()) {
+                        errorValue = ErrorMessage.NEED_NEW_COMPANY
+                        return false
+                    }
+                    prefHelper.company = newCompanyName
+                    repo.companyEditing?.let {
+                        val companies = db.tableAddress.queryByCompanyName(it)
+                        for (address in companies) {
+                            address.company = newCompanyName
+                            db.tableAddress.update(address)
+                        }
+                    }
+                }
+            }
+            Stage.COMPANY ->
+                if (isNext) {
+                    if (prefHelper.company.isNullOrBlank()) {
+                        errorValue = ErrorMessage.NEED_COMPANY
+                        return false
+                    }
+                }
+            Stage.NOTES ->
+                if (isNext) {
+                    if (!repo.isNotesComplete(notes())) {
+                        dispatchActionEvent(Action.SHOW_NOTE_ERROR)
+                        return false
+                    }
+                }
+            Stage.STATUS ->
+                if (isNext) {
+                    if (prefHelper.status === TruckStatus.UNKNOWN) {
+                        errorValue = ErrorMessage.NEED_STATUS
+                        return false
+                    }
+                }
+            Stage.CONFIRM ->
+                if (isNext) {
+                    dispatchActionEvent(Action.CONFIRM_DIALOG)
+                    return false
+                }
+            else -> {
+            }
+        }
+        return true
+    }
+    // endregion save
 }

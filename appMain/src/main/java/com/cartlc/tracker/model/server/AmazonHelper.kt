@@ -14,6 +14,7 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
 import com.cartlc.tracker.model.data.DataEntry
 import com.cartlc.tracker.model.data.DataPicture
+import com.cartlc.tracker.model.event.EventController
 import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.pref.PrefHelper
@@ -26,16 +27,11 @@ import org.greenrobot.eventbus.EventBus
 
 class AmazonHelper(
         private val db: DatabaseTable,
-        prefHelper: PrefHelper
+        prefHelper: PrefHelper,
+        private val eventController: EventController
 ) {
 
     companion object {
-
-        lateinit var instance: AmazonHelper
-
-        fun Init(db: DatabaseTable, prefHelper: PrefHelper) {
-            AmazonHelper(db, prefHelper)
-        }
 
         private val BUCKET_NAME_DEVELOP = "fleetdev2"
         private val BUCKET_NAME_RELEASE = "fleettlc"
@@ -50,7 +46,6 @@ class AmazonHelper(
     internal var mTrans: TransferUtility? = null
 
     init {
-        instance = this
         if (prefHelper.isDevelopment) {
             BUCKET_NAME = BUCKET_NAME_DEVELOP
         } else {

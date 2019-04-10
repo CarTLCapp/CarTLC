@@ -20,11 +20,11 @@ class SqlTableVehicleName(
 
     companion object {
 
-        private val TABLE_NAME = "table_vehicle_names"
+        private const val TABLE_NAME = "table_vehicle_names"
 
-        private val KEY_ROWID = "_id"
-        private val KEY_NAME = "name"
-        private val KEY_NUMBER = "number"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_NAME = "name"
+        private const val KEY_NUMBER = "number"
     }
 
     override val vehicleNames: List<String>

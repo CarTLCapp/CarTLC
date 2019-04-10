@@ -27,7 +27,7 @@ GET     /tech/:id/reset_upload   controllers.TechnicianController.resetUpload(id
 GET     /project                    controllers.ProjectController.list()
 GET     /project/disabled           controllers.ProjectController.list_disabled()
 GET     /project/new                controllers.ProjectController.create()
-POST    /project                    controllers.ProjectController.save()
+POST    /project/save               controllers.ProjectController.save()
 GET     /project/new/many           controllers.ProjectController.createMany()
 POST    /project/many               controllers.ProjectController.saveMany()
 GET     /project/:id                controllers.ProjectController.edit(id:Long)
@@ -35,6 +35,18 @@ POST    /project/:id                controllers.ProjectController.update(id:Long
 POST    /project/:id/delete         controllers.ProjectController.delete(id:Long)
 GET     /project/:id/enable         controllers.ProjectController.enable(id:Long)
 POST    /projects                   controllers.ProjectController.query()
+
+### ROOT PROJECTS ###
+
+GET     /project/root/list          controllers.RootProjectController.list()
+GET     /project/root/disabled      controllers.RootProjectController.list_disabled()
+POST    /project/root/save          controllers.RootProjectController.save()
+GET     /project/:id/root           controllers.RootProjectController.edit(id:Long)
+POST    /project/:id/root           controllers.RootProjectController.update(id:Long)
+POST    /project/:id/root/delete    controllers.RootProjectController.delete(id:Long)
+GET     /project/:id/root/enable    controllers.RootProjectController.enable(id:Long)
+GET     /project/root/new           controllers.RootProjectController.create()
+POST    /projects/root              controllers.RootProjectController.query()
 
 ### COMPANIES ###
 
@@ -63,7 +75,8 @@ GET     /equipment/:id/project/:projectId/remove    controllers.EquipmentControl
 POST    /equipment/:id/delete       controllers.EquipmentController.delete(id:Long)
 GET     /equipment/:id/enable       controllers.EquipmentController.enable(id:Long)
 GET     /equipment/num_entries/next controllers.EquipmentController.fillNext()
-POST    /equipments                 controllers.EquipmentController.query()
+POST    /equipments                 controllers.EquipmentController.queryOldWay()
+POST    /equipments/root            controllers.EquipmentController.queryWithRoot()
 
 ### NOTES ###
 
@@ -79,7 +92,8 @@ GET     /note/:id/project/:projectId/add       controllers.NoteController.addPro
 GET     /note/:id/project/:projectId/remove    controllers.NoteController.removeProject(id:Long, projectId:Long)
 POST    /note/:id/delete       controllers.NoteController.delete(id:Long)
 GET     /note/:id/enable       controllers.NoteController.enable(id:Long)
-POST    /notes                 controllers.NoteController.query()
+POST    /notes                 controllers.NoteController.queryOldWay()
+POST    /notes/root            controllers.NoteController.queryWithRoot()
 
 ### CLIENTS ###
 

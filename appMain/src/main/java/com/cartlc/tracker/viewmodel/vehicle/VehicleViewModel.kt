@@ -54,7 +54,7 @@ class VehicleViewModel(
 
     fun dispatchActionEvent(action: Action) = repo.dispatchActionEvent(action)
 
-    fun handleActionEvent() = repo.handleActionEvent()
+    val actionUseCase = repo.actionUseCase
 
     fun doSimpleEntryReturn(value: String) {
         store(value)

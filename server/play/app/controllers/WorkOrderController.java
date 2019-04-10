@@ -17,6 +17,7 @@ import play.mvc.Http.MultipartFormData.*;
 import play.mvc.Security;
 
 import models.*;
+import views.formdata.ImportWorkOrder;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -116,7 +117,8 @@ public class WorkOrderController extends Controller {
     public Result importWorkOrders() {
         Form<ImportWorkOrder> importForm = formFactory.form(ImportWorkOrder.class).bindFromRequest();
         StringBuilder sbuf = new StringBuilder();
-        String projectName = importForm.get().project;
+        String rootProjectName = importForm.get().rootProject;
+        String subProjectName = importForm.get().subProject;
         String companyName = importForm.get().company;
         MultipartFormData<File> body = request().body().asMultipartFormData();
         if (body != null) {
@@ -126,19 +128,23 @@ public class WorkOrderController extends Controller {
                 if (fileName.trim().length() > 0) {
                     File file = importname.getFile();
                     if (file.exists()) {
-                        Project project = Project.findByName(projectName);
-                        Client client = Secured.getClient(ctx());
-                        WorkOrderReader reader = new WorkOrderReader(client, project, companyName);
-                        if (!reader.load(file)) {
-                            sbuf.append("Errors:\n");
-                            sbuf.append(reader.getErrors());
-                            String warnings = reader.getWarnings();
-                            if (warnings.length() > 0) {
-                                sbuf.append("\nWarnings:\n");
-                                sbuf.append(warnings);
-                            }
+                        Project project = Project.findByName(rootProjectName, subProjectName);
+                        if (project == null) {
+                            sbuf.append("Project does not exist: " + rootProjectName + "-" + subProjectName);
                         } else {
-                            return INDEX(reader.getWarnings());
+                            Client client = Secured.getClient(ctx());
+                            WorkOrderReader reader = new WorkOrderReader(client, project, companyName);
+                            if (!reader.load(file)) {
+                                sbuf.append("Errors:\n");
+                                sbuf.append(reader.getErrors());
+                                String warnings = reader.getWarnings();
+                                if (warnings.length() > 0) {
+                                    sbuf.append("\nWarnings:\n");
+                                    sbuf.append(warnings);
+                                }
+                            } else {
+                                return INDEX(reader.getWarnings());
+                            }
                         }
                     } else {
                         sbuf.append("File does not exist: " + fileName);

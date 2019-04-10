@@ -28,7 +28,8 @@ class PrefHelper constructor(
 
     companion object {
 
-        const val KEY_PROJECT = "project"
+        const val KEY_ROOT_PROJECT = "root_project"
+        const val KEY_SUB_PROJECT = "sub_project"
         const val KEY_COMPANY = "company"
         const val KEY_STREET = "street"
         const val KEY_STATE = "state"
@@ -55,7 +56,7 @@ class PrefHelper constructor(
         private const val KEY_SECONDARY_TECH_ID = "secondary_tech_id"
         private const val KEY_REGISTRATION_CHANGED = "registration_changed"
         private const val KEY_IS_DEVELOPMENT = "is_development"
-        private const val KEY_SPECIAL_UPDATE_CHECK = "special_update_check"
+        private const val KEY_RELOAD_FROM_SERVER = "reload_from_server"
         private const val KEY_DO_ERROR_CHECK = "do_error_check"
         private const val KEY_AUTO_ROTATE_PICTURE = "auto_rotate_picture"
 
@@ -98,18 +99,25 @@ class PrefHelper constructor(
         get() = getString(KEY_ZIPCODE, null)
         set(value) = setString(KEY_ZIPCODE, value)
 
-    var projectName: String?
-        get() = getString(KEY_PROJECT, null)
-        set(value) = setString(KEY_PROJECT, value)
+    val projectDashName: String
+        get() = "${projectRootName ?: ""} - ${projectSubName ?: ""}"
+
+    var projectRootName: String?
+        get() = getString(KEY_ROOT_PROJECT, null)
+        set(value) = setString(KEY_ROOT_PROJECT, value)
+
+    var projectSubName: String?
+        get() = getString(KEY_SUB_PROJECT, null)
+        set(value) = setString(KEY_SUB_PROJECT, value)
 
     val projectId: Long?
         get() {
-            projectName?.let {
-                val projectNameId = db.tableProjects.queryProjectName(it)
-                return if (projectNameId >= 0) {
-                    projectNameId
-                } else null
-            } ?: return null
+            val rootName = projectRootName
+            val subName = projectSubName
+            return if (rootName != null && subName != null) {
+                val id = db.tableProjects.queryProjectId(rootName, subName)
+                if (id >= 0) id else null
+            } else null
         }
 
     var currentProjectGroupId: Long
@@ -203,19 +211,23 @@ class PrefHelper constructor(
         set(group) {
             group?.let {
                 currentProjectGroupId = group.id
-                projectName = group.projectName
+                val projectName = group.projectName
+                projectName?.let {
+                    projectRootName = projectName.first
+                    projectSubName = projectName.second
+                }
                 setAddress(group.address)
             }
         }
 
     // Note: ID zero has a special meaning, it means that the set is pending.
-    val nextPictureCollectionID: Long
+    private val nextPictureCollectionID: Long
         get() = getLong(KEY_NEXT_PICTURE_COLLECTION_ID, 1L)
 
-    val nextEquipmentCollectionID: Long
+    private val nextEquipmentCollectionID: Long
         get() = getLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, 0L)
 
-    val nextNoteCollectionID: Long
+    private val nextNoteCollectionID: Long
         get() = getLong(KEY_NEXT_NOTE_COLLECTION_ID, 1L)
 
     val address: String
@@ -227,28 +239,28 @@ class PrefHelper constructor(
             }
             val street = street
             if (street != null) {
-                if (sbuf.length > 0) {
+                if (sbuf.isNotEmpty()) {
                     sbuf.append("\n")
                 }
                 sbuf.append(street)
             }
             val city = city
             if (city != null) {
-                if (sbuf.length > 0) {
+                if (sbuf.isNotEmpty()) {
                     sbuf.append("\n")
                 }
                 sbuf.append(city)
             }
             val state = state
             if (state != null) {
-                if (sbuf.length > 0) {
+                if (sbuf.isNotEmpty()) {
                     sbuf.append(", ")
                 }
                 sbuf.append(state)
             }
             val zip = zipCode
             if (zip != null) {
-                if (sbuf.length > 0) {
+                if (sbuf.isNotEmpty()) {
                     sbuf.append(" ")
                 }
                 sbuf.append(zip)
@@ -261,17 +273,13 @@ class PrefHelper constructor(
             val value: String
             val license = licensePlate
             val number = truckNumber
-            if (TextUtils.isEmpty(license)) {
-                if (number != null) {
-                    value = number
-                } else {
-                    value = ""
-                }
+            value = if (TextUtils.isEmpty(license)) {
+                number ?: ""
             } else {
                 if (number != null) {
-                    value = DataTruck.toString(number, license)
+                    DataTruck.toString(number, license)
                 } else {
-                    value = license ?: ""
+                    license ?: ""
                 }
             }
             return value
@@ -317,19 +325,23 @@ class PrefHelper constructor(
         versionTruck = VERSION_RESET
     }
 
-    fun detectSpecialUpdateCheck() {
-        val value = getInt(KEY_SPECIAL_UPDATE_CHECK, 0)
-        if (value < 1) {
-            reloadFromServer()
-            setInt(KEY_SPECIAL_UPDATE_CHECK, 1)
+    fun detectOneTimeReloadFromServerCheck(): Boolean {
+        val value = getInt(KEY_RELOAD_FROM_SERVER, 0)
+        if (value < 2) {
+            setInt(KEY_RELOAD_FROM_SERVER, 2)
+            return true
         }
+        return false
     }
-
 
     fun setFromCurrentProjectId(): Boolean {
         val projectGroup = currentProjectGroup
         if (projectGroup != null) {
-            projectName = projectGroup.projectName
+            val name = projectGroup.projectName
+            name?.let {
+                projectRootName = it.first
+                projectSubName = it.second
+            }
             val address = projectGroup.address
             if (address != null) {
                 setAddress(address)
@@ -346,10 +358,17 @@ class PrefHelper constructor(
         company = null
         street = null
         zipCode = null
-        projectName = null
+        projectRootName = null
+        projectSubName = null
         savedProjectGroupId = currentProjectGroupId
         currentProjectGroupId = -1L
         db.tableEquipment.clearChecked()
+    }
+
+    fun clearCurProjectIfMatching(rootName: String?, subName: String?) {
+        if (projectRootName == rootName && projectSubName == subName) {
+            clearCurProject()
+        }
     }
 
     fun clearLastEntry() {
@@ -365,10 +384,8 @@ class PrefHelper constructor(
     }
 
     fun saveProjectAndAddressCombo(modifyCurrent: Boolean): Boolean {
-        val project = projectName
-        if (project.isNullOrBlank()) {
-            return false // Okay to have nothing selected
-        }
+        val rootName = projectRootName ?: return false
+        val subName = projectSubName ?: return false
         val company = company
         val state = state
         val street = street
@@ -387,14 +404,14 @@ class PrefHelper constructor(
             address.isLocal = true
             addressId = db.tableAddress.add(address)
             if (addressId < 0) {
-                Timber.e("saveProjectAndAddressCombo(): could not find address: " + address.toString())
+                Timber.e("saveProjectAndAddressCombo(): could not find address: $address")
                 clearCurProject()
                 return false
             }
         }
-        val projectNameId = db.tableProjects.queryProjectName(project)
+        val projectNameId = db.tableProjects.queryProjectId(rootName, subName)
         if (projectNameId < 0) {
-            Timber.e("saveProjectAndAddressCombo(): could not find project: $project")
+            Timber.e("saveProjectAndAddressCombo(): could not find project: $rootName - $subName")
             clearCurProject()
             return false
         }
@@ -449,7 +466,7 @@ class PrefHelper constructor(
         setLong(KEY_NEXT_NOTE_COLLECTION_ID, nextEquipmentCollectionID + 1)
     }
 
-    fun createEntry(): DataEntry? {
+    private fun createEntry(): DataEntry? {
         val projectGroupId = currentProjectGroupId
         if (projectGroupId < 0) {
             return null
@@ -512,14 +529,14 @@ class PrefHelper constructor(
         return entry
     }
 
-    fun genPictureFilename(): String {
-        val tech_id = techID.toLong()
-        val project_id = projectId!!
+    private fun genPictureFilename(): String {
+        val techId = techID.toLong()
+        val projId = projectId!!
         val sbuf = StringBuilder()
         sbuf.append("picture_t")
-        sbuf.append(tech_id)
+        sbuf.append(techId)
         sbuf.append("_p")
-        sbuf.append(project_id)
+        sbuf.append(projId)
         sbuf.append("_d")
         val fmt = SimpleDateFormat(PICTURE_DATE_FORMAT, Locale.getDefault())
         sbuf.append(fmt.format(Date(System.currentTimeMillis())))

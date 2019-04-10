@@ -20,7 +20,8 @@ public class EntryListWriter {
 
     static final String TECH_NAME = "Name";
     static final String DATE = "Date";
-    static final String PROJECT = "Project";
+    static final String ROOT_PROJECT = "Root";
+    static final String SUB_PROJECT = "Sub";
     static final String COMPANY = "Company";
     static final String STREET = "Street";
     static final String CITY = "City";
@@ -50,7 +51,9 @@ public class EntryListWriter {
         mBR.write(",");
         mBR.write(TECH_NAME);
         mBR.write(",");
-        mBR.write(PROJECT);
+        mBR.write(ROOT_PROJECT);
+        mBR.write(",");
+        mBR.write(SUB_PROJECT);
         mBR.write(",");
         mBR.write(COMPANY);
         mBR.write(",");
@@ -91,7 +94,9 @@ public class EntryListWriter {
             mBR.write(",");
             mBR.write(entry.getTechName());
             mBR.write(",");
-            mBR.write(entry.getProjectLine());
+            mBR.write(entry.getRootProjectName());
+            mBR.write(",");
+            mBR.write(entry.getSubProjectName());
             mBR.write(",");
             mBR.write(entry.getCompany());
             mBR.write(",");

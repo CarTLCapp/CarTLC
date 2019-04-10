@@ -14,6 +14,7 @@ import static play.data.Form.*;
 import play.Logger;
 
 import models.*;
+import views.formdata.InputLines;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -149,7 +150,7 @@ public class NoteController extends Controller {
             if (!name.isEmpty()) {
                 if (name.startsWith(PROJECT)) {
                     String line = name.substring(PROJECT.length()).trim();
-                    String [] project_names = line.split(",");
+                    String[] project_names = line.split(",");
                     for (String project_name : project_names) {
                         String use_name = project_name.trim();
                         if (use_name.length() > 0) {
@@ -258,13 +259,21 @@ public class NoteController extends Controller {
         collection.note_id = id;
         collection = ProjectNoteCollection.get(collection);
         if (collection != null) {
-            ProjectNoteCollection.find.ref(collection.id).delete();
+            ProjectNoteCollection.find.byId(collection.id).delete();
             Version.inc(Version.VERSION_NOTE);
         }
         return edit(id);
     }
 
-    public Result query() {
+    public Result queryOldWay() {
+        return query(false);
+    }
+
+    public Result queryWithRoot() {
+        return query(true);
+    }
+
+    public Result query(boolean withRoot) {
         JsonNode json = request().body().asJson();
         JsonNode value = json.findValue("tech_id");
         if (value == null) {
@@ -285,13 +294,11 @@ public class NoteController extends Controller {
         }
         array = top.putArray("project_note");
         for (ProjectNoteCollection item : ProjectNoteCollection.find.all()) {
-            if (noteIds.contains(item.note_id)) {
-                if (!Note.isDisabled(item.note_id)) {
-                    ObjectNode node = array.addObject();
-                    node.put("id", item.id);
-                    node.put("project_id", item.project_id);
-                    node.put("note_id", item.note_id);
-                }
+            if (noteIds.contains(item.note_id) && !Note.isDisabled(item.note_id) && Project.IsValid(item.project_id, withRoot)) {
+                ObjectNode node = array.addObject();
+                node.put("id", item.id);
+                node.put("project_id", item.project_id);
+                node.put("note_id", item.note_id);
             }
         }
         return ok(top);

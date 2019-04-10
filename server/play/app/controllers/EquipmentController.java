@@ -5,27 +5,36 @@ package controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
+
 import play.mvc.*;
 import play.data.*;
+
 import static play.data.Form.*;
+
 import play.Logger;
+
 import com.avaje.ebean.PagedList;
 
 import models.*;
+import views.formdata.InputLines;
 import modules.WorkerExecutionContext;
 import modules.CalcHelper;
 
 import java.util.List;
 import java.util.ArrayList;
+
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
+
 import play.db.ebean.Transactional;
 import play.libs.Json;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.concurrent.*;
+
 import play.libs.concurrent.HttpExecution;
 
 /**
@@ -85,9 +94,9 @@ public class EquipmentController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result list(int page, boolean disabled) {
         return ok(views.html.equipment_list.render(
-                    calcRowItem.init(page, disabled),
-                    Secured.getClient(ctx()),
-                    disabled));
+                calcRowItem.init(page, disabled),
+                Secured.getClient(ctx()),
+                disabled));
     }
 
     @Security.Authenticated(Secured.class)
@@ -199,7 +208,8 @@ public class EquipmentController extends Controller {
             name = name.trim();
             if (!name.isEmpty()) {
                 if (name.startsWith(PROJECT)) {
-                    Project project = Project.findByName(name.substring(PROJECT.length()).trim());
+                    String fullName = name.substring(PROJECT.length()).trim();
+                    Project project = Project.findByName(fullName);
                     if (project != null) {
                         activeProject = project;
                         continue;
@@ -281,13 +291,21 @@ public class EquipmentController extends Controller {
         collection.equipment_id = id;
         collection = ProjectEquipmentCollection.get(collection);
         if (collection != null) {
-            ProjectEquipmentCollection.find.ref(collection.id).delete();
+            ProjectEquipmentCollection.find.byId(collection.id).delete();
             Version.inc(Version.VERSION_EQUIPMENT);
         }
         return edit(id);
     }
 
-    public Result query() {
+    public Result queryOldWay() {
+        return query(false);
+    }
+
+    public Result queryWithRoot() {
+        return query(true);
+    }
+
+    private Result query(boolean withRoot) {
         JsonNode json = request().body().asJson();
         JsonNode value = json.findValue("tech_id");
         if (value == null) {
@@ -296,7 +314,6 @@ public class EquipmentController extends Controller {
         int tech_id = value.intValue();
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("equipments");
-        // List<Equipment> equipments = Equipment.appList(tech_id);
         List<Equipment> equipments = Equipment.all();
         List<Long> equipmentIds = new ArrayList<Long>();
         for (Equipment item : equipments) {
@@ -315,7 +332,7 @@ public class EquipmentController extends Controller {
             if (equipmentIds.contains(item.equipment_id)) {
                 Project project = Project.get(item.project_id);
                 Equipment equipment = Equipment.get(item.equipment_id);
-                if (project != null && !project.disabled && equipment != null && !equipment.disabled) {
+                if (project != null && !project.disabled && equipment != null && !equipment.disabled && project.isValid(withRoot)) {
                     ObjectNode node = array.addObject();
                     node.put("id", item.id);
                     node.put("project_id", item.project_id);

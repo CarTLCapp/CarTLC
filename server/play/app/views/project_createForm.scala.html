@@ -1,23 +1,29 @@
-@(projectForm: Form[Project])
+@(projectForm: Form[views.formdata.ProjectData])
 
 @import helper._
 
 @import b3.vertical.fieldConstructor
 
-@main("Fleet TLC - New Project", home = "/project") {
+@main("Fleet TLC - New Sub Project", home = "/project") {
     
-    <h1>Add a project</h1>
+    <h1>Add a sub project</h1>
     
     @b3.form(routes.ProjectController.save()) {
 
         @CSRF.formField
 
         <fieldset>
+            @b3.select(
+                projectForm("rootProject"),
+                options(Entry.optionsRootProject),
+                '_label -> "Root Project", '_default -> "-- Choose Root Project --",
+                '_showConstraints -> false
+            )
             @b3.text(projectForm("name"), '_label -> "Name", '_help -> "")
         </fieldset>
         
         <div class="actions">
-            <input type="submit" value="Create this project" class="btn primary"> or
+            <input type="submit" value="Create this sub project" class="btn primary"> or
             <a href="@routes.ProjectController.list()" class="btn">Cancel</a>
         </div>
     }

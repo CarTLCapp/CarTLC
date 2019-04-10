@@ -3,68 +3,93 @@
  */
 package com.cartlc.tracker.viewmodel.main
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.event.Button
 import com.cartlc.tracker.model.flow.*
-import com.cartlc.tracker.model.misc.ErrorMessage
-import com.cartlc.tracker.model.misc.StringMessage
+import com.cartlc.tracker.model.msg.ErrorMessage
+import com.cartlc.tracker.model.msg.StringMessage
 import com.cartlc.tracker.model.misc.TruckStatus
+import com.cartlc.tracker.model.msg.MessageHandler
+import com.cartlc.tracker.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.viewmodel.frag.ButtonsViewModel
 
-class MainButtonsViewModel(repo: CarRepository) : ButtonsViewModel(repo) {
-
-    companion object {
-        private val ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG // true=Debugging only
-    }
+class MainButtonsViewModel(
+        boundFrag: BoundFrag,
+        private val messageHandler: MessageHandler
+) : ButtonsViewModel(boundFrag.repo, messageHandler), LifecycleObserver, FlowUseCase.Listener {
 
     val isLocalCompany: Boolean
         get() = db.tableAddress.isLocalCompanyOnly(prefHelper.company)
 
-    val isCenterButtonEdit: Boolean
+    private var curFlowValue: Flow
+        get() = repo.curFlowValue
+        set(value) { repo.curFlowValue = value }
+
+    private val isCenterButtonEdit: Boolean
         get() = curFlowValue.stage == Stage.COMPANY && isLocalCompany
 
-    var entryTextValue: () -> String = { "" }
-    var notes: () -> List<DataNote> = { emptyList() }
+    var save: (isNext: Boolean) -> Boolean = { false }
 
-    internal var companyEditing: String? = null
     internal var wasNext: Boolean = false
     internal var didAutoSkip: Boolean = false
 
-    private var errorValue: ErrorMessage
-        get() = repo.errorValue
-        set(value) {
-            repo.errorValue = value
-        }
+    init {
+        boundFrag.bindObserver(this)
+        repo.flowUseCase.registerListener(this)
+    }
+
+    // region lifecycle
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun onCreate() {
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun onDestroy() {
+        repo.flowUseCase.unregisterListener(this)
+    }
+
+    // endregion lifecycle
 
     fun dispatchActionEvent(action: Action) {
         repo.dispatchActionEvent(action)
     }
 
-    fun reset(flow: Flow) {
+    // region FlowUseCase.Listener
+
+    override fun onStageChangedAboutTo(flow: Flow) {
         showChangeButtonValue = false
         showCenterButtonValue = false
-        centerTextValue = getString(StringMessage.btn_add)
+        centerTextValue = messageHandler.getString(StringMessage.btn_add)
         showNextButtonValue = flow.hasNext
-        nextTextValue = getString(StringMessage.btn_next)
+        nextTextValue = messageHandler.getString(StringMessage.btn_next)
         showPrevButtonValue = flow.hasPrev
-        prevTextValue = getString(StringMessage.btn_prev)
+        prevTextValue = messageHandler.getString(StringMessage.btn_prev)
     }
 
+    override fun onStageChanged(flow: Flow) {
+    }
+
+    // region FlowUseCase.Listener
+
     fun checkCenterButtonIsEdit() {
-        if (isCenterButtonEdit) {
-            centerTextValue = getString(StringMessage.btn_edit)
+        centerTextValue = if (isCenterButtonEdit) {
+            messageHandler.getString(StringMessage.btn_edit)
         } else {
-            centerTextValue = getString(StringMessage.btn_add)
+            messageHandler.getString(StringMessage.btn_add)
         }
     }
 
     private fun btnPrev() {
         if (confirmPrev()) {
             wasNext = false
-            companyEditing = null
+            repo.companyEditing = null
             curFlowValue.prev()
         }
     }
@@ -76,7 +101,7 @@ class MainButtonsViewModel(repo: CarRepository) : ButtonsViewModel(repo) {
     private fun btnNext(wasAutoSkip: Boolean = false) {
         if (confirmNext()) {
             didAutoSkip = wasAutoSkip
-            companyEditing = null
+            repo.companyEditing = null
             advance()
         }
     }
@@ -95,6 +120,7 @@ class MainButtonsViewModel(repo: CarRepository) : ButtonsViewModel(repo) {
     private fun confirmCenter(): Boolean {
         when (curFlowValue.stage) {
             Stage.LOGIN -> dispatchActionEvent(Action.SAVE_LOGIN_INFO)
+            else -> {}
         }
         return true
     }
@@ -115,91 +141,6 @@ class MainButtonsViewModel(repo: CarRepository) : ButtonsViewModel(repo) {
     private fun advance() {
         wasNext = true
         curFlowValue.next()
-    }
-
-    private fun save(isNext: Boolean): Boolean {
-        val entryText = entryTextValue()
-        when (curFlowValue.stage) {
-            Stage.TRUCK ->
-                if (entryText.isEmpty()) {
-                    if (isNext) {
-                        errorValue = ErrorMessage.NEED_A_TRUCK
-                    }
-                    if (!ALLOW_EMPTY_TRUCK) {
-                        return false
-                    }
-                    // For debugging purposes only.
-                    prefHelper.truckNumber = null
-                    prefHelper.licensePlate = null
-                    prefHelper.doErrorCheck = true
-                } else {
-                    prefHelper.parseTruckValue(entryText)
-                }
-            Stage.ADD_CITY -> prefHelper.city = entryText
-            Stage.ADD_STREET -> prefHelper.street = entryText
-            Stage.ADD_EQUIPMENT -> {
-                val name = entryText
-                if (!name.isEmpty()) {
-                    val group = prefHelper.currentProjectGroup
-                    if (group != null) {
-                        db.tableCollectionEquipmentProject.addLocal(name, group.projectNameId)
-                    }
-                }
-            }
-            Stage.EQUIPMENT ->
-                if (isNext) {
-                    if (db.tableEquipment.countChecked() == 0) {
-                        errorValue = ErrorMessage.NEED_EQUIPMENT
-                        return false
-                    }
-                }
-            Stage.ADD_COMPANY -> {
-                val newCompanyName = entryText.trim { it <= ' ' }
-                if (isNext) {
-                    if (newCompanyName.isEmpty()) {
-                        errorValue = ErrorMessage.NEED_NEW_COMPANY
-                        return false
-                    }
-                    prefHelper.company = newCompanyName
-                    companyEditing?.let {
-                        val companies = db.tableAddress.queryByCompanyName(it)
-                        for (address in companies) {
-                            address.company = newCompanyName
-                            db.tableAddress.update(address)
-                        }
-                    }
-                }
-            }
-            Stage.COMPANY ->
-                if (isNext) {
-                    if (prefHelper.company.isNullOrBlank()) {
-                        errorValue = ErrorMessage.NEED_COMPANY
-                        return false
-                    }
-                }
-            Stage.NOTES ->
-                if (isNext) {
-                    if (!repo.isNotesComplete(notes())) {
-                        dispatchActionEvent(Action.SHOW_NOTE_ERROR)
-                        return false
-                    }
-                }
-            Stage.STATUS ->
-                if (isNext) {
-                    if (prefHelper.status === TruckStatus.UNKNOWN) {
-                        errorValue = ErrorMessage.NEED_STATUS
-                        return false
-                    }
-                }
-            Stage.CONFIRM ->
-                if (isNext) {
-                    dispatchActionEvent(Action.CONFIRM_DIALOG)
-                    return false
-                }
-            else -> {
-            }
-        }
-        return true
     }
 
     fun showNoteErrorOk() {

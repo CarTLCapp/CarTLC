@@ -14,6 +14,7 @@ import play.data.*;
 import static play.data.Form.*;
 
 import models.*;
+import views.formdata.InputClient;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -143,7 +144,7 @@ public class ClientController extends Controller {
         List<Project> projects = new ArrayList<Project>();
         for (Project project : Project.list()) {
             try {
-                if (clientForm.field(project.name).getValue().get().equals("true")) {
+                if (clientForm.field(project.getFullProjectName()).getValue().get().equals("true")) {
                     projects.add(project);
                 }
             } catch (Exception ex) {

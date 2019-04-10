@@ -39,7 +39,7 @@ public class WorkOrderSummary {
     public String getProjectName() {
         Project project = Project.get(project_id);
         if (project != null) {
-            return project.name;
+            return project.getFullProjectName();
         }
         return "";
     }
@@ -124,7 +124,7 @@ public class WorkOrderSummary {
         if (last_date == null) {
             return "";
         }
-        return new SimpleDateFormat("yyyy-MM-dd kk:mm").format(last_date);
+        return new SimpleDateFormat("dd/MM/yyyy kk:mm z").format(last_date);
     }
 
 }

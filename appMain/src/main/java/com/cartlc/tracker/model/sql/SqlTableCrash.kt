@@ -23,15 +23,15 @@ class SqlTableCrash(
 
     companion object {
 
-        internal val TABLE_NAME = "table_crash"
+        private const val TABLE_NAME = "table_crash"
 
-        internal val KEY_ROWID = "_id"
-        internal val KEY_DATE = "date"
-        internal val KEY_CODE = "code"
-        internal val KEY_MESSAGE = "message"
-        internal val KEY_TRACE = "trace"
-        internal val KEY_VERSION = "version"
-        internal val KEY_UPLOADED = "uploaded"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_DATE = "date"
+        private const val KEY_CODE = "code"
+        private const val KEY_MESSAGE = "message"
+        private const val KEY_TRACE = "trace"
+        private const val KEY_VERSION = "version"
+        private const val KEY_UPLOADED = "uploaded"
 
         fun upgrade10(db: DatabaseTable, dbSql: SQLiteDatabase) {
             try {

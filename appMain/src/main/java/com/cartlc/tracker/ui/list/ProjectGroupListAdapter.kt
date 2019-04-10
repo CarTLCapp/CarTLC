@@ -24,24 +24,20 @@ class ProjectGroupListAdapter(
         private val vm: MainListViewModel
 ) : RecyclerView.Adapter<ProjectGroupListAdapter.CustomViewHolder>() {
 
-    private val mLayoutInflater: LayoutInflater
-    private var mProjectGroups: List<DataProjectAddressCombo> = emptyList()
-    private var mCurProjectGroupId: Long? = null
+    private val layoutInflater: LayoutInflater = LayoutInflater.from(mContext)
+    private var projectGroups: List<DataProjectAddressCombo> = emptyList()
+    private var curProjectGroupId: Long? = null
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
-    init {
-        mLayoutInflater = LayoutInflater.from(mContext)
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
-        val view = mLayoutInflater.inflate(R.layout.entry_item_project, null)
+        val view = layoutInflater.inflate(R.layout.entry_item_project, null)
         return CustomViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
-        val projectGroup = mProjectGroups[position]
-        holder.view.project_name.text = projectGroup.projectName
+        val projectGroup = projectGroups[position]
+        holder.view.project_name.text = projectGroup.projectDashName
         val count = vm.countProjectAddressCombo(projectGroup.id)
         if (count.totalEntries > 0) {
             val sbuf = StringBuilder()
@@ -72,7 +68,7 @@ class ProjectGroupListAdapter(
         } else {
             holder.view.project_address.text = address.block
         }
-        if (projectGroup.id == mCurProjectGroupId) {
+        if (projectGroup.id == curProjectGroupId) {
             holder.itemView.setBackgroundResource(R.color.project_highlight)
         } else {
             holder.itemView.setBackgroundResource(R.color.project_normal)
@@ -81,18 +77,18 @@ class ProjectGroupListAdapter(
     }
 
     private fun setSelected(group: DataProjectAddressCombo) {
-        mCurProjectGroupId = group.id
+        curProjectGroupId = group.id
         vm.currentProjectGroup = group
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
-        return mProjectGroups.size
+        return projectGroups.size
     }
 
     fun onDataChanged() {
-        mProjectGroups = vm.projectGroups
-        mCurProjectGroupId = vm.currentProjectGroupId
+        projectGroups = vm.projectGroups
+        curProjectGroupId = vm.currentProjectGroupId
         notifyDataSetChanged()
     }
 

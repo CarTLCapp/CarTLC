@@ -23,15 +23,15 @@ class SqlTableNote constructor(
         private val dbSql: SQLiteDatabase
 ): TableNote {
     companion object {
-        private val TABLE_NAME = "list_notes"
+        private const val TABLE_NAME = "list_notes"
 
-        private val KEY_ROWID = "_id"
-        private val KEY_NAME = "name"
-        private val KEY_VALUE = "value"
-        private val KEY_TYPE = "type"
-        private val KEY_NUM_DIGITS = "num_digits"
-        private val KEY_SERVER_ID = "server_id"
-        private val KEY_IS_BOOT = "is_boot_strap"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_NAME = "name"
+        private const val KEY_VALUE = "value"
+        private const val KEY_TYPE = "type"
+        private const val KEY_NUM_DIGITS = "num_digits"
+        private const val KEY_SERVER_ID = "server_id"
+        private const val KEY_IS_BOOT = "is_boot_strap"
 
         fun upgrade3(db: SQLiteDatabase) {
             try {

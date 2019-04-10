@@ -5,12 +5,12 @@ package com.cartlc.tracker.model.sql
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import com.cartlc.tracker.model.data.DataProject
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.model.table.TableProjects
 
 import com.cartlc.tracker.ui.app.TBApplication
-
 import timber.log.Timber
 
 /**
@@ -24,13 +24,14 @@ class SqlTableProjects(
 
     companion object {
 
-        private val TABLE_NAME = "list_projects"
+        private const val TABLE_NAME = "list_projects"
 
-        private val KEY_ROWID = "_id"
-        private val KEY_NAME = "name"
-        private val KEY_SERVER_ID = "server_id"
-        private val KEY_DISABLED = "disabled"
-        private val KEY_IS_BOOT = "is_boot_strap"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_NAME = "name" // sub_project if root_project not null
+        private const val KEY_ROOT_PROJECT = "root_project"
+        private const val KEY_SERVER_ID = "server_id"
+        private const val KEY_DISABLED = "disabled"
+        private const val KEY_IS_BOOT = "is_boot_strap"
     }
 
     fun create() {
@@ -42,6 +43,8 @@ class SqlTableProjects(
         sbuf.append(" integer primary key autoincrement, ")
         sbuf.append(KEY_NAME)
         sbuf.append(" text not null, ")
+        sbuf.append(KEY_ROOT_PROJECT)
+        sbuf.append(" text, ")
         sbuf.append(KEY_SERVER_ID)
         sbuf.append(" integer, ")
         sbuf.append(KEY_DISABLED)
@@ -49,6 +52,14 @@ class SqlTableProjects(
         sbuf.append(KEY_IS_BOOT)
         sbuf.append(" bit default 0)")
         dbSql.execSQL(sbuf.toString())
+    }
+
+    fun upgrade17() {
+        try {
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_ROOT_PROJECT text")
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableProjects::class.java, "upgrade17()", "db")
+        }
     }
 
     fun clear() {
@@ -79,24 +90,6 @@ class SqlTableProjects(
         }
     }
 
-    fun add(list: List<String>) {
-        dbSql.beginTransaction()
-        try {
-            val values = ContentValues()
-            for (value in list) {
-                values.clear()
-                values.put(KEY_NAME, value)
-                values.put(KEY_DISABLED, 0)
-                dbSql.insert(TABLE_NAME, null, values)
-            }
-            dbSql.setTransactionSuccessful()
-        } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableProjects::class.java, "add()", "db")
-        } finally {
-            dbSql.endTransaction()
-        }
-    }
-
     override fun addTest(item: String): Long {
         var id = -1L
         dbSql.beginTransaction()
@@ -115,13 +108,14 @@ class SqlTableProjects(
         return id
     }
 
-    override fun add(item: String, server_id: Int, disabled: Boolean): Long {
+    override fun add(rootProject: String, subProject: String, serverId: Int, disabled: Boolean): Long {
         var id = -1L
         dbSql.beginTransaction()
         try {
             val values = ContentValues()
-            values.put(KEY_NAME, item)
-            values.put(KEY_SERVER_ID, server_id)
+            values.put(KEY_ROOT_PROJECT, rootProject)
+            values.put(KEY_NAME, subProject)
+            values.put(KEY_SERVER_ID, serverId)
             values.put(KEY_DISABLED, if (disabled) 1 else 0)
             id = dbSql.insert(TABLE_NAME, null, values)
             dbSql.setTransactionSuccessful()
@@ -139,6 +133,7 @@ class SqlTableProjects(
         try {
             val values = ContentValues()
             values.put(KEY_NAME, project.name)
+            values.put(KEY_ROOT_PROJECT, project.rootProject)
             values.put(KEY_SERVER_ID, project.serverId)
             values.put(KEY_DISABLED, if (project.disabled) 1 else 0)
             values.put(KEY_IS_BOOT, if (project.isBootStrap) 1 else 0)
@@ -168,60 +163,48 @@ class SqlTableProjects(
         return count
     }
 
-
-    override fun query(activeOnly: Boolean): List<String> {
-        val list = mutableListOf<String>()
-        try {
-            val columns = arrayOf(KEY_NAME, KEY_DISABLED)
-            val orderBy = "$KEY_NAME ASC"
-            // Warning: do not use KEY_DISABLED=0 in selection because I failed to include "default 0"
-            // for the column definition above on earlier versions. This means the value is actually NULL.
-            val cursor = dbSql.query(TABLE_NAME, columns, null, null, null, null, orderBy)
-            val idxValue = cursor.getColumnIndex(KEY_NAME)
-            val idxDisabled = cursor.getColumnIndex(KEY_DISABLED)
-            while (cursor.moveToNext()) {
-                val name = cursor.getString(idxValue)
-                val disabled = cursor.getShort(idxDisabled).toInt() == 1
-                if (!activeOnly || !disabled) {
-                    list.add(name)
-                }
-            }
-            cursor.close()
-        } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableProjects::class.java, "query()", "db")
-        }
-
-        // Move enteredOther to bottom of the list.
-        if (list.contains(TBApplication.OTHER)) {
-            list.remove(TBApplication.OTHER)
-            list.add(TBApplication.OTHER)
-        }
-        return list
+    /**
+     * Returns list of project names.
+     *
+     * If the project has a rootProject, the return string will be on the form:
+     * $rootProject - $subProject
+     */
+    override fun query(activeOnly: Boolean): List<DataProject> {
+        return query(null, null)
     }
 
-    override fun queryProjectName(id: Long): String? {
-        var projectName: String? = null
+    /**
+     * Return project name from id.
+     * If the project has a rootProject, the returned name will be of the form
+     * $rootProject - $subProject
+     */
+    // TODO:
+    override fun queryProjectName(id: Long): Pair<String, String>? {
         try {
-            val columns = arrayOf(KEY_NAME)
+            val columns = arrayOf(KEY_NAME, KEY_ROOT_PROJECT)
             val selection = "$KEY_ROWID=?"
             val selectionArgs = arrayOf(java.lang.Long.toString(id))
             val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null)
             val idxValue = cursor.getColumnIndex(KEY_NAME)
+            val idxRootProject = cursor.getColumnIndex(KEY_ROOT_PROJECT)
             if (cursor.moveToFirst()) {
-                projectName = cursor.getString(idxValue)
+                val subName = cursor.getString(idxValue)
+                val rootName = cursor.getString(idxRootProject)
+                cursor.close()
+                return Pair(rootName, subName)
             }
             cursor.close()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableProjects::class.java, "queryProjectName()", "db")
         }
-        return projectName
+        return null
     }
 
     override fun queryByServerId(server_id: Int): DataProject? {
         val selection = "$KEY_SERVER_ID=?"
         val selectionArgs = arrayOf(Integer.toString(server_id))
         val list = query(selection, selectionArgs)
-        return if (list.size > 0) {
+        return if (list.isNotEmpty()) {
             list[0]
         } else null
     }
@@ -230,7 +213,7 @@ class SqlTableProjects(
         val selection = "$KEY_ROWID=?"
         val selectionArgs = arrayOf(java.lang.Long.toString(id))
         val list = query(selection, selectionArgs)
-        return if (list.size > 0) {
+        return if (list.isNotEmpty()) {
             list[0]
         } else null
     }
@@ -240,27 +223,29 @@ class SqlTableProjects(
         return project.disabled
     }
 
-    override fun queryByName(name: String): DataProject? {
-        val selection = "$KEY_NAME=?"
-        val selectionArgs = arrayOf(name)
+    override fun queryByName(rootName: String, subProject: String): DataProject? {
+        val selection = "$KEY_ROOT_PROJECT=? AND $KEY_NAME=?"
+        val selectionArgs = arrayOf(rootName, subProject)
         val list = query(selection, selectionArgs)
-        return if (list.size > 0) {
+        return if (list.isNotEmpty()) {
             list[0]
         } else null
     }
 
-    internal fun query(selection: String, selectionArgs: Array<String>): List<DataProject> {
+    private fun query(selection: String?, selectionArgs: Array<String>?): List<DataProject> {
         val list = mutableListOf<DataProject>()
         try {
             val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null)
             val idxValue = cursor.getColumnIndex(KEY_NAME)
             val idxRowId = cursor.getColumnIndex(KEY_ROWID)
+            val idxRootProject = cursor.getColumnIndex(KEY_ROOT_PROJECT)
             val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
             val idxDisabled = cursor.getColumnIndex(KEY_DISABLED)
             val idxTest = cursor.getColumnIndex(KEY_IS_BOOT)
             while (cursor.moveToNext()) {
                 val project = DataProject()
                 project.name = cursor.getString(idxValue)
+                project.rootProject = cursor.getString(idxRootProject)
                 project.disabled = cursor.getShort(idxDisabled).toInt() != 0
                 project.isBootStrap = cursor.getShort(idxTest).toInt() != 0
                 project.serverId = cursor.getInt(idxServerId)
@@ -274,20 +259,46 @@ class SqlTableProjects(
         return list
     }
 
-    override fun queryProjectName(name: String): Long {
+    override fun queryRootProjectNames(): List<String> {
+        val projects = query(true)
+        val names = mutableListOf<String>()
+        for (project in projects) {
+            if (project.name != null) {
+                project.rootProject?.let { name ->
+                    if (!names.contains(name)) {
+                        names.add(name)
+                    }
+                }
+            }
+        }
+        return names
+    }
+
+    override fun querySubProjectNames(rootName: String): List<String> {
+        val selection = "$KEY_ROOT_PROJECT=?"
+        val selectionArgs = arrayOf(rootName)
+        val list = query(selection, selectionArgs)
+        val names = mutableListOf<String>()
+        for (project in list) {
+            project.name?.let { name -> names.add(name) }
+        }
+        return names
+    }
+
+    override fun queryProjectId(rootName: String, subProject: String): Long {
         var rowId = -1L
         try {
             val columns = arrayOf(KEY_ROWID)
-            val selection = "$KEY_NAME=?"
-            val selectionArgs = arrayOf(name)
+            val selection = "$KEY_ROOT_PROJECT=? AND $KEY_NAME=?"
+            val selectionArgs = arrayOf(rootName, subProject)
             val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null)
             val idxValue = cursor.getColumnIndex(KEY_ROWID)
             if (cursor.moveToFirst()) {
                 rowId = cursor.getLong(idxValue)
             }
             cursor.close()
-        } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableProjects::class.java, "queryProjectName()", name)
+        } catch (ex: SQLiteException) {
+            TBApplication.ReportError(ex, SqlTableProjects::class.java, "queryProjectName()", "$rootName - $subProject")
         }
         return rowId
     }
@@ -295,10 +306,8 @@ class SqlTableProjects(
     override fun removeOrDisable(project: DataProject) {
         if (db.tableEntry.countProjects(project.id) == 0 && db.tableProjectAddressCombo.countProjects(project.id) == 0) {
             // No entries for this, so just remove.
-            Timber.i("remove(" + project.id + ", " + project.name + ")")
             remove(project.id)
         } else {
-            Timber.i("disable(" + project.id + ", " + project.name + ")")
             project.disabled = true
             update(project)
         }

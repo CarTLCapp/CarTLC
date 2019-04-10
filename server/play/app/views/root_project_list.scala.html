@@ -1,0 +1,66 @@
+@(currentPage: List[RootProject], client : Client, disabled : Boolean)
+
+@header = { @Messages("root_project.list.title", currentPage.size()) }
+
+@main(Messages("root_project.list.header", if (disabled) "Disabled" else "Active"), client, "/project") {
+
+    @if(RootProject.hasDisabled()) {
+        @if(disabled) {
+            <h1 id="homeTitle" class="fill">@header
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.RootProjectController.list()">Show Active Root Projects</a>
+                </span>
+            </h1>
+        } else {
+            <h1 id="homeTitle" class="fill">@header
+                <span style="float:right;font-size:16px">
+                    <a href="@routes.RootProjectController.list_disabled()">Show Disabled Root Projects</a>
+                </span>
+            </h1>
+        }
+    } else {
+        <h1 id="homeTitle">@header</h1>
+    }
+
+    @if(currentPage.size() == 0) {
+        
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+        
+    } else {
+        
+        <table class="projects zebra-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(project <- currentPage) {
+                    <tr>
+                        <td>@project.name</td>
+                        <td>
+                            @if(client.is_admin) {
+                                <a href="@routes.RootProjectController.edit(project.id)">Edit</a>
+                            } else {
+                                <em>-</em>
+                            }
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        
+    }
+
+    @if(client.is_admin && !disabled) {
+        <a class="btn success" id="add" href="@routes.RootProjectController.create()">Add a new root project</a>
+    }
+
+}
+
+            

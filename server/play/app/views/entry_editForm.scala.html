@@ -22,9 +22,15 @@
             )
             @b3.text(entryForm("date"), '_label -> "Date", '_help -> "")
             @b3.select(
-                entryForm("project"),
-                options(Entry.optionsProject),
-                '_label -> "Project", '_default -> "-- Choose Project --",
+                entryForm("rootProject"),
+                options(Entry.optionsRootProject),
+                '_label -> "Root Project", '_default -> "-- Choose Root Project --",
+                '_showConstraints -> false
+            )
+            @b3.select(
+                entryForm("subProject"),
+                options(entryForm.get().optionsSubProject),
+                '_label -> "Sub Project", '_default -> "-- Choose Sub Project --",
                 '_showConstraints -> false
             )
             @b3.text(entryForm("address"), '_label -> "Address", '_help -> "")

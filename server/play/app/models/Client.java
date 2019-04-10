@@ -45,7 +45,7 @@ public class Client extends com.avaje.ebean.Model {
 
     public static Client get(long id) {
         if (id > 0) {
-            return find.ref(id);
+            return find.byId(id);
         }
         return null;
     }
@@ -138,7 +138,7 @@ public class Client extends com.avaje.ebean.Model {
             if (sbuf.length() > 0) {
                 sbuf.append(split);
             }
-            sbuf.append(project.name);
+            sbuf.append(project.getFullProjectName());
         }
         return sbuf.toString();
     }

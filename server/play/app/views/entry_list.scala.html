@@ -1,4 +1,4 @@
-@(currentPage: EntryPagedList, currentSortBy: String, currentOrder: String, searchForm : Form[InputSearch], client : Client)
+@(currentPage: EntryPagedList, currentSortBy: String, currentOrder: String, searchForm : Form[views.formdata.InputSearch], client : Client)
 
 @import helper._
 
@@ -76,8 +76,10 @@
                 <tr>
                     <th style="width:55px"><input style="margin-right:5px" id="all" type="checkbox" value="ALL">Row</th>
                     @header("tech", "Name")
-                    @header("time", "Date")
-                    @header("project", "Project")
+                    @header("date", "Date")
+                    @header("time", "Time")
+                    <th>Root</th>
+                    @header("sub_project", "Sub Project")
                     @header("company", "Company")
                     @header("street", "Street / Plant Name")
                     @header("city", "City")
@@ -100,7 +102,9 @@
                         <td><input class="entryCheckbox" style="margin-right:5px" type="checkbox" value="@entry.id">@currentPage.getRowNumber()</td>
                         <td>@currentPage.highlightSearch(entry.getTechName())</td>
                         <td>@entry.getDate()</td>
-                        <td>@currentPage.highlightSearch(entry.getProjectLine())</td>
+                        <td>@entry.getTime()</td>
+                        <td>@currentPage.highlightSearch(entry.getRootProjectName())</td>
+                        <td>@currentPage.highlightSearch(entry.getSubProjectName())</td>
                         <td>@currentPage.highlightSearch(entry.getCompany())</td>
                         <td>@currentPage.highlightSearch(entry.getStreet())</td>
                         <td>@currentPage.highlightSearch(entry.getCity())</td>

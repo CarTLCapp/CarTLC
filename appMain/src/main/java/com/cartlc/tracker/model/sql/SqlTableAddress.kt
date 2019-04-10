@@ -26,18 +26,18 @@ class SqlTableAddress(
 ) : TableAddress {
 
     companion object {
-        private val TABLE_NAME = "list_address"
+        private const val TABLE_NAME = "list_address"
 
-        private val KEY_ROWID = "_id"
-        private val KEY_COMPANY = "company"
-        private val KEY_STREET = "street"
-        private val KEY_CITY = "city"
-        private val KEY_STATE = "state"
-        private val KEY_ZIPCODE = "zipcode"
-        private val KEY_SERVER_ID = "server_id"
-        private val KEY_DISABLED = "disabled"
-        private val KEY_LOCAL = "local"
-        private val KEY_IS_BOOT = "is_boot_strap"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_COMPANY = "company"
+        private const val KEY_STREET = "street"
+        private const val KEY_CITY = "city"
+        private const val KEY_STATE = "state"
+        private const val KEY_ZIPCODE = "zipcode"
+        private const val KEY_SERVER_ID = "server_id"
+        private const val KEY_DISABLED = "disabled"
+        private const val KEY_LOCAL = "local"
+        private const val KEY_IS_BOOT = "is_boot_strap"
     }
 
     internal inner class SelectionArgs(company: String?, street: String?, city: String?, state: String?, zipcode: String?) {

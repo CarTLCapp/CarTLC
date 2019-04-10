@@ -120,7 +120,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
         if (project == null) {
             return "";
         }
-        return project.name;
+        return project.getFullProjectName();
     }
 
     public Company getCompany() {
@@ -198,7 +198,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
         if (entry == null) {
             return "";
         }
-        return entry.getDate();
+        return entry.getDateTime();
     }
 
     public boolean isFulfilled() {

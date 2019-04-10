@@ -32,10 +32,8 @@ public class Globals {
     }
 
     private void superInit() {
-        EntryV2.transfer();
         EntryEquipmentCollection.removeUnused();
         EntryNoteCollection.removeUnused();
-        TruckV6.transfer();
         WorkOrder.fixTrucks();
         Logger.info("SUPER INIT DONE");
     }

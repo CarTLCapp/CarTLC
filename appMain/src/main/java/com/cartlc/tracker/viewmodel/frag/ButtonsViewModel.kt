@@ -10,20 +10,21 @@ import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.event.Button
 import com.cartlc.tracker.model.event.ButtonEvent
-import com.cartlc.tracker.model.flow.*
-import com.cartlc.tracker.model.misc.StringMessage
+import com.cartlc.tracker.model.msg.MessageHandler
+import com.cartlc.tracker.model.msg.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.viewmodel.BaseViewModel
 
-open class ButtonsViewModel(protected val repo: CarRepository) : BaseViewModel() {
-
-    var getString: (msg: StringMessage) -> String = { "" }
+open class ButtonsViewModel(
+        protected val repo: CarRepository,
+        private val messageHandler: MessageHandler
+) : BaseViewModel() {
 
     var showing = ObservableBoolean(true)
-    var prevText = ObservableField<String>(getString(StringMessage.btn_prev))
-    var nextText = ObservableField<String>(getString(StringMessage.btn_next))
-    var centerText = ObservableField<String>(getString(StringMessage.btn_add))
+    var prevText = ObservableField<String>(messageHandler.getString(StringMessage.btn_prev))
+    var nextText = ObservableField<String>(messageHandler.getString(StringMessage.btn_next))
+    var centerText = ObservableField<String>(messageHandler.getString(StringMessage.btn_add))
     var showPrevButton = ObservableBoolean(false)
     var showNextButton = ObservableBoolean(false)
     var showCenterButton = ObservableBoolean(false)
@@ -60,15 +61,6 @@ open class ButtonsViewModel(protected val repo: CarRepository) : BaseViewModel()
     protected val prefHelper: PrefHelper
         get() = repo.prefHelper
 
-    protected val curFlow: MutableLiveData<Flow>
-        get() = repo.curFlow
-
-    protected var curFlowValue: Flow
-        get() = curFlow.value ?: LoginFlow()
-        set(value) {
-            curFlow.value = value
-        }
-
     private val handleButton: MutableLiveData<ButtonEvent> by lazy {
         MutableLiveData<ButtonEvent>()
     }
@@ -80,9 +72,9 @@ open class ButtonsViewModel(protected val repo: CarRepository) : BaseViewModel()
     }
 
     fun reset() {
-        prevText.set(getString(StringMessage.btn_prev))
-        nextText.set(getString(StringMessage.btn_next))
-        centerText.set(getString(StringMessage.btn_add))
+        prevText.set(messageHandler.getString(StringMessage.btn_prev))
+        nextText.set(messageHandler.getString(StringMessage.btn_next))
+        centerText.set(messageHandler.getString(StringMessage.btn_add))
     }
 
 }

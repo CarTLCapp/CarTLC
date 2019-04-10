@@ -1,83 +1,39 @@
 package com.cartlc.tracker.ui.frag
 
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import com.cartlc.tracker.databinding.FragButtonsBinding
-import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.event.Button
 import com.cartlc.tracker.ui.act.MainActivity
 import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.ui.base.BaseFragment
+import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
 import com.cartlc.tracker.viewmodel.frag.ButtonsViewModel
 import com.cartlc.tracker.viewmodel.main.MainButtonsViewModel
-import javax.inject.Inject
 
-class ButtonsFragment: BaseFragment() {
-
-    private inner class SoftKeyboardDetect : ViewTreeObserver.OnGlobalLayoutListener {
-
-        val ratio = 0.15
-
-        fun clear() {
-            vm.showingValue = true
-        }
-
-        override fun onGlobalLayout() {
-            val rect = Rect()
-            root?.let {
-                it.rootView?.getWindowVisibleDisplayFrame(rect)
-                val screenHeight = it.rootView.height
-                val keypadHeight = screenHeight - rect.bottom
-                if (keypadHeight > screenHeight * ratio) {
-                    hideButtons()
-                } else {
-                    restoreButtons()
-                }
-            }
-        }
-
-        fun hideButtons() {
-            if (vm.showingValue) {
-                vm.showingValue = false
-            }
-        }
-
-        fun restoreButtons() {
-            if (!vm.showingValue) {
-                vm.showingValue = true
-            }
-        }
-    }
+class ButtonsFragment : BaseFragment(), SoftKeyboardDetect.Listener {
 
     lateinit var binding: FragButtonsBinding
-
-    var root: ViewGroup? = null
-        set(value) {
-            field = value
-            value?.viewTreeObserver?.addOnGlobalLayoutListener(softKeyboardDetect)
-        }
 
     val vm: ButtonsViewModel
         get() = baseVM as ButtonsViewModel
 
-    private var softKeyboardDetect = SoftKeyboardDetect()
-
-    private val app: TBApplication
-        get() = activity!!.applicationContext as TBApplication
-
-    @Inject
-    lateinit var repo: CarRepository
+    var softKeyboardDetect: SoftKeyboardDetect? = null
+        set(value) {
+            field?.unregisterListener(this)
+            field = value
+            field?.registerListener(this)
+        }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragButtonsBinding.inflate(layoutInflater, container, false)
-        app.carRepoComponent.inject(this)
+        val componentRoot = app.componentRoot
         if (activity is MainActivity) {
-            baseVM = MainButtonsViewModel(repo)
+            baseVM = MainButtonsViewModel(boundFrag, componentRoot.messageHandler)
         } else {
-            baseVM = ButtonsViewModel(repo)
+            baseVM = ButtonsViewModel(repo, componentRoot.messageHandler)
         }
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
@@ -88,8 +44,13 @@ class ButtonsFragment: BaseFragment() {
         return binding.root
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        softKeyboardDetect = null
+    }
+
     private fun clearSoftKeyboard(v: View) {
-        softKeyboardDetect.clear()
+        vm.showingValue = false
         activity?.let { TBApplication.hideKeyboard(it, v) }
     }
 
@@ -110,5 +71,20 @@ class ButtonsFragment: BaseFragment() {
     private fun btnChangeCompany() {
         vm.dispatchButtonEvent(Button.BTN_CHANGE)
     }
+
+    // region SoftKeyboardDetect.Listener
+    override fun onSoftKeyboardVisible() {
+        if (vm.showingValue) {
+            vm.showingValue = false
+        }
+    }
+
+    override fun onSoftKeyboardHidden() {
+        if (!vm.showingValue) {
+            vm.showingValue = true
+        }
+    }
+
+    // endregion SoftKeyboardDetect.Listener
 
 }

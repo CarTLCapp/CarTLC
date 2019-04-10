@@ -1,4 +1,4 @@
-@(id: Long, techForm: Form[InputClient])
+@(id: Long, techForm: Form[views.formdata.InputClient])
 
 @import helper._
 
@@ -23,9 +23,9 @@
 
                 @for(project <- Project.list()) {
                     @if(Client.hasProject(id, project.id)) {
-                        @b3.checkbox(techForm(project.name), '_label -> project.name, 'checked -> true)
+                        @b3.checkbox(techForm(project.getFullProjectName()), '_label -> project.getFullProjectName(), 'checked -> true)
                     } else {
-                        @b3.checkbox(techForm(project.name), '_label -> project.name)
+                        @b3.checkbox(techForm(project.getFullProjectName()), '_label -> project.getFullProjectName())
                     }
 					<div style="clear:both;"></div>
                 }

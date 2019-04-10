@@ -105,7 +105,7 @@ public class Note extends Model implements Comparable<Note> {
     }
 
     public static boolean isDisabled(long note_id) {
-        Note note = find.ref(note_id);
+        Note note = find.byId(note_id);
         if (note == null) {
             return true;
         }
@@ -139,7 +139,7 @@ public class Note extends Model implements Comparable<Note> {
             if (sbuf.length() > 0) {
                 sbuf.append(", ");
             }
-            sbuf.append(project.name);
+            sbuf.append(project.getFullProjectName());
         }
         return sbuf.toString();
     }
@@ -177,7 +177,7 @@ public class Note extends Model implements Comparable<Note> {
     }
 
     public static boolean isDisabled(Long id) {
-        Note note = find.ref(id);
+        Note note = find.byId(id);
         if (note == null) {
             return false;
         }
