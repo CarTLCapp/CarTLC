@@ -5,15 +5,21 @@
         android:id="@+id/fleet_vehicles"
         android:icon="@drawable/ic_interstate_truck"
         android:title="@string/vehicle_title_vehicles"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/upload"
         android:icon="@drawable/icon_upload"
         android:title="@string/title_upload"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/profile"
         android:icon="@drawable/icon_profile"
         android:title="@string/title_profile"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/privacy"
+        android:icon="@android:drawable/ic_dialog_info"
+        android:title="@string/app_privacy_policy"
+        app:showAsAction="ifRoom"/>
+
 </menu>

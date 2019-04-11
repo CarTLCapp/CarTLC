@@ -63,7 +63,7 @@ dependencies {
     implementation 'androidx.media:media:1.0.1'
     implementation 'androidx.exifinterface:exifinterface:1.0.0'
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha4'
     implementation 'com.google.android.material:material:1.0.0'
 
     // Timber
@@ -76,8 +76,8 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.1.1'
 
     // Play Services
-    implementation "com.google.android.gms:play-services-location:$play_services"
-    implementation "com.google.android.gms:play-services-gcm:$rootProject.ext.play_services"
+    implementation "com.google.android.gms:play-services-location:16.0.0"
+    implementation "com.google.android.gms:play-services-gcm:16.1.0"
 
     // Amazon AWS
     implementation "com.amazonaws:aws-android-sdk-core:$rootProject.ext.aws"
@@ -90,7 +90,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Firebase
-    implementation 'com.google.firebase:firebase-core:16.0.7'
+    implementation 'com.google.firebase:firebase-core:16.0.8'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.9'
 
     // LeakCanary

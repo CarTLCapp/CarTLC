@@ -9,6 +9,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
+import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
 import android.view.*
@@ -62,6 +63,8 @@ class MainActivity : BaseActivity() {
         val RESULT_DELETE_PROJECT = 4
 
         private val KEY_TAKING_PICTURE = "picture"
+
+        private const val PRIVACY_POLICY_URL = "https://www.iubenda.com/privacy-policy/10260978"
     }
 
     private lateinit var mApp: TBApplication
@@ -171,8 +174,17 @@ class MainActivity : BaseActivity() {
             R.id.fleet_vehicles -> {
                 vm.onVehiclesPressed()
             }
+            R.id.privacy -> {
+                onPrivacyPolicy()
+            }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun onPrivacyPolicy() {
+        val i = Intent (Intent.ACTION_VIEW)
+        i.data = Uri.parse(PRIVACY_POLICY_URL)
+        startActivity(i)
     }
 
     override fun onDestroy() {
