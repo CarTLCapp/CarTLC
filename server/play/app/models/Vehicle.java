@@ -80,11 +80,19 @@ public class Vehicle extends com.avaje.ebean.Model {
     public String other;
 
     public String getTechName() {
-        Technician tech = Technician.find.ref((long) tech_id);
+        Technician tech = null;
+        try {
+            tech = Technician.find.ref((long) tech_id);
+        } catch (Exception ex) {
+        }
         if (tech == null) {
             return Technician.RIP;
         }
-        return tech.fullName();
+        try {
+            return tech.fullName();
+        } catch (Exception ex) {
+            return Technician.RIP;
+        }
     }
 
     static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a z";

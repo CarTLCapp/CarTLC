@@ -162,7 +162,11 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getTechName() {
-        Technician tech = Technician.find.ref((long) tech_id);
+        Technician tech = null;
+        try {
+            tech = Technician.find.ref((long) tech_id);
+        } catch (Exception ex) {
+        }
         if (tech == null) {
             return Technician.RIP;
         }
@@ -173,7 +177,11 @@ public class Entry extends com.avaje.ebean.Model {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(tech.fullName());
         sbuf.append(" & ");
-        sbuf.append(tech2.fullName());
+        try {
+            sbuf.append(tech2.fullName());
+        } catch (Exception ex) {
+            sbuf.append(Technician.RIP);
+        }
         return sbuf.toString();
     }
 
