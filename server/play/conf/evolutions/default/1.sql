@@ -11,21 +11,21 @@ create table client (
 );
 
 create table project (
-  id                int auto_increment primary key,
-  name              varchar(64),
-  disabled          bit default 0
+    id                int auto_increment primary key,
+    name              varchar(64),
+    disabled          bit default 0
 );
 
 create table technician (
-  id                int auto_increment primary key,
-  first_name        varchar(255),
-  last_name         varchar(255),
-  device_id         varchar(255),
-  last_ping         datetime,
-  disabled          bit default 0,
-  reset_upload      bit default 0,
-  app_version       varchar(64),
-  reload_code       varchar(16)
+    id                int auto_increment primary key,
+    first_name        varchar(255),
+    last_name         varchar(255),
+    device_id         varchar(255),
+    last_ping         datetime,
+    disabled          bit default 0,
+    reset_upload      bit default 0,
+    app_version       varchar(64),
+    reload_code       varchar(16)
 );
 
 create table company_name (
@@ -53,83 +53,83 @@ alter table client_project_association add constraint c_cpa_client_id foreign ke
 alter table client_project_association add constraint c_cpa_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 
 create table company (
-  id                int auto_increment primary key,
-  name              varchar(255),
-  street            varchar(255),
-  city              varchar(128),
-  state             varchar(64),
-  zipcode           varchar(64),
-  created_by        int default 0,
-  disabled          bit default 0,
-  created_by_client int default 0,
-  upload_id         int default 0
+    id                int auto_increment primary key,
+    name              varchar(255),
+    street            varchar(255),
+    city              varchar(128),
+    state             varchar(64),
+    zipcode           varchar(64),
+    created_by        int default 0,
+    disabled          bit default 0,
+    created_by_client int default 0,
+    upload_id         int default 0
 );
 
 create table equipment (
-  id                int auto_increment primary key,
-  name              varchar(128),
-  created_by        int default 0,
-  disabled          bit default 0,
-  created_by_client bit default 0
+    id                int auto_increment primary key,
+    name              varchar(128),
+    created_by        int default 0,
+    disabled          bit default 0,
+    created_by_client bit default 0
 );
 
 create table entry_equipment_collection (
-  id                int auto_increment primary key,
-  collection_id     int,
-  equipment_id      int
+    id                int auto_increment primary key,
+    collection_id     int,
+    equipment_id      int
 );
 
 alter table entry_equipment_collection add constraint c_eec_equipment_id foreign key (equipment_id) references equipment (id) on delete restrict on update restrict;
 
 create table note (
-  id                int auto_increment primary key,
-  name              varchar(128),
-  type              smallint,
-  created_by        int default 0,
-  disabled          bit default 0,
-  created_by_client bit default 0,
-  num_digits        smallint default 0
+    id                int auto_increment primary key,
+    name              varchar(128),
+    type              smallint,
+    created_by        int default 0,
+    disabled          bit default 0,
+    created_by_client bit default 0,
+    num_digits        smallint default 0
 );
 
 create table project_note_collection (
-  id                int auto_increment primary key,
-  project_id        int,
-  note_id           int
+    id                int auto_increment primary key,
+    project_id        int,
+    note_id           int
 );
 
 alter table project_note_collection add constraint c_pnc_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
 alter table project_note_collection add constraint c_pnc_note_id foreign key (note_id) references note (id) on delete restrict on update restrict;
 
 create table entry_note_collection (
-  id                int auto_increment primary key,
-  collection_id     int,
-  note_id           int,
-  note_value        varchar(255)
+    id                int auto_increment primary key,
+    collection_id     int,
+    note_id           int,
+    note_value        varchar(255)
 );
 
 alter table entry_note_collection add constraint c_enc_note_id foreign key (note_id) references note (id) on delete restrict on update restrict;
 
 create table message (
-  id            int auto_increment primary key,
-  tech_id       int,
-  log_time      datetime,
-  code          smallint,
-  message       text,
-  trace         text,
-  app_version   varchar(64)
+    id            int auto_increment primary key,
+    tech_id       int,
+    log_time      datetime,
+    code          smallint,
+    message       text,
+    trace         text,
+    app_version   varchar(64)
 );
 
 create table picture_collection (
-  id                int auto_increment primary key,
-  collection_id     int,
-  picture           varchar(255),
-  note              varchar(1028)
+    id                int auto_increment primary key,
+    collection_id     int,
+    picture           varchar(255),
+    note              varchar(1028)
 );
 
 create table project_equipment_collection (
-  id                int auto_increment primary key,
-  project_id        int,
-  equipment_id      int
+    id                int auto_increment primary key,
+    project_id        int,
+    equipment_id      int
 );
 
 alter table project_equipment_collection add constraint c_pec_project_id foreign key (project_id) references project (id) on delete restrict on update restrict;
@@ -227,10 +227,10 @@ create table work_order (
     truck_id       int
 );
 
-alter table work_order add constraint c2_project_id foreign key(project_id) references project(id) on delete restrict on update restrict;
-alter table work_order add constraint c2_truck_id foreign key(truck_id) references truck(id) on delete restrict on update restrict;
-alter table work_order add constraint c2_company_id foreign key(company_id) references company(id) on delete restrict on update restrict;
-alter table work_order add constraint c2_client_id foreign key(client_id) references client(id) on delete restrict on update restrict;
+alter table work_order add constraint c2_w_project_id foreign key(project_id) references project(id) on delete restrict on update restrict;
+alter table work_order add constraint c2_w_truck_id foreign key(truck_id) references truck(id) on delete restrict on update restrict;
+alter table work_order add constraint c2_w_company_id foreign key(company_id) references company(id) on delete restrict on update restrict;
+alter table work_order add constraint c2_w_client_id foreign key(client_id) references client(id) on delete restrict on update restrict;
 
 # --- !Downs
 
@@ -252,10 +252,10 @@ drop table if exists picture_collection;
 drop table if exists work_order;
 drop table if exists message;
 drop table if exists company;
-drop table if exists company_name;
 drop table if exists note;
 drop table if exists truck;
 drop table if exists truck_v6;
+drop table if exists company_name;
 drop table if exists technician;
 drop table if exists client;
 drop table if exists equipment;
