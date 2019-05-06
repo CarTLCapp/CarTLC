@@ -259,7 +259,7 @@ class MainVMHolder(val repo: CarRepository) {
         curFlowValue = curFlowValue
     }
 
-    fun dispatchPictureRequest() {
+    private fun dispatchPictureRequest() {
         val pictureFile = prefHelper.genFullPictureFile()
         db.tablePictureCollection.add(pictureFile, prefHelper.currentPictureCollectionId)
         takingPictureFile = pictureFile

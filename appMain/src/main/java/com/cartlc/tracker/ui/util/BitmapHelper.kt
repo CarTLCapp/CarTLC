@@ -21,7 +21,7 @@ import timber.log.Timber
 
 object BitmapHelper {
 
-    internal val MAX_TMP_SIZE = 350 // was 500
+    private val MAX_TMP_SIZE = 500
 
     fun createScaledFilename(originalFilename: String): String {
         val pos = originalFilename.lastIndexOf('.')
