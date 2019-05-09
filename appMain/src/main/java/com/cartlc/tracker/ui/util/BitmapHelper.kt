@@ -21,7 +21,8 @@ import timber.log.Timber
 
 object BitmapHelper {
 
-    private val MAX_TMP_SIZE = 500
+    private const val MAX_TMP_SIZE = 800
+    private const val QUALITY = 100
 
     fun createScaledFilename(originalFilename: String): String {
         val pos = originalFilename.lastIndexOf('.')
@@ -45,7 +46,7 @@ object BitmapHelper {
             }
             val bitmap = loadScaledFile(unscaledFile.absolutePath, MAX_TMP_SIZE, MAX_TMP_SIZE)
             val fos = FileOutputStream(scaledFilename)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, QUALITY, fos)
             fos.close()
 
             bitmap.recycle()

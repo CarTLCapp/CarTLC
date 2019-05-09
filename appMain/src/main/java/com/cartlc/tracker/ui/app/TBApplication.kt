@@ -55,10 +55,9 @@ class TBApplication : Application() {
         @VisibleForTesting
         var DEBUG_TREE = false
 
-        private const val LEAK_CANARY = false
+        private const val LEAK_CANARY = true
 
         const val REPORT_LOCATION = false
-
         const val OTHER = "Other"
 
         private val PERMISSIONS = arrayOf(
