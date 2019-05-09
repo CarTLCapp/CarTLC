@@ -21,7 +21,8 @@ import timber.log.Timber
 
 object BitmapHelper {
 
-    private const val MAX_TMP_SIZE = 800
+    // See also R.dimen.image_full_max_height
+    private const val MAX_TMP_SIZE = 600
     private const val QUALITY = 100
 
     fun createScaledFilename(originalFilename: String): String {
@@ -57,7 +58,7 @@ object BitmapHelper {
         return true
     }
 
-    internal fun loadScaledFile(pathname: String, dstWidth: Int, dstHeight: Int): Bitmap {
+    private fun loadScaledFile(pathname: String, dstWidth: Int, dstHeight: Int): Bitmap {
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
         BitmapFactory.decodeFile(pathname, options)
@@ -67,7 +68,7 @@ object BitmapHelper {
         return BitmapFactory.decodeFile(pathname, options)
     }
 
-    internal fun calculateSampleSize(srcWidth: Int, srcHeight: Int, dstWidth: Int, dstHeight: Int): Int {
+    private fun calculateSampleSize(srcWidth: Int, srcHeight: Int, dstWidth: Int, dstHeight: Int): Int {
         val srcAspect = srcWidth.toFloat() / srcHeight.toFloat()
         val dstAspect = dstWidth.toFloat() / dstHeight.toFloat()
         return if (srcAspect > dstAspect) {

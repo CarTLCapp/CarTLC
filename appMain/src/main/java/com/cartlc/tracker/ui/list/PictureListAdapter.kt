@@ -117,12 +117,10 @@ open class PictureListAdapter(
                     mHandler.sendEmptyMessageDelayed(MSG_DECREASE_SIZE, DELAY_DECREASE_SIZE.toLong())
                 }
                 val pictureFile: File?
-                if (item.existsUnscaled) {
-                    pictureFile = item.unscaledFile
-                } else if (item.existsScaled) {
-                    pictureFile = item.scaledFile
-                } else {
-                    pictureFile = null
+                when {
+                    item.existsUnscaled -> pictureFile = item.unscaledFile
+                    item.existsScaled -> pictureFile = item.scaledFile
+                    else -> pictureFile = null
                 }
                 if (pictureFile == null || !pictureFile.exists()) {
                     val msg = Message()
@@ -132,16 +130,9 @@ open class PictureListAdapter(
                     picture!!.setImageResource(android.R.color.transparent)
                     loading!!.setText(R.string.error_picture_removed)
                 } else {
-                    //
-                    // TODO: WAS GETTING AN OUT-OF-MEMORY crash here on some devices.
-                    // I reduced the maxHeight value from 500 to 400 hoping that would
-                    // help. But that does not seem to be the most solid solution possible.
-                    // Needs more thought.
-                    //
                     builder.build()
                             .load(getUri(pictureFile))
                             .placeholder(R.drawable.loading)
-//                            .memoryPolicy(MemoryPolicy.NO_CACHE)
                             .centerInside()
                             .resize(0, maxHeight)
                             .into(picture)

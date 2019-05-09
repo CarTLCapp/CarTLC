@@ -55,7 +55,7 @@ class TBApplication : Application() {
         @VisibleForTesting
         var DEBUG_TREE = false
 
-        private const val LEAK_CANARY = true
+        private const val LEAK_CANARY = false
 
         const val REPORT_LOCATION = false
         const val OTHER = "Other"

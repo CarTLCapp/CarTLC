@@ -4,7 +4,7 @@
     <dimen name="project_list_width">190dp</dimen>
     <dimen name="confirm_gap_height">10dp</dimen>
     <dimen name="confirm_gap_left">10dp</dimen>
-    <dimen name="image_full_max_height">400dp</dimen> <!-- was 500 -->
+    <dimen name="image_full_max_height">550dp</dimen>
     <dimen name="image_thumbnail_max_height">150dp</dimen>
     <dimen name="image_dec_size">50dp</dimen>
     <dimen name="button_buffer">10dp</dimen>
