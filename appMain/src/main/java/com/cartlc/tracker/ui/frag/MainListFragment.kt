@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.databinding.FragMainListBinding
-import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.data.DataNote
 import com.cartlc.tracker.model.flow.Flow
@@ -20,7 +19,6 @@ import com.cartlc.tracker.ui.list.*
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.ui.act.MainActivity
-import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.ui.base.BaseFragment
 import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleController
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel

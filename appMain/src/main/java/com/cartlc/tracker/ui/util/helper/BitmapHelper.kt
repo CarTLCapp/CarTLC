@@ -18,11 +18,10 @@ import timber.log.Timber
 /**
  * Created by dug on 6/1/17.
  */
-
 object BitmapHelper {
 
     // See also R.dimen.image_full_max_height
-    private const val MAX_TMP_SIZE = 600
+    private const val SCALED_SIZE = 600
     private const val QUALITY = 100
 
     fun createScaledFilename(originalFilename: String): String {
@@ -45,7 +44,7 @@ object BitmapHelper {
                 Timber.e("File does not exist: $unscaledFile.absolutePath")
                 return false
             }
-            val bitmap = loadScaledFile(unscaledFile.absolutePath, MAX_TMP_SIZE, MAX_TMP_SIZE)
+            val bitmap = loadScaledFile(unscaledFile.absolutePath, SCALED_SIZE, SCALED_SIZE)
             val fos = FileOutputStream(scaledFilename)
             bitmap.compress(Bitmap.CompressFormat.JPEG, QUALITY, fos)
             fos.close()

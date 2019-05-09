@@ -1,12 +1,10 @@
 package com.cartlc.tracker.ui.stage
 
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.transition.Fade
-import com.callassistant.util.observable.BaseObservableImpl
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.FlowUseCase

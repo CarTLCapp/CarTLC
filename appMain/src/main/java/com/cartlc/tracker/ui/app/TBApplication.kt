@@ -55,7 +55,6 @@ class TBApplication : Application() {
         private const val LEAK_CANARY = false
 
         const val REPORT_LOCATION = false
-        const val OTHER = "Other"
 
         private val PERMISSIONS = arrayOf(
                 PermissionRequest(Manifest.permission.WRITE_EXTERNAL_STORAGE,

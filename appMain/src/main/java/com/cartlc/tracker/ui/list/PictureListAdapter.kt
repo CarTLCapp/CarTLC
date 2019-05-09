@@ -10,7 +10,6 @@ import java.util.HashMap
 import com.cartlc.tracker.R
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.data.DataPicture
-import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.Picasso
 
 import android.app.AlertDialog
@@ -27,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.entry_item_picture.view.*
 
 import timber.log.Timber
+import java.lang.ref.WeakReference
 
 /**
  * Created by dug on 5/10/17.
@@ -35,13 +35,11 @@ open class PictureListAdapter(
         protected val mContext: Context,
         protected val mListener: (Int) -> Unit?
 ) : RecyclerView.Adapter<PictureListAdapter.CustomViewHolder>() {
-    protected val mLayoutInflater: LayoutInflater
+    private val mLayoutInflater: LayoutInflater = LayoutInflater.from(mContext)
     private var mRotation: HashMap<String, Int> = HashMap()
     protected var mItems: MutableList<DataPicture> = ArrayList()
-    protected val mDecHeight: Int by lazy {
-        mContext.resources.getDimension(R.dimen.image_dec_size).toInt()
-    }
-    protected var mHandler = MyHandler()
+    private val mDecHeight: Int by lazy { mContext.resources.getDimension(R.dimen.image_dec_size).toInt() }
+    private var mHandler = MyHandler(this)
 
     protected open val itemLayout: Int
         get() = R.layout.entry_item_picture
@@ -75,26 +73,39 @@ open class PictureListAdapter(
             return commonRotation
         }
 
-    inner class MyHandler : Handler() {
+    private class MyHandler(
+            other: PictureListAdapter
+    ) : Handler() {
+
+        private val obj = WeakReference<PictureListAdapter>(other)
+
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 MSG_DECREASE_SIZE -> {
-                    var height = maxHeight
-                    height -= mDecHeight
-                    if (height < mDecHeight) {
-                        height = mDecHeight
-                    }
-                    maxHeight = height
-                    notifyDataSetChanged()
+                    obj.get()?.decreaseMaxHeightSize()
                 }
                 MSG_REMOVE_ITEM -> if (msg.obj is DataPicture) {
                     val item = msg.obj as DataPicture
-                    item.remove()
-                    mItems.remove(item)
-                    notifyDataSetChanged()
+                    obj.get()?.increaseMaxHeightSize(item)
                 }
             }
         }
+    }
+
+    private fun decreaseMaxHeightSize() {
+        var height = maxHeight
+        height -= mDecHeight
+        if (height < mDecHeight) {
+            height = mDecHeight
+        }
+        maxHeight = height
+        notifyDataSetChanged()
+    }
+
+    private fun increaseMaxHeightSize(item: DataPicture) {
+        item.remove()
+        mItems.remove(item)
+        notifyDataSetChanged()
     }
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
@@ -139,7 +150,7 @@ open class PictureListAdapter(
                             .into(picture)
                     loading!!.visibility = View.GONE
                     remove?.let { view ->
-                        view.setOnClickListener { _ ->
+                        view.setOnClickListener {
                             item.remove()
                             mItems.remove(item)
                             notifyDataSetChanged()
@@ -147,19 +158,19 @@ open class PictureListAdapter(
                         }
                     }
                     rotate_cw?.let { view ->
-                        view.setOnClickListener { _ ->
+                        view.setOnClickListener {
                             incRotation(item, item.rotateCW())
                             notifyDataSetChanged()
                         }
                     }
                     rotate_ccw?.let { view ->
-                        view.setOnClickListener { _ ->
+                        view.setOnClickListener {
                             incRotation(item, item.rotateCCW())
                             notifyDataSetChanged()
                         }
                     }
                     note_dialog?.let { view ->
-                        view.setOnClickListener { _ -> showPictureNoteDialog(item) }
+                        view.setOnClickListener { showPictureNoteDialog(item) }
                     }
                     note?.let { view ->
                         if (TextUtils.isEmpty(item.note)) {
@@ -173,10 +184,6 @@ open class PictureListAdapter(
             }
 
         }
-    }
-
-    init {
-        mLayoutInflater = LayoutInflater.from(mContext)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
