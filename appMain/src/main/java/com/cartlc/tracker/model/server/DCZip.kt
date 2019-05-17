@@ -65,7 +65,7 @@ class DCZip(
                     .appendQueryParameter("address", zipcode)
                     .appendQueryParameter("sensor", "true")
             val url = URL(builder.build().toString())
-            val result = post(url) ?: return
+            val result = post(url)
             val data = DataZipCode()
             val root = JSONObject(result)
             val results = root.getJSONArray("results")
@@ -100,7 +100,7 @@ class DCZip(
     }
 
     @Throws(IOException::class)
-    internal fun post(url: URL): String? {
+    internal fun post(url: URL): String {
         val connection = url.openConnection() as HttpURLConnection
         val result = getResult(connection)
         connection.disconnect()

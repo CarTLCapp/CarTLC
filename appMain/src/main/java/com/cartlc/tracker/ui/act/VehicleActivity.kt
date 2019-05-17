@@ -16,11 +16,11 @@ import com.cartlc.tracker.model.flow.VehicleStage
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.ui.base.BaseActivity
 import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
-import com.cartlc.tracker.ui.frag.ButtonsFragment
 import com.cartlc.tracker.ui.frag.TitleFragment
 import com.cartlc.tracker.ui.list.CheckBoxListAdapter
 import com.cartlc.tracker.ui.list.RadioListAdapter
 import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleView
+import com.cartlc.tracker.ui.frag.ButtonsFragment
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 import javax.inject.Inject
 

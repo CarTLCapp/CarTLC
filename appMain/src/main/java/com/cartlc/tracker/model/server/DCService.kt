@@ -19,10 +19,9 @@ import javax.inject.Inject
  */
 class DCService : IntentService(SERVER_NAME) {
 
-    private lateinit var mPing: DCPing
     private lateinit var mZip: DCZip
-
     private lateinit var app: TBApplication
+    private lateinit var ping: DCPing
 
     private val repo: CarRepository
         get() = app.repo
@@ -37,7 +36,7 @@ class DCService : IntentService(SERVER_NAME) {
 
     override fun onHandleIntent(intent: Intent?) {
         app = applicationContext as TBApplication
-        mPing = DCPing(this, repo)
+        ping = app.ping
         mZip = DCZip(db)
         ServerHelper.Init(this)
         if (!ServerHelper.instance.hasConnection(this)) {
@@ -49,12 +48,15 @@ class DCService : IntentService(SERVER_NAME) {
             val zipCode = intent.getStringExtra(DATA_ZIP_CODE)
             mZip.findZipCode(zipCode)
         } else {
-            if (prefHelper.techID == 0 || prefHelper.registrationHasChanged) {
-                if (prefHelper.hasName) {
-                    mPing.sendRegistration()
+            if (prefHelper.techID == 0 && prefHelper.hasCode) {
+                prefHelper.firstTechCode?.let {
+                    ping.sendRegistration(it, prefHelper.secondaryTechCode)
+                } ?: run {
+                    Timber.e("Need to register first!")
+                    return
                 }
             }
-            mPing.ping()
+            ping.ping()
         }
     }
 

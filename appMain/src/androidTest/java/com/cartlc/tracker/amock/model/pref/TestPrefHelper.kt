@@ -14,10 +14,12 @@ import com.cartlc.tracker.model.data.DataProjectAddressCombo
 import com.cartlc.tracker.model.table.*
 import com.cartlc.tracker.ui.app.TBApplication
 import com.nhaarman.mockito_kotlin.any
+import com.squareup.haha.perflib.RootType
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.mockito.Mockito.never
@@ -25,6 +27,11 @@ import org.mockito.Mockito.never
 @RunWith(AndroidJUnit4::class)
 class TestPrefHelper {
 
+    companion object {
+        private const val ROOT_NAME = "RootName"
+        private const val SUB_NAME = "SubProject"
+        private const val PROJECT_ID = 5L
+    }
     lateinit var context: Context
 
     @Mock
@@ -68,21 +75,27 @@ class TestPrefHelper {
     @Test
     fun verifyProjectID() {
         Mockito.`when`(db.tableProjects).thenReturn(tableProjects)
-        Mockito.`when`(tableProjects.queryProjectName(anyString())).thenReturn(-1)
-        Mockito.`when`(tableProjects.queryProjectName("sampleName")).thenReturn(5)
+        Mockito.`when`(tableProjects.queryProjectName(anyLong())).thenReturn(Pair(ROOT_NAME, SUB_NAME))
+        Mockito.`when`(tableProjects.queryProjectId(ROOT_NAME, SUB_NAME)).thenReturn(PROJECT_ID)
 
-        prefHelper.projectName = "sampleName"
-        assertEquals(5.toLong(), prefHelper.projectId)
-        prefHelper.projectName = null
+        prefHelper.projectRootName = ROOT_NAME
+        assertEquals(PROJECT_ID, prefHelper.projectId)
+        prefHelper.projectRootName = null
         assertEquals(null, prefHelper.projectId)
-        prefHelper.projectName = "5"
+        prefHelper.projectRootName = "whatever"
+        assertEquals(null, prefHelper.projectId)
+
+        prefHelper.projectRootName = ROOT_NAME
+        prefHelper.projectSubName = null
+        assertEquals(null, prefHelper.projectId)
+        prefHelper.projectSubName = "whatever"
         assertEquals(null, prefHelper.projectId)
     }
 
     @Test
     fun verifyCurrentProjectGroup() {
         Mockito.`when`(db.tableProjects).thenReturn(tableProjects)
-        Mockito.`when`(tableProjects.queryProjectName("sampleName")).thenReturn(5)
+        Mockito.`when`(tableProjects.queryProjectId(ROOT_NAME, SUB_NAME)).thenReturn(PROJECT_ID)
         Mockito.`when`(db.tableAddress).thenReturn(tableAddress)
         val address = DataAddress("Company", "Street", "City", "IL", "60626")
         Mockito.`when`(tableAddress.query(10)).thenReturn(address)
@@ -122,7 +135,8 @@ class TestPrefHelper {
     @Test
     fun verifySaveProjectAndAddressComboNoModifyCurrentNoAddress() {
         assertFalse(prefHelper.saveProjectAndAddressCombo(false))
-        prefHelper.projectName = "ProjectName"
+        prefHelper.projectRootName = ROOT_NAME
+        prefHelper.projectSubName = SUB_NAME
         assertFalse(prefHelper.saveProjectAndAddressCombo(false))
         val address = DataAddress("Company", "Street", "City", "IL", "60626")
         prefHelper.company = address.company
@@ -135,7 +149,7 @@ class TestPrefHelper {
         Mockito.`when`(db.tableProjects).thenReturn(tableProjects)
         Mockito.`when`(db.tableAddress).thenReturn(tableAddress)
         Mockito.`when`(tableAddress.queryAddressId(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(-1)
-        Mockito.`when`(tableProjects.queryProjectName(anyString())).thenReturn(-1)
+        Mockito.`when`(tableProjects.queryProjectId(ROOT_NAME, SUB_NAME)).thenReturn(-1)
 
         assertFalse(prefHelper.saveProjectAndAddressCombo(false))
         Mockito.verify(tableAddress).add(any<DataAddress>())
@@ -144,7 +158,8 @@ class TestPrefHelper {
 
     @Test
     fun verifySaveProjectAndAddressComboNoModifyCurrentWithAddressNoGroup() {
-        prefHelper.projectName = "ProjectName"
+        prefHelper.projectRootName = ROOT_NAME
+        prefHelper.projectSubName = SUB_NAME
         val address = DataAddress("Company", "Street", "City", "IL", "60626")
         prefHelper.company = address.company
         prefHelper.state = address.state
@@ -156,8 +171,8 @@ class TestPrefHelper {
         Mockito.`when`(db.tableAddress).thenReturn(tableAddress)
         Mockito.`when`(db.tableProjectAddressCombo).thenReturn(tableProjectAddressCombo)
         Mockito.`when`(tableAddress.queryAddressId(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(5)
-        Mockito.`when`(tableProjects.queryProjectName(anyString())).thenReturn(4)
-        Mockito.`when`(db.tableProjectAddressCombo.queryProjectGroupId(4, 5)).thenReturn(-1)
+        Mockito.`when`(tableProjects.queryProjectId(ROOT_NAME, SUB_NAME)).thenReturn(PROJECT_ID)
+        Mockito.`when`(db.tableProjectAddressCombo.queryProjectGroupId(PROJECT_ID, 5)).thenReturn(-1)
 
         assertTrue(prefHelper.saveProjectAndAddressCombo(false))
         Mockito.verify(tableAddress, never()).add(any<DataAddress>())
@@ -167,7 +182,8 @@ class TestPrefHelper {
 
     @Test
     fun verifySaveProjectAndAddressComboNoModifyCurrentWithAddressAndGroup() {
-        prefHelper.projectName = "ProjectName"
+        prefHelper.projectRootName = ROOT_NAME
+        prefHelper.projectSubName = SUB_NAME
         val address = DataAddress("Company", "Street", "City", "IL", "60626")
         prefHelper.company = address.company
         prefHelper.state = address.state
@@ -179,8 +195,8 @@ class TestPrefHelper {
         Mockito.`when`(db.tableAddress).thenReturn(tableAddress)
         Mockito.`when`(db.tableProjectAddressCombo).thenReturn(tableProjectAddressCombo)
         Mockito.`when`(tableAddress.queryAddressId(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(5)
-        Mockito.`when`(tableProjects.queryProjectName(anyString())).thenReturn(4)
-        Mockito.`when`(db.tableProjectAddressCombo.queryProjectGroupId(4, 5)).thenReturn(3)
+        Mockito.`when`(tableProjects.queryProjectId(ROOT_NAME, SUB_NAME)).thenReturn(PROJECT_ID)
+        Mockito.`when`(db.tableProjectAddressCombo.queryProjectGroupId(PROJECT_ID, 5)).thenReturn(3)
 
         assertTrue(prefHelper.saveProjectAndAddressCombo(false))
         Mockito.verify(tableProjectAddressCombo, never()).add(any())
@@ -190,7 +206,8 @@ class TestPrefHelper {
 
     @Test
     fun verifySaveProjectAndAddressComboModifyCurrentNoProjectGroup() {
-        prefHelper.projectName = "ProjectName"
+        prefHelper.projectRootName = ROOT_NAME
+        prefHelper.projectSubName = SUB_NAME
         val address = DataAddress("Company", "Street", "City", "IL", "60626")
         prefHelper.company = address.company
         prefHelper.state = address.state
@@ -203,7 +220,7 @@ class TestPrefHelper {
         Mockito.`when`(db.tableAddress).thenReturn(tableAddress)
         Mockito.`when`(db.tableProjectAddressCombo).thenReturn(tableProjectAddressCombo)
         Mockito.`when`(tableAddress.queryAddressId(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(5)
-        Mockito.`when`(tableProjects.queryProjectName(anyString())).thenReturn(4)
+        Mockito.`when`(tableProjects.queryProjectId(ROOT_NAME, SUB_NAME)).thenReturn(PROJECT_ID)
 
         assertFalse(prefHelper.saveProjectAndAddressCombo(true))
         prefHelper.clearCurProject()
@@ -211,7 +228,8 @@ class TestPrefHelper {
 
     @Test
     fun verifySaveProjectAndAddressComboModifyCurrentWithProjectGroupFailedSave() {
-        prefHelper.projectName = "ProjectName"
+        prefHelper.projectRootName = ROOT_NAME
+        prefHelper.projectSubName = SUB_NAME
         val address = DataAddress("Company", "Street", "City", "IL", "60626")
         prefHelper.company = address.company
         prefHelper.state = address.state
@@ -226,7 +244,7 @@ class TestPrefHelper {
         Mockito.`when`(db.tableAddress).thenReturn(tableAddress)
         Mockito.`when`(db.tableProjectAddressCombo).thenReturn(tableProjectAddressCombo)
         Mockito.`when`(tableAddress.queryAddressId(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(combo.addressId)
-        Mockito.`when`(tableProjects.queryProjectName(anyString())).thenReturn(combo.projectNameId)
+        Mockito.`when`(tableProjects.queryProjectId(anyString(), anyString())).thenReturn(combo.projectNameId)
         Mockito.`when`(db.tableProjectAddressCombo.query(combo.id)).thenReturn(combo)
         Mockito.`when`(db.tableProjectAddressCombo.save(combo)).thenReturn(false)
 
@@ -237,7 +255,8 @@ class TestPrefHelper {
 
     @Test
     fun verifySaveProjectAndAddressComboModifyCurrentWithProjectGroup() {
-        prefHelper.projectName = "ProjectName"
+        prefHelper.projectRootName = ROOT_NAME
+        prefHelper.projectSubName = SUB_NAME
         val address = DataAddress("Company", "Street", "City", "IL", "60626")
         prefHelper.company = address.company
         prefHelper.state = address.state
@@ -253,7 +272,7 @@ class TestPrefHelper {
         Mockito.`when`(db.tableEntry).thenReturn(tableEntry)
         Mockito.`when`(db.tableProjectAddressCombo).thenReturn(tableProjectAddressCombo)
         Mockito.`when`(tableAddress.queryAddressId(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(combo.addressId)
-        Mockito.`when`(tableProjects.queryProjectName(anyString())).thenReturn(combo.projectNameId)
+        Mockito.`when`(tableProjects.queryProjectId(anyString(), anyString())).thenReturn(combo.projectNameId)
         Mockito.`when`(db.tableProjectAddressCombo.query(combo.id)).thenReturn(combo)
         Mockito.`when`(db.tableProjectAddressCombo.save(combo)).thenReturn(true)
 

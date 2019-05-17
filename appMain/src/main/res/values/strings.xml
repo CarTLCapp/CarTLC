@@ -18,8 +18,7 @@
     <string name="btn_stop">Stop Showing</string>
     <string name="btn_change">Change Company</string>
 
-    <string name="entry_hint_last_name">Last Name</string>
-    <string name="entry_hint_first_name">First Name</string>
+    <string name="entry_hint_tech_code">code</string>
     <string name="entry_hint_notes">Add any notes here</string>
     <string name="entry_hint_skip_zip">Enter ZIP or hit NEXT</string>
     <string name="entry_hint_edit_project">Changing Existing Project:</string>
@@ -76,6 +75,8 @@
     <string name="error_missing_truck_short">Missing Truck</string>
 
     <string name="dialog_confirm_delete">Are you sure you want to delete this entry?</string>
+    <string name="dialog_entry_done">Logged in as %s</string>
+    <string name="dialog_entry_done2">Logged in as %1$s and %2$s</string>
 
     <string name="loading">LOADING...</string>
 

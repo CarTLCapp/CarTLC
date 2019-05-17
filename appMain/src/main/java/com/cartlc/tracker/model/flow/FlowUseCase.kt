@@ -5,7 +5,6 @@ import com.callassistant.util.observable.BaseObservable
 interface FlowUseCase : BaseObservable<FlowUseCase.Listener> {
 
     interface Listener {
-
         fun onStageChangedAboutTo(flow: Flow)
         fun onStageChanged(flow: Flow)
     }
@@ -16,4 +15,5 @@ interface FlowUseCase : BaseObservable<FlowUseCase.Listener> {
     val wasFromNotify: Boolean
 
     fun notifyListeners()
+
 }

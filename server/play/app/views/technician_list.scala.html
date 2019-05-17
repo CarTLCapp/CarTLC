@@ -17,10 +17,12 @@
                 <tr>
                     <th>First Name</th>
                     <th>Last Name</th>
+                    <th>Login Code</th>
                     <th>Tech ID</th>
                     <th>Device ID</th>
                     <th>App Version</th>
                     <th>Entries</th>
+                    <th>Last Ping</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -42,10 +44,12 @@
                                 @tech.last_name
                             }
                         </td>
+                        <td>@tech.code</td>
                         <td>@tech.id</td>
                         <td>@tech.device_id</td>
                         <td>@tech.getAppVersion()</td>
                         <td>@tech.countEntries()</td>
+                        <td>@tech.lastPing()</td>
                         <td>
                             @if(client.is_admin) {
                                 <a href="@routes.TechnicianController.edit(tech.id)">Edit</a>
@@ -59,6 +63,10 @@
             </tbody>
         </table>
         
+    }
+
+    @if(client.is_admin) {
+        <a class="btn success" id="add" href="@routes.TechnicianController.create()">Add a new technician</a>
     }
 
 }

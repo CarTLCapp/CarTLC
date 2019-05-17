@@ -15,6 +15,7 @@ import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.model.event.EventRefreshProjects
+import com.cartlc.tracker.model.flow.LoginFlow
 import com.cartlc.tracker.model.sql.*
 import com.cartlc.tracker.model.table.DatabaseTable
 
@@ -28,6 +29,7 @@ import java.net.URL
 
 import org.greenrobot.eventbus.EventBus
 import timber.log.Timber
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -45,8 +47,6 @@ class DCPing(
         private const val TAG = "DCPing"
         private const val LOG = true
 
-//        private const val QUERY_TRUCKS = false
-
         private const val SERVER_URL_DEVELOPMENT = "http://fleetdev.arqnetworks.com/"
         private const val SERVER_URL_RELEASE = "http://fleettlc.arqnetworks.com/"
 
@@ -61,7 +61,6 @@ class DCPing(
         private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
 
         private const val COMPANY_PAGE_SIZE = 100
-//        private const val TRUCK_PAGE_SIZE = 500
     }
 
     private val serverUrl: String
@@ -123,56 +122,76 @@ class DCPing(
         stringsUrl = serverUrl + "strings"
     }
 
-    fun sendRegistration() {
-        Timber.i("sendRegistration()")
+    fun sendRegistration(techCode: String, secondaryTechCode: String?): String? {
+        var errorMessage: String?
+        Timber.i("sendRegistration($techCode, $secondaryTechCode)")
         try {
             val deviceId = ServerHelper.instance.deviceId
             val jsonObject = JSONObject()
-            jsonObject.accumulate("first_name", prefHelper.firstName)
-            jsonObject.accumulate("last_name", prefHelper.lastName)
-            if (prefHelper.isSecondaryEnabled && prefHelper.hasSecondaryName) {
-                jsonObject.accumulate("secondary_first_name", prefHelper.secondaryFirstName)
-                jsonObject.accumulate("secondary_last_name", prefHelper.secondaryLastName)
+            jsonObject.accumulate("code", techCode)
+            if (secondaryTechCode != null) {
+                jsonObject.accumulate("secondary_code", secondaryTechCode)
             }
             jsonObject.accumulate("device_id", deviceId)
-            val result = post(registerUrl, jsonObject, true)
-            if (result != null) {
-                if (parseRegistrationResult(result)) {
-                    prefHelper.registrationHasChanged = false
-                }
+            val response = post(registerUrl, jsonObject, false)
+            val result = parseRegistrationResult(response)
+            if (result.errorMessage == null) {
+                prefHelper.firstTechCode = techCode
+                prefHelper.secondaryTechCode = secondaryTechCode
+
+                prefHelper.techID = result.techID
+                prefHelper.techFirstName = result.techFirstName
+                prefHelper.techLastName = result.techLastName
+                prefHelper.secondaryTechID = result.secondaryTechID ?: 0
+                prefHelper.secondaryTechFirstName = result.secondaryFirstName
+                prefHelper.secondaryTechLastName = result.secondaryLastName
             }
-        } catch (ex: Exception) {
-            TBApplication.ReportError(ex, DCPing::class.java, "sendRegistration()", "server")
+            errorMessage = result.errorMessage
+        } catch (ex: IOException) {
+            errorMessage = ex.message
         }
+        return errorMessage
     }
 
-    private fun parseRegistrationResult(result: String): Boolean {
-        try {
-            if (result.contains(":")) {
-                val pos = result.indexOf(':')
-                var word = result.substring(0, pos)
-                var techId = Integer.parseInt(word)
-                prefHelper.techID = techId
-                Timber.i("TECH ID=$techId")
+    data class RegResult(
+            val techID: Int,
+            val techFirstName: String,
+            val techLastName: String,
+            val secondaryTechID: Int?,
+            val secondaryFirstName: String?,
+            val secondaryLastName: String?,
+            val errorMessage: String?
+    )
 
-                word = result.substring(pos + 1)
-                techId = Integer.parseInt(word)
-                prefHelper.secondaryTechID = techId
-                Timber.i("SECONDARY TECH ID=$techId")
-                return true
+    private fun parseRegistrationResult(response: String): RegResult {
+        val blob = parseResult(response)
+        try {
+            val techId = blob.getInt("tech_id")
+            val techFirstName = blob.getString("tech_first_name")
+            val techLastName = blob.getString("tech_last_name")
+
+            val secondaryTechId: Int?
+            val secondaryTechFirstName: String?
+            val secondaryTechLastName: String?
+
+            if (blob.has("secondary_tech_id")) {
+                secondaryTechId = blob.getInt("secondary_tech_id")
+                secondaryTechFirstName = blob.getString("secondary_tech_first_name")
+                secondaryTechLastName = blob.getString("secondary_tech_last_name")
+            } else {
+                secondaryTechId = null
+                secondaryTechFirstName = null
+                secondaryTechLastName = null
             }
-            if (TextUtils.isDigitsOnly(result)) {
-                val tech_id = Integer.parseInt(result)
-                prefHelper.techID = tech_id
-                prefHelper.secondaryTechID = 0
-                Timber.i("TECH ID=$tech_id")
-                return true
-            }
-            Timber.e("sendRegistration() failed on: $result")
+            return RegResult(
+                    techId, techFirstName, techLastName,
+                    secondaryTechId, secondaryTechFirstName, secondaryTechLastName,
+                    null
+            )
         } catch (ex: NumberFormatException) {
-            Timber.e("sendRegistration(): PARSE ERROR on: $result")
+            val msg = "sendRegistration(): PARSE ERROR on: ${ex.message}"
+            return RegResult(0, "", "", null, null, null, msg)
         }
-        return false
     }
 
     @Synchronized
@@ -186,7 +205,12 @@ class DCPing(
         jsonObject.accumulate("device_id", deviceId)
         jsonObject.accumulate("tech_id", prefHelper.techID)
         jsonObject.accumulate("app_version", version)
-        val response = post(pingUrl, jsonObject, true) ?: return
+        val response: String
+        try {
+            response = post(pingUrl, jsonObject)
+        } catch (ex: IOException) {
+            return
+        }
         val blob = parseResult(response)
         if (blob.has(UPLOAD_RESET_TRIGGER)) {
             if (blob.getBoolean(UPLOAD_RESET_TRIGGER)) {
@@ -197,7 +221,9 @@ class DCPing(
         if (blob.has(RE_REGISTER_TRIGGER)) {
             if (blob.getBoolean(RE_REGISTER_TRIGGER)) {
                 Timber.i("RE-REGISTER DETECTED!")
-                sendRegistration()
+                prefHelper.firstTechCode?.let {
+                    sendRegistration(it, prefHelper.secondaryTechCode)
+                }
             }
         }
         if (blob.has(RELOAD_CODE)) {
@@ -227,7 +253,6 @@ class DCPing(
         val version_equipment = blob.getInt(PrefHelper.VERSION_EQUIPMENT)
         val version_note = blob.getInt(PrefHelper.VERSION_NOTE)
         val version_company = blob.getInt(PrefHelper.VERSION_COMPANY)
-//        val version_truck = blob.getInt(PrefHelper.VERSION_TRUCK)
         val version_vehicle_names = blob.getInt(PrefHelper.VERSION_VEHICLE_NAMES)
         if (prefHelper.versionProject != version_project) {
             Timber.i("New project version $version_project")
@@ -316,7 +341,7 @@ class DCPing(
     private fun queryProjects(): Boolean {
         Timber.i("queryProjects()")
         try {
-            val response = post(projectsUrl, true)
+            val response = post(projectsUrl)
             if (response == null) {
                 Timber.e("queryProjects(): Unexpected NULL response from server")
                 return false
@@ -347,7 +372,6 @@ class DCPing(
                         existing.isBootStrap = false
                         existing.disabled = disabled
                         db.tableProjects.update(existing)
-
                         unprocessed.delete(rootProject, subProject)
                     } else {
                         // Otherwise just add the new project.
@@ -372,17 +396,19 @@ class DCPing(
                         }
                         else -> Timber.i("No change to project: $rootProject - $subProject")
                     }
+                    unprocessed.delete(rootProject, subProject)
                 }
             }
             // Remaining unprocessed elements are disabled if they have entries.
             unprocessed.disableRemaining()
+        } catch (ex: IOException) {
+            return false
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryProjects()", "server")
             return false
         }
         return true
     }
-
 
     private fun queryCompanies(): Boolean {
         val unprocessed = db.tableAddress.query().toMutableList()
@@ -406,7 +432,7 @@ class DCPing(
         Timber.i("queryCompanies()")
         val numPages: Int
         try {
-            val response = post(companiesUrl, page, COMPANY_PAGE_SIZE, true) ?: return 0
+            val response = post(companiesUrl, page, COMPANY_PAGE_SIZE)
             val obj = parseResult(response)
             numPages = obj.getInt("numPages")
             val array = obj.getJSONArray("companies")
@@ -467,7 +493,8 @@ class DCPing(
                     unprocessed.remove(item)
                 }
             }
-
+        } catch (ex: IOException) {
+            return 0
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryCompanies()", "server")
             return 0
@@ -488,7 +515,7 @@ class DCPing(
         val showDebug = BuildConfig.DEBUG
         Timber.i("queryEquipments()")
         try {
-            val response = post(equipmentsUrl, true) ?: return false
+            val response = post(equipmentsUrl) ?: return false
             val blob = parseResult(response)
             run {
                 val unprocessed = db.tableEquipment.query().toMutableList()
@@ -631,6 +658,8 @@ class DCPing(
                     }
                 }
             }
+        } catch (ex: IOException) {
+            return false
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryEquipments()", "server")
             return false
@@ -659,7 +688,7 @@ class DCPing(
     private fun queryNotes(): Boolean {
         Timber.i("queryNotes()")
         try {
-            val response = post(notesUrl, true) ?: return false
+            val response = post(notesUrl) ?: return false
             val obj = parseResult(response)
             run {
                 val unprocessed = db.tableNote.query().toMutableList()
@@ -752,6 +781,8 @@ class DCPing(
                     db.tableCollectionNoteProject.removeIfGone(item)
                 }
             }
+        } catch (ex: IOException) {
+            return false
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryNotes()", "server")
             return false
@@ -858,7 +889,7 @@ class DCPing(
     private fun queryVehicleNames(): Boolean {
         Timber.i("queryVehicleNames()")
         try {
-            val response = post(vehiclesUrl, true) ?: return false
+            val response = post(vehiclesUrl) ?: return false
             val obj = parseResult(response)
             run {
                 val unprocessed = db.tableVehicleName.query().toMutableList()
@@ -898,6 +929,8 @@ class DCPing(
                     db.tableVehicleName.remove(item)
                 }
             }
+        } catch (ex: IOException) {
+            return false
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryTrucks()", "server")
             return false
@@ -933,11 +966,10 @@ class DCPing(
 
     private fun sendEntry(entry: DataEntry): Boolean {
         var success = false
-        Timber.i("sendEntry(${entry.id})")
         try {
             val jsonObject = JSONObject()
             jsonObject.accumulate("tech_id", prefHelper.techID)
-            if (prefHelper.isSecondaryEnabled && prefHelper.secondaryTechID > 0) {
+            if (prefHelper.hasSecondary && prefHelper.secondaryTechID > 0) {
                 jsonObject.accumulate("secondary_tech_id", prefHelper.secondaryTechID)
             }
             jsonObject.accumulate("date_string", entry.dateString)
@@ -1025,26 +1057,26 @@ class DCPing(
                 jsonObject.put("notes", jarray)
             }
             Timber.i("SENDING $jsonObject")
-            val result = post(enterUrl, jsonObject, true)
-            if (result != null) {
-                if (TextUtils.isDigitsOnly(result)) {
-                    entry.uploadedMaster = true
-                    entry.serverErrorCount = 0.toShort()
-                    entry.hasError = false
-                    entry.serverId = Integer.parseInt(result)
-                    db.tableEntry.saveUploaded(entry)
-                    success = true
-                    Timber.i("SUCCESS, ENTRY SERVER ID is ${entry.serverId}")
-                } else {
-                    val sbuf = StringBuilder()
-                    sbuf.append("While trying to send entry: ")
-                    sbuf.append(entry.toLongString(db))
-                    sbuf.append("\nERROR: ")
-                    sbuf.append(result)
-                    TBApplication.ShowError(sbuf.toString())
-                    Timber.e(sbuf.toString())
-                }
+            val result = post(enterUrl, jsonObject)
+            if (TextUtils.isDigitsOnly(result)) {
+                entry.uploadedMaster = true
+                entry.serverErrorCount = 0.toShort()
+                entry.hasError = false
+                entry.serverId = Integer.parseInt(result)
+                db.tableEntry.saveUploaded(entry)
+                success = true
+                Timber.i("SUCCESS, ENTRY SERVER ID is ${entry.serverId}")
+            } else {
+                val sbuf = StringBuilder()
+                sbuf.append("While trying to send entry: ")
+                sbuf.append(entry.toLongString(db))
+                sbuf.append("\nERROR: ")
+                sbuf.append(result)
+                TBApplication.ShowError(sbuf.toString())
+                Timber.e(sbuf.toString())
             }
+        } catch (ex: IOException) {
+            return false
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "sendEntry()", "server")
             return false
@@ -1059,7 +1091,7 @@ class DCPing(
         return
     }
 
-    private fun sendVehicle(vehicle: DataVehicle) {
+    private fun sendVehicle(vehicle: DataVehicle): Boolean {
         Timber.i("sendVehicle(${vehicle.id})")
         try {
             val dateString = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(System.currentTimeMillis()))
@@ -1080,32 +1112,34 @@ class DCPing(
             jsonObject.accumulate("other", vehicle.other)
 
             Timber.i("SENDING $jsonObject")
-            val result = post(vehicleUrl, jsonObject, true)
-            if (result != null) {
-                if (TextUtils.isDigitsOnly(result)) {
-                    vehicle.uploaded = true
-                    vehicle.serverId = result.toLong()
-                    db.tableVehicle.saveUploaded(vehicle)
-                    Timber.i("SUCCESS, VEHICLE SERVER ID is ${vehicle.serverId}")
-                } else {
-                    val sbuf = StringBuilder()
-                    sbuf.append("While trying to send vehicle: ")
-                    sbuf.append(vehicle.toString())
-                    sbuf.append("\nERROR: ")
-                    sbuf.append(result)
-                    TBApplication.ShowError(sbuf.toString())
-                    Timber.e(sbuf.toString())
-                }
+            val result = post(vehicleUrl, jsonObject)
+            if (TextUtils.isDigitsOnly(result)) {
+                vehicle.uploaded = true
+                vehicle.serverId = result.toLong()
+                db.tableVehicle.saveUploaded(vehicle)
+                Timber.i("SUCCESS, VEHICLE SERVER ID is ${vehicle.serverId}")
+            } else {
+                val sbuf = StringBuilder()
+                sbuf.append("While trying to send vehicle: ")
+                sbuf.append(vehicle.toString())
+                sbuf.append("\nERROR: ")
+                sbuf.append(result)
+                TBApplication.ShowError(sbuf.toString())
+                Timber.e(sbuf.toString())
             }
+        } catch (ex: IOException) {
+            return false
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "sendVehicle()", "server")
+            return false
         }
+        return true
     }
 
-    private fun queryStrings() {
+    private fun queryStrings(): Boolean {
         Timber.i("queryStrings()")
         try {
-            val response = post(stringsUrl, true) ?: return
+            val response = post(stringsUrl) ?: return false
             val obj = parseResult(response)
             val array = obj.getJSONArray("strings")
             for (i in 0 until array.length()) {
@@ -1127,9 +1161,13 @@ class DCPing(
                     }
                 }
             }
+        } catch (ex: IOException) {
+            return false
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryTrucks()", "server")
+            return false
         }
+        return true
     }
 
     private operator fun get(items: List<DataNote>, match: DataNote): DataNote? {
@@ -1141,36 +1179,29 @@ class DCPing(
         return null
     }
 
-    private fun post(target: String, sendErrors: Boolean): String? {
-        return post(target, -1, 0, sendErrors)
+    @Throws(IOException::class)
+    private fun post(target: String): String? {
+        return post(target, -1, 0)
     }
 
-    private fun post(target: String, page: Int, pageSize: Int, sendErrors: Boolean): String? {
-        try {
-            val jsonObject = JSONObject()
-            jsonObject.accumulate("device_id", ServerHelper.instance.deviceId)
-            jsonObject.accumulate("tech_id", prefHelper.techID)
-            if (page >= 0 && pageSize > 0) {
-                jsonObject.accumulate("page", page)
-                jsonObject.accumulate("page_size", pageSize)
-            }
-            return post(target, jsonObject, sendErrors)
-        } catch (ex: Exception) {
-            val msg = "While sending to " + target + "\n" + ex.message
-            if (sendErrors) {
-                Timber.e("$TAG:$msg")
-            } else {
-                Log.e(TAG, msg)
-            }
-            return null
+    @Throws(IOException::class)
+    private fun post(target: String, page: Int, pageSize: Int): String {
+        val jsonObject = JSONObject()
+        jsonObject.accumulate("device_id", ServerHelper.instance.deviceId)
+        jsonObject.accumulate("tech_id", prefHelper.techID)
+        if (page >= 0 && pageSize > 0) {
+            jsonObject.accumulate("page", page)
+            jsonObject.accumulate("page_size", pageSize)
         }
+        return post(target, jsonObject)
     }
 
     private fun openTargetConnection(target: String): HttpURLConnection {
         return URL(target).openConnection() as HttpURLConnection
     }
 
-    private fun post(target: String, json: JSONObject, sendErrors: Boolean): String? {
+    @Throws(IOException::class)
+    private fun post(target: String, json: JSONObject, sendErrors: Boolean = true): String {
         try {
             if (LOG) {
                 Log.d(TAG, "POST: $target: $json")
@@ -1189,15 +1220,18 @@ class DCPing(
                 Log.d(TAG, "GOT RESULT: $result")
             }
             return result
-        } catch (ex: Exception) {
+        } catch (ex: IOException) {
+            val msg: String
             if (sendErrors) {
-                TBApplication.ReportServerError(ex, DCPing::class.java, "post()", "server")
+                msg = TBApplication.ReportServerError(ex, DCPing::class.java, "post()", "server")
             } else {
-                val msg = "While sending to " + target + "\n" + ex.message
-                Log.e(TAG, msg)
-                TBApplication.ShowError(msg)
+                msg = ex.message ?: "unknown error"
+                Log.e(TAG, "While sending to $target\n$msg")
+                if (sendErrors) {
+                    TBApplication.ShowError(msg)
+                }
             }
-            return null
+            throw(IOException(msg))
         }
     }
 
@@ -1226,12 +1260,12 @@ class DCPing(
             jsonObject.accumulate("trace", line.trace)
             jsonObject.accumulate("app_version", line.version)
             val result = post(messageUrl, jsonObject, false)
-            if (result != null && Integer.parseInt(result) == 0) {
+            if (Integer.parseInt(result) == 0) {
                 db.tableCrash.delete(line)
             } else {
-                Log.e(TAG, "Unable to send previously trapped message: " + line.message!!)
+                Log.e(TAG, "Unable to send previously trapped message: " + line.message)
             }
-        } catch (ex: Exception) {
+        } catch (ex: IOException) {
             Log.e(TAG, "Exception: " + ex.message)
         }
     }
@@ -1256,7 +1290,6 @@ class DCPing(
         }
 
         fun disableRemaining() {
-            Timber.i("MYDEBUG Disable remaining")
             for (project in unprocessed) {
                 Timber.i("Project disable or delete: ${project.dashName}")
                 db.tableProjects.removeOrDisable(project)

@@ -19,7 +19,6 @@ class TitleFragment: BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragTitleBinding.inflate(layoutInflater, container, false)
-        val componentRoot = app.componentRoot
         baseVM = TitleViewModel(boundFrag)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)

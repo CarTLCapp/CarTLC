@@ -130,7 +130,7 @@ open class CarRepository(
     fun computeCurStage() {
         var inEntry = false
         when {
-            prefHelper.lastName.isNullOrBlank() -> curFlowValue = LoginFlow()
+            prefHelper.firstTechCode.isNullOrBlank() -> curFlowValue = LoginFlow()
             prefHelper.projectRootName.isNullOrBlank() -> curFlowValue = RootProjectFlow()
             prefHelper.projectSubName.isNullOrBlank() -> curFlowValue = SubProjectFlow()
             prefHelper.company.isNullOrBlank() -> curFlowValue = CompanyFlow()

@@ -83,15 +83,15 @@ class TestDCPing {
         Mockito.`when`(mockHttpConnection.outputStream).thenReturn(outputStream)
     }
 
-    @Test
-    fun verifyRegistration() {
-        prefHelper.registrationHasChanged = true
-        initStream("23:72")
-        ping.sendRegistration()
-        assertFalse(prefHelper.registrationHasChanged)
-        assertEquals(23, prefHelper.techID)
-        assertEquals(72, prefHelper.secondaryTechID)
-    }
+//    @Test
+//    fun verifyRegistration() {
+//        prefHelper.registrationHasChanged = true
+//        initStream("23:72")
+//        ping.sendRegistration()
+//        assertFalse(prefHelper.registrationHasChanged)
+//        assertEquals(23, prefHelper.techID)
+//        assertEquals(72, prefHelper.secondaryTechID)
+//    }
 
     private fun initBasic() {
         Mockito.`when`(db.tableEntry).thenReturn(tableEntry)

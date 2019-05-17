@@ -21,8 +21,8 @@ import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.ui.act.MainActivity
 import com.cartlc.tracker.ui.base.BaseFragment
 import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleController
+import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel
-import com.cartlc.tracker.viewmodel.main.MainButtonsViewModel
 
 class MainListFragment : BaseFragment(), FlowUseCase.Listener {
 
@@ -43,8 +43,8 @@ class MainListFragment : BaseFragment(), FlowUseCase.Listener {
     private val mainActivity: MainActivity?
         get() = activity as? MainActivity
 
-    private val buttonsViewModel: MainButtonsViewModel?
-        get() = mainActivity?.vm?.buttonsViewModel
+    private val buttonsUseCase: ButtonsUseCase?
+        get() = mainActivity?.vm?.buttonsUseCase
 
     private val entrySimpleControl: EntrySimpleController?
         get() = mainActivity?.entrySimpleView?.control
@@ -80,11 +80,11 @@ class MainListFragment : BaseFragment(), FlowUseCase.Listener {
                 Stage.ADD_CITY,
                 Stage.ADD_STATE,
                 Stage.ADD_STREET -> {
-                    buttonsViewModel?.showNextButtonValue = true
+                    buttonsUseCase?.nextVisible = true
                 }
                 Stage.COMPANY -> {
-                    buttonsViewModel?.showNextButtonValue = true
-                    buttonsViewModel?.checkCenterButtonIsEdit()
+                    buttonsUseCase?.nextVisible = true
+                    buttonsUseCase?.checkCenterButtonIsEdit()
                 }
                 Stage.TRUCK -> {
                     entrySimpleControl?.entryTextValue = value

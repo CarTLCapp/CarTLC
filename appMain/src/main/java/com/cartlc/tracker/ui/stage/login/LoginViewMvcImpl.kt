@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.TextView
 import com.callassistant.util.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.R
 import com.cartlc.tracker.ui.bits.TextWatcherImpl
@@ -17,38 +18,24 @@ class LoginViewMvcImpl(
 
     override val rootView: View = inflater.inflate(R.layout.frame_login, container, false) as ViewGroup
 
-    private val firstNameView = findViewById<EditText>(R.id.first_name)
-    private val lastNameView = findViewById<EditText>(R.id.last_name)
-    private val secondaryFirstNameView = findViewById<EditText>(R.id.secondary_first_name)
-    private val secondaryLastNameView = findViewById<EditText>(R.id.secondary_last_name)
+    private val firstTechCodeView = findViewById<EditText>(R.id.first_tech_code)
+    private val firstTechNameView = findViewById<TextView>(R.id.first_tech_name)
+    private val secondaryTechCodeView = findViewById<EditText>(R.id.secondary_tech_code)
+    private val secondaryTechNameView = findViewById<TextView>(R.id.secondary_tech_name)
     private val secondaryLoginCheckBox = findViewById<CheckBox>(R.id.secondary_login)
 
     init {
-        firstNameView.addTextChangedListener(object : TextWatcherImpl() {
+        firstTechCodeView.addTextChangedListener(object : TextWatcherImpl() {
             override fun afterTextChanged(s: Editable?) {
                 for (listener in listeners) {
-                    listener.onFirstNameChanged(s.toString())
+                    listener.onFirstTechCodeChanged(s.toString())
                 }
             }
         })
-        lastNameView.addTextChangedListener(object : TextWatcherImpl() {
+        secondaryTechCodeView.addTextChangedListener(object : TextWatcherImpl() {
             override fun afterTextChanged(s: Editable?) {
                 for (listener in listeners) {
-                    listener.onLastNameChanged(s.toString())
-                }
-            }
-        })
-        secondaryFirstNameView.addTextChangedListener(object : TextWatcherImpl() {
-            override fun afterTextChanged(s: Editable?) {
-                for (listener in listeners) {
-                    listener.onSecondaryFirstNameChanged(s.toString())
-                }
-            }
-        })
-        secondaryLastNameView.addTextChangedListener(object : TextWatcherImpl() {
-            override fun afterTextChanged(s: Editable?) {
-                for (listener in listeners) {
-                    listener.onSecondaryLastNameChanged(s.toString())
+                    listener.onSecondaryTechCodeChanged(s.toString())
                 }
             }
         })
@@ -59,31 +46,27 @@ class LoginViewMvcImpl(
         }
     }
 
-    override var firstName: String
-        get() = firstNameView.text.toString()
-        set(value) { firstNameView.setText(value) }
+    override var firstTechCode: String
+        get() = firstTechCodeView.text.toString()
+        set(value) { firstTechCodeView.setText(value) }
 
-    override var lastName: String
-        get() = lastNameView.text.toString()
-        set(value) { lastNameView.setText(value) }
+    override var firstTechName: String
+        get() = firstTechNameView.text.toString()
+        set(value) { firstTechNameView.text = value }
 
-    override var secondaryFirstName: String
-        get() = secondaryFirstNameView.text.toString()
-        set(value) { secondaryFirstNameView.setText(value) }
+    override var secondaryTechCode: String
+        get() = secondaryTechCodeView.text.toString()
+        set(value) { secondaryTechCodeView.setText(value) }
 
-    override var secondaryLastName: String
-        get() = secondaryLastNameView.text.toString()
-        set(value) { secondaryLastNameView.setText(value) }
+    override var secondaryTechName: String
+        get() = secondaryTechNameView.text.toString()
+        set(value) { secondaryTechNameView.text = value }
 
-    override var secondaryFirstNameEnabled: Boolean
-        get() = secondaryFirstNameView.isEnabled
-        set(value) { secondaryFirstNameView.isEnabled = value }
+    override var secondaryTechCodeEnabled: Boolean
+        get() = secondaryTechCodeView.isEnabled
+        set(value) { secondaryTechCodeView.isEnabled = value }
 
-    override var secondaryLastNameEnabled: Boolean
-        get() = secondaryLastNameView.isEnabled
-        set(value) { secondaryLastNameView.isEnabled = value }
-
-    var secondaryCheckBoxChecked: Boolean
+    override var secondaryCheckBoxChecked: Boolean
         get() = secondaryLoginCheckBox.isChecked
         set(value) { secondaryLoginCheckBox.isChecked = value }
 }

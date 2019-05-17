@@ -6,12 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import com.cartlc.tracker.databinding.FragButtonsBinding
 import com.cartlc.tracker.model.event.Button
-import com.cartlc.tracker.ui.act.MainActivity
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.ui.base.BaseFragment
 import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
 import com.cartlc.tracker.viewmodel.frag.ButtonsViewModel
-import com.cartlc.tracker.viewmodel.main.MainButtonsViewModel
 
 class ButtonsFragment : BaseFragment(), SoftKeyboardDetect.Listener {
 
@@ -30,11 +28,7 @@ class ButtonsFragment : BaseFragment(), SoftKeyboardDetect.Listener {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragButtonsBinding.inflate(layoutInflater, container, false)
         val componentRoot = app.componentRoot
-        if (activity is MainActivity) {
-            baseVM = MainButtonsViewModel(boundFrag, componentRoot.messageHandler)
-        } else {
-            baseVM = ButtonsViewModel(repo, componentRoot.messageHandler)
-        }
+        baseVM = ButtonsViewModel(repo, componentRoot.messageHandler)
         binding.viewModel = vm
         super.onCreateView(inflater, container, savedInstanceState)
         binding.btnNext.setOnClickListener { btnNext(it) }

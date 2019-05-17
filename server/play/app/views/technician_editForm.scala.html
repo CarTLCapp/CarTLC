@@ -1,4 +1,4 @@
-@(id: Long, techForm: Form[Technician], client : Client)
+@(id: Long, techForm: Form[views.formdata.InputTechnician], client : Client)
 
 @import helper._
 
@@ -6,7 +6,7 @@
 
 @main("FleetTLC - Edit Technician", home = "/tech") {
     
-    <h1 id="homeTitle" class="fill">Edit user
+    <h1 id="homeTitle" class="fill">Edit technician
         <span style="float:right;font-size:16px">
         @if(client.is_admin) {
             <a href="@routes.TechnicianController.resetUpload(id)">Reset Upload</a>
@@ -29,6 +29,7 @@
         
             @b3.text(techForm("first_name"), '_label -> "First Name", '_help -> "")
             @b3.text(techForm("last_name"), '_label -> "Last Name", '_help -> "")
+            @b3.text(techForm("code"), '_label -> "Login Code", '_help -> "")
 
         </fieldset>
 
@@ -38,4 +39,7 @@
         </div>
 
     }
+
+    <p>If Login Code 0 (zero) is used a new unused code will be assigned upon save.</p>
+
 }

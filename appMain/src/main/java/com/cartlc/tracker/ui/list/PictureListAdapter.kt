@@ -4,7 +4,6 @@
 package com.cartlc.tracker.ui.list
 
 import java.io.File
-import java.util.ArrayList
 import java.util.HashMap
 
 import com.cartlc.tracker.R
@@ -23,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
+import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import kotlinx.android.synthetic.main.entry_item_picture.view.*
 
 import timber.log.Timber
@@ -35,10 +35,29 @@ open class PictureListAdapter(
         protected val mContext: Context,
         protected val mListener: (Int) -> Unit?
 ) : RecyclerView.Adapter<PictureListAdapter.CustomViewHolder>() {
+
+    companion object {
+        private const val MSG_REMOVE_ITEM = 1
+        private const val DELAY_REMOVE_ITEM = 100
+    }
+
+    private class MyHandler(other: PictureListAdapter) : Handler() {
+
+        private val obj = WeakReference<PictureListAdapter>(other)
+
+        override fun handleMessage(msg: Message) {
+            when (msg.what) {
+                MSG_REMOVE_ITEM -> if (msg.obj is DataPicture) {
+                    val item = msg.obj as DataPicture
+                    obj.get()?.itemRemove(item)
+                }
+            }
+        }
+    }
+
     private val mLayoutInflater: LayoutInflater = LayoutInflater.from(mContext)
     private var mRotation: HashMap<String, Int> = HashMap()
-    protected var mItems: MutableList<DataPicture> = ArrayList()
-    private val mDecHeight: Int by lazy { mContext.resources.getDimension(R.dimen.image_dec_size).toInt() }
+    protected var mItems: MutableList<DataPicture> = mutableListOf()
     private var mHandler = MyHandler(this)
 
     protected open val itemLayout: Int
@@ -73,36 +92,7 @@ open class PictureListAdapter(
             return commonRotation
         }
 
-    private class MyHandler(
-            other: PictureListAdapter
-    ) : Handler() {
-
-        private val obj = WeakReference<PictureListAdapter>(other)
-
-        override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                MSG_DECREASE_SIZE -> {
-                    obj.get()?.decreaseMaxHeightSize()
-                }
-                MSG_REMOVE_ITEM -> if (msg.obj is DataPicture) {
-                    val item = msg.obj as DataPicture
-                    obj.get()?.increaseMaxHeightSize(item)
-                }
-            }
-        }
-    }
-
-    private fun decreaseMaxHeightSize() {
-        var height = maxHeight
-        height -= mDecHeight
-        if (height < mDecHeight) {
-            height = mDecHeight
-        }
-        maxHeight = height
-        notifyDataSetChanged()
-    }
-
-    private fun increaseMaxHeightSize(item: DataPicture) {
+    private fun itemRemove(item: DataPicture) {
         item.remove()
         mItems.remove(item)
         notifyDataSetChanged()
@@ -112,22 +102,7 @@ open class PictureListAdapter(
 
         fun bind(item: DataPicture) {
             with(view) {
-                Picasso.get().cancelRequest(picture!!)
-                val builder = Picasso.Builder(mContext)
-                builder.listener { _, uri, exception ->
-                    val sbuf = StringBuilder()
-                    sbuf.append("While processing: ")
-                    sbuf.append(uri.toString())
-                    sbuf.append("\n")
-                    sbuf.append(exception.message)
-                    Timber.e(sbuf.toString())
-
-                    loading?.setText(R.string.error_while_loading_picture)
-                    picture?.setImageResource(android.R.color.transparent)
-
-                    // TODO: Need to get rid of adjustViewBounds since I am getting way too many errors!
-                    mHandler.sendEmptyMessageDelayed(MSG_DECREASE_SIZE, DELAY_DECREASE_SIZE.toLong())
-                }
+                Picasso.get().cancelRequest(picture)
                 val pictureFile: File?
                 when {
                     item.existsUnscaled -> pictureFile = item.unscaledFile
@@ -139,16 +114,11 @@ open class PictureListAdapter(
                     msg.what = MSG_REMOVE_ITEM
                     msg.obj = item
                     mHandler.sendMessageDelayed(msg, DELAY_REMOVE_ITEM.toLong())
-                    picture!!.setImageResource(android.R.color.transparent)
-                    loading!!.setText(R.string.error_picture_removed)
+                    picture.setImageResource(android.R.color.transparent)
+                    loading.setText(R.string.error_picture_removed)
                 } else {
-                    builder.build()
-                            .load(getUri(pictureFile))
-                            .placeholder(R.drawable.loading)
-                            .centerInside()
-                            .resize(0, maxHeight)
-                            .into(picture)
-                    loading!!.visibility = View.GONE
+                    BitmapHelper.loadBitmap(pictureFile.absolutePath, maxHeight, picture)
+                    loading.visibility = View.GONE
                     remove?.let { view ->
                         view.setOnClickListener {
                             item.remove()
@@ -247,12 +217,4 @@ open class PictureListAdapter(
         return false
     }
 
-    companion object {
-
-        internal val MSG_DECREASE_SIZE = 0
-        internal val MSG_REMOVE_ITEM = 1
-
-        internal val DELAY_DECREASE_SIZE = 100
-        internal val DELAY_REMOVE_ITEM = 100
-    }
 }

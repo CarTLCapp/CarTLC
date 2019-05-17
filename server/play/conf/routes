@@ -17,6 +17,8 @@ GET     /picture_cleanup          controllers.HomeController.pictureCleanup()
 ### TECHNICIANS ###
 
 GET     /tech                    controllers.TechnicianController.list()
+GET     /tech/new                controllers.TechnicianController.create()
+POST    /tech/save               controllers.TechnicianController.save()
 GET     /tech/:id                controllers.TechnicianController.edit(id:Long)
 POST    /tech/:id                controllers.TechnicianController.update(id:Long)
 GET     /tech/:id/delete         controllers.TechnicianController.delete(id:Long)

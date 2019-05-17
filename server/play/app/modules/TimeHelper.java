@@ -11,21 +11,29 @@ public class TimeHelper {
 
     public static final String DATE_FORMAT = "MM/dd/yyyy";
     public static final String TIME_FORMAT = "kk:mm z";
-
     public static final String DATE_TIME_FORMAT = "MM/dd/yyyy kk:mm z";
 
     public TimeHelper() {
     }
 
     public String getDateTime(Date entry_time, String time_zone) {
+        if (entry_time == null) {
+            return "";
+        }
         return getFormat(DATE_TIME_FORMAT, time_zone).format(entry_time);
     }
 
     public String getDate(Date entry_time, String time_zone) {
+        if (entry_time == null) {
+            return "";
+        }
         return getFormat(DATE_FORMAT, time_zone).format(entry_time);
     }
 
     public String getTime(Date entry_time, String time_zone) {
+        if (entry_time == null) {
+            return "";
+        }
         return getFormat(TIME_FORMAT, time_zone).format(entry_time);
     }
 

@@ -17,8 +17,8 @@ class EntrySimpleView(
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     private val app = context.applicationContext as TBApplication
-    private val act = context as? BaseActivity
-    private val boundAct = act!!.boundAct
+    private val act = context as BaseActivity
+    private val boundAct = act.boundAct
     private val componentRoot = app.componentRoot
     private val factoryViewMvc = componentRoot.factoryViewMvc
     private val factoryController = componentRoot.factoryController

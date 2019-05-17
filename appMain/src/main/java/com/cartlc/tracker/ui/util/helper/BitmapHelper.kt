@@ -6,7 +6,10 @@ package com.cartlc.tracker.ui.util.helper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.os.AsyncTask
 import android.os.Environment
+import android.widget.ImageView
+import com.cartlc.tracker.R
 
 import com.cartlc.tracker.ui.app.TBApplication
 
@@ -14,6 +17,8 @@ import java.io.File
 import java.io.FileOutputStream
 
 import timber.log.Timber
+import java.lang.ref.WeakReference
+import kotlin.math.roundToInt
 
 /**
  * Created by dug on 6/1/17.
@@ -63,7 +68,6 @@ object BitmapHelper {
         BitmapFactory.decodeFile(pathname, options)
         options.inJustDecodeBounds = false
         options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, dstWidth, dstHeight)
-        // TODO: Got a out-of-memory error here:
         return BitmapFactory.decodeFile(pathname, options)
     }
 
@@ -93,16 +97,42 @@ object BitmapHelper {
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, BitmapHelper::class.java, "rotate()", picture.toString())
         }
-
     }
 
-    //    public static int [] getImageSize(String pathname) {
-    //        BitmapFactory.Options options = new BitmapFactory.Options();
-    //        options.inJustDecodeBounds = true;
-    //        BitmapFactory.decodeFile(pathname, options);
-    //        int [] result = new int[2];
-    //        result[0] = options.outWidth;
-    //        result[1] = options.outHeight;
-    //        return result;
-    //    }
+    fun loadBitmap(pathname: String, dstHeight: Int): Bitmap {
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(pathname, options)
+        val origHeight = options.outHeight
+        options.inJustDecodeBounds = false
+        val sampleSize = 1f / (dstHeight.toFloat() / origHeight.toFloat())
+        options.inSampleSize = sampleSize.roundToInt()
+        return BitmapFactory.decodeFile(pathname, options)
+    }
+
+    private class LoadTask(
+        imageView: ImageView,
+        private val dstHeight: Int
+    ) : AsyncTask<String, String, Bitmap>() {
+
+        val ref = WeakReference<ImageView>(imageView)
+
+        override fun onPreExecute() {
+            ref.get()?.setImageResource(R.drawable.loading)
+        }
+
+        override fun doInBackground(vararg params: String): Bitmap {
+            return loadBitmap(params[0], dstHeight)
+        }
+
+        override fun onPostExecute(result: Bitmap) {
+            ref.get()?.setImageBitmap(result)
+        }
+    }
+
+    fun loadBitmap(pathname: String, dstHeight: Int, imageView: ImageView) {
+        LoadTask(imageView, dstHeight).execute(pathname)
+    }
+
+
 }

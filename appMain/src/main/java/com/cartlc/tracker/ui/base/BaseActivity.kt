@@ -22,10 +22,9 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dialogHelper = DialogHelper(this)
         componentRoot = (applicationContext as TBApplication).componentRoot
-
         boundAct = BoundAct(this)
+        dialogHelper = boundAct.dialogHelper
     }
 
     override fun onDestroy() {

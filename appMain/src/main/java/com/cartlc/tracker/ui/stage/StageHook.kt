@@ -1,9 +1,9 @@
 package com.cartlc.tracker.ui.stage
 
-import com.cartlc.tracker.viewmodel.frag.ButtonsViewModel
+import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
 
 interface StageHook {
 
-    val buttonsViewModel: ButtonsViewModel
+    val buttonsUseCase: ButtonsUseCase
 
 }

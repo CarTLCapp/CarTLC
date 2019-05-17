@@ -18,7 +18,7 @@
     <ImageView
         android:id="@+id/picture"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop='true'
         android:layout_centerInParent="true"
         android:paddingBottom="10dp"
@@ -26,7 +26,7 @@
         android:paddingRight="20dp"
         android:paddingTop="10dp"
         android:adjustViewBounds="true"
-        android:scaleType="fitCenter"/>
+        android:scaleType="center"/>
 
     <ImageView
         android:id="@+id/remove"

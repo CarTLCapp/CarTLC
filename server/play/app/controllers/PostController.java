@@ -33,6 +33,40 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Singleton
 public class PostController extends Controller {
 
+    class FindTechnician {
+
+        String mErrorMessage;
+
+        public Technician find(JsonNode codeNode, String first_name, String last_name) {
+            Technician tech = null;
+            mErrorMessage = null;
+            if (codeNode != null) {
+                int code;
+                try {
+                    code = Integer.valueOf(codeNode.textValue());
+                } catch (NumberFormatException ex) {
+                    mErrorMessage = "Bad code string value: " + ex.getMessage();
+                    return null;
+                }
+                List<Technician> found = Technician.listWithCode(code);
+                if (found.size() == 0) {
+                    mErrorMessage = "No such technician with code: " + code;
+                    return null;
+                }
+                tech = found.get(0);
+            } else if (first_name != null && last_name != null) {
+                tech = Technician.findByName(first_name, last_name);
+                if (tech == null) {
+                    mErrorMessage = "No such technician with name: " + first_name + " " + last_name;
+                    return null;
+                }
+            } else {
+                mErrorMessage = "Malformed request";
+            }
+            return tech;
+        }
+    }
+
     @Inject
     public PostController() {
     }
@@ -42,13 +76,8 @@ public class PostController extends Controller {
         JsonNode json = request().body().asJson();
         ArrayList<String> missing = new ArrayList<String>();
         String first_name = json.findPath("first_name").textValue();
-        if (first_name == null) {
-            missing.add("first_name");
-        }
         String last_name = json.findPath("last_name").textValue();
-        if (last_name == null) {
-            missing.add("last_name");
-        }
+        JsonNode codeNode = json.findValue("code");
         String device_id = json.findPath("device_id").textValue();
         if (device_id == null) {
             missing.add("device_id");
@@ -56,49 +85,51 @@ public class PostController extends Controller {
         if (missing.size() > 0) {
             return missingRequest(missing);
         }
-        long tech_id;
-        tech_id = saveTechnician(first_name, last_name, device_id);
-        if (tech_id == 0) {
-            return badRequest("Bad technician registration.");
+        FindTechnician findTechnician = new FindTechnician();
+        Technician tech = findTechnician.find(codeNode, first_name, last_name);
+        if (tech == null) {
+            return badRequest(findTechnician.mErrorMessage);
         }
-        long secondary_tech_id = 0;
+        // An old APK query:
+        if (codeNode == null) {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(tech.id);
+
+            long secondary_tech_id = 0;
+            first_name = json.findPath("secondary_first_name").textValue();
+            last_name = json.findPath("secondary_last_name").textValue();
+            codeNode = json.findValue("secondary_code");
+
+            if (codeNode != null || (first_name != null && !first_name.isEmpty() && last_name != null && !last_name.isEmpty())) {
+                tech = findTechnician.find(codeNode, first_name, last_name);
+                if (tech == null) {
+                    return badRequest(findTechnician.mErrorMessage);
+                }
+                sbuf.append(":");
+                sbuf.append(tech.id);
+            }
+            return ok(sbuf.toString());
+        }
+        ObjectNode result = Json.newObject();
+        result.put("tech_id", tech.id);
+        result.put("tech_first_name", tech.first_name);
+        result.put("tech_last_name", tech.last_name);
+
+        Technician secondaryTech = null;
         first_name = json.findPath("secondary_first_name").textValue();
         last_name = json.findPath("secondary_last_name").textValue();
-
-        if (first_name != null && !first_name.isEmpty() && last_name != null && !last_name.isEmpty()) {
-            secondary_tech_id = saveTechnician(first_name, last_name, device_id);
-        }
-        StringBuilder sbuf = new StringBuilder();
-        sbuf.append(tech_id);
-        if (secondary_tech_id > 0) {
-            sbuf.append(":");
-            sbuf.append(secondary_tech_id);
-        }
-        return ok(sbuf.toString());
-    }
-
-    long saveTechnician(String first_name, String last_name, String device_id) {
-        Technician tech = null;
-        Transaction txn = Ebean.beginTransaction();
-        try {
-            tech = Technician.findByName(first_name, last_name);
-            if (tech == null) {
-                tech = new Technician();
+        codeNode = json.findValue("secondary_code");
+        if (codeNode != null || (first_name != null && !first_name.isEmpty() && last_name != null && !last_name.isEmpty())) {
+            secondaryTech = findTechnician.find(codeNode, first_name, last_name);
+            if (secondaryTech == null) {
+                return badRequest(findTechnician.mErrorMessage);
+            } else {
+                result.put("secondary_tech_id", secondaryTech.id);
+                result.put("secondary_tech_first_name", secondaryTech.first_name);
+                result.put("secondary_tech_last_name", secondaryTech.last_name);
             }
-            tech.first_name = first_name;
-            tech.last_name = last_name;
-            tech.device_id = device_id;
-            tech.save();
-            txn.commit();
-        } catch (Exception ex) {
-            Logger.error(ex.getMessage());
-        } finally {
-            txn.end();
         }
-        if (tech == null) {
-            return 0L;
-        }
-        return tech.id;
+        return ok(result);
     }
 
     @Transactional
@@ -149,6 +180,7 @@ public class PostController extends Controller {
                 result.put("reload_code", tech.reload_code);
                 tech.reload_code = null;
             }
+            tech.device_id = deviceId;
             tech.last_ping = new Date(System.currentTimeMillis());
             tech.app_version = app_version;
             tech.save();

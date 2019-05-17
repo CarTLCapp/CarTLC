@@ -26,6 +26,8 @@ sealed class StringMessage {
     object title_status: StringMessage()
     object title_confirmation: StringMessage()
     object title_photo: StringMessage()
+    data class dialog_dialog_entry_done(val name: String): StringMessage()
+    data class dialog_dialog_entry_done2(val name: String, val name2: String): StringMessage()
     data class title_photos(val count: Int): StringMessage()
     data class status_installed_equipments(val checkedEquipment: Int, val maxEquip: Int) : StringMessage()
     data class status_installed_pictures(val countPictures: Int) : StringMessage()

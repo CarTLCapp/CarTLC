@@ -22,11 +22,11 @@ import com.cartlc.tracker.model.*
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.event.EventError
-import com.cartlc.tracker.model.server.AmazonHelper
-import com.cartlc.tracker.model.server.DCService
-import com.cartlc.tracker.model.server.ServerHelper
+import com.cartlc.tracker.model.flow.FlowUseCaseImpl
 import com.cartlc.tracker.model.sql.DatabaseManager
 import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.model.flow.FlowUseCase
+import com.cartlc.tracker.model.server.*
 import com.cartlc.tracker.ui.app.dependencyinjection.ComponentRoot
 import com.cartlc.tracker.ui.util.helper.LocationHelper
 import com.cartlc.tracker.ui.util.helper.PermissionHelper.PermissionRequest
@@ -96,9 +96,10 @@ class TBApplication : Application() {
             return sbuf.toString()
         }
 
-        fun ReportServerError(ex: Exception, claz: Class<*>, function: String, type: String) {
+        fun ReportServerError(ex: Exception, claz: Class<*>, function: String, type: String): String {
             val msg = ReportError(ex, claz, function, type)
             ShowError(msg)
+            return msg
         }
 
         fun ShowError(msg: String) {
@@ -119,8 +120,6 @@ class TBApplication : Application() {
             return sbuf.toString()
         }
 
-//    lateinit var carRepoComponent: CarRepositoryComponent
-
     private lateinit var carRepo: CarRepository
     private lateinit var prefHelper: PrefHelper
     private lateinit var dm: DatabaseManager
@@ -131,6 +130,9 @@ class TBApplication : Application() {
     lateinit var componentRoot: ComponentRoot
     lateinit var vehicleComponent: VehicleViewModelComponent
     lateinit var amazonHelper: AmazonHelper
+    lateinit var flowUseCase: FlowUseCase
+    lateinit var ping: DCPing
+    lateinit var dcRx: DCServerRx
 
     private lateinit var vehicleViewModel: VehicleViewModel
     private lateinit var vehicleRepository: VehicleRepository
@@ -154,14 +156,22 @@ class TBApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        componentRoot = ComponentRoot(this)
         dm = DatabaseManager(this)
         prefHelper = PrefHelper(this, dm)
+        flowUseCase = FlowUseCaseImpl()
         carRepo = CarRepository(
                 dm,
                 prefHelper,
-                componentRoot.flowUseCase
+                flowUseCase
         )
+        ping = DCPing(this, repo)
+        dcRx = DCServerRxImpl(ping)
+        componentRoot = ComponentRoot(this,
+                prefHelper,
+                flowUseCase,
+                carRepo,
+                ping,
+                dcRx)
         carRepo.computeCurStage()
 
         vehicleRepository = VehicleRepository(this, dm, prefHelper)

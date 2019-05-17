@@ -17,22 +17,22 @@ import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleController
+import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
 import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.viewmodel.frag.*
-import timber.log.Timber
 import java.io.File
 
 class MainVMHolder(
         boundAct: BoundAct,
         private val newProjectHolder: NewProjectVMHolder,
-        val buttonsViewModel: MainButtonsViewModel,
+        val buttonsUseCase: ButtonsUseCase,
         private val mainListViewModel: MainListViewModel,
         private val confirmationViewModel: ConfirmationViewModel,
         private val titleViewModel: TitleViewModel,
         private val entrySimpleControl: EntrySimpleController
-) : LifecycleObserver, FlowUseCase.Listener {
+) : LifecycleObserver, FlowUseCase.Listener, ButtonsUseCase.Listener {
 
     companion object {
         private val ALLOW_EMPTY_TRUCK = BuildConfig.DEBUG // true=Debugging only
@@ -114,9 +114,6 @@ class MainVMHolder(
         Flow.processActionEvent = { action -> processActionEvent(action) }
         Flow.processStageEvent = { flow -> curFlowValue = flow }
 
-        buttonsViewModel.handleButtonEvent().observe(boundAct.lifecycleOwner, Observer { event ->
-            event.executeIfNotHandled { onButtonDispatch(event.peekContent()) }
-        })
         repo.flowUseCase.registerListener(this)
     }
 
@@ -127,15 +124,17 @@ class MainVMHolder(
         entrySimpleControl.dispatchActionEvent = { event -> dispatchActionEvent(event) }
         entrySimpleControl.afterTextChangedListener = { value -> onEntryValueChanged(value) }
         confirmationViewModel.dispatchActionEvent = entrySimpleControl.dispatchActionEvent
-        confirmationViewModel.buttonsViewModel = buttonsViewModel
+        confirmationViewModel.buttonsUseCase = buttonsUseCase
         confirmationViewModel.titleViewModel = titleViewModel
         mainListViewModel.onCurrentProjectGroupChanged = { checkAddButtonVisible() }
         prefHelper.setFromCurrentProjectId()
+        buttonsUseCase.registerListener(this)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
         repo.flowUseCase.unregisterListener(this)
+        buttonsUseCase.unregisterListener(this)
     }
 
     fun onRestoreInstanceState(path: String?) {
@@ -156,14 +155,14 @@ class MainVMHolder(
 
     private fun btnChangeCompany() {
         newProjectHolder.autoNarrowOkay = false
-        buttonsViewModel.wasNext = false
+        buttonsUseCase.wasNext = false
         repo.onCompanyChanged()
     }
 
     private fun doSimpleEntryReturn(value: String) {
         when (curFlowValue.stage) {
             Stage.LOGIN -> {
-                buttonsViewModel.onButtonDispatch(Button.BTN_CENTER)
+                buttonsUseCase.dispatch(Button.BTN_CENTER)
                 return
             }
             Stage.COMPANY, Stage.ADD_COMPANY -> prefHelper.company = value
@@ -172,7 +171,7 @@ class MainVMHolder(
             else -> {
             }
         }
-        buttonsViewModel.onButtonDispatch(Button.BTN_NEXT)
+        buttonsUseCase.dispatch(Button.BTN_NEXT)
     }
 
     // endregion ACTION OBJECT
@@ -209,7 +208,7 @@ class MainVMHolder(
         when (curFlowValue.stage) {
             Stage.PICTURE_1,
             Stage.PICTURE_2,
-            Stage.PICTURE_3 -> buttonsViewModel.onButtonDispatch(Button.BTN_NEXT)
+            Stage.PICTURE_3 -> buttonsUseCase.dispatch(Button.BTN_NEXT)
             else -> {
             }
         }
@@ -219,10 +218,18 @@ class MainVMHolder(
 
     // region BUTTONS
 
-    private fun onButtonDispatch(button: Button) {
-        when (button) {
+    override fun onButtonConfirm(action: Button): Boolean {
+        return when (action) {
+            Button.BTN_NEXT -> save(true)
+            Button.BTN_PREV -> save(false)
+            else -> true
+        }
+    }
+
+    override fun onButtonEvent(action: Button) {
+        when (action) {
             Button.BTN_CHANGE -> btnChangeCompany()
-            else -> buttonsViewModel.onButtonDispatch(button)
+            else -> {}
         }
     }
 
@@ -231,7 +238,6 @@ class MainVMHolder(
             Action.NEW_PROJECT -> onNewProject()
             Action.PING -> dispatchActionEvent(Action.PING)
             Action.ADD_PICTURE -> dispatchPictureRequest()
-            Action.PREVIOUS_FLOW -> repo.onPreviousFlow()
             is Action.RETURN_PRESSED -> doSimpleEntryReturn(action.text)
             else -> dispatchActionEvent(action)
         }
@@ -248,6 +254,11 @@ class MainVMHolder(
             prefHelper.clearLastEntry()
         }
         curFlowValue = TruckFlow()
+    }
+
+    fun btnProfile() {
+        save(false)
+        curFlowValue = LoginFlow()
     }
 
     // endregion BUTTONS
@@ -297,7 +308,6 @@ class MainVMHolder(
     }
 
     override fun onStageChanged(flow: Flow) {
-        Timber.i("MYDEBUG: VM FLOW=${flow.stage}")
         when (flow.stage) {
             Stage.CURRENT_PROJECT -> {
                 if (!repo.flowUseCase.wasFromNotify) {
@@ -310,9 +320,9 @@ class MainVMHolder(
 
                 mainListViewModel.showingValue = true
                 titleViewModel.showSeparatorValue = true
-                buttonsViewModel.showCenterButtonValue = true
-                buttonsViewModel.prevTextValue = messageHandler.getString(StringMessage.btn_edit)
-                buttonsViewModel.centerTextValue = messageHandler.getString(StringMessage.btn_new_project)
+                buttonsUseCase.centerVisible = true
+                buttonsUseCase.prevText = messageHandler.getString(StringMessage.btn_edit)
+                buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_new_project)
                 titleViewModel.titleValue = messageHandler.getString(StringMessage.title_current_project)
             }
             Stage.TRUCK -> {
@@ -336,7 +346,7 @@ class MainVMHolder(
             Stage.EQUIPMENT -> {
                 titleViewModel.titleValue = messageHandler.getString(StringMessage.title_equipment_installed)
                 mainListViewModel.showingValue = true
-                buttonsViewModel.showCenterButtonValue = true
+                buttonsUseCase.centerVisible = true
             }
             Stage.ADD_EQUIPMENT -> {
                 titleViewModel.titleValue = messageHandler.getString(StringMessage.title_equipment)
@@ -353,9 +363,9 @@ class MainVMHolder(
             Stage.PICTURE_3 -> {
                 val pictureCount = prefHelper.numPicturesTaken
                 var showToast = false
-                if (buttonsViewModel.wasNext) {
+                if (buttonsUseCase.wasNext) {
                     showToast = true
-                    buttonsViewModel.wasNext = false
+                    buttonsUseCase.wasNext = false
                 }
                 val pictures = db.tablePictureCollection.removeNonExistant(
                         db.tablePictureCollection.queryPictures(prefHelper.currentPictureCollectionId
@@ -364,20 +374,20 @@ class MainVMHolder(
                     dispatchActionEvent(Action.SHOW_PICTURE_TOAST(pictureCount))
                 }
                 titleViewModel.setPhotoTitleCount(pictureCount)
-                buttonsViewModel.showNextButtonValue = false
-                buttonsViewModel.showCenterButtonValue = true
-                buttonsViewModel.centerTextValue = messageHandler.getString(StringMessage.btn_another)
+                buttonsUseCase.nextVisible = false
+                buttonsUseCase.centerVisible = true
+                buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_another)
                 framePictureVisibleValue = true
                 val pictureFlow = flow as PictureFlow
                 if (pictureCount < pictureFlow.expected) {
                     dispatchPictureRequest()
                 } else {
-                    buttonsViewModel.showNextButtonValue = true
+                    buttonsUseCase.nextVisible = true
                     setList(pictures)
                 }
             }
             Stage.STATUS -> {
-                buttonsViewModel.nextTextValue = messageHandler.getString(StringMessage.btn_done)
+                buttonsUseCase.nextText = messageHandler.getString(StringMessage.btn_done)
                 mainListViewModel.showingValue = true
                 titleViewModel.titleValue = messageHandler.getString(StringMessage.title_status)
                 titleViewModel.subTitleValue = statusHint
@@ -439,7 +449,7 @@ class MainVMHolder(
             Stage.STREET,
             Stage.CITY,
             Stage.EQUIPMENT,
-            Stage.STATE -> buttonsViewModel.onButtonDispatch(Button.BTN_CENTER)
+            Stage.STATE -> buttonsUseCase.dispatch(Button.BTN_CENTER)
             else -> {
             }
         }
@@ -460,7 +470,7 @@ class MainVMHolder(
             Stage.ADD_STREET,
             Stage.ADD_CITY,
             Stage.ADD_EQUIPMENT,
-            Stage.ADD_STATE -> buttonsViewModel.showNextButtonValue = value.isNotBlank()
+            Stage.ADD_STATE -> buttonsUseCase.nextVisible = value.isNotBlank()
             else -> {
             }
         }
@@ -551,5 +561,12 @@ class MainVMHolder(
         }
         return true
     }
+
     // endregion save
+
+    fun showNoteErrorOk() {
+        if (BuildConfig.DEBUG) {
+            buttonsUseCase.skip()
+        }
+    }
 }

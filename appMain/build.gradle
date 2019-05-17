@@ -18,7 +18,7 @@ android {
         minSdkVersion 19
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 51
-        versionName "3.08"
+        versionName "3.09"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -63,7 +63,7 @@ dependencies {
     implementation 'androidx.media:media:1.0.1'
     implementation 'androidx.exifinterface:exifinterface:1.0.0'
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta1'
     implementation 'com.google.android.material:material:1.0.0'
 
     // Timber
@@ -90,12 +90,17 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Firebase
-    implementation 'com.google.firebase:firebase-core:16.0.8'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.9'
+    implementation 'com.google.firebase:firebase-core:16.0.9'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.0'
 
     // LeakCanary
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$leak_canary"
     releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leak_canary"
+
+    // RxJava
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.8'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.3.0'
 
     // Dagger
     implementation "com.google.dagger:dagger:$dagger_version"

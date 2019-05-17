@@ -10,9 +10,9 @@ data class StageArg(val stage: Stage) : ActionBundle()
 
 open class Flow(
         val stage: Stage,
-        private val prev: ActionBundle?,
-        private val center: ActionBundle?,
-        private val next: ActionBundle?
+        private val prev: ActionBundle? = null,
+        private val center: ActionBundle? = null,
+        private val next: ActionBundle? = null
 ) {
 
     constructor(
@@ -137,7 +137,7 @@ open class PictureFlow(
     override val isPictureStage = true
 }
 
-class LoginFlow : Flow(Stage.LOGIN, null, Action.PREVIOUS_FLOW, null)
+class LoginFlow : Flow(Stage.LOGIN)
 class RootProjectFlow : Flow(Stage.ROOT_PROJECT, Stage.CURRENT_PROJECT, null, Stage.SUB_PROJECT)
 class SubProjectFlow : Flow(Stage.SUB_PROJECT, Stage.ROOT_PROJECT, null, Stage.COMPANY)
 class CompanyFlow : Flow(Stage.COMPANY, Stage.SUB_PROJECT, Stage.ADD_COMPANY, Stage.STATE)

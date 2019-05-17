@@ -20,6 +20,7 @@ import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import org.greenrobot.eventbus.EventBus
+import timber.log.Timber
 
 /**
  * Created by dug on 5/31/17.

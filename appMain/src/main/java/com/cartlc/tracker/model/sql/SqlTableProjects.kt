@@ -11,7 +11,6 @@ import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.model.table.TableProjects
 
 import com.cartlc.tracker.ui.app.TBApplication
-import timber.log.Timber
 
 /**
  * Created by dug on 4/17/17.

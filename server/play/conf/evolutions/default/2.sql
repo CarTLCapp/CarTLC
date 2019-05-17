@@ -2,7 +2,7 @@
 
 # --- !Ups
 
-create table root_project (
+create table root_project(
     id                int auto_increment primary key,
     name              varchar(64),
     disabled          bit default 0
@@ -10,9 +10,11 @@ create table root_project (
 
 alter table project add root_project_id int;
 alter table project add constraint c_p_root_project_id foreign key (root_project_id) references root_project (id) on delete restrict on update restrict;
+alter table technician add code int default 0;
 
 # --- !Downs
 
 alter table project drop foreign key c_p_root_project_id;
 alter table project drop root_project_id;
+alter table technician drop code;
 drop table if exists root_project;

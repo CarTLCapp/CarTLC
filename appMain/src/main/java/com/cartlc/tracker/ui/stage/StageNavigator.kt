@@ -1,5 +1,6 @@
 package com.cartlc.tracker.ui.stage
 
+import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -10,12 +11,14 @@ import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.FlowUseCase
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.ui.app.dependencyinjection.BoundAct
+import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
+import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
+import com.cartlc.tracker.ui.stage.buttons.ButtonsView
 import com.cartlc.tracker.ui.stage.login.LoginFragment
-import com.cartlc.tracker.viewmodel.frag.ButtonsViewModel
 
 class StageNavigator(
         boundAct: BoundAct,
-        override val buttonsViewModel: ButtonsViewModel
+        override val buttonsUseCase: ButtonsUseCase
 ) : LifecycleObserver, StageHook, FlowUseCase.Listener {
 
     private val activity = boundAct.act
@@ -24,13 +27,13 @@ class StageNavigator(
 
     init {
         boundAct.bindObserver(this)
-        repo.flowUseCase.registerListener(this)
     }
 
     // region lifecycle
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
+        repo.flowUseCase.registerListener(this)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -39,8 +42,8 @@ class StageNavigator(
     }
 
     // endregion lifecycle
-    private fun bind(fragment: Fragment, showing: Boolean) {
-        val previousFragment = activity.supportFragmentManager.findFragmentById(R.id.frame_fragment)
+    private fun bind(fragment: Fragment, @IdRes layout: Int, showing: Boolean) {
+        val previousFragment = activity.supportFragmentManager.findFragmentById(layout)
         if (showing) {
             if (previousFragment != fragment) {
                 previousFragment?.exitTransition = Fade()
@@ -62,10 +65,10 @@ class StageNavigator(
     override fun onStageChangedAboutTo(flow: Flow) {
         when (flow.stage) {
             Stage.LOGIN -> {
-                bind(loginFragment, true)
+                bind(loginFragment, R.id.frame_fragment,true)
             }
             else -> {
-                bind(loginFragment, false)
+                bind(loginFragment, R.id.frame_fragment,false)
             }
         }
     }

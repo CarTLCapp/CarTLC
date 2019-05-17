@@ -16,7 +16,7 @@ import com.cartlc.tracker.R
  * Created by dug on 12/2/17.
  */
 
-class DialogHelper(internal var mAct: Activity) {
+class DialogHelper(private var mAct: Activity) {
 
     internal var mDialog: AlertDialog? = null
 
@@ -30,6 +30,18 @@ class DialogHelper(internal var mAct: Activity) {
             mDialog!!.dismiss()
             mDialog = null
         }
+    }
+
+    fun showMessage(message: String, listener: DialogListener? = null) {
+        clearDialog()
+        val builder = AlertDialog.Builder(mAct)
+        builder.setMessage(message)
+        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+            clearDialog()
+            listener?.onOkay()
+        }
+        mDialog = builder.create()
+        mDialog!!.show()
     }
 
     fun showError(message: String, listener: DialogListener?) {

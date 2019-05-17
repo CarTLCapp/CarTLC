@@ -40,11 +40,8 @@ class PrefHelper constructor(
 
         private const val KEY_CURRENT_PROJECT_GROUP_ID = "current_project_group_id"
         private const val KEY_SAVED_PROJECT_GROUP_ID = "saved_project_group_id"
-        private const val KEY_FIRST_NAME = "first_name"
-        private const val KEY_LAST_NAME = "last_name"
-        private const val KEY_SECONDARY_FIRST_NAME = "secondary_first_name"
-        private const val KEY_SECONDARY_LAST_NAME = "secondary_last_name"
-        private const val KEY_HAS_SECONDARY = "has_secondary"
+        private const val KEY_FIRST_TECH_CODE = "first_tech_code"
+        private const val KEY_SECONDARY_TECH_CODE = "secondary_tech_code"
         private const val KEY_TRUCK_NUMBER = "truck_number_string"
         private const val KEY_LICENSE_PLATE = "license_plate"
         private const val KEY_EDIT_ENTRY_ID = "edit_id"
@@ -53,8 +50,11 @@ class PrefHelper constructor(
         private const val KEY_NEXT_NOTE_COLLECTION_ID = "next_note_collection_id"
         private const val KEY_CURRENT_PICTURE_COLLECTION_ID = "picture_collection_id"
         private const val KEY_TECH_ID = "tech_id"
+        private const val KEY_TECH_FIRST_NAME = "tech_first_name"
+        private const val KEY_TECH_LAST_NAME = "tech_last_name"
         private const val KEY_SECONDARY_TECH_ID = "secondary_tech_id"
-        private const val KEY_REGISTRATION_CHANGED = "registration_changed"
+        private const val KEY_SECONDARY_TECH_FIRST_NAME = "secondary_tech_first_name"
+        private const val KEY_SECONDARY_TECH_LAST_NAME = "secondary_tech_last_name"
         private const val KEY_IS_DEVELOPMENT = "is_development"
         private const val KEY_RELOAD_FROM_SERVER = "reload_from_server"
         private const val KEY_DO_ERROR_CHECK = "do_error_check"
@@ -71,13 +71,46 @@ class PrefHelper constructor(
         private const val VERSION_RESET = -1
     }
 
+    val isLocalCompany: Boolean
+        get() = db.tableAddress.isLocalCompanyOnly(company)
+
     var techID: Int
         get() = getInt(KEY_TECH_ID, 0)
         set(id) = setInt(KEY_TECH_ID, id)
 
+    var techFirstName: String?
+        get() = getString(KEY_TECH_FIRST_NAME, null)
+        set(value) { setString(KEY_TECH_FIRST_NAME, value) }
+
+    var techLastName: String?
+        get() = getString(KEY_TECH_LAST_NAME, null)
+        set(value) { setString(KEY_TECH_LAST_NAME, value) }
+
+    val techName: String
+        get() {
+            return if (techFirstName != null && techLastName != null) {
+                "$techFirstName $techLastName"
+            } else ""
+        }
+
     var secondaryTechID: Int
         get() = getInt(KEY_SECONDARY_TECH_ID, 0)
         set(id) = setInt(KEY_SECONDARY_TECH_ID, id)
+
+    var secondaryTechFirstName: String?
+        get() = getString(KEY_SECONDARY_TECH_FIRST_NAME, null)
+        set(value) { setString(KEY_SECONDARY_TECH_FIRST_NAME, value) }
+
+    var secondaryTechLastName: String?
+        get() = getString(KEY_SECONDARY_TECH_LAST_NAME, null)
+        set(value) { setString(KEY_SECONDARY_TECH_LAST_NAME, value) }
+
+    val secondaryTechName: String
+        get() {
+            return if (secondaryTechFirstName != null && secondaryTechLastName != null) {
+                "$secondaryTechFirstName $secondaryTechLastName"
+            } else ""
+        }
 
     var street: String?
         get() = getString(KEY_STREET, null)
@@ -132,25 +165,13 @@ class PrefHelper constructor(
         get() = getLong(KEY_CURRENT_PICTURE_COLLECTION_ID, 0)
         set(id) = setLong(KEY_CURRENT_PICTURE_COLLECTION_ID, id)
 
-    var firstName: String?
-        get() = getString(KEY_FIRST_NAME, null)
-        set(name) = setString(KEY_FIRST_NAME, name)
+    var firstTechCode: String?
+        get() = getString(KEY_FIRST_TECH_CODE, null)
+        set(name) = setString(KEY_FIRST_TECH_CODE, name)
 
-    var lastName: String?
-        get() = getString(KEY_LAST_NAME, null)
-        set(name) = setString(KEY_LAST_NAME, name)
-
-    var secondaryFirstName: String?
-        get() = getString(KEY_SECONDARY_FIRST_NAME, null)
-        set(name) = setString(KEY_SECONDARY_FIRST_NAME, name)
-
-    var secondaryLastName: String?
-        get() = getString(KEY_SECONDARY_LAST_NAME, null)
-        set(name) = setString(KEY_SECONDARY_LAST_NAME, name)
-
-    var isSecondaryEnabled: Boolean
-        get() = getInt(KEY_HAS_SECONDARY, 0) != 0
-        set(flag) = setInt(KEY_HAS_SECONDARY, if (flag) 1 else 0)
+    var secondaryTechCode: String?
+        get() = getString(KEY_SECONDARY_TECH_CODE, null)
+        set(name) = setString(KEY_SECONDARY_TECH_CODE, name)
 
     var truckNumber: String?
         get() = getString(KEY_TRUCK_NUMBER, null)
@@ -297,17 +318,11 @@ class PrefHelper constructor(
     val autoRotatePicture: Int
         get() = getInt(KEY_AUTO_ROTATE_PICTURE, 0)
 
-    var registrationHasChanged: Boolean
-        get() = getInt(KEY_REGISTRATION_CHANGED, 0) != 0
-        set(value) {
-            setInt(KEY_REGISTRATION_CHANGED, if (value) 1 else 0)
-        }
+    val hasCode: Boolean
+        get() = !TextUtils.isEmpty(firstTechCode)
 
-    val hasName: Boolean
-        get() = !TextUtils.isEmpty(firstName) && !TextUtils.isEmpty(lastName)
-
-    val hasSecondaryName: Boolean
-        get() = !TextUtils.isEmpty(secondaryFirstName) && !TextUtils.isEmpty(secondaryLastName)
+    val hasSecondary: Boolean
+        get() = !TextUtils.isEmpty(secondaryTechCode)
 
     fun getKeyValue(key: String): String? {
         return getString(key, null)
@@ -531,12 +546,12 @@ class PrefHelper constructor(
 
     private fun genPictureFilename(): String {
         val techId = techID.toLong()
-        val projId = projectId!!
+        val projId = projectId
         val sbuf = StringBuilder()
         sbuf.append("picture_t")
         sbuf.append(techId)
         sbuf.append("_p")
-        sbuf.append(projId)
+        sbuf.append(projId ?: "bad")
         sbuf.append("_d")
         val fmt = SimpleDateFormat(PICTURE_DATE_FORMAT, Locale.getDefault())
         sbuf.append(fmt.format(Date(System.currentTimeMillis())))

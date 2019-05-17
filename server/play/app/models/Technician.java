@@ -4,15 +4,19 @@
 package models;
 
 import java.util.*;
-
 import javax.persistence.*;
+
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Transaction;
 
 import play.db.ebean.*;
 import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
-import modules.DataErrorException;
 import play.Logger;
+
+import modules.DataErrorException;
+import modules.TimeHelper;
 
 /**
  * User entity managed by Ebean
@@ -23,29 +27,7 @@ public class Technician extends com.avaje.ebean.Model {
     private static final long serialVersionUID = 1L;
 
     public static String RIP = "Inactive";
-
-    public static Finder<Long, Technician> find = new Finder<Long, Technician>(Technician.class);
-
-    public static List<Technician> listEnabled() {
-        return find.where()
-                .eq("disabled", false)
-                .findList();
-    }
-
-    @Transactional
-    public static Technician findByName(String first_name, String last_name) {
-        List<Technician> items = find.where()
-                .eq("first_name", first_name)
-                .eq("last_name", last_name)
-                .findList();
-        if (items.size() == 0) {
-            return null;
-        }
-        if (items.size() > 1) {
-            Logger.error("Found more than one technician with the name: " + first_name + ", " + last_name + " -> just using the first encountered");
-        }
-        return items.get(0);
-    }
+    public static int BASE_CODE = 1000;
 
     @Id
     public Long id;
@@ -74,6 +56,72 @@ public class Technician extends com.avaje.ebean.Model {
     @Constraints.Required
     public String reload_code;
 
+    @Constraints.Required
+    public int code;
+
+    public static Finder<Long, Technician> find = new Finder<Long, Technician>(Technician.class);
+
+    public static void fixCodeZeros() {
+        List<Technician> missingCode = find.where()
+                .eq("code", 0)
+                .findList();
+        if (missingCode.size() > 0) {
+            int lastCode = findLastCode();
+            Transaction txn = Ebean.beginTransaction();
+            try {
+                for (Technician tech : missingCode) {
+                    tech.code = ++lastCode;
+                    tech.update();
+                }
+                txn.commit();
+            } finally {
+                txn.end();
+            }
+        }
+    }
+
+    public static List<Technician> listEnabled() {
+        return find.where()
+                .eq("disabled", false)
+                .findList();
+    }
+
+    public static List<Technician> listWithCode(int code) {
+        return find.where()
+                .eq("code", code)
+                .findList();
+    }
+
+    public static int findLastCode() {
+        List<Technician> hasCode = find.where()
+                .ne("code", 0)
+                .findList();
+        int lastCode = BASE_CODE;
+        if (hasCode.size() > 0) {
+            for (Technician tech : hasCode) {
+                if (tech.code > lastCode) {
+                    lastCode = tech.code;
+                }
+            }
+        }
+        return lastCode;
+    }
+
+    @Transactional
+    public static Technician findByName(String first_name, String last_name) {
+        List<Technician> items = find.where()
+                .eq("first_name", first_name)
+                .eq("last_name", last_name)
+                .findList();
+        if (items.size() == 0) {
+            return null;
+        }
+        if (items.size() > 1) {
+            Logger.error("Found more than one technician with the name: " + first_name + ", " + last_name + " -> just using the first encountered");
+        }
+        return items.get(0);
+    }
+
     public String fullName() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(first_name);
@@ -91,6 +139,10 @@ public class Technician extends com.avaje.ebean.Model {
             return app_version;
         }
         return "";
+    }
+
+    public String lastPing() {
+        return new TimeHelper().getDate(last_ping, null);
     }
 
     public static void AddReloadCode(long tech_id, char ch) {

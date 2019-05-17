@@ -5,6 +5,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.ui.util.helper.DialogHelper
 
 class BoundFrag(
         private val frag: Fragment
@@ -17,9 +18,14 @@ class BoundFrag(
     override val lifecycleOwner: LifecycleOwner
         get() = frag
 
+    override val dialogHelper: DialogHelper
+        get() = DialogHelper(activity)
+
     fun bindObserver(observer: LifecycleObserver): LifecycleObserver {
         (frag as LifecycleOwner).lifecycle.addObserver(observer)
         return observer
     }
+
+
 
 }

@@ -30,7 +30,6 @@ import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.event.EventError
 import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.model.flow.ActionUseCase
-import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.msg.ErrorMessage
 import com.cartlc.tracker.ui.base.BaseActivity
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
@@ -42,6 +41,7 @@ import com.cartlc.tracker.ui.util.helper.PermissionHelper
 import com.cartlc.tracker.ui.frag.*
 import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleView
 import com.cartlc.tracker.ui.stage.StageNavigator
+import com.cartlc.tracker.ui.stage.buttons.ButtonsView
 import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
 import com.cartlc.tracker.viewmodel.main.*
 import com.crashlytics.android.Crashlytics // CRASHLYTICS
@@ -80,7 +80,6 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
 
     lateinit var vm: MainVMHolder
     private lateinit var stageNavigator: StageNavigator
-    private lateinit var buttonsViewModel: MainButtonsViewModel
 
     private val mainListFragment: MainListFragment
         get() = frame_main_list as MainListFragment
@@ -88,8 +87,8 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         get() = frame_confirmation_fragment as ConfirmationFragment
     private val titleFragment: TitleFragment
         get() = frame_title as TitleFragment
-    private val buttonsFragment: ButtonsFragment
-        get() = frame_buttons as ButtonsFragment
+    private val buttonsView: ButtonsView
+        get() = frame_buttons as ButtonsView
     val entrySimpleView: EntrySimpleView
         get() = frame_entry_simple as EntrySimpleView
 
@@ -123,9 +122,11 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar_main))
 
-        buttonsFragment.softKeyboardDetect = SoftKeyboardDetect(root)
-        buttonsViewModel = buttonsFragment.vm as MainButtonsViewModel
-        stageNavigator = StageNavigator(boundAct, buttonsViewModel)
+        val softKeyboardDetect = SoftKeyboardDetect(root)
+        buttonsView.softKeyboardDetect = softKeyboardDetect
+        val buttonsUseCase = buttonsView.controller
+
+        stageNavigator = StageNavigator(boundAct, buttonsUseCase)
 
         val confirmationViewModel = confirmationFragment.vm
         val mainListViewModel = mainListFragment.vm
@@ -134,7 +135,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
 
         val newProjectHolder = NewProjectVMHolder(
                 boundAct,
-                buttonsViewModel,
+                buttonsUseCase,
                 mainListViewModel,
                 titleViewModel,
                 entrySimpleControl
@@ -142,7 +143,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         vm = MainVMHolder(
                 boundAct,
                 newProjectHolder,
-                buttonsViewModel,
+                buttonsUseCase,
                 mainListViewModel,
                 confirmationViewModel,
                 titleViewModel,
@@ -164,13 +165,16 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         vm.error.observe(this, Observer<ErrorMessage> { message -> showError(message) })
         vm.notes = { mainListFragment.notes }
 
-        buttonsViewModel.save = { isNext -> vm.save(isNext) }
         entrySimpleControl.emsValue = resources.getInteger(R.integer.entry_simple_ems)
 
         componentRoot.eventController.register(this)
         title = app.versionedTitle
-        getLocation()
 
+        getLocation()
+    }
+
+    override fun onStart() {
+        super.onStart()
         repo.flowUseCase.notifyListeners()
     }
 
@@ -189,7 +193,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.profile -> buttonsViewModel.btnProfile()
+            R.id.profile -> vm.btnProfile()
             R.id.upload -> {
                 app.reloadFromServer()
             }
@@ -357,7 +361,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
     }
 
     private fun showNoteErrorOk(dialog: DialogInterface) {
-        buttonsViewModel.showNoteErrorOk()
+        vm.showNoteErrorOk()
         dialog.dismiss()
     }
 

@@ -94,7 +94,7 @@ public class ClientController extends Controller {
     }
 
     /**
-     * Display the 'new user form'.
+     * Display the 'new client form'.
      */
     @Security.Authenticated(Secured.class)
     public Result create() {
@@ -103,7 +103,7 @@ public class ClientController extends Controller {
     }
 
     /**
-     * Handle the 'new user form' submission
+     * Handle the 'new client form' submission
      */
     @Security.Authenticated(Secured.class)
     @Transactional

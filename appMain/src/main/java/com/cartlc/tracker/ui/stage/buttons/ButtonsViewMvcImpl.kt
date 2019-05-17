@@ -53,19 +53,19 @@ class ButtonsViewMvcImpl(
     override var btnPrevVisible: Boolean
         get() = btnPrev.visibility == View.VISIBLE
         set(value) {
-            btnPrev.visibility = if (value) View.VISIBLE else View.GONE
+            btnPrev.visibility = if (value) View.VISIBLE else View.INVISIBLE
         }
 
     override var btnNextVisible: Boolean
         get() = btnNext.visibility == View.VISIBLE
         set(value) {
-            btnNext.visibility = if (value) View.VISIBLE else View.GONE
+            btnNext.visibility = if (value) View.VISIBLE else View.INVISIBLE
         }
 
     override var btnCenterVisible: Boolean
         get() = btnCenter.visibility == View.VISIBLE
         set(value) {
-            btnCenter.visibility = if (value) View.VISIBLE else View.GONE
+            btnCenter.visibility = if (value) View.VISIBLE else View.INVISIBLE
         }
 
     override var btnChangeVisible: Boolean

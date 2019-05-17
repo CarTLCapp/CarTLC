@@ -122,7 +122,6 @@ class VehicleRepository(
         get() = entered.noIssuesOther || entered.isValidOther
 
     fun submit() {
-        prefHelper.registrationHasChanged = true
         dm.tableVehicle.save(entered.vehicle)
         entered.clear()
         app.ping()

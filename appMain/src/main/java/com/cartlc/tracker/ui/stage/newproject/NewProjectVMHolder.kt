@@ -19,20 +19,19 @@ import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.table.DatabaseTable
 import com.cartlc.tracker.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleController
+import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
 import com.cartlc.tracker.ui.util.helper.LocationHelper
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 import com.cartlc.tracker.viewmodel.frag.TitleViewModel
-import com.cartlc.tracker.viewmodel.main.MainButtonsViewModel
-import timber.log.Timber
 import java.util.*
 
 class NewProjectVMHolder(
         boundAct: BoundAct,
-        private val buttonsViewModel: MainButtonsViewModel,
+        private val buttonsUseCase: ButtonsUseCase,
         private val mainListViewModel: MainListViewModel,
         private val titleViewModel: TitleViewModel,
         private val entrySimpleControl: EntrySimpleController
-) : LifecycleObserver, FlowUseCase.Listener {
+) : LifecycleObserver, FlowUseCase.Listener, ButtonsUseCase.Listener {
 
     private val repo = boundAct.repo
     private val messageHandler: MessageHandler = boundAct.componentRoot.messageHandler
@@ -83,23 +82,26 @@ class NewProjectVMHolder(
     internal var autoNarrowOkay = true
 
     private val isAutoNarrowOkay: Boolean
-        get() = buttonsViewModel.wasNext && autoNarrowOkay
+        get() = buttonsUseCase.wasNext && autoNarrowOkay
 
     var fabAddress: Address? = null
 
     init {
         boundAct.bindObserver(this)
-        repo.flowUseCase.registerListener(this)
     }
 
     // region lifecycle
+
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
+        repo.flowUseCase.registerListener(this)
+        buttonsUseCase.registerListener(this)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
         repo.flowUseCase.unregisterListener(this)
+        buttonsUseCase.unregisterListener(this)
     }
 
     // endregion lifecycle
@@ -110,12 +112,11 @@ class NewProjectVMHolder(
     }
 
     override fun onStageChanged(flow: Flow) {
-        Timber.i("MYDEBUG: FLOW=${flow.stage}")
         when (flow.stage) {
             Stage.ROOT_PROJECT -> {
                 mainListViewModel.showingValue = true
                 titleViewModel.subTitleValue = null
-                buttonsViewModel.showNextButtonValue = hasProjectRootName
+                buttonsUseCase.nextVisible = hasProjectRootName
                 setList(StringMessage.title_root_project, PrefHelper.KEY_ROOT_PROJECT, db.tableProjects.queryRootProjectNames())
                 dispatchActionEvent(Action.GET_LOCATION)
             }
@@ -123,7 +124,7 @@ class NewProjectVMHolder(
                 prefHelper.projectRootName?.let { rootName ->
                     mainListViewModel.showingValue = true
                     titleViewModel.subTitleValue = curProjectHint
-                    buttonsViewModel.showNextButtonValue = hasProjectSubName
+                    buttonsUseCase.nextVisible = hasProjectSubName
                     setList(StringMessage.title_sub_project, PrefHelper.KEY_SUB_PROJECT, db.tableProjects.querySubProjectNames(rootName))
                 } ?: run {
                     curFlowValue = RootProjectFlow()
@@ -132,24 +133,24 @@ class NewProjectVMHolder(
             Stage.COMPANY -> {
                 titleViewModel.subTitleValue = editProjectHint
                 mainListViewModel.showingValue = true
-                buttonsViewModel.showNextButtonValue = hasCompanyName
-                buttonsViewModel.showCenterButtonValue = true
+                buttonsUseCase.nextVisible = hasCompanyName
+                buttonsUseCase.centerVisible = true
                 val companies = db.tableAddress.query()
                 autoNarrowCompanies(companies.toMutableList())
                 val companyNames = getNames(companies)
                 if (companyNames.size == 1 && isAutoNarrowOkay) {
                     prefHelper.company = companyNames[0]
-                    buttonsViewModel.skip()
+                    buttonsUseCase.skip()
                 } else {
                     setList(StringMessage.title_company, PrefHelper.KEY_COMPANY, companyNames)
-                    buttonsViewModel.checkCenterButtonIsEdit()
+                    buttonsUseCase.checkCenterButtonIsEdit()
                 }
             }
             Stage.ADD_COMPANY -> {
                 titleViewModel.titleValue = messageHandler.getString(StringMessage.title_company)
                 entrySimpleControl.showing = true
                 entrySimpleControl.hintValue = messageHandler.getString(StringMessage.title_company)
-                if (buttonsViewModel.isLocalCompany) {
+                if (prefHelper.isLocalCompany) {
                     repo.companyEditing = prefHelper.company
                     repo.companyEditing?.let {
                         entrySimpleControl.entryTextValue = it
@@ -170,8 +171,8 @@ class NewProjectVMHolder(
             Stage.CONFIRM_ADDRESS -> {
                 titleViewModel.subTitleValue = curProjectHint
                 titleViewModel.titleValue = messageHandler.getString(StringMessage.title_confirmation)
-                buttonsViewModel.showCenterButtonValue = false
-                buttonsViewModel.showNextButtonValue = true
+                buttonsUseCase.centerVisible = false
+                buttonsUseCase.nextVisible = true
             }
             else -> {
             }
@@ -201,7 +202,7 @@ class NewProjectVMHolder(
             Stage.STREET,
             Stage.CITY,
             Stage.EQUIPMENT,
-            Stage.STATE -> buttonsViewModel.onButtonDispatch(Button.BTN_CENTER)
+            Stage.STATE -> buttonsUseCase.dispatch(Button.BTN_CENTER)
             else -> {
             }
         }
@@ -209,13 +210,28 @@ class NewProjectVMHolder(
 
     // endregion FlowUseCase.Listener
 
+    // region ButtonsUseCase.Listener
+
+    override fun onButtonConfirm(action: Button): Boolean {
+        return true
+    }
+
+    override fun onButtonEvent(action: Button) {
+        when (action) {
+            Button.BTN_NEXT -> repo.companyEditing = null
+            else -> {}
+        }
+    }
+
+    // endregion ButtonsUseCase.Listener
+
     fun dispatchActionEvent(action: Action) = repo.dispatchActionEvent(action)
 
     private fun processStates(flow: Flow) {
         var isEditing = flow.stage == Stage.ADD_STATE
         titleViewModel.subTitleValue = if (isEditing) editProjectHint else curProjectHint
         mainListViewModel.showingValue = true
-        buttonsViewModel.showNextButtonValue = false
+        buttonsUseCase.nextVisible = false
         val company = prefHelper.company
         val zipcode = prefHelper.zipCode
         if (company == null) {
@@ -239,7 +255,7 @@ class NewProjectVMHolder(
             autoNarrowStates(states)
             if (states.size == 1 && isAutoNarrowOkay) {
                 prefHelper.state = states[0]
-                buttonsViewModel.skip()
+                buttonsUseCase.skip()
                 return
             }
         }
@@ -249,16 +265,16 @@ class NewProjectVMHolder(
             setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
 
             if (mainListViewModel.keyValue == null) {
-                buttonsViewModel.showNextButtonValue = true
+                buttonsUseCase.nextVisible = true
             }
-            buttonsViewModel.showCenterButtonValue = true
+            buttonsUseCase.centerVisible = true
         }
     }
 
     private fun processCities(flow: Flow) {
         var isEditing = flow.stage == Stage.ADD_CITY
         titleViewModel.subTitleValue = if (isEditing) editProjectHint else curProjectHint
-        buttonsViewModel.showNextButtonValue = false
+        buttonsUseCase.nextVisible = false
         val company = prefHelper.company
         val zipcode = prefHelper.zipCode
         val state = prefHelper.state
@@ -288,7 +304,7 @@ class NewProjectVMHolder(
             autoNarrowCities(cities)
             if (cities.size == 1 && isAutoNarrowOkay) {
                 prefHelper.city = cities[0]
-                buttonsViewModel.skip()
+                buttonsUseCase.skip()
                 return
             } else {
                 hint = prefHelper.address
@@ -307,15 +323,15 @@ class NewProjectVMHolder(
             mainListViewModel.showingValue = true
             setList(StringMessage.title_city, PrefHelper.KEY_CITY, cities)
             if (mainListViewModel.keyValue == null) {
-                buttonsViewModel.showNextButtonValue = true
+                buttonsUseCase.nextVisible = true
             }
-            buttonsViewModel.showCenterButtonValue = true
+            buttonsUseCase.centerVisible = true
         }
     }
 
     private fun processStreets(flow: Flow) {
         var isEditing = flow.stage == Stage.ADD_STREET
-        buttonsViewModel.showNextButtonValue = false
+        buttonsUseCase.nextVisible = false
         titleViewModel.subTitleValue = if (isEditing) editProjectHint else curProjectHint
         val company = prefHelper.company
         val city = prefHelper.city
@@ -348,7 +364,7 @@ class NewProjectVMHolder(
             autoNarrowStreets(streets)
             if (streets.size == 1 && isAutoNarrowOkay) {
                 prefHelper.street = streets[0]
-                buttonsViewModel.skip()
+                buttonsUseCase.skip()
                 return
             } else {
                 hint = prefHelper.address
@@ -365,11 +381,11 @@ class NewProjectVMHolder(
             }
         } else {
             entrySimpleControl.helpValue = hint
-            buttonsViewModel.showCenterButtonValue = true
+            buttonsUseCase.centerVisible = true
             mainListViewModel.showingValue = true
             setList(StringMessage.title_street, PrefHelper.KEY_STREET, streets)
             if (mainListViewModel.keyValue == null) {
-                buttonsViewModel.showNextButtonValue = true
+                buttonsUseCase.nextVisible = true
             }
         }
     }
@@ -452,11 +468,6 @@ class NewProjectVMHolder(
             return
         }
         LocationHelper.instance.reduceStreets(fabAddress!!, streets.toMutableList())
-    }
-
-    private fun checkCenterButtonVisible() {
-        if (buttonsViewModel.didAutoSkip) {
-        }
     }
 
 }

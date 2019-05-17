@@ -3,10 +3,6 @@
  */
 package com.cartlc.tracker.model.server
 
-import android.util.Log
-
-import com.cartlc.tracker.ui.app.TBApplication
-
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -26,30 +22,24 @@ open class DCPost {
 
     }
 
-
     @Throws(IOException::class)
-    protected fun getResult(connection: HttpURLConnection): String? {
+    protected fun getResult(connection: HttpURLConnection): String {
         val inputStream: InputStream?
         try {
             inputStream = connection.inputStream
         } catch (ex: Exception) {
-            showError(connection, ex.message)
-            return null
+            throw IOException(getError(connection, ex.message))
         }
-        if (inputStream == null) {
-            showError(connection, null)
-            return null
+        inputStream?.let {
+            return getStreamString(it)
         }
-        return getStreamString(inputStream)
+        throw IOException(getError(connection, null))
     }
 
     @Throws(IOException::class)
-    protected fun getStreamString(inputStream: InputStream?): String? {
-        if (inputStream == null) {
-            return null
-        }
+    protected fun getStreamString(inputStream: InputStream): String {
         val buffer = CharArray(1024)
-        val reader = BufferedReader(InputStreamReader(inputStream)!!)
+        val reader = BufferedReader(InputStreamReader(inputStream))
         var count: Int
         val sbuf = StringBuffer()
         while (true) {
@@ -66,21 +56,17 @@ open class DCPost {
         return sbuf.toString()
     }
 
-    @Throws(IOException::class)
-    protected fun showError(connection: HttpURLConnection, message: String?) {
+    private fun getError(connection: HttpURLConnection, message: String?): String {
         val errorMsg = getStreamString(connection.errorStream)
-        val msg: String
-        if (errorMsg == null) {
+        return if (errorMsg == null) {
             if (message == null) {
-                msg = "Server might be DOWN. Try again later."
+                "Server might be DOWN. Try again later."
             } else {
-                msg = "Server connection error: $message"
+                "Server connection error: $message"
             }
         } else {
-            msg = "Server COMPLAINT: $errorMsg"
+            "Server COMPLAINT: $errorMsg"
         }
-        Log.e(TAG, msg)
-        TBApplication.ShowError(msg)
     }
 
 }
