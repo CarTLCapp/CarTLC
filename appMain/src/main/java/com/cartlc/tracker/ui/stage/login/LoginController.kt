@@ -138,7 +138,7 @@ class LoginController(
         dcRx.sendRegistration(firstCode, secondCode)
                 .subscribeOn(schedulerPlan.subscribeWith)
                 .observeOn(schedulerPlan.observeWith)
-                .subscribe { result ->
+                .subscribe { result: DCServerRx.Result ->
                     if (result.errorMessage != null) {
                         TBApplication.ShowError(result.errorMessage)
                     }

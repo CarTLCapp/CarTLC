@@ -37,7 +37,6 @@ import com.cartlc.tracker.viewmodel.vehicle.DaggerVehicleViewModelComponent
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModelComponent
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModelModule
-import com.squareup.leakcanary.LeakCanary
 
 import org.greenrobot.eventbus.EventBus
 import timber.log.Timber
@@ -51,8 +50,6 @@ class TBApplication : Application() {
 
         @VisibleForTesting
         var DEBUG_TREE = false
-
-        private const val LEAK_CANARY = false
 
         const val REPORT_LOCATION = false
 
@@ -180,14 +177,6 @@ class TBApplication : Application() {
                 .vehicleViewModelModule(VehicleViewModelModule(vehicleViewModel))
                 .build()
 
-        if (LEAK_CANARY) {
-            if (LeakCanary.isInAnalyzerProcess(this)) {
-                // This process is dedicated to LeakCanary for heap analysis.
-                // You should not init your app in this process.
-                return
-            }
-            LeakCanary.install(this)
-        }
         if (IsDevelopmentServer() && DEBUG_TREE) {
             Timber.plant(Timber.DebugTree())
         } else {
