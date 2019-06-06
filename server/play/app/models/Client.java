@@ -156,14 +156,14 @@ public class Client extends com.avaje.ebean.Model {
     }
 
     public String getCompanyName() {
-        return ClientCompanyNameAssociation.getCompanyLine(id);
+        return ClientAssociation.getCompanyLine(id);
     }
 
     public List<String> getCompanyNames() {
         if (id == null) {
             return new ArrayList<>();
         }
-        return ClientCompanyNameAssociation.findCompaniesFor(id);
+        return ClientAssociation.findCompaniesFor(id);
     }
 }
 

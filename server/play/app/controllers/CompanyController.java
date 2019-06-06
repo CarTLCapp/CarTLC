@@ -8,6 +8,7 @@ import com.avaje.ebean.Transaction;
 import play.mvc.*;
 import play.data.*;
 import static play.data.Form.*;
+import com.avaje.ebean.PagedList;
 import play.Logger;
 
 import models.*;
@@ -37,12 +38,26 @@ public class CompanyController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result list(int page, String sortBy, String order, String filter, boolean disabled) {
-        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, disabled), sortBy, order, filter, Secured.getClient(ctx()), disabled));
+    public Result list(String order, boolean disabled) {
+        return ok(views.html.company_list.render(
+                Company.list(order, disabled),
+                order, Secured.getClient(ctx()), disabled)
+        );
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result view(Long id, String sortBy, String order) {
+        Company company = Company.find.byId(id);
+        if (company == null) {
+            return badRequest("could not locate company with id " + id);
+        }
+        return ok(views.html.company_address_list.render(
+                Company.listAddresses(company.name, sortBy, order, company.disabled), company, sortBy, order, Secured.getClient(ctx()))
+        );
     }
 
     public Result list() {
-        return list(0, "name", "asc", "", false);
+        return list("asc", false);
     }
 
     @Security.Authenticated(Secured.class)

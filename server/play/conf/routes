@@ -52,7 +52,7 @@ POST    /projects/root              controllers.RootProjectController.query()
 
 ### COMPANIES ###
 
-GET     /company                    controllers.CompanyController.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "", disabled:Boolean ?= false)
+GET     /company                    controllers.CompanyController.list(o ?= "asc", disabled:Boolean ?= false)
 GET     /company/new                controllers.CompanyController.create()
 POST    /company                    controllers.CompanyController.save()
 GET     /company/new/many           controllers.CompanyController.createMany()
@@ -61,6 +61,7 @@ GET     /company/:id                controllers.CompanyController.edit(id:Long)
 POST    /company/:id                controllers.CompanyController.update(id:Long)
 POST    /company/:id/delete         controllers.CompanyController.delete(id:Long)
 GET     /company/:id/enable         controllers.CompanyController.enable(id:Long)
+GET     /company/:id/view           controllers.CompanyController.view(id:Long, sortBy ?= "name", o ?= "asc")
 POST    /companies                  controllers.CompanyController.query()
 
 ### EQUIPMENTS ###

@@ -84,20 +84,35 @@ public class Company extends Model {
     }
 
     /**
-     * Return a paged list of companies
+     * Return a list of companies, but since we are only showing the names of each company
+     * filter results such that only the first company is returned with a distinct name.
      *
-     * @param page     Page to display
-     * @param pageSize Number of companies per page
-     * @param sortBy   Property used for sorting
      * @param order    Sort order (either or asc or desc)
-     * @param filter   Filter applied on the name column
+     * @param disabled Show only disabled or non-disabled entries
      */
-    public static PagedList<Company> list(int page, String sortBy, String order, String filter, boolean disabled) {
+    public static List<Company> list(String order, boolean disabled) {
+        StringBuilder query = new StringBuilder();
+        List<Company> items = find.where()
+                .eq("disabled", disabled)
+                .orderBy("name" + " " + order)
+                .findList();
+        ArrayList<Company> result = new ArrayList<Company>();
+        HashSet<String> set = new HashSet<String>();
+        for (Company company : items) {
+            if (!set.contains(company.name)) {
+                result.add(company);
+                set.add(company.name);
+            }
+        }
+        return result;
+    }
+
+    public static List<Company> listAddresses(String name, String sortBy, String order, boolean disabled) {
         return find.where()
                 .eq("disabled", disabled)
-                .ilike("name", "%" + filter + "%")
+                .eq("name", name)
                 .orderBy(sortBy + " " + order)
-                .findPagedList(page, PAGE_SIZE);
+                .findList();
     }
 
     public static List<Company> appList(int tech_id) {
@@ -178,8 +193,22 @@ public class Company extends Model {
         return company;
     }
 
+    public int countAddresses() {
+        return find.where()
+                .eq("disabled", disabled)
+                .eq("name", name)
+                .findList().size();
+    }
+
     public int countEntries() {
         return Entry.countEntriesForCompany(id);
+    }
+
+    public int countNameEntries() {
+        List<Company> items = find.where()
+                .eq("name", name)
+                .findList();
+        return Entry.countEntriesForCompanies(items);
     }
 
     public String getName() {

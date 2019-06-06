@@ -88,7 +88,7 @@ public class ClientController extends Controller {
         Logger.info("Company value was " + updateClient.company);
 
         if (updateClient.company != null && !updateClient.company.trim().isEmpty()) {
-            ClientCompanyNameAssociation.save(id, updateClient.company);
+            ClientAssociation.save(id, updateClient.company);
         }
         return list();
     }
@@ -135,7 +135,7 @@ public class ClientController extends Controller {
         Logger.info("Client " + newClient.name + " has been created");
         Logger.info("Company value was " + inputClient.company);
         if (inputClient.company != null && !inputClient.company.trim().isEmpty()) {
-            ClientCompanyNameAssociation.save(newClient.id, inputClient.company);
+            ClientAssociation.save(newClient.id, inputClient.company);
         }
         return list();
     }
@@ -204,7 +204,7 @@ public class ClientController extends Controller {
             client.update();
             flash("success", "Client has been disabled");
         } else {
-            ClientCompanyNameAssociation.deleteEntries(id);
+            ClientAssociation.deleteEntries(id);
             Client.find.ref(id).delete();
             flash("success", "Client has been deleted");
         }

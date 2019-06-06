@@ -4,6 +4,7 @@ technicians.list.title={0,choice,0#No technicians|1#One technician|1<{0,number,i
 project.list.title={0,choice,0#No sub sub projects|1#One project|1<{0,number,integer} sub projects} found
 root_project.list.title={0,choice,0#No root projects|1#One root project|1<{0,number,integer} root projects} found
 company.list.title={0,choice,0#No companies|1#One company|1<{0,number,integer} companies} found
+address.list.title={0,choice,0#No addresses for company|1#One address for company|1<{0,number,integer} addresses for company} found
 equipment.list.title={0,choice,0#No equipments|1#One equipment|1<{0,number,integer} equipments} found
 note.list.title={0,choice,0#No notes|1#One note|1<{0,number,integer} notes} found
 entry.list.title={0,choice,0#No entries|1#One Entry|1<{0,number,integer} entries} found

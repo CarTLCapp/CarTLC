@@ -20,7 +20,7 @@ import play.db.ebean.Transactional;
  * Project entity managed by Ebean
  */
 @Entity
-public class ClientCompanyNameAssociation extends Model {
+public class ClientAssociation extends Model {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,11 +33,27 @@ public class ClientCompanyNameAssociation extends Model {
     @Constraints.Required
     public Long company_name_id;
 
-    public static Finder<Long, ClientCompanyNameAssociation> find = new Finder<Long, ClientCompanyNameAssociation>(ClientCompanyNameAssociation.class);
+    @Constraints.Required
+    public boolean show_pictures;
 
-    public static List<ClientCompanyNameAssociation> list() {
+    @Constraints.Required
+    public boolean show_trucks;
+
+    @Constraints.Required
+    public boolean show_all_notes;
+
+    @Constraints.Required
+    public boolean show_all_equipments;
+
+    public static Finder<Long, ClientAssociation> find = new Finder<Long, ClientAssociation>(ClientAssociation.class);
+
+    public static List<ClientAssociation> list() {
         return find.all();
     }
+
+    // ---------
+    // COMPANIES
+    // ---------
 
     public static String findCompanyNameFor(long client_id) {
         List<String> result = findCompaniesFor(client_id);
@@ -48,11 +64,11 @@ public class ClientCompanyNameAssociation extends Model {
     }
 
     public static List<String> findCompaniesFor(long client_id) {
-        List<ClientCompanyNameAssociation> items = find.where()
+        List<ClientAssociation> items = find.where()
                 .eq("client_id", client_id)
                 .findList();
         List<String> result = new ArrayList<String>();
-        for (ClientCompanyNameAssociation item : items) {
+        for (ClientAssociation item : items) {
             String name = CompanyName.get(item.company_name_id);
             if (name != null) {
                 result.add(name);
@@ -62,11 +78,11 @@ public class ClientCompanyNameAssociation extends Model {
     }
 
     public static String getCompanyLine(long client_id) {
-        List<ClientCompanyNameAssociation> items = find.where()
+        List<ClientAssociation> items = find.where()
                 .eq("client_id", client_id)
                 .findList();
         StringBuilder sbuf = new StringBuilder();
-        for (ClientCompanyNameAssociation item : items) {
+        for (ClientAssociation item : items) {
             if (sbuf.length() > 0) {
                 sbuf.append(", ");
             }
@@ -76,20 +92,30 @@ public class ClientCompanyNameAssociation extends Model {
     }
 
     public static void deleteEntries(long client_id) {
-        List<ClientCompanyNameAssociation> items = find.where()
+        List<ClientAssociation> items = find.where()
                 .eq("client_id", client_id)
                 .findList();
-        for (ClientCompanyNameAssociation item : items) {
+        for (ClientAssociation item : items) {
             item.delete();
         }
     }
 
     public static void save(long client_id, String companyName) {
-        deleteEntries(client_id);
-        ClientCompanyNameAssociation entry = new ClientCompanyNameAssociation();
-        entry.client_id = client_id;
-        entry.company_name_id = CompanyName.save(companyName);
-        entry.save();
+        List<ClientAssociation> items = find.where()
+                .eq("client_id", client_id)
+                .findList();
+        long company_name_id = CompanyName.save(companyName);
+        if (items.size() > 0) {
+            for (ClientAssociation item : items) {
+                item.company_name_id = company_name_id;
+                item.update();
+            }
+        } else {
+            ClientAssociation entry = new ClientAssociation();
+            entry.client_id = client_id;
+            entry.company_name_id = company_name_id;
+            entry.save();
+        }
     }
 
 }

@@ -13,7 +13,7 @@ import play.data.validation.*;
 import com.avaje.ebean.*;
 
 import models.Client;
-import models.ClientCompanyNameAssociation;
+import models.ClientAssociation;
 
 public class InputClient extends Model {
     private static final long serialVersionUID = 1L;
@@ -24,7 +24,7 @@ public class InputClient extends Model {
     public InputClient(Client client) {
         name = client.name;
         password = client.password;
-        company = ClientCompanyNameAssociation.findCompanyNameFor(client.id);
+        company = ClientAssociation.findCompanyNameFor(client.id);
     }
 
     public InputClient() {
