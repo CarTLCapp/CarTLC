@@ -11,6 +11,8 @@ import com.avaje.ebean.Model;
 
 import play.data.format.*;
 import play.data.validation.*;
+import play.data.Form;
+
 import play.Logger;
 
 import com.avaje.ebean.*;
@@ -100,22 +102,119 @@ public class ClientAssociation extends Model {
         }
     }
 
-    public static void save(long client_id, String companyName) {
+    // -----
+    // FLAGS
+    // -----
+
+    public static boolean hasShowPictures(long client_id) {
         List<ClientAssociation> items = find.where()
                 .eq("client_id", client_id)
                 .findList();
-        long company_name_id = CompanyName.save(companyName);
         if (items.size() > 0) {
             for (ClientAssociation item : items) {
-                item.company_name_id = company_name_id;
-                item.update();
+                if (item.show_pictures) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasShowTrucks(long client_id) {
+        List<ClientAssociation> items = find.where()
+                .eq("client_id", client_id)
+                .findList();
+        if (items.size() > 0) {
+            for (ClientAssociation item : items) {
+                if (item.show_trucks) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasShowAllNotes(long client_id) {
+        List<ClientAssociation> items = find.where()
+                .eq("client_id", client_id)
+                .findList();
+        if (items.size() > 0) {
+            for (ClientAssociation item : items) {
+                if (item.show_all_notes) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasShowAllEquipments(long client_id) {
+        List<ClientAssociation> items = find.where()
+                .eq("client_id", client_id)
+                .findList();
+        if (items.size() > 0) {
+            for (ClientAssociation item : items) {
+                if (item.show_all_equipments) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static void process(Client client, String companyName, Form entryForm) {
+        List<ClientAssociation> items = find.where()
+                .eq("client_id", client.id)
+                .findList();
+        ClientAssociation item;
+        if (items.size() > 0) {
+            item = items.get(0);
+            for (int i = 1; i < items.size(); i++) {
+                items.get(i).delete();
             }
         } else {
-            ClientAssociation entry = new ClientAssociation();
-            entry.client_id = client_id;
-            entry.company_name_id = company_name_id;
-            entry.save();
+            item = new ClientAssociation();
+            item.client_id = client.id;
         }
+        if (companyName != null && !companyName.trim().isEmpty()) {
+            long company_name_id = CompanyName.save(companyName);
+            item.company_name_id = company_name_id;
+        }
+        item.show_pictures = isTrue(entryForm, "hasShowPictures"); // Note: must match client_editForm.scala.html
+        item.show_trucks = isTrue(entryForm, "hasShowTrucks"); // Note: must match client_editForm.scala.html
+
+        if (ClientNoteAssociation.allTrue(entryForm)) {
+            item.show_all_notes = true;
+            ClientNoteAssociation.deleteEntries(client.id);
+        } else {
+            item.show_all_notes = false;
+            ClientNoteAssociation.process(client.id, entryForm);
+        }
+        if (ClientEquipmentAssociation.allTrue(entryForm)) {
+            item.show_all_equipments = true;
+            ClientEquipmentAssociation.deleteEntries(client.id);
+        } else {
+            item.show_all_equipments = false;
+            ClientEquipmentAssociation.process(client.id, entryForm);
+        }
+        if (item.id == null || item.id == 0) {
+            item.save();
+        } else {
+            item.update();
+        }
+    }
+
+    public static boolean isTrue(Form entryForm, String field) {
+        try {
+            Optional<String> value = entryForm.field(field).getValue();
+            if (value.isPresent()) {
+                if (value.get().equals("true")) {
+                    return true;
+                }
+            }
+        } catch (Exception ex) {
+        }
+        return false;
     }
 
 }

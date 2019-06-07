@@ -5,7 +5,7 @@
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
 @main("FleetTLC - Edit Client", home = "/client") {
-    
+
     <h1>Edit client</h1>
     
     @b3.form(routes.ClientController.update(id)) {
@@ -17,15 +17,39 @@
             @b3.text(techForm("name"), '_label -> "Logon name", '_help -> "")
             @b3.text(techForm("password"), '_label -> "Password", '_help -> "")
 
+            <h3>Options</h3>
+
+                <div class="checkbox-container">
+
+                @defining(ClientAssociation.hasShowPictures(id)) { flag =>
+                    @b3.checkbox(techForm("hasShowPictures"), '_label -> "Show Pictures", 'checked -> flag)
+                }
+                <div style="clear:both;"></div>
+
+                @defining(ClientAssociation.hasShowTrucks(id)) { flag =>
+                    @b3.checkbox(techForm("hasShowTrucks"), '_label -> "Show Trucks", 'checked -> flag)
+                }
+                <div style="clear:both;"></div>
+
+                @defining(ClientAssociation.hasShowAllNotes(id)) { flag =>
+                    @b3.checkbox(techForm("hasShowAllNotes"), '_label -> "Show All Notes", 'checked -> flag)
+                }
+                <div style="clear:both;"></div>
+
+                @defining(ClientAssociation.hasShowAllEquipments(id)) { flag =>
+                    @b3.checkbox(techForm("hasShowAllEquipments"), '_label -> "Show All Equipments", 'checked -> flag)
+                }
+                <div style="clear:both;"></div>
+
+            </div>
+
             <h3>Projects</h3>
 
-            <div class="checkbox-container">
+            <div class="checkbox-container-columns">
 
                 @for(project <- Project.list()) {
-                    @if(Client.hasProject(id, project.id)) {
-                        @b3.checkbox(techForm(project.getFullProjectName()), '_label -> project.getFullProjectName(), 'checked -> true)
-                    } else {
-                        @b3.checkbox(techForm(project.getFullProjectName()), '_label -> project.getFullProjectName())
+                    @defining(Client.hasProject(id, project.id)) { flag =>
+                        @b3.checkbox(techForm(project.getFullProjectName()), '_label -> project.getFullProjectName(), 'checked -> flag)
                     }
 					<div style="clear:both;"></div>
                 }
@@ -35,6 +59,32 @@
             <h3>Company</h3>
 
             @b3.select(techForm("company"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
+
+            <h3>Notes</h3>
+
+            <div class="checkbox-container-columns">
+
+                @for(note <- Note.list()) {
+                    @defining(Client.hasNote(id, note.id)) { flag =>
+                        @b3.checkbox(techForm(note.idString()), '_label -> note.name, 'checked -> flag)
+                    }
+                    <div style="clear:both;"></div>
+                }
+
+            </div>
+
+            <h3>Equipments</h3>
+
+            <div class="checkbox-container-columns">
+
+                @for(equipment <- Equipment.list()) {
+                    @defining(Client.hasEquipment(id, equipment.id)) { flag =>
+                        @b3.checkbox(techForm(equipment.idString()), '_label -> equipment.name, 'checked -> flag)
+                    }
+                    <div style="clear:both;"></div>
+                }
+
+            </div>
 
         </fieldset>
 
@@ -49,5 +99,24 @@
         @CSRF.formField
         <input type="submit" value="Delete this client" class="btn danger">
     }
+
+    <script type="text/javascript">
+        function setNoteStates() {
+            var flag = document.getElementById("hasShowAllNotes").checked;
+            @for(note <- Note.list()) {
+                document.getElementById("@note.idString()").checked = flag;
+            }
+        }
+        document.getElementById("hasShowAllNotes").onclick = setNoteStates
+
+         function setEquipmentStates() {
+            var flag = document.getElementById("hasShowAllEquipments").checked;
+            @for(equipment <- Equipment.list()) {
+                var str = "@equipment.name";
+                document.getElementById("@equipment.idString()").checked = flag;
+            }
+        }
+        document.getElementById("hasShowAllEquipments").onclick = setEquipmentStates;
+    </script>
     
 }

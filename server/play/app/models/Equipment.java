@@ -234,6 +234,10 @@ public class Equipment extends Model implements Comparable<Equipment> {
         delete();
     }
 
+    public String idString() {
+        return "E" + id;
+    }
+
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(id);
@@ -260,14 +264,8 @@ public class Equipment extends Model implements Comparable<Equipment> {
     public static List<Equipment> getChecked(Form entryForm) {
         List<Equipment> equipments = new ArrayList<Equipment>();
         for (Equipment equipment : Equipment.list()) {
-            try {
-                Optional<String> value = entryForm.field(equipment.name).getValue();
-                if (value.isPresent()) {
-                    if (value.get().equals("true")) {
-                        equipments.add(equipment);
-                    }
-                }
-            } catch (Exception ex) {
+            if (ClientAssociation.isTrue(entryForm, equipment.idString())) {
+                equipments.add(equipment);
             }
         }
         return equipments;

@@ -16,6 +16,21 @@
             @b3.text(techForm("name"), '_label -> "Logon name:  ", '_help -> "")
             @b3.text(techForm("password"), '_label -> "Password:  ", '_help -> "")
 
+            <h3>Options</h3>
+
+            <div class="checkbox-container">
+
+                @b3.checkbox(techForm("hasShowPictures"), '_label -> "Show Pictures")
+                <div style="clear:both;"></div>
+                @b3.checkbox(techForm("hasShowTrucks"), '_label -> "Show Trucks")
+                <div style="clear:both;"></div>
+                @b3.checkbox(techForm("hasShowAllNotes"), '_label -> "Show All Notes")
+                <div style="clear:both;"></div>
+                @b3.checkbox(techForm("hasShowAllEquipments"), '_label -> "Show All Equipments")
+                <div style="clear:both;"></div>
+
+            </div>
+
             <h3>Projects</h3>
 
             <div class="checkbox-container">
@@ -31,6 +46,28 @@
 
             @b3.select(techForm("company"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
 
+            <h3>Notes</h3>
+
+            <div class="checkbox-container-columns">
+
+                @for(note <- Note.list()) {
+                    @b3.checkbox(techForm(note.idString()), '_label -> note.name)
+                    <div style="clear:both;"></div>
+                }
+
+            </div>
+
+            <h3>Equipments</h3>
+
+            <div class="checkbox-container-columns">
+
+                @for(equipment <- Equipment.list()) {
+                    @b3.checkbox(techForm(equipment.idString()), '_label -> equipment.name)
+                    <div style="clear:both;"></div>
+                }
+
+            </div>
+
         </fieldset>
         
         <div class="actions">
@@ -39,5 +76,24 @@
         </div>
         
     }
+
+    <script type="text/javascript">
+        function setNoteStates() {
+            var flag = document.getElementById("hasShowAllNotes").checked;
+            @for(note <- Note.list()) {
+                document.getElementById("@note.idString()").checked = flag;
+            }
+        }
+        document.getElementById("hasShowAllNotes").onclick = setNoteStates
+
+         function setEquipmentStates() {
+            var flag = document.getElementById("hasShowAllEquipments").checked;
+            @for(equipment <- Equipment.list()) {
+                var str = "@equipment.name";
+                document.getElementById("@equipment.idString()").checked = flag;
+            }
+        }
+        document.getElementById("hasShowAllEquipments").onclick = setEquipmentStates;
+    </script>
 
 }

@@ -108,7 +108,7 @@ public class ClientProjectAssociation extends Model {
         }
     }
 
-    public static void addNew(long client_id, List<Project> projects) {
+    public static void process(long client_id, List<Project> projects) {
         deleteEntries(client_id);
         for (Project project : projects) {
             ClientProjectAssociation entry = new ClientProjectAssociation();

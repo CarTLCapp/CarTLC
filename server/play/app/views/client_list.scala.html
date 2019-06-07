@@ -19,6 +19,10 @@
                     <th>Password</th>
                     <th>Projects</th>
                     <th>Company</th>
+                    <th>Pictures</th>
+                    <th>Trucks</th>
+                    <th>Notes</th>
+                    <th>Equipment</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -33,15 +37,19 @@
                         }
                         <td>@client.getProjectsLine()</td>
                         <td>@client.getCompanyName()</td>
+                        <td>@client.getCanViewPictures()</td>
+                        <td>@client.getCanViewTrucks()</td>
+                        <td>@client.getViewableNotes()</td>
+                        <td>@client.getViewableEquipments()</td>
                         <td>
                             @if(client.is_admin) {
-                                <em>Admin</em>
+                            <em>Admin</em>
                             } else {
-                                @if(curClient.is_admin){
-                                    <a href="@routes.ClientController.edit(client.id)">Edit</a>
-                                } else {
-                                    <em>-</em>
-                                }
+                            @if(curClient.is_admin){
+                            <a href="@routes.ClientController.edit(client.id)">Edit</a>
+                            } else {
+                            <em>-</em>
+                            }
                             }
                         </td>
                     </tr>

@@ -213,6 +213,9 @@ public class EntryPagedList {
     int mRowNumber;
     int mDefaultPageSize = PAGE_SIZES[0];
 
+    public boolean canViewTrucks = true;
+    public boolean canViewPictures = true;
+
     public EntryPagedList() {
     }
 
@@ -293,6 +296,14 @@ public class EntryPagedList {
     public void computeFilters(Client client) {
         setProjects(client);
         setCompanies(client);
+
+        if (client.is_admin) {
+            canViewTrucks = true;
+            canViewPictures = true;
+        } else {
+            canViewTrucks = ClientAssociation.hasShowTrucks(client.id);
+            canViewPictures = ClientAssociation.hasShowPictures(client.id);
+        }
     }
 
     void setProjects(Client client) {

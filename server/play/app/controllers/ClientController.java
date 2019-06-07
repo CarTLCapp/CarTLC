@@ -83,13 +83,9 @@ public class ClientController extends Controller {
         client.password = updateClient.password;
         client.update();
 
-        ClientProjectAssociation.addNew(id, getCheckedProjects(clientForm));
-        Logger.info("Client " + client.name + " has been updated");
-        Logger.info("Company value was " + updateClient.company);
+        ClientProjectAssociation.process(id, getCheckedProjects(clientForm));
+        ClientAssociation.process(client, updateClient.company, clientForm);
 
-        if (updateClient.company != null && !updateClient.company.trim().isEmpty()) {
-            ClientAssociation.save(id, updateClient.company);
-        }
         return list();
     }
 
@@ -131,12 +127,12 @@ public class ClientController extends Controller {
         newClient.name = inputClient.name;
         newClient.password = inputClient.password;
         newClient.save();
-        ClientProjectAssociation.addNew(newClient.id, getCheckedProjects(clientForm));
-        Logger.info("Client " + newClient.name + " has been created");
-        Logger.info("Company value was " + inputClient.company);
-        if (inputClient.company != null && !inputClient.company.trim().isEmpty()) {
-            ClientAssociation.save(newClient.id, inputClient.company);
-        }
+
+        long id = newClient.id;
+
+        ClientProjectAssociation.process(id, getCheckedProjects(clientForm));
+        ClientAssociation.process(newClient, inputClient.company, clientForm);
+
         return list();
     }
 

@@ -143,6 +143,8 @@ public class Client extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
+    // HAS PROJECT
+
     public static boolean hasProject(long client_id, long project_id) {
         Client client = find.byId(client_id);
         if (client != null) {
@@ -155,6 +157,8 @@ public class Client extends com.avaje.ebean.Model {
         return ClientProjectAssociation.hasProject(id, project_id);
     }
 
+    // COMPANY NAMES
+
     public String getCompanyName() {
         return ClientAssociation.getCompanyLine(id);
     }
@@ -165,5 +169,90 @@ public class Client extends com.avaje.ebean.Model {
         }
         return ClientAssociation.findCompaniesFor(id);
     }
+
+    // VISIBLES
+
+    public String getCanViewPictures() {
+        return ClientAssociation.hasShowPictures(id) ? "True" : "False";
+    }
+
+    public String getCanViewTrucks() {
+        return ClientAssociation.hasShowTrucks(id) ? "True" : "False";
+    }
+
+    public String getViewableNotes() {
+        if (ClientAssociation.hasShowAllNotes(id)) {
+            return "ALL";
+        } else {
+            StringBuilder sbuf = new StringBuilder();
+            List<Note> notes = ClientNoteAssociation.getNotes(id);
+            boolean first = true;
+            for (Note note : notes) {
+                if (first) {
+                    first = false;
+                } else {
+                    sbuf.append(", ");
+                }
+                sbuf.append(note.name);
+            }
+            if (sbuf.length() == 0) {
+                return "NONE";
+            }
+            return sbuf.toString();
+        }
+    }
+
+    public String getViewableEquipments() {
+        if (ClientAssociation.hasShowAllEquipments(id)) {
+            return "ALL";
+        } else {
+            StringBuilder sbuf = new StringBuilder();
+            List<Equipment> items = ClientEquipmentAssociation.getEquipments(id);
+            boolean first = true;
+            for (Equipment equipment : items) {
+                if (first) {
+                    first = false;
+                } else {
+                    sbuf.append(", ");
+                }
+                sbuf.append(equipment.name);
+            }
+            if (sbuf.length() == 0) {
+                return "NONE";
+            }
+            return sbuf.toString();
+        }
+    }
+
+    //
+
+    // HAS NOTE
+
+    public static boolean hasNote(long client_id, long note_id) {
+        Client client = find.byId(client_id);
+        if (client != null) {
+            return client.hasNote(note_id);
+        }
+        return false;
+    }
+
+    public boolean hasNote(long note_id) {
+        return ClientNoteAssociation.hasNote(id, note_id);
+    }
+
+    // HAS EQUIPMENT
+
+    public static boolean hasEquipment(long client_id, long equipment_id) {
+        Client client = find.byId(client_id);
+        if (client != null) {
+            return client.hasEquipment(equipment_id);
+        }
+        return false;
+    }
+
+    public boolean hasEquipment(long equipment_id) {
+        return ClientEquipmentAssociation.hasEquipment(id, equipment_id);
+    }
+
 }
 

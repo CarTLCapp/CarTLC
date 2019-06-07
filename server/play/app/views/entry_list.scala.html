@@ -85,9 +85,14 @@
                     @header("city", "City")
                     @header("state", "State")
                     @header("zipcode", "ZIP")
-                    <th>Truck</th>
+
+                    @if(currentPage.canViewTrucks) {
+                        <th>Truck</th>
+                    }
                     <th>Equipment</th>
-                    <th>Pictures</th>
+                    @if(currentPage.canViewPictures) {
+                        <th>Pictures</th>
+                    }
                     <th>Notes</th>
                     <th>View</th>
                     <th>Status</th>
@@ -110,9 +115,13 @@
                         <td>@currentPage.highlightSearch(entry.getCity())</td>
                         <td>@currentPage.highlightSearch(entry.getState())</td>
                         <td>@currentPage.highlightSearch(entry.getZipCode())</td>
-                        <td>@currentPage.highlightSearch(entry.getTruckLine())</td>
+                        @if(currentPage.canViewTrucks) {
+                            <td>@currentPage.highlightSearch(entry.getTruckLine())</td>
+                        }
                         <td>@currentPage.highlightSearch(entry.getEquipmentLine())</td>
-                        <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
+                        @if(currentPage.canViewPictures) {
+                            <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
+                        }
                         <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum()</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
                         <td bgcolor="@entry.getCellColor()">@currentPage.highlightSearch(entry.getStatus())</td>

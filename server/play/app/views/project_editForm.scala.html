@@ -30,10 +30,8 @@
 
             @for(equipment <- Equipment.list()) {
                 <div class="checkbox-item">
-                    @if(ProjectEquipmentCollection.hasEquipment(id, equipment.id)) {
-                        @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name, 'checked -> true)
-                    } else {
-                        @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name)
+                    @defining(ProjectEquipmentCollection.hasEquipment(id, equipment.id)) { flag =>
+                        @b3.checkbox(projectForm(equipment.idString()), '_label -> equipment.name, 'checked -> flag)
                     }
                 </div>
                 <div style="clear:both;"></div>
@@ -47,10 +45,8 @@
 
             @for(note <- Note.list()) {
                 <div class="checkbox-item">
-                    @if(ProjectNoteCollection.hasNote(id, note.id)) {
-                        @b3.checkbox(projectForm(note.name), '_label -> note.name, 'checked -> true)
-                    } else {
-                        @b3.checkbox(projectForm(note.name), '_label -> note.name)
+                    @defining(ProjectNoteCollection.hasNote(id, note.id)) { flag =>
+                        @b3.checkbox(projectForm(note.idString()), '_label -> note.name, 'checked -> flag)
                     }
                 </div>
                 <div style="clear:both;"></div>

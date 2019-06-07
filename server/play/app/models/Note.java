@@ -245,6 +245,10 @@ public class Note extends Model implements Comparable<Note> {
         return super.equals(other);
     }
 
+    public String idString() {
+        return "N" + id;
+    }
+
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(id);
@@ -264,14 +268,8 @@ public class Note extends Model implements Comparable<Note> {
     public static List<Note> getChecked(Form entryForm) {
         List<Note> notes = new ArrayList<Note>();
         for (Note note : Note.list()) {
-            try {
-                Optional<String> value = entryForm.field(note.name).getValue();
-                if (value.isPresent()) {
-                    if (value.get().equals("true")) {
-                        notes.add(note);
-                    }
-                }
-            } catch (Exception ex) {
+            if (ClientAssociation.isTrue(entryForm, note.idString())) {
+                notes.add(note);
             }
         }
         return notes;
