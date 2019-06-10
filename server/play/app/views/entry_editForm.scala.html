@@ -81,7 +81,7 @@
 
         <div>
 
-            @for(note <- Entry.getNotesForId(id)) {
+            @for(note <- Entry.getNotesForId(client.id, id)) {
                 @{
                     val name = note.getName()
                     val valueName = "value_" + name

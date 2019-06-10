@@ -182,7 +182,7 @@ public class EntryPagedList {
             ArrayList<Entry> outgoing = new ArrayList<>();
             List<String> subterms = mTerms.subList(1, mTerms.size());
             for (Entry entry : mResult.mList) {
-                if (entry.match(subterms)) {
+                if (entry.match(subterms, mForClientId)) {
                     outgoing.add(entry);
                 }
             }
@@ -215,6 +215,7 @@ public class EntryPagedList {
 
     public boolean canViewTrucks = true;
     public boolean canViewPictures = true;
+    public long mForClientId = 0;
 
     public EntryPagedList() {
     }
@@ -300,10 +301,16 @@ public class EntryPagedList {
         if (client.is_admin) {
             canViewTrucks = true;
             canViewPictures = true;
+            mForClientId = 0;
         } else {
             canViewTrucks = ClientAssociation.hasShowTrucks(client.id);
             canViewPictures = ClientAssociation.hasShowPictures(client.id);
+            mForClientId = client.id;
         }
+    }
+
+    public String getEquipmentLine(Entry entry) {
+        return entry.getEquipmentLine(mForClientId);
     }
 
     void setProjects(Client client) {
@@ -630,7 +637,7 @@ public class EntryPagedList {
 
     private boolean hasEquipmentMatch(List<Entry> entries) {
         for (Entry entry : entries) {
-            String line = entry.getEquipmentLine();
+            String line = entry.getEquipmentLine(mForClientId);
             if (mSearch.hasMatch(line)) {
                 return true;
             }

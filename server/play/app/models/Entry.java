@@ -118,16 +118,16 @@ public class Entry extends com.avaje.ebean.Model {
                 .findPagedList(page, pageSize);
     }
 
-    public boolean match(List<String> terms) {
+    public boolean match(List<String> terms, long client_id) {
         for (String term : terms) {
-            if (!match(term)) {
+            if (!match(term, client_id)) {
                 return false;
             }
         }
         return true;
     }
 
-    public boolean match(String search) {
+    public boolean match(String search, long client_id) {
         if (getRootProjectName().toLowerCase().contains(search)) {
             return true;
         }
@@ -140,11 +140,13 @@ public class Entry extends com.avaje.ebean.Model {
         if (getCompany().toLowerCase().contains(search)) {
             return true;
         }
-        if (getEquipmentLine().toLowerCase().contains(search)) {
+        if (getEquipmentLine(client_id).toLowerCase().contains(search)) {
             return true;
         }
-        if (getTruckLine().toLowerCase().contains(search)) {
-            return true;
+        if (client_id == 0 || ClientAssociation.hasShowTrucks(client_id)) {
+            if (getTruckLine().toLowerCase().contains(search)) {
+                return true;
+            }
         }
         if (getZipCode().toLowerCase().contains(search)) {
             return true;
@@ -327,14 +329,17 @@ public class Entry extends com.avaje.ebean.Model {
         return -1;
     }
 
-    public String getEquipmentLine() {
+    public String getEquipmentLine(long client_id) {
+        boolean is_admin = Client.isAdmin(client_id);
         List<Equipment> equipments = EntryEquipmentCollection.findEquipments(equipment_collection_id);
         StringBuilder sbuf = new StringBuilder();
         for (Equipment equipment : equipments) {
-            if (sbuf.length() > 0) {
-                sbuf.append(", ");
+            if (client_id == 0 || is_admin || ClientEquipmentAssociation.hasEquipment(client_id, equipment.id)) {
+                if (sbuf.length() > 0) {
+                    sbuf.append(", ");
+                }
+                sbuf.append(equipment.name);
             }
-            sbuf.append(equipment.name);
         }
         return sbuf.toString();
     }
@@ -360,8 +365,8 @@ public class Entry extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
-    public String getNoteAddendum() {
-        int num_notes = getNotes().size();
+    public String getNoteAddendum(long client_id) {
+        int num_notes = getNotes(client_id).size();
         StringBuilder sbuf = new StringBuilder();
         if (num_notes > 0) {
             sbuf.append("N#");
@@ -370,42 +375,52 @@ public class Entry extends com.avaje.ebean.Model {
         return sbuf.toString();
     }
 
-    public List<EntryNoteCollection> getNotes() {
-        return EntryNoteCollection.findByCollectionId(note_collection_id);
-    }
-
-    public String getNoteLine() {
-        StringBuilder sbuf = new StringBuilder();
-        for (EntryNoteCollection note : getNotes()) {
-            if (sbuf.length() > 0) {
-                sbuf.append(",");
+    public List<EntryNoteCollection> getNotes(long client_id) {
+        if (Client.canViewAllNotes(client_id)) {
+            return EntryNoteCollection.findByCollectionId(note_collection_id);
+        } else {
+            ArrayList<EntryNoteCollection> notes = new ArrayList<EntryNoteCollection>();
+            for (EntryNoteCollection item : EntryNoteCollection.findByCollectionId(note_collection_id)) {
+                if (ClientNoteAssociation.hasNote(client_id, item.note_id)) {
+                    notes.add(item);
+                }
             }
-            sbuf.append(note.getName());
-            sbuf.append("=");
-            sbuf.append(note.getValue());
+            return notes;
         }
-        return sbuf.toString();
     }
 
-    public HashMap<String, Object> getNoteValues() {
+//    public String getNoteLine() {
+//        StringBuilder sbuf = new StringBuilder();
+//        for (EntryNoteCollection note : getNotes()) {
+//            if (sbuf.length() > 0) {
+//                sbuf.append(",");
+//            }
+//            sbuf.append(note.getName());
+//            sbuf.append("=");
+//            sbuf.append(note.getValue());
+//        }
+//        return sbuf.toString();
+//    }
+
+    public HashMap<String, Object> getNoteValues(long client_id) {
         HashMap<String, Object> map = new HashMap<String, Object>();
-        for (EntryNoteCollection note : getNotes()) {
+        for (EntryNoteCollection note : getNotes(client_id)) {
             String valueName = "value_" + note.getName();
             map.put(valueName, note.getValue());
         }
         return map;
     }
 
-    static public List<EntryNoteCollection> getNotesForId(long id) {
+    static public List<EntryNoteCollection> getNotesForId(long client_id, long id) {
         Entry entry = find.byId(id);
         if (entry == null) {
             return new ArrayList<EntryNoteCollection>();
         }
-        return entry.getNotes();
+        return entry.getNotes(client_id);
     }
 
-    public void applyToNotes(Form entryForm) {
-        for (EntryNoteCollection note: getNotes()) {
+    public void applyToNotes(long client_id, Form entryForm) {
+        for (EntryNoteCollection note : getNotes(client_id)) {
             String valueName = "value_" + note.getName();
             Optional<String> value = entryForm.field(valueName).getValue();
             if (value.isPresent()) {
@@ -418,8 +433,8 @@ public class Entry extends com.avaje.ebean.Model {
         return getPictures().size() > 0;
     }
 
-    public boolean hasNotes() {
-        return getNotes().size() > 0;
+    public boolean hasNotes(long client_id) {
+        return getNotes(client_id).size() > 0;
     }
 
     public List<PictureCollection> getPictures() {

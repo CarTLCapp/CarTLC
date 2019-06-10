@@ -172,12 +172,33 @@ public class Client extends com.avaje.ebean.Model {
 
     // VISIBLES
 
+    public static boolean canViewPictures(long client_id) {
+        return isAdmin(client_id) || ClientAssociation.hasShowPictures(client_id);
+    }
+
+    public static boolean canViewTrucks(long client_id) {
+        return isAdmin(client_id) || ClientAssociation.hasShowTrucks(client_id);
+    }
+
+    public static boolean isAdmin(long client_id) {
+        Client client = find.byId(client_id);
+        return client != null && client.is_admin;
+    }
+
+    public static boolean canViewAllNotes(long client_id) {
+        return client_id == 0 || isAdmin(client_id) || ClientAssociation.hasShowAllNotes(client_id);
+    }
+
+    public static boolean canViewAllEquipments(long client_id) {
+        return client_id == 0 || isAdmin(client_id) || ClientAssociation.hasShowAllEquipments(client_id);
+    }
+
     public String getCanViewPictures() {
-        return ClientAssociation.hasShowPictures(id) ? "True" : "False";
+        return is_admin || ClientAssociation.hasShowPictures(id) ? "True" : "False";
     }
 
     public String getCanViewTrucks() {
-        return ClientAssociation.hasShowTrucks(id) ? "True" : "False";
+        return is_admin || ClientAssociation.hasShowTrucks(id) ? "True" : "False";
     }
 
     public String getViewableNotes() {

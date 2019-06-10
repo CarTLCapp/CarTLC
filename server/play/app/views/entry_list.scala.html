@@ -118,11 +118,11 @@
                         @if(currentPage.canViewTrucks) {
                             <td>@currentPage.highlightSearch(entry.getTruckLine())</td>
                         }
-                        <td>@currentPage.highlightSearch(entry.getEquipmentLine())</td>
+                        <td>@currentPage.highlightSearch(currentPage.getEquipmentLine(entry))</td>
                         @if(currentPage.canViewPictures) {
                             <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
                         }
-                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum()</a></td>
+                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum(client.id)</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
                         <td bgcolor="@entry.getCellColor()">@currentPage.highlightSearch(entry.getStatus())</td>
                     </tr>

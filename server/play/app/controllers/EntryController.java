@@ -291,7 +291,12 @@ public class EntryController extends Controller {
         if (entry == null) {
             return badRequest2("Could not find entry ID " + entry_id);
         }
-        return ok(views.html.entry_list_note.render(entry.getNotes()));
+        return ok(views.html.entry_list_note.render(entry.getNotes(getClientId())));
+    }
+
+    private long getClientId() {
+        Client client = Secured.getClient(ctx());
+        return client == null ? 0 : client.id;
     }
 
     @Security.Authenticated(Secured.class)
@@ -313,7 +318,7 @@ public class EntryController extends Controller {
         }
         String home = "/entry/" + entry_id + "/view";
         Form<EntryFormData> entryForm = mFormFactory.form(EntryFormData.class).fill(new EntryFormData(entry));
-        DynamicForm noteValues = mFormFactory.form().fill(entry.getNoteValues());
+        DynamicForm noteValues = mFormFactory.form().fill(entry.getNoteValues(getClientId()));
         return ok(views.html.entry_editForm.render(entry.id, entryForm, noteValues, home, Secured.getClient(ctx())));
     }
 
@@ -378,7 +383,7 @@ public class EntryController extends Controller {
             }
             EntryEquipmentCollection.replace(entry.equipment_collection_id, Equipment.getChecked(entryForm));
             EntryNoteCollection.replace(entry.note_collection_id, Note.getChecked(entryForm));
-            entry.applyToNotes(entryForm);
+            entry.applyToNotes(client.id, entryForm);
             entry.update();
             Logger.info("Entry updated: " + entry.toString());
         } catch (ParseException ex) {

@@ -108,9 +108,11 @@ public class EntryListWriter {
             mBR.write(",");
             mBR.write(entry.getZipCode());
             mBR.write(",");
-            mBR.write(entry.getTruckLine());
-            mBR.write(",");
-            mBR.write(chkComma(entry.getEquipmentLine()));
+            if (mList.canViewTrucks) {
+                mBR.write(entry.getTruckLine());
+                mBR.write(",");
+            }
+            mBR.write(chkComma(entry.getEquipmentLine(mList.mForClientId)));
             mBR.write(",");
             mBR.write(entry.getStatus());
             mBR.write(mNoteColumns.getValues(entry));
@@ -155,7 +157,7 @@ public class EntryListWriter {
             mNextColumn = 0;
             mNoteColumns.clear();
             for (Entry entry : mList.getList()) {
-                prepare(entry.getNotes());
+                prepare(entry.getNotes(mList.mForClientId));
             }
             mColumns = new String[mNextColumn];
         }
@@ -189,7 +191,7 @@ public class EntryListWriter {
             for (int i = 0; i < mColumns.length; i++) {
                 mColumns[i] = null;
             }
-            for (EntryNoteCollection note : entry.getNotes()) {
+            for (EntryNoteCollection note : entry.getNotes(mList.mForClientId)) {
                 mColumns[mNoteColumns.get(note.getName())] = note.getValue();
             }
             StringBuilder sbuf = new StringBuilder();

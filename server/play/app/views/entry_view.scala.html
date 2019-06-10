@@ -17,7 +17,9 @@
                 <th>Root Project</th>
                 <th>Sub Project</th>
                 <th>Address</th>
-                <th>Truck</th>
+                @if(Client.canViewTrucks(client.id)) {
+                    <th>Truck</th>
+                }
                 <th>Equipment</th>
                 <th>Status</th>
 
@@ -31,50 +33,59 @@
                 <td>@entry.getRootProjectName()</td>
                 <td>@entry.getSubProjectName()</td>
                 <td>@entry.getAddressLine()</td>
-                <td>@entry.getTruckLine()</td>
-                <td>@entry.getEquipmentLine()</td>
+                @if(Client.canViewTrucks(client.id)) {
+                    <td>@entry.getTruckLine()</td>
+                }
+                <td>@entry.getEquipmentLine(client.id)</td>
                 <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
             </tr>
         </tbody>
     </table>
 
-    <h1 id="noteTitle">Notes</h1>
+    @if(entry.hasNotes(client.id)) {
 
-    <table class="notes zebra-striped">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-        @for(note <- entry.getNotes()) {
-            <tr>
-                <td>@note.getName()</td>
-                <td>@note.note_value</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+        <h1 id="noteTitle">Notes</h1>
 
-    <h1 id="pictureTitle">Pictures</h1>
-
-    <table class="pictures zebra-striped">
-        <thead>
-        <tr>
-            <th>Picture</th>
-            <th>Note</th>
-        </tr>
-        </thead>
-        <tbody>
-            @for(item <- entry.getPictures()) {
+        <table class="notes zebra-striped">
+            <thead>
                 <tr>
-                    <td><img src='@routes.EntryController.getImage(item.picture)'/></td>
-                    <td>@item.note</td>
+                    <th>Name</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            @for(note <- entry.getNotes(client.id)) {
+                <tr>
+                    <td>@note.getName()</td>
+                    <td>@note.note_value</td>
                 </tr>
             }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    }
+
+    @if(Client.canViewPictures(client.id)) {
+
+        <h1 id="pictureTitle">Pictures</h1>
+
+        <table class="pictures zebra-striped">
+            <thead>
+            <tr>
+                <th>Picture</th>
+                <th>Note</th>
+            </tr>
+            </thead>
+            <tbody>
+                @for(item <- entry.getPictures()) {
+                    <tr>
+                        <td><img src='@routes.EntryController.getImage(item.picture)'/></td>
+                        <td>@item.note</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 
     @if(client.is_admin) {
         <div class="actions">
