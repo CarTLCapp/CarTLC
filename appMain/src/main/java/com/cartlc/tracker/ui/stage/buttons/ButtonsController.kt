@@ -91,8 +91,11 @@ open class ButtonsController(
 
     private fun onPrev() {
         wasNext = false
+        val currentCurFlowValue = curFlowValue.stage
         dispatchButtonEvent(Button.BTN_PREV)
-        curFlowValue.prev()
+        if (currentCurFlowValue == curFlowValue.stage) {
+            curFlowValue.prev()
+        }
     }
 
     override fun onBtnNextClicked(view: View) {
@@ -105,8 +108,12 @@ open class ButtonsController(
 
     private fun onNext() {
         wasNext = true
+        val currentCurFlowValue = curFlowValue.stage
         dispatchButtonEvent(Button.BTN_NEXT)
-        curFlowValue.next()
+        // TODO: Clean this up so I don't have both dispatch AND the normal next button.
+        if (currentCurFlowValue == curFlowValue.stage) {
+            curFlowValue.next()
+        }
     }
 
     override fun onBtnCenterClicked(view: View) {
@@ -121,7 +128,13 @@ open class ButtonsController(
     }
 
     private fun dispatchButtonEvent(action: Button) {
+        val live = mutableListOf<ButtonsUseCase.Listener>()
         for (listener in listeners) {
+            if (listener.onButtonLive) {
+                live.add(listener)
+            }
+        }
+        for (listener in live) {
             listener.onButtonEvent(action)
         }
     }

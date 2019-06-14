@@ -113,6 +113,9 @@ class LoginController(
         return true
     }
 
+    override val onButtonLive: Boolean
+        get() = repo.curFlowValue.stage == Stage.LOGIN
+
     override fun onButtonEvent(action: Button) {
         when (action) {
             Button.BTN_CENTER -> {

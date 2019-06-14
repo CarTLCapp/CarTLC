@@ -33,8 +33,25 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
 
     val projectDashName: String
         get() {
-            val name = db.tableProjects.queryProjectName(projectNameId)
-            return name?.let {"${name.first} - ${name.second}" } ?: "-"
+            val name = db.tableProjects.queryProjectName(projectNameId) ?: return "-"
+            val rootProject = name.first
+            val subProject = name.second
+            if (subProject.isEmpty()) {
+                return rootProject
+            }
+            return "$rootProject - $subProject"
+        }
+
+    val isRootProject: Boolean
+        get() {
+            val name = db.tableProjects.queryProjectName(projectNameId) ?: return false
+            return name.second.isEmpty()
+        }
+
+    val rootName: String
+        get() {
+            val name = db.tableProjects.queryProjectName(projectNameId) ?: return ""
+            return name.first
         }
 
     val projectName: Pair<String, String>?
@@ -91,18 +108,6 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
         return name.compareTo(otherName)
     }
 
-//    val hasValidState: Boolean
-//        get() = address?.hasValidState() ?: false
-//
-//    fun fix(): DataAddress? {
-//        address?.let {
-//            if (it.fix()) {
-//                return it
-//            }
-//        }
-//        return null
-//    }
-
     override fun toString(): String {
         val sbuf = StringBuilder()
         sbuf.append("ID=")
@@ -120,4 +125,17 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
         }
         return sbuf.toString()
     }
+
+
+//    val hasValidState: Boolean
+//        get() = address?.hasValidState() ?: false
+//
+//    fun fix(): DataAddress? {
+//        address?.let {
+//            if (it.fix()) {
+//                return it
+//            }
+//        }
+//        return null
+//    }
 }

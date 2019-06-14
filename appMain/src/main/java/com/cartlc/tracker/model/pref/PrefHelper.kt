@@ -133,7 +133,14 @@ class PrefHelper constructor(
         set(value) = setString(KEY_ZIPCODE, value)
 
     val projectDashName: String
-        get() = "${projectRootName ?: ""} - ${projectSubName ?: ""}"
+        get() {
+            val rootName = projectRootName ?: ""
+            val subName = projectSubName ?: return rootName
+            if (subName.isEmpty()) {
+                return rootName
+            }
+            return "$rootName - $subName"
+        }
 
     var projectRootName: String?
         get() = getString(KEY_ROOT_PROJECT, null)
@@ -398,9 +405,9 @@ class PrefHelper constructor(
         db.tableEquipment.clearChecked()
     }
 
-    fun saveProjectAndAddressCombo(modifyCurrent: Boolean): Boolean {
+    fun saveProjectAndAddressCombo(modifyCurrent: Boolean, needsValidServerId: Boolean = false): Boolean {
         val rootName = projectRootName ?: return false
-        val subName = projectSubName ?: return false
+        val subName = projectSubName ?: ""
         val company = company
         val state = state
         val street = street
@@ -424,11 +431,29 @@ class PrefHelper constructor(
                 return false
             }
         }
-        val projectNameId = db.tableProjects.queryProjectId(rootName, subName)
-        if (projectNameId < 0) {
-            Timber.e("saveProjectAndAddressCombo(): could not find project: $rootName - $subName")
-            clearCurProject()
-            return false
+        val project = db.tableProjects.queryByName(rootName, subName)
+        val projectNameId: Long
+        if (project == null) {
+            if (subName.isEmpty()) {
+                projectNameId = db.tableProjects.add(rootName)
+            } else {
+                Timber.e("saveProjectAndAddressCombo(): could not find project: $rootName - $subName")
+                clearCurProject()
+                return false
+            }
+        } else {
+            if (project.disabled) {
+                project.disabled = false
+                db.tableProjects.update(project)
+            }
+            projectNameId = project.id
+        }
+        if (needsValidServerId) {
+            if (!db.tableProjects.hasServerId(rootName, subName)) {
+                Timber.e("saveProjectAndAddressCombo(): current project does not associated with the server: $rootName - $subName")
+                clearCurProject()
+                return false
+            }
         }
         var projectGroupId: Long
         if (modifyCurrent) {
@@ -449,15 +474,24 @@ class PrefHelper constructor(
                 Timber.i("saveProjectAddressCombo(): re-upload $count entries")
             }
             db.tableProjectAddressCombo.updateUsed(projectGroupId)
+            Timber.d("MYDEBUG MODIFY CURRENT")
+
+            db.tableProjectAddressCombo.query() // MYDEBUG
+
         } else {
             projectGroupId = db.tableProjectAddressCombo.queryProjectGroupId(projectNameId, addressId)
             if (projectGroupId < 0) {
                 projectGroupId = db.tableProjectAddressCombo.add(DataProjectAddressCombo(db, projectNameId, addressId))
+                Timber.d("MYDEBUG ADD")
             } else {
                 db.tableProjectAddressCombo.updateUsed(projectGroupId)
+                Timber.d("MYDEBUG UPDATE USED")
             }
+            db.tableProjectAddressCombo.query() // MYDEBUG
+
             currentProjectGroupId = projectGroupId
         }
+
         return true
     }
 

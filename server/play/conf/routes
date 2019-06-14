@@ -23,6 +23,7 @@ GET     /tech/:id                controllers.TechnicianController.edit(id:Long)
 POST    /tech/:id                controllers.TechnicianController.update(id:Long)
 GET     /tech/:id/delete         controllers.TechnicianController.delete(id:Long)
 GET     /tech/:id/reset_upload   controllers.TechnicianController.resetUpload(id:Long)
+# POST    /techs                   controllers.TechnicianController.query()
 
 ### PROJECTS ###
 

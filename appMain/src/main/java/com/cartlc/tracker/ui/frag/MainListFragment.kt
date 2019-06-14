@@ -84,7 +84,7 @@ class MainListFragment : BaseFragment(), FlowUseCase.Listener {
                 }
                 Stage.COMPANY -> {
                     buttonsUseCase?.nextVisible = true
-                    buttonsUseCase?.checkCenterButtonIsEdit()
+//                    buttonsUseCase?.checkCenterButtonIsEdit()
                 }
                 Stage.TRUCK -> {
                     entrySimpleControl?.entryTextValue = value

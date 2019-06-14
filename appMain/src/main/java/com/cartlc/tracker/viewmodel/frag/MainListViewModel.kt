@@ -20,7 +20,7 @@ import com.cartlc.tracker.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.viewmodel.BaseViewModel
 
 class MainListViewModel(
-        private val boundFrag: BoundFrag
+        boundFrag: BoundFrag
 ) : BaseViewModel(), LifecycleObserver, FlowUseCase.Listener {
 
     private val repo = boundFrag.repo
@@ -48,7 +48,9 @@ class MainListViewModel(
 
     var curFlowValue: Flow
         get() = repo.curFlowValue
-        set(value) { repo.curFlowValue = value }
+        set(value) {
+            repo.curFlowValue = value
+        }
 
     val isInNotes: Boolean
         get() = curFlowValue.stage == Stage.NOTES
@@ -142,8 +144,8 @@ class MainListViewModel(
             currentProjectGroup?.let { repo.db.tableCollectionNoteProject.getNotes(it.projectNameId) }
                     ?: emptyList()
 
-    fun countProjectAddressCombo(projectGroupId: Long): SqlTableEntry.Count =
-            repo.db.tableEntry.countProjectAddressCombo(projectGroupId)
+    fun countProjectAddressCombo(projectGroup: DataProjectAddressCombo): SqlTableEntry.Count =
+        repo.db.tableEntry.countProjectAddressCombo(projectGroup.id)
 
     init {
         key.observeForever { value ->

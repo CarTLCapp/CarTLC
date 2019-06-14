@@ -65,6 +65,7 @@ class MainVMHolder(
         MutableLiveData<Boolean>()
     }
 
+
     var notes: () -> List<DataNote> = { emptyList() }
 
     // Private
@@ -95,6 +96,19 @@ class MainVMHolder(
 
     private var editProject: Boolean = false
     private var takingPictureFile: File? = null
+
+    private val hasProjectSubName: Boolean
+        get() = prefHelper.projectSubName != null
+
+    private val curProjectHint: String
+        get() {
+            val sbuf = StringBuilder()
+            val name = prefHelper.projectDashName
+            sbuf.append(name)
+            sbuf.append("\n")
+            sbuf.append(prefHelper.address)
+            return sbuf.toString()
+        }
 
     private val statusHint: String
         get() {
@@ -226,6 +240,12 @@ class MainVMHolder(
         }
     }
 
+    override val onButtonLive: Boolean
+        get() {
+            // TODO: Need to give this one more thought
+            return curFlowValue.stage != Stage.LOGIN
+        }
+
     override fun onButtonEvent(action: Button) {
         when (action) {
             Button.BTN_CHANGE -> btnChangeCompany()
@@ -253,7 +273,7 @@ class MainVMHolder(
         if (prefHelper.currentEditEntryId != 0L) {
             prefHelper.clearLastEntry()
         }
-        curFlowValue = TruckFlow()
+        curFlowValue = SubProjectFlow()
     }
 
     fun btnProfile() {
@@ -315,6 +335,7 @@ class MainVMHolder(
                 }
                 prefHelper.saveProjectAndAddressCombo(editProject)
                 editProject = false
+
                 checkErrors()
                 checkAddButtonVisible()
 
@@ -325,7 +346,20 @@ class MainVMHolder(
                 buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_new_project)
                 titleViewModel.titleValue = messageHandler.getString(StringMessage.title_current_project)
             }
+            Stage.SUB_PROJECT -> {
+                prefHelper.projectRootName?.let { rootName ->
+                    mainListViewModel.showingValue = true
+                    titleViewModel.subTitleValue = curProjectHint
+                    buttonsUseCase.nextVisible = hasProjectSubName
+                    setList(StringMessage.title_sub_project, PrefHelper.KEY_SUB_PROJECT, db.tableProjects.querySubProjectNames(rootName))
+                } ?: run {
+                    curFlowValue = RootProjectFlow()
+                }
+            }
             Stage.TRUCK -> {
+
+                prefHelper.saveProjectAndAddressCombo(modifyCurrent = false, needsValidServerId = true)
+
                 entrySimpleControl.showing = true
                 entrySimpleControl.hintValue = messageHandler.getString(StringMessage.title_truck)
                 entrySimpleControl.helpValue = messageHandler.getString(StringMessage.entry_hint_truck)

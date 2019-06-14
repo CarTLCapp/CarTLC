@@ -14,10 +14,10 @@
             style="@style/EntryText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:ems="4"
             android:hint="@string/entry_hint_tech_code"
             android:inputType="number"
             android:maxLines="1"
-            android:ems = "4"
             android:textSize="18sp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -25,15 +25,17 @@
 
         <TextView
             android:id="@+id/first_tech_name"
+            style="@style/LoginName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="15sp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/first_tech_code"/>
+            app:layout_constraintTop_toBottomOf="@id/first_tech_code" />
 
         <CheckBox
             android:id="@+id/secondary_login"
+            style="@style/LoginCheckBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -47,10 +49,10 @@
             style="@style/EntryText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:ems="4"
             android:hint="@string/entry_hint_tech_code"
             android:inputType="number"
             android:maxLines="1"
-            android:ems = "4"
             android:textSize="18sp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -58,12 +60,13 @@
 
         <TextView
             android:id="@+id/secondary_tech_name"
+            style="@style/LoginName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="15sp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/secondary_tech_code"/>
+            app:layout_constraintTop_toBottomOf="@id/secondary_tech_code" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -15,7 +15,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.cartlc.tracker"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 51
         versionName "3.09"

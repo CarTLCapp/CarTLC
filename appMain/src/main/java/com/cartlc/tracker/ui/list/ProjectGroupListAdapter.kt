@@ -11,9 +11,11 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.data.DataProjectAddressCombo
+import com.cartlc.tracker.model.sql.SqlTableEntry
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 
 import kotlinx.android.synthetic.main.entry_item_project.view.*
+import timber.log.Timber
 
 /**
  * Created by dug on 5/10/17.
@@ -25,7 +27,8 @@ class ProjectGroupListAdapter(
 ) : RecyclerView.Adapter<ProjectGroupListAdapter.CustomViewHolder>() {
 
     private val layoutInflater: LayoutInflater = LayoutInflater.from(mContext)
-    private var projectGroups: List<DataProjectAddressCombo> = emptyList()
+    private var allProjectGroups: List<DataProjectAddressCombo> = emptyList()
+    private val filteredProjectGroups = mutableListOf<DataProjectAddressCombo>()
     private var curProjectGroupId: Long? = null
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)
@@ -36,9 +39,9 @@ class ProjectGroupListAdapter(
     }
 
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
-        val projectGroup = projectGroups[position]
+        val projectGroup = filteredProjectGroups[position]
         holder.view.project_name.text = projectGroup.projectDashName
-        val count = vm.countProjectAddressCombo(projectGroup.id)
+        val count = countEntries(projectGroup)
         if (count.totalEntries > 0) {
             val sbuf = StringBuilder()
             sbuf.append(mContext.getString(R.string.title_entries_))
@@ -83,13 +86,37 @@ class ProjectGroupListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return projectGroups.size
+        return filteredProjectGroups.size
     }
 
     fun onDataChanged() {
-        projectGroups = vm.projectGroups
+        Timber.d("MYDEBUG: onDataChanged()")
+        allProjectGroups = vm.projectGroups
         curProjectGroupId = vm.currentProjectGroupId
+        filterGroups()
         notifyDataSetChanged()
     }
 
+    private fun filterGroups() {
+        filteredProjectGroups.clear()
+        for (projectGroup in allProjectGroups) {
+            if (projectGroup.isRootProject) {
+                filteredProjectGroups.add(projectGroup)
+            }
+        }
+    }
+
+    private fun countEntries(projectGroup: DataProjectAddressCombo): SqlTableEntry.Count {
+        val count = SqlTableEntry.Count()
+        val rootName = projectGroup.rootName
+        for (item in allProjectGroups) {
+            if (!item.isRootProject && item.rootName == rootName && item.addressId == projectGroup.addressId) {
+                val subCount = vm.countProjectAddressCombo(item)
+                count.totalUploadedAws += subCount.totalUploadedAws
+                count.totalUploadedMaster += subCount.totalUploadedMaster
+                count.totalEntries += subCount.totalEntries
+            }
+        }
+        return count
+    }
 }

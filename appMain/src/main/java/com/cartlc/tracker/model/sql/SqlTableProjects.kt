@@ -19,7 +19,7 @@ import com.cartlc.tracker.ui.app.TBApplication
 class SqlTableProjects(
         private val db: DatabaseTable,
         private val dbSql: SQLiteDatabase
-): TableProjects {
+) : TableProjects {
 
     companion object {
 
@@ -119,7 +119,26 @@ class SqlTableProjects(
             id = dbSql.insert(TABLE_NAME, null, values)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableProjects::class.java, "add(item)", "db")
+            TBApplication.ReportError(ex, SqlTableProjects::class.java, "add(rootProject,subProject)", "db")
+        } finally {
+            dbSql.endTransaction()
+        }
+        return id
+    }
+
+    override fun add(rootProject: String): Long {
+        var id = -1L
+        dbSql.beginTransaction()
+        try {
+            val values = ContentValues()
+            values.put(KEY_ROOT_PROJECT, rootProject)
+            values.put(KEY_NAME, "")
+            values.put(KEY_SERVER_ID, 0)
+            values.put(KEY_DISABLED, 0)
+            id = dbSql.insert(TABLE_NAME, null, values)
+            dbSql.setTransactionSuccessful()
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableProjects::class.java, "add(rootProject)", "db")
         } finally {
             dbSql.endTransaction()
         }
@@ -279,7 +298,11 @@ class SqlTableProjects(
         val list = query(selection, selectionArgs)
         val names = mutableListOf<String>()
         for (project in list) {
-            project.name?.let { name -> names.add(name) }
+            project.name?.let {
+                if (it.isNotEmpty()) {
+                    names.add(it)
+                }
+            }
         }
         return names
     }
@@ -300,6 +323,25 @@ class SqlTableProjects(
             TBApplication.ReportError(ex, SqlTableProjects::class.java, "queryProjectName()", "$rootName - $subProject")
         }
         return rowId
+    }
+
+    override fun hasServerId(rootName: String, subProject: String): Boolean {
+        var valid = false
+        try {
+            val columns = arrayOf(KEY_SERVER_ID)
+            val selection = "$KEY_ROOT_PROJECT=? AND $KEY_NAME=?"
+            val selectionArgs = arrayOf(rootName, subProject)
+            val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null)
+            val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
+            if (cursor.moveToFirst()) {
+                val serverId = cursor.getLong(idxServerId)
+                valid = serverId > 0
+            }
+            cursor.close()
+        } catch (ex: SQLiteException) {
+            TBApplication.ReportError(ex, SqlTableProjects::class.java, "hasServerId()", "$rootName - $subProject")
+        }
+        return valid
     }
 
     override fun removeOrDisable(project: DataProject) {

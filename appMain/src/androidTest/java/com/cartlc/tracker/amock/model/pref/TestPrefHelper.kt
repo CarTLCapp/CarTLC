@@ -14,7 +14,6 @@ import com.cartlc.tracker.model.data.DataProjectAddressCombo
 import com.cartlc.tracker.model.table.*
 import com.cartlc.tracker.ui.app.TBApplication
 import com.nhaarman.mockito_kotlin.any
-import com.squareup.haha.perflib.RootType
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test

@@ -213,5 +213,18 @@ public class TechnicianController extends Controller {
         newTech.save();
         return list();
     }
+
+    public Result query() {
+        ObjectNode top = Json.newObject();
+        ArrayNode array = top.putArray("technicians");
+        for (Technician tech : Technician.listEnabled()) {
+            ObjectNode node = array.addObject();
+            node.put("first_name", tech.first_name);
+            node.put("last_name", tech.last_name);
+            node.put("code", tech.code);
+        }
+        return ok(top);
+    }
+
 }
             

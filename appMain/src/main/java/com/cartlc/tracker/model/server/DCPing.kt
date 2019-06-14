@@ -47,7 +47,7 @@ class DCPing(
         private const val TAG = "DCPing"
         private const val LOG = true
 
-        private const val SERVER_URL_DEVELOPMENT = "http://fleetdev.arqnetworks.com/"
+        private const val SERVER_URL_DEVELOPMENT = "https://fleetdev.arqnetworks.com/"
         private const val SERVER_URL_RELEASE = "http://fleettlc.arqnetworks.com/"
 
         private const val UPLOAD_RESET_TRIGGER = "reset_upload"
@@ -149,6 +149,8 @@ class DCPing(
             errorMessage = result.errorMessage
         } catch (ex: IOException) {
             errorMessage = ex.message
+        } catch (ex: Exception) {
+            errorMessage = ex.message
         }
         return errorMessage
     }
@@ -191,6 +193,9 @@ class DCPing(
         } catch (ex: NumberFormatException) {
             val msg = "sendRegistration(): PARSE ERROR on: ${ex.message}"
             return RegResult(0, "", "", null, null, null, msg)
+        } catch (ex: Exception) {
+            val msg = "sendRegistration(): ERROR on: ${ex.message}"
+            return RegResult(0, "", "", null, null, null, msg)
         }
     }
 
@@ -209,6 +214,8 @@ class DCPing(
         try {
             response = post(pingUrl, jsonObject)
         } catch (ex: IOException) {
+            return
+        } catch (ex: Exception) {
             return
         }
         val blob = parseResult(response)
@@ -1232,6 +1239,17 @@ class DCPing(
                 }
             }
             throw(IOException(msg))
+        } catch (ex: Exception) {
+            val msg: String
+            if (sendErrors) {
+                msg = TBApplication.ReportServerError(ex, DCPing::class.java, "post()", "server")
+            } else {
+                msg = ex.message ?: "unknown error"
+                if (sendErrors) {
+                    TBApplication.ShowError(msg)
+                }
+            }
+            throw(IOException(msg))
         }
     }
 
@@ -1267,6 +1285,8 @@ class DCPing(
             }
         } catch (ex: IOException) {
             Log.e(TAG, "Exception: " + ex.message)
+        } catch (ex: Exception) {
+            Log.e(TAG, "Unknown: " + ex.message)
         }
     }
 

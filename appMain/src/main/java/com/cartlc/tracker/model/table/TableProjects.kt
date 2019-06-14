@@ -3,8 +3,10 @@ package com.cartlc.tracker.model.table
 import com.cartlc.tracker.model.data.DataProject
 
 interface TableProjects {
-    fun add(rootProject: String, subProject: String, server_id: Int, disabled: Boolean): Long
+    fun add(rootProject: String, subProject: String, serverId: Int, disabled: Boolean): Long
+    fun add(rootProject: String): Long
     fun addTest(item: String): Long
+    fun hasServerId(rootName: String, subProject: String): Boolean
     fun isDisabled(id: Long): Boolean
     fun query(activeOnly: Boolean = false): List<DataProject>
     fun queryRootProjectNames(): List<String>

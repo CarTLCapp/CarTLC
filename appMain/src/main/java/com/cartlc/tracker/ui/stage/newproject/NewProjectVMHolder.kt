@@ -62,19 +62,21 @@ class NewProjectVMHolder(
         get() {
             val sbuf = StringBuilder()
             sbuf.append(messageHandler.getString(StringMessage.entry_hint_edit_project))
-            sbuf.append("\n")
             val name = prefHelper.projectDashName
-            sbuf.append(name)
-            sbuf.append("\n")
-            sbuf.append(prefHelper.address)
+            if (name.isNotEmpty()) {
+                sbuf.append("\n")
+                sbuf.append(name)
+            }
+            val address = prefHelper.address
+            if (address.isNotEmpty()) {
+                sbuf.append("\n")
+                sbuf.append(address)
+            }
             return sbuf.toString()
         }
 
     private val hasProjectRootName: Boolean
         get() = prefHelper.projectRootName != null
-
-    private val hasProjectSubName: Boolean
-        get() = prefHelper.projectSubName != null
 
     private val hasCompanyName: Boolean
         get() = !prefHelper.company.isNullOrBlank()
@@ -120,21 +122,10 @@ class NewProjectVMHolder(
                 setList(StringMessage.title_root_project, PrefHelper.KEY_ROOT_PROJECT, db.tableProjects.queryRootProjectNames())
                 dispatchActionEvent(Action.GET_LOCATION)
             }
-            Stage.SUB_PROJECT -> {
-                prefHelper.projectRootName?.let { rootName ->
-                    mainListViewModel.showingValue = true
-                    titleViewModel.subTitleValue = curProjectHint
-                    buttonsUseCase.nextVisible = hasProjectSubName
-                    setList(StringMessage.title_sub_project, PrefHelper.KEY_SUB_PROJECT, db.tableProjects.querySubProjectNames(rootName))
-                } ?: run {
-                    curFlowValue = RootProjectFlow()
-                }
-            }
             Stage.COMPANY -> {
                 titleViewModel.subTitleValue = editProjectHint
                 mainListViewModel.showingValue = true
                 buttonsUseCase.nextVisible = hasCompanyName
-                buttonsUseCase.centerVisible = true
                 val companies = db.tableAddress.query()
                 autoNarrowCompanies(companies.toMutableList())
                 val companyNames = getNames(companies)
@@ -198,7 +189,6 @@ class NewProjectVMHolder(
                 dispatchActionEvent(Action.PING)
             }
             Stage.SUB_PROJECT -> curFlowValue = RootProjectFlow()
-            Stage.COMPANY,
             Stage.STREET,
             Stage.CITY,
             Stage.EQUIPMENT,
@@ -215,6 +205,9 @@ class NewProjectVMHolder(
     override fun onButtonConfirm(action: Button): Boolean {
         return true
     }
+
+    override val onButtonLive: Boolean
+        get() = true
 
     override fun onButtonEvent(action: Button) {
         when (action) {

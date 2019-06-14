@@ -184,6 +184,9 @@ class SqlTableProjectAddressCombo(
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableProjectAddressCombo::class.java, "query()", "sqlDb")
         }
+        for (ele in list) {
+            Timber.d("MYDEBUG PROJECT: ${ele.projectDashName}")
+        }
         return list
     }
 

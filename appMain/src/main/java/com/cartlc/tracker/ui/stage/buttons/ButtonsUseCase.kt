@@ -8,6 +8,7 @@ interface ButtonsUseCase : BaseObservable<ButtonsUseCase.Listener> {
     interface Listener {
         fun onButtonConfirm(action: Button): Boolean
         fun onButtonEvent(action: Button)
+        val onButtonLive: Boolean
     }
 
     var wasNext: Boolean

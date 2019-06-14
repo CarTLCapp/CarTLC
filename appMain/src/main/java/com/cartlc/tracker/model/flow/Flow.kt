@@ -138,9 +138,8 @@ open class PictureFlow(
 }
 
 class LoginFlow : Flow(Stage.LOGIN)
-class RootProjectFlow : Flow(Stage.ROOT_PROJECT, Stage.CURRENT_PROJECT, null, Stage.SUB_PROJECT)
-class SubProjectFlow : Flow(Stage.SUB_PROJECT, Stage.ROOT_PROJECT, null, Stage.COMPANY)
-class CompanyFlow : Flow(Stage.COMPANY, Stage.SUB_PROJECT, Stage.ADD_COMPANY, Stage.STATE)
+class RootProjectFlow : Flow(Stage.ROOT_PROJECT, Stage.CURRENT_PROJECT, null, Stage.COMPANY)
+class CompanyFlow : Flow(Stage.COMPANY, Stage.SUB_PROJECT, null, Stage.STATE)
 class AddCompanyFlow : Flow(Stage.ADD_COMPANY, Stage.SUB_PROJECT, null, Stage.STATE)
 class StateFlow : Flow(Stage.STATE, Stage.COMPANY, Stage.ADD_STATE, Stage.CITY)
 class AddStateFlow : Flow(Stage.ADD_STATE, Stage.COMPANY, null, Stage.CITY)
@@ -152,7 +151,8 @@ class ConfirmAddressFlow : Flow(Stage.CONFIRM_ADDRESS, Stage.STREET, null, Stage
 
 class CurrentProjectFlow : Flow(Stage.CURRENT_PROJECT, Action.VIEW_PROJECT, Action.NEW_PROJECT, null)
 
-class TruckFlow : Flow(Stage.TRUCK, Stage.CURRENT_PROJECT, null, Stage.PICTURE_1)
+class SubProjectFlow : Flow(Stage.SUB_PROJECT, Stage.CURRENT_PROJECT, null, Stage.TRUCK)
+class TruckFlow : Flow(Stage.TRUCK, Stage.SUB_PROJECT, null, Stage.PICTURE_1)
 class Picture1Flow : PictureFlow(Stage.PICTURE_1, Stage.TRUCK, Stage.EQUIPMENT, 1)
 class EquipmentFlow : Flow(Stage.EQUIPMENT, Stage.PICTURE_1, Stage.ADD_EQUIPMENT, Stage.NOTES)
 class AddEquipmentFlow : Flow(Stage.ADD_EQUIPMENT, Stage.PICTURE_1, null, Stage.NOTES)

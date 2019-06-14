@@ -27,7 +27,9 @@ open class CarRepository(
 
     var curFlowValue: Flow
         get() = flowUseCase.curFlow
-        set(value) { flowUseCase.curFlow = value }
+        set(value) {
+            flowUseCase.curFlow = value
+        }
 
     fun onPreviousFlow() {
         flowUseCase.previousFlowValue?.let {
@@ -128,33 +130,37 @@ open class CarRepository(
     // region COMPUTE
 
     fun computeCurStage() {
-        var inEntry = false
-        when {
-            prefHelper.firstTechCode.isNullOrBlank() -> curFlowValue = LoginFlow()
-            prefHelper.projectRootName.isNullOrBlank() -> curFlowValue = RootProjectFlow()
-            prefHelper.projectSubName.isNullOrBlank() -> curFlowValue = SubProjectFlow()
-            prefHelper.company.isNullOrBlank() -> curFlowValue = CompanyFlow()
-            prefHelper.state.isNullOrBlank() -> curFlowValue = StateFlow()
-            prefHelper.city.isNullOrBlank() -> curFlowValue = CityFlow()
-            prefHelper.street.isNullOrBlank() -> curFlowValue = StreetFlow()
-            else -> inEntry = true
-        }
-        if (inEntry) {
-            val hasTruck = prefHelper.truckValue.isNotEmpty()
-            val items = computeNoteItems()
-            val hasNotes = hasNotesEntered(items) && isNotesComplete(items)
-            val hasEquip = hasChecked(prefHelper.currentProjectGroup)
-            val hasPictures = db.tablePictureCollection.countPictures(prefHelper.currentPictureCollectionId) > 0
-            if (!hasTruck && !hasNotes && !hasEquip && !hasPictures) {
-                curFlowValue = CurrentProjectFlow()
-            } else if (!hasTruck) {
-                curFlowValue = TruckFlow()
-            } else if (!hasEquip) {
-                curFlowValue = EquipmentFlow()
-            } else if (!hasNotes) {
-                curFlowValue = NotesFlow()
+        if (db.tableProjects.query().isEmpty()) {
+            when {
+                prefHelper.firstTechCode.isNullOrBlank() -> curFlowValue = LoginFlow()
+                prefHelper.projectRootName.isNullOrBlank() -> curFlowValue = RootProjectFlow()
+                prefHelper.company.isNullOrBlank() -> curFlowValue = CompanyFlow()
+                prefHelper.state.isNullOrBlank() -> curFlowValue = StateFlow()
+                prefHelper.city.isNullOrBlank() -> curFlowValue = CityFlow()
+                prefHelper.street.isNullOrBlank() -> curFlowValue = StreetFlow()
+                else -> { curFlowValue = CurrentProjectFlow() }
+            }
+        } else {
+            val hasSubProject = !prefHelper.projectSubName.isNullOrBlank()
+            if (hasSubProject) {
+                val hasTruck = prefHelper.truckValue.isNotEmpty()
+                val items = computeNoteItems()
+                val hasNotes = hasNotesEntered(items) && isNotesComplete(items)
+                val hasEquip = hasChecked(prefHelper.currentProjectGroup)
+                val hasPictures = db.tablePictureCollection.countPictures(prefHelper.currentPictureCollectionId) > 0
+                if (!hasTruck && !hasNotes && !hasEquip && !hasPictures) {
+                    curFlowValue = CurrentProjectFlow()
+                } else if (!hasTruck) {
+                    curFlowValue = TruckFlow()
+                } else if (!hasEquip) {
+                    curFlowValue = EquipmentFlow()
+                } else if (!hasNotes) {
+                    curFlowValue = NotesFlow()
+                } else {
+                    curFlowValue = Picture2Flow()
+                }
             } else {
-                curFlowValue = Picture2Flow()
+                curFlowValue = CurrentProjectFlow()
             }
         }
     }
