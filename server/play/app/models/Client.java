@@ -159,15 +159,15 @@ public class Client extends com.avaje.ebean.Model {
 
     // COMPANY NAMES
 
-    public String getCompanyName() {
-        return ClientAssociation.getCompanyLine(id);
+    public String getCompanyLine() {
+        return ClientCompanyNameAssociation.getCompanyLine(id);
     }
 
     public List<String> getCompanyNames() {
         if (id == null) {
             return new ArrayList<>();
         }
-        return ClientAssociation.findCompaniesFor(id);
+        return ClientCompanyNameAssociation.findCompaniesFor(id);
     }
 
     // VISIBLES
@@ -202,7 +202,7 @@ public class Client extends com.avaje.ebean.Model {
     }
 
     public String getViewableNotes() {
-        if (ClientAssociation.hasShowAllNotes(id)) {
+        if (canViewAllNotes(id)) {
             return "ALL";
         } else {
             StringBuilder sbuf = new StringBuilder();
@@ -224,7 +224,7 @@ public class Client extends com.avaje.ebean.Model {
     }
 
     public String getViewableEquipments() {
-        if (ClientAssociation.hasShowAllEquipments(id)) {
+        if (canViewAllEquipments(id)) {
             return "ALL";
         } else {
             StringBuilder sbuf = new StringBuilder();
@@ -243,36 +243,6 @@ public class Client extends com.avaje.ebean.Model {
             }
             return sbuf.toString();
         }
-    }
-
-    //
-
-    // HAS NOTE
-
-    public static boolean hasNote(long client_id, long note_id) {
-        Client client = find.byId(client_id);
-        if (client != null) {
-            return client.hasNote(note_id);
-        }
-        return false;
-    }
-
-    public boolean hasNote(long note_id) {
-        return ClientNoteAssociation.hasNote(id, note_id);
-    }
-
-    // HAS EQUIPMENT
-
-    public static boolean hasEquipment(long client_id, long equipment_id) {
-        Client client = find.byId(client_id);
-        if (client != null) {
-            return client.hasEquipment(equipment_id);
-        }
-        return false;
-    }
-
-    public boolean hasEquipment(long equipment_id) {
-        return ClientEquipmentAssociation.hasEquipment(id, equipment_id);
     }
 
 }

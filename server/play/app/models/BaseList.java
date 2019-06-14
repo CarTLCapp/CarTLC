@@ -223,7 +223,7 @@ public abstract class BaseList<T> {
         if (client == null || client.is_admin) {
             mNextParameters.companyNames = null;
         } else {
-            mNextParameters.companyNames = ClientAssociation.findCompaniesFor(client.id);
+            mNextParameters.companyNames = ClientCompanyNameAssociation.findCompaniesFor(client.id);
         }
     }
 

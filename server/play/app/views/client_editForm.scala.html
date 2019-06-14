@@ -58,14 +58,27 @@
 
             <h3>Company</h3>
 
+            <!--
             @b3.select(techForm("company"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
+            -->
+
+            <div class="checkbox-container-columns">
+
+                @for(companyName <- CompanyName.list()) {
+                    @defining(ClientCompanyNameAssociation.hasCompanyName(id, companyName.id)) { flag =>
+                        @b3.checkbox(techForm(companyName.idString()), '_label -> companyName.name, 'checked -> flag)
+                    }
+                    <div style="clear:both;"></div>
+                }
+
+            </div>
 
             <h3>Notes</h3>
 
             <div class="checkbox-container-columns">
 
                 @for(note <- Note.list()) {
-                    @defining(Client.hasNote(id, note.id)) { flag =>
+                    @defining(ClientNoteAssociation.hasNote(id, note.id)) { flag =>
                         @b3.checkbox(techForm(note.idString()), '_label -> note.name, 'checked -> flag)
                     }
                     <div style="clear:both;"></div>
@@ -78,7 +91,7 @@
             <div class="checkbox-container-columns">
 
                 @for(equipment <- Equipment.list()) {
-                    @defining(Client.hasEquipment(id, equipment.id)) { flag =>
+                    @defining(ClientEquipmentAssociation.hasEquipment(id, equipment.id)) { flag =>
                         @b3.checkbox(techForm(equipment.idString()), '_label -> equipment.name, 'checked -> flag)
                     }
                     <div style="clear:both;"></div>

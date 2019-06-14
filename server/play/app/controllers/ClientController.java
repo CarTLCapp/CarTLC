@@ -84,7 +84,8 @@ public class ClientController extends Controller {
         client.update();
 
         ClientProjectAssociation.process(id, getCheckedProjects(clientForm));
-        ClientAssociation.process(client, updateClient.company, clientForm);
+        ClientCompanyNameAssociation.process(id, clientForm);
+        ClientAssociation.process(client, clientForm);
 
         return list();
     }
@@ -131,7 +132,8 @@ public class ClientController extends Controller {
         long id = newClient.id;
 
         ClientProjectAssociation.process(id, getCheckedProjects(clientForm));
-        ClientAssociation.process(newClient, inputClient.company, clientForm);
+        ClientCompanyNameAssociation.process(id, clientForm);
+        ClientAssociation.process(newClient, clientForm);
 
         return list();
     }
@@ -201,6 +203,9 @@ public class ClientController extends Controller {
             flash("success", "Client has been disabled");
         } else {
             ClientAssociation.deleteEntries(id);
+            ClientCompanyNameAssociation.deleteEntries(id);
+            ClientEquipmentAssociation.deleteEntries(id);
+            ClientNoteAssociation.deleteEntries(id);
             Client.find.ref(id).delete();
             flash("success", "Client has been deleted");
         }

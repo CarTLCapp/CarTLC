@@ -38,6 +38,17 @@ public class CompanyName extends Model {
      */
     public static Finder<Long, CompanyName> find = new Finder<Long, CompanyName>(CompanyName.class);
 
+    public static List<CompanyName> list() {
+        return find.where()
+                .eq("disabled", false)
+                .orderBy("name ASC")
+                .findList();
+    }
+
+    public String idString() {
+        return "C" + id;
+    }
+
     public static String get(long id) {
         if (id > 0) {
             CompanyName company = find.byId(id);

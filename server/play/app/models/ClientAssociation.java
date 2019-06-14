@@ -33,9 +33,6 @@ public class ClientAssociation extends Model {
     public Long client_id;
 
     @Constraints.Required
-    public Long company_name_id;
-
-    @Constraints.Required
     public boolean show_pictures;
 
     @Constraints.Required
@@ -53,46 +50,6 @@ public class ClientAssociation extends Model {
         return find.all();
     }
 
-    // ---------
-    // COMPANIES
-    // ---------
-
-    public static String findCompanyNameFor(long client_id) {
-        List<String> result = findCompaniesFor(client_id);
-        if (result.size() > 0) {
-            return result.get(0);
-        }
-        return null;
-    }
-
-    public static List<String> findCompaniesFor(long client_id) {
-        List<ClientAssociation> items = find.where()
-                .eq("client_id", client_id)
-                .findList();
-        List<String> result = new ArrayList<String>();
-        for (ClientAssociation item : items) {
-            String name = CompanyName.get(item.company_name_id);
-            if (name != null) {
-                result.add(name);
-            }
-        }
-        return result;
-    }
-
-    public static String getCompanyLine(long client_id) {
-        List<ClientAssociation> items = find.where()
-                .eq("client_id", client_id)
-                .findList();
-        StringBuilder sbuf = new StringBuilder();
-        for (ClientAssociation item : items) {
-            if (sbuf.length() > 0) {
-                sbuf.append(", ");
-            }
-            sbuf.append(CompanyName.get(item.company_name_id));
-        }
-        return sbuf.toString();
-    }
-
     public static void deleteEntries(long client_id) {
         List<ClientAssociation> items = find.where()
                 .eq("client_id", client_id)
@@ -101,10 +58,6 @@ public class ClientAssociation extends Model {
             item.delete();
         }
     }
-
-    // -----
-    // FLAGS
-    // -----
 
     public static boolean hasShowPictures(long client_id) {
         List<ClientAssociation> items = find.where()
@@ -162,7 +115,7 @@ public class ClientAssociation extends Model {
         return false;
     }
 
-    public static void process(Client client, String companyName, Form entryForm) {
+    public static void process(Client client, Form entryForm) {
         List<ClientAssociation> items = find.where()
                 .eq("client_id", client.id)
                 .findList();
@@ -175,10 +128,6 @@ public class ClientAssociation extends Model {
         } else {
             item = new ClientAssociation();
             item.client_id = client.id;
-        }
-        if (companyName != null && !companyName.trim().isEmpty()) {
-            long company_name_id = CompanyName.save(companyName);
-            item.company_name_id = company_name_id;
         }
         item.show_pictures = isTrue(entryForm, "hasShowPictures"); // Note: must match client_editForm.scala.html
         item.show_trucks = isTrue(entryForm, "hasShowTrucks"); // Note: must match client_editForm.scala.html
