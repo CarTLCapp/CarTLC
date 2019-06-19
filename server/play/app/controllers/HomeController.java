@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package controllers;
 
@@ -35,6 +35,7 @@ public class HomeController extends Controller {
     private FormFactory mFormFactory;
     private Globals mGlobals;
     private String mVersion;
+    private Daily mDaily = new Daily();
 
     @Inject
     public HomeController(
@@ -52,7 +53,13 @@ public class HomeController extends Controller {
     public Result index() {
         mGlobals.checkInit();
         mGlobals.setClearSearch(true);
-        return ok(views.html.home.render(Secured.getClient(ctx()), mVersion));
+        return ok(views.html.home.render(Secured.getClient(ctx()), mVersion, "", mDaily));
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result daily(long date) {
+        mDaily.resetTo(date);
+        return index();
     }
 
     public static Result HOME() {
@@ -60,7 +67,7 @@ public class HomeController extends Controller {
     }
 
     public Result problem(String msg) {
-        return badRequest(views.html.home.render(Secured.getClient(ctx()), mVersion));
+        return badRequest(views.html.home.render(Secured.getClient(ctx()), mVersion, msg, mDaily));
     }
 
     public static Result PROBLEM(String msg) {

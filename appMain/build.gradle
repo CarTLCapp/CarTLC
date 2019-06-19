@@ -6,7 +6,6 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
 
 repositories {
-//    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url 'https://maven.google.com' }
     mavenCentral()
 }
@@ -18,7 +17,7 @@ android {
         minSdkVersion 21
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 51
-        versionName "3.09"
+        versionName "3.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }

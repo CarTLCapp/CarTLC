@@ -41,7 +41,7 @@ public class InputTruck extends Model {
     }
 
     public List<String> optionsSubProject() {
-        return Project.listSubProjectsWithBlank(root_project_name);
+        return Project.listSubProjectNamesWithBlank(root_project_name);
     }
 }
 

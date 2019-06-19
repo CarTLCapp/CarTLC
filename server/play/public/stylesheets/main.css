@@ -26,6 +26,26 @@ table.progress {
     width: 200px;
 }
 
+table.daily, th.daily, td.daily {
+  border: 2px solid black;
+}
+
+table.daily {
+  border-collapse: collapse;
+   margin-top: 0px;
+   margin-bottom: 0px;
+}
+
+table.dailyDate {
+  border-collapse: collapse;
+}
+
+.dailyBox {
+  top: 120px;
+  right: 30px;
+  position: fixed;
+}
+
 .break-div {
     display: block;
     width: 98%;

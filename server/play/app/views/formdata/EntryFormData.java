@@ -36,7 +36,7 @@ public class EntryFormData {
     }
 
     public List<String> optionsSubProject() {
-        return Project.listSubProjects(rootProject);
+        return Project.listSubProjectNames(rootProject);
     }
 
 }

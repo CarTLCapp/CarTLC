@@ -1,4 +1,4 @@
-@(client : Client, version : String)
+@(client : Client, version : String, msg: String, daily: Daily)
 
 @*
 * Call the `main` template with two arguments. The first
@@ -7,7 +7,7 @@
 *@
 @main("FleetTLC", client) {
 
-    <h2>Data</h2>
+    <h2>Data @msg</h2>
 
     <h3><a href="@routes.EntryController.list()">Entries</a></h3>
 
@@ -72,6 +72,42 @@
 
 		<p id="cleanup_result"></p>
 
+        <div class="dailyBox">
+
+            <table class="dailyDate" cellpadding="4px">
+                <col width="200">
+                <col width="80">
+                <tr>
+                    <th bgcolor="black"><font color="white">Date</font></th>
+                    <th>
+                        <select style="width:80px" id="dateSelected" onchange="onDateSelected()">
+                            @for(choice <- daily.getDates()) {
+                                <option value="@choice.date" @choice.getSelected()>@choice.text</option>
+                            }
+                        </select>
+                    </th>
+                </tr>
+            </table>
+
+            @for(root <- daily.getRootProjects()) {
+                <table class="daily" cellpadding="4px">
+                    <col width="200">
+                    <col width="80">
+                    <tr>
+                        <th class="daily" bgcolor="black" colspan="2"><font color="white">@root.name</font></th>
+                    </tr>
+
+                    @for(project <- root.projects) {
+                        <tr>
+                            <td class="daily" >@project.name</td>
+                            <td class="daily" >@project.count</td>
+                        </tr>
+                    }
+                </table>
+            }
+
+        </div>
+
 	}
 
     <script type="text/javascript">
@@ -97,5 +133,21 @@
 
         document.getElementById("picture_cleanup").onclick = myConfirmPictureCleanup;
 
+        function onDateSelected() {
+            var e = document.getElementById("dateSelected");
+            var selected = e.options[e.selectedIndex].value;
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    location.reload(true);
+                }
+            };
+            var call = "/daily/" + selected;
+            xhttp.open("GET", call, true);
+            xhttp.send();
+        }
+
     </script>
+
+
 }

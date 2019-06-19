@@ -75,37 +75,40 @@ public class Project extends Model implements Comparable<Project> {
                 .findList();
     }
 
-    public static List<String> listSubProjectsWithBlank(String rootName) {
-        ArrayList<String> names = listSubProjects(rootName);
+    public static List<String> listSubProjectNamesWithBlank(String rootName) {
+        ArrayList<String> names = listSubProjectNames(rootName);
         names.add(0, "");
         return names;
     }
 
-    public static ArrayList<String> listSubProjects(String rootName) {
+    public static ArrayList<String> listSubProjectNames(String rootName) {
+        List<Project> projects = listSubProjects(rootName);
         ArrayList<String> names = new ArrayList<String>();
+        for (Project project : projects) {
+            names.add(project.name);
+        }
+        Collections.sort(names);
+        return names;
+    }
+
+    public static List<Project> listSubProjects(String rootName) {
+        List<Project> projects = new ArrayList<Project>();
         RootProject rootProject = RootProject.findByName(rootName);
         if (rootProject != null) {
-            List<Project> projects = find
+            projects = find
                     .where()
                     .eq("disabled", false)
                     .eq("root_project_id", rootProject.id)
                     .findList();
-            for (Project project : projects) {
-                names.add(project.name);
-            }
-            Collections.sort(names);
         } else {
-            List<Project> projects = find
+            projects = find
                     .where()
                     .eq("disabled", false)
                     .eq("root_project_id", null)
                     .orderBy("name asc")
                     .findList();
-            for (Project project : projects) {
-                names.add(project.name);
-            }
         }
-        return names;
+        return projects;
     }
 
     public static Project findByName(String name) {

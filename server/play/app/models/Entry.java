@@ -527,6 +527,14 @@ public class Entry extends com.avaje.ebean.Model {
         return find.where().eq("project_id", project_id).findList().size();
     }
 
+    public static int countEntriesForProjectWithinRange(long project_id, long start_time, long end_time) {
+        return find.where()
+                .eq("project_id", project_id)
+                .ge("entry_time", new Date(start_time))
+                .le("entry_time", new Date(end_time))
+                .findList().size();
+    }
+
     public static int countEntriesForCompanies(List<Company> companies) {
         int count = 0;
         for (Company company : companies) {
