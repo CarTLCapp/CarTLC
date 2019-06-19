@@ -46,11 +46,17 @@ public class Daily {
         public String name;
         public ArrayList<ProjectCount> projects = new ArrayList<ProjectCount>();
         private int mCount;
+        private boolean isBlank;
 
         public RootCount(RootProject root) {
-            name = root.name;
+            if (root == null) {
+                name = "NONE";
+                isBlank = true;
+            } else {
+                name = root.name;
+            }
             mCount = 0;
-            for (Project project : Project.listSubProjects(root.name)) {
+            for (Project project : Project.listSubProjects(name)) {
                 ProjectCount count = new ProjectCount(project);
                 if (count.count > 0) {
                     mCount += count.count;
@@ -63,6 +69,11 @@ public class Daily {
         @Override
         public int compareTo(RootCount o)
         {
+            if (isBlank) {
+                return 1;
+            } else if (o.isBlank) {
+                return -1;
+            }
             return name.compareTo(o.name);
         }
     }
@@ -79,6 +90,10 @@ public class Daily {
                 }
             }
             Collections.sort(mRoots);
+            RootCount blank = new RootCount(null);
+            if (blank.mCount > 0) {
+                mRoots.add(blank);
+            }
         }
     }
 

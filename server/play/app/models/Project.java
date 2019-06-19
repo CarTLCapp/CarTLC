@@ -93,7 +93,12 @@ public class Project extends Model implements Comparable<Project> {
 
     public static List<Project> listSubProjects(String rootName) {
         List<Project> projects = new ArrayList<Project>();
-        RootProject rootProject = RootProject.findByName(rootName);
+        RootProject rootProject;
+        if (rootName == null) {
+            rootProject = null;
+        } else {
+            rootProject = RootProject.findByName(rootName);
+        }
         if (rootProject != null) {
             projects = find
                     .where()

@@ -35,7 +35,7 @@ public class HomeController extends Controller {
     private FormFactory mFormFactory;
     private Globals mGlobals;
     private String mVersion;
-    private Daily mDaily = new Daily();
+    private Daily mDaily;
 
     @Inject
     public HomeController(
@@ -53,7 +53,7 @@ public class HomeController extends Controller {
     public Result index() {
         mGlobals.checkInit();
         mGlobals.setClearSearch(true);
-        return ok(views.html.home.render(Secured.getClient(ctx()), mVersion, "", mDaily));
+        return ok(views.html.home.render(Secured.getClient(ctx()), mVersion, "", daily()));
     }
 
     @Security.Authenticated(Secured.class)
@@ -62,12 +62,19 @@ public class HomeController extends Controller {
         return index();
     }
 
+    private Daily daily() {
+        if (mDaily == null) {
+            mDaily = new Daily();
+        }
+        return mDaily;
+    }
+
     public static Result HOME() {
         return Results.redirect(routes.HomeController.index());
     }
 
     public Result problem(String msg) {
-        return badRequest(views.html.home.render(Secured.getClient(ctx()), mVersion, msg, mDaily));
+        return badRequest(views.html.home.render(Secured.getClient(ctx()), mVersion, msg, daily()));
     }
 
     public static Result PROBLEM(String msg) {
