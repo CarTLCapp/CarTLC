@@ -34,8 +34,8 @@ public class MessageController extends Controller {
         return ok(views.html.message_list.render(Message.list(page, PAGE_SIZE, sortBy, order), sortBy, order, Secured.getClient(ctx())));
     }
 
-    public Result list() {
-        return list(0, "log_time", "desc");
+    public Result LIST() {
+        return Results.redirect(routes.MessageController.list(0, "log_time", "desc"));
     }
 
     /**
@@ -56,7 +56,7 @@ public class MessageController extends Controller {
             message.delete();
             flash("success", "Message has been deleted");
         }
-        return list();
+        return LIST();
     }
 
     @Security.Authenticated(Secured.class)
@@ -64,7 +64,7 @@ public class MessageController extends Controller {
         for (Message message : Message.find.findList()) {
             message.delete();
         }
-        return list();
+        return LIST();
     }
 
     @Transactional
@@ -106,6 +106,7 @@ public class MessageController extends Controller {
             return missingRequest(missing);
         }
         message.save();
+        // TODO: This needs to be a redirect with a message pass.
         return ok(Integer.toString(0));
     }
 

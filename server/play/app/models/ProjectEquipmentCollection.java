@@ -55,7 +55,7 @@ public class ProjectEquipmentCollection extends Model {
         return find.where()
                 .eq("project_id", project_id)
                 .eq("equipment_id", equipment_id)
-                .findList().size() > 0;
+                .findRowCount() > 0;
     }
 
     public static List<Project> findProjects(long equipment_id) {
@@ -75,12 +75,10 @@ public class ProjectEquipmentCollection extends Model {
     }
 
     public static boolean has(ProjectEquipmentCollection collection) {
-        List<ProjectEquipmentCollection> items =
-                find.where()
+        return find.where()
                         .eq("project_id", collection.project_id)
                         .eq("equipment_id", collection.equipment_id)
-                        .findList();
-        return items.size() > 0;
+                        .findRowCount() > 0;
     }
 
     public static ProjectEquipmentCollection get(ProjectEquipmentCollection collection) {

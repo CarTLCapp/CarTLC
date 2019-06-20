@@ -286,7 +286,6 @@ public class Entry extends com.avaje.ebean.Model {
         return status.getCellColor();
     }
 
-
     public String getDate() {
         return new TimeHelper().getDate(entry_time, time_zone);
     }
@@ -388,19 +387,6 @@ public class Entry extends com.avaje.ebean.Model {
             return notes;
         }
     }
-
-//    public String getNoteLine() {
-//        StringBuilder sbuf = new StringBuilder();
-//        for (EntryNoteCollection note : getNotes()) {
-//            if (sbuf.length() > 0) {
-//                sbuf.append(",");
-//            }
-//            sbuf.append(note.getName());
-//            sbuf.append("=");
-//            sbuf.append(note.getValue());
-//        }
-//        return sbuf.toString();
-//    }
 
     public HashMap<String, Object> getNoteValues(long client_id) {
         HashMap<String, Object> map = new HashMap<String, Object>();
@@ -516,15 +502,14 @@ public class Entry extends com.avaje.ebean.Model {
         List<Project> projects = Project.listWithRoot(root_project_id);
         int count = 0;
         for (Project project : projects) {
-            List<Entry> items = find.where()
-                    .eq("project_id", project.id).findList();
-            count += items.size();
+            count += find.where()
+                    .eq("project_id", project.id).findRowCount();
         }
         return count;
     }
 
     public static int countEntriesForProject(long project_id) {
-        return find.where().eq("project_id", project_id).findList().size();
+        return find.where().eq("project_id", project_id).findRowCount();
     }
 
     public static int countEntriesForProjectWithinRange(long project_id, long start_time, long end_time) {
@@ -532,27 +517,27 @@ public class Entry extends com.avaje.ebean.Model {
                 .eq("project_id", project_id)
                 .ge("entry_time", new Date(start_time))
                 .le("entry_time", new Date(end_time))
-                .findList().size();
+                .findRowCount();
     }
 
     public static int countEntriesForCompanies(List<Company> companies) {
         int count = 0;
         for (Company company : companies) {
-            count += find.where().eq("company_id", company.id).findList().size();
+            count += find.where().eq("company_id", company.id).findRowCount();
         }
         return count;
     }
 
     public static int countEntriesForCompany(long company_id) {
-        return find.where().eq("company_id", company_id).findList().size();
+        return find.where().eq("company_id", company_id).findRowCount();
     }
 
     public static int countEntriesForTechnician(long tech_id) {
-        return find.where().eq("tech_id", tech_id).findList().size();
+        return find.where().eq("tech_id", tech_id).findRowCount();
     }
 
     public static int countEntriesForTruck(long truck_id) {
-        return find.where().eq("truck_id", truck_id).findList().size();
+        return find.where().eq("truck_id", truck_id).findRowCount();
     }
 
     public static int countEntriesForNote(long note_id) {
@@ -566,9 +551,8 @@ public class Entry extends com.avaje.ebean.Model {
     public static boolean hasEntryForRootProject(long root_project_id) {
         List<Project> projects = Project.listWithRoot(root_project_id);
         for (Project project : projects) {
-            List<Entry> items = find.where()
-                    .eq("project_id", project.id).findList();
-            if (items.size() > 0) {
+            if (find.where()
+                    .eq("project_id", project.id).findRowCount() > 0) {
                 return true;
             }
         }
@@ -580,86 +564,78 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasEntryForCompany(final int tech_id, final long company_id) {
-        List<Entry> items = find.where()
+        return find.where()
                 .eq("tech_id", tech_id)
-                .eq("company_id", company_id).findList();
-        return items.size() > 0;
+                .eq("company_id", company_id).findRowCount() > 0;
     }
 
     public static boolean hasEntryForCompany(final long company_id) {
-        List<Entry> items = find.where()
-                .eq("company_id", company_id).findList();
-        return items.size() > 0;
+        return find.where()
+                .eq("company_id", company_id).findRowCount() > 0;
     }
 
     public static boolean hasEntryForEquipment(final int tech_id, final long equipment_id) {
-        List<Entry> items = find.where()
-                .eq("tech_id", tech_id)
-                .findList();
-        for (Entry entry : items) {
-            List<Equipment> collection = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
-            for (Equipment equip : collection) {
-                if (equip.id == equipment_id) {
-                    return true;
-                }
+        List<EntryEquipmentCollection> collections = EntryEquipmentCollection.findCollectionsFor(equipment_id);
+        for (EntryEquipmentCollection collection : collections) {
+            if (find.where()
+                    .eq("tech_id", tech_id)
+                    .eq("equipment_collection_id", collection.collection_id)
+                    .findRowCount() > 0) {
+                return true;
             }
         }
         return false;
     }
 
     public static boolean hasEntryForEquipment(final long equipment_id) {
-        List<Entry> items = find.where().findList();
-        for (Entry entry : items) {
-            List<Equipment> collection = EntryEquipmentCollection.findEquipments(entry.equipment_collection_id);
-            for (Equipment equip : collection) {
-                if (equip.id == equipment_id) {
-                    return true;
-                }
+        List<EntryEquipmentCollection> collections = EntryEquipmentCollection.findCollectionsFor(equipment_id);
+        for (EntryEquipmentCollection collection : collections) {
+            if (find.where()
+                    .eq("equipment_collection_id", collection.collection_id)
+                    .findRowCount() > 0) {
+                return true;
             }
         }
         return false;
     }
 
     public static boolean hasEntryForEquipmentCollectionId(final long collection_id) {
-        return find.where().eq("equipment_collection_id", collection_id).findList().size() > 0;
+        return find.where().eq("equipment_collection_id", collection_id).findRowCount() > 0;
     }
 
     public static boolean hasEntryForNote(final int tech_id, final long note_id) {
-        List<Entry> items = find.where()
-                .eq("tech_id", tech_id)
-                .findList();
-        for (Entry entry : items) {
-            List<EntryNoteCollection> collection = EntryNoteCollection.findByCollectionId(entry.note_collection_id);
-            for (EntryNoteCollection note : collection) {
-                if (note.id == note_id) {
-                    return true;
-                }
+        List<EntryNoteCollection> collections = EntryNoteCollection.findByNoteId(note_id);
+        for (EntryNoteCollection collection : collections) {
+            if (find.where()
+                    .eq("tech_id", tech_id)
+                    .eq("note_collection_id", collection.collection_id)
+                    .findRowCount() > 0) {
+                return true;
             }
         }
         return false;
     }
 
     public static boolean hasEntryForNote(final long note_id) {
-        List<Entry> items = find.where().findList();
-        for (Entry entry : items) {
-            List<EntryNoteCollection> collection = EntryNoteCollection.findByCollectionId(entry.note_collection_id);
-            for (EntryNoteCollection note : collection) {
-                if (note.note_id == note_id) {
-                    return true;
-                }
+        List<EntryNoteCollection> collections = EntryNoteCollection.findByNoteId(note_id);
+        for (EntryNoteCollection collection : collections) {
+            if (find.where()
+                    .eq("note_collection_id", collection.collection_id)
+                    .findRowCount() > 0) {
+                return true;
             }
         }
         return false;
     }
 
     public static boolean hasEntryForNoteCollectionId(final long collection_id) {
-        return find.where().eq("note_collection_id", collection_id).findList().size() > 0;
+        return find.where().eq("note_collection_id", collection_id).findRowCount() > 0;
     }
 
     public static boolean hasEntryForTruck(final long truck_id) {
-        List<Entry> items = find.where()
-                .eq("truck_id", truck_id).findList();
-        return items.size() > 0;
+        return find.where()
+                .eq("truck_id", truck_id)
+                .findRowCount() > 0;
     }
 
     public static boolean hasEntryForPicture(String filename) {
@@ -681,9 +657,9 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasEntryForPictureCollectionId(long picture_collection_id) {
-        return !find.where()
+        return find.where()
                 .eq("picture_collection_id", picture_collection_id)
-                .findList().isEmpty();
+                .findRowCount() > 0;
     }
 
     public static Entry getFulfilledBy(WorkOrder order) {

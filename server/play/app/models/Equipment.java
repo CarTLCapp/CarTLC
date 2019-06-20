@@ -71,6 +71,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
     public static PagedList<Equipment> list(int page, boolean disabled) {
         return find.where()
                 .eq("disabled", disabled)
+                .orderBy("name asc")
                 .findPagedList(page, PAGE_SIZE);
     }
 

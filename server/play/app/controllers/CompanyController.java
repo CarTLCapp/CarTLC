@@ -56,8 +56,8 @@ public class CompanyController extends Controller {
         );
     }
 
-    public Result list() {
-        return list("asc", false);
+    public Result LIST() {
+        return Results.redirect(routes.CompanyController.list("asc", false));
     }
 
     @Security.Authenticated(Secured.class)
@@ -90,7 +90,7 @@ public class CompanyController extends Controller {
         } finally {
             txn.end();
         }
-        return list();
+        return LIST();
     }
 
     @Security.Authenticated(Secured.class)
@@ -120,7 +120,7 @@ public class CompanyController extends Controller {
         savedCompany.zipcode = company.zipcode;
         savedCompany.save();
         flash("success", "Company " + companyForm.get().name + " has been created");
-        return list();
+        return LIST();
     }
 
     @Security.Authenticated(Secured.class)
@@ -152,7 +152,7 @@ public class CompanyController extends Controller {
             linesForm.withError("lines", ex.getMessage());
             return badRequest(views.html.companies_createForm.render(linesForm));
         }
-        return list();
+        return LIST();
     }
 
     public Result query() {
@@ -240,7 +240,7 @@ public class CompanyController extends Controller {
             Logger.info("Company has been deleted");
         }
         Version.inc(Version.VERSION_COMPANY);
-        return list();
+        return LIST();
     }
 
     @Security.Authenticated(Secured.class)
@@ -253,7 +253,7 @@ public class CompanyController extends Controller {
         company.disabled = false;
         company.update();
         Version.inc(Version.VERSION_COMPANY);
-        return list();
+        return LIST();
     }
 }
 

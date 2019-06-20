@@ -45,6 +45,10 @@ public class TechnicianController extends Controller {
         return ok(views.html.technician_list.render(Technician.listEnabled(), Secured.getClient(ctx())));
     }
 
+    public static Result LIST() {
+        return Results.redirect(routes.TechnicianController.list());
+    }
+
     /**
      * Display the 'edit form' of an existing Technician.
      *
@@ -113,7 +117,7 @@ public class TechnicianController extends Controller {
         } finally {
             txn.end();
         }
-        return list();
+        return LIST();
     }
 
     private String isCodeUsed(Technician forTech, int checkCode) {
@@ -164,7 +168,7 @@ public class TechnicianController extends Controller {
                 txn.end();
             }
         }
-        return list();
+        return LIST();
     }
 
     /**
@@ -216,7 +220,7 @@ public class TechnicianController extends Controller {
         newTech.last_name = inputTech.last_name;
         newTech.code = codeValue;
         newTech.save();
-        return list();
+        return LIST();
     }
 
     public Result query() {

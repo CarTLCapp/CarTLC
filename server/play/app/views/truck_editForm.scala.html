@@ -16,7 +16,11 @@
 
             @b3.text(truckForm("truck_number"), '_label -> "Truck Number", '_help -> "")
             @b3.text(truckForm("license_plate"), '_label -> "License Plate", '_help -> "")
-            @b3.select(truckForm("root_project_name"), options = options(RootProject.listNamesWithBlank()), args = '_label -> "Root Project:")
+            @b3.select(truckForm("root_project_name"),
+                            options = options(RootProject.listNamesWithBlank()),
+                            args =
+                                '_label -> "Root Project:",
+                                'onchange -> "onRootProjectSelected()")
             @b3.select(truckForm("sub_project_name"), options = options(truckForm.get().optionsSubProject), args = '_label -> "Sub Project:")
             @b3.select(truckForm("company_name"), options = options(CompanyName.getNamesWithBlank()), args = '_label -> "Company:")
 
@@ -35,5 +39,34 @@
             <input type="submit" value="Delete this truck" class="btn danger">
         }
     }
-    
+
+    <script type="text/javascript">
+
+        function onRootProjectSelected() {
+            var e = document.getElementById("root_project_name");
+            var selected = e.options[e.selectedIndex].value;
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    var line = this.responseText;
+                    var words = line.split("\n");
+                    var e2 = document.getElementById("sub_project_name");
+                    for (var i = e2.options.length-1; i >= 0; i--) {
+                        e2.remove(i);
+                    }
+                    for (var i2 = 0; i2 < words.length; i2++) {
+                        var option = document.createElement("option");
+                        option.text = words[i2];
+                        e2.add(option);
+                    }
+                }
+            };
+            var call = "/project/root/sub/" + e.selectedIndex.toString();
+            xhttp.open("GET", call, true);
+            xhttp.send();
+        }
+
+    </script>
+
 }

@@ -56,19 +56,19 @@ public class TruckController extends Controller {
         }
     }
 
-    public Result list() {
-        return list(0);
+    public Result LIST() {
+        return Results.redirect(routes.TruckController.list(0));
     }
 
     @Security.Authenticated(Secured.class)
     public Result cleanup() {
         Truck.cleanup();
-        return list();
+        return LIST();
     }
 
     public Result toggleFilter() {
         mFilter = !mFilter;
-        return list();
+        return LIST();
     }
 
     /**
@@ -93,7 +93,7 @@ public class TruckController extends Controller {
             return ok(message);
         }
         Truck.find.byId(id).delete();
-        return list();
+        return LIST();
     }
 
     public Result query() {
@@ -222,7 +222,7 @@ public class TruckController extends Controller {
         Logger.info("Truck updated: " + truck.toString());
         Version.inc(Version.VERSION_TRUCK);
 
-        return list();
+        return LIST();
     }
 
 }

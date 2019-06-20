@@ -49,24 +49,11 @@ public class Project extends Model implements Comparable<Project> {
     }
 
     public static List<Project> list(boolean disabled) {
-        StringBuilder query = new StringBuilder();
-        query.append("SELECT DISTINCT p.id, r.name, p.name, p.disabled, p.root_project_id");
-        query.append(" FROM project AS p");
-        query.append(" LEFT JOIN root_project AS r ON p.root_project_id = r.id");
-        query.append(" WHERE p.disabled=" + (disabled ? 1 : 0));
-        query.append(" ORDER BY r.name ASC, p.name ASC");
-        List<SqlRow> rows;
-        rows = Ebean.createSqlQuery(query.toString()).findList();
-        List<Project> result = new ArrayList<Project>();
-        for (SqlRow row : rows) {
-            Project project = new Project();
-            project.id = row.getLong("id");
-            project.name = row.getString("name");
-            project.disabled = row.getBoolean("disabled");
-            project.root_project_id = row.getLong("root_project_id");
-            result.add(project);
-        }
-        return result;
+        List<Project> projects = find.where()
+                .eq("disabled", disabled)
+                .findList();
+        Collections.sort(projects);
+        return projects;
     }
 
     public static List<Project> listWithRoot(long root_project_id) {
@@ -192,37 +179,6 @@ public class Project extends Model implements Comparable<Project> {
         }
         return result;
     }
-
-    public String getProjectNameOrDash() {
-        if (name == null) {
-            return "-";
-        }
-        return name;
-    }
-
-    public String getRootProjectName() {
-        if (root_project_id == null) {
-            return null;
-        }
-        RootProject project = RootProject.find.byId(root_project_id);
-        if (project == null) {
-            return null;
-        }
-        return project.name;
-    }
-
-    public String getFullProjectName() {
-        String root = getRootProjectName();
-        if (root != null && root.length() > 0) {
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append(root);
-            sbuf.append(" - ");
-            sbuf.append(name);
-            return sbuf.toString();
-        }
-        return getProjectNameOrDash();
-    }
-
     public String getEquipmentsLine() {
         List<Equipment> items = ProjectEquipmentCollection.findEquipments(id);
         Collections.sort(items);
@@ -265,25 +221,10 @@ public class Project extends Model implements Comparable<Project> {
         return project.isValid(withRoot);
     }
 
-    @Override
-    public int compareTo(Project project) {
-        return name.compareTo(project.name);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Project) {
-            return equals((Project) other);
-        }
-        return super.equals(other);
-    }
-
-    public boolean equals(Project other) {
-        return name.equals(other.name);
-    }
-
     public static boolean hasDisabled() {
-        return list(true).size() > 0;
+        return find.where()
+                .eq("disabled", true)
+                .findRowCount() > 0;
     }
 
     public int countEntries() {
@@ -297,6 +238,66 @@ public class Project extends Model implements Comparable<Project> {
         }
         return project.disabled;
     }
+
+    // region NAME & COMPARE
+
+    @Transient
+    private String savedRootProjectName;
+    @Transient
+    private Long savedRootProjectId = 0L;
+
+    public String getRootProjectName() {
+        if (root_project_id == null) {
+            return null;
+        }
+        if (savedRootProjectId != root_project_id || savedRootProjectName == null) {
+            RootProject rootProject = RootProject.find.byId(root_project_id);
+            if (rootProject == null) {
+                return null;
+            }
+            savedRootProjectId = root_project_id;
+            savedRootProjectName = rootProject.name;
+        }
+        return savedRootProjectName;
+    }
+
+    @Override
+    public int compareTo(Project project) {
+        return getFullProjectName().compareTo(project.getFullProjectName());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Project) {
+            return equals((Project) other);
+        }
+        return super.equals(other);
+    }
+
+    public boolean equals(Project other) {
+        return getFullProjectName().equals(other.getFullProjectName());
+    }
+
+    public String getProjectNameOrDash() {
+        if (name == null) {
+            return "-";
+        }
+        return name;
+    }
+
+    public String getFullProjectName() {
+        String root = getRootProjectName();
+        if (root != null && root.length() > 0) {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(root);
+            sbuf.append(" - ");
+            sbuf.append(name);
+            return sbuf.toString();
+        }
+        return getProjectNameOrDash();
+    }
+
+    // endregion NAME & COMPARE
 
 }
 

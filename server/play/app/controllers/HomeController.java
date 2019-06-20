@@ -111,7 +111,7 @@ public class HomeController extends Controller {
         } else {
             session().clear();
             session("username", formData.get().username);
-            return index();
+            return HOME();
         }
     }
 

@@ -42,9 +42,16 @@
 
             </div>
 
-            <h3>Company</h3>
+            <h3>Companies</h3>
 
-            @b3.select(techForm("company"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
+            <div class="checkbox-container-columns">
+
+                @for(companyName <- CompanyName.list()) {
+                    @b3.checkbox(techForm(companyName.idString()), '_label -> companyName.name)
+                    <div style="clear:both;"></div>
+                }
+
+            </div>
 
             <h3>Notes</h3>
 

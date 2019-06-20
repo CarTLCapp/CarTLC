@@ -42,6 +42,10 @@ public class ClientController extends Controller {
         return ok(views.html.client_list.render(Client.list(), Secured.getClient(ctx())));
     }
 
+    public Result LIST() {
+        return Results.redirect(routes.ClientController.list());
+    }
+
     /**
      * Display the 'edit form' of an existing Technician.
      *
@@ -87,7 +91,7 @@ public class ClientController extends Controller {
         ClientCompanyNameAssociation.process(id, clientForm);
         ClientAssociation.process(client, clientForm);
 
-        return list();
+        return LIST();
     }
 
     /**
@@ -135,7 +139,7 @@ public class ClientController extends Controller {
         ClientCompanyNameAssociation.process(id, clientForm);
         ClientAssociation.process(newClient, clientForm);
 
-        return list();
+        return LIST();
     }
 
     List<Project> getCheckedProjects(Form<InputClient> clientForm) {
@@ -209,7 +213,7 @@ public class ClientController extends Controller {
             Client.find.ref(id).delete();
             flash("success", "Client has been deleted");
         }
-        return list();
+        return LIST();
     }
 
 }

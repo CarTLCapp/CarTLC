@@ -59,6 +59,10 @@ public class RootProjectController extends Controller {
         return ok(views.html.root_project_list.render(RootProject.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
+    public Result LIST() {
+        return Results.redirect(routes.RootProjectController.list());
+    }
+
     /**
      * Display the 'edit form' of an existing root project name.
      *
@@ -94,7 +98,7 @@ public class RootProjectController extends Controller {
         } catch (Exception ex) {
             Logger.error(ex.getMessage());
         }
-        return list();
+        return LIST();
     }
 
     /**
@@ -128,7 +132,7 @@ public class RootProjectController extends Controller {
         project.name = projectData.name;
         project.save();
         flash("success", "Root Project " + project.name + " has been created");
-        return list();
+        return LIST();
     }
 
     /**
@@ -158,7 +162,7 @@ public class RootProjectController extends Controller {
             }
         }
         Version.inc(Version.VERSION_PROJECT);
-        return list();
+        return LIST();
     }
 
     public Result query() {
@@ -189,6 +193,21 @@ public class RootProjectController extends Controller {
         project.update();
         Version.inc(Version.VERSION_PROJECT);
         return list();
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result listSubProjects(int index) {
+        List<String> rootProjectsWithBlank = RootProject.listNamesWithBlank();
+        String selected = rootProjectsWithBlank.get(index);
+        List<String> names = Project.listSubProjectNames(selected);
+        StringBuilder sbuf = new StringBuilder();
+        for (String name : names) {
+            if (sbuf.length() > 0) {
+                sbuf.append("\n");
+            }
+            sbuf.append(name);
+        }
+        return ok(sbuf.toString());
     }
 
 }

@@ -60,6 +60,10 @@ public class NoteController extends Controller {
         return ok(views.html.note_list.render(Note.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
+    public Result LIST() {
+        return Results.redirect(routes.NoteController.list());
+    }
+
     /**
      * Display the 'edit form' of an existing note name.
      *
@@ -89,7 +93,7 @@ public class NoteController extends Controller {
         newNoteData.update();
         Logger.info("Note " + newNoteData.name + " has been updated");
         Version.inc(Version.VERSION_NOTE);
-        return list();
+        return LIST();
     }
 
     /**
@@ -121,7 +125,7 @@ public class NoteController extends Controller {
         }
         note.save();
         flash("success", "Note " + note.name + " has been created");
-        return list();
+        return LIST();
     }
 
     /**
@@ -208,7 +212,7 @@ public class NoteController extends Controller {
             }
         }
         Version.inc(Version.VERSION_NOTE);
-        return list();
+        return LIST();
     }
 
     /**
@@ -227,7 +231,7 @@ public class NoteController extends Controller {
             Logger.info("Note has been deleted: " + note.name);
         }
         Version.inc(Version.VERSION_NOTE);
-        return list();
+        return LIST();
     }
 
     @Security.Authenticated(Secured.class)

@@ -20,8 +20,11 @@ public class ImportWorkOrder extends Model {
     public String subProject;
     public String company;
 
+    public ImportWorkOrder() {
+    }
+
     public List<String> optionsSubProject() {
-        return Project.listSubProjectNames(rootProject);
+        return Project.listSubProjectNamesWithBlank(rootProject);
     }
 }
 

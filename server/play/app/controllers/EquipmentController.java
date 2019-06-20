@@ -99,9 +99,8 @@ public class EquipmentController extends Controller {
                 disabled));
     }
 
-    @Security.Authenticated(Secured.class)
-    public Result list() {
-        return list(0, false);
+    public Result LIST() {
+        return Results.redirect(routes.EquipmentController.list(0, false));
     }
 
     public CompletionStage<Result> fillNext() {
@@ -147,7 +146,7 @@ public class EquipmentController extends Controller {
         } finally {
             txn.end();
         }
-        return list();
+        return LIST();
     }
 
     /**
@@ -180,7 +179,7 @@ public class EquipmentController extends Controller {
         }
         equip.save();
         flash("success", "Equipment " + equipmentForm.get().name + " has been created");
-        return list();
+        return LIST();
     }
 
     /**
@@ -241,8 +240,7 @@ public class EquipmentController extends Controller {
             }
         }
         Version.inc(Version.VERSION_EQUIPMENT);
-
-        return list();
+        return LIST();
     }
 
     /**
@@ -259,7 +257,7 @@ public class EquipmentController extends Controller {
             Logger.info("Equipment has been deleted: " + equipment.name);
         }
         Version.inc(Version.VERSION_EQUIPMENT);
-        return list();
+        return LIST();
     }
 
     @Security.Authenticated(Secured.class)
@@ -269,7 +267,7 @@ public class EquipmentController extends Controller {
         equipment.disabled = false;
         equipment.update();
         Version.inc(Version.VERSION_EQUIPMENT);
-        return list();
+        return LIST();
     }
 
     @Transactional

@@ -60,6 +60,10 @@ public class ProjectController extends Controller {
         return ok(views.html.project_list.render(Project.list(disabled), Secured.getClient(ctx()), disabled));
     }
 
+    public Result LIST() {
+        return Results.redirect(routes.ProjectController.list());
+    }
+
     /**
      * Display the 'edit form' of an existing project name.
      *
@@ -104,7 +108,7 @@ public class ProjectController extends Controller {
         } catch (Exception ex) {
             Logger.error(ex.getMessage());
         }
-        return list();
+        return LIST();
     }
 
     /**
@@ -144,7 +148,7 @@ public class ProjectController extends Controller {
         project.save();
         flash("success", "Project " + rootProject.name + "-" + project.name + " has been created");
         Version.inc(Version.VERSION_PROJECT);
-        return list();
+        return LIST();
     }
 
     /**
@@ -193,7 +197,7 @@ public class ProjectController extends Controller {
             }
         }
         Version.inc(Version.VERSION_PROJECT);
-        return list();
+        return LIST();
     }
 
     /**
@@ -223,7 +227,7 @@ public class ProjectController extends Controller {
             }
         }
         Version.inc(Version.VERSION_PROJECT);
-        return list();
+        return LIST();
     }
 
     public Result query() {

@@ -48,12 +48,16 @@ public class WorkOrderController extends Controller {
         this.formFactory = formFactory;
     }
 
-    public Result INDEX() {
+    public Result index() {
         return list(0, "last_modified", "desc", "");
     }
 
-    public Result INDEX(String msg) {
+    public Result index(String msg) {
         return list(0, "last_modified", "desc", msg);
+    }
+
+    public Result LIST() {
+        return Results.redirect(routes.WorkOrderController.list(0, "last_modified", "desc", ""));
     }
 
     @Security.Authenticated(Secured.class)
@@ -103,8 +107,8 @@ public class WorkOrderController extends Controller {
         return ok(views.html.progress_grid.render(progressGrid, Secured.getClient(ctx()), home));
     }
 
-    public Result importWorkOrdersForm() {
-        return importWorkOrdersForm("");
+    public Result ImportWorkOrdersForm(String msg) {
+        return Results.redirect(routes.WorkOrderController.importWorkOrdersForm(msg));
     }
 
     @Security.Authenticated(Secured.class)
@@ -143,7 +147,7 @@ public class WorkOrderController extends Controller {
                                     sbuf.append(warnings);
                                 }
                             } else {
-                                return INDEX(reader.getWarnings());
+                                return index(reader.getWarnings());
                             }
                         }
                     } else {
@@ -159,9 +163,9 @@ public class WorkOrderController extends Controller {
             sbuf.append("Invalid call");
         }
         if (sbuf.length() == 0) {
-            return INDEX();
+            return LIST();
         } else {
-            return importWorkOrdersForm(sbuf.toString());
+            return ImportWorkOrdersForm(sbuf.toString());
         }
     }
 
@@ -171,7 +175,7 @@ public class WorkOrderController extends Controller {
         File file = new File(EXPORT_FILENAME);
         WorkOrderWriter writer = new WorkOrderWriter(client);
         if (!writer.save(file)) {
-            INDEX("Errors: " + writer.getError());
+            index("Errors: " + writer.getError());
         }
         return ok(file);
     }
@@ -194,7 +198,7 @@ public class WorkOrderController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result deleteSummary(Integer upload_id) {
         int count = WorkOrder.deleteByUploadId(upload_id, Secured.getClient(ctx()));
-        return INDEX(count + " work orders deleted");
+        return index(count + " work orders deleted");
     }
 
     /**
@@ -209,7 +213,7 @@ public class WorkOrderController extends Controller {
             return ok(message);
         }
         WorkOrder.find.byId(id).delete();
-        return INDEX();
+        return index();
     }
 
     /**
@@ -274,7 +278,7 @@ public class WorkOrderController extends Controller {
         } catch (Exception ex) {
             Logger.error(ex.getMessage());
         }
-        return INDEX();
+        return index();
     }
 
     public static boolean isValidTruckNumber(String line) {

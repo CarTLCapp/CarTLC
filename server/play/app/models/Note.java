@@ -185,15 +185,14 @@ public class Note extends Model implements Comparable<Note> {
     }
 
     public static boolean hasDisabled() {
-        return find.where().eq("disabled", true).findList().size() > 0;
+        return find.where().eq("disabled", true).findRowCount() > 0;
     }
 
     public static boolean hasNoteWithName(String name, long ignoreId) {
-        List<Note> notes = find.where()
+        return find.where()
                 .eq("name", name)
                 .ne("id", ignoreId)
-                .findList();
-        return notes.size() > 0;
+                .findRowCount() > 0;
     }
 
     public static Map<String, String> options() {
