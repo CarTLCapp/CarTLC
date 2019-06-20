@@ -25,12 +25,14 @@
                 entryForm("rootProject"),
                 options(Entry.optionsRootProject),
                 '_label -> "Root Project", '_default -> "-- Choose Root Project --",
-                '_showConstraints -> false
+                '_showConstraints -> false,
+                'onchange -> "onRootProjectSelected()"
             )
             @b3.select(
                 entryForm("subProject"),
                 options(entryForm.get().optionsSubProject),
-                '_label -> "Sub Project", '_default -> "-- Choose Sub Project --",
+                '_label -> "Sub Project",
+                '_default -> "-- Choose Sub Project --",
                 '_showConstraints -> false
             )
             @b3.text(entryForm("address"), '_label -> "Address", '_help -> "")
@@ -97,5 +99,34 @@
         </div>
 
     }
+
+    <script type="text/javascript">
+
+        function onRootProjectSelected() {
+            var e = document.getElementById("rootProject");
+            var selected = e.options[e.selectedIndex].value;
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    var line = this.responseText;
+                    var words = line.split("\n");
+                    var e2 = document.getElementById("subProject");
+                    for (var i = e2.options.length-1; i >= 0; i--) {
+                        e2.remove(i);
+                    }
+                    for (var i2 = 0; i2 < words.length; i2++) {
+                        var option = document.createElement("option");
+                        option.text = words[i2];
+                        e2.add(option);
+                    }
+                }
+            };
+            var call = "/project/root/sub/" + e.selectedIndex.toString();
+            xhttp.open("GET", call, true);
+            xhttp.send();
+        }
+
+    </script>
 
 }
