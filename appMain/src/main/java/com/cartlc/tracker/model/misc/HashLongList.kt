@@ -1,6 +1,6 @@
 package com.cartlc.tracker.model.misc
 
-import com.cartlc.tracker.model.table.TableString
+import com.cartlc.tracker.fresh.model.core.table.TableString
 import timber.log.Timber
 import java.lang.NumberFormatException
 

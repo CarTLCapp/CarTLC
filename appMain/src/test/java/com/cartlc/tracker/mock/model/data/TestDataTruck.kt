@@ -3,8 +3,7 @@
  */
 package com.cartlc.tracker.mock.model.data
 
-import com.cartlc.tracker.model.data.DataTruck
-import org.junit.Assert.assertEquals
+import com.cartlc.tracker.fresh.model.core.data.DataTruck
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test

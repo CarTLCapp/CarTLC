@@ -8,7 +8,7 @@ import java.util.HashMap
 
 import com.cartlc.tracker.R
 import com.cartlc.tracker.ui.app.TBApplication
-import com.cartlc.tracker.model.data.DataPicture
+import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.squareup.picasso.Picasso
 
 import android.app.AlertDialog
@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import kotlinx.android.synthetic.main.entry_item_picture.view.*
 
-import timber.log.Timber
 import java.lang.ref.WeakReference
 
 /**

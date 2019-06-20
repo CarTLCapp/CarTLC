@@ -23,21 +23,16 @@ import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.event.EventError
 import com.cartlc.tracker.model.flow.FlowUseCaseImpl
-import com.cartlc.tracker.model.sql.DatabaseManager
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.sql.DatabaseManager
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.model.flow.FlowUseCase
 import com.cartlc.tracker.model.server.*
-import com.cartlc.tracker.ui.app.dependencyinjection.ComponentRoot
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
 import com.cartlc.tracker.ui.util.helper.LocationHelper
 import com.cartlc.tracker.ui.util.helper.PermissionHelper.PermissionRequest
 import com.cartlc.tracker.ui.util.helper.PermissionHelper.PermissionListener
-
 import com.cartlc.tracker.ui.util.helper.PermissionHelper
-import com.cartlc.tracker.viewmodel.vehicle.DaggerVehicleViewModelComponent
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
-import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModelComponent
-import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModelModule
-
 import org.greenrobot.eventbus.EventBus
 import timber.log.Timber
 import java.io.File
@@ -125,14 +120,13 @@ class TBApplication : Application() {
         get() = carRepo
 
     lateinit var componentRoot: ComponentRoot
-    lateinit var vehicleComponent: VehicleViewModelComponent
     lateinit var amazonHelper: AmazonHelper
     lateinit var flowUseCase: FlowUseCase
     lateinit var ping: DCPing
     lateinit var dcRx: DCServerRx
 
-    private lateinit var vehicleViewModel: VehicleViewModel
-    private lateinit var vehicleRepository: VehicleRepository
+    lateinit var vehicleViewModel: VehicleViewModel
+    lateinit var vehicleRepository: VehicleRepository
 
     val db: DatabaseTable
         get() = dm
@@ -171,11 +165,8 @@ class TBApplication : Application() {
                 dcRx)
         carRepo.computeCurStage()
 
-        vehicleRepository = VehicleRepository(this, dm, prefHelper)
+        vehicleRepository = VehicleRepository(this, dm)
         vehicleViewModel = VehicleViewModel(vehicleRepository)
-        vehicleComponent = DaggerVehicleViewModelComponent.builder()
-                .vehicleViewModelModule(VehicleViewModelModule(vehicleViewModel))
-                .build()
 
         if (IsDevelopmentServer() && DEBUG_TREE) {
             Timber.plant(Timber.DebugTree())

@@ -8,29 +8,29 @@ import android.text.InputType
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.cartlc.tracker.model.data.DataAddress
-import com.cartlc.tracker.model.data.DataStates
+import com.cartlc.tracker.fresh.model.core.data.DataAddress
+import com.cartlc.tracker.fresh.model.core.data.DataStates
 import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.event.Button
 import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.model.msg.MessageHandler
 import com.cartlc.tracker.model.msg.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.table.DatabaseTable
-import com.cartlc.tracker.ui.app.dependencyinjection.BoundAct
-import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleController
-import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleUseCase
+import com.cartlc.tracker.fresh.ui.title.TitleUseCase
 import com.cartlc.tracker.ui.util.helper.LocationHelper
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel
-import com.cartlc.tracker.viewmodel.frag.TitleViewModel
 import java.util.*
 
 class NewProjectVMHolder(
         boundAct: BoundAct,
         private val buttonsUseCase: ButtonsUseCase,
         private val mainListViewModel: MainListViewModel,
-        private val titleViewModel: TitleViewModel,
-        private val entrySimpleControl: EntrySimpleController
+        private val titleUseCase: TitleUseCase,
+        private val entrySimpleControl: EntrySimpleUseCase
 ) : LifecycleObserver, FlowUseCase.Listener, ButtonsUseCase.Listener {
 
     private val repo = boundAct.repo
@@ -97,13 +97,11 @@ class NewProjectVMHolder(
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
         repo.flowUseCase.registerListener(this)
-        buttonsUseCase.registerListener(this)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
         repo.flowUseCase.unregisterListener(this)
-        buttonsUseCase.unregisterListener(this)
     }
 
     // endregion lifecycle
@@ -111,20 +109,39 @@ class NewProjectVMHolder(
     // region FlowUseCase.Listener
 
     override fun onStageChangedAboutTo(flow: Flow) {
+        when (flow.stage) {
+            Stage.ROOT_PROJECT,
+            Stage.COMPANY,
+            Stage.ADD_COMPANY,
+            Stage.STATE,
+            Stage.ADD_STATE,
+            Stage.CITY,
+            Stage.ADD_CITY,
+            Stage.STREET,
+            Stage.ADD_STREET,
+            Stage.CONFIRM_ADDRESS -> {
+                buttonsUseCase.listener = this
+            }
+            else -> {}
+        }
     }
 
     override fun onStageChanged(flow: Flow) {
         when (flow.stage) {
             Stage.ROOT_PROJECT -> {
                 mainListViewModel.showingValue = true
-                titleViewModel.subTitleValue = null
+                titleUseCase.subTitleText = null
+                titleUseCase.mainTitleVisible = true
+                titleUseCase.subTitleVisible = true
                 buttonsUseCase.nextVisible = hasProjectRootName
                 setList(StringMessage.title_root_project, PrefHelper.KEY_ROOT_PROJECT, db.tableProjects.queryRootProjectNames())
                 dispatchActionEvent(Action.GET_LOCATION)
             }
             Stage.COMPANY -> {
-                titleViewModel.subTitleValue = editProjectHint
+                titleUseCase.subTitleText = editProjectHint
                 mainListViewModel.showingValue = true
+                titleUseCase.subTitleText = null
+                titleUseCase.mainTitleVisible = true
                 buttonsUseCase.nextVisible = hasCompanyName
                 val companies = db.tableAddress.query()
                 autoNarrowCompanies(companies.toMutableList())
@@ -134,11 +151,14 @@ class NewProjectVMHolder(
                     buttonsUseCase.skip()
                 } else {
                     setList(StringMessage.title_company, PrefHelper.KEY_COMPANY, companyNames)
-                    buttonsUseCase.checkCenterButtonIsEdit()
+                    checkCenterButtonIsEdit()
                 }
             }
             Stage.ADD_COMPANY -> {
-                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_company)
+                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_company)
+                titleUseCase.subTitleText = null
+                titleUseCase.mainTitleVisible = true
+                titleUseCase.subTitleVisible = true
                 entrySimpleControl.showing = true
                 entrySimpleControl.hintValue = messageHandler.getString(StringMessage.title_company)
                 if (prefHelper.isLocalCompany) {
@@ -160,8 +180,10 @@ class NewProjectVMHolder(
                 processStreets(flow)
             }
             Stage.CONFIRM_ADDRESS -> {
-                titleViewModel.subTitleValue = curProjectHint
-                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_confirmation)
+                titleUseCase.subTitleText = curProjectHint
+                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_confirmation)
+                titleUseCase.mainTitleVisible = true
+                titleUseCase.subTitleVisible = true
                 buttonsUseCase.centerVisible = false
                 buttonsUseCase.nextVisible = true
             }
@@ -170,8 +192,19 @@ class NewProjectVMHolder(
         }
     }
 
+    private val isCenterButtonEdit: Boolean
+        get() = curFlowValue.stage == Stage.COMPANY && prefHelper.isLocalCompany
+
+    private fun checkCenterButtonIsEdit() {
+        buttonsUseCase.centerText = if (isCenterButtonEdit) {
+            messageHandler.getString(StringMessage.btn_edit)
+        } else {
+            messageHandler.getString(StringMessage.btn_add)
+        }
+    }
+
     private fun setList(msg: StringMessage, key: String, list: List<String>) {
-        titleViewModel.titleValue = messageHandler.getString(msg)
+        titleUseCase.mainTitleText = messageHandler.getString(msg)
         mainListViewModel.curKey = key
         if (list.isEmpty()) {
             mainListViewModel.showingValue = false
@@ -206,14 +239,12 @@ class NewProjectVMHolder(
         return true
     }
 
-    override val onButtonLive: Boolean
-        get() = true
-
     override fun onButtonEvent(action: Button) {
         when (action) {
             Button.BTN_NEXT -> repo.companyEditing = null
             else -> {}
         }
+        curFlowValue.process(action)
     }
 
     // endregion ButtonsUseCase.Listener
@@ -222,7 +253,9 @@ class NewProjectVMHolder(
 
     private fun processStates(flow: Flow) {
         var isEditing = flow.stage == Stage.ADD_STATE
-        titleViewModel.subTitleValue = if (isEditing) editProjectHint else curProjectHint
+        titleUseCase.subTitleText = if (isEditing) editProjectHint else curProjectHint
+        titleUseCase.mainTitleVisible = true
+        titleUseCase.subTitleVisible = true
         mainListViewModel.showingValue = true
         buttonsUseCase.nextVisible = false
         val company = prefHelper.company
@@ -266,7 +299,9 @@ class NewProjectVMHolder(
 
     private fun processCities(flow: Flow) {
         var isEditing = flow.stage == Stage.ADD_CITY
-        titleViewModel.subTitleValue = if (isEditing) editProjectHint else curProjectHint
+        titleUseCase.subTitleText = if (isEditing) editProjectHint else curProjectHint
+        titleUseCase.mainTitleVisible = true
+        titleUseCase.subTitleVisible = true
         buttonsUseCase.nextVisible = false
         val company = prefHelper.company
         val zipcode = prefHelper.zipCode
@@ -304,7 +339,7 @@ class NewProjectVMHolder(
             }
         }
         if (isEditing) {
-            titleViewModel.titleValue = messageHandler.getString(StringMessage.title_city)
+            titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_city)
             entrySimpleControl.showing = true
             entrySimpleControl.simpleTextClear()
             entrySimpleControl.hintValue = messageHandler.getString(StringMessage.title_city)
@@ -325,7 +360,9 @@ class NewProjectVMHolder(
     private fun processStreets(flow: Flow) {
         var isEditing = flow.stage == Stage.ADD_STREET
         buttonsUseCase.nextVisible = false
-        titleViewModel.subTitleValue = if (isEditing) editProjectHint else curProjectHint
+        titleUseCase.subTitleText = if (isEditing) editProjectHint else curProjectHint
+        titleUseCase.mainTitleVisible = true
+        titleUseCase.subTitleVisible = true
         val company = prefHelper.company
         val city = prefHelper.city
         val state = prefHelper.state
@@ -364,7 +401,7 @@ class NewProjectVMHolder(
             }
         }
         if (isEditing) {
-            titleViewModel.titleValue = messageHandler.getString(StringMessage.title_street)
+            titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_street)
             entrySimpleControl.showing = true
             entrySimpleControl.simpleTextClear()
             entrySimpleControl.hintValue = messageHandler.getString(StringMessage.title_street)

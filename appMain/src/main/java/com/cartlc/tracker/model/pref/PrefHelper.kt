@@ -6,9 +6,9 @@ package com.cartlc.tracker.model.pref
 import android.content.Context
 import android.os.Environment
 import android.text.TextUtils
-import com.cartlc.tracker.model.data.*
+import com.cartlc.tracker.fresh.model.core.data.*
 import com.cartlc.tracker.model.misc.TruckStatus
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication
 
 import java.io.File
@@ -474,18 +474,13 @@ class PrefHelper constructor(
                 Timber.i("saveProjectAddressCombo(): re-upload $count entries")
             }
             db.tableProjectAddressCombo.updateUsed(projectGroupId)
-            Timber.d("MYDEBUG MODIFY CURRENT")
-
-            db.tableProjectAddressCombo.query() // MYDEBUG
 
         } else {
             projectGroupId = db.tableProjectAddressCombo.queryProjectGroupId(projectNameId, addressId)
             if (projectGroupId < 0) {
                 projectGroupId = db.tableProjectAddressCombo.add(DataProjectAddressCombo(db, projectNameId, addressId))
-                Timber.d("MYDEBUG ADD")
             } else {
                 db.tableProjectAddressCombo.updateUsed(projectGroupId)
-                Timber.d("MYDEBUG UPDATE USED")
             }
             db.tableProjectAddressCombo.query() // MYDEBUG
 

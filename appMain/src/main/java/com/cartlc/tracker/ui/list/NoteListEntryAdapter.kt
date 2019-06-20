@@ -6,7 +6,6 @@ package com.cartlc.tracker.ui.list
 import android.content.Context
 import android.text.Editable
 import android.text.InputType
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +14,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 import kotlinx.android.synthetic.main.entry_item_entry_note.view.*
 

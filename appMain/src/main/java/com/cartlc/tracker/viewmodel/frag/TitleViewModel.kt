@@ -12,7 +12,7 @@ import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.FlowUseCase
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.msg.StringMessage
-import com.cartlc.tracker.ui.app.dependencyinjection.BoundFrag
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.viewmodel.BaseViewModel
 
 class TitleViewModel(
@@ -69,6 +69,7 @@ class TitleViewModel(
     }
 
     /// endregion FlowUseCase.Listener
+
     fun setPhotoTitleCount(count: Int) {
         titleValue = if (count == 1) {
             messageHandler.getString(StringMessage.title_photo)

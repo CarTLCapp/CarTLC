@@ -12,11 +12,10 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.app.TBApplication
 import kotlinx.android.synthetic.main.entry_item_full.view.*
-import javax.inject.Inject
 
 /**
  * Created by dug on 5/12/17.

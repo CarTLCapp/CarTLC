@@ -2,6 +2,7 @@ package com.cartlc.tracker.model.flow
 
 import androidx.annotation.VisibleForTesting
 import com.cartlc.tracker.model.event.Action
+import com.cartlc.tracker.model.event.Button
 import timber.log.Timber
 
 sealed class ActionBundle
@@ -91,6 +92,15 @@ open class Flow(
 
     fun prev() {
         process(prev)
+    }
+
+    fun process(button: Button) {
+        when (button) {
+            Button.BTN_NEXT -> next()
+            Button.BTN_CENTER -> center()
+            Button.BTN_PREV -> prev()
+            else -> {}
+        }
     }
 
     val hasNext: Boolean

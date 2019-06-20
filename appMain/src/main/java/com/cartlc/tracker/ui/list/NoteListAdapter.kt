@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataNote
 import kotlinx.android.synthetic.main.entry_item_note.view.*
 
 /**

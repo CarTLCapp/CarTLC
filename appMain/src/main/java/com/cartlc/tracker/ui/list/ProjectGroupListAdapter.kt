@@ -10,8 +10,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.data.DataProjectAddressCombo
-import com.cartlc.tracker.model.sql.SqlTableEntry
+import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.model.core.sql.SqlTableEntry
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 
 import kotlinx.android.synthetic.main.entry_item_project.view.*
@@ -90,7 +90,6 @@ class ProjectGroupListAdapter(
     }
 
     fun onDataChanged() {
-        Timber.d("MYDEBUG: onDataChanged()")
         allProjectGroups = vm.projectGroups
         curProjectGroupId = vm.currentProjectGroupId
         filterGroups()

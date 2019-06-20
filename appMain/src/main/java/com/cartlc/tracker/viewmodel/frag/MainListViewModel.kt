@@ -8,15 +8,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.OnLifecycleEvent
-import com.cartlc.tracker.model.data.*
+import com.cartlc.tracker.fresh.model.core.data.*
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.FlowUseCase
 import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.sql.SqlTableEntry
-import com.cartlc.tracker.ui.app.dependencyinjection.BoundFrag
+import com.cartlc.tracker.fresh.model.core.sql.SqlTableEntry
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.viewmodel.BaseViewModel
 
 class MainListViewModel(

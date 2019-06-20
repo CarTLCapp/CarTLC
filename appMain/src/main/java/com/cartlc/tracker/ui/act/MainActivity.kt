@@ -23,8 +23,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.ui.app.TBApplication
-import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.model.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.event.EventError
@@ -39,9 +39,10 @@ import com.cartlc.tracker.ui.util.helper.DialogHelper
 import com.cartlc.tracker.ui.util.helper.LocationHelper
 import com.cartlc.tracker.ui.util.helper.PermissionHelper
 import com.cartlc.tracker.ui.frag.*
-import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleView
+import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleView
 import com.cartlc.tracker.ui.stage.StageNavigator
-import com.cartlc.tracker.ui.stage.buttons.ButtonsView
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsView
+import com.cartlc.tracker.fresh.ui.title.TitleView
 import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
 import com.cartlc.tracker.viewmodel.main.*
 import com.crashlytics.android.Crashlytics // CRASHLYTICS
@@ -85,8 +86,8 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         get() = frame_main_list as MainListFragment
     val confirmationFragment: ConfirmationFragment
         get() = frame_confirmation_fragment as ConfirmationFragment
-    private val titleFragment: TitleFragment
-        get() = frame_title as TitleFragment
+    private val titleView: TitleView
+        get() = frame_title as TitleView
     private val buttonsView: ButtonsView
         get() = frame_buttons as ButtonsView
     val entrySimpleView: EntrySimpleView
@@ -123,21 +124,22 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         setSupportActionBar(findViewById(R.id.toolbar_main))
 
         val softKeyboardDetect = SoftKeyboardDetect(root)
-        buttonsView.softKeyboardDetect = softKeyboardDetect
-        val buttonsUseCase = buttonsView.controller
+        val buttonsUseCase = buttonsView.useCase
+
+        buttonsUseCase.softKeyboardDetect = softKeyboardDetect
 
         stageNavigator = StageNavigator(boundAct, buttonsUseCase)
 
         val confirmationViewModel = confirmationFragment.vm
         val mainListViewModel = mainListFragment.vm
-        val titleViewModel = titleFragment.vm
+        val titleUseCase = titleView.useCase
         val entrySimpleControl = entrySimpleView.control
 
         val newProjectHolder = NewProjectVMHolder(
                 boundAct,
                 buttonsUseCase,
                 mainListViewModel,
-                titleViewModel,
+                titleUseCase,
                 entrySimpleControl
         )
         vm = MainVMHolder(
@@ -146,14 +148,14 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
                 buttonsUseCase,
                 mainListViewModel,
                 confirmationViewModel,
-                titleViewModel,
+                titleUseCase,
                 entrySimpleControl
         )
         mInputMM = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         fab_add.setOnClickListener { vm.btnPlus() }
 
-        mPictureAdapter = PictureListAdapter(this) { newCount: Int -> titleFragment.vm.setPhotoTitleCount(newCount) }
+        mPictureAdapter = PictureListAdapter(this) { newCount: Int -> titleUseCase.setPhotoTitleCount(newCount) }
         val linearLayoutManager = AutoLinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         list_pictures.layoutManager = linearLayoutManager
         list_pictures.adapter = mPictureAdapter
@@ -312,6 +314,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             REQUEST_EDIT_ENTRY ->
                 when (resultCode) {

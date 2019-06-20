@@ -12,15 +12,14 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
-import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.model.data.DataPicture
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.model.event.EventController
 import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import org.greenrobot.eventbus.EventBus
-import timber.log.Timber
 
 /**
  * Created by dug on 5/31/17.

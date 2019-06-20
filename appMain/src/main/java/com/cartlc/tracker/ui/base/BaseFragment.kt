@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.ui.app.TBApplication
-import com.cartlc.tracker.ui.app.dependencyinjection.BoundFrag
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.viewmodel.BaseViewModel
 
 open class BaseFragment : Fragment() {

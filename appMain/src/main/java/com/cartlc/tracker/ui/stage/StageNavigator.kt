@@ -10,11 +10,9 @@ import com.cartlc.tracker.R
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.FlowUseCase
 import com.cartlc.tracker.model.flow.Stage
-import com.cartlc.tracker.ui.app.dependencyinjection.BoundAct
-import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
-import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
-import com.cartlc.tracker.ui.stage.buttons.ButtonsView
-import com.cartlc.tracker.ui.stage.login.LoginFragment
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.login.LoginFragment
 
 class StageNavigator(
         boundAct: BoundAct,

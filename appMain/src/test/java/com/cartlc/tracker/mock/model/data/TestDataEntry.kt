@@ -3,15 +3,14 @@
  */
 package com.cartlc.tracker.mock.model.data
 
-import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.model.data.DataNote
-import com.cartlc.tracker.model.data.DataProjectAddressCombo
-import com.cartlc.tracker.model.table.DatabaseTable
-import com.cartlc.tracker.model.table.TableCollectionNoteEntry
-import com.cartlc.tracker.model.table.TableCollectionNoteProject
-import com.cartlc.tracker.model.table.TableNote
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.table.TableCollectionNoteEntry
+import com.cartlc.tracker.fresh.model.core.table.TableCollectionNoteProject
+import com.cartlc.tracker.fresh.model.core.table.TableNote
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

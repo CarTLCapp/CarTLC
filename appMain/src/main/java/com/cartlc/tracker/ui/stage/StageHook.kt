@@ -1,6 +1,6 @@
 package com.cartlc.tracker.ui.stage
 
-import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 
 interface StageHook {
 

@@ -3,8 +3,8 @@
  */
 package com.cartlc.tracker.amock
 
-import com.cartlc.tracker.model.data.DataAddress
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.data.DataAddress
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 
 import javax.inject.Inject
 

@@ -8,9 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.FragConfirmationBinding
-import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.ui.base.BaseFragment
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.NoteListAdapter

@@ -7,14 +7,15 @@ import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.cartlc.tracker.model.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.model.msg.MessageHandler
 import com.cartlc.tracker.model.msg.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.ui.app.dependencyinjection.BoundFrag
-import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.title.TitleUseCase
 import com.cartlc.tracker.viewmodel.BaseViewModel
 
 class ConfirmationViewModel(
@@ -46,7 +47,8 @@ class ConfirmationViewModel(
     var dispatchActionEvent: (action: Action) -> Unit = {}
 
     var buttonsUseCase: ButtonsUseCase? = null
-    lateinit var titleViewModel: TitleViewModel
+
+    lateinit var titleUseCase: TitleUseCase
 
     init {
         boundFrag.bindObserver(this)
@@ -74,6 +76,7 @@ class ConfirmationViewModel(
     }
 
     // region FlowUseCase.Listener
+
     override fun onStageChangedAboutTo(flow: Flow) {
         showingValue = false
     }
@@ -86,7 +89,7 @@ class ConfirmationViewModel(
             Stage.CONFIRM -> {
                 buttonsUseCase?.nextText = messageHandler.getString(StringMessage.btn_confirm)
                 showingValue = true
-                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_confirmation)
+                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_confirmation)
                 curEntry = prefHelper.saveEntry()
                 curEntry?.let { entry -> dispatchActionEvent(Action.CONFIRMATION_FILL(entry)) }
                 dispatchActionEvent(Action.STORE_ROTATION)

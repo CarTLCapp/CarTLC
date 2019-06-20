@@ -9,9 +9,11 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.cartlc.tracker.model.data.DataAddress
-import com.cartlc.tracker.model.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.model.core.data.DataAddress
+import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.model.core.table.*
 import com.cartlc.tracker.model.table.*
+import com.cartlc.tracker.fresh.model.table.*
 import com.cartlc.tracker.ui.app.TBApplication
 import com.nhaarman.mockito_kotlin.any
 import org.junit.Assert.*
@@ -99,7 +101,7 @@ class TestPrefHelper {
         val address = DataAddress("Company", "Street", "City", "IL", "60626")
         Mockito.`when`(tableAddress.query(10)).thenReturn(address)
         Mockito.`when`(db.tableProjectAddressCombo).thenReturn(tableProjectAddressCombo)
-        val projectGroup = DataProjectAddressCombo(db, 2,5, 10)
+        val projectGroup = DataProjectAddressCombo(db, 2, 5, 10)
         Mockito.`when`(tableProjectAddressCombo.query(2)).thenReturn(projectGroup)
 
         prefHelper = PrefHelper(context, db)
@@ -237,7 +239,7 @@ class TestPrefHelper {
         prefHelper.zipCode = address.zipcode
         prefHelper.currentProjectGroupId = 10
 
-        val combo = DataProjectAddressCombo(db, 10,4, 5)
+        val combo = DataProjectAddressCombo(db, 10, 4, 5)
 
         Mockito.`when`(db.tableProjects).thenReturn(tableProjects)
         Mockito.`when`(db.tableAddress).thenReturn(tableAddress)
@@ -264,7 +266,7 @@ class TestPrefHelper {
         prefHelper.zipCode = address.zipcode
         prefHelper.currentProjectGroupId = 10
 
-        val combo = DataProjectAddressCombo(db, 10,4, 5)
+        val combo = DataProjectAddressCombo(db, 10, 4, 5)
 
         Mockito.`when`(db.tableProjects).thenReturn(tableProjects)
         Mockito.`when`(db.tableAddress).thenReturn(tableAddress)

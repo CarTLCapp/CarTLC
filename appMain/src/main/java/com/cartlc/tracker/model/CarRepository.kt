@@ -2,14 +2,14 @@ package com.cartlc.tracker.model
 
 import android.os.Looper
 import androidx.lifecycle.MutableLiveData
-import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.model.data.DataNote
-import com.cartlc.tracker.model.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.model.msg.ErrorMessage
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import java.util.ArrayList
 
 // Open class for testing

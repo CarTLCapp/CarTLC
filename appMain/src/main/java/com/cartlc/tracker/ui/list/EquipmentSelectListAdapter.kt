@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.data.DataEquipment
-import com.cartlc.tracker.model.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.model.core.data.DataEquipment
+import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 
 import kotlinx.android.synthetic.main.entry_item_equipment.view.*

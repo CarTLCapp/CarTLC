@@ -6,7 +6,7 @@ package com.cartlc.tracker.ui.app
 import android.util.Log
 
 import com.cartlc.tracker.BuildConfig
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 
 import timber.log.Timber
 

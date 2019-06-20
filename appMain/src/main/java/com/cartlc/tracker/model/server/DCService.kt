@@ -8,11 +8,10 @@ import android.content.Intent
 import com.cartlc.tracker.model.CarRepository
 
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication
 
 import timber.log.Timber
-import javax.inject.Inject
 
 /**
  * Created by dug on 5/22/17.

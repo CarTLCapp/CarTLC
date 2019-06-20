@@ -7,17 +7,20 @@ import android.location.Address
 import android.text.InputType
 import androidx.lifecycle.*
 import com.cartlc.tracker.BuildConfig
-import com.cartlc.tracker.model.data.*
 import com.cartlc.tracker.model.event.*
 import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.model.misc.*
 import com.cartlc.tracker.model.msg.ErrorMessage
 import com.cartlc.tracker.model.msg.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.table.DatabaseTable
-import com.cartlc.tracker.ui.app.dependencyinjection.BoundAct
-import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleController
-import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataPicture
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleUseCase
+import com.cartlc.tracker.fresh.ui.title.TitleUseCase
 import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import com.cartlc.tracker.ui.util.CheckError
@@ -30,8 +33,8 @@ class MainVMHolder(
         val buttonsUseCase: ButtonsUseCase,
         private val mainListViewModel: MainListViewModel,
         private val confirmationViewModel: ConfirmationViewModel,
-        private val titleViewModel: TitleViewModel,
-        private val entrySimpleControl: EntrySimpleController
+        private val titleUseCase: TitleUseCase,
+        private val entrySimpleControl: EntrySimpleUseCase
 ) : LifecycleObserver, FlowUseCase.Listener, ButtonsUseCase.Listener {
 
     companion object {
@@ -139,16 +142,14 @@ class MainVMHolder(
         entrySimpleControl.afterTextChangedListener = { value -> onEntryValueChanged(value) }
         confirmationViewModel.dispatchActionEvent = entrySimpleControl.dispatchActionEvent
         confirmationViewModel.buttonsUseCase = buttonsUseCase
-        confirmationViewModel.titleViewModel = titleViewModel
+        confirmationViewModel.titleUseCase = titleUseCase
         mainListViewModel.onCurrentProjectGroupChanged = { checkAddButtonVisible() }
         prefHelper.setFromCurrentProjectId()
-        buttonsUseCase.registerListener(this)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
         repo.flowUseCase.unregisterListener(this)
-        buttonsUseCase.unregisterListener(this)
     }
 
     fun onRestoreInstanceState(path: String?) {
@@ -240,16 +241,10 @@ class MainVMHolder(
         }
     }
 
-    override val onButtonLive: Boolean
-        get() {
-            // TODO: Need to give this one more thought
-            return curFlowValue.stage != Stage.LOGIN
-        }
-
     override fun onButtonEvent(action: Button) {
         when (action) {
             Button.BTN_CHANGE -> btnChangeCompany()
-            else -> {}
+            else -> { curFlowValue.process(action) }
         }
     }
 
@@ -325,6 +320,20 @@ class MainVMHolder(
     override fun onStageChangedAboutTo(flow: Flow) {
         addButtonVisibleValue = false
         framePictureVisibleValue = false
+        when (flow.stage) {
+            Stage.CURRENT_PROJECT,
+            Stage.SUB_PROJECT,
+            Stage.TRUCK,
+            Stage.EQUIPMENT,
+            Stage.ADD_EQUIPMENT,
+            Stage.NOTES,
+            Stage.PICTURE_1,
+            Stage.PICTURE_2,
+            Stage.PICTURE_3,
+            Stage.STATUS-> {
+                buttonsUseCase.listener = this
+            }
+        }
     }
 
     override fun onStageChanged(flow: Flow) {
@@ -340,16 +349,18 @@ class MainVMHolder(
                 checkAddButtonVisible()
 
                 mainListViewModel.showingValue = true
-                titleViewModel.showSeparatorValue = true
+                titleUseCase.separatorVisible = true
+                titleUseCase.mainTitleVisible = true
                 buttonsUseCase.centerVisible = true
                 buttonsUseCase.prevText = messageHandler.getString(StringMessage.btn_edit)
                 buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_new_project)
-                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_current_project)
+                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_current_project)
             }
             Stage.SUB_PROJECT -> {
+                titleUseCase.mainTitleVisible = true
                 prefHelper.projectRootName?.let { rootName ->
                     mainListViewModel.showingValue = true
-                    titleViewModel.subTitleValue = curProjectHint
+                    titleUseCase.subTitleText = curProjectHint
                     buttonsUseCase.nextVisible = hasProjectSubName
                     setList(StringMessage.title_sub_project, PrefHelper.KEY_SUB_PROJECT, db.tableProjects.querySubProjectNames(rootName))
                 } ?: run {
@@ -375,21 +386,22 @@ class MainVMHolder(
                 val trucks = db.tableTruck.queryStrings(prefHelper.currentProjectGroup)
                 entrySimpleControl.entryTextValue = prefHelper.truckValue
                 setList(StringMessage.title_truck, PrefHelper.KEY_TRUCK, trucks)
-                titleViewModel.subTitleValue = hint
+                titleUseCase.subTitleText = hint
+                titleUseCase.subTitleVisible = true
             }
             Stage.EQUIPMENT -> {
-                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_equipment_installed)
+                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_equipment_installed)
                 mainListViewModel.showingValue = true
                 buttonsUseCase.centerVisible = true
             }
             Stage.ADD_EQUIPMENT -> {
-                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_equipment)
+                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_equipment)
                 entrySimpleControl.showing = true
                 entrySimpleControl.hintValue = messageHandler.getString(StringMessage.title_equipment)
                 entrySimpleControl.simpleTextClear()
             }
             Stage.NOTES -> {
-                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_notes)
+                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_notes)
                 mainListViewModel.showingValue = true
             }
             Stage.PICTURE_1,
@@ -407,7 +419,7 @@ class MainVMHolder(
                 if (showToast) {
                     dispatchActionEvent(Action.SHOW_PICTURE_TOAST(pictureCount))
                 }
-                titleViewModel.setPhotoTitleCount(pictureCount)
+                titleUseCase.setPhotoTitleCount(pictureCount)
                 buttonsUseCase.nextVisible = false
                 buttonsUseCase.centerVisible = true
                 buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_another)
@@ -423,8 +435,8 @@ class MainVMHolder(
             Stage.STATUS -> {
                 buttonsUseCase.nextText = messageHandler.getString(StringMessage.btn_done)
                 mainListViewModel.showingValue = true
-                titleViewModel.titleValue = messageHandler.getString(StringMessage.title_status)
-                titleViewModel.subTitleValue = statusHint
+                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_status)
+                titleUseCase.subTitleText = statusHint
             }
             else -> {
             }
@@ -466,7 +478,7 @@ class MainVMHolder(
     // region SET LIST
 
     private fun setList(msg: StringMessage, key: String, list: List<String>) {
-        titleViewModel.titleValue = messageHandler.getString(msg)
+        titleUseCase.mainTitleText = messageHandler.getString(msg)
         mainListViewModel.curKey = key
         if (list.isEmpty()) {
             mainListViewModel.showingValue = false

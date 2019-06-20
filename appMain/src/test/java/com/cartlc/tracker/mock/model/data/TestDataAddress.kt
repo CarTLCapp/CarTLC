@@ -3,7 +3,7 @@
  */
 package com.cartlc.tracker.mock.model.data
 
-import com.cartlc.tracker.model.data.DataAddress
+import com.cartlc.tracker.fresh.model.core.data.DataAddress
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before

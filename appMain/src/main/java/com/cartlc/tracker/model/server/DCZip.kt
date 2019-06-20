@@ -6,8 +6,8 @@ package com.cartlc.tracker.model.server
 import android.net.Uri
 
 import com.cartlc.tracker.ui.app.TBApplication
-import com.cartlc.tracker.model.data.DataZipCode
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.data.DataZipCode
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 
 import org.json.JSONArray
 import org.json.JSONException

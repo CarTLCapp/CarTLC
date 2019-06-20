@@ -4,22 +4,22 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.flow.VehicleStage
-import com.cartlc.tracker.model.data.DataVehicle
+import com.cartlc.tracker.fresh.model.core.data.DataVehicle
 import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.flow.ActionUseCase
 import com.cartlc.tracker.model.flow.ActionUseCaseImpl
 import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.ui.app.TBApplication
 
 class VehicleRepository(
         private val context: Context,
-        private val dm: DatabaseTable,
-        private val prefHelper: PrefHelper
+        private val dm: DatabaseTable
 ) {
 
     val app: TBApplication
         get() = context.applicationContext as TBApplication
+
     val stage: MutableLiveData<VehicleStage> by lazy {
         MutableLiveData<VehicleStage>()
     }

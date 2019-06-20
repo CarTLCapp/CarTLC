@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.databinding.FragMainListBinding
 import com.cartlc.tracker.model.flow.Stage
-import com.cartlc.tracker.model.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.FlowUseCase
 import com.cartlc.tracker.ui.list.*
@@ -20,8 +20,8 @@ import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.ui.act.MainActivity
 import com.cartlc.tracker.ui.base.BaseFragment
-import com.cartlc.tracker.ui.bits.entrysimple.EntrySimpleController
-import com.cartlc.tracker.ui.stage.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleUseCase
 import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 
 class MainListFragment : BaseFragment(), FlowUseCase.Listener {
@@ -46,7 +46,7 @@ class MainListFragment : BaseFragment(), FlowUseCase.Listener {
     private val buttonsUseCase: ButtonsUseCase?
         get() = mainActivity?.vm?.buttonsUseCase
 
-    private val entrySimpleControl: EntrySimpleController?
+    private val entrySimpleControl: EntrySimpleUseCase?
         get() = mainActivity?.entrySimpleView?.control
 
     private lateinit var simpleAdapter: SimpleListAdapter

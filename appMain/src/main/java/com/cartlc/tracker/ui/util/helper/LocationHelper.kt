@@ -14,9 +14,9 @@ import android.text.TextUtils
 import android.util.Log
 
 import com.cartlc.tracker.ui.app.TBApplication
-import com.cartlc.tracker.model.data.DataAddress
-import com.cartlc.tracker.model.data.DataStates
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.data.DataAddress
+import com.cartlc.tracker.fresh.model.core.data.DataStates
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 

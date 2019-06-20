@@ -9,15 +9,14 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 
 import com.cartlc.tracker.BuildConfig
+import com.cartlc.tracker.fresh.model.core.data.*
 import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.data.*
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.misc.TruckStatus
 import com.cartlc.tracker.model.event.EventRefreshProjects
-import com.cartlc.tracker.model.flow.LoginFlow
-import com.cartlc.tracker.model.sql.*
-import com.cartlc.tracker.model.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.sql.SqlTableCrash
 
 import org.json.JSONArray
 import org.json.JSONObject

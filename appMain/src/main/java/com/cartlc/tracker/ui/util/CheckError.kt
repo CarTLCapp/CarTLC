@@ -8,7 +8,7 @@ import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.model.event.EventRefreshProjects
 import org.greenrobot.eventbus.EventBus
 

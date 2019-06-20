@@ -1,7 +1,7 @@
 package com.cartlc.tracker.model.event
 
-import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.model.data.DataPicture
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.ui.util.CheckError
 import java.io.File
 

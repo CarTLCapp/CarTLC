@@ -8,17 +8,17 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.cartlc.tracker.fresh.model.core.table.*
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.flow.FlowUseCaseImpl
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.model.server.DCPing
 import com.cartlc.tracker.model.server.ServerHelper
 import com.cartlc.tracker.model.table.*
+import com.cartlc.tracker.fresh.model.table.*
 import com.cartlc.tracker.ui.app.TBApplication
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.spy
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 
 import org.junit.Before
 import org.junit.Test
