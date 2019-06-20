@@ -59,14 +59,7 @@ public class HomeController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result daily(long date) {
         mDaily.resetTo(date);
-        return index();
-    }
-
-    private Daily daily() {
-        if (mDaily == null) {
-            mDaily = new Daily();
-        }
-        return mDaily;
+        return HOME();
     }
 
     public static Result HOME() {
@@ -79,6 +72,13 @@ public class HomeController extends Controller {
 
     public static Result PROBLEM(String msg) {
         return Results.redirect(routes.HomeController.problem(msg));
+    }
+
+    private Daily daily() {
+        if (mDaily == null) {
+            mDaily = new Daily();
+        }
+        return mDaily;
     }
 
     /**

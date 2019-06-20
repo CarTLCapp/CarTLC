@@ -122,7 +122,11 @@ public class Daily {
     }
 
     public void resetTo(long date) {
-        mDate = new Date(date);
+        if (date == 0) {
+            mDate = new Date();
+        } else {
+            mDate = new Date(date);
+        }
         init();
     }
 
