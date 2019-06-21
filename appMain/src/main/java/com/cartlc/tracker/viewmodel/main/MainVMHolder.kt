@@ -331,6 +331,7 @@ class MainVMHolder(
             Stage.PICTURE_2,
             Stage.PICTURE_3,
             Stage.STATUS-> {
+                buttonsUseCase.reset(flow)
                 buttonsUseCase.listener = this
             }
         }

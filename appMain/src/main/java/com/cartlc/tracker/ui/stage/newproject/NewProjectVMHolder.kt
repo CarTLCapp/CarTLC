@@ -120,6 +120,7 @@ class NewProjectVMHolder(
             Stage.STREET,
             Stage.ADD_STREET,
             Stage.CONFIRM_ADDRESS -> {
+                buttonsUseCase.reset(flow)
                 buttonsUseCase.listener = this
             }
             else -> {}

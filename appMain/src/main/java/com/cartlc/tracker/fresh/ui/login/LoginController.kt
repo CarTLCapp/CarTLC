@@ -73,6 +73,7 @@ class LoginController(
         viewMvc.secondaryCheckBoxChecked = isSecondaryPromptsEnabled
         viewMvc.secondaryTechCodeEnabled = isSecondaryPromptsEnabled
         repo.actionUseCase.registerListener(this)
+        onStageChangedAboutTo(repo.flowUseCase.curFlow)
         onStageChanged(repo.flowUseCase.curFlow)
     }
 
@@ -91,6 +92,7 @@ class LoginController(
     override fun onStageChangedAboutTo(flow: Flow) {
         when (flow.stage) {
             Stage.LOGIN -> {
+                buttonsUseCase.reset(flow)
                 buttonsUseCase.listener = this
             }
             else -> {}
@@ -100,6 +102,7 @@ class LoginController(
     override fun onStageChanged(flow: Flow) {
         when (flow.stage) {
             Stage.LOGIN -> {
+                buttonsUseCase.prevVisible = false
                 buttonsUseCase.centerVisible = true
                 buttonsUseCase.centerText = messageHandler.getString(StringMessage.title_login)
                 buttonsUseCase.nextVisible = loginSuccess
