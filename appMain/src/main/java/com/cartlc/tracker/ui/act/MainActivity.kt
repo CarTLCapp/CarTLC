@@ -84,8 +84,6 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
 
     private val mainListFragment: MainListFragment
         get() = frame_main_list as MainListFragment
-    val confirmationFragment: ConfirmationFragment
-        get() = frame_confirmation_fragment as ConfirmationFragment
     private val titleView: TitleView
         get() = frame_title as TitleView
     private val buttonsView: ButtonsView
@@ -95,7 +93,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
 
     private class RotatePictureTask(act: MainActivity) : AsyncTask<Void, Void, Boolean>() {
 
-        private val ref = WeakReference<MainActivity>(act)
+        private val ref = WeakReference(act)
         private val main: MainActivity?
             get() = ref.get()
 
@@ -125,14 +123,15 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
 
         val softKeyboardDetect = SoftKeyboardDetect(root)
         val buttonsUseCase = buttonsView.useCase
+        val titleUseCase = titleView.useCase
 
         buttonsUseCase.softKeyboardDetect = softKeyboardDetect
 
-        stageNavigator = StageNavigator(boundAct, buttonsUseCase)
+        stageNavigator = StageNavigator(boundAct, buttonsUseCase, titleUseCase)
+        stageNavigator.storeRotation = { storeCommonRotation() }
+        stageNavigator.dispatchActionEvent = { event -> onActionChanged(event) }
 
-        val confirmationViewModel = confirmationFragment.vm
         val mainListViewModel = mainListFragment.vm
-        val titleUseCase = titleView.useCase
         val entrySimpleControl = entrySimpleView.control
 
         val newProjectHolder = NewProjectVMHolder(
@@ -147,7 +146,6 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
                 newProjectHolder,
                 buttonsUseCase,
                 mainListViewModel,
-                confirmationViewModel,
                 titleUseCase,
                 entrySimpleControl
         )
@@ -280,14 +278,11 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
             Action.VEHICLES -> doVehicles()
             Action.VEHICLES_PENDING -> doVehiclesPendingDialog()
             Action.GET_LOCATION -> getLocation()
-            Action.STORE_ROTATION -> storeCommonRotation()
             Action.SHOW_NOTE_ERROR -> showNoteError(mainListFragment.notes)
             is Action.SHOW_TRUCK_ERROR -> showTruckError(action.entry, action.callback)
             is Action.SET_MAIN_LIST -> mainListFragment.setList(action.list)
             is Action.SET_PICTURE_LIST -> mPictureAdapter.setList(action.list)
             is Action.SHOW_PICTURE_TOAST -> showPictureToast(action.count)
-            is Action.CONFIRMATION_FILL -> confirmationFragment.fill(action.entry)
-//            else -> stageNavigator.onActionDispatch(action)
         }
     }
 
@@ -406,7 +401,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
     private fun showConfirmDialog() {
         dialogHelper.showConfirmDialog(object : DialogHelper.DialogListener {
             override fun onOkay() {
-                confirmationFragment.vm.onConfirmOkay()
+                stageNavigator.onConfirmOkay()
             }
 
             override fun onCancel() {}

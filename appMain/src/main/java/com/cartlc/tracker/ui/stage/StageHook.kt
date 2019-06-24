@@ -6,4 +6,6 @@ interface StageHook {
 
     val buttonsUseCase: ButtonsUseCase
 
+    fun onConfirmOkay()
+
 }

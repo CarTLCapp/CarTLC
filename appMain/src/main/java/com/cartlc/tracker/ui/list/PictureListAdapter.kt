@@ -151,7 +151,6 @@ open class PictureListAdapter(
                     }
                 }
             }
-
         }
     }
 

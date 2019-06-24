@@ -15,7 +15,7 @@ open class ButtonsController(
         private val viewMvc: ButtonsViewMvc
 ) : ButtonsUseCase, LifecycleObserver, ButtonsViewMvc.Listener, SoftKeyboardDetect.Listener {
 
-    protected val messageHandler = boundAct.componentRoot.messageHandler
+    private val messageHandler = boundAct.componentRoot.messageHandler
     private val activity = boundAct.act
     protected val repo = boundAct.repo
 

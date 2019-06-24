@@ -19,7 +19,6 @@ sealed class Action {
     object VEHICLES_PENDING : Action()
     object GET_LOCATION : Action()
     object PING: Action()
-    object STORE_ROTATION: Action()
     object ADD_PICTURE: Action()
     object SHOW_NOTE_ERROR: Action()
     data class RETURN_PRESSED(val text: String): Action()
@@ -29,5 +28,4 @@ sealed class Action {
     data class SHOW_PICTURE_TOAST(val count: Int): Action()
     data class SET_MAIN_LIST(val list: List<String>) : Action()
     data class SET_PICTURE_LIST(val list: List<DataPicture>): Action()
-    data class CONFIRMATION_FILL(val entry: DataEntry): Action()
 }

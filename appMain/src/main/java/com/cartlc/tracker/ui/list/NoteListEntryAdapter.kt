@@ -30,7 +30,7 @@ class NoteListEntryAdapter(
         private val mListener: EntryListener
 ) : RecyclerView.Adapter<NoteListEntryAdapter.CustomViewHolder>() {
 
-    private val mLayoutInflater: LayoutInflater
+    private val mLayoutInflater = LayoutInflater.from(ctx)
     private var mItems: MutableList<DataNote> = mutableListOf()
 
     val notes: List<DataNote>
@@ -52,7 +52,7 @@ class NoteListEntryAdapter(
     }
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        internal var mTextWatcherForEntry: ItemTextChangedWatcher? = null
+        private var mTextWatcherForEntry: ItemTextChangedWatcher? = null
 
         fun bind(item: DataNote) {
             with(view) {
@@ -87,7 +87,7 @@ class NoteListEntryAdapter(
             }
         }
 
-        internal fun setTextWatcher(item: DataNote) {
+        private fun setTextWatcher(item: DataNote) {
             if (mTextWatcherForEntry != null) {
                 view.entry!!.removeTextChangedListener(mTextWatcherForEntry)
             }
@@ -98,12 +98,7 @@ class NoteListEntryAdapter(
 
     interface EntryListener {
         fun textEntered(note: DataNote)
-
         fun textFocused(note: DataNote)
-    }
-
-    init {
-        mLayoutInflater = LayoutInflater.from(ctx)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
@@ -121,16 +116,16 @@ class NoteListEntryAdapter(
 
     fun onDataChanged() {
         val currentEditEntry = vm.currentEditEntry
-        if (currentEditEntry != null) {
-            mItems = currentEditEntry.notesAllWithValuesOverlaid.toMutableList()
+        mItems = if (currentEditEntry != null) {
+            currentEditEntry.notesAllWithValuesOverlaid.toMutableList()
         } else {
-            mItems = vm.queryNotes().toMutableList()
+            vm.queryNotes().toMutableList()
         }
         pushToBottom("Other")
         notifyDataSetChanged()
     }
 
-    internal fun pushToBottom(name: String) {
+    private fun pushToBottom(name: String) {
         val others = ArrayList<DataNote>()
         for (item in mItems) {
             if (item.name.startsWith(name)) {

@@ -37,9 +37,8 @@
             android:layout_height="match_parent"
             android:layout_marginTop="60dp">
 
-            <fragment
+            <com.cartlc.tracker.fresh.ui.title.TitleView
                 android:id="@+id/frame_title"
-                android:name="com.cartlc.tracker.ui.frag.TitleFragment"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"

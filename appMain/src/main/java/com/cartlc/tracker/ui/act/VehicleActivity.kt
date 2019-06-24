@@ -18,10 +18,11 @@ import com.cartlc.tracker.model.flow.VehicleStage
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.ui.base.BaseActivity
 import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
-import com.cartlc.tracker.ui.frag.TitleFragment
 import com.cartlc.tracker.ui.list.CheckBoxListAdapter
 import com.cartlc.tracker.ui.list.RadioListAdapter
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleView
+import com.cartlc.tracker.fresh.ui.title.TitleUseCase
+import com.cartlc.tracker.fresh.ui.title.TitleView
 import com.cartlc.tracker.model.event.Button
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 
@@ -35,12 +36,13 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
     private lateinit var checkboxAdapter: CheckBoxListAdapter
     private lateinit var checkboxAdapter2: CheckBoxListAdapter
 
-    private lateinit var titleFragment: TitleFragment
+    private lateinit var titleView: TitleView
     private lateinit var buttonsView: ButtonsView
     private lateinit var stage2Entry: EntrySimpleView
     private lateinit var stage345Entry: EntrySimpleView
 
     private lateinit var buttonsUseCase: ButtonsUseCase
+    private lateinit var titleUseCase: TitleUseCase
 
     lateinit var vm: VehicleViewModel
 
@@ -59,13 +61,15 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
 
         title = getString(R.string.vehicle_title)
 
-        titleFragment = supportFragmentManager.findFragmentById(R.id.frame_title) as TitleFragment
+        titleView = findViewById(R.id.frame_title)
         buttonsView = findViewById(R.id.frame_buttons)
         stage2Entry = findViewById(R.id.stage2_entry)
         stage345Entry = findViewById(R.id.stage345_entry_simple)
 
         buttonsUseCase = buttonsView.useCase
         buttonsUseCase.listener = this
+
+        titleUseCase = titleView.useCase
 
         setup(binding.stage12List)
         setup(binding.stage345List)
@@ -98,7 +102,7 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
         stage345Entry.control.afterTextChangedListener = { value -> vm.onEntryChanged(value) }
         stage345Entry.control.showCheckedValue = true
         stage345Entry.control.dispatchActionEvent = { action -> vm.dispatchActionEvent(action) }
-        titleFragment.vm.titleValue = null
+        titleUseCase.mainTitleText = null
 
         vm.repo.entered.clear()
         vm.repo.stage.observe(this, Observer { stage -> onStageChanged(stage) })
@@ -137,8 +141,8 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
 
     private fun onStageChanged(stage: VehicleStage) {
 
-        titleFragment.vm.titleValue = null
-        titleFragment.vm.subTitleValue = null
+        titleUseCase.mainTitleText = null
+        titleUseCase.subTitleText = null
         vm.showFrame12Value = false
         vm.showFrame345Value = false
         vm.stage3ListTitleValue = null
@@ -168,8 +172,8 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
             }
             VehicleStage.STAGE_3 -> {
                 vm.showFrame345Value = true
-                titleFragment.vm.titleValue = getString(R.string.vehicle_lights)
-                titleFragment.vm.subTitleValue = getString(R.string.vehicle_lights_description)
+                titleUseCase.mainTitleText = getString(R.string.vehicle_lights)
+                titleUseCase.subTitleText = getString(R.string.vehicle_lights_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_lights_head)
                 vm.stage3List2TitleValue = getString(R.string.vehicle_lights_tail)
                 checkboxAdapter.items = vm.repo.headLights.toList()
@@ -183,8 +187,8 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
             }
             VehicleStage.STAGE_4 -> {
                 vm.showFrame345Value = true
-                titleFragment.vm.titleValue = getString(R.string.vehicle_fluids)
-                titleFragment.vm.subTitleValue = getString(R.string.vehicle_fluids_description)
+                titleUseCase.mainTitleText = getString(R.string.vehicle_fluids)
+                titleUseCase.subTitleText = getString(R.string.vehicle_fluids_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_fluids_checks)
                 checkboxAdapter.items = vm.repo.fluidChecks.toList()
                 checkboxAdapter.selectedItems = vm.repo.entered.vehicle.fluidChecksValue
@@ -195,8 +199,8 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
             }
             VehicleStage.STAGE_5 -> {
                 vm.showFrame345Value = true
-                titleFragment.vm.titleValue = getString(R.string.vehicle_exterior)
-                titleFragment.vm.subTitleValue = getString(R.string.vehicle_exterior_description)
+                titleUseCase.mainTitleText = getString(R.string.vehicle_exterior)
+                titleUseCase.subTitleText = getString(R.string.vehicle_exterior_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_tire_inspection)
                 checkboxAdapter.items = vm.repo.tireInspection.toList()
                 checkboxAdapter.selectedItems = vm.repo.entered.vehicle.tireInspectionValue
@@ -207,8 +211,8 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
             }
             VehicleStage.STAGE_6 -> {
                 vm.showFrame345Value = true
-                titleFragment.vm.titleValue = getString(R.string.vehicle_other_title)
-                titleFragment.vm.subTitleValue = getString(R.string.vehicle_other_description)
+                titleUseCase.mainTitleText = getString(R.string.vehicle_other_title)
+                titleUseCase.subTitleText = getString(R.string.vehicle_other_description)
                 buttonsUseCase.nextText = getString(R.string.vehicle_submit)
                 stage345Entry.control.entryTextValue = vm.repo.entered.vehicle.other
                 stage345Entry.control.checkedButtonBooleanValue = vm.repo.entered.hasIssuesOther

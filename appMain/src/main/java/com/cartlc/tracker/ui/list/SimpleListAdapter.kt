@@ -30,6 +30,7 @@ class SimpleListAdapter : RecyclerView.Adapter<SimpleListAdapter.CustomViewHolde
             field = value
             notifyDataSetChanged()
         }
+
     var selectedPos: Int = -1
         set(value) {
             field = value
@@ -87,4 +88,5 @@ class SimpleListAdapter : RecyclerView.Adapter<SimpleListAdapter.CustomViewHolde
     fun setNoneSelected() {
         selectedPos = -1
     }
+
 }

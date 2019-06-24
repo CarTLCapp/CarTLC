@@ -10,6 +10,8 @@ import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvc
 import com.cartlc.tracker.ui.stage.StageHook
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsController
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
+import com.cartlc.tracker.fresh.ui.confirm.ConfirmController
+import com.cartlc.tracker.fresh.ui.confirm.ConfirmViewMvc
 import com.cartlc.tracker.fresh.ui.login.LoginController
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvc
 import com.cartlc.tracker.fresh.ui.title.TitleController
@@ -44,6 +46,11 @@ class FactoryController(
     fun allocTitleController(boundAct: BoundAct,
                              viewMvc: TitleViewMvc): TitleController {
         return TitleController(boundAct, viewMvc)
+    }
+
+    fun allocConfirmController(boundFrag: BoundFrag,
+                               viewMvc: ConfirmViewMvc): ConfirmController {
+        return ConfirmController(boundFrag, viewMvc)
     }
 
 }

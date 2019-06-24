@@ -6,6 +6,8 @@ import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvc
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvcImpl
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvcImpl
+import com.cartlc.tracker.fresh.ui.confirm.ConfirmViewMvc
+import com.cartlc.tracker.fresh.ui.confirm.ConfirmViewMvcImpl
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvc
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvcImpl
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
@@ -34,6 +36,10 @@ class FactoryViewMvc(
 
     fun allocTitleViewMvc(container: ViewGroup?): TitleViewMvc {
         return TitleViewMvcImpl(getInflater(container), container)
+    }
+
+    fun allocConfirmViewMvc(container: ViewGroup?): ConfirmViewMvc {
+        return ConfirmViewMvcImpl(getInflater(container), container)
     }
 
 }

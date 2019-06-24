@@ -27,7 +27,7 @@ class RadioListAdapter(ctx: Context) : RecyclerView.Adapter<RadioListAdapter.Cus
     private var lastSelectedPos = -1
     private var lastSelectedText: String? = null
 
-    var selectedPos: Int
+    private var selectedPos: Int
         get() = lastSelectedPos
         set(value) {
             lastSelectedPos = value
@@ -45,6 +45,7 @@ class RadioListAdapter(ctx: Context) : RecyclerView.Adapter<RadioListAdapter.Cus
             field = value
             notifyDataSetChanged()
         }
+
     var listener: (seletectedPos: Int, selectedText: String) -> Unit = { _, _ -> }
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)

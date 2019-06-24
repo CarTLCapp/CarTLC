@@ -32,7 +32,6 @@ class MainVMHolder(
         private val newProjectHolder: NewProjectVMHolder,
         val buttonsUseCase: ButtonsUseCase,
         private val mainListViewModel: MainListViewModel,
-        private val confirmationViewModel: ConfirmationViewModel,
         private val titleUseCase: TitleUseCase,
         private val entrySimpleControl: EntrySimpleUseCase
 ) : LifecycleObserver, FlowUseCase.Listener, ButtonsUseCase.Listener {
@@ -140,9 +139,6 @@ class MainVMHolder(
     fun onCreate() {
         entrySimpleControl.dispatchActionEvent = { event -> dispatchActionEvent(event) }
         entrySimpleControl.afterTextChangedListener = { value -> onEntryValueChanged(value) }
-        confirmationViewModel.dispatchActionEvent = entrySimpleControl.dispatchActionEvent
-        confirmationViewModel.buttonsUseCase = buttonsUseCase
-        confirmationViewModel.titleUseCase = titleUseCase
         mainListViewModel.onCurrentProjectGroupChanged = { checkAddButtonVisible() }
         prefHelper.setFromCurrentProjectId()
     }

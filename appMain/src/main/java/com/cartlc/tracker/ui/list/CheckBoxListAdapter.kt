@@ -20,15 +20,11 @@ typealias CheckBoxListListener = (position: Int, text: String, isSelected: Boole
  * Created by dug on 10/10/18.
  */
 class CheckBoxListAdapter(
-        private val ctx: Context,
+        ctx: Context,
         private val listener: CheckBoxListListener
 ) : RecyclerView.Adapter<CheckBoxListAdapter.CustomViewHolder>() {
 
-    private val layoutInflater: LayoutInflater
-
-    init {
-        layoutInflater = LayoutInflater.from(ctx)
-    }
+    private val layoutInflater = LayoutInflater.from(ctx)
 
     var items: List<String> = emptyList()
         set(value) {
@@ -68,7 +64,7 @@ class CheckBoxListAdapter(
         return items.size
     }
 
-    fun toggle(value: String) {
+    private fun toggle(value: String) {
         if (selectedItems.contains(value)) {
             selectedItems.remove(value)
         } else {
@@ -78,7 +74,7 @@ class CheckBoxListAdapter(
 
     }
 
-    fun isSelected(value: String): Boolean {
+    private fun isSelected(value: String): Boolean {
         return selectedItems.contains(value)
     }
 }
