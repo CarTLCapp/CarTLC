@@ -13,7 +13,6 @@ import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.ui.picture.item.*
-import java.io.File
 import java.lang.ref.WeakReference
 import java.util.HashMap
 
@@ -127,19 +126,14 @@ class PictureListController(
         get() = notes.size
 
     override fun onBindViewHolder(itemViewMvc: ViewMvc, position: Int) {
-        if (itemViewMvc is PictureListThumbnailItemViewMvc) {
+        if (itemViewMvc is PictureListItemViewMvc) {
             onBindPictureViewHolder(itemViewMvc, position)
-        } else if (itemViewMvc is PictureNoteThumbnailItemViewMvc) {
-            val note = notes[position]
-            itemViewMvc.noteLabel = note.name
-            itemViewMvc.noteValue = note.value
         } else if (itemViewMvc is PictureNoteItemViewMvc) {
             itemViewMvc.bind(notes[position], this)
         }
     }
 
-    private fun onBindPictureViewHolder(itemViewMvc: PictureListThumbnailItemViewMvc, position: Int) {
-        val itemViewMvcRegular = itemViewMvc as? PictureListItemViewMvc
+    private fun onBindPictureViewHolder(itemViewMvc: PictureListItemViewMvc, position: Int) {
         val item = pictures[position]
         val pictureFile = item.file
         itemViewMvc.bindPicture(pictureFile)
@@ -152,7 +146,7 @@ class PictureListController(
             itemViewMvc.loading = messageHandler.getString(StringMessage.error_picture_removed)
         } else {
             itemViewMvc.loading = null
-            itemViewMvcRegular?.bindListener(object : PictureListItemViewMvc.Listener {
+            itemViewMvc.bindListener(object : PictureListItemViewMvc.Listener {
                 override fun onRemoveClicked() {
                     itemRemove(item)
                 }

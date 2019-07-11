@@ -1,8 +1,12 @@
 package com.cartlc.tracker.fresh.model.msg
 
 sealed class StringMessage {
+
+    object app_name: StringMessage()
+
     object entry_hint_edit_project : StringMessage()
     object entry_hint_truck: StringMessage()
+
     object btn_prev : StringMessage()
     object btn_next: StringMessage()
     object btn_add: StringMessage()
@@ -22,6 +26,7 @@ sealed class StringMessage {
     object title_city: StringMessage()
     object title_street: StringMessage()
     object title_current_project: StringMessage()
+    object title_element: StringMessage()
     object title_truck: StringMessage()
     object title_truck_number: StringMessage()
     object title_truck_damage: StringMessage()
@@ -49,7 +54,9 @@ sealed class StringMessage {
     data class prompt_custom_photo_more(val count: Int, val prompt: String): StringMessage()
     data class prompt_notes(val prompt: String): StringMessage()
 
+    data class title_elements(val count: Int): StringMessage()
     data class title_photos(val count: Int, val max: Int): StringMessage()
+
     data class status_installed_equipments(val checkedEquipment: Int, val maxEquip: Int) : StringMessage()
     data class status_installed_pictures(val countPictures: Int) : StringMessage()
     data class error_incorrect_note_count(val length: Int, val digits: Int): StringMessage()

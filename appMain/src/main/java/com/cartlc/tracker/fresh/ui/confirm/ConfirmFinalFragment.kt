@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryController
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
-import com.cartlc.tracker.ui.base.BaseFragment
+import com.cartlc.tracker.fresh.ui.base.BaseFragment
 
 class ConfirmFinalFragment: BaseFragment() {
 

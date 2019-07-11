@@ -19,7 +19,9 @@ import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.event.EventRefreshProjects
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.sql.SqlTableCrash
+import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.service.help.ServerHelper
+import com.cartlc.tracker.fresh.ui.common.DeviceHelper
 
 import org.json.JSONArray
 import org.json.JSONObject
@@ -90,11 +92,14 @@ class DCPing(
     private val app: TBApplication
         get() = context.applicationContext as TBApplication
 
+    private val deviceHelper: DeviceHelper
+        get() = app.componentRoot.deviceHelper
+
     private val version: String?
         get() {
             if (appVersion == null) {
                 try {
-                    appVersion = app.version
+                    appVersion = deviceHelper.version
                 } catch (ex: Exception) {
                     TBApplication.ReportError(ex, DCPing::class.java, "getVersion()", "server")
                 }
@@ -1022,11 +1027,14 @@ class DCPing(
 
             val truck = entry.truck
             if (truck != null) {
-                if (truck.serverId > 0) {
-                    jsonObject.accumulate("truck_id", truck.serverId)
-                }
+//                if (truck.serverId > 0) {
+//                    jsonObject.accumulate("truck_id", truck.serverId)
+//                }
                 if (truck.truckNumberValue != null) {
                     jsonObject.accumulate("truck_number_string", truck.truckNumberValue)
+                }
+                if (truck.truckNumberPictureId > 0) {
+
                 }
             } else {
                 prefHelper.doErrorCheck = true
@@ -1077,6 +1085,12 @@ class DCPing(
                     val jobj = JSONObject()
                     jobj.put("filename", picture.tailname)
                     jobj.put("id", picture.id)
+                    val flowElementServerId = getFlowElementServerId(picture)
+                    when {
+                        flowElementServerId != null -> jobj.put("flow_element_id", flowElementServerId)
+                        picture.stage == Stage.TRUCK_NUMBER_PICTURE -> jobj.put("flow_stage", "truck_number")
+                        picture.stage == Stage.TRUCK_DAMAGE_PICTURE -> jobj.put("flow_stage", "truck_damage")
+                    }
                     jarray.put(jobj)
                 }
                 jsonObject.put("picture", jarray)
@@ -1092,7 +1106,6 @@ class DCPing(
                         jobj.put("name", note.name)
                     }
                     jobj.put("value", note.value)
-                    jobj.put("picture", note.dataPictureId)
                     jarray.put(jobj)
                 }
                 jsonObject.put("notes", jarray)
@@ -1123,6 +1136,15 @@ class DCPing(
             return false
         }
         return success
+    }
+
+    private fun getFlowElementServerId(picture: DataPicture): Int? {
+        if (picture.stage is Stage.CUSTOM_FLOW) {
+            db.tableFlowElement.query(picture.stage.flowElementId)?.let { element ->
+                return element.serverId
+            }
+        }
+        return null
     }
 
     private fun sendVehicles(list: List<DataVehicle>) {

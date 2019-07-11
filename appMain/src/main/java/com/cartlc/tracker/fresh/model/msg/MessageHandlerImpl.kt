@@ -9,6 +9,7 @@ class MessageHandlerImpl(
 
     override fun getString(msg: StringMessage): String =
             when (msg) {
+                StringMessage.app_name -> ctx.getString(R.string.app_name)
                 StringMessage.entry_hint_edit_project -> ctx.getString(R.string.entry_hint_edit_project)
                 StringMessage.entry_hint_truck -> ctx.getString(R.string.entry_hint_truck)
                 StringMessage.btn_add -> ctx.getString(R.string.btn_add)
@@ -36,6 +37,7 @@ class MessageHandlerImpl(
                 StringMessage.title_truck_damage -> ctx.getString(R.string.title_truck_damage_)
                 StringMessage.title_equipment -> ctx.getString(R.string.title_equipment)
                 StringMessage.title_equipment_installed -> ctx.getString(R.string.title_equipment_installed)
+                StringMessage.title_element -> ctx.getString(R.string.title_element)
                 StringMessage.title_notes -> ctx.getString(R.string.title_notes)
                 StringMessage.title_status -> ctx.getString(R.string.title_status)
                 StringMessage.title_confirmation -> ctx.getString(R.string.title_confirmation)
@@ -61,6 +63,7 @@ class MessageHandlerImpl(
                 is StringMessage.prompt_custom_photo_more -> ctx.getString(R.string.prompt_custom_photo_more, msg.count, msg.prompt)
                 is StringMessage.prompt_notes -> ctx.getString(R.string.prompt_notes, msg.prompt)
 
+                is StringMessage.title_elements -> ctx.getString(R.string.title_elements, msg.count)
                 is StringMessage.title_photos -> ctx.getString(R.string.title_photos, msg.count, msg.max)
 
                 is StringMessage.status_installed_equipments -> ctx.getString(R.string.status_installed_equipments, msg.checkedEquipment, msg.maxEquip)

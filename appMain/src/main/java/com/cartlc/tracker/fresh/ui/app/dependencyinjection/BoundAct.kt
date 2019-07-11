@@ -14,6 +14,7 @@ import com.cartlc.tracker.fresh.ui.common.FragmentHelper
 import com.cartlc.tracker.fresh.ui.common.ScreenNavigator
 import com.cartlc.tracker.fresh.model.CarRepository
 import com.cartlc.tracker.fresh.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.common.DeviceHelper
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 
 open class BoundAct(

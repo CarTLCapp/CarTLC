@@ -10,8 +10,7 @@ import android.view.MenuItem
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryController
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
-import com.cartlc.tracker.fresh.ui.app.TBApplication
-import com.cartlc.tracker.ui.base.BaseActivity
+import com.cartlc.tracker.fresh.ui.base.BaseActivity
 import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
@@ -27,9 +26,6 @@ class MainActivity : BaseActivity() {
         get() = componentRoot.factoryViewMvc
     private val factoryController: FactoryController
         get() = componentRoot.factoryController
-
-    private val app: TBApplication
-        get() = applicationContext as TBApplication
 
     private lateinit var controller: MainController
 
@@ -47,7 +43,7 @@ class MainActivity : BaseActivity() {
         controller.softKeyboardDetect = SoftKeyboardDetect(root)
         content.addView(viewMvc.rootView)
 
-        title = app.versionedTitle
+        title = controller.versionedTitle
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,

@@ -107,29 +107,17 @@ class TBApplication : Application() {
         }
     }
 
-    val versionedTitle: String
-        get() {
-            val sbuf = StringBuilder()
-            sbuf.append(getString(R.string.app_name))
-            sbuf.append(" - ")
-            try {
-                sbuf.append(version)
-            } catch (ex: Exception) {
-                ReportError(ex, TBApplication::class.java, "versionedTitle", "main")
-            }
-            return sbuf.toString()
-        }
-
     private lateinit var carRepo: CarRepository
     private lateinit var prefHelper: PrefHelper
     private lateinit var dm: DatabaseManager
+    private lateinit var dcRx: DCServerRx
+    private lateinit var vehicleRepository: VehicleRepository
+
     lateinit var componentRoot: ComponentRoot
     lateinit var amazonHelper: AmazonHelper
     lateinit var flowUseCase: FlowUseCase
     lateinit var ping: DCPing
-    lateinit var dcRx: DCServerRx
     lateinit var vehicleViewModel: VehicleViewModel
-    lateinit var vehicleRepository: VehicleRepository
 
     val repo: CarRepository
         get() = carRepo
@@ -138,17 +126,7 @@ class TBApplication : Application() {
         get() = dm
 
     val version: String
-        @Throws(PackageManager.NameNotFoundException::class)
-        get() {
-            val sbuf = StringBuilder()
-            val version = packageManager.getPackageInfo(packageName, 0).versionName
-            sbuf.append("v")
-            sbuf.append(version)
-            if (prefHelper.isDevelopment) {
-                sbuf.append("d")
-            }
-            return sbuf.toString()
-        }
+        get() = componentRoot.deviceHelper.version
 
     override fun onCreate() {
         super.onCreate()

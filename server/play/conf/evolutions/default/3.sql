@@ -35,11 +35,11 @@ create table flow_element_collection (
 alter table flow_element_collection add constraint c_fec_flow_id foreign key (flow_id) references flow (id) on delete restrict on update restrict;
 alter table flow_element_collection add constraint c_fec_flow_element_id foreign key (flow_element_id) references flow_element (id) on delete restrict on update restrict;
 
-alter table entry_note_collection add picture_collection_id int;
+alter table picture_collection add flow_element_id int default 0;
 
 # --- !Downs
 
-alter table entry_note_collection drop picture_collection_id;
+alter table picture_collection drop flow_element_id;
 alter table flow_element_collection drop foreign key c_fec_flow_id;
 alter table flow_element_collection drop foreign key c_fec_flow_element_id;
 drop table if exists flow_element_collection;

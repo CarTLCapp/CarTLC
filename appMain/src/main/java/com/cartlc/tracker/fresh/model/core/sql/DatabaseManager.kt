@@ -24,12 +24,15 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
         private const val DATABASE_VERSION = 20
     }
 
-    private var dbHelper: DatabaseHelper
-    private var dbSql: SQLiteDatabase
+    private val dbHelper: DatabaseHelper by lazy {
+        DatabaseHelper(ctx, this)
+    }
+    private val dbSql: SQLiteDatabase by lazy {
+        dbHelper.writableDatabase
+    }
 
     init {
-        dbHelper = DatabaseHelper(ctx, this)
-        dbSql = dbHelper.writableDatabase
+        dbSql
     }
 
     private class DatabaseHelper(
@@ -237,6 +240,10 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     override val tableString: TableString
         get() = dbHelper.tableString
+
+    override val noteHelper: NoteHelper by lazy {
+        NoteHelperImpl(this)
+    }
 
     override fun reportError(ex: Exception, claz: Class<*>, function: String, type: String): String =
             TBApplication.ReportError(ex, claz, function, type)

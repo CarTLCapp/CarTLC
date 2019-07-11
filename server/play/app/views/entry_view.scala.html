@@ -69,22 +69,36 @@
 
         <h1 id="pictureTitle">Pictures</h1>
 
-        <table class="pictures zebra-striped">
-            <thead>
-            <tr>
-                <th>Picture</th>
-                <th>Note</th>
-            </tr>
-            </thead>
-            <tbody>
-                @for(item <- entry.getPictures()) {
-                    <tr>
-                        <td><img src='@routes.EntryController.getImage(item.picture)'/></td>
-                        <td>@item.note</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        @for(element <- entry.getFlowElements()) {
+
+            <h2 id="sectionTitle">@element.prompt</h2>
+
+            @if(element.hasNotes()) {
+
+                <table class="notes zebra-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for(note <- element.getNoteValues()) {
+                            <tr>
+                                <td>@note.getName()</td>
+                                <td>@note.note_value</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+
+            @for(picture <- element.getPictures()) {
+                <img src='@routes.EntryController.getImage(picture.picture)'/>
+            }
+
+        }
     }
 
     @if(client.is_admin) {

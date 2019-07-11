@@ -3,7 +3,10 @@
  */
 package com.cartlc.tracker.fresh.ui.picture.item
 
-interface PictureListItemViewMvc: PictureListThumbnailItemViewMvc {
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
+import java.io.File
+
+interface PictureListItemViewMvc: ViewMvc {
 
     interface Listener {
         fun onRemoveClicked()
@@ -11,6 +14,8 @@ interface PictureListItemViewMvc: PictureListThumbnailItemViewMvc {
         fun onCcwClicked()
     }
 
+    var loading: String?
+    fun bindPicture(pictureFile: File?)
     fun bindListener(listener: Listener)
 
 }

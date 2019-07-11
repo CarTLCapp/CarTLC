@@ -6,7 +6,7 @@ import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
-import com.cartlc.tracker.ui.base.BaseActivity
+import com.cartlc.tracker.fresh.ui.base.BaseActivity
 
 class ButtonsView(
         context: Context,

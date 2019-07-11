@@ -303,8 +303,9 @@ class PrefHelper constructor(
         get() = db.tableNote.noteTruckNumber?.value
         set(value) { db.tableNote.noteTruckNumber?.value = value }
 
-    val truckDamageValue: String?
+    private var truckDamageValue: String?
         get() = db.tableNote.noteTruckDamage?.value
+        set(value) { db.tableNote.noteTruckDamage?.value = value }
 
     var truckHasDamage: Boolean?
         get() {
@@ -378,7 +379,7 @@ class PrefHelper constructor(
         setInt(CONFIRM_PROMPT_PREFIX + prompt, if (value) 1 else 0)
     }
 
-    fun clearConfirmValues() {
+    private fun clearConfirmValues() {
         val editor = prefs.edit()
         val map = prefs.all
         for (key in map.keys) {
@@ -447,6 +448,7 @@ class PrefHelper constructor(
 
     fun clearLastEntry() {
         truckNumberValue = null
+        truckDamageValue = null
         truckHasDamage = null
         setKeyValue(KEY_TRUCK, null)
         status = null
@@ -592,9 +594,6 @@ class PrefHelper constructor(
         val truck = entry.truck
         if (truck != null) {
             truckNumberValue = truck.truckNumberValue
-            // TODO: Don't think I need this anymore as it is already there to be referenced fine.
-//            truckNumberPictureId = truck.truckNumberPictureId
-//            truckDamagePictureId = truck.truckDamagePictureId
             truckHasDamage = truck.truckHasDamage
         } else {
             truckNumberValue = null

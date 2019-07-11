@@ -16,6 +16,10 @@ import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvc
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.item.*
+import com.cartlc.tracker.fresh.ui.listentries.ListEntriesViewMvc
+import com.cartlc.tracker.fresh.ui.listentries.ListEntriesViewMvcImpl
+import com.cartlc.tracker.fresh.ui.listentries.item.ListEntriesItemViewMvc
+import com.cartlc.tracker.fresh.ui.listentries.item.ListEntriesItemViewMvcImpl
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvc
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvcImpl
 import com.cartlc.tracker.fresh.ui.main.MainViewMvc
@@ -95,20 +99,16 @@ class FactoryViewMvc(
         return PictureListItemViewMvcImpl(getInflater(container), container)
     }
 
-    fun allocPictureListThumbnailItemViewMvc(container: ViewGroup?): PictureListThumbnailItemViewMvc {
-        return PictureListThumbnailItemViewMvcImpl(getInflater(container), container)
-    }
-
     fun allocPictureNoteItemViewMvc(container: ViewGroup?): PictureNoteItemViewMvc {
         return PictureNoteItemViewMvcImpl(getInflater(container), container)
     }
 
-    fun allocPictureNoteThumbnailItemViewMvc(container: ViewGroup?): PictureNoteThumbnailItemViewMvc {
-        return PictureNoteThumbnailItemViewMvcImpl(getInflater(container), container)
-    }
-
     fun allocMainViewMvc(container: ViewGroup?, factoryViewHelper: FactoryViewHelper): MainViewMvc {
         return MainViewMvcImpl(getInflater(container), container, factoryViewHelper)
+    }
+
+    fun allocListEntriesViewMvc(container: ViewGroup?): ListEntriesViewMvc {
+        return ListEntriesViewMvcImpl(getInflater(container), container, this)
     }
 
     fun allocConfirmPictureItemViewMvc(container: ViewGroup?): ConfirmPictureItemViewMvc {
@@ -134,4 +134,9 @@ class FactoryViewMvc(
     fun allocConfirmPictureViewMvc(container: ViewGroup?): ConfirmPictureViewMvc {
         return ConfirmPictureViewMvcImpl(getInflater(container), container, this)
     }
+
+    fun allocListEntriesViewItemViewMvc(container: ViewGroup): ListEntriesItemViewMvc {
+        return ListEntriesItemViewMvcImpl(getInflater(container), container)
+    }
+
 }

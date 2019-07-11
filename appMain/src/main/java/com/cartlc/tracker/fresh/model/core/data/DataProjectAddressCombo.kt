@@ -93,7 +93,19 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
         }
 
     val entries: List<DataEntry>
-        get() = db.tableEntry.queryForProjectAddressCombo(id)
+        get() {
+            return if (isRootProject) {
+                val list = mutableListOf<DataEntry>()
+                for (item in db.tableProjectAddressCombo.query()) {
+                    if (!item.isRootProject && item.rootName == rootName && item.addressId == addressId) {
+                        list.addAll(db.tableEntry.queryForProjectAddressCombo(item.id))
+                    }
+                }
+                list
+            } else {
+                db.tableEntry.queryForProjectAddressCombo(id)
+            }
+        }
 
     fun reset(projectNameId: Long, addressId: Long) {
         this.projectNameId = projectNameId

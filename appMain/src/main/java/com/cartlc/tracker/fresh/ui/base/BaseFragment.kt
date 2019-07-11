@@ -1,4 +1,4 @@
-package com.cartlc.tracker.ui.base
+package com.cartlc.tracker.fresh.ui.base
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

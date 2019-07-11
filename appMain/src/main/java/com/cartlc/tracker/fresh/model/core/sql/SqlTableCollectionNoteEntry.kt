@@ -117,6 +117,25 @@ class SqlTableCollectionNoteEntry(
         return list
     }
 
+    override fun query(collectionId: Long, noteId: Long): DataNote? {
+        var note: DataNote? = null
+        try {
+            val columns = arrayOf(KEY_VALUE)
+            val selection = "$KEY_COLLECTION_ID=? AND $KEY_NOTE_ID=?"
+            val selectionArgs = arrayOf(collectionId.toString(), noteId.toString())
+            val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
+            val idxValueId = cursor.getColumnIndex(KEY_VALUE)
+            if (cursor.moveToNext()) {
+                note = db.tableNote.query(noteId) // Fill out with original values.
+                note!!.value = cursor.getString(idxValueId) // override
+            }
+            cursor.close()
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableCollectionNoteEntry::class.java, "query()", "db")
+        }
+        return note
+    }
+
     private fun removeCollection(collection_id: Long) {
         val where = "$KEY_COLLECTION_ID=?"
         val whereArgs = arrayOf(java.lang.Long.toString(collection_id))

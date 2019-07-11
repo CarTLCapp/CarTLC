@@ -14,6 +14,8 @@ import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalController
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvc
+import com.cartlc.tracker.fresh.ui.listentries.ListEntriesController
+import com.cartlc.tracker.fresh.ui.listentries.ListEntriesViewMvc
 import com.cartlc.tracker.fresh.ui.login.LoginController
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvc
 import com.cartlc.tracker.fresh.ui.main.MainController
@@ -72,6 +74,10 @@ class FactoryController(
 
     fun allocMainController(boundAct: BoundAct, viewMvc: MainViewMvc): MainController {
         return MainController(boundAct, viewMvc)
+    }
+
+    fun allocListEntriesController(boundAct: BoundAct, viewMvc: ListEntriesViewMvc): ListEntriesController {
+        return ListEntriesController(boundAct, viewMvc)
     }
 
 }

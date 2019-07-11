@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package models;
 
@@ -19,6 +19,10 @@ import play.Logger;
 
 /**
  * User entity managed by Ebean
+ *
+ * NOTE: This whole class is an obsolete idea.
+ * What has replaced this, is a unique note data value with an associated unique picture. No need
+ * for an entire table.
  */
 @Entity
 public class Truck extends com.avaje.ebean.Model {

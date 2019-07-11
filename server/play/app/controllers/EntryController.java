@@ -536,6 +536,7 @@ public class EntryController extends Controller {
                 entry = existing;
             }
         }
+        // This is OLD SCHOOL:
         int truck_id;
         String truck_number;
         String license_plate;
@@ -562,6 +563,17 @@ public class EntryController extends Controller {
         } else {
             license_plate = null;
         }
+        if (truck_number == null && license_plate == null && truck_id == 0) {
+            // In flow style this is okay. So just ignore this.
+        } else {
+            // Old pre-flow school:
+
+            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
+            // The reason is that other techs don't need to know about a local techs truck updates.
+            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_id, truck_number, license_plate, entry.tech_id);
+            entry.truck_id = truck.id;
+        }
+
         value = json.findValue("project_id");
         if (value == null) {
             missing.add("project_id");
@@ -606,16 +618,6 @@ public class EntryController extends Controller {
                 Technician.AddReloadCode(entry.tech_id, 'c');
                 return badRequest2("address: no such company with ID " + entry.company_id);
             }
-        }
-        if (truck_number == null && license_plate == null && truck_id == 0) {
-            missing.add("truck_id");
-            missing.add("truck_number");
-            missing.add("license_plate");
-        } else {
-            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
-            // The reason is that other techs don't need to know about a local techs truck updates.
-            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_id, truck_number, license_plate, entry.tech_id);
-            entry.truck_id = truck.id;
         }
         value = json.findValue("equipment");
         if (value != null) {
@@ -693,9 +695,19 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     PictureCollection collection = new PictureCollection();
                     collection.collection_id = (long) collection_id;
+                    // This reference is old school. Will not be seen in flow style:
                     JsonNode subValue = ele.findValue("note");
                     if (subValue != null) {
                         collection.note = subValue.textValue();
+                    }
+                    // The new way:
+                    JsonNode flowElementIdValue = ele.findValue("flow_element_id");
+                    if (flowElementIdValue != null) {
+                        long flowElementId = flowElementIdValue.longValue();
+                        collection.flow_element_id = flowElementId;
+                    } else {
+                        JsonNode flowStageValue = ele.findValue("flow_stage");
+
                     }
                     subValue = ele.findValue("filename");
                     if (subValue == null) {
@@ -730,11 +742,6 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     EntryNoteCollection collection = new EntryNoteCollection();
                     collection.collection_id = (long) collection_id;
-                    JsonNode pictureValue = ele.findValue("picture");
-                    if (pictureValue != null) {
-                        long appId = pictureValue.longValue();
-                        collection.picture_collection_id = pictureIdMap.get(appId);
-                    }
                     JsonNode subValue = ele.findValue("id");
                     if (subValue == null) {
                         subValue = ele.findValue("name");

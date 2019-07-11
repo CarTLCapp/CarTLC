@@ -70,6 +70,7 @@ class MainController(
     private val serviceUseCase = boundAct.componentRoot.serviceUseCase
     private val locationUseCase = boundAct.locationUseCase
     private val screenNavigator = boundAct.screenNavigator
+    private val deviceHelper = boundAct.componentRoot.deviceHelper
     private val dialogHelper = boundAct.dialogHelper
     private val dialogNavigator = boundAct.dialogNavigator
     private val permissionHelper = boundAct.componentRoot.permissionHelper
@@ -91,6 +92,19 @@ class MainController(
 
         error.observe(boundAct.act, Observer<ErrorMessage> { message -> showError(message) })
     }
+
+    val versionedTitle: String
+        get() {
+            val sbuf = StringBuilder()
+            sbuf.append(messageHandler.getString(StringMessage.app_name))
+            sbuf.append(" - ")
+            try {
+                sbuf.append(deviceHelper.version)
+            } catch (ex: Exception) {
+                TBApplication.ReportError(ex, MainController::class.java, "versionedTitle", "main")
+            }
+            return sbuf.toString()
+        }
 
     var softKeyboardDetect: SoftKeyboardDetect? = null
         set(value) {

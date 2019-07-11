@@ -1,4 +1,4 @@
-package com.cartlc.tracker.ui.base
+package com.cartlc.tracker.fresh.ui.base
 
 import android.os.Bundle
 import android.view.View
@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.content_main.*
 
 abstract class BaseActivity : AppCompatActivity() {
 
-    protected lateinit var dialogHelper: DialogHelper
+    private lateinit var dialogHelper: DialogHelper // TODO: This is to be obsoleted in favor of DialogNavigator
 
     lateinit var boundAct: BoundAct
     lateinit var componentRoot: ComponentRoot
@@ -30,33 +30,6 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         dialogHelper.clearDialog()
-    }
-
-    fun showError(error: ErrorMessage) {
-        return showError(componentRoot.messageHandler.getErrorMessage(error))
-    }
-
-    private fun showError(error: String) {
-        dialogHelper.showError(error, object : DialogHelper.DialogListener {
-            override fun onOkay() { onErrorDialogOkay() }
-            override fun onCancel() {}
-        })
-    }
-
-    protected open fun onErrorDialogOkay() {}
-
-    fun showEntryHint(entryHint: EntryHint) {
-        if (entryHint.message.isNotEmpty()) {
-            list_entry_hint.text = entryHint.message
-            if (entryHint.isError) {
-                list_entry_hint.setTextColor(ContextCompat.getColor(this, R.color.entry_error_color))
-            } else {
-                list_entry_hint.setTextColor(ContextCompat.getColor(this, android.R.color.white))
-            }
-            list_entry_hint.visibility = View.VISIBLE
-        } else {
-            list_entry_hint.visibility = View.GONE
-        }
     }
 
 }

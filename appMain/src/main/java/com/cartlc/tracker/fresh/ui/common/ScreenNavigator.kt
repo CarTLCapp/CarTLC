@@ -14,9 +14,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
-import com.cartlc.tracker.ui.act.ListProjectEntriesActivity
 import com.cartlc.tracker.ui.act.VehicleActivity
 import com.cartlc.tracker.fresh.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.listentries.ListEntriesActivity
 import com.cartlc.tracker.ui.util.CheckError
 import java.io.File
 
@@ -77,7 +77,7 @@ class ScreenNavigator(
     }
 
     fun showViewProjectActivity(requestCode: Int) {
-        val intent = Intent(act, ListProjectEntriesActivity::class.java)
+        val intent = Intent(act, ListEntriesActivity::class.java)
         act.startActivityForResult(intent, requestCode)
     }
 
@@ -97,5 +97,14 @@ class ScreenNavigator(
         val i = Intent(Intent.ACTION_VIEW)
         i.data = Uri.parse(PRIVACY_POLICY_URL)
         act.startActivity(i)
+    }
+
+    fun finish(result: Int) {
+        act.setResult(result)
+        act.finish()
+    }
+
+    fun setResult(result: Int) {
+        act.setResult(result)
     }
 }

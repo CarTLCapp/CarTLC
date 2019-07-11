@@ -1,27 +1,28 @@
-/**
+/*
  * Copyright 2019, FleetTLC. All rights reserved
  */
-package com.cartlc.tracker.fresh.ui.picture
+package com.cartlc.tracker.fresh.ui.listentries
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
-import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
+import com.cartlc.tracker.fresh.ui.listentries.item.ListEntriesItemViewMvc
 
-class PictureListAdapter(
+class ListEntriesAdapter(
         private val viewMvcFactory: FactoryViewMvc,
         private val listener: Listener
-) : RecyclerView.Adapter<PictureListAdapter.MyViewHolder>() {
+) : RecyclerView.Adapter<ListEntriesAdapter.MyViewHolder>() {
+
 
     interface Listener {
-        val pictureCount: Int
-        fun onBindViewHolder(itemViewMvc: ViewMvc, position: Int)
+        val itemCount: Int
+        fun onBindViewHolder(itemViewMvc: ListEntriesItemViewMvc, position: Int)
     }
 
-    class MyViewHolder(val viewMvc: ViewMvc) : RecyclerView.ViewHolder(viewMvc.rootView)
+    class MyViewHolder(val viewMvc: ListEntriesItemViewMvc) : RecyclerView.ViewHolder(viewMvc.rootView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        return MyViewHolder(viewMvcFactory.allocPictureListItemViewMvc(parent))
+        return MyViewHolder(viewMvcFactory.allocListEntriesViewItemViewMvc(parent))
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
@@ -29,7 +30,7 @@ class PictureListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return listener.pictureCount
+        return listener.itemCount
     }
 
 }

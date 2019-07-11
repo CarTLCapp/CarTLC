@@ -16,7 +16,6 @@ class DataNote {
     var value: String? = null
     var type: Type? = null
     var numDigits: Short = 0
-    var dataPictureId: Long = 0
     var serverId: Int = 0
     var isBootStrap: Boolean = false
 

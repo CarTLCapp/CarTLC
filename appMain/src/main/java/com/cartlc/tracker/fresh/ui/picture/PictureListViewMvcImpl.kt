@@ -39,35 +39,17 @@ class PictureListViewMvcImpl(
         val linearLayoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         noteList.layoutManager = linearLayoutManager
         noteList.adapter = noteListAdapter
-        layout()
+        pictureList.layoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        pictureList.adapter = pictureListAdapter
     }
 
     override fun onPictureRefreshNeeded() {
         pictureListAdapter.notifyDataSetChanged()
         noteListAdapter.notifyDataSetChanged()
-        layout()
-    }
 
-    private fun layout() {
-        if (listener?.isThumbnail == true) {
-            pictureList.layoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            pictureList.adapter = pictureListAdapter
-            val params = pictureList.layoutParams as ConstraintLayout.LayoutParams
-            params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-            rootView.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-        } else {
-            pictureList.layoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            pictureList.adapter = pictureListAdapter
-            val params = pictureList.layoutParams as ConstraintLayout.LayoutParams
-            params.height = 0
-            rootView.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-        }
     }
 
     // region PictureListAdapter.Listener & PictureListItemNoteAdapter.Listener
-
-    override val isThumbnail: Boolean
-        get() = listener?.isThumbnail ?: false
 
     override fun onBindViewHolder(itemViewMvc: ViewMvc, position: Int) {
         listener?.onBindViewHolder(itemViewMvc, position)

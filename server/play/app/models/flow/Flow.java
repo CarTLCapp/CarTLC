@@ -43,6 +43,16 @@ public class Flow extends com.avaje.ebean.Model {
         return null;
     }
 
+    public static Flow getByProjectId(long project_id) {
+        List<Flow> list = find.where()
+                .eq("sub_project_id", project_id)
+                .findList();
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
     public List<FlowElement> getFlowElements() {
         return FlowElementCollection.findElementsByFlowId(id);
     }

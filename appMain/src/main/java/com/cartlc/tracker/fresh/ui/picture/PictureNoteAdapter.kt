@@ -14,7 +14,6 @@ class PictureNoteAdapter(
 ) : RecyclerView.Adapter<PictureNoteAdapter.MyViewHolder>() {
 
     interface Listener {
-        val isThumbnail: Boolean
         val noteCount: Int
         fun onBindViewHolder(itemViewMvc: ViewMvc, position: Int)
     }
@@ -22,10 +21,7 @@ class PictureNoteAdapter(
     class MyViewHolder(val viewMvc: ViewMvc) : RecyclerView.ViewHolder(viewMvc.rootView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        return if (listener.isThumbnail)
-            MyViewHolder(viewMvcFactory.allocPictureNoteThumbnailItemViewMvc(parent))
-        else
-            MyViewHolder(viewMvcFactory.allocPictureNoteItemViewMvc(parent))
+        return MyViewHolder(viewMvcFactory.allocPictureNoteItemViewMvc(parent))
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {

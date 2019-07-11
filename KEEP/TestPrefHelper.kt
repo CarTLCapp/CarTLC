@@ -110,28 +110,28 @@ class TestPrefHelper {
         assertEquals("Company\nStreet\nCity, IL 60626", prefHelper.address)
     }
 
-    @Test
-    fun verifyTruckValue() {
-        prefHelper.truckNumber = "123"
-        prefHelper.licensePlate = "ABC"
-        assertEquals("123 : ABC", prefHelper.truckValue)
-
-        prefHelper.truckNumber = null
-        prefHelper.licensePlate = "ABC"
-        assertEquals("ABC", prefHelper.truckValue)
-
-        prefHelper.truckNumber = ""
-        prefHelper.licensePlate = "ABC"
-        assertEquals("ABC", prefHelper.truckValue)
-
-        prefHelper.truckNumber = "123"
-        prefHelper.licensePlate = ""
-        assertEquals("123", prefHelper.truckValue)
-
-        prefHelper.truckNumber = "123"
-        prefHelper.licensePlate = null
-        assertEquals("123", prefHelper.truckValue)
-    }
+//    @Test
+//    fun verifyTruckValue() {
+//        prefHelper.truckNumber = "123"
+//        prefHelper.licensePlate = "ABC"
+//        assertEquals("123 : ABC", prefHelper.truckValue)
+//
+//        prefHelper.truckNumber = null
+//        prefHelper.licensePlate = "ABC"
+//        assertEquals("ABC", prefHelper.truckValue)
+//
+//        prefHelper.truckNumber = ""
+//        prefHelper.licensePlate = "ABC"
+//        assertEquals("ABC", prefHelper.truckValue)
+//
+//        prefHelper.truckNumber = "123"
+//        prefHelper.licensePlate = ""
+//        assertEquals("123", prefHelper.truckValue)
+//
+//        prefHelper.truckNumber = "123"
+//        prefHelper.licensePlate = null
+//        assertEquals("123", prefHelper.truckValue)
+//    }
 
     @Test
     fun verifySaveProjectAndAddressComboNoModifyCurrentNoAddress() {

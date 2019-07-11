@@ -100,9 +100,10 @@ class SqlTableFlowElementNote(
         val selection = "$KEY_FLOW_ELEMENT_ID=?"
         val selectionArgs = arrayOf(flowElementId.toString())
         val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
-        return cursor.count > 0
+        val count = cursor.count > 0
+        cursor.close()
+        return count
     }
-
 
     override fun queryNotes(flowElementId: Long): List<DataNote> {
         val items = query(flowElementId)
@@ -148,7 +149,7 @@ class SqlTableFlowElementNote(
             }
             val note = db.tableNote.query(elementNote.noteId)
             note?.let {
-                sbuf.append("${note.name}")
+                sbuf.append(note.name)
             } ?: run {
                 sbuf.append("NOT FOUND ${elementNote.noteId}")
             }

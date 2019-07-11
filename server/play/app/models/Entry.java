@@ -17,6 +17,7 @@ import com.avaje.ebean.*;
 import modules.AmazonHelper;
 import modules.AmazonHelper.OnDownloadComplete;
 import modules.TimeHelper;
+import models.flow.*;
 import play.Logger;
 
 /**
@@ -102,7 +103,7 @@ public class Entry extends com.avaje.ebean.Model {
     public long note_collection_id;
 
     @Constraints.Required
-    public long truck_id;
+    public long truck_id; // Not used anymore in Flow style.
 
     @Constraints.Required
     public Status status;
@@ -207,6 +208,20 @@ public class Entry extends com.avaje.ebean.Model {
             return "NOT FOUND: " + project_id;
         }
         return project.getRootProjectName();
+    }
+
+    public Flow getFlow() {
+        return Flow.getByProjectId(project_id);
+    }
+
+    public List<FlowElement> getFlowElements() {
+        Flow flow = getFlow();
+        if (flow != null) {
+            List<FlowElement> list = flow.getFlowElements();
+            Collections.sort(list);
+            return list;
+        }
+        return new ArrayList<FlowElement>();
     }
 
     public String getAddressLine() {

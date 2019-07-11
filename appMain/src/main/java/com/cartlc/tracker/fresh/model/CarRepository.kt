@@ -170,7 +170,8 @@ class CarRepository(
                     curFlowValue = EquipmentFlow()
                 } else {
                     curFlowValue = TruckNumberPictureFlow()
-                    // TODO: This is what I want to do but it is weird to have it come up with a picture dispatch first thing.
+                    // TODO: This it the eventual, yet not with a 0 for flowElementId, but having that
+                    // computed based on what is not yet filled up.
 //                    curFlowValue = CustomFlow(0)
                 }
             } else {

@@ -6,7 +6,7 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.cartlc.tracker.ui.act.ListProjectEntriesActivity">
+    tools:context="com.cartlc.tracker.fresh.ui.listentries.ListEntriesActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -22,75 +22,14 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <RelativeLayout
-            android:id="@+id/address_box"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp">
-
-            <Button
-                android:id="@+id/edit_address"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:text="@string/btn_edit"/>
-
-            <TextView
-                android:id="@+id/project_name"
-                style="@style/ProjectFullTextTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_toStartOf="@id/edit_address"
-                tools:text="Project Name"/>
-
-            <TextView
-                android:id="@+id/project_address"
-                style="@style/ProjectFullTextSub"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/project_name"
-                android:layout_toStartOf="@id/edit_address"
-                tools:text="Company Name, 5103 Some Road, Some City, State 99900"/>
-
-        </RelativeLayout>
-
-        <View
-            android:id="@+id/line"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_below="@id/address_box"
-            android:background="@android:color/white"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list_entries"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@id/line"
-            android:layout_marginTop="10dp"/>
-
-        <Button
-            android:id="@+id/delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/line"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
-            android:text="@string/btn_delete"
-            android:visibility="gone"/>
-
-    </RelativeLayout>
+        android:layout_centerHorizontal="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context="com.cartlc.tracker.fresh.ui.listentries.ListEntriesActivity"
+        tools:showIn="@layout/activity_list_entries"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
