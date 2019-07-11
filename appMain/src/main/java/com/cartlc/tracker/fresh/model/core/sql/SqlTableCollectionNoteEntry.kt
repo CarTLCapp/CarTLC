@@ -118,11 +118,10 @@ class SqlTableCollectionNoteEntry(
         return list
     }
 
-    internal fun removeCollection(collection_id: Long) {
+    private fun removeCollection(collection_id: Long) {
         val where = "$KEY_COLLECTION_ID=?"
         val whereArgs = arrayOf(java.lang.Long.toString(collection_id))
         dbSql.delete(TABLE_NAME, where, whereArgs)
     }
-
 
 }

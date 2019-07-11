@@ -90,7 +90,7 @@ public class Note extends Model implements Comparable<Note> {
     public static Finder<Long, Note> find = new Finder<Long, Note>(Note.class);
 
     public static List<Note> list() {
-        return list(false );
+        return list(false);
     }
 
     public static List<Note> list(boolean disabled) {
@@ -102,6 +102,10 @@ public class Note extends Model implements Comparable<Note> {
                 .eq("disabled", disabled)
                 .orderBy(sortBy + " " + order)
                 .findList();
+    }
+
+    public static Note get(long id) {
+        return find.byId(id);
     }
 
     public static boolean isDisabled(long note_id) {

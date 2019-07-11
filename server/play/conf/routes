@@ -101,6 +101,21 @@ GET     /note/:id/enable       controllers.NoteController.enable(id:Long)
 POST    /notes                 controllers.NoteController.queryOldWay()
 POST    /notes/root            controllers.NoteController.queryWithRoot()
 
+### FLOWS ###
+
+GET     /flow                       controllers.FlowController.list()
+GET     /flow/new                   controllers.FlowController.create()
+GET     /flow/:id/edit              controllers.FlowController.edit(id:Long)
+GET     /flow/:id/edit_message/:message     controllers.FlowController.editWithMessage(id:Long, message: String)
+POST    /flow/:id                           controllers.FlowController.save(id:Long)
+GET     /flow/:id/delete                    controllers.FlowController.delete(id:Long)
+GET     /flow/:id/up/:elementId             controllers.FlowController.moveUp(id:Long, elementId:Long)
+GET     /flow/:id/down/:elementId           controllers.FlowController.moveDown(id:Long, elementId:Long)
+GET     /flow/:id/edit_element/:elementId   controllers.FlowController.editElement(id:Long, elementId:Long)
+GET     /flow/:id/delete_element/:elementId controllers.FlowController.deleteElement(id:Long, elementId:Long)
+GET     /flow/:id/add_element               controllers.FlowController.addElement(id:Long)
+POST    /flow/:id/save_element/:elementId   controllers.FlowController.saveElement(id:Long, elementId: Long)
+
 ### CLIENTS ###
 
 GET     /client                controllers.ClientController.list()

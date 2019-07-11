@@ -1,0 +1,80 @@
+@import models.flow.Bit
+@import models.flow.FlowNoteCollection
+@import helper._
+@import b3.vertical.fieldConstructor
+
+@(id: Long, flow_id: Long, flowElementForm: Form[views.formdata.InputFlowElement], client : Client)
+
+@titleOf(id: Long) = @{
+    if (id > 0) {
+        "Fleet TLC - Edit Element Flow";
+    } else {
+        "Fleet TLC - Add Element Flow";
+    }
+}
+
+@buttonOf(id: Long) = @{
+    if (id > 0) {
+        "Update this flow element";
+    } else {
+        "Create this flow element";
+    }
+}
+
+@homeValue() = @{ "/flow/" + flow_id }
+
+@main(titleOf(id), home = homeValue()) {
+    
+    <h1>Add an element to a flow</h1>
+    
+    @b3.form(routes.FlowController.saveElement(flow_id, id)) {
+
+        @CSRF.formField
+
+        <fieldset>
+
+            <h3>Options</h3>
+
+            <div class="checkbox-container">
+
+                @b3.textCheckPrompt(flowElementForm("toastPrompt"), 'placeholder -> "" )(flowElementForm("hasToast"))(flowElementForm("toastSelect"))('_label -> "Toast Prompt")
+                <div style="clear:both;"></div>
+                @b3.textCheckPrompt(flowElementForm("dialogPrompt"), 'placeholder -> "")(flowElementForm("hasDialog"))(flowElementForm("dialogSelect"))('_label -> "OK Dialog")
+                <div style="clear:both;"></div>
+                @b3.checkbox(flowElementForm("hasImage"), '_label -> "Image Request")
+                <div style="clear:both;"></div>
+                @b3.checkbox(flowElementForm("hasGenericNote"), '_label -> "Generic Note Allowed")
+                <div style="clear:both;"></div>
+                @b3.textCheckPrompt(flowElementForm("confirmationPrompt"), 'placeholder -> "")(flowElementForm("hasConfirmation"))(flowElementForm("confirmationSelect"))('_label -> "Confirmation Dialog")
+                <div style="clear:both;"></div>
+
+            </div>
+
+            <h3>Notes</h3>
+
+            <div class="checkbox-container-columns">
+
+                @for(note <- Note.list()) {
+                    @defining(FlowNoteCollection.hasNote(id, note.id)) { flag =>
+                        @b3.checkbox(flowElementForm(note.idString()), '_label -> note.name, 'checked -> flag)
+                    }
+                    <div style="clear:both;"></div>
+                }
+
+            </div>
+
+        <div class="actions">
+            <input type="submit" value="@buttonOf(id)" class="btn primary"> or
+            <a href="@routes.FlowController.edit(flow_id)" class="btn">Cancel</a>
+        </div>
+
+    }
+
+    @if(client.is_admin) {
+        @b3.form(routes.FlowController.deleteElement(flow_id, id), 'class -> "topRight") {
+            @CSRF.formField
+            <input type="submit" value="Delete Element" class="btn danger" onclick="return confirm('Are you sure you wish to delete this element?');">
+        }
+    }
+
+}

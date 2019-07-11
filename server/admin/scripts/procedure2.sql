@@ -21,12 +21,19 @@ use cartlc
 source dump-...
 
 6. Now the data is in there, but unfortunately against the wrong evolution version.
+   And the new tables have not been removed by the source.
    So execute this:
 	DELETE FROM `play_evolutions` WHERE `play_evolutions`.`id` = 2;
+	DELETE FROM `play_evolutions` WHERE `play_evolutions`.`id` = 3;
 	drop table if exists root_project;
 	drop table if exists client_association;
 	drop table if exists client_note_association;
 	drop table if exists client_equipment_association;
+	drop table if exists flow;
+	drop table if exists flow_element_collection;
+	drop table if exists flow_element;
+	drop table if exists flow_note_collection;
+	drop table if exists prompt;
 	drop table if exists entry_v2;
 	drop table if exists truck_v6;
 

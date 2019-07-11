@@ -15,10 +15,10 @@ alter table technician add code int default 0;
 create table client_association (
     id              int auto_increment primary key,
     client_id       int,
-    show_pictures   int default 0,
-    show_trucks     int default 0,
-    show_all_notes  int default 0,
-    show_all_equipments  int default 0
+    show_pictures   bit default 0,
+    show_trucks     bit default 0,
+    show_all_notes  bit default 0,
+    show_all_equipments bit default 0
 );
 
 create table client_note_association (

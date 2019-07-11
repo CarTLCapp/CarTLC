@@ -266,7 +266,7 @@ class SqlTableEntry(
             val idxDate = cursor.getColumnIndex(KEY_DATE)
             val idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID)
             val idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID)
-            val idxNotetCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID)
+            val idxNoteCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID)
             val idxTruckId = cursor.getColumnIndex(KEY_TRUCK_ID)
             val idxStatus = cursor.getColumnIndex(KEY_STATUS)
             val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
@@ -293,8 +293,8 @@ class SqlTableEntry(
                     val pictureCollectionId = cursor.getLong(idxPictureCollectionId)
                     entry.pictureCollection = db.tablePictureCollection.query(pictureCollectionId)
                 }
-                if (!cursor.isNull(idxNotetCollectionId)) {
-                    entry.noteCollectionId = cursor.getLong(idxNotetCollectionId)
+                if (!cursor.isNull(idxNoteCollectionId)) {
+                    entry.noteCollectionId = cursor.getLong(idxNoteCollectionId)
                 }
                 if (!cursor.isNull(idxTruckId)) {
                     entry.truckId = cursor.getLong(idxTruckId)

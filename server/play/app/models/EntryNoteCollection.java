@@ -33,6 +33,9 @@ public class EntryNoteCollection extends Model {
     @Constraints.Required
     public String note_value;
 
+    @Constraints.Required
+    public Long picture_collection_id; // NOTE: This references PictureCollection.id NOT PictureCollection.collection_id
+
     public static Finder<Long,EntryNoteCollection> find = new Finder<Long,EntryNoteCollection>(EntryNoteCollection.class);
 
     public String getName() {
@@ -114,7 +117,6 @@ public class EntryNoteCollection extends Model {
             Logger.info(sbuf.toString());
         }
     }
-
 
     public static void replace(long collection_id, List<Note> notes) {
         deleteByCollectionId(collection_id);

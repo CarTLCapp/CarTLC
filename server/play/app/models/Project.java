@@ -179,6 +179,7 @@ public class Project extends Model implements Comparable<Project> {
         }
         return result;
     }
+
     public String getEquipmentsLine() {
         List<Equipment> items = ProjectEquipmentCollection.findEquipments(id);
         Collections.sort(items);
