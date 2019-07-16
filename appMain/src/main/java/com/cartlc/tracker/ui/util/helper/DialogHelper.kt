@@ -11,12 +11,15 @@ import android.widget.CompoundButton
 import androidx.appcompat.app.AlertDialog
 
 import com.cartlc.tracker.R
+import com.cartlc.tracker.fresh.model.core.data.DataNote
 
 /**
  * Created by dug on 12/2/17.
  */
 
-class DialogHelper(private var mAct: Activity) {
+class DialogHelper(
+        private var mAct: Activity
+) {
 
     internal var mDialog: AlertDialog? = null
 

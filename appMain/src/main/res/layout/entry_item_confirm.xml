@@ -8,4 +8,4 @@
           android:singleLine="true"
           android:layout_margin="2dp"
           android:padding="10dp"
-          android:textAlignment="inherit"/>
+          android:textAlignment="inherit" />

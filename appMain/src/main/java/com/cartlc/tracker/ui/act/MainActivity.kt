@@ -25,6 +25,7 @@ import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.model.core.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.model.event.EventError
@@ -42,7 +43,11 @@ import com.cartlc.tracker.ui.frag.*
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleView
 import com.cartlc.tracker.ui.stage.StageNavigator
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsView
+import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
+import com.cartlc.tracker.fresh.ui.mainlist.MainListView
 import com.cartlc.tracker.fresh.ui.title.TitleView
+import com.cartlc.tracker.model.flow.Stage
+import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
 import com.cartlc.tracker.viewmodel.main.*
 import com.crashlytics.android.Crashlytics // CRASHLYTICS
@@ -56,7 +61,10 @@ import timber.log.Timber
 import java.io.File
 import java.lang.ref.WeakReference
 
-class MainActivity : BaseActivity(), ActionUseCase.Listener {
+class MainActivity : BaseActivity(),
+        ActionUseCase.Listener,
+        MainListUseCase.Listener
+{
 
     companion object {
 
@@ -82,8 +90,10 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
     lateinit var vm: MainVMHolder
     private lateinit var stageNavigator: StageNavigator
 
-    private val mainListFragment: MainListFragment
-        get() = frame_main_list as MainListFragment
+//    private val mainListFragmentOld: MainListFragment
+//        get() = frame_main_list as MainListFragment
+    private val mainListView: MainListView
+        get() = view_main_list as MainListView
     private val titleView: TitleView
         get() = frame_title as TitleView
     private val buttonsView: ButtonsView
@@ -131,13 +141,14 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         stageNavigator.storeRotation = { storeCommonRotation() }
         stageNavigator.dispatchActionEvent = { event -> onActionChanged(event) }
 
-        val mainListViewModel = mainListFragment.vm
+//        val mainListViewModelOld = mainListFragmentOld.vm
+        val mainListUseCase = mainListView.control
         val entrySimpleControl = entrySimpleView.control
 
         val newProjectHolder = NewProjectVMHolder(
                 boundAct,
                 buttonsUseCase,
-                mainListViewModel,
+                mainListUseCase,
                 titleUseCase,
                 entrySimpleControl
         )
@@ -145,7 +156,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
                 boundAct,
                 newProjectHolder,
                 buttonsUseCase,
-                mainListViewModel,
+                mainListUseCase,
                 titleUseCase,
                 entrySimpleControl
         )
@@ -163,12 +174,13 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         vm.addButtonVisible.observe(this, Observer { visible -> onAddButtonVisibleChanged(visible) })
         vm.framePictureVisible.observe(this, Observer { visible -> onFramePictureVisibleChanged(visible) })
         vm.error.observe(this, Observer<ErrorMessage> { message -> showError(message) })
-        vm.notes = { mainListFragment.notes }
 
         entrySimpleControl.emsValue = resources.getInteger(R.integer.entry_simple_ems)
 
         componentRoot.eventController.register(this)
         title = app.versionedTitle
+
+        mainListView.control.registerListener(this)
 
         getLocation()
     }
@@ -219,6 +231,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         CheckError.instance.cleanup()
         LocationHelper.instance.onDestroy()
         repo.actionUseCase.unregisterListener(this)
+        mainListView.control.unregisterListener(this)
     }
 
     private fun doViewProject() {
@@ -278,9 +291,7 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
             Action.VEHICLES -> doVehicles()
             Action.VEHICLES_PENDING -> doVehiclesPendingDialog()
             Action.GET_LOCATION -> getLocation()
-            Action.SHOW_NOTE_ERROR -> showNoteError(mainListFragment.notes)
             is Action.SHOW_TRUCK_ERROR -> showTruckError(action.entry, action.callback)
-            is Action.SET_MAIN_LIST -> mainListFragment.setList(action.list)
             is Action.SET_PICTURE_LIST -> mPictureAdapter.setList(action.list)
             is Action.SHOW_PICTURE_TOAST -> showPictureToast(action.count)
         }
@@ -338,31 +349,6 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
         }
     }
 
-    private fun showNoteError(notes: List<DataNote>) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(R.string.title_notes)
-        val sbuf = StringBuilder()
-        for (note in notes) {
-            if (note.num_digits > 0 && note.valueLength() > 0 && note.valueLength() != note.num_digits.toInt()) {
-                sbuf.append("    ")
-                sbuf.append(note.name)
-                sbuf.append(": ")
-                sbuf.append(getString(R.string.error_incorrect_note_count, note.valueLength(), note.num_digits))
-                sbuf.append("\n")
-            }
-        }
-        val msg = getString(R.string.error_incorrect_digit_count, sbuf.toString())
-        builder.setMessage(msg)
-        builder.setPositiveButton(android.R.string.yes) { dialog, _ -> showNoteErrorOk(dialog) }
-        builder.setNegativeButton(android.R.string.no) { dialog, _ -> dialog.dismiss() }
-        builder.create().show()
-    }
-
-    private fun showNoteErrorOk(dialog: DialogInterface) {
-        vm.showNoteErrorOk()
-        dialog.dismiss()
-    }
-
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         vm.onRestoreInstanceState(savedInstanceState.getString(KEY_TAKING_PICTURE, null))
         super.onRestoreInstanceState(savedInstanceState)
@@ -418,5 +404,21 @@ class MainActivity : BaseActivity(), ActionUseCase.Listener {
             }
         })
     }
+
+    // region MainListUseCase.Listener
+
+    override fun onEntryHintChanged(entryHint: EntryHint) {
+        showEntryHint(entryHint)
+    }
+
+    override fun onKeyValueChanged(key: String, keyValue: String?) {
+        vm.onKeyValueChanged(key, keyValue)
+    }
+
+    override fun onProjectGroupSelected(projectGroup: DataProjectAddressCombo) {
+        vm.onProjectGroupSelected(projectGroup)
+    }
+
+    // endregion MainListUseCase.Listener
 
 }

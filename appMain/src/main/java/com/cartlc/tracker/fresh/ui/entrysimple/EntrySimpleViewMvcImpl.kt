@@ -94,7 +94,7 @@ class EntrySimpleViewMvcImpl(
         }
 
     override var entryEditTextEms: Int
-        get() = TODO()
+        get() = TODO("not implemented")
         set(value) {
             entryEditText.setEms(value)
         }

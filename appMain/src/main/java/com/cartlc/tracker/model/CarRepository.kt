@@ -22,6 +22,7 @@ open class CarRepository(
         get() = prefHelper.isDevelopment
 
     var companyEditing: String? = null
+    var editProject: Boolean = false
 
     // region Current Flow
 

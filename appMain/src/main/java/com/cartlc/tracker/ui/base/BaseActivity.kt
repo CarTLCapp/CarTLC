@@ -36,7 +36,7 @@ abstract class BaseActivity : AppCompatActivity() {
         return showError(componentRoot.messageHandler.getErrorMessage(error))
     }
 
-    protected fun showError(error: String) {
+    private fun showError(error: String) {
         dialogHelper.showError(error, object : DialogHelper.DialogListener {
             override fun onOkay() { onErrorDialogOkay() }
             override fun onCancel() {}
@@ -59,6 +59,4 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    // region Fragment Management
-    // endregion Fragment Management
 }

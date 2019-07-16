@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.viewmodel.frag
 
@@ -122,7 +122,7 @@ class MainListViewModel(
     override fun onStageChanged(flow: Flow) {
     }
 
-    /// endregion FlowUseCase.Listener
+    // endregion FlowUseCase.Listener
 
     fun onStatusButtonClicked(status: TruckStatus) {
         prefHelper.status = status
@@ -134,7 +134,6 @@ class MainListViewModel(
 
     fun queryForProject(currentProjectGroup: DataProjectAddressCombo): DataCollectionEquipmentProject =
             repo.db.tableCollectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
-
 
     fun updateNoteValue(note: DataNote) {
         repo.db.tableNote.updateValue(note)

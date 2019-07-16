@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.ui.stage.newproject
 
@@ -20,15 +20,15 @@ import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleUseCase
+import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
 import com.cartlc.tracker.fresh.ui.title.TitleUseCase
 import com.cartlc.tracker.ui.util.helper.LocationHelper
-import com.cartlc.tracker.viewmodel.frag.MainListViewModel
 import java.util.*
 
 class NewProjectVMHolder(
         boundAct: BoundAct,
         private val buttonsUseCase: ButtonsUseCase,
-        private val mainListViewModel: MainListViewModel,
+        private val mainListUseCase: MainListUseCase,
         private val titleUseCase: TitleUseCase,
         private val entrySimpleControl: EntrySimpleUseCase
 ) : LifecycleObserver, FlowUseCase.Listener, ButtonsUseCase.Listener {
@@ -109,6 +109,8 @@ class NewProjectVMHolder(
     // region FlowUseCase.Listener
 
     override fun onStageChangedAboutTo(flow: Flow) {
+        mainListUseCase.visible = false
+
         when (flow.stage) {
             Stage.ROOT_PROJECT,
             Stage.COMPANY,
@@ -123,14 +125,15 @@ class NewProjectVMHolder(
                 buttonsUseCase.reset(flow)
                 buttonsUseCase.listener = this
             }
-            else -> {}
+            else -> {
+            }
         }
     }
 
     override fun onStageChanged(flow: Flow) {
         when (flow.stage) {
             Stage.ROOT_PROJECT -> {
-                mainListViewModel.showingValue = true
+                mainListUseCase.visible = true
                 titleUseCase.subTitleText = null
                 titleUseCase.mainTitleVisible = true
                 titleUseCase.subTitleVisible = true
@@ -140,7 +143,7 @@ class NewProjectVMHolder(
             }
             Stage.COMPANY -> {
                 titleUseCase.subTitleText = editProjectHint
-                mainListViewModel.showingValue = true
+                mainListUseCase.visible = true
                 titleUseCase.subTitleText = null
                 titleUseCase.mainTitleVisible = true
                 buttonsUseCase.nextVisible = hasCompanyName
@@ -206,13 +209,16 @@ class NewProjectVMHolder(
 
     private fun setList(msg: StringMessage, key: String, list: List<String>) {
         titleUseCase.mainTitleText = messageHandler.getString(msg)
-        mainListViewModel.curKey = key
+//        mainListViewModel.curKey = key
+        mainListUseCase.key = key
         if (list.isEmpty()) {
-            mainListViewModel.showingValue = false
+//            mainListViewModel.showingValue = false
             onEmptyList()
         } else {
-            mainListViewModel.showingValue = true
-            dispatchActionEvent(Action.SET_MAIN_LIST(list))
+//            mainListViewModel.showingValue = true
+            mainListUseCase.visible = true
+//            dispatchActionEvent(Action.SET_MAIN_LIST(list))
+            mainListUseCase.simpleItems = list
         }
     }
 
@@ -237,13 +243,20 @@ class NewProjectVMHolder(
     // region ButtonsUseCase.Listener
 
     override fun onButtonConfirm(action: Button): Boolean {
+        when (curFlowValue.stage) {
+            Stage.CONFIRM_ADDRESS -> {
+                prefHelper.saveProjectAndAddressCombo(repo.editProject)
+                repo.editProject = false
+            }
+        }
         return true
     }
 
     override fun onButtonEvent(action: Button) {
         when (action) {
             Button.BTN_NEXT -> repo.companyEditing = null
-            else -> {}
+            else -> {
+            }
         }
         curFlowValue.process(action)
     }
@@ -257,7 +270,8 @@ class NewProjectVMHolder(
         titleUseCase.subTitleText = if (isEditing) editProjectHint else curProjectHint
         titleUseCase.mainTitleVisible = true
         titleUseCase.subTitleVisible = true
-        mainListViewModel.showingValue = true
+//        mainListViewModel.showingValue = true
+        mainListUseCase.visible = true
         buttonsUseCase.nextVisible = false
         val company = prefHelper.company
         val zipcode = prefHelper.zipCode
@@ -290,10 +304,12 @@ class NewProjectVMHolder(
             setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
         } else {
             setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
-
-            if (mainListViewModel.keyValue == null) {
+            if (mainListUseCase.keyValue != null) {
                 buttonsUseCase.nextVisible = true
             }
+//            if (mainListViewModel.keyValue == null) {
+//                buttonsUseCase.nextVisible = true
+//            }
             buttonsUseCase.centerVisible = true
         }
     }
@@ -349,11 +365,15 @@ class NewProjectVMHolder(
             }
         } else {
             entrySimpleControl.entryTextValue = hint
-            mainListViewModel.showingValue = true
+//            mainListViewModel.showingValue = true
+            mainListUseCase.visible = true
             setList(StringMessage.title_city, PrefHelper.KEY_CITY, cities)
-            if (mainListViewModel.keyValue == null) {
+            if (mainListUseCase.keyValue != null) {
                 buttonsUseCase.nextVisible = true
             }
+//            if (mainListViewModel.keyValue == null) {
+//                buttonsUseCase.nextVisible = true
+//            }
             buttonsUseCase.centerVisible = true
         }
     }
@@ -413,9 +433,13 @@ class NewProjectVMHolder(
         } else {
             entrySimpleControl.helpValue = hint
             buttonsUseCase.centerVisible = true
-            mainListViewModel.showingValue = true
+//            mainListViewModel.showingValue = true
+            mainListUseCase.visible = true
             setList(StringMessage.title_street, PrefHelper.KEY_STREET, streets)
-            if (mainListViewModel.keyValue == null) {
+//            if (mainListViewModel.keyValue == null) {
+//                buttonsUseCase.nextVisible = true
+//            }
+            if (mainListUseCase.keyValue != null) {
                 buttonsUseCase.nextVisible = true
             }
         }

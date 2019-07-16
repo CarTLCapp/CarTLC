@@ -11,15 +11,18 @@ import com.callassistant.util.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
+import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
+import com.cartlc.tracker.fresh.ui.mainlist.adapter.SimpleListAdapter
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.NoteListAdapter
 import com.cartlc.tracker.ui.list.PictureThumbnailListAdapter
-import com.cartlc.tracker.ui.list.SimpleListAdapter
 
 class ConfirmViewMvcImpl(
         inflater: LayoutInflater,
-        container: ViewGroup?
-) : ObservableViewMvcImpl<ConfirmViewMvc.Listener>(), ConfirmViewMvc {
+        container: ViewGroup?,
+        factoryViewMvc: FactoryViewMvc
+) : ObservableViewMvcImpl<ConfirmViewMvc.Listener>(), ConfirmViewMvc
+{
 
     override val rootView: View = inflater.inflate(R.layout.frame_confirm, container, false) as ViewGroup
 
@@ -28,7 +31,7 @@ class ConfirmViewMvcImpl(
     private val equipmentGrid = findViewById<RecyclerView>(R.id.equipment_grid)
     private val notesList = findViewById<RecyclerView>(R.id.notes_list)
     private val confirmPictureList = findViewById<RecyclerView>(R.id.confirm_pictures_list)
-    private val equipmentListAdapter: SimpleListAdapter
+    private val equipmentListAdapter: SimpleListAdapter = SimpleListAdapter(factoryViewMvc, R.layout.entry_item_confirm, null)
     private val noteAdapter: NoteListAdapter
     private val pictureAdapter: PictureThumbnailListAdapter
     private val projectNameValue = findViewById<TextView>(R.id.project_name_value)
@@ -38,7 +41,6 @@ class ConfirmViewMvcImpl(
     private val confirmPicturesLabel = findViewById<TextView>(R.id.confirm_pictures_label)
 
     init {
-        equipmentListAdapter = SimpleListAdapter(ctx, R.layout.entry_item_confirm)
         equipmentGrid.adapter = equipmentListAdapter
         val gridLayout = GridLayoutManager(ctx, 2)
         equipmentGrid.layoutManager = gridLayout
@@ -53,7 +55,9 @@ class ConfirmViewMvcImpl(
 
     override var projectName: String
         get() = projectNameValue.text.toString()
-        set(value) { projectNameValue.text = value }
+        set(value) {
+            projectNameValue.text = value
+        }
 
     override var projectAddress: String?
         get() = projectAddressValue.text.toString()
@@ -71,22 +75,31 @@ class ConfirmViewMvcImpl(
 
     override var status: String
         get() = statusValue.text.toString()
-        set(value) { statusValue.text = value }
+        set(value) {
+            statusValue.text = value
+        }
 
     override var pictureLabel: String
         get() = confirmPicturesLabel.text.toString()
-        set(value) { confirmPicturesLabel.text = value }
+        set(value) {
+            confirmPicturesLabel.text = value
+        }
 
     override var notes: List<DataNote>
         get() = TODO("not implemented")
-        set(value) { noteAdapter.setItems(value) }
+        set(value) {
+            noteAdapter.setItems(value)
+        }
 
     override var equipmentNames: List<String>
         get() = TODO("not implemented")
-        set(value) { equipmentListAdapter.items = value }
+        set(value) {
+            equipmentListAdapter.items = value
+        }
 
     override var pictures: MutableList<DataPicture>
         get() = TODO("not implemented")
-        set(value) { pictureAdapter.setList(value) }
-
+        set(value) {
+            pictureAdapter.setList(value)
+        }
 }

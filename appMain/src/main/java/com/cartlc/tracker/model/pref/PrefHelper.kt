@@ -246,7 +246,10 @@ class PrefHelper constructor(
                 }
                 setAddress(group.address)
             }
+            onCurrentProjecGroupChanged.invoke(group)
         }
+
+    var onCurrentProjecGroupChanged: (group: DataProjectAddressCombo?) -> Unit = {}
 
     // Note: ID zero has a special meaning, it means that the set is pending.
     private val nextPictureCollectionID: Long

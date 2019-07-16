@@ -1,7 +1,7 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="setup_frame_width">200dp</dimen>
-    <dimen name="project_list_width">190dp</dimen>
+    <dimen name="project_list_width">150dp</dimen>
     <dimen name="confirm_gap_height">10dp</dimen>
     <dimen name="confirm_gap_left">10dp</dimen>
     <dimen name="image_full_max_height">550dp</dimen>

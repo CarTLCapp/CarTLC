@@ -15,23 +15,23 @@ import com.cartlc.tracker.model.msg.StringMessage
 import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
-import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
+import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleUseCase
+import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
 import com.cartlc.tracker.fresh.ui.title.TitleUseCase
 import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import com.cartlc.tracker.ui.util.CheckError
-import com.cartlc.tracker.viewmodel.frag.*
 import java.io.File
 
 class MainVMHolder(
         boundAct: BoundAct,
         private val newProjectHolder: NewProjectVMHolder,
         val buttonsUseCase: ButtonsUseCase,
-        private val mainListViewModel: MainListViewModel,
+        private val mainListUseCase: MainListUseCase,
         private val titleUseCase: TitleUseCase,
         private val entrySimpleControl: EntrySimpleUseCase
 ) : LifecycleObserver, FlowUseCase.Listener, ButtonsUseCase.Listener {
@@ -42,6 +42,7 @@ class MainVMHolder(
 
     private val repo = boundAct.repo
     private val messageHandler = boundAct.componentRoot.messageHandler
+    private val dialogNavigator = boundAct.componentRoot.dialogNavigator
 
     private var curFlowValue: Flow
         get() = repo.curFlowValue
@@ -66,9 +67,6 @@ class MainVMHolder(
     val framePictureVisible: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
-
-
-    var notes: () -> List<DataNote> = { emptyList() }
 
     // Private
 
@@ -96,11 +94,13 @@ class MainVMHolder(
             framePictureVisible.value = value
         }
 
-    private var editProject: Boolean = false
     private var takingPictureFile: File? = null
 
     private val hasProjectSubName: Boolean
         get() = prefHelper.projectSubName != null
+
+    private val hasCurrentProject: Boolean
+        get() = prefHelper.currentProjectGroup != null
 
     private val curProjectHint: String
         get() {
@@ -139,7 +139,8 @@ class MainVMHolder(
     fun onCreate() {
         entrySimpleControl.dispatchActionEvent = { event -> dispatchActionEvent(event) }
         entrySimpleControl.afterTextChangedListener = { value -> onEntryValueChanged(value) }
-        mainListViewModel.onCurrentProjectGroupChanged = { checkAddButtonVisible() }
+//        mainListViewModel.onCurrentProjectGroupChanged = { checkAddButtonVisible() } // TODO: Obsolete
+        prefHelper.onCurrentProjecGroupChanged = { checkAddButtonVisible() }
         prefHelper.setFromCurrentProjectId()
     }
 
@@ -203,7 +204,7 @@ class MainVMHolder(
     }
 
     fun onEditProject() {
-        editProject = true
+        repo.editProject = true
         curFlowValue = RootProjectFlow()
     }
 
@@ -339,16 +340,13 @@ class MainVMHolder(
                 if (!repo.flowUseCase.wasFromNotify) {
                     dispatchActionEvent(Action.PING)
                 }
-                prefHelper.saveProjectAndAddressCombo(editProject)
-                editProject = false
-
                 checkErrors()
                 checkAddButtonVisible()
-
-                mainListViewModel.showingValue = true
+                mainListUseCase.visible = true
                 titleUseCase.separatorVisible = true
                 titleUseCase.mainTitleVisible = true
                 buttonsUseCase.centerVisible = true
+                buttonsUseCase.prevVisible = hasCurrentProject
                 buttonsUseCase.prevText = messageHandler.getString(StringMessage.btn_edit)
                 buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_new_project)
                 titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_current_project)
@@ -356,7 +354,7 @@ class MainVMHolder(
             Stage.SUB_PROJECT -> {
                 titleUseCase.mainTitleVisible = true
                 prefHelper.projectRootName?.let { rootName ->
-                    mainListViewModel.showingValue = true
+                    mainListUseCase.visible = true
                     titleUseCase.subTitleText = curProjectHint
                     buttonsUseCase.nextVisible = hasProjectSubName
                     setList(StringMessage.title_sub_project, PrefHelper.KEY_SUB_PROJECT, db.tableProjects.querySubProjectNames(rootName))
@@ -365,15 +363,12 @@ class MainVMHolder(
                 }
             }
             Stage.TRUCK -> {
-
                 prefHelper.saveProjectAndAddressCombo(modifyCurrent = false, needsValidServerId = true)
 
                 entrySimpleControl.showing = true
                 entrySimpleControl.hintValue = messageHandler.getString(StringMessage.title_truck)
                 entrySimpleControl.helpValue = messageHandler.getString(StringMessage.entry_hint_truck)
                 entrySimpleControl.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
-                mainListViewModel.showingValue = true
-
                 val hint: String?
                 if (prefHelper.currentProjectGroup != null) {
                     hint = prefHelper.currentProjectGroup?.hintLine
@@ -388,7 +383,7 @@ class MainVMHolder(
             }
             Stage.EQUIPMENT -> {
                 titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_equipment_installed)
-                mainListViewModel.showingValue = true
+                mainListUseCase.visible = true
                 buttonsUseCase.centerVisible = true
             }
             Stage.ADD_EQUIPMENT -> {
@@ -399,7 +394,7 @@ class MainVMHolder(
             }
             Stage.NOTES -> {
                 titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_notes)
-                mainListViewModel.showingValue = true
+                mainListUseCase.visible = true
             }
             Stage.PICTURE_1,
             Stage.PICTURE_2,
@@ -431,7 +426,7 @@ class MainVMHolder(
             }
             Stage.STATUS -> {
                 buttonsUseCase.nextText = messageHandler.getString(StringMessage.btn_done)
-                mainListViewModel.showingValue = true
+                mainListUseCase.visible = true
                 titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_status)
                 titleUseCase.subTitleText = statusHint
             }
@@ -476,13 +471,16 @@ class MainVMHolder(
 
     private fun setList(msg: StringMessage, key: String, list: List<String>) {
         titleUseCase.mainTitleText = messageHandler.getString(msg)
-        mainListViewModel.curKey = key
+        mainListUseCase.key = key
+//        mainListViewModel.curKey = key
         if (list.isEmpty()) {
-            mainListViewModel.showingValue = false
+//            mainListViewModel.showingValue = false
             onEmptyList()
         } else {
-            mainListViewModel.showingValue = true
-            dispatchActionEvent(Action.SET_MAIN_LIST(list))
+            mainListUseCase.visible = true
+            mainListUseCase.simpleItems = list
+//            mainListViewModel.showingValue = true
+//            dispatchActionEvent(Action.SET_MAIN_LIST_OLD(list))
         }
     }
 
@@ -582,8 +580,10 @@ class MainVMHolder(
                 }
             Stage.NOTES ->
                 if (isNext) {
-                    if (!repo.isNotesComplete(notes())) {
-                        dispatchActionEvent(Action.SHOW_NOTE_ERROR)
+                    if (!mainListUseCase.areNotesComplete) {
+                        dialogNavigator.showNoteError(mainListUseCase.notes) {
+                            showNoteErrorOk()
+                        }
                         return false
                     }
                 }
@@ -611,5 +611,36 @@ class MainVMHolder(
         if (BuildConfig.DEBUG) {
             buttonsUseCase.skip()
         }
+    }
+
+    fun onKeyValueChanged(key: String, keyValue: String?) {
+        when (curFlowValue.stage) {
+            Stage.ROOT_PROJECT,
+            Stage.SUB_PROJECT,
+            Stage.CITY,
+            Stage.STATE,
+            Stage.STREET,
+            Stage.ADD_CITY,
+            Stage.ADD_STATE,
+            Stage.ADD_STREET -> {
+                buttonsUseCase.nextVisible = true
+            }
+            Stage.COMPANY -> {
+                buttonsUseCase.nextVisible = true
+//              buttonsUseCase?.checkCenterButtonIsEdit()
+            }
+            Stage.TRUCK -> {
+                entrySimpleControl.entryTextValue = keyValue
+            }
+            Stage.CURRENT_PROJECT -> {
+                buttonsUseCase.prevVisible = hasCurrentProject
+            }
+            else -> {
+            }
+        }
+    }
+
+    fun onProjectGroupSelected(projectGroup: DataProjectAddressCombo) {
+        buttonsUseCase.prevVisible = hasCurrentProject
     }
 }

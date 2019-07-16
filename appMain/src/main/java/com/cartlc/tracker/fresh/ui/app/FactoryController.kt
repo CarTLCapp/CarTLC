@@ -14,11 +14,13 @@ import com.cartlc.tracker.fresh.ui.confirm.ConfirmController
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmViewMvc
 import com.cartlc.tracker.fresh.ui.login.LoginController
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvc
+import com.cartlc.tracker.fresh.ui.mainlist.MainListController
+import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
+import com.cartlc.tracker.fresh.ui.mainlist.MainListViewMvc
 import com.cartlc.tracker.fresh.ui.title.TitleController
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
 
 class FactoryController(
-        private val prefHelper: PrefHelper,
         private val dcRx: DCServerRx,
         private val schedulerPlan: SchedulerPlan
 ) {
@@ -51,6 +53,11 @@ class FactoryController(
     fun allocConfirmController(boundFrag: BoundFrag,
                                viewMvc: ConfirmViewMvc): ConfirmController {
         return ConfirmController(boundFrag, viewMvc)
+    }
+
+    fun allocMainListController(boundAct: BoundAct,
+                                viewMvc: MainListViewMvc): MainListController {
+        return MainListController(boundAct, viewMvc)
     }
 
 }

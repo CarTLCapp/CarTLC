@@ -34,11 +34,15 @@ class MessageHandlerImpl(
                 StringMessage.title_status -> ctx.getString(R.string.title_status)
                 StringMessage.title_confirmation -> ctx.getString(R.string.title_confirmation)
                 StringMessage.title_photo -> ctx.getString(R.string.title_photo)
+                StringMessage.title_entries_ -> ctx.getString(R.string.title_entries_)
+                StringMessage.title_uploaded_done -> ctx.getString(R.string.title_uploaded_done)
                 is StringMessage.dialog_dialog_entry_done -> ctx.getString(R.string.dialog_entry_done, msg.name)
                 is StringMessage.dialog_dialog_entry_done2 -> ctx.getString(R.string.dialog_entry_done2, msg.name, msg.name2)
                 is StringMessage.title_photos -> ctx.getString(R.string.title_photos, msg.count)
                 is StringMessage.status_installed_equipments -> ctx.getString(R.string.status_installed_equipments, msg.checkedEquipment, msg.maxEquip)
                 is StringMessage.status_installed_pictures -> ctx.getString(R.string.status_installed_pictures, msg.countPictures)
+                is StringMessage.error_incorrect_note_count -> ctx.getString(R.string.error_incorrect_note_count, msg.length, msg.digits)
+                is StringMessage.error_incorrect_digit_count -> ctx.getString(R.string.error_incorrect_digit_count, msg.msg)
             }
 
     override fun getErrorMessage(error: ErrorMessage): String =
