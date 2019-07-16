@@ -170,6 +170,7 @@ public class PostController extends Controller {
         result.put(Version.VERSION_NOTE, Version.get(Version.VERSION_NOTE));
         result.put(Version.VERSION_TRUCK, Version.get(Version.VERSION_TRUCK));
         result.put(Version.VERSION_VEHICLE_NAMES, Version.get(Version.VERSION_VEHICLE_NAMES));
+        result.put(Version.VERSION_FLOW, Version.get(Version.VERSION_FLOW));
         Technician tech = Technician.find.byId((long) tech_id);
         if (tech != null) {
             if (tech.reset_upload) {

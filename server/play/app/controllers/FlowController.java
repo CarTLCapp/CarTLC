@@ -25,6 +25,11 @@ import java.util.List;
 import java.util.ArrayList;
 import play.Logger;
 
+import play.libs.Json;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 /**
  * Manage a database of users
  */
@@ -252,5 +257,40 @@ public class FlowController extends Controller {
 
         return EDIT(flowId);
     }
+
+    public Result query() {
+        ObjectNode top = Json.newObject();
+        ArrayNode array = top.putArray("flows");
+        for (Flow flow : Flow.list()) {
+            ObjectNode node = array.addObject();
+            node.put("flow_id", flow.id);
+            node.put("sub_project_id", flow.sub_project_id);
+            ArrayNode elementsNode = node.putArray("elements");
+            for (FlowElement element : flow.getFlowElements()) {
+                ObjectNode elementNode = elementsNode.addObject();
+                if (element.hasToast()) {
+                    elementNode.put("toast", element.getToastValue());
+                }
+                if (element.hasDialog()) {
+                    elementNode.put("dialog", element.getDialogValue());
+                }
+                if (element.hasConfirmation()) {
+                    elementNode.put("confirmation", element.getConfirmationValue());
+                }
+                elementNode.put("requestImage", element.request_image);
+                elementNode.put("genericNote", element.generic_note);
+
+                if (element.hasNotes()) {
+                    ArrayNode notesNote = elementNode.putArray("notes");
+                    for (Note note : element.getNotes()) {
+                        ObjectNode noteNode = notesNote.addObject();
+                        noteNode.put("node_id", note.id);
+                    }
+                }
+            }
+        }
+        return ok(top);
+    }
+
 }
             

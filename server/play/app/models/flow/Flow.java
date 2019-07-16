@@ -95,6 +95,10 @@ public class Flow extends com.avaje.ebean.Model {
         return "";
     }
 
+    public Project getSubProject() {
+        return Project.get(sub_project_id);
+    }
+
     public int getChainSize() {
         return FlowElementCollection.getNumElements(id);
     }
