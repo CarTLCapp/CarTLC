@@ -21,6 +21,7 @@ import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleUseCase
 import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
+import com.cartlc.tracker.fresh.ui.picture.PictureListUseCase
 import com.cartlc.tracker.fresh.ui.title.TitleUseCase
 import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
@@ -33,7 +34,8 @@ class MainVMHolder(
         val buttonsUseCase: ButtonsUseCase,
         private val mainListUseCase: MainListUseCase,
         private val titleUseCase: TitleUseCase,
-        private val entrySimpleControl: EntrySimpleUseCase
+        private val entrySimpleControl: EntrySimpleUseCase,
+        private val pictureListUseCase: PictureListUseCase
 ) : LifecycleObserver, FlowUseCase.Listener, ButtonsUseCase.Listener {
 
     companion object {
@@ -42,7 +44,7 @@ class MainVMHolder(
 
     private val repo = boundAct.repo
     private val messageHandler = boundAct.componentRoot.messageHandler
-    private val dialogNavigator = boundAct.componentRoot.dialogNavigator
+    private val dialogNavigator = boundAct.dialogNavigator
 
     private var curFlowValue: Flow
         get() = repo.curFlowValue
@@ -286,10 +288,12 @@ class MainVMHolder(
     }
 
     fun autoRotatePictureResult() {
-        if (takingPictureFile != null && takingPictureFile!!.exists()) {
-            val degrees = prefHelper.autoRotatePicture
-            if (degrees != 0) {
-                BitmapHelper.rotate(takingPictureFile!!, degrees)
+        takingPictureFile?.let {
+            if (it.exists()) {
+                val degrees = prefHelper.autoRotatePicture
+                if (degrees != 0) {
+                    BitmapHelper.rotate(it, degrees)
+                }
             }
         }
     }
@@ -308,6 +312,10 @@ class MainVMHolder(
     fun dispatchPictureRequestFailure() {
         takingPictureFile = null
         errorValue = ErrorMessage.CANNOT_TAKE_PICTURE
+    }
+
+    fun onPictureNoteAdded(picture: DataPicture) {
+        db.tablePictureCollection.update(picture, prefHelper.currentPictureCollectionId)
     }
 
     // endregion PICTURE
@@ -497,7 +505,7 @@ class MainVMHolder(
     }
 
     private fun setList(list: List<DataPicture>) {
-        dispatchActionEvent(Action.SET_PICTURE_LIST(list))
+        pictureListUseCase.pictureItems = list
     }
 
     // endregion SET LIST
@@ -643,4 +651,9 @@ class MainVMHolder(
     fun onProjectGroupSelected(projectGroup: DataProjectAddressCombo) {
         buttonsUseCase.prevVisible = hasCurrentProject
     }
+
+    fun onPictureRemoveDone(remaining: Int) {
+        titleUseCase.setPhotoTitleCount(remaining)
+    }
+
 }

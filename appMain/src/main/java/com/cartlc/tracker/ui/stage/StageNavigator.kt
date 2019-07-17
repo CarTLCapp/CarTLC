@@ -1,6 +1,5 @@
 package com.cartlc.tracker.ui.stage
 
-import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver

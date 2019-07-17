@@ -25,5 +25,4 @@ sealed class Action {
     data class PICTURE_REQUEST(val file: File) : Action()
     data class SHOW_TRUCK_ERROR(val entry: DataEntry, val callback: CheckError.CheckErrorResult) : Action()
     data class SHOW_PICTURE_TOAST(val count: Int): Action()
-    data class SET_PICTURE_LIST(val list: List<DataPicture>): Action()
 }

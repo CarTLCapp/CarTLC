@@ -19,6 +19,7 @@ class MessageHandlerImpl(
                 StringMessage.btn_another -> ctx.getString(R.string.btn_another)
                 StringMessage.btn_done -> ctx.getString(R.string.btn_done)
                 StringMessage.btn_confirm -> ctx.getString(R.string.btn_confirm)
+                StringMessage.error_picture_removed -> ctx.getString(R.string.error_picture_removed)
                 StringMessage.title_current_project -> ctx.getString(R.string.title_current_project)
                 StringMessage.title_login -> ctx.getString(R.string.title_login)
                 StringMessage.title_root_project -> ctx.getString(R.string.title_root_project)

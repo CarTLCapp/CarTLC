@@ -21,7 +21,7 @@ class ConfirmFragment: BaseFragment() {
     var useCase: ConfirmUseCase? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val viewMvc = factoryViewMvc.allocConfirmViewMvc(null)
+        val viewMvc = factoryViewMvc.allocConfirmViewMvc(context!!)
         useCase = factoryController.allocConfirmController(boundFrag, viewMvc)
         return viewMvc.rootView
     }

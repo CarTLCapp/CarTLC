@@ -17,6 +17,8 @@ import com.cartlc.tracker.fresh.ui.login.LoginViewMvc
 import com.cartlc.tracker.fresh.ui.mainlist.MainListController
 import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
 import com.cartlc.tracker.fresh.ui.mainlist.MainListViewMvc
+import com.cartlc.tracker.fresh.ui.picture.PictureListController
+import com.cartlc.tracker.fresh.ui.picture.PictureListViewMvc
 import com.cartlc.tracker.fresh.ui.title.TitleController
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
 
@@ -58,6 +60,11 @@ class FactoryController(
     fun allocMainListController(boundAct: BoundAct,
                                 viewMvc: MainListViewMvc): MainListController {
         return MainListController(boundAct, viewMvc)
+    }
+
+    fun allocPictureListController(boundAct: BoundAct,
+                               viewMvc: PictureListViewMvc): PictureListController {
+        return PictureListController(boundAct, viewMvc)
     }
 
 }

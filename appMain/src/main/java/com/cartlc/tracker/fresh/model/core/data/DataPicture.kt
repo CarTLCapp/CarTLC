@@ -35,13 +35,13 @@ class DataPicture(
 
     var note: String? = _note
         set(value) {
-            if (value == null) {
-                field = value
+            field = if (value == null) {
+                value
             } else {
                 if (value.length > MAX_NOTE_LENGTH) {
-                    field = value.substring(0, MAX_NOTE_LENGTH)
+                    value.substring(0, MAX_NOTE_LENGTH)
                 } else {
-                    field = value
+                    value
                 }
             }
         }

@@ -20,7 +20,7 @@ class ConfirmController (
         ConfirmViewMvc.Listener,
         FlowUseCase.Listener {
 
-    private val ctx = boundFrag.activity
+    private val ctx = boundFrag.act
     private val repo = boundFrag.repo
     private val componentRoot = boundFrag.componentRoot
     private val prefHelper = componentRoot.prefHelper

@@ -11,6 +11,7 @@ sealed class StringMessage {
     object btn_another: StringMessage()
     object btn_done: StringMessage()
     object btn_confirm: StringMessage()
+    object error_picture_removed: StringMessage()
     object title_login: StringMessage()
     object title_root_project: StringMessage()
     object title_sub_project: StringMessage()

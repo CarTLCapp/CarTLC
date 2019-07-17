@@ -16,4 +16,5 @@ interface TablePictureCollection {
     fun queryPictures(collection_id: Long): List<DataPicture>
     fun removeNonExistant(list: List<DataPicture>): List<DataPicture>
     fun setUploaded(item: DataPicture)
+    fun update(item: DataPicture, collection_id: Long?)
 }

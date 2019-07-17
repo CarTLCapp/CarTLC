@@ -9,11 +9,9 @@ import com.cartlc.tracker.viewmodel.BaseViewModel
 
 open class BaseFragment : Fragment() {
 
-    protected lateinit var baseVM: BaseViewModel // TODO: Will eventually be obsoleted
-
     protected lateinit var app: TBApplication
     protected lateinit var repo: CarRepository
-    protected lateinit var boundFrag: BoundFrag
+    lateinit var boundFrag: BoundFrag
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,4 +20,5 @@ open class BaseFragment : Fragment() {
         repo = app.repo
         boundFrag = BoundFrag(this)
     }
+
 }

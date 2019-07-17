@@ -13,9 +13,8 @@ import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.SimpleListAdapter
-import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
+import com.cartlc.tracker.fresh.ui.picture.PictureListView
 import com.cartlc.tracker.ui.list.NoteListAdapter
-import com.cartlc.tracker.ui.list.PictureThumbnailListAdapter
 
 class ConfirmViewMvcImpl(
         inflater: LayoutInflater,
@@ -30,15 +29,16 @@ class ConfirmViewMvcImpl(
 
     private val equipmentGrid = findViewById<RecyclerView>(R.id.equipment_grid)
     private val notesList = findViewById<RecyclerView>(R.id.notes_list)
-    private val confirmPictureList = findViewById<RecyclerView>(R.id.confirm_pictures_list)
+    private val confirmPictureList = findViewById<PictureListView>(R.id.confirm_pictures_list)
     private val equipmentListAdapter: SimpleListAdapter = SimpleListAdapter(factoryViewMvc, R.layout.entry_item_confirm, null)
     private val noteAdapter: NoteListAdapter
-    private val pictureAdapter: PictureThumbnailListAdapter
     private val projectNameValue = findViewById<TextView>(R.id.project_name_value)
     private val projectAddressValue = findViewById<TextView>(R.id.project_address_value)
     private val truckNumberValue = findViewById<TextView>(R.id.truck_number_value)
     private val statusValue = findViewById<TextView>(R.id.status_value)
     private val confirmPicturesLabel = findViewById<TextView>(R.id.confirm_pictures_label)
+
+    private val pictureUseCase = confirmPictureList.control
 
     init {
         equipmentGrid.adapter = equipmentListAdapter
@@ -47,10 +47,7 @@ class ConfirmViewMvcImpl(
         noteAdapter = NoteListAdapter(ctx)
         notesList.adapter = noteAdapter
         notesList.layoutManager = LinearLayoutManager(ctx)
-        pictureAdapter = PictureThumbnailListAdapter(ctx)
-        val layoutManager = AutoLinearLayoutManager(ctx, LinearLayoutManager.HORIZONTAL, false)
-        confirmPictureList.layoutManager = layoutManager
-        confirmPictureList.adapter = pictureAdapter
+        pictureUseCase.isThumbnail = true
     }
 
     override var projectName: String
@@ -100,6 +97,6 @@ class ConfirmViewMvcImpl(
     override var pictures: MutableList<DataPicture>
         get() = TODO("not implemented")
         set(value) {
-            pictureAdapter.setList(value)
+            pictureUseCase.pictureItems = value
         }
 }

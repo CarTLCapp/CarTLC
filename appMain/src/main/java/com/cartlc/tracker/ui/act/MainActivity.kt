@@ -5,7 +5,6 @@ package com.cartlc.tracker.ui.act
 
 import android.app.Activity
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
@@ -18,13 +17,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
 
 import com.cartlc.tracker.R
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
-import com.cartlc.tracker.fresh.model.core.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.ui.util.CheckError
@@ -33,20 +31,17 @@ import com.cartlc.tracker.model.event.EventRefreshProjects
 import com.cartlc.tracker.model.flow.ActionUseCase
 import com.cartlc.tracker.model.msg.ErrorMessage
 import com.cartlc.tracker.ui.base.BaseActivity
-import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
-import com.cartlc.tracker.ui.list.*
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 import com.cartlc.tracker.ui.util.helper.LocationHelper
 import com.cartlc.tracker.ui.util.helper.PermissionHelper
-import com.cartlc.tracker.ui.frag.*
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleView
 import com.cartlc.tracker.ui.stage.StageNavigator
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsView
 import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
 import com.cartlc.tracker.fresh.ui.mainlist.MainListView
+import com.cartlc.tracker.fresh.ui.picture.PictureListUseCase
 import com.cartlc.tracker.fresh.ui.title.TitleView
-import com.cartlc.tracker.model.flow.Stage
 import com.cartlc.tracker.model.misc.EntryHint
 import com.cartlc.tracker.ui.stage.newproject.NewProjectVMHolder
 import com.cartlc.tracker.viewmodel.main.*
@@ -63,7 +58,8 @@ import java.lang.ref.WeakReference
 
 class MainActivity : BaseActivity(),
         ActionUseCase.Listener,
-        MainListUseCase.Listener
+        MainListUseCase.Listener,
+        PictureListUseCase.Listener
 {
 
     companion object {
@@ -80,7 +76,6 @@ class MainActivity : BaseActivity(),
     }
 
     private lateinit var app: TBApplication
-    private lateinit var mPictureAdapter: PictureListAdapter
     private lateinit var mInputMM: InputMethodManager
     private var showServerError = true
 
@@ -90,16 +85,16 @@ class MainActivity : BaseActivity(),
     lateinit var vm: MainVMHolder
     private lateinit var stageNavigator: StageNavigator
 
-//    private val mainListFragmentOld: MainListFragment
-//        get() = frame_main_list as MainListFragment
     private val mainListView: MainListView
-        get() = view_main_list as MainListView
+        get() = frame_main_list as MainListView
     private val titleView: TitleView
         get() = frame_title as TitleView
     private val buttonsView: ButtonsView
         get() = frame_buttons as ButtonsView
-    val entrySimpleView: EntrySimpleView
+    private val entrySimpleView: EntrySimpleView
         get() = frame_entry_simple as EntrySimpleView
+    private val pictureUseCase: PictureListUseCase
+        get() = frame_pictures.control
 
     private class RotatePictureTask(act: MainActivity) : AsyncTask<Void, Void, Boolean>() {
 
@@ -115,7 +110,7 @@ class MainActivity : BaseActivity(),
         override fun onPostExecute(result: Boolean?) {
             main?.let {
                 if (!it.isDestroyed && !it.isFinishing && it.vm.isPictureStage) {
-                    it.mPictureAdapter.notifyDataSetChanged()
+                    it.pictureUseCase.onPictureRefreshNeeded()
                 }
             }
         }
@@ -158,16 +153,19 @@ class MainActivity : BaseActivity(),
                 buttonsUseCase,
                 mainListUseCase,
                 titleUseCase,
-                entrySimpleControl
+                entrySimpleControl,
+                pictureUseCase
         )
         mInputMM = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         fab_add.setOnClickListener { vm.btnPlus() }
 
-        mPictureAdapter = PictureListAdapter(this) { newCount: Int -> titleUseCase.setPhotoTitleCount(newCount) }
-        val linearLayoutManager = AutoLinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        list_pictures.layoutManager = linearLayoutManager
-        list_pictures.adapter = mPictureAdapter
+        pictureUseCase.registerListener(this)
+
+//        mPictureAdapter = PictureListAdapter(this) { newCount: Int -> titleUseCase.setPhotoTitleCount(newCount) }
+//        val linearLayoutManager = AutoLinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+//        list_pictures.layoutManager = linearLayoutManager
+//        list_pictures.adapter = mPictureAdapter
 
         repo.actionUseCase.registerListener(this)
         vm.error.observe(this, Observer { message -> showError(message) })
@@ -232,6 +230,7 @@ class MainActivity : BaseActivity(),
         LocationHelper.instance.onDestroy()
         repo.actionUseCase.unregisterListener(this)
         mainListView.control.unregisterListener(this)
+        pictureUseCase.unregisterListener(this)
     }
 
     private fun doViewProject() {
@@ -292,7 +291,6 @@ class MainActivity : BaseActivity(),
             Action.VEHICLES_PENDING -> doVehiclesPendingDialog()
             Action.GET_LOCATION -> getLocation()
             is Action.SHOW_TRUCK_ERROR -> showTruckError(action.entry, action.callback)
-            is Action.SET_PICTURE_LIST -> mPictureAdapter.setList(action.list)
             is Action.SHOW_PICTURE_TOAST -> showPictureToast(action.count)
         }
     }
@@ -339,11 +337,11 @@ class MainActivity : BaseActivity(),
     }
 
     private fun storeCommonRotation() {
-        val commonRotation = mPictureAdapter.commonRotation
+        val commonRotation = pictureUseCase.commonRotation
         if (commonRotation != 0) {
             vm.incAutoRotatePicture(commonRotation)
         } else {
-            if (mPictureAdapter.hadSomeRotations()) {
+            if (pictureUseCase.hadSomeRotations) {
                 vm.clearAutoRotatePicture()
             }
         }
@@ -421,4 +419,15 @@ class MainActivity : BaseActivity(),
 
     // endregion MainListUseCase.Listener
 
+    // region PictureListUseCase.Listener
+
+    override fun onPictureRemoveDone(remaining: Int) {
+        vm.onPictureRemoveDone(remaining)
+    }
+
+    override fun onPictureNoteAdded(picture: DataPicture) {
+        vm.onPictureNoteAdded(picture)
+    }
+
+    // endregion PictureListUseCase.Listener
 }

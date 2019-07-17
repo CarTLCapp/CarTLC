@@ -98,7 +98,7 @@ class SqlTablePictureCollection(
 
     override fun query(collection_id: Long): DataPictureCollection {
         val selection = "$KEY_COLLECTION_ID =?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(collection_id))
+        val selectionArgs = arrayOf(collection_id.toString())
         val collection = DataPictureCollection(collection_id)
         collection.pictures = query(selection, selectionArgs).toMutableList()
         return collection
@@ -106,7 +106,7 @@ class SqlTablePictureCollection(
 
     override fun queryPictures(collection_id: Long): List<DataPicture> {
         val selection = "$KEY_COLLECTION_ID=?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(collection_id))
+        val selectionArgs = arrayOf(collection_id.toString())
         return query(selection, selectionArgs)
     }
 
@@ -245,7 +245,7 @@ class SqlTablePictureCollection(
         update(item, null)
     }
 
-    fun update(item: DataPicture, collection_id: Long?) {
+    override fun update(item: DataPicture, collection_id: Long?) {
         dbSql.beginTransaction()
         try {
             val values = ContentValues()
