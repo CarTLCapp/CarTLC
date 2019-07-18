@@ -10,8 +10,8 @@ import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
-import com.callassistant.util.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.R
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvc.YesNo.*
 
 class EntrySimpleViewMvcImpl(

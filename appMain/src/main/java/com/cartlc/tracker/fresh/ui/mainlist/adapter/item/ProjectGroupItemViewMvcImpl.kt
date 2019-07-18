@@ -4,9 +4,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.callassistant.util.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 
 class ProjectGroupItemViewMvcImpl(
         inflater: LayoutInflater,

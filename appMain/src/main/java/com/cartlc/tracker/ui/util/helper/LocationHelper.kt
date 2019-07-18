@@ -1,5 +1,5 @@
-/*
- * Copyright 2018, FleetTLC. All rights reserved
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.ui.util.helper
 
@@ -41,10 +41,10 @@ class LocationHelper(
 
     companion object {
 
-        val GOOGLE_LOC = "http://maps.googleapis.com/maps/api/geocode/json?"
+        const val GOOGLE_LOC = "http://maps.googleapis.com/maps/api/geocode/json?"
 
         private val TAG = LocationHelper::class.java.simpleName
-        private val LOG = false
+        private const val LOG = false
 
         lateinit var instance: LocationHelper
             private set
@@ -250,7 +250,7 @@ class LocationHelper(
         return match(address.locality, cities)
     }
 
-    fun reduceStreets(address: Address, streets: MutableList<String>) {
+    fun reduceStreets(address: Address, streets: List<String>): List<String> {
         val reduced = ArrayList<String>()
         val compareWith = stripNumbers(replaceOrdinals(address.thoroughfare))
         for (street in streets) {
@@ -258,10 +258,7 @@ class LocationHelper(
                 reduced.add(street)
             }
         }
-        if (reduced.size > 0) {
-            streets.clear()
-            streets.addAll(reduced)
-        }
+        return reduced
     }
 
     private fun stripNumbers(line: String): String {

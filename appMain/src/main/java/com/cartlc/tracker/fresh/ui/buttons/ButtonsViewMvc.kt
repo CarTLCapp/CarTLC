@@ -1,7 +1,7 @@
 package com.cartlc.tracker.fresh.ui.buttons
 
 import android.view.View
-import com.callassistant.util.viewmvc.ObservableViewMvc
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvc
 
 interface ButtonsViewMvc : ObservableViewMvc<ButtonsViewMvc.Listener> {
 

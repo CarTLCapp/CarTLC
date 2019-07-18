@@ -3,8 +3,8 @@ package com.cartlc.tracker.fresh.ui.mainlist.adapter.item
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.RadioButton
-import com.callassistant.util.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.R
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 
 class RadioListItemViewMvcImpl(
         inflater: LayoutInflater,

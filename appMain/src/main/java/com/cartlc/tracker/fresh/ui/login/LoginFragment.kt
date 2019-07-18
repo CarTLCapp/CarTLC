@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import com.cartlc.tracker.fresh.ui.app.FactoryController
 import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.ui.base.BaseFragment
-import com.cartlc.tracker.ui.stage.StageHook
 
 class LoginFragment(
-        private val stageHook: StageHook
+        private val buttonsUseCase: ButtonsUseCase
 ) : BaseFragment() {
 
     private val componentRoot: ComponentRoot
@@ -25,7 +25,7 @@ class LoginFragment(
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val viewMvc = factoryViewMvc.allocLoginViewMvc(null)
-        controller = factoryController.allocLoginController(boundFrag, viewMvc, stageHook)
+        controller = factoryController.allocLoginController(boundFrag, viewMvc, buttonsUseCase)
         return viewMvc.rootView
     }
 

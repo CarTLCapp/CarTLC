@@ -29,26 +29,6 @@ class SqlTableCollectionEquipmentProject(
         return collection
     }
 
-//    fun addByName(projectName: String, equipments: List<String>) {
-//        var projectNameId = db.tableProjects.queryProjectId(projectName)
-//        if (projectNameId < 0) {
-//            projectNameId = db.tableProjects.addTest(projectName)
-//        }
-//        addByNameTest(projectNameId, equipments)
-//    }
-//
-//    fun addByNameTest(collectionId: Long, names: List<String>) {
-//        val list = ArrayList<Long>()
-//        for (name in names) {
-//            var id = db.tableEquipment.query(name)
-//            if (id < 0) {
-//                id = db.tableEquipment.addTest(name)
-//            }
-//            list.add(id)
-//        }
-//        addTest(collectionId, list)
-//    }
-
     override fun addLocal(name: String, projectNameId: Long) {
         val equipId = db.tableEquipment.addLocal(name)
         add(projectNameId, equipId)

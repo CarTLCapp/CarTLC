@@ -3,7 +3,7 @@ package com.cartlc.tracker.ui.bits
 import android.graphics.Rect
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import com.callassistant.util.observable.BaseObservableImpl
+import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 
 class SoftKeyboardDetect(
         private val root: ViewGroup

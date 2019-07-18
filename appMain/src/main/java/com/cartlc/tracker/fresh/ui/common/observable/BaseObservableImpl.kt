@@ -1,4 +1,7 @@
-package com.callassistant.util.observable
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
+package com.cartlc.tracker.fresh.ui.common.observable
 
 import java.util.Collections
 import java.util.HashSet

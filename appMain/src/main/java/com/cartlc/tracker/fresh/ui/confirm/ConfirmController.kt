@@ -6,7 +6,6 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
-import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.flow.CurrentProjectFlow
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.FlowUseCase

@@ -67,7 +67,7 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
         stage345Entry = findViewById(R.id.stage345_entry_simple)
 
         buttonsUseCase = buttonsView.useCase
-        buttonsUseCase.listener = this
+        buttonsUseCase.registerListener(this)
 
         titleUseCase = titleView.useCase
 
@@ -116,6 +116,7 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
     override fun onDestroy() {
         super.onDestroy()
         vm.actionUseCase.unregisterListener(this)
+        buttonsUseCase.unregisterListener(this)
     }
 
     private fun setup(list: RecyclerView) {

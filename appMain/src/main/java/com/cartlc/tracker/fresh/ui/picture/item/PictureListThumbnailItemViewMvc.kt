@@ -3,7 +3,7 @@
  */
 package com.cartlc.tracker.fresh.ui.picture.item
 
-import com.callassistant.util.viewmvc.ViewMvc
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 import java.io.File
 
 interface PictureListThumbnailItemViewMvc: ViewMvc {

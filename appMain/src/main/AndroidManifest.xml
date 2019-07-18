@@ -30,7 +30,7 @@
             android:value="fdf2c9c4ee8de1171d7114f9b5301d02d13abeb6" />
 
         <activity
-            android:name=".ui.act.MainActivity"
+            android:name=".fresh.ui.main.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"

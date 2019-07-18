@@ -3,10 +3,10 @@ package com.cartlc.tracker.fresh.ui.mainlist
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.callassistant.util.observable.BaseObservableImpl
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
+import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.flow.FlowUseCase
 import com.cartlc.tracker.model.flow.Stage

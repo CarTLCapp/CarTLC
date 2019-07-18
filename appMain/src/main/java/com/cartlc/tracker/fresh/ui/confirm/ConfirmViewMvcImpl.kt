@@ -7,11 +7,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.callassistant.util.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.SimpleListAdapter
 import com.cartlc.tracker.fresh.ui.picture.PictureListView
 import com.cartlc.tracker.ui.list.NoteListAdapter

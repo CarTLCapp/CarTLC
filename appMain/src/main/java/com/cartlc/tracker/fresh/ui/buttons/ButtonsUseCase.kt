@@ -1,17 +1,16 @@
 package com.cartlc.tracker.fresh.ui.buttons
 
+import com.cartlc.tracker.fresh.ui.common.observable.BaseObservable
 import com.cartlc.tracker.model.event.Button
 import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
 
-interface ButtonsUseCase {
+interface ButtonsUseCase : BaseObservable<ButtonsUseCase.Listener> {
 
     interface Listener {
         fun onButtonConfirm(action: Button): Boolean
         fun onButtonEvent(action: Button)
     }
-
-    var listener: Listener?
 
     var wasNext: Boolean
     var wasSkip: Boolean

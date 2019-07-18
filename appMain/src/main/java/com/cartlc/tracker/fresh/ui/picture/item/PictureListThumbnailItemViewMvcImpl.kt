@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.callassistant.util.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.R
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import java.io.File
 

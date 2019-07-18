@@ -16,6 +16,7 @@ import com.cartlc.tracker.model.pref.PrefHelper
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.ListEntryAdapter
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.ui.base.BaseActivity
 import kotlinx.android.synthetic.main.activity_list_entries.*
 
@@ -52,7 +53,7 @@ class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListene
         mEntryListAdapter = ListEntryAdapter(this, this)
         edit_address!!.setOnClickListener {
             prefHelper.setFromCurrentProjectId()
-            setResult(MainActivity.RESULT_EDIT_PROJECT)
+            setResult(MainController.RESULT_EDIT_PROJECT)
             finish()
         }
         delete!!.setOnClickListener {
@@ -60,7 +61,7 @@ class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListene
             if (projectGroup != null) {
                 db.tableProjectAddressCombo.remove(projectGroup.id)
             }
-            setResult(MainActivity.RESULT_DELETE_PROJECT)
+            setResult(MainController.RESULT_DELETE_PROJECT)
             finish()
         }
         val linearLayoutManager = AutoLinearLayoutManager(this)
@@ -105,7 +106,7 @@ class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListene
 
     override fun onEdit(entry: DataEntry) {
         prefHelper.setFromEntry(entry)
-        setResult(MainActivity.RESULT_EDIT_ENTRY)
+        setResult(MainController.RESULT_EDIT_ENTRY)
         finish()
     }
 }

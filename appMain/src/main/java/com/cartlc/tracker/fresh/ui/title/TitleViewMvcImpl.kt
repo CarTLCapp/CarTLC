@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.callassistant.util.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.R
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
 
 class TitleViewMvcImpl (
         inflater: LayoutInflater,

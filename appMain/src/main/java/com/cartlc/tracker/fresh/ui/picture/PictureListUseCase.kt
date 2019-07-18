@@ -3,8 +3,8 @@
  */
 package com.cartlc.tracker.fresh.ui.picture
 
-import com.callassistant.util.observable.BaseObservable
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
+import com.cartlc.tracker.fresh.ui.common.observable.BaseObservable
 
 interface PictureListUseCase : BaseObservable<PictureListUseCase.Listener> {
 

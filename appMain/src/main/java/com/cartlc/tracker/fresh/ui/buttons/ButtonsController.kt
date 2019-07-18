@@ -8,18 +8,22 @@ import com.cartlc.tracker.model.flow.Flow
 import com.cartlc.tracker.model.msg.StringMessage
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
+import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
 
 open class ButtonsController(
         boundAct: BoundAct,
         private val viewMvc: ButtonsViewMvc
-) : ButtonsUseCase, LifecycleObserver, ButtonsViewMvc.Listener, SoftKeyboardDetect.Listener {
+) : BaseObservableImpl<ButtonsUseCase.Listener>(),
+        ButtonsUseCase,
+        LifecycleObserver,
+        ButtonsViewMvc.Listener,
+        SoftKeyboardDetect.Listener
+{
 
     private val messageHandler = boundAct.componentRoot.messageHandler
     private val activity = boundAct.act
     protected val repo = boundAct.repo
-
-    override var listener: ButtonsUseCase.Listener? = null
 
     init {
         boundAct.bindObserver(this)
@@ -99,11 +103,19 @@ open class ButtonsController(
     // region ButtonsUseCase.Listener
 
     private fun dispatchButtonEvent(action: Button) {
-        listener?.onButtonEvent(action)
+        for (listener in listeners) {
+            listener.onButtonEvent(action)
+        }
     }
 
     private fun confirmButton(action: Button): Boolean {
-        return listener?.onButtonConfirm(action) ?: true
+        var flag = true
+        for (listener in listeners) {
+            if (!listener.onButtonConfirm(action)) {
+                flag = false
+            }
+        }
+        return flag
     }
 
     // endregion ButtonsUseCase.Listener

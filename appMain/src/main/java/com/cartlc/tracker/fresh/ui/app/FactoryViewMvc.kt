@@ -1,3 +1,6 @@
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.fresh.ui.app
 
 import android.content.Context
@@ -12,6 +15,8 @@ import com.cartlc.tracker.fresh.ui.confirm.ConfirmViewMvc
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmViewMvcImpl
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvc
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvcImpl
+import com.cartlc.tracker.fresh.ui.main.MainViewMvc
+import com.cartlc.tracker.fresh.ui.main.MainViewMvcImpl
 import com.cartlc.tracker.fresh.ui.mainlist.MainListViewMvc
 import com.cartlc.tracker.fresh.ui.mainlist.MainListViewMvcImpl
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.*
@@ -89,6 +94,10 @@ class FactoryViewMvc(
 
     fun allocPictureListThumbnailItemViewMvc(container: ViewGroup?): PictureListThumbnailItemViewMvc {
         return PictureListThumbnailItemViewMvcImpl(getInflater(container), container)
+    }
+
+    fun allocMainViewMvc(container: ViewGroup?, factoryViewHelper: FactoryViewHelper): MainViewMvc {
+        return MainViewMvcImpl(getInflater(container), container, factoryViewHelper)
     }
 
 }

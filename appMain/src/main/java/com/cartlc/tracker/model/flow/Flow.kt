@@ -149,8 +149,8 @@ open class PictureFlow(
 
 class LoginFlow : Flow(Stage.LOGIN)
 class RootProjectFlow : Flow(Stage.ROOT_PROJECT, Stage.CURRENT_PROJECT, null, Stage.COMPANY)
-class CompanyFlow : Flow(Stage.COMPANY, Stage.SUB_PROJECT, null, Stage.STATE)
-class AddCompanyFlow : Flow(Stage.ADD_COMPANY, Stage.SUB_PROJECT, null, Stage.STATE)
+class CompanyFlow : Flow(Stage.COMPANY, Stage.ROOT_PROJECT, null, Stage.STATE)
+class AddCompanyFlow : Flow(Stage.ADD_COMPANY, Stage.ROOT_PROJECT, null, Stage.STATE)
 class StateFlow : Flow(Stage.STATE, Stage.COMPANY, Stage.ADD_STATE, Stage.CITY)
 class AddStateFlow : Flow(Stage.ADD_STATE, Stage.COMPANY, null, Stage.CITY)
 class CityFlow : Flow(Stage.CITY, Stage.STATE, Stage.ADD_CITY, Stage.STREET)

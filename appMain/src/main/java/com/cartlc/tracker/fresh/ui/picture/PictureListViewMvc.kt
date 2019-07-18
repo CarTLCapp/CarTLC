@@ -3,7 +3,7 @@
  */
 package com.cartlc.tracker.fresh.ui.picture
 
-import com.callassistant.util.viewmvc.ViewMvc
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 
 interface PictureListViewMvc : ViewMvc {
 

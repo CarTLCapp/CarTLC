@@ -1,7 +1,6 @@
 package com.cartlc.tracker.fresh.ui.entrysimple
 
-import androidx.annotation.IdRes
-import com.callassistant.util.viewmvc.ObservableViewMvc
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvc
 
 interface EntrySimpleViewMvc : ObservableViewMvc<EntrySimpleViewMvc.Listener> {
 

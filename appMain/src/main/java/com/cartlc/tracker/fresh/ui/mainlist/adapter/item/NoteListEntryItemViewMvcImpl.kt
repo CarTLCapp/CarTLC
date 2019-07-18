@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
-import com.callassistant.util.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.R
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.NoteListEntryItemViewMvc.Listener
 
 class NoteListEntryItemViewMvcImpl(

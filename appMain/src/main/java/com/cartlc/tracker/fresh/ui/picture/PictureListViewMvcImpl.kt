@@ -8,12 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.callassistant.util.viewmvc.ObservableViewMvcImpl
-import com.callassistant.util.viewmvc.ViewMvc
-import com.callassistant.util.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
-import com.cartlc.tracker.fresh.ui.picture.item.PictureListItemViewMvc
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
 
 class PictureListViewMvcImpl(

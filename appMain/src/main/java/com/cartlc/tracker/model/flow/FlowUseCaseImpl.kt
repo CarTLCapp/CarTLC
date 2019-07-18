@@ -1,6 +1,6 @@
 package com.cartlc.tracker.model.flow
 
-import com.callassistant.util.observable.BaseObservableImpl
+import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 
 class FlowUseCaseImpl : BaseObservableImpl<FlowUseCase.Listener>(), FlowUseCase {
 

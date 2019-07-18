@@ -1,8 +1,8 @@
 package com.cartlc.tracker.fresh.ui.mainlist
 
-import com.callassistant.util.observable.BaseObservable
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.ui.common.observable.BaseObservable
 import com.cartlc.tracker.model.misc.EntryHint
 
 interface MainListUseCase : BaseObservable<MainListUseCase.Listener> {

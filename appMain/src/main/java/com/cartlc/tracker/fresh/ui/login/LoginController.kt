@@ -3,7 +3,7 @@ package com.cartlc.tracker.fresh.ui.login
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.callassistant.common.rx.SchedulerPlan
+import com.cartlc.tracker.fresh.model.SchedulerPlan
 import com.cartlc.tracker.model.event.Action
 import com.cartlc.tracker.model.event.Button
 import com.cartlc.tracker.model.flow.ActionUseCase
@@ -15,16 +15,16 @@ import com.cartlc.tracker.model.msg.StringMessage
 import com.cartlc.tracker.model.server.DCServerRx
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
-import com.cartlc.tracker.ui.stage.StageHook
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 
 class LoginController(
         boundFrag: BoundFrag,
         private val viewMvc: LoginViewMvc,
-        stageHook: StageHook,
+        private val buttonsUseCase: ButtonsUseCase,
         private val dcRx: DCServerRx,
         private val schedulerPlan: SchedulerPlan
 ) : LifecycleObserver,
+        LoginUseCase,
         LoginViewMvc.Listener,
         FlowUseCase.Listener,
         ActionUseCase.Listener,
@@ -33,9 +33,9 @@ class LoginController(
     private val repo = boundFrag.repo
     private val prefHelper = repo.prefHelper
     private val messageHandler: MessageHandler = boundFrag.componentRoot.messageHandler
-    private val buttonsUseCase = stageHook.buttonsUseCase
     private val dialogHelper = boundFrag.dialogHelper
-
+    private val curFlowValue: Flow
+        get() = repo.curFlowValue
     private var firstCodeEdit: String = ""
     private var secondaryCodeEdit: String = ""
     private var isSecondaryPromptsEnabled = false
@@ -75,6 +75,7 @@ class LoginController(
         repo.actionUseCase.registerListener(this)
         onStageChangedAboutTo(repo.flowUseCase.curFlow)
         onStageChanged(repo.flowUseCase.curFlow)
+        buttonsUseCase.registerListener(this)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -82,6 +83,7 @@ class LoginController(
         viewMvc.unregisterListener(this)
         repo.flowUseCase.unregisterListener(this)
         repo.actionUseCase.unregisterListener(this)
+        buttonsUseCase.unregisterListener(this)
     }
 
     override fun onActionChanged(action: Action) {
@@ -90,13 +92,6 @@ class LoginController(
     // region FlowUseCase.Listener
 
     override fun onStageChangedAboutTo(flow: Flow) {
-        when (flow.stage) {
-            Stage.LOGIN -> {
-                buttonsUseCase.reset(flow)
-                buttonsUseCase.listener = this
-            }
-            else -> {}
-        }
     }
 
     override fun onStageChanged(flow: Flow) {
@@ -121,15 +116,20 @@ class LoginController(
     }
 
     override fun onButtonEvent(action: Button) {
-        when (action) {
-            Button.BTN_CENTER -> {
-                login()
+        when (curFlowValue.stage) {
+            Stage.LOGIN -> {
+                when (action) {
+                    Button.BTN_CENTER -> {
+                        login()
+                    }
+                    Button.BTN_NEXT -> {
+                        next()
+                    }
+                    else -> {
+                    }
+                }
             }
-            Button.BTN_NEXT -> {
-                next()
-            }
-            else -> {
-            }
+            else -> {}
         }
     }
 

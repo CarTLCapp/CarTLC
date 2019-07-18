@@ -1,8 +1,8 @@
 package com.cartlc.tracker.fresh.ui.mainlist
 
-import com.callassistant.util.viewmvc.ObservableViewMvc
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvc
 import com.cartlc.tracker.model.misc.EntryHint
 
 interface MainListViewMvc : ObservableViewMvc<MainListViewMvc.Listener> {

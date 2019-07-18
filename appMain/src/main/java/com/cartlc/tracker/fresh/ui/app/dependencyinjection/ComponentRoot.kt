@@ -1,9 +1,13 @@
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.fresh.ui.app.dependencyinjection
 
 import android.content.Context
 import android.view.LayoutInflater
-import com.callassistant.common.rx.SchedulerPlan
-import com.callassistant.common.rx.SchedulerPlanImpl
+import com.cartlc.tracker.fresh.model.SchedulerPlan
+import com.cartlc.tracker.fresh.model.SchedulerPlanImpl
+import com.cartlc.tracker.fresh.service.ServiceUseCaseImpl
 import com.cartlc.tracker.fresh.ui.app.FactoryAdapterController
 import com.cartlc.tracker.model.CarRepository
 import com.cartlc.tracker.model.event.EventController
@@ -16,7 +20,6 @@ import com.cartlc.tracker.model.server.DCServerRx
 import com.cartlc.tracker.fresh.ui.app.FactoryController
 import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.common.ContextWrapper
-import com.cartlc.tracker.fresh.ui.common.DialogNavigator
 
 class ComponentRoot(
         context: Context,
@@ -34,5 +37,6 @@ class ComponentRoot(
     val schedulerPlan: SchedulerPlan = SchedulerPlanImpl()
     val factoryController = FactoryController(dcRx, schedulerPlan)
     val eventController = EventController()
+    val serviceUseCase = ServiceUseCaseImpl(context)
 
 }

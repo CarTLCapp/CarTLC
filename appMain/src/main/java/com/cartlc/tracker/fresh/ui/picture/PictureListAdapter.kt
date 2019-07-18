@@ -5,8 +5,8 @@ package com.cartlc.tracker.fresh.ui.picture
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.callassistant.util.viewmvc.ViewMvc
 import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 
 class PictureListAdapter(
         private val viewMvcFactory: FactoryViewMvc,

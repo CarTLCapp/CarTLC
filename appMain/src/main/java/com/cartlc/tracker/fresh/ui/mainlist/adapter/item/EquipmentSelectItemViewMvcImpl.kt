@@ -3,10 +3,9 @@ package com.cartlc.tracker.fresh.ui.mainlist.adapter.item
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.CheckBox
-import com.callassistant.util.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEquipment
-import kotlinx.android.synthetic.main.entry_item_equipment.view.*
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 
 class EquipmentSelectItemViewMvcImpl(
         inflater: LayoutInflater,

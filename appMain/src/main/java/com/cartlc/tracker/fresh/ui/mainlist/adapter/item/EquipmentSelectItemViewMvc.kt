@@ -1,7 +1,7 @@
 package com.cartlc.tracker.fresh.ui.mainlist.adapter.item
 
-import com.callassistant.util.viewmvc.ViewMvc
 import com.cartlc.tracker.fresh.model.core.data.DataEquipment
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 
 interface EquipmentSelectItemViewMvc : ViewMvc {
 

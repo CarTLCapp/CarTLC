@@ -5,11 +5,10 @@ package com.cartlc.tracker.fresh.ui.picture
 
 import android.os.Handler
 import android.os.Message
-import com.callassistant.util.observable.BaseObservableImpl
-import com.callassistant.util.viewmvc.ViewMvc
-import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
+import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 import com.cartlc.tracker.fresh.ui.picture.item.PictureListItemViewMvc
 import com.cartlc.tracker.fresh.ui.picture.item.PictureListThumbnailItemViewMvc
 import com.cartlc.tracker.model.msg.StringMessage

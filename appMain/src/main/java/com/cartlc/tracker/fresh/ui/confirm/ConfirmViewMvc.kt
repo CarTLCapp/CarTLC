@@ -1,8 +1,8 @@
 package com.cartlc.tracker.fresh.ui.confirm
 
-import com.callassistant.util.viewmvc.ObservableViewMvc
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvc
 
 interface ConfirmViewMvc : ObservableViewMvc<ConfirmViewMvc.Listener> {
 
