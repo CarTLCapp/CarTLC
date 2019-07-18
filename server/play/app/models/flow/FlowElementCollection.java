@@ -15,6 +15,7 @@ import modules.AmazonHelper;
 import java.io.File;
 import models.Note;
 
+import play.db.ebean.Transactional;
 /**
  * A list of flow elements for a flow managed by Ebean
  */
@@ -69,6 +70,7 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
         return list;
     }
 
+    @Transactional
     public static void deleteByFlowId(long flow_id) {
         List<FlowElementCollection> items = find.where()
                 .eq("flow_id", flow_id)
@@ -120,6 +122,7 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
         return FlowElement.get(flow_element_id);
     }
 
+    @Transactional
     public static boolean moveUp(long flow_id, long flow_element_id) {
         List<FlowElementCollection> items = findByFlowId(flow_id);
         int element_pos = -1;
@@ -147,6 +150,7 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
         return true;
     }
 
+    @Transactional
     public static boolean moveDown(long flow_id, long flow_element_id) {
         List<FlowElementCollection> items = findByFlowId(flow_id);
         int element_pos = -1;

@@ -4,9 +4,9 @@
 package controllers;
 
 import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Transaction;
 
 import play.db.ebean.Transactional;
+import com.avaje.ebean.Transaction;
 
 import play.mvc.*;
 import play.data.*;
@@ -58,7 +58,11 @@ public class FlowController extends Controller {
     }
 
     public Result EDIT(Long id, String message) {
-        return Results.redirect(routes.FlowController.editWithMessage(id, message));
+        if (message != null && !message.isEmpty()) {
+            return Results.redirect(routes.FlowController.editWithMessage(id, message));
+        } else {
+            return Results.redirect(routes.FlowController.edit(id));
+        }
     }
 
     /**
@@ -100,7 +104,6 @@ public class FlowController extends Controller {
      * Handle the 'new flow form' submission
      */
     @Security.Authenticated(Secured.class)
-    @Transactional
     public Result save(Long flowId) {
         Client curClient = Secured.getClient(ctx());
         if (!curClient.is_admin) {
@@ -117,30 +120,37 @@ public class FlowController extends Controller {
                 return EDIT(flowId, "A flow with this name has already been done: " + name);
             }
         }
-        Flow editFlow;
-        if (flowId > 0) {
-            editFlow = Flow.get(flowId);
-        } else {
-            editFlow = new Flow();
+        String message = "";
+        Ebean.beginTransaction();
+        try {
+            Flow editFlow;
+            if (flowId > 0) {
+                editFlow = Flow.get(flowId);
+            } else {
+                editFlow = new Flow();
+            }
+            Project project = Project.findByName(inputFlow.root_project_name, inputFlow.sub_project_name);
+            if (project == null) {
+                message = "Cannot find project named: " + inputFlow.root_project_name + " - " + inputFlow.sub_project_name;
+            } else {
+                editFlow.name = name;
+                editFlow.sub_project_id = project.id;
+                if (flowId > 0) {
+                    editFlow.update();
+                } else {
+                    editFlow.save();
+                    flowId = editFlow.id;
+                }
+                Ebean.commitTransaction();
+            }
+        } finally {
+            Ebean.endTransaction();
         }
-        editFlow.name = name;
-
-        Project project = Project.findByName(inputFlow.root_project_name, inputFlow.sub_project_name);
-        if (project == null) {
-            return EDIT(flowId, "Cannot find project named: " + inputFlow.root_project_name + " - " + inputFlow.sub_project_name);
-        }
-        editFlow.sub_project_id = project.id;
-
-        if(flowId > 0) {
-            editFlow.update();
-        } else {
-            editFlow.save();
-            flowId = editFlow.id;
-        }
-        return EDIT(flowId);
+        return EDIT(flowId, message);
     }
 
     @Security.Authenticated(Secured.class)
+    @Transactional
     public Result delete(Long flowId) {
         Client curClient = Secured.getClient(ctx());
         if (!curClient.is_admin) {
@@ -151,6 +161,7 @@ public class FlowController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
+    @Transactional
     public Result moveUp(Long flowId, Long elementId) {
         Form<InputFlow> flowForm = formFactory.form(InputFlow.class).bindFromRequest();
         Client curClient = Secured.getClient(ctx());
@@ -162,6 +173,7 @@ public class FlowController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
+    @Transactional
     public Result moveDown(Long flowId, Long elementId) {
         Form<InputFlow> flowForm = formFactory.form(InputFlow.class).bindFromRequest();
         Client curClient = Secured.getClient(ctx());
@@ -193,6 +205,7 @@ public class FlowController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
+    @Transactional
     public Result deleteElement(Long flowId, Long elementId) {
         Client curClient = Secured.getClient(ctx());
         if (!curClient.is_admin) {

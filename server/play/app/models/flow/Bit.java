@@ -14,4 +14,9 @@ public class Bit {
         this.name = name;
         this.detail = detail;
     }
+
+    public String getName() {
+        return name + ": " + Collect.reduce(detail);
+    }
+
 }

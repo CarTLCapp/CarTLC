@@ -1,4 +1,5 @@
 @import models.flow.Bit
+@import models.flow.Collect
 @import models.flow.Flow
 @import models.flow.FlowElementCollection
 @import helper._
@@ -59,13 +60,13 @@
             </thead>
             <tbody>
 
-                @for(element <- FlowElementCollection.findElementsByFlowId(id)) {
+                @for(element <- Collect.compute(FlowElementCollection.findElementsByFlowId(id))) {
                     <tr>
                         <td>@element.id</td>
                         <td>
-                            @for(bit <- element.getBits()) {
+                            @for(bit <- Collect.count(element.getBits())) {
                                 @if(bit.id != null) {
-                                    <a class="popup" onclick="popupElementBit(this)" data-id="@bit.id"><font color="blue">@bit.name</font>
+                                    <a class="popup" onclick="popupElementBit(this)" data-id="@bit.id"><font color="blue">@bit.getName()</font>
                                         <span class="popuptext" id="@bit.id">@bit.detail</span>
                                     </a>
                                 } else {

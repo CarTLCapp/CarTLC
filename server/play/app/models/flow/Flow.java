@@ -111,5 +111,14 @@ public class Flow extends com.avaje.ebean.Model {
         FlowElementCollection.deleteByFlowId(id);
         Flow.find.ref(id).delete();
     }
+
+    @java.lang.Override
+    public java.lang.String toString() {
+        return "Flow{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", sub_project_id=" + sub_project_id +
+                '}';
+    }
 }
 
