@@ -10,10 +10,10 @@ import android.view.View
 
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.CarRepository
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
-import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
+import com.cartlc.tracker.fresh.ui.bits.AutoLinearLayoutManager
 import com.cartlc.tracker.ui.list.ListEntryAdapter
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.ui.main.MainController

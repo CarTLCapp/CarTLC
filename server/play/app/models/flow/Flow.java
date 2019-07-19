@@ -28,15 +28,12 @@ public class Flow extends com.avaje.ebean.Model {
     public Long id;
 
     @Constraints.Required
-    public String name;
-
-    @Constraints.Required
     public Long sub_project_id;
 
     public static Finder<Long, Flow> find = new Finder<Long, Flow>(Flow.class);
 
     public static List<Flow> list() {
-        return find.orderBy("name asc").findList();
+        return find.orderBy("id asc").findList();
     }
 
     public static Flow get(long id) {
@@ -44,31 +41,6 @@ public class Flow extends com.avaje.ebean.Model {
             return find.byId(id);
         }
         return null;
-    }
-
-    public static Flow getByName(String name) {
-        List<Flow> list = find.where().eq("name", name).findList();
-        if (list.size() == 0) {
-            return null;
-        }
-        if (list.size() > 1) {
-            Logger.error("More than one flow named " + name);
-        }
-        return list.get(0);
-    }
-
-    public static boolean hasFlowName(String name) {
-        return find.where().eq("name", name).findRowCount() > 0;
-    }
-
-    public static String generateFlowName() {
-        int counter;
-        for (counter = 1; true; counter++) {
-            String name = String.format("Flow %d", counter);
-            if (!hasFlowName(name)) {
-                return name;
-            }
-        }
     }
 
     public List<FlowElement> getFlowElements() {
@@ -116,7 +88,6 @@ public class Flow extends com.avaje.ebean.Model {
     public java.lang.String toString() {
         return "Flow{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
                 ", sub_project_id=" + sub_project_id +
                 '}';
     }

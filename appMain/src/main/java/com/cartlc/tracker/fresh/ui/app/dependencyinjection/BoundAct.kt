@@ -8,12 +8,12 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.cartlc.tracker.fresh.service.LocationUseCase
 import com.cartlc.tracker.fresh.service.LocationUseCaseImpl
-import com.cartlc.tracker.fresh.ui.app.FactoryViewHelper
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewHelper
 import com.cartlc.tracker.fresh.ui.common.DialogNavigator
 import com.cartlc.tracker.fresh.ui.common.FragmentHelper
 import com.cartlc.tracker.fresh.ui.common.ScreenNavigator
 import com.cartlc.tracker.fresh.model.CarRepository
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 
 open class BoundAct(

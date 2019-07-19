@@ -15,9 +15,9 @@ import com.cartlc.tracker.fresh.ui.buttons.ButtonsView
 import com.cartlc.tracker.fresh.model.event.Action
 import com.cartlc.tracker.fresh.model.flow.ActionUseCase
 import com.cartlc.tracker.fresh.model.flow.VehicleStage
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.ui.base.BaseActivity
-import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
+import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
 import com.cartlc.tracker.ui.list.CheckBoxListAdapter
 import com.cartlc.tracker.ui.list.RadioListAdapter
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleView

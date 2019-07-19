@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.cartlc.tracker.R
-import com.cartlc.tracker.fresh.ui.app.FactoryViewHelper
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewHelper
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsView
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl

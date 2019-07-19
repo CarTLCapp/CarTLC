@@ -8,11 +8,11 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import com.cartlc.tracker.R
-import com.cartlc.tracker.fresh.ui.app.FactoryController
-import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryController
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.ui.base.BaseActivity
-import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
+import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.activity_main.*

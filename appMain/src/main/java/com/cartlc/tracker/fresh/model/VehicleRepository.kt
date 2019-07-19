@@ -1,3 +1,9 @@
+/*
+ * *
+ *   * Copyright 2019, FleetTLC. All rights reserved
+ *
+ */
+
 package com.cartlc.tracker.fresh.model
 
 import android.content.Context
@@ -9,7 +15,7 @@ import com.cartlc.tracker.fresh.model.event.Action
 import com.cartlc.tracker.fresh.model.flow.ActionUseCase
 import com.cartlc.tracker.fresh.model.flow.ActionUseCaseImpl
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 class VehicleRepository(
         private val context: Context,

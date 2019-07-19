@@ -80,6 +80,10 @@ table.dailyDate {
     text-transform:uppercase;
 }
 
+.longer {
+    width:400px
+}
+
 /* Popup container */
 .popup {
   position: relative;

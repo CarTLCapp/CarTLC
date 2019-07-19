@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import com.cartlc.tracker.ui.base.BaseActivity
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 class TitleView(
         context: Context, attrs: AttributeSet?,

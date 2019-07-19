@@ -111,15 +111,6 @@ public class FlowController extends Controller {
         }
         Form<InputFlow> flowForm = formFactory.form(InputFlow.class).bindFromRequest();
         InputFlow inputFlow = flowForm.get();
-        String name = inputFlow.getName();
-        if (name == null || name.isEmpty()) {
-            return EDIT(flowId,"No flow name entered.");
-        }
-        if (flowId == 0) {
-            if (Flow.getByName(name) != null) {
-                return EDIT(flowId, "A flow with this name has already been done: " + name);
-            }
-        }
         String message = "";
         Ebean.beginTransaction();
         try {
@@ -133,7 +124,6 @@ public class FlowController extends Controller {
             if (project == null) {
                 message = "Cannot find project named: " + inputFlow.root_project_name + " - " + inputFlow.sub_project_name;
             } else {
-                editFlow.name = name;
                 editFlow.sub_project_id = project.id;
                 if (flowId > 0) {
                     editFlow.update();
@@ -233,21 +223,8 @@ public class FlowController extends Controller {
         } else {
             flowElement = new FlowElement();
         }
-        if (inputFlowElement.hasToast) {
-            flowElement.toast_id = Prompt.requestPrompt(inputFlowElement.toastPrompt);
-        } else {
-            flowElement.toast_id = null;
-        }
-        if (inputFlowElement.hasDialog) {
-            flowElement.dialog_id = Prompt.requestPrompt(inputFlowElement.dialogPrompt);
-        } else {
-            flowElement.dialog_id = null;
-        }
-        if (inputFlowElement.hasConfirmation) {
-            flowElement.confirmation_id = Prompt.requestPrompt(inputFlowElement.confirmationPrompt);
-        } else {
-            flowElement.confirmation_id = null;
-        }
+        flowElement.prompt = inputFlowElement.prompt;
+        flowElement.prompt_type = inputFlowElement.getPromptType().getCode();
         flowElement.request_image = inputFlowElement.hasImage;
         flowElement.generic_note = inputFlowElement.hasGenericNote;
 
@@ -259,7 +236,6 @@ public class FlowController extends Controller {
         }
         if (flowId == 0) {
             Flow flow = new Flow();
-            flow.name = Flow.generateFlowName();
             flow.save();
             flowId = flow.id;
         }
@@ -281,18 +257,12 @@ public class FlowController extends Controller {
             ArrayNode elementsNode = node.putArray("elements");
             for (FlowElement element : flow.getFlowElements()) {
                 ObjectNode elementNode = elementsNode.addObject();
-                if (element.hasToast()) {
-                    elementNode.put("toast", element.getToastValue());
+                if (element.hasPrompt()) {
+                    elementNode.put("prompt", element.prompt);
                 }
-                if (element.hasDialog()) {
-                    elementNode.put("dialog", element.getDialogValue());
-                }
-                if (element.hasConfirmation()) {
-                    elementNode.put("confirmation", element.getConfirmationValue());
-                }
+                elementNode.put("type", element.getPromptType().getCodeString());
                 elementNode.put("requestImage", element.request_image);
                 elementNode.put("genericNote", element.generic_note);
-
                 if (element.hasNotes()) {
                     ArrayNode notesNote = elementNode.putArray("notes");
                     for (Note note : element.getNotes()) {

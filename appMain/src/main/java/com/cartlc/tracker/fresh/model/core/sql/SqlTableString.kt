@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteDatabase
 import com.cartlc.tracker.fresh.model.core.data.DataString
 import com.cartlc.tracker.fresh.model.core.table.TableString
 
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 import java.util.ArrayList
 

@@ -9,7 +9,7 @@ import com.cartlc.tracker.fresh.model.core.data.DataEquipment
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableEquipment
 
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 import java.util.ArrayList
 

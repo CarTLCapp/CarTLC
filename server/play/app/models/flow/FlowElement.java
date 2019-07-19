@@ -23,18 +23,16 @@ import models.Note;
 public class FlowElement extends Model {
 
     private static final long serialVersionUID = 1L;
+    public static final int MAX_LEN = 60;
 
     @Id
     public Long id;
 
     @Constraints.Required
-    public Long toast_id;
+    public String prompt;
 
     @Constraints.Required
-    public Long dialog_id;
-
-    @Constraints.Required
-    public Long confirmation_id;
+    public short prompt_type;
 
     @Constraints.Required
     public boolean request_image;
@@ -58,114 +56,75 @@ public class FlowElement extends Model {
         return find.byId(id);
     }
 
-    public boolean hasToast() { return toast_id != null && toast_id > 0; }
+    public boolean hasPrompt() { return prompt != null && prompt.length() > 0; }
 
-    public boolean hasDialog() { return dialog_id != null && dialog_id > 0; }
+    public boolean hasPromptPopup() { return prompt != null && prompt.length() > MAX_LEN; }
 
-    public boolean hasConfirmation() { return confirmation_id != null && confirmation_id > 0; }
+    public PromptType getPromptType() { return PromptType.from(prompt_type); }
+
+    public String getPromptTypeName() { return getPromptType().getDesc(); }
 
     public boolean hasNotes() { return FlowNoteCollection.hasNotes(id); }
 
-    public Prompt getToast() {
-        if (toast_id != null) return Prompt.get(toast_id); else return null;
-    }
-
-    public String getToastValue() { return prompt(getToast()); }
-
-    public Prompt getDialog() {
-        if (dialog_id != null) return Prompt.get(dialog_id); else return null;
-    }
-
-    public String getDialogValue() { return prompt(getDialog()); }
-
-    public Prompt getConfirmation() {
-        if (confirmation_id != null) return Prompt.get(confirmation_id); else return null;
-    }
-
-    public String getConfirmationValue() { return prompt(getConfirmation()); }
-
     public List<Note> getNotes() { return FlowNoteCollection.findNotesByFlowElementId(id); }
 
-    public List<Bit> getBits() {
-        List<Bit> list = new ArrayList<Bit>();
-        if (toast_id != null && toast_id > 0) {
-            list.add(new Bit(getId("toast"), "Toast", getToastValue()));
-        }
-        if (dialog_id != null && dialog_id > 0) {
-            list.add(new Bit(getId("dialog"), "Dialog", getDialogValue()));
-        }
-        if (request_image) {
-            list.add(new Bit(null, "Image", null));
-        }
-        int count = FlowNoteCollection.countNotes(id);
-        if (count > 0) {
-            if (count == 1) {
-                list.add(new Bit(getId("note"), "Note", getNoteLine()));
+    private String getName() {
+        StringBuilder sbuf = new StringBuilder();
+        PromptType promptType = getPromptType();
+        sbuf.append(promptType.getDesc());
+        if (hasPrompt()) {
+            sbuf.append(": ");
+            if (prompt.length() > MAX_LEN) {
+                sbuf.append(prompt.substring(0, MAX_LEN));
             } else {
-                list.add(new Bit(getId("note"), String.format("%d Notes", count), getNoteLine()));
+                sbuf.append(prompt);
             }
         }
-        if (confirmation_id != null && confirmation_id > 0) {
-            list.add(new Bit(getId("confirm"), "Confirm", getConfirmationValue()));
+        return sbuf.toString();
+    }
+
+    public String getPromptId() {
+        return String.format("prompt%d", id);
+    }
+
+    public String getPromptSummary() {
+        return prompt.substring(0, MAX_LEN);
+    }
+
+    public String getFlags() {
+        StringBuilder sbuf = new StringBuilder();
+        if (request_image) {
+            sbuf.append("Image");
+        } else {
+            sbuf.append("-");
         }
-        return list;
+        return sbuf.toString();
     }
 
-    private String getId(String base) {
-        return String.format("%s%d", base, id);
+    public String getNotesId(){
+        return String.format("notes%d", id);
     }
 
-    private String getNoteLine() {
+    public String getNotesSummary() {
+        return String.format("%d Notes", FlowNoteCollection.countNotes(id));
+    }
+
+    public String getNotesLine() {
         StringBuilder sbuf = new StringBuilder();
         for (Note note : getNotes()) {
             if (sbuf.length() > 0) {
-                sbuf.append(" ");
+                sbuf.append(", ");
             }
             sbuf.append(note.name);
         }
         return sbuf.toString();
     }
 
-    private String prompt(Prompt prompt) {
-        if (prompt == null) {
-            return "";
-        }
-        return prompt.line;
-    }
-
     public static void delete(long elementId) {
         FlowElementCollection.deleteByFlowElementId(elementId);
         FlowNoteCollection.deleteByFlowElementId(elementId);
         FlowElement element = FlowElement.find.ref(elementId);
-        element.deleteMe();
-    }
-
-    public void deleteMe() {
-        Long toast_id = this.toast_id;
-        Long dialog_id = this.dialog_id;
-        Long confirmation_id = this.confirmation_id;
-        
-        delete();
-
-        if (toast_id != null && toast_id != 0 && !usingPrompt(toast_id)) {
-            Prompt.find.byId(toast_id).delete();
-        }
-        if (dialog_id != null && dialog_id != 0 && !usingPrompt(dialog_id)) {
-            Prompt.find.byId(dialog_id).delete();
-        }
-        if (confirmation_id != null && confirmation_id != 0 && !usingPrompt(confirmation_id)) {
-            Prompt.find.byId(confirmation_id).delete();
-        }
-    }
-
-    public static boolean usingPrompt(long promptId) {
-        return find.where()
-                .disjunction()
-                .eq("toast_id", promptId)
-                .eq("dialog_id", promptId)
-                .eq("confirmation_id", promptId)
-                .endJunction()
-                .findRowCount() > 0;
+        element.delete();
     }
 
 }

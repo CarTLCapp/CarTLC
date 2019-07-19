@@ -9,10 +9,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.R
-import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
-import com.cartlc.tracker.ui.bits.AutoLinearLayoutManager
+import com.cartlc.tracker.fresh.ui.bits.AutoLinearLayoutManager
 
 class PictureListViewMvcImpl(
         inflater: LayoutInflater,

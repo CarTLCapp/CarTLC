@@ -3,7 +3,7 @@ package com.cartlc.tracker.ui.base
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.cartlc.tracker.fresh.model.CarRepository
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
 
 open class BaseFragment : Fragment() {

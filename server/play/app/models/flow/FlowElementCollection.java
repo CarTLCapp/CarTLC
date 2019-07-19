@@ -79,7 +79,7 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
             FlowNoteCollection.deleteByFlowElementId(item.flow_element_id);
             FlowElement element = item.getFlowElement();
             item.delete();
-            element.deleteMe();
+            element.delete();
         }
     }
 

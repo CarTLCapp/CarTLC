@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteDatabase
 import com.cartlc.tracker.fresh.model.core.data.DataZipCode
 import com.cartlc.tracker.fresh.model.core.table.TableZipCode
 
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 /**
  * Created by dug on 8/24/17.

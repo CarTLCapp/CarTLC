@@ -4,7 +4,7 @@
 package com.cartlc.tracker.fresh.service
 
 import android.content.Context
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 class ServiceUseCaseImpl(
         context: Context

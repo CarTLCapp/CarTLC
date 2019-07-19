@@ -1,7 +1,7 @@
 /**
  * Copyright 2018, FleetTLC. All rights reserved
  */
-package com.cartlc.tracker.ui.app
+package com.cartlc.tracker.fresh.ui.app
 
 import android.util.Log
 

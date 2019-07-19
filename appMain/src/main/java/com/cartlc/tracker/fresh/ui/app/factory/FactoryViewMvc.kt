@@ -1,7 +1,9 @@
-/**
- * Copyright 2019, FleetTLC. All rights reserved
+/*
+ * *
+ *   * Copyright 2019, FleetTLC. All rights reserved
+ *
  */
-package com.cartlc.tracker.fresh.ui.app
+package com.cartlc.tracker.fresh.ui.app.factory
 
 import android.content.Context
 import android.view.LayoutInflater

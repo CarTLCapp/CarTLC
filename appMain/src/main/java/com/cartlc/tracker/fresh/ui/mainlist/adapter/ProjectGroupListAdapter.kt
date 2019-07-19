@@ -6,7 +6,7 @@ package com.cartlc.tracker.fresh.ui.mainlist.adapter
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
-import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.ProjectGroupItemViewMvc
 
 class ProjectGroupListAdapter(

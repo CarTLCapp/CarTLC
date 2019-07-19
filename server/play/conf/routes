@@ -105,7 +105,7 @@ POST    /notes/root            controllers.NoteController.queryWithRoot()
 
 GET     /flow                       controllers.FlowController.list()
 GET     /flow/new                   controllers.FlowController.create()
-GET     /flow/:id/edit              controllers.FlowController.edit(id:Long)
+GET     /flow/:id                   controllers.FlowController.edit(id:Long)
 GET     /flow/:id/edit_message/:message     controllers.FlowController.editWithMessage(id:Long, message: String)
 POST    /flow/:id                           controllers.FlowController.save(id:Long)
 GET     /flow/:id/delete                    controllers.FlowController.delete(id:Long)

@@ -1,7 +1,9 @@
-/**
- * Copyright 2018, FleetTLC. All rights reserved
+/*
+ * *
+ *   * Copyright 2019, FleetTLC. All rights reserved
+ *
  */
-package com.cartlc.tracker.ui.app
+package com.cartlc.tracker.fresh.ui.app
 
 import android.Manifest
 import android.app.Activity
@@ -63,7 +65,8 @@ class TBApplication : Application() {
                         R.string.perm_location))
 
         fun IsDevelopmentServer(): Boolean {
-            return OVERRIDE_IS_DEVELOPMENT_SERVER ?: BuildConfig.DEBUG
+            return OVERRIDE_IS_DEVELOPMENT_SERVER
+                    ?: BuildConfig.DEBUG
         }
 
         fun getUri(ctx: Context, file: File): Uri {

@@ -11,7 +11,7 @@ import android.os.Environment
 import android.widget.ImageView
 import com.cartlc.tracker.R
 
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 import java.io.File
 import java.io.FileOutputStream

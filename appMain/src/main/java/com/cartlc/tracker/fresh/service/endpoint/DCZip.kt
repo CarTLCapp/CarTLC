@@ -7,7 +7,7 @@ package com.cartlc.tracker.fresh.service.endpoint
 
 import android.net.Uri
 
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.model.core.data.DataZipCode
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 

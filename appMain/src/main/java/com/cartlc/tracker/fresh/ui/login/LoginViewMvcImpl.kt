@@ -9,7 +9,7 @@ import android.widget.EditText
 import android.widget.TextView
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
-import com.cartlc.tracker.ui.bits.TextWatcherImpl
+import com.cartlc.tracker.fresh.ui.bits.TextWatcherImpl
 
 class LoginViewMvcImpl(
         inflater: LayoutInflater,

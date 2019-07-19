@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package views.formdata;
 
@@ -13,32 +13,30 @@ import play.data.validation.*;
 import com.avaje.ebean.*;
 
 import models.flow.FlowElement;
+import models.flow.PromptType;
 
 public class InputFlowElement extends Model {
     private static final long serialVersionUID = 1L;
 
-    public String toastPrompt;
-    public String dialogPrompt;
-    public String confirmationPrompt;
-    public boolean hasToast;
-    public boolean hasDialog;
-    public boolean hasConfirmation;
+    public String prompt;
+    public String type;
+    public boolean hasPrompt;
     public boolean hasImage;
     public boolean hasGenericNote;
 
     public InputFlowElement() {
     }
 
-
     public InputFlowElement(FlowElement flowElement) {
-        hasToast = flowElement.hasToast();
-        hasDialog = flowElement.hasDialog();
-        hasConfirmation = flowElement.hasConfirmation();
+        hasPrompt = flowElement.hasPrompt();
         hasImage = flowElement.request_image;
         hasGenericNote = flowElement.generic_note;
-        toastPrompt = flowElement.getToastValue();
-        dialogPrompt = flowElement.getDialogValue();
-        confirmationPrompt = flowElement.getConfirmationValue();
+        prompt = flowElement.prompt;
+        type = String.valueOf(flowElement.getPromptType().getCodeString());
+    }
+
+    public PromptType getPromptType() {
+        return PromptType.from(type);
     }
 }
 

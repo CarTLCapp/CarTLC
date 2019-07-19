@@ -32,7 +32,7 @@ import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
-import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
+import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 import com.cartlc.tracker.ui.util.helper.LocationHelper

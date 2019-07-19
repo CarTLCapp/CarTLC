@@ -11,8 +11,8 @@ import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEquipment
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
-import com.cartlc.tracker.fresh.ui.app.FactoryAdapterController
-import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryAdapterController
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.*
 import com.cartlc.tracker.fresh.model.misc.EntryHint

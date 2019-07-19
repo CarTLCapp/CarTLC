@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.VisibleForTesting
 import com.cartlc.tracker.fresh.model.core.table.*
 
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 import timber.log.Timber
 

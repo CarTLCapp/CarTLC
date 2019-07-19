@@ -13,7 +13,7 @@ import androidx.annotation.VisibleForTesting
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.fresh.model.core.data.*
 import com.cartlc.tracker.fresh.model.CarRepository
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.event.EventRefreshProjects

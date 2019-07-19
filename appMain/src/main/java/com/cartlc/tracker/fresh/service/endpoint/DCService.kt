@@ -12,7 +12,7 @@ import com.cartlc.tracker.fresh.model.CarRepository
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.service.help.ServerHelper
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 import timber.log.Timber
 

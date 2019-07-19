@@ -1,5 +1,3 @@
-@import models.flow.Bit
-@import models.flow.Collect
 @import models.flow.Flow
 @import models.flow.FlowElementCollection
 @import helper._
@@ -33,7 +31,6 @@
 
         <fieldset>
 
-            @b3.text(flowForm("name"), '_label -> "Name:  ", '_help -> "")
             @b3.select(flowForm("root_project_name"),
                 options = options(RootProject.listNamesWithBlank()),
                 args =
@@ -52,7 +49,10 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Prompt</th>
+                    <th>Flags</th>
+                    <th>Notes</th>
                     <th>Move Up</th>
                     <th>Move Down</th>
                     <th>Edit</th>
@@ -60,21 +60,29 @@
             </thead>
             <tbody>
 
-                @for(element <- Collect.compute(FlowElementCollection.findElementsByFlowId(id))) {
+                @for(element <- FlowElementCollection.findElementsByFlowId(id)) {
                     <tr>
                         <td>@element.id</td>
+                        <td>@element.getPromptTypeName()</td>
                         <td>
-                            @for(bit <- Collect.count(element.getBits())) {
-                                @if(bit.id != null) {
-                                    <a class="popup" onclick="popupElementBit(this)" data-id="@bit.id"><font color="blue">@bit.getName()</font>
-                                        <span class="popuptext" id="@bit.id">@bit.detail</span>
-                                    </a>
-                                } else {
-                                    @bit.name
-                                }
-                                &nbsp;
+                            @if(element.hasPromptPopup()) {
+                                <a class="popup" onclick="popupElementBit(this)" data-id="@element.getPromptId()"><font color="blue">@element.getPromptSummary()</font>
+                                    <span class="popuptext" id="@element.getPromptId()">@element.prompt</span>
+                                </a>
+                            } else {
+                                @element.prompt
                             }
                         </td>
+                        <td>@element.getFlags()</td>
+                        @if(element.hasNotes()) {
+                            <td>
+                                <a class="popup" onclick="popupElementBit(this)" data-id="@element.getNotesId()"><font color="blue">@element.getNotesSummary()</font>
+                                    <span class="popuptext" id="@element.getNotesId()">@element.getNotesLine()</span>
+                                </a>
+                            </td>
+                        } else {
+                            <td>-</td>
+                        }
                         @if(element.isFirst) {
                             <td>-</td>
                         } else {

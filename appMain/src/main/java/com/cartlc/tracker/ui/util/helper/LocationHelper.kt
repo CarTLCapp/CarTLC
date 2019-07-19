@@ -13,7 +13,7 @@ import android.os.AsyncTask
 import android.text.TextUtils
 import android.util.Log
 
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.model.core.data.DataAddress
 import com.cartlc.tracker.fresh.model.core.data.DataStates
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable

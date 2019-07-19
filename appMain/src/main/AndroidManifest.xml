@@ -14,7 +14,7 @@
         android:required="true"/>
 
     <application
-        android:name=".ui.app.TBApplication"
+        android:name=".fresh.ui.app.TBApplication"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"

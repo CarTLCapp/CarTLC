@@ -9,7 +9,7 @@ import android.text.TextUtils
 import com.cartlc.tracker.fresh.model.core.data.*
 import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 import java.io.File
 import java.text.SimpleDateFormat

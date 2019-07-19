@@ -10,7 +10,7 @@ import com.cartlc.tracker.fresh.model.core.data.DataProject
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableProjects
 
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 /**
  * Created by dug on 4/17/17.

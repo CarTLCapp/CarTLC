@@ -14,7 +14,7 @@ import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.CarRepository
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import kotlinx.android.synthetic.main.entry_item_full.view.*
 
 /**

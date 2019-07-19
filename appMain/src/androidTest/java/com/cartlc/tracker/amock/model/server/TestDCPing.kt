@@ -16,7 +16,7 @@ import com.cartlc.tracker.fresh.service.endpoint.DCPing
 import com.cartlc.tracker.fresh.service.help.ServerHelper
 import com.cartlc.tracker.model.table.*
 import com.cartlc.tracker.fresh.model.table.*
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.spy
 

@@ -1,4 +1,3 @@
-@import models.flow.Bit
 @import models.flow.FlowNoteCollection
 @import helper._
 @import b3.vertical.fieldConstructor
@@ -37,15 +36,16 @@
 
             <div class="checkbox-container">
 
-                @b3.textCheckPrompt(flowElementForm("toastPrompt"), 'placeholder -> "" )(flowElementForm("hasToast"))(flowElementForm("toastSelect"))('_label -> "Toast Prompt")
+                @b3.text(flowElementForm("prompt"), '_label -> "Prompt", 'class -> "longer")
                 <div style="clear:both;"></div>
-                @b3.textCheckPrompt(flowElementForm("dialogPrompt"), 'placeholder -> "")(flowElementForm("hasDialog"))(flowElementForm("dialogSelect"))('_label -> "OK Dialog")
+                @{
+                    val opts = Seq("T"->"Toast","D"->"Dialog","C"->"Confirm","N"->"Confirm Top")
+                    b3.radio(flowElementForm("type"), options = opts, '_label -> "Type", '_inline -> true)
+                }
                 <div style="clear:both;"></div>
                 @b3.checkbox(flowElementForm("hasImage"), '_label -> "Image Request")
                 <div style="clear:both;"></div>
                 @b3.checkbox(flowElementForm("hasGenericNote"), '_label -> "Generic Note Allowed")
-                <div style="clear:both;"></div>
-                @b3.textCheckPrompt(flowElementForm("confirmationPrompt"), 'placeholder -> "")(flowElementForm("hasConfirmation"))(flowElementForm("confirmationSelect"))('_label -> "Confirmation Dialog")
                 <div style="clear:both;"></div>
 
             </div>

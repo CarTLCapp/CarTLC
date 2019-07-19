@@ -5,7 +5,7 @@ package com.cartlc.tracker.fresh.ui.picture
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 
 class PictureListAdapter(

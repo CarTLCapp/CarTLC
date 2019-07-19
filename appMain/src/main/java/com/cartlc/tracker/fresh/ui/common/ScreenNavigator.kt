@@ -16,7 +16,7 @@ import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.ui.act.ListEntryActivity
 import com.cartlc.tracker.ui.act.VehicleActivity
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.ui.util.CheckError
 import java.io.File
 

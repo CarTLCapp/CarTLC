@@ -3,7 +3,7 @@ package com.cartlc.tracker.fresh.ui.buttons
 import com.cartlc.tracker.fresh.ui.common.observable.BaseObservable
 import com.cartlc.tracker.fresh.model.event.Button
 import com.cartlc.tracker.fresh.model.flow.Flow
-import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
+import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
 
 interface ButtonsUseCase : BaseObservable<ButtonsUseCase.Listener> {
 

@@ -14,7 +14,7 @@ import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.model.core.table.*
 import com.cartlc.tracker.model.table.*
 import com.cartlc.tracker.fresh.model.table.*
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.nhaarman.mockito_kotlin.any
 import org.junit.Assert.*
 import org.junit.Before

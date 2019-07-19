@@ -17,7 +17,6 @@
         <table class="clients zebra-striped">
             <thead>
                 <tr>
-                    <th>Name</th>
                     <th>Root</th>
                     <th>Project</th>
                     <th>Chain Size</th>
@@ -27,7 +26,6 @@
             <tbody>
                 @for(flow <- currentPage) {
                     <tr>
-                        <td>@flow.name</td>
                         <td>@flow.getRootProjectName()</td>
                         <td>@flow.getSubProjectName()</td>
                         <td>@flow.getChainSize()</td>

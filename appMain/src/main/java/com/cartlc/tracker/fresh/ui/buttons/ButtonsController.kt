@@ -6,10 +6,10 @@ import androidx.lifecycle.*
 import com.cartlc.tracker.fresh.model.event.Button
 import com.cartlc.tracker.fresh.model.flow.Flow
 import com.cartlc.tracker.fresh.model.msg.StringMessage
-import com.cartlc.tracker.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
-import com.cartlc.tracker.ui.bits.SoftKeyboardDetect
+import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
 
 open class ButtonsController(
         boundAct: BoundAct,

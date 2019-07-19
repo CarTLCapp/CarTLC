@@ -17,26 +17,20 @@ import models.Project;
 
 public class InputFlow extends Model {
     private static final long serialVersionUID = 1L;
-    public String name;
     public String root_project_name;
     public String sub_project_name;
 
     public InputFlow(Flow flow) {
         if (flow != null) {
-            name = flow.name;
             root_project_name = flow.getRootProjectName();
             sub_project_name = flow.getSubProjectName();
-        } else {
-            name = Flow.generateFlowName();
         }
     }
 
     public InputFlow() {
-        name = Flow.generateFlowName();
     }
 
     public InputFlow(InputFlow other) {
-        name = other.name;
         root_project_name = other.root_project_name;
         sub_project_name = other.sub_project_name;
     }
@@ -45,15 +39,5 @@ public class InputFlow extends Model {
         return Project.listSubProjectNamesWithBlank(root_project_name);
     }
 
-    public String getName() {
-        if (name == null) {
-            return name;
-        }
-        return name.trim();
-    }
-
-    public void saveMe() {
-
-    }
 }
 
