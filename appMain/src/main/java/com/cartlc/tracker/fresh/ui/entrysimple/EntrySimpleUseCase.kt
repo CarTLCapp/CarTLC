@@ -1,6 +1,6 @@
 package com.cartlc.tracker.fresh.ui.entrysimple
 
-import com.cartlc.tracker.model.event.Action
+import com.cartlc.tracker.fresh.model.event.Action
 
 interface EntrySimpleUseCase {
 

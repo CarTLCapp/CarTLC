@@ -1,10 +1,10 @@
 package com.cartlc.tracker.fresh.ui.main.process
 
 import com.cartlc.tracker.fresh.ui.main.MainController
-import com.cartlc.tracker.model.event.Button
-import com.cartlc.tracker.model.flow.RootProjectFlow
-import com.cartlc.tracker.model.flow.Stage
-import com.cartlc.tracker.model.msg.StringMessage
+import com.cartlc.tracker.fresh.model.event.Button
+import com.cartlc.tracker.fresh.model.flow.RootProjectFlow
+import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.model.msg.StringMessage
 
 open class ProcessBase(
         protected val shared: MainController.Shared

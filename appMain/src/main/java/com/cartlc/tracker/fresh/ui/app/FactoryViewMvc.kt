@@ -28,7 +28,6 @@ import com.cartlc.tracker.fresh.ui.picture.item.PictureListThumbnailItemViewMvc
 import com.cartlc.tracker.fresh.ui.picture.item.PictureListThumbnailItemViewMvcImpl
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvcImpl
-import com.cartlc.tracker.model.msg.MessageHandler
 
 class FactoryViewMvc(
         private val inflater: LayoutInflater,

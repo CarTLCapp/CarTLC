@@ -15,7 +15,7 @@ import com.cartlc.tracker.fresh.ui.app.FactoryAdapterController
 import com.cartlc.tracker.fresh.ui.app.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.*
-import com.cartlc.tracker.model.misc.EntryHint
+import com.cartlc.tracker.fresh.model.misc.EntryHint
 
 class MainListViewMvcImpl(
         inflater: LayoutInflater,

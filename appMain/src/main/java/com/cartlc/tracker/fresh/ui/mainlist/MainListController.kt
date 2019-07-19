@@ -7,11 +7,11 @@ import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
-import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.FlowUseCase
-import com.cartlc.tracker.model.flow.Stage
-import com.cartlc.tracker.model.misc.EntryHint
-import com.cartlc.tracker.model.misc.TruckStatus
+import com.cartlc.tracker.fresh.model.flow.Flow
+import com.cartlc.tracker.fresh.model.flow.FlowUseCase
+import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.model.misc.EntryHint
+import com.cartlc.tracker.fresh.model.misc.TruckStatus
 
 class MainListController(
         boundAct: BoundAct,

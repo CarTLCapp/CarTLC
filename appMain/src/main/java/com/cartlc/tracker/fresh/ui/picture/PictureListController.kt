@@ -11,7 +11,7 @@ import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 import com.cartlc.tracker.fresh.ui.picture.item.PictureListItemViewMvc
 import com.cartlc.tracker.fresh.ui.picture.item.PictureListThumbnailItemViewMvc
-import com.cartlc.tracker.model.msg.StringMessage
+import com.cartlc.tracker.fresh.model.msg.StringMessage
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.HashMap

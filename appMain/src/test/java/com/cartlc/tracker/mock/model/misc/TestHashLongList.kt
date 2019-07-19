@@ -4,7 +4,7 @@
 package com.cartlc.tracker.mock.model.misc
 
 import com.cartlc.tracker.fresh.model.core.data.DataString
-import com.cartlc.tracker.model.misc.HashLongList
+import com.cartlc.tracker.fresh.model.misc.HashLongList
 import com.cartlc.tracker.fresh.model.core.table.TableString
 import org.junit.Assert.*
 import org.junit.Before

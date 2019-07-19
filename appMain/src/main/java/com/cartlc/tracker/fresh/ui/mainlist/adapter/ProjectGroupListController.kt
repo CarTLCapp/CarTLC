@@ -6,9 +6,9 @@ package com.cartlc.tracker.fresh.ui.mainlist.adapter
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.model.core.sql.SqlTableEntry
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.ProjectGroupItemViewMvc
-import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.msg.MessageHandler
-import com.cartlc.tracker.model.msg.StringMessage
+import com.cartlc.tracker.fresh.model.CarRepository
+import com.cartlc.tracker.fresh.model.msg.MessageHandler
+import com.cartlc.tracker.fresh.model.msg.StringMessage
 
 class ProjectGroupListController(
         private val repo: CarRepository,

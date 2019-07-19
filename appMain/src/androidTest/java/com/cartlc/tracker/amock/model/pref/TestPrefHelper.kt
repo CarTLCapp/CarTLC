@@ -4,7 +4,7 @@
 package com.cartlc.tracker.amock.model.pref
 
 import android.content.Context
-import com.cartlc.tracker.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import androidx.test.ext.junit.runners.AndroidJUnit4

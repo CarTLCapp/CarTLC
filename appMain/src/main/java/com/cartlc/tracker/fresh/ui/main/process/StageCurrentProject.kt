@@ -1,10 +1,8 @@
 package com.cartlc.tracker.fresh.ui.main.process
 
-import androidx.lifecycle.MutableLiveData
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.ui.main.MainController
-import com.cartlc.tracker.model.flow.Stage
-import com.cartlc.tracker.model.msg.StringMessage
+import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.ui.util.CheckError
 
 class StageCurrentProject(

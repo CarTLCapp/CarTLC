@@ -4,10 +4,10 @@ import androidx.lifecycle.Lifecycle
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.FlowUseCase
-import com.cartlc.tracker.model.flow.Stage
-import com.cartlc.tracker.model.msg.StringMessage
+import com.cartlc.tracker.fresh.model.flow.Flow
+import com.cartlc.tracker.fresh.model.flow.FlowUseCase
+import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.model.msg.StringMessage
 
 class TitleController(
         boundAct: BoundAct,

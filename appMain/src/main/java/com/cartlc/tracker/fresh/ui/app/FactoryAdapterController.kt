@@ -4,8 +4,8 @@
 package com.cartlc.tracker.fresh.ui.app
 
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.*
-import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.msg.MessageHandler
+import com.cartlc.tracker.fresh.model.CarRepository
+import com.cartlc.tracker.fresh.model.msg.MessageHandler
 
 class FactoryAdapterController(
         val repo: CarRepository,

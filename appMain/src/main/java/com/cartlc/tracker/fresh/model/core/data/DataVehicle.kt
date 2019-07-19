@@ -3,9 +3,9 @@
  */
 package com.cartlc.tracker.fresh.model.core.data
 
-import com.cartlc.tracker.model.misc.HashLongList
-import com.cartlc.tracker.model.misc.HashStringList
-import com.cartlc.tracker.model.msg.StringBuilderWithComma
+import com.cartlc.tracker.fresh.model.misc.HashLongList
+import com.cartlc.tracker.fresh.model.misc.HashStringList
+import com.cartlc.tracker.fresh.model.msg.StringBuilderWithComma
 import com.cartlc.tracker.fresh.model.core.table.TableString
 
 /**

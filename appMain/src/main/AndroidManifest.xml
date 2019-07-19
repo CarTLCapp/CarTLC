@@ -69,7 +69,7 @@
         </provider>
 
         <service
-            android:name=".model.server.DCService"
+            android:name=".fresh.service.endpoint.DCService"
             android:exported="false">
         </service>
         <service

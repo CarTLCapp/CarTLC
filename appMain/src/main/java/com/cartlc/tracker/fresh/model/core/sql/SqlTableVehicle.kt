@@ -7,7 +7,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.VisibleForTesting
 import com.cartlc.tracker.fresh.model.core.data.DataVehicle
-import com.cartlc.tracker.model.misc.HashLongList
+import com.cartlc.tracker.fresh.model.misc.HashLongList
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableVehicle
 import com.cartlc.tracker.ui.app.TBApplication

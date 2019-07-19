@@ -12,7 +12,7 @@ import com.cartlc.tracker.fresh.ui.app.FactoryViewHelper
 import com.cartlc.tracker.fresh.ui.common.DialogNavigator
 import com.cartlc.tracker.fresh.ui.common.FragmentHelper
 import com.cartlc.tracker.fresh.ui.common.ScreenNavigator
-import com.cartlc.tracker.model.CarRepository
+import com.cartlc.tracker.fresh.model.CarRepository
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 

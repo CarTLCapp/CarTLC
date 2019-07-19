@@ -2,11 +2,11 @@ package com.cartlc.tracker.fresh.ui.main.process
 
 import com.cartlc.tracker.fresh.model.core.data.DataStates
 import com.cartlc.tracker.fresh.ui.main.MainController
-import com.cartlc.tracker.model.flow.CompanyFlow
-import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.Stage
-import com.cartlc.tracker.model.msg.StringMessage
-import com.cartlc.tracker.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.model.flow.CompanyFlow
+import com.cartlc.tracker.fresh.model.flow.Flow
+import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.model.msg.StringMessage
+import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import java.util.ArrayList
 
 class StageState(

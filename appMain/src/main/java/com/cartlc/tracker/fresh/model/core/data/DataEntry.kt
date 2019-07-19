@@ -6,7 +6,7 @@ package com.cartlc.tracker.fresh.model.core.data
 import android.content.Context
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.misc.TruckStatus
+import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 
 import java.text.SimpleDateFormat

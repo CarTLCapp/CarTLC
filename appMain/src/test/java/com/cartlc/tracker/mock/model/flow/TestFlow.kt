@@ -3,9 +3,9 @@
  */
 package com.cartlc.tracker.mock.model.flow
 
-import com.cartlc.tracker.model.event.Action
-import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.Stage
+import com.cartlc.tracker.fresh.model.event.Action
+import com.cartlc.tracker.fresh.model.flow.Flow
+import com.cartlc.tracker.fresh.model.flow.Stage
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

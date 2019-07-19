@@ -7,8 +7,8 @@ import com.cartlc.tracker.fresh.model.core.data.DataCollectionEquipmentProject
 import com.cartlc.tracker.fresh.model.core.data.DataEquipment
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.EquipmentSelectItemViewMvc
-import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.model.CarRepository
+import com.cartlc.tracker.fresh.model.pref.PrefHelper
 
 class EquipmentSelectController(
         private val repo: CarRepository,

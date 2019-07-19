@@ -9,11 +9,11 @@ import org.mockito.MockitoAnnotations
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.cartlc.tracker.fresh.model.core.table.*
-import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.flow.FlowUseCaseImpl
-import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.server.DCPing
-import com.cartlc.tracker.model.server.ServerHelper
+import com.cartlc.tracker.fresh.model.CarRepository
+import com.cartlc.tracker.fresh.model.flow.FlowUseCaseImpl
+import com.cartlc.tracker.fresh.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.service.endpoint.DCPing
+import com.cartlc.tracker.fresh.service.help.ServerHelper
 import com.cartlc.tracker.model.table.*
 import com.cartlc.tracker.fresh.model.table.*
 import com.cartlc.tracker.ui.app.TBApplication

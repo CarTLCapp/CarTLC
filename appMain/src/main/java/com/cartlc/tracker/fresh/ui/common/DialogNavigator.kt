@@ -7,8 +7,8 @@ import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataNote
-import com.cartlc.tracker.model.msg.MessageHandler
-import com.cartlc.tracker.model.msg.StringMessage
+import com.cartlc.tracker.fresh.model.msg.MessageHandler
+import com.cartlc.tracker.fresh.model.msg.StringMessage
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View

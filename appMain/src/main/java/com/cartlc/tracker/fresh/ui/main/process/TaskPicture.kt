@@ -2,7 +2,7 @@ package com.cartlc.tracker.fresh.ui.main.process
 
 import android.os.AsyncTask
 import com.cartlc.tracker.fresh.ui.main.MainController
-import com.cartlc.tracker.model.msg.ErrorMessage
+import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import java.io.File
 import java.lang.ref.WeakReference

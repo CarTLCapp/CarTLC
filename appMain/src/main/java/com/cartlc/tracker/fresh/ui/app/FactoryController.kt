@@ -4,7 +4,7 @@
 package com.cartlc.tracker.fresh.ui.app
 
 import com.cartlc.tracker.fresh.model.SchedulerPlan
-import com.cartlc.tracker.model.server.DCServerRx
+import com.cartlc.tracker.fresh.service.endpoint.DCServerRx
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleController

@@ -18,15 +18,21 @@ import androidx.multidex.MultiDex
 
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.*
+import com.cartlc.tracker.fresh.model.CarRepository
+import com.cartlc.tracker.fresh.model.VehicleRepository
 import com.cartlc.tracker.ui.util.CheckError
-import com.cartlc.tracker.model.pref.PrefHelper
-import com.cartlc.tracker.model.event.EventError
-import com.cartlc.tracker.model.flow.FlowUseCaseImpl
+import com.cartlc.tracker.fresh.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.model.event.EventError
+import com.cartlc.tracker.fresh.model.flow.FlowUseCaseImpl
 import com.cartlc.tracker.fresh.model.core.sql.DatabaseManager
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
-import com.cartlc.tracker.model.flow.FlowUseCase
-import com.cartlc.tracker.model.server.*
+import com.cartlc.tracker.fresh.model.flow.FlowUseCase
+import com.cartlc.tracker.fresh.service.endpoint.DCPing
+import com.cartlc.tracker.fresh.service.endpoint.DCServerRx
+import com.cartlc.tracker.fresh.service.endpoint.DCServerRxImpl
+import com.cartlc.tracker.fresh.service.endpoint.DCService
+import com.cartlc.tracker.fresh.service.help.AmazonHelper
+import com.cartlc.tracker.fresh.service.help.ServerHelper
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
 import com.cartlc.tracker.ui.util.helper.LocationHelper
 import com.cartlc.tracker.ui.util.helper.PermissionHelper.PermissionRequest
@@ -115,18 +121,16 @@ class TBApplication : Application() {
     private lateinit var carRepo: CarRepository
     private lateinit var prefHelper: PrefHelper
     private lateinit var dm: DatabaseManager
-
-    val repo: CarRepository
-        get() = carRepo
-
     lateinit var componentRoot: ComponentRoot
     lateinit var amazonHelper: AmazonHelper
     lateinit var flowUseCase: FlowUseCase
     lateinit var ping: DCPing
     lateinit var dcRx: DCServerRx
-
     lateinit var vehicleViewModel: VehicleViewModel
     lateinit var vehicleRepository: VehicleRepository
+
+    val repo: CarRepository
+        get() = carRepo
 
     val db: DatabaseTable
         get() = dm
@@ -195,6 +199,15 @@ class TBApplication : Application() {
         }
     }
 
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        MultiDex.install(this)
+    }
+
+    fun checkPermissions(act: Activity, listener: PermissionListener) {
+        PermissionHelper.instance.checkPermissions(act, PERMISSIONS, listener)
+    }
+
 //    fun requestZipCode(tableZipCode: String) {
 //        val data = db.tableZipCode.query(tableZipCode)
 //        if (data != null) {
@@ -207,14 +220,5 @@ class TBApplication : Application() {
 //            startService(intent)
 //        }
 //    }
-
-    override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(base)
-        MultiDex.install(this)
-    }
-
-    fun checkPermissions(act: Activity, listener: PermissionListener) {
-        PermissionHelper.instance.checkPermissions(act, PERMISSIONS, listener)
-    }
 
 }

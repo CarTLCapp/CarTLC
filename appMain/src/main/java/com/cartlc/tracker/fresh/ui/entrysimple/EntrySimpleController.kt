@@ -5,10 +5,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.event.Action
-import com.cartlc.tracker.model.event.ButtonDialog
-import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.FlowUseCase
+import com.cartlc.tracker.fresh.model.event.Action
+import com.cartlc.tracker.fresh.model.event.ButtonDialog
+import com.cartlc.tracker.fresh.model.flow.Flow
+import com.cartlc.tracker.fresh.model.flow.FlowUseCase
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvc.YesNo
 

@@ -5,8 +5,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.misc.EntryHint
-import com.cartlc.tracker.model.msg.ErrorMessage
+import com.cartlc.tracker.fresh.model.misc.EntryHint
+import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot

@@ -7,10 +7,10 @@ import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.NoteListEntryItemViewMvc
-import com.cartlc.tracker.model.CarRepository
-import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.Stage
-import com.cartlc.tracker.model.misc.EntryHint
+import com.cartlc.tracker.fresh.model.CarRepository
+import com.cartlc.tracker.fresh.model.flow.Flow
+import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.model.misc.EntryHint
 import java.util.ArrayList
 
 class NoteListEntryController(

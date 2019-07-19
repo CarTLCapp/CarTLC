@@ -1,11 +1,11 @@
 package com.cartlc.tracker.fresh.ui.main.process
 
 import com.cartlc.tracker.fresh.ui.main.MainController
-import com.cartlc.tracker.model.flow.Flow
-import com.cartlc.tracker.model.flow.RootProjectFlow
-import com.cartlc.tracker.model.flow.Stage
-import com.cartlc.tracker.model.msg.StringMessage
-import com.cartlc.tracker.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.model.flow.Flow
+import com.cartlc.tracker.fresh.model.flow.RootProjectFlow
+import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.model.msg.StringMessage
+import com.cartlc.tracker.fresh.model.pref.PrefHelper
 
 class StageSelectProject(
         shared: MainController.Shared
