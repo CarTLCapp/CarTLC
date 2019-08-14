@@ -28,7 +28,7 @@ class SqlTableFlowElement(
         private const val KEY_FLOW_ID = "sub_flow_id"
         private const val KEY_PROMPT = "prompt"
         private const val KEY_TYPE = "type"
-        private const val KEY_REQUEST_IMAGE = "request_image"
+        private const val KEY_NUM_IMAGES = "num_images"
         private const val KEY_GENERIC_NOTE = "generic_note"
 
     }
@@ -48,8 +48,8 @@ class SqlTableFlowElement(
         sbuf.append(" text default null, ")
         sbuf.append(KEY_TYPE)
         sbuf.append(" char(2) default null, ")
-        sbuf.append(KEY_REQUEST_IMAGE)
-        sbuf.append(" bit default 0, ")
+        sbuf.append(KEY_NUM_IMAGES)
+        sbuf.append(" int default 0, ")
         sbuf.append(KEY_GENERIC_NOTE)
         sbuf.append(" bit default 0)")
         dbSql.execSQL(sbuf.toString())
@@ -63,7 +63,7 @@ class SqlTableFlowElement(
             values.put(KEY_FLOW_ID, item.flowId)
             values.put(KEY_PROMPT, item.prompt)
             values.put(KEY_TYPE, item.type.code.toString())
-            values.put(KEY_REQUEST_IMAGE, if (item.requestImage) 1 else 0)
+            values.put(KEY_NUM_IMAGES, item.numImages)
             values.put(KEY_GENERIC_NOTE, if (item.genericNote) 1 else 0)
             item.id = dbSql.insert(TABLE_NAME, null, values)
             dbSql.setTransactionSuccessful()
@@ -87,7 +87,7 @@ class SqlTableFlowElement(
         val idxFlowId = cursor.getColumnIndex(KEY_FLOW_ID)
         val idxPrompt = cursor.getColumnIndex(KEY_PROMPT)
         val idxType = cursor.getColumnIndex(KEY_TYPE)
-        val idxRequestImage = cursor.getColumnIndex(KEY_REQUEST_IMAGE)
+        val idxNumImages = cursor.getColumnIndex(KEY_NUM_IMAGES)
         val idxGenericNote = cursor.getColumnIndex(KEY_GENERIC_NOTE)
 
         var item: DataFlowElement
@@ -98,7 +98,7 @@ class SqlTableFlowElement(
                     cursor.getLong(idxFlowId),
                     cursor.getString(idxPrompt),
                     DataFlowElement.Type.from(cursor.getString(idxType)),
-                    cursor.getShort(idxRequestImage).toInt() != 0,
+                    cursor.getInt(idxNumImages).toShort(),
                     cursor.getShort(idxGenericNote).toInt() != 0
             )
             list.add(item)
@@ -130,7 +130,7 @@ class SqlTableFlowElement(
             values.put(KEY_FLOW_ID, item.flowId)
             values.put(KEY_PROMPT, item.prompt)
             values.put(KEY_TYPE, item.type.code.toString())
-            values.put(KEY_REQUEST_IMAGE, if (item.requestImage) 1 else 0)
+            values.put(KEY_NUM_IMAGES, item.numImages)
             values.put(KEY_GENERIC_NOTE, if (item.genericNote) 1 else 0)
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(item.id.toString())
@@ -166,8 +166,10 @@ class SqlTableFlowElement(
             if (element.genericNote) {
                 sbuf.append(" GENERIC")
             }
-            if (element.requestImage) {
+            if (element.numImages.toInt() == 1) {
                 sbuf.append(" IMAGE")
+            } else if (element.numImages > 1) {
+                sbuf.append("${element.numImages} IMAGES")
             }
             if (db.tableFlowElementNote.hasNotes(element.id)) {
                 sbuf.append(" NOTES")

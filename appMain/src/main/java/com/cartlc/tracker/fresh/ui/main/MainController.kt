@@ -3,6 +3,7 @@
  */
 package com.cartlc.tracker.fresh.ui.main
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.location.Address
@@ -31,7 +32,9 @@ import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
+import com.cartlc.tracker.fresh.ui.util.helper.PermissionHelper
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 import com.cartlc.tracker.ui.util.helper.LocationHelper
@@ -71,6 +74,7 @@ class MainController(
     private val screenNavigator = boundAct.screenNavigator
     private val dialogHelper = boundAct.dialogHelper
     private val dialogNavigator = boundAct.dialogNavigator
+    private val permissionHelper = boundAct.componentRoot.permissionHelper
 
     private val buttonsUseCase = viewMvc.buttonsUseCase
     private val titleUseCase = viewMvc.titleUseCase
@@ -266,12 +270,19 @@ class MainController(
         entrySimpleUseCase.dispatchActionEvent = { event -> dispatchActionEvent(event) }
         entrySimpleUseCase.afterTextChangedListener = { value -> onEntryValueChanged(value) }
         eventController.register(this)
-        shared.getLocation()
         actionUseCase.registerListener(this)
         prefHelper.onCurrentProjecGroupChanged = { checkAddButtonVisible() }
         prefHelper.setFromCurrentProjectId()
         buttonsUseCase.registerListener(this)
         viewMvc.registerListener(this)
+        permissionHelper.checkPermissions(boundAct.act, TBApplication.PERMISSIONS,
+                object : PermissionHelper.PermissionListener {
+                    override fun onGranted(permission: String) {
+                        shared.getLocation()
+                    }
+
+                    override fun onDenied(permission: String) {}
+                })
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -610,7 +621,7 @@ class MainController(
 
     // region Action Events
 
-    fun dispatchActionEvent(action: Action) = repo.dispatchActionEvent(action)
+    private fun dispatchActionEvent(action: Action) = repo.dispatchActionEvent(action)
 
     private fun processActionEvent(action: Action) {
         when (action) {
@@ -693,6 +704,14 @@ class MainController(
     }
 
     // endregion onActivityResult
+
+    // region handlePermissionResult
+
+    fun handlePermissionResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        permissionHelper.onHandlePermissionResult(requestCode, permissions, grantResults)
+    }
+
+    // endregion handlePermissionResult
 
     // region MenuItem
 

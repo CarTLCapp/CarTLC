@@ -50,6 +50,11 @@ class MainActivity : BaseActivity() {
         title = app.versionedTitle
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
+                                            grantResults: IntArray) {
+        controller.handlePermissionResult(requestCode, permissions, grantResults)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         controller.onActivityResult(requestCode, resultCode, data)

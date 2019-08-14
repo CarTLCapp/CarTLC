@@ -39,7 +39,7 @@
                 @b3.text(flowElementForm("prompt"), '_label -> "Prompt", 'class -> "longer")
                 <div style="clear:both;"></div>
                 @{
-                    val opts = Seq("T"->"Toast","D"->"Dialog","C"->"Confirm","N"->"Confirm Top","Y"->"Category")
+                    val opts = Seq("X"->"None","T"->"Toast","D"->"Dialog","C"->"Confirm","N"->"Confirm Top","Y"->"Category")
                     b3.radio(flowElementForm("type"), options = opts, '_label -> "Type", '_inline -> true)
                 }
                 <div style="clear:both;"></div>

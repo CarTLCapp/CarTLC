@@ -20,6 +20,7 @@ import com.cartlc.tracker.fresh.service.endpoint.DCServerRx
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryController
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.common.ContextWrapper
+import com.cartlc.tracker.fresh.ui.util.helper.PermissionHelper
 
 class ComponentRoot(
         context: Context,
@@ -38,5 +39,6 @@ class ComponentRoot(
     val factoryController = FactoryController(dcRx, schedulerPlan)
     val eventController = EventController()
     val serviceUseCase = ServiceUseCaseImpl(context)
+    val permissionHelper = PermissionHelper(context)
 
 }

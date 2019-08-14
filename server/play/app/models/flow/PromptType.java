@@ -6,6 +6,7 @@
 package models.flow;
 
 public enum PromptType {
+    NONE('X', "None"),
     TOAST('T', "Toast"),
     DIALOG('D', "Dialog"),
     CONFIRM('C', "Confirm"),
@@ -38,10 +39,13 @@ public enum PromptType {
                 return prompt;
             }
         }
-        return TOAST;
+        return NONE;
     }
 
     public static PromptType from(String code) {
+        if (code == null) {
+            return NONE;
+        }
         return from((short) code.charAt(0));
     }
 

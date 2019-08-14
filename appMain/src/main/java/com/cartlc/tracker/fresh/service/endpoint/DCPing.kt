@@ -868,7 +868,13 @@ class DCPing(
                 val eleFlow = arrayFlow.getJSONObject(f)
                 val incomingFlow = DataFlow()
                 incomingFlow.serverId = eleFlow.getInt("flow_id")
-                incomingFlow.subProjectId = eleFlow.getLong("sub_project_id")
+                val serverSubProjectId = eleFlow.getInt("sub_project_id")
+                val project = db.tableProjects.queryByServerId(serverSubProjectId)
+                if (project == null) {
+                    Timber.e("queryFlows(): Can't find project with server ID $serverSubProjectId")
+                    return false
+                }
+                incomingFlow.subProjectId = project.id
                 val itemFlow = db.tableFlow.queryByServerId(incomingFlow.serverId)
                 if (itemFlow == null) {
                     val match = get(unprocessedFlow, incomingFlow)
@@ -904,7 +910,7 @@ class DCPing(
                         incomingEle.prompt = eleElement.getString("prompt")
                     }
                     incomingEle.type = DataFlowElement.Type.from(eleElement.getString("type"))
-                    incomingEle.requestImage = eleElement.getBoolean("request_image")
+                    incomingEle.numImages = eleElement.getInt("num_images").toShort()
                     incomingEle.genericNote = eleElement.getBoolean("generic_note")
                     val itemElement = db.tableFlowElement.queryByServerId(incomingEle.serverId)
                     if (itemElement == null) {
@@ -952,8 +958,8 @@ class DCPing(
                                         unprocessedFlowElementNote.remove(match)
                                     } else {
                                         // Otherwise just add the new entry.
-                                        db.tableFlowElement.add(incomingEle)
-                                        Timber.i("New flow element note: $incomingEle")
+                                        db.tableFlowElementNote.add(incomingNote)
+                                        Timber.i("New flow element note: $incomingNote")
                                     }
                                 } else {
                                     Timber.i("No change: $itemElementNote")

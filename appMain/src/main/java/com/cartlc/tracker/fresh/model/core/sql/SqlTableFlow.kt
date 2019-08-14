@@ -123,6 +123,7 @@ class SqlTableFlow(
             }
             sbuf.append(": ")
             sbuf.append(db.tableFlowElement.toString(flow.id))
+            sbuf.append("\n")
         }
         return sbuf.toString()
     }

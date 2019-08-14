@@ -14,16 +14,18 @@ class DataFlowElement(
         var flowId: Long = 0,
         var prompt: String? = null,
         var type: Type = Type.UNSET,
-        var requestImage: Boolean = false,
+        var numImages: Short = 0,
         var genericNote: Boolean = false
 ) {
 
     enum class Type(val code: Char) {
         UNSET('U'),
+        NONE('X'),
         TOAST('T'),
         DIALOG('D'),
         CONFIRM('C'),
-        CONFIRM_NEW('N');
+        CONFIRM_NEW('N'),
+        CATEGORY('Y');
 
         companion object {
 
@@ -48,7 +50,7 @@ class DataFlowElement(
         if (flowId != other.flowId) return false
         if (prompt != other.prompt) return false
         if (type != other.type) return false
-        if (requestImage != other.requestImage) return false
+        if (numImages != other.numImages) return false
         if (genericNote != other.genericNote) return false
 
         return true
@@ -58,13 +60,13 @@ class DataFlowElement(
         var result = flowId.hashCode()
         result = 31 * result + (prompt?.hashCode() ?: 0)
         result = 31 * result + type.hashCode()
-        result = 31 * result + requestImage.hashCode()
+        result = 31 * result + numImages.hashCode()
         result = 31 * result + genericNote.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "DataFlowElement(id=$id, serverId=$serverId, flowId=$flowId, prompt=$prompt, type=$type, requestImage=$requestImage, genericNote=$genericNote)"
+        return "DataFlowElement(id=$id, serverId=$serverId, flowId=$flowId, prompt=$prompt, type=$type, numImages=$numImages, genericNote=$genericNote)"
     }
 
 }

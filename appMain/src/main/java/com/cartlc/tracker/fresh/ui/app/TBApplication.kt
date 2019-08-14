@@ -36,10 +36,10 @@ import com.cartlc.tracker.fresh.service.endpoint.DCService
 import com.cartlc.tracker.fresh.service.help.AmazonHelper
 import com.cartlc.tracker.fresh.service.help.ServerHelper
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
+import com.cartlc.tracker.fresh.ui.util.helper.PermissionHelper
+import com.cartlc.tracker.fresh.ui.util.helper.PermissionHelper.PermissionRequest
+import com.cartlc.tracker.fresh.ui.util.helper.PermissionHelper.PermissionListener
 import com.cartlc.tracker.ui.util.helper.LocationHelper
-import com.cartlc.tracker.ui.util.helper.PermissionHelper.PermissionRequest
-import com.cartlc.tracker.ui.util.helper.PermissionHelper.PermissionListener
-import com.cartlc.tracker.ui.util.helper.PermissionHelper
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 import org.greenrobot.eventbus.EventBus
 import timber.log.Timber
@@ -56,7 +56,7 @@ class TBApplication : Application() {
 
         const val REPORT_LOCATION = false
 
-        private val PERMISSIONS = arrayOf(
+        val PERMISSIONS = arrayOf(
                 PermissionRequest(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         R.string.perm_read_external_storage),
                 PermissionRequest(Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -182,7 +182,6 @@ class TBApplication : Application() {
         }
         ServerHelper.Init(this)
         amazonHelper = AmazonHelper(db, prefHelper, componentRoot.eventController)
-        PermissionHelper.Init()
         CheckError.Init()
         LocationHelper.Init(this, db)
 
@@ -208,7 +207,7 @@ class TBApplication : Application() {
     }
 
     fun checkPermissions(act: Activity, listener: PermissionListener) {
-        PermissionHelper.instance.checkPermissions(act, PERMISSIONS, listener)
+        componentRoot.permissionHelper.checkPermissions(act, PERMISSIONS, listener)
     }
 
 //    fun requestZipCode(tableZipCode: String) {
