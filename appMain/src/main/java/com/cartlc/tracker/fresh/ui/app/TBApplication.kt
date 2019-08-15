@@ -36,9 +36,8 @@ import com.cartlc.tracker.fresh.service.endpoint.DCService
 import com.cartlc.tracker.fresh.service.help.AmazonHelper
 import com.cartlc.tracker.fresh.service.help.ServerHelper
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
-import com.cartlc.tracker.fresh.ui.util.helper.PermissionHelper
-import com.cartlc.tracker.fresh.ui.util.helper.PermissionHelper.PermissionRequest
-import com.cartlc.tracker.fresh.ui.util.helper.PermissionHelper.PermissionListener
+import com.cartlc.tracker.fresh.ui.common.PermissionHelper.PermissionRequest
+import com.cartlc.tracker.fresh.ui.common.PermissionHelper.PermissionListener
 import com.cartlc.tracker.ui.util.helper.LocationHelper
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 import org.greenrobot.eventbus.EventBus
@@ -171,6 +170,7 @@ class TBApplication : Application() {
                 ping,
                 dcRx)
         carRepo.computeCurStage()
+        carRepo.db.tablePicture.removeFileDoesNotExist()
 
         vehicleRepository = VehicleRepository(this, dm)
         vehicleViewModel = VehicleViewModel(vehicleRepository)

@@ -3,7 +3,6 @@
  */
 package com.cartlc.tracker.fresh.ui.main
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.location.Address
@@ -12,9 +11,8 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
-import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.R
-import com.cartlc.tracker.fresh.model.core.data.DataPicture
+import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.flow.*
@@ -34,7 +32,7 @@ import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
-import com.cartlc.tracker.fresh.ui.util.helper.PermissionHelper
+import com.cartlc.tracker.fresh.ui.common.PermissionHelper
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 import com.cartlc.tracker.ui.util.helper.LocationHelper
@@ -58,7 +56,7 @@ class MainController(
         const val REQUEST_IMAGE_CAPTURE = 1
         private const val REQUEST_EDIT_ENTRY = 2
 
-        const val RESULT_EDIT_ENTRY = 2
+        const val RESULT_EDIT_PROJECT_ENTRY = 2
         const val RESULT_EDIT_PROJECT = 3
         const val RESULT_DELETE_PROJECT = 4
     }
@@ -182,6 +180,7 @@ class MainController(
         val serviceUseCase = main.serviceUseCase
         val messageHandler = main.messageHandler
         val screenNavigator = main.screenNavigator
+        val dialogNavigator = main.dialogNavigator
 
         val buttonsUseCase = viewMvc.buttonsUseCase
         val titleUseCase = viewMvc.titleUseCase
@@ -195,16 +194,18 @@ class MainController(
         val curProjectHint: String
             get() = main.curProjectHint
 
+        var progress: String?
+            get() = viewMvc.customProgress
+            set(value) { viewMvc.customProgress = value }
+
+        var picturesVisible: Boolean
+            get() = viewMvc.picturesVisible
+            set(value) { viewMvc.picturesVisible = value }
+
         var curFlowValue: Flow
             get() = main.curFlowValue
             set(value) {
                 main.curFlowValue = value
-            }
-
-        var picturesVisible: Boolean
-            get() = viewMvc.picturesVisible
-            set(value) {
-                viewMvc.picturesVisible = value
             }
 
         val isAutoNarrowOkay: Boolean
@@ -241,21 +242,22 @@ class MainController(
 
         fun getLocation() = locationUseCase.getLocation { address -> fabAddress = address }
 
-        fun onEditEntry() = main.onEditEntry()
+        fun onEditEntry() = main.onEditProjectEntry()
     }
 
     private val shared = Shared()
+    private val taskPicture = TaskPicture(shared)
     private val stageStreet = StageStreet(shared)
     private val stageCity = StageCity(shared)
     private val stageState = StageState(shared)
     private val stageCompany = StageCompany(shared)
     private val stageCurrentProject = StageCurrentProject(shared)
     private val stageSelectProject = StageSelectProject(shared)
-    private val stageTruck = StageTruck(shared)
+    private val stageTruckNumber = StageTruckNumber(shared, taskPicture)
+    private val stageTruckDamage = StageTruckDamage(shared, taskPicture)
     private val stageEquipment = StageEquipment(shared)
-    private val taskPicture = TaskPicture(shared)
-    private val stagePicture = StagePicture(shared, taskPicture)
-    private val stageConfirm = StageConfirm(shared)
+    private val stageCustom = StageCustom(shared, taskPicture)
+    private val stageConfirm = StageFinalConfirm(shared)
 
     // endregion Shared
 
@@ -341,6 +343,7 @@ class MainController(
             else -> {
             }
         }
+        viewMvc.customProgress = null
     }
 
     override fun onStageChanged(flow: Flow) {
@@ -372,20 +375,17 @@ class MainController(
             Stage.CURRENT_PROJECT -> {
                 stageCurrentProject.process()
             }
-            Stage.TRUCK -> {
-                stageTruck.process()
+            Stage.TRUCK_NUMBER_PICTURE -> {
+                stageTruckNumber.process()
+            }
+            Stage.TRUCK_DAMAGE_PICTURE -> {
+                stageTruckDamage.process()
             }
             Stage.EQUIPMENT, Stage.ADD_EQUIPMENT -> {
                 stageEquipment.process(flow)
             }
-            Stage.NOTES -> {
-                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_notes)
-                mainListUseCase.visible = true
-            }
-            Stage.PICTURE_1,
-            Stage.PICTURE_2,
-            Stage.PICTURE_3 -> {
-                stagePicture.process(flow)
+            is Stage.CUSTOM_FLOW -> {
+                stageCustom.process()
             }
             Stage.STATUS -> {
                 buttonsUseCase.nextText = messageHandler.getString(StringMessage.btn_done)
@@ -425,6 +425,13 @@ class MainController(
         when (curFlowValue.stage) {
             Stage.LOGIN -> {
             }
+            is Stage.CUSTOM_FLOW -> {
+                if (action == Button.BTN_CENTER) {
+                    stageCustom.center()
+                } else {
+                    curFlowValue.process(action)
+                }
+            }
             else -> {
                 when (action) {
                     Button.BTN_NEXT -> repo.companyEditing = null
@@ -444,92 +451,25 @@ class MainController(
     }
 
     private fun save(isNext: Boolean): Boolean {
-        val entryText = entrySimpleUseCase.entryTextValue ?: ""
-        when (curFlowValue.stage) {
-            Stage.TRUCK ->
-                if (entryText.isEmpty()) {
-                    if (isNext) {
-                        errorValue = ErrorMessage.NEED_A_TRUCK
-                        return false
-                    }
-                    // For debugging purposes only.
-                    prefHelper.truckNumber = null
-                    prefHelper.licensePlate = null
-                    prefHelper.doErrorCheck = true
-                } else {
-                    prefHelper.parseTruckValue(entryText)
-                }
-            Stage.ADD_CITY -> prefHelper.city = entryText
-            Stage.ADD_STREET -> prefHelper.street = entryText
-            Stage.ADD_EQUIPMENT -> {
-                if (entryText.isNotEmpty()) {
-                    val group = prefHelper.currentProjectGroup
-                    if (group != null) {
-                        db.tableCollectionEquipmentProject.addLocal(entryText, group.projectNameId)
-                    }
-                }
-            }
-            Stage.EQUIPMENT ->
-                if (isNext) {
-                    if (db.tableEquipment.countChecked() == 0) {
-                        errorValue = ErrorMessage.NEED_EQUIPMENT
-                        return false
-                    }
-                }
-            Stage.ADD_COMPANY -> {
-                val newCompanyName = entryText.trim { it <= ' ' }
-                if (isNext) {
-                    if (newCompanyName.isEmpty()) {
-                        errorValue = ErrorMessage.NEED_NEW_COMPANY
-                        return false
-                    }
-                    prefHelper.company = newCompanyName
-                    repo.companyEditing?.let {
-                        val companies = db.tableAddress.queryByCompanyName(it)
-                        for (address in companies) {
-                            address.company = newCompanyName
-                            db.tableAddress.update(address)
-                        }
-                    }
-                }
-            }
-            Stage.COMPANY ->
-                if (isNext) {
-                    if (prefHelper.company.isNullOrBlank()) {
-                        errorValue = ErrorMessage.NEED_COMPANY
-                        return false
-                    }
-                }
-            Stage.NOTES ->
-                if (isNext) {
-                    if (!mainListUseCase.areNotesComplete) {
-                        dialogNavigator.showNoteError(mainListUseCase.notes) {
-                            showNoteErrorOk()
-                        }
-                        return false
-                    }
-                }
+        return when (curFlowValue.stage) {
+            Stage.ADD_CITY -> stageCity.saveAdd()
+            Stage.ADD_STREET -> stageStreet.saveAdd()
+            Stage.ADD_EQUIPMENT -> stageEquipment.saveAdd()
+            Stage.EQUIPMENT -> stageEquipment.save(isNext)
+            Stage.ADD_COMPANY -> stageCompany.saveAdd(isNext)
+            Stage.COMPANY -> stageCompany.save(isNext)
+            Stage.TRUCK_NUMBER_PICTURE -> stageTruckNumber.save()
+            Stage.TRUCK_DAMAGE_PICTURE -> stageTruckDamage.save()
+            is Stage.CUSTOM_FLOW -> stageCustom.save(isNext)
             Stage.STATUS ->
-                if (isNext) {
+                return if (isNext) {
                     if (prefHelper.status === TruckStatus.UNKNOWN) {
                         errorValue = ErrorMessage.NEED_STATUS
-                        return false
-                    }
-                }
-            Stage.CONFIRM ->
-                if (isNext) {
-                    showConfirmDialog()
-                    return false
-                }
-            else -> {
-            }
-        }
-        return true
-    }
-
-    private fun showNoteErrorOk() {
-        if (BuildConfig.DEBUG) {
-            buttonsUseCase.skip()
+                        false
+                    } else true
+                } else true
+            Stage.CONFIRM -> stageConfirm.save(viewMvc, isNext)
+            else -> true
         }
     }
 
@@ -600,22 +540,23 @@ class MainController(
     private fun showError(error: String) {
         dialogHelper.showError(error, object : DialogHelper.DialogListener {
             override fun onOkay() {
-                onErrorDialogOkay()
+                // TODO: Do I still need to do something like this?
+//                onErrorDialogOkay()
             }
 
             override fun onCancel() {}
         })
     }
 
-    private fun onErrorDialogOkay() {
-        when (curFlowValue.stage) {
-            Stage.PICTURE_1,
-            Stage.PICTURE_2,
-            Stage.PICTURE_3 -> buttonsUseCase.dispatch(Button.BTN_NEXT)
-            else -> {
-            }
-        }
-    }
+//    private fun onErrorDialogOkay() {
+//        when (curFlowValue.stage) {
+//            Stage.PICTURE_1,
+//            Stage.PICTURE_2,
+//            Stage.PICTURE_3 -> buttonsUseCase.dispatch(Button.BTN_NEXT)
+//            else -> {
+//            }
+//        }
+//    }
 
     // endregion error
 
@@ -661,7 +602,7 @@ class MainController(
         when (requestCode) {
             REQUEST_EDIT_ENTRY ->
                 when (resultCode) {
-                    RESULT_EDIT_ENTRY -> onEditEntry()
+                    RESULT_EDIT_PROJECT_ENTRY -> onEditProjectEntry()
                     RESULT_EDIT_PROJECT -> onEditProject()
                     RESULT_DELETE_PROJECT -> onDeletedProject()
                     else -> onAbort()
@@ -670,6 +611,8 @@ class MainController(
                 if (resultCode == Activity.RESULT_OK) {
                     taskPicture.rotatePicture()
                     taskPicture.onPictureRequestComplete()
+                } else {
+                    taskPicture.onPictureRequestAbort()
                 }
             else -> onAbort()
         }
@@ -679,8 +622,9 @@ class MainController(
         curFlowValue = CurrentProjectFlow()
     }
 
-    private fun onEditEntry() {
-        curFlowValue = TruckFlow()
+    // The user wants to change some data from a previously entered & uploaded entry
+    private fun onEditProjectEntry() {
+        curFlowValue = TruckNumberPictureFlow()
     }
 
     private fun onEditProject() {
@@ -773,9 +717,6 @@ class MainController(
             Stage.COMPANY -> {
                 buttonsUseCase.nextVisible = true
             }
-            Stage.TRUCK -> {
-                entrySimpleUseCase.entryTextValue = keyValue
-            }
             Stage.CURRENT_PROJECT -> {
                 buttonsUseCase.prevVisible = hasCurrentProject
             }
@@ -788,16 +729,33 @@ class MainController(
         buttonsUseCase.prevVisible = hasCurrentProject
     }
 
+    override fun onConfirmItemChecked(isAllChecked: Boolean) {
+        buttonsUseCase.nextVisible = isAllChecked
+    }
+
     // endregion MainListUseCase.Listener
 
     // region PictureListUseCase.Listener
 
     override fun onPictureRemoveDone(remaining: Int) {
-        titleUseCase.setPhotoTitleCount(remaining)
+//        titleUseCase.setPhotoTitleCount(remaining)
+        if (curFlowValue.stage == Stage.TRUCK_DAMAGE_PICTURE) {
+            stageTruckDamage.clearDamage()
+        } else {
+            pictureStateChanged()
+        }
     }
 
-    override fun onPictureNoteAdded(picture: DataPicture) {
-        db.tablePictureCollection.update(picture, prefHelper.currentPictureCollectionId)
+    override fun onPictureNoteChanged(note: DataNote) {
+        pictureStateChanged()
+    }
+
+    private fun pictureStateChanged() {
+        when(curFlowValue.stage) {
+            Stage.TRUCK_NUMBER_PICTURE -> stageTruckNumber.pictureStateChanged()
+            Stage.TRUCK_DAMAGE_PICTURE -> stageTruckDamage.pictureStateChanged()
+            is Stage.CUSTOM_FLOW -> stageCustom.pictureStateChanged()
+        }
     }
 
     // endregion PictureListUseCase.Listener
@@ -808,21 +766,6 @@ class MainController(
         when (action) {
             Action.VIEW_PROJECT -> screenNavigator.showViewProjectActivity(REQUEST_EDIT_ENTRY)
         }
-    }
-
-    private fun showConfirmDialog() {
-        dialogHelper.showConfirmDialog(object : DialogHelper.DialogListener {
-            override fun onOkay() {
-                onConfirmOkay()
-            }
-
-            override fun onCancel() {}
-        })
-    }
-
-    private fun onConfirmOkay() {
-        viewMvc.confirmUseCase?.onConfirmOkay()
-        serviceUseCase.ping()
     }
 
     // endregion ActionUseCase.Listener

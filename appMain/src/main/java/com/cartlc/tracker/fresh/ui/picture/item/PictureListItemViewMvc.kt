@@ -9,9 +9,8 @@ interface PictureListItemViewMvc: PictureListThumbnailItemViewMvc {
         fun onRemoveClicked()
         fun onCwClicked()
         fun onCcwClicked()
-        fun onNoteDialogClicked()
     }
 
-    fun bind(listener: Listener)
+    fun bindListener(listener: Listener)
 
 }

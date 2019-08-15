@@ -89,6 +89,15 @@ class SqlTableFlow(
         } else null
     }
 
+    override fun queryBySubProjectId(project_id: Int): DataFlow? {
+        val selection = "$KEY_SUB_PROJECT_ID=?"
+        val selectionArgs = arrayOf(project_id.toString())
+        val list = query(selection, selectionArgs)
+        return if (list.isNotEmpty()) {
+            list[0]
+        } else null
+    }
+
     override fun update(item: DataFlow) {
         dbSql.beginTransaction()
         try {

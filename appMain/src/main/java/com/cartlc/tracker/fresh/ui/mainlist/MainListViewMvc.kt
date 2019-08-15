@@ -12,6 +12,8 @@ interface MainListViewMvc : ObservableViewMvc<MainListViewMvc.Listener> {
         fun onSimpleItemClicked(position: Int, value: String)
         fun onProjectGroupSelected(projectGroup: DataProjectAddressCombo)
         fun onRadioItemSelected(text: String)
+        fun onCheckBoxItemChanged(position: Int, item: String, isChecked: Boolean)
+        fun isCheckBoxItemSelected(position: Int): Boolean
     }
 
     enum class Adapter {
@@ -19,7 +21,8 @@ interface MainListViewMvc : ObservableViewMvc<MainListViewMvc.Listener> {
         PROJECT,
         EQUIPMENT,
         RADIO,
-        NOTE_ENTRY
+        NOTE_ENTRY,
+        CHECK_BOX
     }
 
     val numNotes: Int
@@ -30,6 +33,7 @@ interface MainListViewMvc : ObservableViewMvc<MainListViewMvc.Listener> {
     var simpleItems: List<String>
     var radioItems: List<String>
     var radioSelectedText: String?
+    var checkBoxItems: List<String>
     var adapter: Adapter
 
     var scrollToPosition: Int

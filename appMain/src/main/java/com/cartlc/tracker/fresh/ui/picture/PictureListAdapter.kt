@@ -15,7 +15,7 @@ class PictureListAdapter(
 
     interface Listener {
         val isThumbnail: Boolean
-        val itemCount: Int
+        val pictureCount: Int
         fun onBindViewHolder(itemViewMvc: ViewMvc, position: Int)
     }
 
@@ -33,7 +33,7 @@ class PictureListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return listener.itemCount
+        return listener.pictureCount
     }
 
 }

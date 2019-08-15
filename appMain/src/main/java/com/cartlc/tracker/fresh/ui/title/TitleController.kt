@@ -78,12 +78,4 @@ class TitleController(
 
     // endregion FlowUseCase.Listener
 
-    override fun setPhotoTitleCount(count: Int) {
-        mainTitleText = if (count == 1) {
-            messageHandler.getString(StringMessage.title_photo)
-        } else {
-            messageHandler.getString(StringMessage.title_photos(count))
-        }
-    }
-
 }

@@ -11,7 +11,6 @@ import android.widget.CompoundButton
 import androidx.appcompat.app.AlertDialog
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.fresh.model.core.data.DataNote
 
 /**
  * Created by dug on 12/2/17.
@@ -79,7 +78,7 @@ class DialogHelper(
         var mQuestions = arrayOfNulls<CheckBox>(7)
 
         init {
-            view = mAct.layoutInflater.inflate(R.layout.confirm_dialog, null)
+            view = mAct.layoutInflater.inflate(R.layout.final_confirm_dialog, null)
             setup(0, R.id.question_1)
             setup(1, R.id.question_2)
             setup(2, R.id.question_3)

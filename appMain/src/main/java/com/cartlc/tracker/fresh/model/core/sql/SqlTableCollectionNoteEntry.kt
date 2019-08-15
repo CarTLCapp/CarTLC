@@ -64,7 +64,7 @@ class SqlTableCollectionNoteEntry(
     }
 
     // There are TWO note tables. One is TableCollectionnNoteProject which stores the
-    // defined notes for each project. The enteredOther is this one which stores the values.
+    // defined notes for each project. The other is this one which stores the values.
     //
     // The values are stored right now in the SqlTableNote table which is represented by the incoming
     // notes. We want them to also be stored now into this table.
@@ -94,13 +94,13 @@ class SqlTableCollectionNoteEntry(
         }
     }
 
-    // Get list of notes the associated collection id in this table and their values.
+    // Get list of notes the associated collection id in this table along with the current values stored in this table.
     override fun query(collectionId: Long): List<DataNote> {
         val list = ArrayList<DataNote>()
         try {
             val columns = arrayOf(KEY_NOTE_ID, KEY_VALUE)
             val selection = "$KEY_COLLECTION_ID =?"
-            val selectionArgs = arrayOf(java.lang.Long.toString(collectionId))
+            val selectionArgs = arrayOf(collectionId.toString())
             val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
             val idxNoteId = cursor.getColumnIndex(KEY_NOTE_ID)
             val idxValueId = cursor.getColumnIndex(KEY_VALUE)

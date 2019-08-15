@@ -64,6 +64,8 @@ open class ButtonsController(
 
     override fun onBtnPrevClicked(view: View) {
         wasSkip = false
+        wasNext = false
+        wasPrev = true
         if (confirmButton(Button.BTN_PREV)) {
             onPrev()
         }
@@ -72,11 +74,14 @@ open class ButtonsController(
 
     private fun onPrev() {
         wasNext = false
+        wasPrev = true
         dispatchButtonEvent(Button.BTN_PREV)
     }
 
     override fun onBtnNextClicked(view: View) {
         wasSkip = false
+        wasNext = true
+        wasPrev = false
         if (confirmButton(Button.BTN_NEXT)) {
             onNext()
         }
@@ -85,16 +90,19 @@ open class ButtonsController(
 
     private fun onNext() {
         wasNext = true
+        wasPrev = false
         dispatchButtonEvent(Button.BTN_NEXT)
     }
 
     override fun onBtnCenterClicked(view: View) {
         wasNext = false
+        wasPrev = false
         dispatchButtonEvent(Button.BTN_CENTER)
     }
 
     override fun onBtnChangeClicked(view: View) {
         wasNext = false
+        wasPrev = false
         dispatchButtonEvent(Button.BTN_CHANGE)
     }
 
@@ -155,6 +163,7 @@ open class ButtonsController(
 
     override var wasNext = false
     override var wasSkip = false
+    override var wasPrev = false
 
     override var nextVisible: Boolean
         get() = viewMvc.btnNextVisible

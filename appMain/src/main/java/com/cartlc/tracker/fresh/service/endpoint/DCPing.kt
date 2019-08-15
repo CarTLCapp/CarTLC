@@ -59,7 +59,6 @@ class DCPing(
         private const val companiesSuffix: String = "companies"
         private const val equipmentsSuffix: String = "equipments/root"
         private const val notesSuffix: String = "notes/root"
-        private const val trucksSuffix: String = "trucks"
         private const val messageSuffix: String = "message"
         private const val vehicleSuffix: String = "vehicle"
         private const val vehiclesSuffix: String = "vehicles"
@@ -318,7 +317,7 @@ class DCPing(
                 EventBus.getDefault().post(EventRefreshProjects())
             }
         }
-        db.tablePictureCollection.clearUploadedUnscaledPhotos()
+        db.tablePicture.clearUploadedUnscaledPhotos()
         val lines = db.tableCrash.queryNeedsUploading()
         sendCrashLines(lines)
         // If any entries do not yet have server-id's, try to get them.
@@ -910,8 +909,11 @@ class DCPing(
                         incomingEle.prompt = eleElement.getString("prompt")
                     }
                     incomingEle.type = DataFlowElement.Type.from(eleElement.getString("type"))
+                    if (incomingEle.type == DataFlowElement.Type.UNSET || incomingEle.type == DataFlowElement.Type.CATEGORY) {
+                        continue
+                    }
                     incomingEle.numImages = eleElement.getInt("num_images").toShort()
-                    incomingEle.genericNote = eleElement.getBoolean("generic_note")
+                    incomingEle.order = eleElement.getInt("order").toShort()
                     val itemElement = db.tableFlowElement.queryByServerId(incomingEle.serverId)
                     if (itemElement == null) {
                         val match = get(unprocessedFlowElement, incomingEle)
@@ -1023,11 +1025,8 @@ class DCPing(
                 if (truck.serverId > 0) {
                     jsonObject.accumulate("truck_id", truck.serverId)
                 }
-                if (truck.truckNumber != null) {
-                    jsonObject.accumulate("truck_number_string", truck.truckNumber)
-                }
-                if (truck.licensePlateNumber != null) {
-                    jsonObject.accumulate("license_plate", truck.licensePlateNumber)
+                if (truck.truckNumberValue != null) {
+                    jsonObject.accumulate("truck_number_string", truck.truckNumberValue)
                 }
             } else {
                 prefHelper.doErrorCheck = true
@@ -1077,15 +1076,12 @@ class DCPing(
                 for (picture in pictures) {
                     val jobj = JSONObject()
                     jobj.put("filename", picture.tailname)
-                    if (!TextUtils.isEmpty(picture.note)) {
-                        jobj.put("note", picture.note)
-                    }
                     jobj.put("id", picture.id)
                     jarray.put(jobj)
                 }
                 jsonObject.put("picture", jarray)
             }
-            val notes = entry.notesWithValuesOnly
+            val notes = entry.notesWithValues
             if (notes.isNotEmpty()) {
                 val jarray = JSONArray()
                 for (note in notes) {

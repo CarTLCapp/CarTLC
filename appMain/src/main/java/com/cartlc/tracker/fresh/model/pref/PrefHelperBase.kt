@@ -12,7 +12,7 @@ import android.content.SharedPreferences
 
 open class PrefHelperBase constructor(protected val ctx: Context) {
 
-    private val prefs: SharedPreferences by lazy {
+    protected val prefs: SharedPreferences by lazy {
         ctx.getSharedPreferences(prefFile, 0)
     }
 

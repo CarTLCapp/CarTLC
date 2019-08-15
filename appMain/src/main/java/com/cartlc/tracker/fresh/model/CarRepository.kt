@@ -8,23 +8,20 @@ package com.cartlc.tracker.fresh.model
 
 import android.os.Looper
 import androidx.lifecycle.MutableLiveData
-import com.cartlc.tracker.fresh.model.core.data.DataEntry
-import com.cartlc.tracker.fresh.model.core.data.DataNote
-import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.model.core.data.*
 import com.cartlc.tracker.fresh.model.event.Action
 import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.flow.*
-import java.util.ArrayList
 
-// Open class for testing
-open class CarRepository(
+// TODO: was open class for testing
+class CarRepository(
         val db: DatabaseTable,
         val prefHelper: PrefHelper,
         val flowUseCase: FlowUseCase
 ) {
-    open val isDevelopment: Boolean
+    val isDevelopment: Boolean
         get() = prefHelper.isDevelopment
 
     var companyEditing: String? = null
@@ -110,7 +107,7 @@ open class CarRepository(
         return null
     }
 
-    open fun clearUploaded() {
+    fun clearUploaded() {
         db.clearUploaded()
         prefHelper.clearUploaded()
     }
@@ -141,31 +138,40 @@ open class CarRepository(
             when {
                 prefHelper.firstTechCode.isNullOrBlank() -> curFlowValue = LoginFlow()
                 prefHelper.projectRootName.isNullOrBlank() -> curFlowValue = RootProjectFlow()
-                prefHelper.company.isNullOrBlank() -> curFlowValue = CompanyFlow()
+                prefHelper.company.isNullOrBlank() -> {
+                    if (db.tableAddress.count > 0) {
+                        curFlowValue = CompanyFlow()
+                    } else {
+                        curFlowValue = RootProjectFlow()
+                    }
+                }
                 prefHelper.state.isNullOrBlank() -> curFlowValue = StateFlow()
                 prefHelper.city.isNullOrBlank() -> curFlowValue = CityFlow()
                 prefHelper.street.isNullOrBlank() -> curFlowValue = StreetFlow()
-                else -> { curFlowValue = CurrentProjectFlow()
+                else -> {
+                    curFlowValue = CurrentProjectFlow()
                 }
             }
         } else {
             val hasSubProject = !prefHelper.projectSubName.isNullOrBlank()
             if (hasSubProject) {
-                val hasTruck = prefHelper.truckValue.isNotEmpty()
-                val items = computeNoteItems()
-                val hasNotes = hasNotesEntered(items) && isNotesComplete(items)
-                val hasEquip = hasChecked(prefHelper.currentProjectGroup)
-                val hasPictures = db.tablePictureCollection.countPictures(prefHelper.currentPictureCollectionId) > 0
-                if (!hasTruck && !hasNotes && !hasEquip && !hasPictures) {
-                    curFlowValue = CurrentProjectFlow()
-                } else if (!hasTruck) {
-                    curFlowValue = TruckFlow()
-                } else if (!hasEquip) {
+                val hasTruckNumberValue = !prefHelper.truckNumberValue.isNullOrEmpty()
+                val hasTruckNumberPicture = db.tablePicture.countPictures(prefHelper.currentPictureCollectionId, Stage.TRUCK_NUMBER_PICTURE) > 0
+                val hasTruckDamagePicture = db.tablePicture.countPictures(prefHelper.currentPictureCollectionId, Stage.TRUCK_DAMAGE_PICTURE) > 0
+                val hasTruckDamageValue = prefHelper.truckHasDamage != null
+                val hasEquipment = prefHelper.projectId?.let { projectId ->
+                    db.tableCollectionEquipmentProject.hasEquipment(projectId)
+                } ?: false
+                if (!hasTruckNumberValue || !hasTruckNumberPicture) {
+                    curFlowValue = TruckNumberPictureFlow()
+                } else if (!hasTruckDamageValue || (hasTruckNumberValue && !hasTruckDamagePicture)) {
+                    curFlowValue = TruckDamagePictureFlow()
+                } else if (hasEquipment) {
                     curFlowValue = EquipmentFlow()
-                } else if (!hasNotes) {
-                    curFlowValue = NotesFlow()
                 } else {
-                    curFlowValue = Picture2Flow()
+                    curFlowValue = TruckNumberPictureFlow()
+                    // TODO: This is what I want to do but it is weird to have it come up with a picture dispatch first thing.
+//                    curFlowValue = CustomFlow(0)
                 }
             } else {
                 curFlowValue = CurrentProjectFlow()
@@ -173,42 +179,19 @@ open class CarRepository(
         }
     }
 
-    private fun computeNoteItems(): List<DataNote> {
-        val currentEditEntry: DataEntry? = prefHelper.currentEditEntry
-        val currentProjectGroup: DataProjectAddressCombo? = prefHelper.currentProjectGroup
-        var items = mutableListOf<DataNote>()
-        if (currentEditEntry != null) {
-            items = currentEditEntry.notesAllWithValuesOverlaid.toMutableList()
-        } else if (currentProjectGroup != null) {
-            items = db.tableCollectionNoteProject.getNotes(currentProjectGroup.projectNameId).toMutableList()
-
-        }
-        pushToBottom(items, "Other")
-        return items
-    }
-
-    private fun pushToBottom(items: MutableList<DataNote>, name: String) {
-        val others = ArrayList<DataNote>()
-        for (item in items) {
-            if (item.name.startsWith(name)) {
-                others.add(item)
-                break
-            }
-        }
-        for (item in others) {
-            items.remove(item)
-            items.add(item)
-        }
-    }
-
-    private fun hasNotesEntered(items: List<DataNote>): Boolean {
-        for (note in items) {
-            if (!note.value.isNullOrBlank()) {
-                return true
-            }
-        }
-        return false
-    }
+    // TODO: TRANSFORM THIS
+//    private fun computeNoteItems(): List<DataNote> {
+//        val currentEditEntry: DataEntry? = prefHelper.currentEditEntry
+//        val currentProjectGroup: DataProjectAddressCombo? = prefHelper.currentProjectGroup
+//        var items = mutableListOf<DataNote>()
+//        if (currentEditEntry != null) {
+//            items = currentEditEntry.notesAllWithValuesOverlaid.toMutableList()
+//        } else if (currentProjectGroup != null) {
+//            items = db.tableCollectionNoteProject.getNotes(currentProjectGroup.projectNameId).toMutableList()
+//        }
+//        pushToBottom(items, "Other")
+//        return items
+//    }
 
     fun isNotesComplete(items: List<DataNote>): Boolean {
         for (note in items) {
@@ -221,17 +204,75 @@ open class CarRepository(
         return true
     }
 
-    private fun hasChecked(currentProjectGroup: DataProjectAddressCombo?): Boolean {
-        if (currentProjectGroup != null) {
-            val collection = db.tableCollectionEquipmentProject.queryForProject(currentProjectGroup.projectNameId)
-            for (item in collection.equipment) {
-                if (item.isChecked) {
-                    return true
+    // endregion COMPUTE
+
+    // region flow element support
+
+    val currentFlowElement: DataFlowElement?
+        get() = currentFlowElementId?.let { elementId -> db.tableFlowElement.query(elementId) }
+
+    val currentFlowElementId: Long?
+        get() {
+            val stage = curFlowValue.stage
+            if (stage is Stage.CUSTOM_FLOW) {
+                return when {
+                    stage.isFirstElement -> firstFlowElementId
+                    stage.isLastElement -> lastFlowElementId
+                    else -> stage.flowElementId
                 }
             }
+            return null
         }
-        return false
-    }
 
-    // endregion COMPUTE
+    val currentFlowElementProgress: Pair<Int, Int>?
+        get() {
+            val stage = curFlowValue.stage
+            if (stage is Stage.CUSTOM_FLOW) {
+                return db.tableFlowElement.progress(stage.flowElementId)
+            }
+            return null
+        }
+
+    private val firstFlowElementId: Long?
+        get() {
+            prefHelper.currentProjectGroup?.let { combo ->
+                combo.project?.let { project ->
+                    db.tableFlow.queryBySubProjectId(project.id.toInt())?.let { flow ->
+                        return db.tableFlowElement.first(flow.id)
+                    }
+                }
+            }
+            return null
+        }
+
+    private val lastFlowElementId: Long?
+        get() {
+            prefHelper.currentProjectGroup?.let { combo ->
+                combo.project?.let { project ->
+                    db.tableFlow.queryBySubProjectId(project.id.toInt())?.let { flow ->
+                        return db.tableFlowElement.last(flow.id)
+                    }
+                }
+            }
+            return null
+        }
+
+    val curFlowValueStage: Stage
+        get() {
+            val flow = curFlowValue
+            if (flow.stage is Stage.CUSTOM_FLOW) {
+                if (flow.stage.isFirstElement) {
+                    firstFlowElementId?.let { firstId ->
+                        return Stage.CUSTOM_FLOW(firstId)
+                    }
+                } else if (flow.stage.isLastElement) {
+                    lastFlowElementId?.let { lastId ->
+                        return Stage.CUSTOM_FLOW(lastId)
+                    }
+                }
+            }
+            return flow.stage
+        }
+
+    // endregion flow element support
 }

@@ -1,3 +1,6 @@
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.fresh.ui.mainlist.adapter.item
 
 import android.view.LayoutInflater
@@ -12,7 +15,7 @@ class EquipmentSelectItemViewMvcImpl(
         container: ViewGroup?
 ) : ViewMvcImpl(), EquipmentSelectItemViewMvc {
 
-    override val rootView = inflater.inflate(R.layout.entry_item_equipment, container, false)
+    override val rootView = inflater.inflate(R.layout.mainlist_item_equipment, container, false)
 
     private val checkButtonView = findViewById<CheckBox>(R.id.check_button)
 

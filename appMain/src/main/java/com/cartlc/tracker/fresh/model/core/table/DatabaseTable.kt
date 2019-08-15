@@ -10,7 +10,7 @@ interface DatabaseTable {
     val tableEntry: TableEntry
     val tableEquipment: TableEquipment
     val tableNote: TableNote
-    val tablePictureCollection: TablePictureCollection
+    val tablePicture: TablePicture
     val tableProjects: TableProjects
     val tableProjectAddressCombo: TableProjectAddressCombo
     val tableTruck: TableTruck

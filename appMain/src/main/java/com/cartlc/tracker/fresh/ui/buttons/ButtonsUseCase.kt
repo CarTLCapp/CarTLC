@@ -12,6 +12,7 @@ interface ButtonsUseCase : BaseObservable<ButtonsUseCase.Listener> {
         fun onButtonEvent(action: Button)
     }
 
+    var wasPrev: Boolean
     var wasNext: Boolean
     var wasSkip: Boolean
 

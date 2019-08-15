@@ -1,3 +1,6 @@
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.fresh.ui.main.process
 
 import com.cartlc.tracker.fresh.model.flow.*
@@ -11,7 +14,6 @@ class StageCity (
 ) : ProcessBase(shared) {
 
     fun process(flow: Flow) {
-
         with(shared) {
             var isEditing = flow.stage == Stage.ADD_CITY
             titleUseCase.subTitleText = if (isEditing) editProjectHint else curProjectHint
@@ -73,7 +75,6 @@ class StageCity (
         }
     }
 
-
     private fun autoNarrowCities(cities: MutableList<String>) {
         with(shared) {
             if (!isAutoNarrowOkay) {
@@ -92,5 +93,11 @@ class StageCity (
         }
     }
 
+    fun saveAdd(): Boolean {
+        with(shared) {
+            prefHelper.city = entrySimpleUseCase.entryTextValue ?: ""
+            return prefHelper.city?.isNotBlank() ?: false
+        }
+    }
 
 }

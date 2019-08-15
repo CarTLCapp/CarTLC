@@ -42,7 +42,7 @@ class MainActivity : BaseActivity() {
         setSupportActionBar(findViewById(R.id.toolbar_main))
 
         val viewMvc = factoryViewMvc.allocMainViewMvc(content, boundAct.factoryViewHelper)
-        (viewMvc as MainViewMvcImpl).fabAdd = fab_add // TODO: Clean this up
+        (viewMvc as MainViewMvcImpl).fabAdd = fab_add // Give access to top layout button
         controller = factoryController.allocMainController(boundAct, viewMvc)
         controller.softKeyboardDetect = SoftKeyboardDetect(root)
         content.addView(viewMvc.rootView)

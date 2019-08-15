@@ -1,6 +1,10 @@
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.fresh.ui.mainlist.adapter.item
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.LayoutRes
@@ -13,7 +17,7 @@ class SimpleItemViewMvcImpl(
         @LayoutRes entryItemLayoutId: Int
 ) : ViewMvcImpl(), SimpleItemViewMvc {
 
-    override val rootView = inflater.inflate(entryItemLayoutId, container, false)
+    override val rootView: View = inflater.inflate(entryItemLayoutId, container, false)
 
     private val itemView = findViewById<TextView>(R.id.item)
 

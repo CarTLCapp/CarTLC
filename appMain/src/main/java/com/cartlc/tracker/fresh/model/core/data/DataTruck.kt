@@ -13,69 +13,25 @@ class DataTruck : Comparable<DataTruck> {
 
     var id: Long = 0
     var serverId: Long = 0
-    var truckNumber: String? = null
-    var licensePlateNumber: String? = null
+    var truckNumberValue: String? = null
+    var truckNumberPictureId: Int = 0
+    var truckHasDamage: Boolean = false
+    var truckDamagePictureId: Int = 0
     var projectNameId: Long = 0
     var companyName: String? = null
     var hasEntry: Boolean = false
 
     constructor()
 
-    constructor(truckNumber: String, licensePlateNumber: String, projectNameId: Long, companyName: String) {
-        this.truckNumber = truckNumber
-        this.licensePlateNumber = licensePlateNumber
-        this.projectNameId = projectNameId
-        this.companyName = companyName
-    }
-
-    constructor(id: Long, truckNumber: String, licensePlateNumber: String, projectNameId: Long, companyName: String) {
+    constructor(id: Long, truckNumber: String, projectNameId: Long, companyName: String) {
         this.id = id
-        this.truckNumber = truckNumber
-        this.licensePlateNumber = licensePlateNumber
+        this.truckNumberValue = truckNumber
         this.projectNameId = projectNameId
         this.companyName = companyName
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other is DataTruck) {
-            return equals(other)
-        }
-        if (other is Long) {
-            return id == other
-        }
-        return false
-    }
-
-    fun equals(other: DataTruck): Boolean {
-        if (truckNumber == null) {
-            if (other.truckNumber != null) {
-                return false
-            }
-        } else if (truckNumber != other.truckNumber) {
-            return false
-        }
-        if (projectNameId != other.projectNameId) {
-            return false
-        }
-        if (companyName == null) {
-            if (other.companyName != null) {
-                return false
-            }
-        } else if (companyName != other.companyName) {
-            return false
-        }
-        if (licensePlateNumber == null) {
-            if (other.licensePlateNumber != null) {
-                return false
-            }
-        } else if (licensePlateNumber != other.licensePlateNumber) {
-            return false
-        }
-        return hasEntry == other.hasEntry
     }
 
     override fun toString(): String {
-        return toString(truckNumber, licensePlateNumber)
+        return truckNumberValue ?: ""
     }
 
     fun toLongString(db: DatabaseTable): String {
@@ -86,18 +42,12 @@ class DataTruck : Comparable<DataTruck> {
             sbuf.append(serverId)
             sbuf.append("]")
         }
-        if (truckNumber != null) {
+        if (truckNumberValue != null) {
             sbuf.append(", ")
-            sbuf.append(truckNumber)
-        }
-        if (!licensePlateNumber.isNullOrEmpty()) {
-            if (sbuf.length > 0) {
-                sbuf.append(" : ")
-            }
-            sbuf.append(licensePlateNumber)
+            sbuf.append(truckNumberValue)
         }
         if (projectNameId > 0) {
-            if (sbuf.length > 0) {
+            if (sbuf.isNotEmpty()) {
                 sbuf.append(", ")
             }
             sbuf.append(db.tableProjects.queryProjectName(projectNameId))
@@ -106,7 +56,7 @@ class DataTruck : Comparable<DataTruck> {
             sbuf.append(")")
         }
         if (companyName != null) {
-            if (sbuf.length > 0) {
+            if (sbuf.isNotEmpty()) {
                 sbuf.append(", ")
             }
             sbuf.append(companyName)
@@ -118,30 +68,36 @@ class DataTruck : Comparable<DataTruck> {
     }
 
     override fun compareTo(other: DataTruck): Int {
-        if (truckNumber == null) {
-            return if (other.truckNumber == null) {
+        if (truckNumberValue == null) {
+            return if (other.truckNumberValue == null) {
                 0
             } else -1
-        } else if (other.truckNumber == null) {
+        } else if (other.truckNumberValue == null) {
             return 1
         }
-        return truckNumber!!.compareTo(other.truckNumber!!)
+        return truckNumberValue!!.compareTo(other.truckNumberValue!!)
     }
 
-    companion object {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-        fun toString(truckNumber: String?, licensePlateNumber: String?): String {
-            val sbuf = StringBuilder()
-            if (truckNumber != null) {
-                sbuf.append(truckNumber)
-            }
-            if (!licensePlateNumber.isNullOrEmpty()) {
-                if (sbuf.length > 0) {
-                    sbuf.append(" : ")
-                }
-                sbuf.append(licensePlateNumber)
-            }
-            return sbuf.toString()
-        }
+        other as DataTruck
+
+        if (truckNumberValue != other.truckNumberValue) return false
+        if (projectNameId != other.projectNameId) return false
+        if (companyName != other.companyName) return false
+        if (hasEntry != other.hasEntry) return false
+
+        return true
     }
+
+    override fun hashCode(): Int {
+        var result = truckNumberValue?.hashCode() ?: 0
+        result = 31 * result + projectNameId.hashCode()
+        result = 31 * result + (companyName?.hashCode() ?: 0)
+        result = 31 * result + hasEntry.hashCode()
+        return result
+    }
+
 }

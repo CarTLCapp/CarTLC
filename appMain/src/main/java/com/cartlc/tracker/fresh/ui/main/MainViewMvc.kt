@@ -6,7 +6,7 @@ package com.cartlc.tracker.fresh.ui.main
 import androidx.annotation.ColorRes
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvc
-import com.cartlc.tracker.fresh.ui.confirm.ConfirmUseCase
+import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalUseCase
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleUseCase
 import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
 import com.cartlc.tracker.fresh.ui.picture.PictureListUseCase
@@ -33,12 +33,13 @@ interface MainViewMvc : ObservableViewMvc<MainViewMvc.Listener> {
     var picturesVisible: Boolean
     var entryHint: EntryHint
     var addButtonVisible: Boolean
+    var customProgress: String?
     
     val buttonsUseCase: ButtonsUseCase
     val titleUseCase: TitleUseCase
     val pictureUseCase: PictureListUseCase
     val mainListUseCase: MainListUseCase
     val entrySimpleUseCase: EntrySimpleUseCase
-    val confirmUseCase: ConfirmUseCase?
+    val confirmUseCase: ConfirmFinalUseCase?
 
 }

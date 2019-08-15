@@ -1,6 +1,6 @@
 package com.cartlc.tracker.fresh.ui.confirm
 
-interface ConfirmUseCase {
+interface ConfirmFinalUseCase {
 
     fun onConfirmOkay()
 

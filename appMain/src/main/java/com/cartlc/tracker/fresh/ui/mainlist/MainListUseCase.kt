@@ -11,9 +11,11 @@ interface MainListUseCase : BaseObservable<MainListUseCase.Listener> {
         fun onEntryHintChanged(entryHint: EntryHint)
         fun onKeyValueChanged(key: String, keyValue: String?)
         fun onProjectGroupSelected(projectGroup: DataProjectAddressCombo)
+        fun onConfirmItemChecked(isAllChecked: Boolean)
     }
 
     val areNotesComplete: Boolean
+    val isConfirmReady: Boolean
     val notes: List<DataNote>
 
     var visible: Boolean

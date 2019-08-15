@@ -22,19 +22,21 @@ import timber.log.Timber
 class SqlTableTruck(
         private val db: DatabaseTable,
         private val dbSql: SQLiteDatabase
-): TableTruck {
+) : TableTruck {
 
     companion object {
 
         private const val TABLE_NAME = "table_trucks_v14"
 
         private const val KEY_ROWID = "_id"
-        private const val KEY_TRUCK_NUMBER = "truck_number"
-        private const val KEY_LICENSE_PLATE = "license_plate"
+        private const val KEY_TRUCK_NUMBER_VALUE = "truck_number"
+        private const val KEY_TRUCK_NUMBER_PICTURE_ID = "truck_number_picture_id"
+        private const val KEY_TRUCK_DAMAGE_PICTURE_ID = "truck_damage_picture_id"
         private const val KEY_SERVER_ID = "server_id"
         private const val KEY_PROJECT_ID = "project_id"
         private const val KEY_COMPANY_NAME = "company_name"
         private const val KEY_HAS_ENTRY = "has_entry"
+        private const val KEY_HAS_DAMAGE = "has_damage"
     }
 
     fun create() {
@@ -44,9 +46,7 @@ class SqlTableTruck(
         sbuf.append(" (")
         sbuf.append(KEY_ROWID)
         sbuf.append(" integer primary key autoincrement, ")
-        sbuf.append(KEY_TRUCK_NUMBER)
-        sbuf.append(" varchar(128), ")
-        sbuf.append(KEY_LICENSE_PLATE)
+        sbuf.append(KEY_TRUCK_NUMBER_VALUE)
         sbuf.append(" varchar(128), ")
         sbuf.append(KEY_SERVER_ID)
         sbuf.append(" integer, ")
@@ -54,19 +54,40 @@ class SqlTableTruck(
         sbuf.append(" int default 0, ")
         sbuf.append(KEY_COMPANY_NAME)
         sbuf.append(" varchar(256), ")
+        sbuf.append(KEY_TRUCK_NUMBER_PICTURE_ID)
+        sbuf.append(" integer default 0, ")
+        sbuf.append(KEY_TRUCK_DAMAGE_PICTURE_ID)
+        sbuf.append(" integer default 0, ")
         sbuf.append(KEY_HAS_ENTRY)
+        sbuf.append(" bit default 0, ")
+        sbuf.append(KEY_HAS_DAMAGE)
         sbuf.append(" bit default 0)")
         dbSql.execSQL(sbuf.toString())
+    }
+
+    fun upgrade20() {
+        try {
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_TRUCK_NUMBER_PICTURE_ID integer default 0")
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_TRUCK_DAMAGE_PICTURE_ID integer default 0")
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_HAS_DAMAGE bit default 0")
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableTruck::class.java, "upgrade20()", "db")
+        }
     }
 
     // Will find exact match of the tableTruck given the parameters. Otherwise will create
     // a new tableTruck with these values.
     // @Returns id of newly saved tableTruck.
-    override fun save(truckNumber: String, licensePlate: String, projectId: Long, companyName: String): Long {
+    override fun save(truckNumberValue: String,
+                      truckNumberPictureId: Int,
+                      truckDamageExists: Boolean,
+                      truckDamagePictureId: Int,
+                      projectId: Long,
+                      companyName: String): Long {
         val values = ContentValues()
         val truck: DataTruck
-        val trucks = query(truckNumber, licensePlate, projectId, companyName)
-        if (trucks.size > 0) {
+        val trucks = query(truckNumberValue, projectId, companyName)
+        if (trucks.isNotEmpty()) {
             truck = trucks[0]
             if (truck.projectNameId == 0L) {
                 truck.projectNameId = projectId
@@ -78,21 +99,28 @@ class SqlTableTruck(
             }
             truck.hasEntry = true
             values.put(KEY_HAS_ENTRY, 1)
+            values.put(KEY_HAS_DAMAGE, truckDamageExists)
+            values.put(KEY_TRUCK_NUMBER_PICTURE_ID, truckNumberPictureId)
+            values.put(KEY_TRUCK_DAMAGE_PICTURE_ID, truckDamagePictureId)
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(truck.id))
+            val whereArgs = arrayOf(truck.id.toString())
             dbSql.update(TABLE_NAME, values, where, whereArgs)
         } else {
             truck = DataTruck()
-            truck.truckNumber = truckNumber
-            truck.licensePlateNumber = licensePlate
+            truck.truckNumberValue = truckNumberValue
+            truck.truckNumberPictureId = truckNumberPictureId
+            truck.truckDamagePictureId = truckDamagePictureId
             truck.companyName = companyName
             truck.projectNameId = projectId
             truck.hasEntry = true
-            values.put(KEY_TRUCK_NUMBER, truckNumber)
+            truck.truckHasDamage = truckDamageExists
+            values.put(KEY_TRUCK_NUMBER_VALUE, truckNumberValue)
+            values.put(KEY_TRUCK_NUMBER_PICTURE_ID, truckNumberPictureId)
+            values.put(KEY_TRUCK_DAMAGE_PICTURE_ID, truckDamagePictureId)
             values.put(KEY_COMPANY_NAME, companyName)
             values.put(KEY_PROJECT_ID, projectId)
-            values.put(KEY_LICENSE_PLATE, licensePlate)
             values.put(KEY_HAS_ENTRY, 1)
+            values.put(KEY_HAS_DAMAGE, if (truckDamageExists) 1 else 0)
             truck.id = dbSql.insert(TABLE_NAME, null, values)
         }
         return truck.id
@@ -101,20 +129,22 @@ class SqlTableTruck(
     override fun save(truck: DataTruck): Long {
         try {
             val values = ContentValues()
-            values.put(KEY_TRUCK_NUMBER, truck.truckNumber)
-            values.put(KEY_LICENSE_PLATE, truck.licensePlateNumber)
+            values.put(KEY_TRUCK_NUMBER_VALUE, truck.truckNumberValue)
+            values.put(KEY_TRUCK_NUMBER_PICTURE_ID, truck.truckNumberPictureId)
+            values.put(KEY_TRUCK_DAMAGE_PICTURE_ID, truck.truckDamagePictureId)
             values.put(KEY_PROJECT_ID, truck.projectNameId)
             values.put(KEY_COMPANY_NAME, truck.companyName)
             values.put(KEY_SERVER_ID, truck.serverId)
             values.put(KEY_HAS_ENTRY, if (truck.hasEntry) 1 else 0)
+            values.put(KEY_HAS_DAMAGE, if (truck.truckHasDamage) 1 else 0)
             if (truck.id > 0) {
                 val where = "$KEY_ROWID=?"
-                val whereArgs = arrayOf(java.lang.Long.toString(truck.id))
+                val whereArgs = arrayOf(truck.id.toString())
                 if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
                     values.put(KEY_ROWID, truck.id)
-                    val confirm_id = dbSql.insert(TABLE_NAME, null, values)
-                    if (confirm_id != truck.id) {
-                        Timber.e("Did not transfer truck properly for ID " + truck.id + "...got back " + confirm_id)
+                    val confirmId = dbSql.insert(TABLE_NAME, null, values)
+                    if (confirmId != truck.id) {
+                        Timber.e("Did not transfer truck properly for ID ${truck.id}...got back $confirmId")
                     }
                 }
             } else {
@@ -133,19 +163,23 @@ class SqlTableTruck(
         var truck: DataTruck? = DataTruck()
         if (cursor.moveToNext()) {
             val idxId = cursor.getColumnIndex(KEY_ROWID)
-            val idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER)
-            val idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE)
+            val idxTruckNumberValue = cursor.getColumnIndex(KEY_TRUCK_NUMBER_VALUE)
+            val idxTruckNumberPictureId = cursor.getColumnIndex(KEY_TRUCK_NUMBER_PICTURE_ID)
+            val idxTruckDamagePictureId = cursor.getColumnIndex(KEY_TRUCK_DAMAGE_PICTURE_ID)
             val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
             val idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID)
             val idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME)
             val idxHasEntry = cursor.getColumnIndex(KEY_HAS_ENTRY)
+            val idxHasDamage = cursor.getColumnIndex(KEY_HAS_DAMAGE)
             truck!!.id = cursor.getLong(idxId)
-            truck.truckNumber = cursor.getString(idxTruckNumber)
-            truck.licensePlateNumber = cursor.getString(idxLicensePlate)
+            truck.truckNumberValue = cursor.getString(idxTruckNumberValue)
+            truck.truckNumberPictureId = cursor.getInt(idxTruckNumberPictureId)
+            truck.truckDamagePictureId = cursor.getInt(idxTruckDamagePictureId)
             truck.serverId = cursor.getLong(idxServerId)
             truck.projectNameId = cursor.getLong(idxProjectId)
             truck.companyName = cursor.getString(idxCompanyName)
             truck.hasEntry = cursor.getShort(idxHasEntry).toInt() != 0
+            truck.truckHasDamage = cursor.getShort(idxHasDamage).toInt() != 0
         } else {
             truck = null
         }
@@ -154,36 +188,28 @@ class SqlTableTruck(
     }
 
     override fun queryByTruckNumber(truck_number: Int): List<DataTruck> {
-        val selection = "$KEY_TRUCK_NUMBER=?"
-        val selectionArgs = arrayOf(Integer.toString(truck_number))
+        val selection = "$KEY_TRUCK_NUMBER_VALUE=?"
+        val selectionArgs = arrayOf(truck_number.toString())
         return query(selection, selectionArgs)
     }
 
     override fun queryByLicensePlate(license_plate: String): List<DataTruck> {
-        val selection = "$KEY_TRUCK_NUMBER=?"
+        val selection = "$KEY_TRUCK_NUMBER_VALUE=?"
         val selectionArgs = arrayOf(license_plate)
         return query(selection, selectionArgs)
     }
 
-    fun query(truck_number: String?, license_plate: String?, projectId: Long, companyName: String?): List<DataTruck> {
+    fun query(truck_number: String?, projectId: Long, companyName: String?): List<DataTruck> {
         val selection = StringBuffer()
         val selectionArgs = ArrayList<String>()
 
-        if (truck_number != null && truck_number.trim { it <= ' ' }.length > 0) {
-            selection.append(KEY_TRUCK_NUMBER)
+        if (truck_number != null && truck_number.isNotBlank()) {
+            selection.append(KEY_TRUCK_NUMBER_VALUE)
             selection.append("=?")
             selectionArgs.add(truck_number)
         }
-        if (license_plate != null && license_plate.trim { it <= ' ' }.length > 0) {
-            if (selection.length > 0) {
-                selection.append(" AND ")
-            }
-            selection.append(KEY_LICENSE_PLATE)
-            selection.append("=?")
-            selectionArgs.add(license_plate)
-        }
         if (projectId > 0) {
-            if (selection.length > 0) {
+            if (selection.isNotEmpty()) {
                 selection.append(" AND ")
             }
             selection.append("(")
@@ -191,10 +217,10 @@ class SqlTableTruck(
             selection.append("=? OR ")
             selection.append(KEY_PROJECT_ID)
             selection.append("=0)")
-            selectionArgs.add(java.lang.Long.toString(projectId))
+            selectionArgs.add(projectId.toString())
         }
-        if (companyName != null && companyName.trim { it <= ' ' }.length > 0) {
-            if (selection.length > 0) {
+        if (companyName != null && companyName.isNotBlank()) {
+            if (selection.isNotEmpty()) {
                 selection.append(" AND ")
             }
             selection.append("(")
@@ -210,22 +236,26 @@ class SqlTableTruck(
     override fun query(selection: String?, selectionArgs: Array<String>?): List<DataTruck> {
         val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
         val idxId = cursor.getColumnIndex(KEY_ROWID)
-        val idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER)
-        val idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE)
+        val idxTruckNumberValue = cursor.getColumnIndex(KEY_TRUCK_NUMBER_VALUE)
+        val idxTruckNumberPictureId = cursor.getColumnIndex(KEY_TRUCK_NUMBER_PICTURE_ID)
+        val idxTruckDamagePictureId = cursor.getColumnIndex(KEY_TRUCK_DAMAGE_PICTURE_ID)
         val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
         val idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID)
         val idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME)
         val idxHasEntry = cursor.getColumnIndex(KEY_HAS_ENTRY)
+        val idxHasDamage = cursor.getColumnIndex(KEY_HAS_DAMAGE)
         val list = ArrayList<DataTruck>()
         while (cursor.moveToNext()) {
             val truck = DataTruck()
             truck.id = cursor.getLong(idxId)
-            truck.truckNumber = cursor.getString(idxTruckNumber)
-            truck.licensePlateNumber = cursor.getString(idxLicensePlate)
+            truck.truckNumberValue = cursor.getString(idxTruckNumberValue)
+            truck.truckNumberPictureId = cursor.getInt(idxTruckNumberPictureId)
+            truck.truckDamagePictureId = cursor.getInt(idxTruckDamagePictureId)
             truck.serverId = cursor.getLong(idxServerId)
             truck.projectNameId = cursor.getLong(idxProjectId)
             truck.companyName = cursor.getString(idxCompanyName)
             truck.hasEntry = cursor.getShort(idxHasEntry).toInt() != 0
+            truck.truckHasDamage = cursor.getShort(idxHasDamage).toInt() != 0
             list.add(truck)
         }
         cursor.close()
@@ -254,7 +284,7 @@ class SqlTableTruck(
                 sbuf.append(KEY_HAS_ENTRY)
                 sbuf.append("=0)")
                 selection = sbuf.toString()
-                selectionArgs = arrayOf<String>(java.lang.Long.toString(curGroup.projectNameId), companyName)
+                selectionArgs = arrayOf(curGroup.projectNameId.toString(), companyName)
             }
         }
         val trucks = query(selection, selectionArgs).toMutableList()
@@ -273,19 +303,23 @@ class SqlTableTruck(
         var truck: DataTruck? = DataTruck()
         if (cursor.moveToNext()) {
             val idxId = cursor.getColumnIndex(KEY_ROWID)
-            val idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER)
-            val idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE)
+            val idxTruckNumberValue = cursor.getColumnIndex(KEY_TRUCK_NUMBER_VALUE)
+            val idxTruckNumberPictureId = cursor.getColumnIndex(KEY_TRUCK_NUMBER_PICTURE_ID)
+            val idxTruckDamagePictureId = cursor.getColumnIndex(KEY_TRUCK_DAMAGE_PICTURE_ID)
             val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
             val idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID)
             val idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME)
             val idxHasEntry = cursor.getColumnIndex(KEY_HAS_ENTRY)
+            val idxHasDamage = cursor.getColumnIndex(KEY_HAS_DAMAGE)
             truck!!.id = cursor.getLong(idxId)
-            truck.truckNumber = cursor.getString(idxTruckNumber)
-            truck.licensePlateNumber = cursor.getString(idxLicensePlate)
+            truck.truckNumberValue = cursor.getString(idxTruckNumberValue)
+            truck.truckNumberPictureId = cursor.getInt(idxTruckNumberPictureId)
+            truck.truckDamagePictureId = cursor.getInt(idxTruckDamagePictureId)
             truck.serverId = cursor.getLong(idxServerId)
             truck.projectNameId = cursor.getLong(idxProjectId)
             truck.companyName = cursor.getString(idxCompanyName)
             truck.hasEntry = cursor.getShort(idxHasEntry).toInt() != 0
+            truck.truckHasDamage = cursor.getShort(idxHasDamage).toInt() != 0
         } else {
             truck = null
         }
@@ -301,7 +335,6 @@ class SqlTableTruck(
 
     override fun removeIfUnused(truck: DataTruck) {
         if (db.tableEntry.countTrucks(truck.id) == 0) {
-            Timber.i("remove(" + truck.toString() + ")")
             remove(truck.id)
         }
     }

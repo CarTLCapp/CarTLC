@@ -43,7 +43,7 @@
         </activity>
 
         <activity
-            android:name=".ui.act.ListEntryActivity"
+            android:name=".ui.act.ListProjectEntriesActivity"
             android:label="@string/title_activity_list_entries"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"

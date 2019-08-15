@@ -234,7 +234,6 @@ public class FlowController extends Controller {
         } catch (Exception ex) {
             flowElement.request_image = 0;
         }
-        flowElement.generic_note = inputFlowElement.hasGenericNote;
         if (elementId > 0) {
             flowElement.update();
         } else {
@@ -266,12 +265,12 @@ public class FlowController extends Controller {
             for (FlowElement element : flow.getFlowElements()) {
                 ObjectNode elementNode = elementsNode.addObject();
                 elementNode.put("id", element.id);
+                elementNode.put("order", element.line_num);
                 if (element.hasPrompt()) {
                     elementNode.put("prompt", element.prompt);
                 }
                 elementNode.put("type", element.getPromptType().getCodeString());
                 elementNode.put("num_images", element.getNumImages());
-                elementNode.put("generic_note", element.generic_note);
                 if (element.hasNotes()) {
                     ArrayNode notesNote = elementNode.putArray("notes");
                     for (Note note : element.getNotes()) {

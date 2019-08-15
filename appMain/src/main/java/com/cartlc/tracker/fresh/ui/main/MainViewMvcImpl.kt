@@ -13,8 +13,8 @@ import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewHelper
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsView
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
-import com.cartlc.tracker.fresh.ui.confirm.ConfirmFragment
-import com.cartlc.tracker.fresh.ui.confirm.ConfirmUseCase
+import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalFragment
+import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalUseCase
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleUseCase
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleView
 import com.cartlc.tracker.fresh.ui.login.LoginFragment
@@ -51,6 +51,7 @@ class MainViewMvcImpl(
     private val entrySimpleView = findViewById<EntrySimpleView>(R.id.frame_entry_simple)
     private val picturesView = findViewById<PictureListView>(R.id.frame_pictures)
     private val listEntryHint = findViewById<TextView>(R.id.list_entry_hint)
+    private val customProgressView = findViewById<TextView>(R.id.custom_progress)
 
     override val buttonsUseCase: ButtonsUseCase = buttonsView.useCase
     override val titleUseCase: TitleUseCase = titleView.useCase
@@ -61,9 +62,9 @@ class MainViewMvcImpl(
     private val fragmentHelper = factoryViewHelper.fragmentHelper
 
     private val loginFragment = LoginFragment(buttonsUseCase)
-    private val confirmFragment = ConfirmFragment()
+    private val confirmFragment = ConfirmFinalFragment()
 
-    override val confirmUseCase: ConfirmUseCase?
+    override val confirmUseCase: ConfirmFinalUseCase?
         get() = confirmFragment.useCase
 
     override var fragmentVisible: FragmentType = FragmentType.NONE
@@ -96,4 +97,7 @@ class MainViewMvcImpl(
         get() = fabAdd?.visibility == View.VISIBLE
         set(value) { fabAdd?.visibility = if (value) View.VISIBLE else View.GONE }
 
+    override var customProgress: String?
+        get() = customProgressView.text.toString()
+        set(value) { customProgressView.text = value }
 }

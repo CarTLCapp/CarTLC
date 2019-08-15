@@ -4,7 +4,7 @@ import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvc
 
-interface ConfirmViewMvc : ObservableViewMvc<ConfirmViewMvc.Listener> {
+interface ConfirmFinalViewMvc : ObservableViewMvc<ConfirmFinalViewMvc.Listener> {
 
     interface Listener {
 
@@ -17,6 +17,7 @@ interface ConfirmViewMvc : ObservableViewMvc<ConfirmViewMvc.Listener> {
     var pictureLabel: String
     var notes: List<DataNote>
     var equipmentNames: List<String>
-    var pictures: MutableList<DataPicture>
+    var pictures: List<DataPicture>
+    var pictureListHeight: Int
 
 }

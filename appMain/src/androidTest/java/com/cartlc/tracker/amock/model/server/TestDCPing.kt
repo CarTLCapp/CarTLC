@@ -14,8 +14,6 @@ import com.cartlc.tracker.fresh.model.flow.FlowUseCaseImpl
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.service.endpoint.DCPing
 import com.cartlc.tracker.fresh.service.help.ServerHelper
-import com.cartlc.tracker.model.table.*
-import com.cartlc.tracker.fresh.model.table.*
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.spy
@@ -57,7 +55,7 @@ class TestDCPing {
     lateinit var tableString: TableString
 
     @Mock
-    lateinit var tablePictureCollection: TablePictureCollection
+    lateinit var tablePictureCollection: TablePicture
 
     private val flowUseCase = FlowUseCaseImpl()
 
@@ -96,7 +94,7 @@ class TestDCPing {
     private fun initBasic() {
         Mockito.`when`(db.tableEntry).thenReturn(tableEntry)
         Mockito.`when`(tableEntry.queryPendingDataToUploadToMaster()).thenReturn(emptyList())
-        Mockito.`when`(db.tablePictureCollection).thenReturn(tablePictureCollection)
+        Mockito.`when`(db.tablePicture).thenReturn(tablePictureCollection)
         Mockito.`when`(db.tableCrash).thenReturn(tableCrash)
         Mockito.`when`(tableCrash.queryNeedsUploading()).thenReturn(emptyList())
         Mockito.`when`(db.tableVehicle).thenReturn(tableVehicle)

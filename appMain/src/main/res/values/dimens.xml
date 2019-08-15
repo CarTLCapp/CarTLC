@@ -15,6 +15,6 @@
     <integer name="entry_simple_ems_lights">17</integer>
 
     <dimen name="text_margin">16dp</dimen>
-    <dimen name="picture_toast_size">10sp</dimen>
+    <dimen name="toast_size">10sp</dimen>
 
 </resources>

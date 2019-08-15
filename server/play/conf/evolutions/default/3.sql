@@ -7,8 +7,7 @@ create table flow_element (
     line_num          smallint default 0,
     prompt            text,
     prompt_type       tinyint default 0,
-    request_image     tinyint default 0,
-    generic_note      bit default 0
+    request_image     tinyint default 0
 );
 
 create table flow (

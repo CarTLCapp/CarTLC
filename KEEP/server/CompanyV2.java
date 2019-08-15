@@ -52,8 +52,6 @@ public class CompanyV2 extends Model {
 
     public static HashMap<Long, Long> transferMap = new HashMap<Long,Long>();
 
-    // TODO: Once data has been transfered, this code can be removed
-    // and the database can be cleaned up by removing this table.
     public static void transfer() {
         List<CompanyV2> list = find.findList();
         for (CompanyV2 c2 : list) {

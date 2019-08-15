@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
-import kotlinx.android.synthetic.main.entry_item_radio.view.*
+import kotlinx.android.synthetic.main.mainlist_item_radio.view.*
 
 /**
  * Created by dug on 11/1/18.
@@ -51,7 +51,7 @@ class RadioListAdapter(ctx: Context) : RecyclerView.Adapter<RadioListAdapter.Cus
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
-        val view = layoutInflater.inflate(R.layout.entry_item_radio, parent, false)
+        val view = layoutInflater.inflate(R.layout.mainlist_item_radio, parent, false)
         return CustomViewHolder(view)
     }
 

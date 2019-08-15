@@ -51,7 +51,7 @@ class TestPrefHelper {
     lateinit var tableNote: TableNote
 
     @Mock
-    lateinit var tablePictureCollection: TablePictureCollection
+    lateinit var tablePictureCollection: TablePicture
 
     @Mock
     lateinit var tableEquipment: TableEquipment
@@ -68,7 +68,7 @@ class TestPrefHelper {
         context = InstrumentationRegistry.getInstrumentation().targetContext
         prefHelper = PrefHelper(context, db)
         Mockito.`when`(db.tableNote).thenReturn(tableNote)
-        Mockito.`when`(db.tablePictureCollection).thenReturn(tablePictureCollection)
+        Mockito.`when`(db.tablePicture).thenReturn(tablePictureCollection)
         Mockito.`when`(db.tableEquipment).thenReturn(tableEquipment)
         prefHelper.clearCurProject()
     }

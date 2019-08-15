@@ -3,8 +3,11 @@ package com.cartlc.tracker.fresh.ui.mainlist
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import com.cartlc.tracker.fresh.model.core.data.DataFlowElement
+import com.cartlc.tracker.fresh.model.core.data.DataFlowElement.Type
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
+import com.cartlc.tracker.fresh.model.core.table.TableFlowElement
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 import com.cartlc.tracker.fresh.model.flow.Flow
@@ -26,6 +29,7 @@ class MainListController(
     private val prefHelper = repo.prefHelper
     private val status: TruckStatus?
         get() = prefHelper.status
+    private val checkBoxItemEnabled = mutableListOf<Boolean>()
 
     init {
         boundAct.bindObserver(this)
@@ -71,7 +75,7 @@ class MainListController(
     override var simpleItems: List<String>
         get() = viewMvc.simpleItems
         set(value) {
-            viewMvc.adapter =  MainListViewMvc.Adapter.SIMPLE
+            viewMvc.adapter = MainListViewMvc.Adapter.SIMPLE
             viewMvc.simpleItems = value
             setSimpleSelected()
         }
@@ -81,6 +85,9 @@ class MainListController(
 
     override val notes: List<DataNote>
         get() = viewMvc.notes
+
+    override val isConfirmReady: Boolean
+        get() = isAllChecked
 
     // endregion MainListUseCase
 
@@ -100,13 +107,28 @@ class MainListController(
             Stage.EQUIPMENT -> {
                 viewMvc.adapter = MainListViewMvc.Adapter.EQUIPMENT
             }
-            Stage.NOTES -> {
-                viewMvc.adapter = MainListViewMvc.Adapter.NOTE_ENTRY
-                if (viewMvc.numNotes == 0) {
-                    viewMvc.visible = false
-                    viewMvc.emptyVisible = true
-                } else {
-                    viewMvc.visible = true
+            is Stage.CUSTOM_FLOW -> {
+                repo.currentFlowElement?.let { element ->
+                    when (element.type) {
+                        Type.NONE ->
+                            if (repo.db.tableFlowElementNote.hasNotes(element.id)) {
+                                viewMvc.adapter = MainListViewMvc.Adapter.NOTE_ENTRY
+                                viewMvc.visible = true
+                            } else {
+                                viewMvc.visible = false
+                                viewMvc.emptyVisible = true
+                            }
+                        Type.CONFIRM_NEW,
+                        Type.CONFIRM -> {
+                            viewMvc.checkBoxItems = convert(repo.db.tableFlowElement.queryConfirmBatch(element.flowId, element.id))
+                            buildCheckBoxMemory()
+                            notifyConfirmListeners()
+                        }
+                        else -> {
+                            viewMvc.visible = false
+                            viewMvc.emptyVisible = false
+                        }
+                    }
                 }
             }
             Stage.STATUS -> {
@@ -117,6 +139,17 @@ class MainListController(
                 )
                 viewMvc.radioSelectedText = status?.getStringNull(ctx)
             }
+        }
+    }
+
+    private fun convert(items: List<DataFlowElement>): List<String> {
+        return TableFlowElement.convertToStrings(items)
+    }
+
+    private fun buildCheckBoxMemory() {
+        checkBoxItemEnabled.clear()
+        for (item in viewMvc.checkBoxItems) {
+            checkBoxItemEnabled.add(prefHelper.getConfirmValue(item))
         }
     }
 
@@ -142,6 +175,36 @@ class MainListController(
 
     override fun onRadioItemSelected(text: String) {
         prefHelper.status = TruckStatus.from(ctx, text)
+    }
+
+    override fun onCheckBoxItemChanged(position: Int, item: String, isChecked: Boolean) {
+        checkBoxItemEnabled[position] = isChecked
+        prefHelper.setConfirmValue(item, isChecked)
+        notifyConfirmListeners()
+    }
+
+    private fun notifyConfirmListeners() {
+        for (listener in listeners) {
+            listener.onConfirmItemChecked(isAllChecked)
+        }
+    }
+
+    private val isAllChecked: Boolean
+        get() {
+            for (i in 0 until checkBoxItemEnabled.size) {
+                if (!checkBoxItemEnabled[i]) {
+                    return false
+                }
+            }
+            return true
+        }
+
+    override fun isCheckBoxItemSelected(position: Int): Boolean {
+        return if (position < checkBoxItemEnabled.size) {
+            checkBoxItemEnabled[position]
+        } else {
+            false
+        }
     }
 
     // endregion MainListViewMvc.Listener

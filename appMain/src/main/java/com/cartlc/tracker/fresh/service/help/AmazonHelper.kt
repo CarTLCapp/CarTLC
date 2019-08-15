@@ -88,7 +88,7 @@ class AmazonHelper(
 
     private fun sendPictures(ctx: Context, entry: DataEntry): Int {
         var count = 0
-        for (item in entry.pictureCollection!!.pictures) {
+        for (item in entry.pictures) {
             if (!item.uploaded) {
                 sendPicture(ctx, entry, item)
                 count++
@@ -130,7 +130,7 @@ class AmazonHelper(
 
     @Synchronized
     private fun uploadComplete(entry: DataEntry, item: DataPicture): Boolean {
-        db.tablePictureCollection.setUploaded(item)
+        db.tablePicture.setUploaded(item)
         return entry.checkPictureUploadComplete()
     }
 

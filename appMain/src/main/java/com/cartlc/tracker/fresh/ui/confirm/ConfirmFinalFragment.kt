@@ -9,7 +9,7 @@ import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
 import com.cartlc.tracker.ui.base.BaseFragment
 
-class ConfirmFragment: BaseFragment() {
+class ConfirmFinalFragment: BaseFragment() {
 
     private val componentRoot: ComponentRoot
         get() = boundFrag.componentRoot
@@ -18,7 +18,7 @@ class ConfirmFragment: BaseFragment() {
     private val factoryController: FactoryController
         get() = componentRoot.factoryController
 
-    var useCase: ConfirmUseCase? = null
+    var useCase: ConfirmFinalUseCase? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val viewMvc = factoryViewMvc.allocConfirmViewMvc(context!!)

@@ -12,5 +12,10 @@ interface TableTruck {
     fun queryStrings(curGroup: DataProjectAddressCombo?): List<String>
     fun removeIfUnused(truck: DataTruck)
     fun save(truck: DataTruck): Long
-    fun save(truckNumber: String, licensePlate: String, projectId: Long, companyName: String): Long
+    fun save(truckNumberValue: String,
+             truckNumberPictureId: Int,
+             truckDamageExists: Boolean,
+             truckDamagePictureId: Int,
+             projectId: Long,
+             companyName: String): Long
 }

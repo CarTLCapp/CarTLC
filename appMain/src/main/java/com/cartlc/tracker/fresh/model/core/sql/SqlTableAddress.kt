@@ -254,17 +254,18 @@ class SqlTableAddress(
         }
     }
 
-    override fun count(): Int {
-        var count = 0
-        try {
-            val cursor = dbSql.query(true, TABLE_NAME, null, null, null, null, null, null, null)
-            count = cursor.count
-            cursor.close()
-        } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableAddress::class.java, "count()", "db")
+    override val count: Int
+        get() {
+            var count = 0
+            try {
+                val cursor = dbSql.query(true, TABLE_NAME, null, null, null, null, null, null, null)
+                count = cursor.count
+                cursor.close()
+            } catch (ex: Exception) {
+                TBApplication.ReportError(ex, SqlTableAddress::class.java, "count()", "db")
+            }
+            return count
         }
-        return count
-    }
 
     override fun isLocalCompanyOnly(company: String?): Boolean {
         if (company == null) {

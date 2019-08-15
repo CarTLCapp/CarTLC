@@ -192,11 +192,8 @@ class SqlTableProjects(
     }
 
     /**
-     * Return project name from id.
-     * If the project has a rootProject, the returned name will be of the form
-     * $rootProject - $subProject
+     * Return project name from id in the form of <Root Project>, <Sub Project>
      */
-    // TODO:
     override fun queryProjectName(id: Long): Pair<String, String>? {
         try {
             val columns = arrayOf(KEY_NAME, KEY_ROOT_PROJECT)

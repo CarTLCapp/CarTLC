@@ -147,8 +147,9 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/confirm_pictures_label"
+            android:paddingBottom="80dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/image_thumbnail_max_height"
             android:layout_marginTop="@dimen/confirm_gap_height" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

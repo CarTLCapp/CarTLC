@@ -62,8 +62,10 @@ class SqlTableTruckV13(
             val idxCompanyName = cursor.getColumnIndex(KEY_COMPANY_NAME)
             truck = DataTruck()
             truck.id = cursor.getLong(idxId)
-            truck.truckNumber = Integer.toString(cursor.getInt(idxTruckNumber))
-            truck.licensePlateNumber = cursor.getString(idxLicensePlate)
+            truck.truckNumberValue = cursor.getInt(idxTruckNumber).toString()
+            if (!truck.truckNumberValue.isNullOrBlank()) {
+                truck.truckNumberValue = cursor.getString(idxLicensePlate)
+            }
             truck.serverId = cursor.getLong(idxServerId)
             truck.projectNameId = cursor.getLong(idxProjectId)
             truck.companyName = cursor.getString(idxCompanyName)

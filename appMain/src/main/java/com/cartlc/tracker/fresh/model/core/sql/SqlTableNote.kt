@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableNote
+import com.cartlc.tracker.fresh.model.core.table.TableNote.Companion.NOTE_TRUCK_DAMAGE_NAME
+import com.cartlc.tracker.fresh.model.core.table.TableNote.Companion.NOTE_TRUCK_NUMBER_NAME
 
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 
@@ -22,6 +24,7 @@ class SqlTableNote constructor(
         private val db: DatabaseTable,
         private val dbSql: SQLiteDatabase
 ): TableNote {
+
     companion object {
         private const val TABLE_NAME = "list_notes"
 
@@ -32,15 +35,13 @@ class SqlTableNote constructor(
         private const val KEY_NUM_DIGITS = "num_digits"
         private const val KEY_SERVER_ID = "server_id"
         private const val KEY_IS_BOOT = "is_boot_strap"
-
-        fun upgrade3(db: SQLiteDatabase) {
-            try {
-                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_NUM_DIGITS smallint default 0")
-            } catch (ex: Exception) {
-                TBApplication.ReportError(ex, SqlTableNote::class.java, "upgrade3()", "db")
-            }
-        }
     }
+
+    override val noteTruckNumber: DataNote?
+        get() = queryByName(NOTE_TRUCK_NUMBER_NAME)
+
+    override val noteTruckDamage: DataNote?
+        get() = queryByName(NOTE_TRUCK_DAMAGE_NAME)
 
     fun create() {
         val sbuf = StringBuilder()
@@ -163,16 +164,25 @@ class SqlTableNote constructor(
         val selection = "$KEY_ROWID=?"
         val selectionArgs = arrayOf(id.toString())
         val list = query(selection, selectionArgs)
-        return if (list.size > 0) {
+        return if (list.isNotEmpty()) {
+            list[0]
+        } else null
+    }
+
+    private fun queryByName(name: String): DataNote? {
+        val selection = "$KEY_NAME=?"
+        val selectionArgs = arrayOf(name)
+        val list = query(selection, selectionArgs)
+        return if (list.isNotEmpty()) {
             list[0]
         } else null
     }
 
     override fun queryByServerId(server_id: Int): DataNote? {
         val selection = "$KEY_SERVER_ID=?"
-        val selectionArgs = arrayOf(Integer.toString(server_id))
+        val selectionArgs = arrayOf(server_id.toString())
         val list = query(selection, selectionArgs)
-        return if (list.size > 0) {
+        return if (list.isNotEmpty()) {
             list[0]
         } else null
     }
@@ -206,24 +216,6 @@ class SqlTableNote constructor(
         return list
     }
 
-    //    public String getName(long id) {
-    //        String name = null;
-    //        try {
-    //            final String[] columns = {KEY_NAME};
-    //            final String selection = KEY_ROWID + "=?";
-    //            final String[] selectionArgs = {Long.toString(id)};
-    //            Cursor cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
-    //            int idxName = cursor.getColumnIndex(KEY_NAME);
-    //            if (cursor.moveToFirst()) {
-    //                name = cursor.getTableString(idxName);
-    //            }
-    //            cursor.close();
-    //        } catch (Exception ex) {
-    //            Timber.e(ex);
-    //        }
-    //        return name;
-    //    }
-
     override fun update(item: DataNote) {
         dbSql.beginTransaction()
         try {
@@ -235,7 +227,7 @@ class SqlTableNote constructor(
             values.put(KEY_SERVER_ID, item.serverId)
             values.put(KEY_NUM_DIGITS, item.numDigits)
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(item.id))
+            val whereArgs = arrayOf(item.id.toString())
             dbSql.update(TABLE_NAME, values, where, whereArgs)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
@@ -251,7 +243,7 @@ class SqlTableNote constructor(
             val values = ContentValues()
             values.put(KEY_VALUE, item.value)
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(item.id))
+            val whereArgs = arrayOf(item.id.toString())
             dbSql.update(TABLE_NAME, values, where, whereArgs)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
@@ -269,10 +261,9 @@ class SqlTableNote constructor(
 
     override fun removeIfUnused(note: DataNote) {
         if (db.tableCollectionNoteEntry.countNotes(note.id) == 0) {
-            Timber.i("remove(" + note.id + ", " + note.name + ")")
             remove(note.id)
         } else {
-            Timber.i("Did not remove unused note because some entries are using it: " + note.toString())
+            Timber.i("Did not remove unused note because some entries are using it: $note")
         }
     }
 

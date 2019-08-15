@@ -12,8 +12,8 @@ import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvc
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsController
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
-import com.cartlc.tracker.fresh.ui.confirm.ConfirmController
-import com.cartlc.tracker.fresh.ui.confirm.ConfirmViewMvc
+import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalController
+import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvc
 import com.cartlc.tracker.fresh.ui.login.LoginController
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvc
 import com.cartlc.tracker.fresh.ui.main.MainController
@@ -56,8 +56,8 @@ class FactoryController(
     }
 
     fun allocConfirmController(boundFrag: BoundFrag,
-                               viewMvc: ConfirmViewMvc): ConfirmController {
-        return ConfirmController(boundFrag, viewMvc)
+                               viewMvc: ConfirmFinalViewMvc): ConfirmFinalController {
+        return ConfirmFinalController(boundFrag, viewMvc)
     }
 
     fun allocMainListController(boundAct: BoundAct,

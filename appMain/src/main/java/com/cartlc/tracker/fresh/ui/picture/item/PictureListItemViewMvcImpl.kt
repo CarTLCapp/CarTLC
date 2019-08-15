@@ -11,6 +11,7 @@ import android.widget.TextView
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
+import timber.log.Timber
 import java.io.File
 
 class PictureListItemViewMvcImpl(
@@ -18,16 +19,31 @@ class PictureListItemViewMvcImpl(
         container: ViewGroup?
 ) : ViewMvcImpl(), PictureListItemViewMvc {
 
-    override val rootView = inflater.inflate(R.layout.entry_item_picture, container, false)
+    override val rootView: View = inflater.inflate(R.layout.picture_list_item, container, false)
 
     private val pictureView = findViewById<ImageView>(R.id.picture)
     private val loadingView = findViewById<TextView>(R.id.loading)
     private val removeButton = findViewById<ImageView>(R.id.remove)
     private val rotateCwButton = findViewById<ImageView>(R.id.rotate_cw)
     private val rotateCcwButton = findViewById<ImageView>(R.id.rotate_ccw)
-    private val noteDialogButton = findViewById<ImageView>(R.id.note_dialog)
-    private val noteView = findViewById<TextView>(R.id.note)
-    private val maxHeight = context.resources.getDimension(R.dimen.image_full_max_height).toInt()
+
+    private var listener: PictureListItemViewMvc.Listener? = null
+    private var dstPictureFile: File? = null
+    private val loadedHeight = context.resources.getDimension(R.dimen.image_full_max_height).toInt()
+
+    private var buttonsVisible: Boolean
+        get() = removeButton.visibility == View.VISIBLE
+        set(value) {
+            removeButton.visibility = if (value) View.VISIBLE else View.GONE
+            rotateCwButton.visibility = if (value) View.VISIBLE else View.GONE
+            rotateCcwButton.visibility = if (value) View.VISIBLE else View.GONE
+        }
+
+    init {
+        buttonsVisible = false
+    }
+
+    // region PictureListItemViewMvc
 
     override var loading: String?
         get() = loadingView.text.toString()
@@ -36,26 +52,26 @@ class PictureListItemViewMvcImpl(
             loadingView.visibility = if (value == null) View.GONE else View.VISIBLE
         }
 
-    override var note: String?
-        get() = noteView.text.toString()
-        set(value) {
-            noteView.text = value
-            noteView.visibility = if (value == null || value.isEmpty()) View.INVISIBLE else View.VISIBLE
-        }
-
-    override fun bind(listener: PictureListItemViewMvc.Listener) {
+    override fun bindListener(listener: PictureListItemViewMvc.Listener) {
         removeButton.setOnClickListener { listener.onRemoveClicked() }
         rotateCwButton.setOnClickListener { listener.onCwClicked() }
         rotateCcwButton.setOnClickListener { listener.onCcwClicked() }
-        noteDialogButton.setOnClickListener { listener.onNoteDialogClicked() }
+        this.listener = listener
     }
 
     override fun bindPicture(pictureFile: File?) {
-        if (pictureFile == null || !pictureFile.exists()) {
-            pictureView.setImageResource(android.R.color.transparent)
-        } else {
-            BitmapHelper.loadBitmap(pictureFile.absolutePath, maxHeight, pictureView)
+        buttonsVisible = false
+        pictureView.setImageResource(android.R.color.transparent)
+        dstPictureFile = pictureFile
+        dstPictureFile?.let {
+            if (it.exists()) {
+                BitmapHelper.loadBitmap(it.absolutePath, loadedHeight, pictureView) {
+                    buttonsVisible = true
+                }
+            }
         }
     }
+
+    // endregion PictureListItemViewMvc
 
 }

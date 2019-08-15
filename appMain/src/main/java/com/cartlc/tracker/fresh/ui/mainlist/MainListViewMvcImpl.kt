@@ -28,14 +28,15 @@ class MainListViewMvcImpl(
         ProjectGroupListController.Listener,
         EquipmentSelectController.Listener,
         RadioListController.Listener,
-        NoteListEntryController.Listener {
+        NoteListEntryController.Listener,
+        CheckBoxListController.Listener {
 
     override val rootView: View = inflater.inflate(R.layout.frame_main_list, container, false) as ViewGroup
 
     private val mainList = findViewById<RecyclerView>(R.id.main_list)
     private val emptyView = findViewById<TextView>(R.id.empty)
     private val simpleListController = factoryAdapterController.allocSimpleListController(this)
-    private val simpleListAdapter = SimpleListAdapter(factoryViewMvc, R.layout.entry_item_simple, simpleListController)
+    private val simpleListAdapter = SimpleListAdapter(factoryViewMvc, R.layout.mainlist_item_simple, simpleListController)
     private val projectGroupController = factoryAdapterController.allocProjectGroupController(this)
     private val projectGroupAdapter = ProjectGroupListAdapter(factoryViewMvc, projectGroupController)
     private val equipmentSelectController = factoryAdapterController.allocEquipmentSelectController(this)
@@ -44,6 +45,8 @@ class MainListViewMvcImpl(
     private val radioAdapter = RadioListAdapter(factoryViewMvc, radioController)
     private val noteListEntryController = factoryAdapterController.allocNoteListEntryController(this)
     private val noteListEntryAdapter = NoteListEntryAdapter(factoryViewMvc, noteListEntryController)
+    private val checkBoxListController = factoryAdapterController.allocCheckBoxListController(this)
+    private val checkBoxListAdapter = CheckBoxListAdapter(factoryViewMvc, checkBoxListController)
 
     init {
         val linearLayoutManager = LinearLayoutManager(mainList.context)
@@ -86,6 +89,13 @@ class MainListViewMvcImpl(
             radioController.selectedText = value
         }
 
+    override var checkBoxItems: List<String>
+        get() = checkBoxListController.list
+        set(value) {
+            mainList.adapter = checkBoxListAdapter
+            checkBoxListController.list = value
+        }
+
     override var adapter: MainListViewMvc.Adapter
         get() = TODO("not implemented")
         set(value) {
@@ -96,6 +106,7 @@ class MainListViewMvcImpl(
                 MainListViewMvc.Adapter.EQUIPMENT -> equipmentSelectAdapter
                 MainListViewMvc.Adapter.RADIO -> radioAdapter
                 MainListViewMvc.Adapter.NOTE_ENTRY -> noteListEntryAdapter
+                MainListViewMvc.Adapter.CHECK_BOX -> checkBoxListAdapter
             }
             when (value) {
                 MainListViewMvc.Adapter.PROJECT -> projectGroupController.onProjectDataChanged()
@@ -174,6 +185,29 @@ class MainListViewMvcImpl(
     }
 
     // endregion RadioListController.Listener
+
+    // region CheckBoxListController.Listener
+
+    override fun onCheckBoxRefreshNeeded() {
+        checkBoxListAdapter.notifyDataSetChanged()
+    }
+
+    override fun onCheckBoxItemChanged(position: Int, item: String, isChecked: Boolean) {
+        for (listener in listeners) {
+            listener.onCheckBoxItemChanged(position, item, isChecked)
+        }
+    }
+
+    override fun isChecked(position: Int): Boolean {
+        for (listener in listeners) {
+            if (listener.isCheckBoxItemSelected(position)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    // endregion CheckBoxListController.Listener
 
     // region NoteListEntryController.Listener
 

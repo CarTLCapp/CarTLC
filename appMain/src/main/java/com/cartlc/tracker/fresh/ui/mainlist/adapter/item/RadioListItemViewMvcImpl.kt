@@ -1,3 +1,6 @@
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.fresh.ui.mainlist.adapter.item
 
 import android.view.LayoutInflater
@@ -11,7 +14,7 @@ class RadioListItemViewMvcImpl(
         container: ViewGroup?
 ) : ViewMvcImpl(), RadioListItemViewMvc {
 
-    override val rootView = inflater.inflate(R.layout.entry_item_radio, container, false)
+    override val rootView = inflater.inflate(R.layout.mainlist_item_radio, container, false)
 
     private val itemView = findViewById<RadioButton>(R.id.item)
 

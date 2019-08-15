@@ -10,13 +10,14 @@ import com.cartlc.tracker.fresh.model.flow.CurrentProjectFlow
 import com.cartlc.tracker.fresh.model.flow.Flow
 import com.cartlc.tracker.fresh.model.flow.FlowUseCase
 import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.ui.picture.PictureListViewMvcImpl
 
-class ConfirmController (
+class ConfirmFinalController (
         boundFrag: BoundFrag,
-        private val viewMvc: ConfirmViewMvc
-) : ConfirmUseCase,
+        private val viewMvc: ConfirmFinalViewMvc
+) : ConfirmFinalUseCase,
         LifecycleObserver,
-        ConfirmViewMvc.Listener,
+        ConfirmFinalViewMvc.Listener,
         FlowUseCase.Listener {
 
     private val ctx = boundFrag.act
@@ -24,6 +25,8 @@ class ConfirmController (
     private val componentRoot = boundFrag.componentRoot
     private val prefHelper = componentRoot.prefHelper
     private var curEntry: DataEntry? = null
+    // TODO: Would like a more universal way of handling this (see other references)
+    private val thumbnailHeight = boundFrag.act.resources.getDimension(R.dimen.image_thumbnail_max_height).toInt()
 
     init {
         boundFrag.bindObserver(this)
@@ -72,7 +75,7 @@ class ConfirmController (
         } else {
             viewMvc.projectAddress = address
         }
-        viewMvc.notes = entry.notesWithValuesOnly
+        viewMvc.notes = entry.notesWithValues
         val truck = entry.truck
         if (truck == null) {
             viewMvc.truckNumber = null
@@ -83,6 +86,7 @@ class ConfirmController (
         viewMvc.pictures = entry.pictures.toMutableList()
         viewMvc.status = entry.getStatus(ctx)
         viewMvc.pictureLabel = ctx.getString(R.string.title_pictures_, entry.pictures.size)
+        viewMvc.pictureListHeight = thumbnailHeight * (viewMvc.pictures.size / PictureListViewMvcImpl.NUM_COLUMNS + 1)
     }
 
     override fun onConfirmOkay() {

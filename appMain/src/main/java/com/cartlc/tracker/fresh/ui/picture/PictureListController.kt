@@ -5,13 +5,19 @@ package com.cartlc.tracker.fresh.ui.picture
 
 import android.os.Handler
 import android.os.Message
+import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
+import com.cartlc.tracker.fresh.model.core.sql.SqlTableNote
+import com.cartlc.tracker.fresh.model.core.table.TableNote
+import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 import com.cartlc.tracker.fresh.ui.picture.item.PictureListItemViewMvc
 import com.cartlc.tracker.fresh.ui.picture.item.PictureListThumbnailItemViewMvc
 import com.cartlc.tracker.fresh.model.msg.StringMessage
+import com.cartlc.tracker.fresh.ui.picture.item.PictureNoteItemViewMvc
+import com.cartlc.tracker.fresh.ui.picture.item.PictureNoteThumbnailItemViewMvc
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.HashMap
@@ -21,7 +27,8 @@ class PictureListController(
         private val viewMvc: PictureListViewMvc
 ) : BaseObservableImpl<PictureListUseCase.Listener>(),
         PictureListViewMvc.Listener,
-        PictureListUseCase {
+        PictureListUseCase,
+        PictureNoteItemViewMvc.Listener {
 
     companion object {
         private const val MSG_REMOVE_ITEM = 1
@@ -43,10 +50,10 @@ class PictureListController(
     }
 
     private val messageHandler = boundAct.componentRoot.messageHandler
-    private val dialogNavigator = boundAct.dialogNavigator
     private var handler = MyHandler(this)
     private var rotationMap: HashMap<String, Int> = HashMap()
-    private var items: MutableList<DataPicture> = mutableListOf()
+    private var pictures: MutableList<DataPicture> = mutableListOf()
+    private val repo = boundAct.repo
 
     init {
         viewMvc.listener = this
@@ -54,12 +61,19 @@ class PictureListController(
 
     // region PictureListUseCase
 
+    private var notes = listOf<DataNote>()
+
     override var pictureItems: List<DataPicture>
-        get() {
-            return items
-        }
+        get() = pictures
         set(value) {
-            items = value.toMutableList()
+            pictures = value.toMutableList()
+            viewMvc.onPictureRefreshNeeded()
+        }
+
+    override var pictureNotes: List<DataNote>
+        get() = notes
+        set(value) {
+            notes = value
             viewMvc.onPictureRefreshNeeded()
         }
 
@@ -68,7 +82,7 @@ class PictureListController(
     override val commonRotation: Int
         get() {
             var commonRotation = 0
-            for (picture in items) {
+            for (picture in pictures) {
                 val path = picture.unscaledFile.absolutePath
                 if (!rotationMap.containsKey(path)) {
                     return 0
@@ -97,17 +111,41 @@ class PictureListController(
         viewMvc.onPictureRefreshNeeded()
     }
 
+    override val notesReady: Boolean
+        get() {
+            for (note in notes) {
+                if (note.value.isNullOrBlank()) {
+                    return false
+                }
+            }
+            return true
+        }
+
     // endregion PicturListUseCase
 
     // region PictureListAdapter.Listener
 
-    override val itemCount: Int
-        get() = items.size
+    override val pictureCount: Int
+        get() = pictures.size
+
+    override val noteCount: Int
+        get() = notes.size
 
     override fun onBindViewHolder(itemViewMvc: ViewMvc, position: Int) {
+        if (itemViewMvc is PictureListThumbnailItemViewMvc) {
+            onBindPictureViewHolder(itemViewMvc, position)
+        } else if (itemViewMvc is PictureNoteThumbnailItemViewMvc) {
+            val note = notes[position]
+            itemViewMvc.noteLabel = note.name
+            itemViewMvc.noteValue = note.value
+        } else if (itemViewMvc is PictureNoteItemViewMvc) {
+            itemViewMvc.bind(notes[position], this)
+        }
+    }
+
+    private fun onBindPictureViewHolder(itemViewMvc: PictureListThumbnailItemViewMvc, position: Int) {
         val itemViewMvcRegular = itemViewMvc as? PictureListItemViewMvc
-        val itemViewMvcThumbnail = itemViewMvc as PictureListThumbnailItemViewMvc
-        val item = items[position]
+        val item = pictures[position]
         val pictureFile: File?
         when {
             item.existsUnscaled -> pictureFile = item.unscaledFile
@@ -124,14 +162,9 @@ class PictureListController(
             itemViewMvc.loading = messageHandler.getString(StringMessage.error_picture_removed)
         } else {
             itemViewMvc.loading = null
-            itemViewMvcRegular?.bind(object : PictureListItemViewMvc.Listener {
+            itemViewMvcRegular?.bindListener(object : PictureListItemViewMvc.Listener {
                 override fun onRemoveClicked() {
-                    item.remove()
-                    items.remove(item)
-                    viewMvc.onPictureRefreshNeeded()
-                    for (listener in listeners) {
-                        listener.onPictureRemoveDone(items.size)
-                    }
+                    itemRemove(item)
                 }
 
                 override fun onCwClicked() {
@@ -143,26 +176,39 @@ class PictureListController(
                     incRotation(item, item.rotateCCW())
                     viewMvc.onPictureRefreshNeeded()
                 }
-
-                override fun onNoteDialogClicked() {
-                    dialogNavigator.showPictureNoteDialog(item) {
-                        viewMvc.onPictureRefreshNeeded()
-                        for (listener in listeners) {
-                            listener.onPictureNoteAdded(item)
-                        }
-                    }
-                }
             })
-            itemViewMvc.note = item.note
         }
     }
 
     // endregion PictureListAdapter.Listener
 
+    // region PictureListItemNoteViewMvc.Listener
+
+    override fun onNoteValueChanged(note: DataNote) {
+        repo.db.tableNote.updateValue(note)
+        for (listener in listeners) {
+            listener.onPictureNoteChanged(note)
+        }
+    }
+
+    override fun getHint(note: DataNote): String? {
+        return when (note.name) {
+            TableNote.NOTE_TRUCK_DAMAGE_NAME -> messageHandler.getString(StringMessage.truck_damage_hint)
+            TableNote.NOTE_TRUCK_NUMBER_NAME -> messageHandler.getString(StringMessage.truck_number_hint)
+            else -> null
+        }
+    }
+
+    // endregion PictureListItemNoteViewMvc.Listener
+
     private fun itemRemove(item: DataPicture) {
         item.remove()
-        items.remove(item)
+        pictures.remove(item)
         viewMvc.onPictureRefreshNeeded()
+        repo.db.tablePicture.removeFileDoesNotExist(listOf(item))
+        for (listener in listeners) {
+            listener.onPictureRemoveDone(pictures.size)
+        }
     }
 
     private fun incRotation(item: DataPicture, degrees: Int) {

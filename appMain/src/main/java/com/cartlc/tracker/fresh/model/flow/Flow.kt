@@ -42,13 +42,12 @@ open class Flow(
             return flow
         }
 
-        fun from(ord: Int): Flow = checkNull(from(Stage.from(ord)))
+//        fun from(ord: Int): Flow = checkNull(from(Stage.from(ord, 0)))
 
         fun from(stage: Stage?): Flow? =
                 when (stage) {
                     Stage.LOGIN -> LoginFlow()
                     Stage.ROOT_PROJECT -> RootProjectFlow()
-                    Stage.SUB_PROJECT -> SubProjectFlow()
                     Stage.COMPANY -> CompanyFlow()
                     Stage.ADD_COMPANY -> AddCompanyFlow()
                     Stage.STATE -> StateFlow()
@@ -59,14 +58,13 @@ open class Flow(
                     Stage.ADD_STREET -> AddStreetFlow()
                     Stage.CONFIRM_ADDRESS -> ConfirmAddressFlow()
                     Stage.CURRENT_PROJECT -> CurrentProjectFlow()
-                    Stage.TRUCK -> TruckFlow()
+                    Stage.SUB_PROJECT -> SubProjectFlow()
+                    Stage.TRUCK_NUMBER_PICTURE -> TruckNumberPictureFlow()
+                    Stage.TRUCK_DAMAGE_PICTURE -> TruckDamagePictureFlow()
                     Stage.EQUIPMENT -> EquipmentFlow()
                     Stage.ADD_EQUIPMENT -> AddEquipmentFlow()
-                    Stage.NOTES -> NotesFlow()
+                    is Stage.CUSTOM_FLOW -> CustomFlow(stage.flowElementId)
                     Stage.STATUS -> StatusFlow()
-                    Stage.PICTURE_1 -> Picture1Flow()
-                    Stage.PICTURE_2 -> Picture2Flow()
-                    Stage.PICTURE_3 -> Picture3Flow()
                     Stage.CONFIRM -> ConfirmFlow()
                     else -> null
                 }
@@ -137,16 +135,6 @@ open class Flow(
         get() = (center as? ActionArg)?.action
 }
 
-
-open class PictureFlow(
-        stage: Stage,
-        prev: Stage,
-        next: Stage,
-        val expected: Int
-) : Flow(stage, StageArg(prev), ActionArg(Action.ADD_PICTURE), StageArg(next)) {
-    override val isPictureStage = true
-}
-
 class LoginFlow : Flow(Stage.LOGIN)
 class RootProjectFlow : Flow(Stage.ROOT_PROJECT, Stage.CURRENT_PROJECT, null, Stage.COMPANY)
 class CompanyFlow : Flow(Stage.COMPANY, Stage.ROOT_PROJECT, null, Stage.STATE)
@@ -161,13 +149,11 @@ class ConfirmAddressFlow : Flow(Stage.CONFIRM_ADDRESS, Stage.STREET, null, Stage
 
 class CurrentProjectFlow : Flow(Stage.CURRENT_PROJECT, Action.VIEW_PROJECT, Action.NEW_PROJECT, null)
 
-class SubProjectFlow : Flow(Stage.SUB_PROJECT, Stage.CURRENT_PROJECT, null, Stage.TRUCK)
-class TruckFlow : Flow(Stage.TRUCK, Stage.SUB_PROJECT, null, Stage.PICTURE_1)
-class Picture1Flow : PictureFlow(Stage.PICTURE_1, Stage.TRUCK, Stage.EQUIPMENT, 1)
-class EquipmentFlow : Flow(Stage.EQUIPMENT, Stage.PICTURE_1, Stage.ADD_EQUIPMENT, Stage.NOTES)
-class AddEquipmentFlow : Flow(Stage.ADD_EQUIPMENT, Stage.PICTURE_1, null, Stage.NOTES)
-class NotesFlow : Flow(Stage.NOTES, Stage.EQUIPMENT, null, Stage.PICTURE_2)
-class Picture2Flow : PictureFlow(Stage.PICTURE_2, Stage.NOTES, Stage.STATUS, 2)
-class StatusFlow : Flow(Stage.STATUS, Stage.PICTURE_2, null, Stage.PICTURE_3)
-class Picture3Flow : PictureFlow(Stage.PICTURE_3, Stage.STATUS, Stage.CONFIRM, 3)
-class ConfirmFlow : Flow(Stage.CONFIRM, Stage.PICTURE_3, null, Stage.CURRENT_PROJECT)
+class SubProjectFlow : Flow(Stage.SUB_PROJECT, Stage.CURRENT_PROJECT, null, Stage.TRUCK_NUMBER_PICTURE)
+class TruckNumberPictureFlow : Flow(Stage.TRUCK_NUMBER_PICTURE, Stage.SUB_PROJECT, null, Stage.TRUCK_DAMAGE_PICTURE)
+class TruckDamagePictureFlow : Flow(Stage.TRUCK_DAMAGE_PICTURE, Stage.TRUCK_NUMBER_PICTURE, null, Stage.EQUIPMENT)
+class EquipmentFlow : Flow(Stage.EQUIPMENT, Stage.TRUCK_DAMAGE_PICTURE, Stage.ADD_EQUIPMENT, Stage.CUSTOM_FLOW(Stage.FIRST_ELEMENT))
+class AddEquipmentFlow : Flow(Stage.ADD_EQUIPMENT, Stage.TRUCK_DAMAGE_PICTURE, null, Stage.CUSTOM_FLOW(Stage.FIRST_ELEMENT))
+class CustomFlow(flowId: Long) : Flow(Stage.CUSTOM_FLOW(flowId), Stage.EQUIPMENT, null, Stage.STATUS)
+class StatusFlow : Flow(Stage.STATUS, Stage.CUSTOM_FLOW(Stage.LAST_ELEMENT), null, Stage.CONFIRM)
+class ConfirmFlow : Flow(Stage.CONFIRM, Stage.STATUS, null, Stage.CURRENT_PROJECT)

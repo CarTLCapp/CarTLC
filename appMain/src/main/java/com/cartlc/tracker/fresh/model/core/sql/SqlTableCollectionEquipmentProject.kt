@@ -43,5 +43,7 @@ class SqlTableCollectionEquipmentProject(
         }
     }
 
-
+    override fun hasEquipment(projectNameId: Long): Boolean {
+        return countCollection(projectNameId) > 0
+    }
 }

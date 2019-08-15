@@ -3,9 +3,10 @@ package com.cartlc.tracker.fresh.model.core.table
 import com.cartlc.tracker.fresh.model.core.data.DataAddress
 
 interface TableAddress {
+    val count: Int
+
     fun add(list: List<DataAddress>)
     fun add(address: DataAddress): Long
-    fun count(): Int
     fun isLocalCompanyOnly(company: String?): Boolean
     fun query(): List<DataAddress>
     fun query(id: Long): DataAddress?

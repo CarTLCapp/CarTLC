@@ -5,10 +5,12 @@ package com.cartlc.tracker.fresh.ui.app.factory
 
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.*
 import com.cartlc.tracker.fresh.model.CarRepository
+import com.cartlc.tracker.fresh.model.misc.NotesHelper
 import com.cartlc.tracker.fresh.model.msg.MessageHandler
 
 class FactoryAdapterController(
         val repo: CarRepository,
+        val notesHelper: NotesHelper,
         val messageHandler: MessageHandler
 ) {
     fun allocSimpleListController(listener: SimpleListController.Listener): SimpleListController {
@@ -28,7 +30,11 @@ class FactoryAdapterController(
     }
 
     fun allocNoteListEntryController(listener: NoteListEntryController.Listener): NoteListEntryController {
-        return NoteListEntryController(repo, listener)
+        return NoteListEntryController(repo, notesHelper, listener)
+    }
+
+    fun allocCheckBoxListController(listener: CheckBoxListController.Listener): CheckBoxListController {
+        return CheckBoxListController(listener)
     }
 
 }

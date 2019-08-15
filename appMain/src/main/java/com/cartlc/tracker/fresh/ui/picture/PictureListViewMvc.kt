@@ -7,7 +7,12 @@ import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 
 interface PictureListViewMvc : ViewMvc {
 
-    interface Listener : PictureListAdapter.Listener
+    interface Listener {
+        val isThumbnail: Boolean
+        val pictureCount: Int
+        fun onBindViewHolder(itemViewMvc: ViewMvc, position: Int)
+        val noteCount: Int
+    }
 
     var listener: Listener?
 

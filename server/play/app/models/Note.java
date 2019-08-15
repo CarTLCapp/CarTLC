@@ -12,6 +12,7 @@ import com.avaje.ebean.Model;
 import play.data.format.*;
 import play.data.validation.*;
 import play.data.Form;
+import play.db.ebean.Transactional;
 
 import com.avaje.ebean.*;
 
@@ -84,6 +85,44 @@ public class Note extends Model implements Comparable<Note> {
 
     @Constraints.Required
     public short num_digits;
+
+    /**
+     * General purpose notes
+     */
+
+    public static final String NOTE_TRUCK_NUMBER_NAME = "Truck Number";
+    public static final String NOTE_TRUCK_DAMAGE_NAME = "Truck Damage";
+
+    @Transactional
+    public static void initGeneralPurpose() {
+        final boolean hasNumber = hasNoteWithName(NOTE_TRUCK_NUMBER_NAME);
+        final boolean hasDamage = hasNoteWithName(NOTE_TRUCK_DAMAGE_NAME);
+        if (!hasNumber || !hasDamage) {
+            final int client_id = Client.getAdmin().id.intValue();
+            if (!hasNumber) {
+                Note note = new Note();
+                note.created_by = client_id;
+                note.created_by_client = false;
+                note.disabled = false;
+                note.name = NOTE_TRUCK_NUMBER_NAME;
+                note.type = Type.ALPHANUMERIC;
+                note.save();
+                Logger.info("ADDED " + note.name);
+            }
+            if (!hasDamage) {
+                Note note = new Note();
+                note.created_by = client_id;
+                note.created_by_client = false;
+                note.disabled = false;
+                note.name = NOTE_TRUCK_DAMAGE_NAME;
+                note.type = Type.TEXT;
+                note.save();
+                Logger.info("ADDED " + note.name);
+            }
+            Version.inc(Version.VERSION_NOTE);
+        }
+    }
+
     /**
      * Generic query helper for entity Computer with id Long
      */
@@ -196,6 +235,12 @@ public class Note extends Model implements Comparable<Note> {
         return find.where()
                 .eq("name", name)
                 .ne("id", ignoreId)
+                .findRowCount() > 0;
+    }
+
+    public static boolean hasNoteWithName(String name) {
+        return find.where()
+                .eq("name", name)
                 .findRowCount() > 0;
     }
 

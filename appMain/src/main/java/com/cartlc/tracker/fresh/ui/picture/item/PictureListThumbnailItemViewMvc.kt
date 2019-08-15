@@ -9,7 +9,6 @@ import java.io.File
 interface PictureListThumbnailItemViewMvc: ViewMvc {
 
     var loading: String?
-    var note: String?
 
     fun bindPicture(pictureFile: File?)
 

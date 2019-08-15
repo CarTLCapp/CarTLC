@@ -14,7 +14,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
-import com.cartlc.tracker.ui.act.ListEntryActivity
+import com.cartlc.tracker.ui.act.ListProjectEntriesActivity
 import com.cartlc.tracker.ui.act.VehicleActivity
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.ui.util.CheckError
@@ -50,24 +50,34 @@ class ScreenNavigator(
         CheckError.instance.showTruckError(act, entry, callback)
     }
 
-    fun showPictureToast(pictureCount: Int) {
-        val msgId = when {
-            pictureCount <= 0 -> R.string.picture_help_1
-            pictureCount <= 1 -> R.string.picture_help_2
-            pictureCount <= 2 -> R.string.picture_help_3
-            else -> return
-        }
-        val toast = Toast.makeText(act, msgId, Toast.LENGTH_LONG)
+//    fun showPictureToast(pictureCount: Int) {
+//        val msgId = when {
+//            pictureCount <= 0 -> R.string.picture_help_1
+//            pictureCount <= 1 -> R.string.picture_help_2
+//            pictureCount <= 2 -> R.string.picture_help_3
+//            else -> return
+//        }
+//        val toast = Toast.makeText(act, msgId, Toast.LENGTH_LONG)
+//        val top = toast.view as ViewGroup
+//        val view = top.getChildAt(0)
+//        if (view is TextView) {
+//            view.textSize = act.resources.getDimension(R.dimen.picture_toast_size)
+//        }
+//        toast.show()
+//    }
+
+    fun showToast(msg: String) {
+        val toast = Toast.makeText(act, msg, Toast.LENGTH_LONG)
         val top = toast.view as ViewGroup
         val view = top.getChildAt(0)
         if (view is TextView) {
-            view.textSize = act.resources.getDimension(R.dimen.picture_toast_size)
+            view.textSize = act.resources.getDimension(R.dimen.toast_size)
         }
         toast.show()
     }
 
     fun showViewProjectActivity(requestCode: Int) {
-        val intent = Intent(act, ListEntryActivity::class.java)
+        val intent = Intent(act, ListProjectEntriesActivity::class.java)
         act.startActivityForResult(intent, requestCode)
     }
 

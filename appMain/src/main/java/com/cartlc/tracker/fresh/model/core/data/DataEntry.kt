@@ -27,7 +27,7 @@ class DataEntry(private val db: DatabaseTable) {
     var date: Long = 0
     var projectAddressCombo: DataProjectAddressCombo? = null
     var equipmentCollection: DataCollectionEquipmentEntry? = null
-    var pictureCollection: DataPictureCollection? = null
+    var pictures: List<DataPicture> = emptyList()
     var noteCollectionId: Long = 0
     var truckId: Long = 0
     var status: TruckStatus? = null
@@ -46,6 +46,14 @@ class DataEntry(private val db: DatabaseTable) {
     val project: DataProject?
         get() = projectAddressCombo?.project
 
+    val pictureCollectionId: Long
+        get() {
+            if (pictures.isNotEmpty()) {
+                return pictures[0].collectionId ?: 0
+            }
+            return 0
+        }
+
     val address: DataAddress?
         get() = projectAddressCombo?.address
 
@@ -61,43 +69,42 @@ class DataEntry(private val db: DatabaseTable) {
             return address?.line ?: "Invalid"
         }
 
-    // Return all the notes, with values overlaid.
-    // Place these values into SqlTableNote as well so they are persisted forward.
-    // These are all the notes.
-    // Get value overrides
-    // Add to result notes without values.
-    val notesAllWithValuesOverlaid: List<DataNote>
-        get() {
-            val allNotes = notesByProject
-            val valueNotes = notesWithValuesOnly
-            val result = ArrayList<DataNote>()
-            for (note in allNotes) {
-                val valueNote = getNoteFrom(valueNotes, note)
-                if (valueNote != null) {
-                    db.tableNote.update(valueNote)
-                    result.add(valueNote)
-                } else {
-                    result.add(note)
-                }
+    /**
+     * Overlay the current value for each of the incoming notes and then store that note back into the TableNote table.
+     *  The current value is fetched from the TableCollectionNoteEntry table.
+     *  It will then be stored into the TableNote table.
+     */
+    fun overlayNoteValues(incoming: List<DataNote>): List<DataNote> {
+        val valueNotes = notesWithValues
+        val result = ArrayList<DataNote>()
+        for (note in incoming) {
+            val valueNote = getNoteFrom(valueNotes, note)
+            if (valueNote != null) {
+                db.tableNote.update(valueNote)
+                result.add(valueNote)
+            } else {
+                result.add(note)
             }
-            return result
         }
+        return result
+    }
 
     // Get all the notes as indicated by the project.
     // This will also include any current edits in place as well.
     private val notesByProject: List<DataNote>
         get() = db.tableCollectionNoteProject.getNotes(projectAddressCombo!!.projectNameId)
 
-    // Return only the notes with values.
-    val notesWithValuesOnly: List<DataNote>
+    // Return the notes for the collection along with their values.
+    // TODO: This should only be done if the value is > 0?
+    val notesWithValues: List<DataNote>
         get() = db.tableCollectionNoteEntry.query(noteCollectionId)
 
     val notesLine: String
         get() {
             val sbuf = StringBuilder()
-            for (note in notesWithValuesOnly) {
+            for (note in notesWithValues) {
                 if (!note.value.isNullOrBlank()) {
-                    if (sbuf.length > 0) {
+                    if (sbuf.isNotEmpty()) {
                         sbuf.append(", ")
                     }
                     sbuf.append(note.value)
@@ -116,9 +123,6 @@ class DataEntry(private val db: DatabaseTable) {
             equipmentCollection!!.equipment
         } else null
 
-    val pictures: List<DataPicture>
-        get() = pictureCollection!!.pictures
-
     val truck: DataTruck?
         get() = db.tableTruck.query(truckId)
 
@@ -128,7 +132,7 @@ class DataEntry(private val db: DatabaseTable) {
         } else TruckStatus.UNKNOWN.getString(ctx)
     }
 
-    internal fun getNoteFrom(list: List<DataNote>, check: DataNote): DataNote? {
+    private fun getNoteFrom(list: List<DataNote>, check: DataNote): DataNote? {
         for (note in list) {
             if (note.id == check.id) {
                 return note
@@ -147,7 +151,7 @@ class DataEntry(private val db: DatabaseTable) {
     }
 
     fun checkPictureUploadComplete(): Boolean {
-        for (item in pictureCollection!!.pictures) {
+        for (item in pictures) {
             if (!item.uploaded) {
                 return false
             }
@@ -190,7 +194,7 @@ class DataEntry(private val db: DatabaseTable) {
             sbuf.append(equipmentCollection!!.toString())
         }
         sbuf.append("\nNOTES=[")
-        for (note in notesWithValuesOnly) {
+        for (note in notesWithValues) {
             sbuf.append("[")
             sbuf.append(note.toString())
             sbuf.append("] ")

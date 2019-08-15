@@ -1,3 +1,6 @@
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.fresh.ui.main.process
 
 import android.text.InputType
@@ -78,7 +81,6 @@ class StageStreet(
     }
 
     private fun autoNarrowStreets(streets: MutableList<String>) {
-
         with(shared) {
             if (!isAutoNarrowOkay) {
                 return
@@ -96,4 +98,10 @@ class StageStreet(
         }
     }
 
+    fun saveAdd(): Boolean {
+        with (shared) {
+            prefHelper.street = entrySimpleUseCase.entryTextValue ?: ""
+            return prefHelper.street?.isNotBlank() ?: false
+        }
+    }
 }

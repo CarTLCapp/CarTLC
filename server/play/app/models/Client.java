@@ -22,6 +22,9 @@ public class Client extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String NAME_ADMIN = "admin";
+    private static final String NAME_GUEST = "guest";
+
     @Id
     public Long id;
 
@@ -116,8 +119,12 @@ public class Client extends com.avaje.ebean.Model {
     }
 
     public static void initClient() {
-        Client.addClient("admin", "admintlc", true);
-        Client.addClient("guest", "tlc", false);
+        Client.addClient(NAME_ADMIN, "admintlc", true);
+        Client.addClient(NAME_GUEST, "tlc", false);
+    }
+
+    public static Client getAdmin() {
+        return getUser(NAME_ADMIN);
     }
 
     public String getProjectsLine() {

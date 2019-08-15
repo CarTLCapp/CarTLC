@@ -1,8 +1,9 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.data
 
+import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 
 import java.io.File
@@ -10,18 +11,22 @@ import java.io.File
 /**
  * Created by dug on 5/16/17.
  */
-
 class DataPicture(
-        _id: Long = 0,
+        private val _id: Long = 0,
         val unscaledFilename: String,
-        _scaledFilename: String? = null,
-        _note: String? = null,
-        _uploaded: Boolean = false
+        val collectionId: Long? = null,
+        val stage: Stage,
+        private val _scaledFilename: String? = null,
+        private val _uploaded: Boolean = false
 ) {
 
-    companion object {
-        internal val MAX_NOTE_LENGTH = 1000
-    }
+    constructor(other: DataPicture, collectionId: Long) :
+            this(other._id,
+                    other.unscaledFilename,
+                    collectionId,
+                    other.stage,
+                    other._scaledFilename,
+                    other._uploaded)
 
     var id: Long = _id
 
@@ -31,19 +36,6 @@ class DataPicture(
                 field = BitmapHelper.createScaledFilename(unscaledFilename)
             }
             return field
-        }
-
-    var note: String? = _note
-        set(value) {
-            field = if (value == null) {
-                value
-            } else {
-                if (value.length > MAX_NOTE_LENGTH) {
-                    value.substring(0, MAX_NOTE_LENGTH)
-                } else {
-                    value
-                }
-            }
         }
 
     var uploaded: Boolean = _uploaded
@@ -91,14 +83,14 @@ class DataPicture(
         val sbuf = StringBuilder()
         sbuf.append(id)
         sbuf.append(", ")
+        sbuf.append(collectionId)
+        sbuf.append(", stage=")
+        sbuf.append(stage.toString())
+        sbuf.append(", ")
         sbuf.append(unscaledFilename)
         if (scaledFilename != null) {
             sbuf.append(", ")
             sbuf.append(scaledFilename)
-        }
-        if (!note.isNullOrEmpty()) {
-            sbuf.append(", note=")
-            sbuf.append(note)
         }
         if (uploaded) {
             sbuf.append(", UPLOADED")

@@ -11,10 +11,12 @@ import com.cartlc.tracker.fresh.model.CarRepository
 import com.cartlc.tracker.fresh.model.flow.Flow
 import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.model.misc.EntryHint
+import com.cartlc.tracker.fresh.model.misc.NotesHelper
 import java.util.ArrayList
 
 class NoteListEntryController(
         private val repo: CarRepository,
+        private val notesHelper: NotesHelper,
         private val listener: Listener
 ) : NoteListEntryAdapter.Listener,
         NoteListEntryUseCase {
@@ -27,16 +29,15 @@ class NoteListEntryController(
     private val prefHelper = repo.prefHelper
     private val currentEditEntry: DataEntry?
         get() = prefHelper.currentEditEntry
-    private val currentProjectGroup: DataProjectAddressCombo?
-        get() = prefHelper.currentProjectGroup
 
     private var currentFocus: DataNote? = null
 
-    private val curFlowValue: Flow
-        get() = repo.curFlowValue
-
     private val isInNotes: Boolean
-        get() = curFlowValue.stage == Stage.NOTES
+        get() {
+            return repo.currentFlowElementId?.let { elementId ->
+                repo.db.tableFlowElementNote.hasNotes(elementId)
+            } ?: false
+        }
 
     private var items: MutableList<DataNote> = mutableListOf()
 
@@ -105,21 +106,19 @@ class NoteListEntryController(
         if (!isInNotes) {
             return
         }
-        val entryHint: EntryHint
-
-        if (note.numDigits > 0) {
+        val entryHint = if (note.numDigits > 0) {
             if (note.value != null && note.value!!.isNotBlank()) {
                 val sbuf = StringBuilder()
                 val count = note.value!!.length
                 sbuf.append(count)
                 sbuf.append("/")
                 sbuf.append(note.numDigits.toInt())
-                entryHint = EntryHint(sbuf.toString(), (count > note.numDigits))
+                EntryHint(sbuf.toString(), (count > note.numDigits))
             } else {
-                entryHint = EntryHint("", false)
+                EntryHint("", false)
             }
         } else {
-            entryHint = EntryHint("", false)
+            EntryHint("", false)
         }
         listener.onEntryHintChanged(entryHint)
     }
@@ -139,32 +138,13 @@ class NoteListEntryController(
         get() = items
 
     override fun onNoteDataChanged() {
-        items = currentEditEntry?.let {
-            it.notesAllWithValuesOverlaid.toMutableList()
-        } ?: run {
-            queryNotes().toMutableList()
-        }
-        pushToBottom("Other")
+        items = currentEditEntry?.overlayNoteValues(queryNotes())?.toMutableList()
+                ?: queryNotes().toMutableList()
         listener.onNotesChanged(items)
     }
 
-    private fun queryNotes(): List<DataNote> =
-            currentProjectGroup?.let { repo.db.tableCollectionNoteProject.getNotes(it.projectNameId) }
-                    ?: emptyList()
-
-    private fun pushToBottom(name: String) {
-        val others = ArrayList<DataNote>()
-        for (item in items) {
-            if (item.name.startsWith(name)) {
-                others.add(item)
-                break
-            }
-        }
-        for (item in others) {
-            items.remove(item)
-            items.add(item)
-        }
-    }
+    // TODO: Perhaps if this is an existing value (see DataEntry.notesWithValues), then overlay those values
+    private fun queryNotes(): List<DataNote> = notesHelper.notesFromCurrentFlowElementId
 
     // endregion NoteListEntryUseCase
 }

@@ -18,12 +18,13 @@ class PictureListThumbnailItemViewMvcImpl(
         container: ViewGroup?
 ) : ViewMvcImpl(), PictureListThumbnailItemViewMvc {
 
-    override val rootView = inflater.inflate(R.layout.entry_item_picture_thumbnail, container, false)
+    override val rootView: View = inflater.inflate(R.layout.picture_list_item_thumbnail, container, false)
 
     private val pictureView = findViewById<ImageView>(R.id.picture)
     private val loadingView = findViewById<TextView>(R.id.loading)
-    private val noteView = findViewById<TextView>(R.id.note)
-    private val maxHeight = context.resources.getDimension(R.dimen.image_thumbnail_max_height).toInt()
+    private val loadedHeight = context.resources.getDimension(R.dimen.image_thumbnail_max_height).toInt()
+
+    // region PictureListThumbnailItemViewMvc
 
     override var loading: String?
         get() = loadingView.text.toString()
@@ -32,19 +33,13 @@ class PictureListThumbnailItemViewMvcImpl(
             loadingView.visibility = if (value == null) View.GONE else View.VISIBLE
         }
 
-    override var note: String?
-        get() = noteView.text.toString()
-        set(value) {
-            noteView.text = value
-            noteView.visibility = if (value == null || value.isEmpty()) View.INVISIBLE else View.VISIBLE
-        }
-
     override fun bindPicture(pictureFile: File?) {
         if (pictureFile == null || !pictureFile.exists()) {
             pictureView.setImageResource(android.R.color.transparent)
         } else {
-            BitmapHelper.loadBitmap(pictureFile.absolutePath, maxHeight, pictureView)
+            BitmapHelper.loadBitmap(pictureFile.absolutePath, loadedHeight, pictureView)
         }
     }
 
+    // endregion PictureListThumbnailItemViewMvc
 }

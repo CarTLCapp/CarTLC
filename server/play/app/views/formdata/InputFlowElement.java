@@ -23,7 +23,6 @@ public class InputFlowElement extends Model {
     public String type;
     public String numImages;
     public boolean hasPrompt;
-    public boolean hasGenericNote;
 
     public InputFlowElement() {
     }
@@ -34,7 +33,6 @@ public class InputFlowElement extends Model {
 
     public InputFlowElement(FlowElement flowElement) {
         hasPrompt = flowElement.hasPrompt();
-        hasGenericNote = flowElement.generic_note;
         prompt = flowElement.prompt;
         type = String.valueOf(flowElement.getPromptType().getCodeString());
         numImages = Integer.toString(flowElement.request_image);

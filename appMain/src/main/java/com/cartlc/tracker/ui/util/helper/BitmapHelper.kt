@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.ui.util.helper
 
@@ -112,10 +112,11 @@ object BitmapHelper {
 
     private class LoadTask(
         imageView: ImageView,
-        private val dstHeight: Int
+        private val dstHeight: Int,
+        private val done: () -> Unit
     ) : AsyncTask<String, String, Bitmap>() {
 
-        val ref = WeakReference<ImageView>(imageView)
+        val ref = WeakReference(imageView)
 
         override fun onPreExecute() {
             ref.get()?.setImageResource(R.drawable.loading)
@@ -127,12 +128,12 @@ object BitmapHelper {
 
         override fun onPostExecute(result: Bitmap) {
             ref.get()?.setImageBitmap(result)
+            done()
         }
     }
 
-    fun loadBitmap(pathname: String, dstHeight: Int, imageView: ImageView) {
-        LoadTask(imageView, dstHeight).execute(pathname)
+    fun loadBitmap(pathname: String, dstHeight: Int, imageView: ImageView, done: () -> Unit = {}) {
+        LoadTask(imageView, dstHeight, done).execute(pathname)
     }
-
 
 }

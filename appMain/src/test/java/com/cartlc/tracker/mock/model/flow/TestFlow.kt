@@ -28,7 +28,6 @@ class TestFlow {
 
     @Test
     fun `verify next,prev,center buttons`() {
-
         for (stage in Stage.values()) {
             val flow = Flow.from(stage)
             if (flow != null) {

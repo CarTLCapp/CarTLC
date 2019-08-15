@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.sql
 
@@ -7,8 +7,6 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
-import com.cartlc.tracker.fresh.model.core.data.DataTruck
-
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
@@ -47,129 +45,13 @@ class SqlTableEntry(
     }
 
     data class Count(
-        var totalEntries: Int = 0,
-        var totalUploadedAws: Int = 0,
-        var totalUploadedMaster: Int = 0
+            var totalEntries: Int = 0,
+            var totalUploadedAws: Int = 0,
+            var totalUploadedMaster: Int = 0
     ) {
         fun uploadedAll(): Boolean {
             return totalUploadedAws >= totalEntries && totalUploadedMaster >= totalEntries
         }
-    }
-
-    fun upgrade3() {
-        val TABLE_NAME2 = TABLE_NAME + "_v2"
-        val KEY_TRUCK_NUMBER = "truck_number"
-        val KEY_LICENSE_PLATE = "license_plate"
-        try {
-            dbSql.execSQL("ALTER TABLE $TABLE_NAME RENAME TO $TABLE_NAME2")
-            create()
-            val cursor = dbSql.query(TABLE_NAME2, null, null, null, null, null, null, null)
-            val idxRow = cursor.getColumnIndex(KEY_ROWID)
-            val idxProjectAddressCombo = cursor.getColumnIndex(KEY_PROJECT_ADDRESS_COMBO_ID)
-            val idxDate = cursor.getColumnIndex(KEY_DATE)
-            val idxEquipmentCollectionId = cursor.getColumnIndex(KEY_EQUIPMENT_COLLECTION_ID)
-            val idxPictureCollectionId = cursor.getColumnIndex(KEY_PICTURE_COLLECTION_ID)
-            val idxNotetCollectionId = cursor.getColumnIndex(KEY_NOTE_COLLECTION_ID)
-            val idxTruckNumber = cursor.getColumnIndex(KEY_TRUCK_NUMBER)
-            val idxLicensePlate = cursor.getColumnIndex(KEY_LICENSE_PLATE)
-            val idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER)
-            val idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS)
-            var truckNumber: Int
-            var licensePlateNumber: String?
-            val values = ContentValues()
-            while (cursor.moveToNext()) {
-                val entry = DataEntry(db)
-                entry.id = cursor.getLong(idxRow)
-                entry.date = cursor.getLong(idxDate)
-                val projectAddressComboId = cursor.getLong(idxProjectAddressCombo)
-                val equipmentCollectionId = cursor.getLong(idxEquipmentCollectionId)
-                val pictureCollectionId = cursor.getLong(idxPictureCollectionId)
-                entry.noteCollectionId = cursor.getLong(idxNotetCollectionId)
-                truckNumber = cursor.getInt(idxTruckNumber)
-                if (idxLicensePlate >= 0) {
-                    licensePlateNumber = cursor.getString(idxLicensePlate)
-                } else {
-                    licensePlateNumber = null
-                }
-                val projectGroup = db.tableProjectAddressCombo.query(projectAddressComboId)
-                val projectNameId: Long
-                val companyName: String?
-                if (projectGroup != null) {
-                    projectNameId = projectGroup.projectNameId
-                    companyName = projectGroup.companyName
-                } else {
-                    projectNameId = 0
-                    companyName = null
-                }
-                var truck = getTruck(truckNumber, licensePlateNumber)
-                if (truck != null) {
-                    truck.companyName = companyName
-                    truck.projectNameId = projectNameId
-                    truck.id = db.tableTruck.save(truck)
-                } else {
-                    truck = DataTruck()
-                    truck.projectNameId = projectNameId
-                    truck.companyName = companyName
-                    truck.licensePlateNumber = licensePlateNumber
-                    truck.truckNumber = Integer.toString(truckNumber)
-                }
-                entry.truckId = db.tableTruck.save(truck)
-                entry.uploadedMaster = cursor.getShort(idxUploadedMaster).toInt() != 0
-                entry.uploadedAws = cursor.getShort(idxUploadedAws).toInt() != 0
-
-                values.clear()
-                values.put(KEY_DATE, entry.date)
-                values.put(KEY_PROJECT_ADDRESS_COMBO_ID, projectAddressComboId)
-                values.put(KEY_EQUIPMENT_COLLECTION_ID, equipmentCollectionId)
-                values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId)
-                values.put(KEY_PICTURE_COLLECTION_ID, pictureCollectionId)
-                values.put(KEY_TRUCK_ID, entry.truckId)
-                values.put(KEY_UPLOADED_AWS, entry.uploadedAws)
-                values.put(KEY_UPLOADED_MASTER, entry.uploadedMaster)
-                dbSql.insert(TABLE_NAME, null, values)
-
-                // Doing this one at a time for safety reasons
-                val where = "$KEY_ROWID=?"
-                val whereArgs = arrayOf(java.lang.Long.toString(entry.id))
-                dbSql.delete(TABLE_NAME2, where, whereArgs)
-            }
-            cursor.close()
-        } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableEntry::class.java, "upgrade3()", "db")
-        }
-
-    }
-
-    private fun getTruck(truckNumber: Int, license_plate: String?): DataTruck? {
-        var truck: DataTruck? = null
-        var trucks: List<DataTruck>
-        license_plate?.let {
-            trucks = db.tableTruck.queryByLicensePlate(license_plate)
-            if (trucks.size == 1) {
-                truck = trucks[0]
-                truck?.let {
-                    if (truckNumber > 0 && it.truckNumber != null) {
-                        if (it.truckNumber != Integer.toString(truckNumber)) {
-                            truck = null
-                        }
-                    }
-                }
-            }
-        }
-        if (truck == null) {
-            trucks = db.tableTruck.queryByTruckNumber(truckNumber)
-            if (trucks.size == 1) {
-                truck = trucks[0]
-                truck?.let {
-                    if (license_plate != null && it.licensePlateNumber != null) {
-                        if (it.licensePlateNumber != license_plate) {
-                            truck = null
-                        }
-                    }
-                }
-            }
-        }
-        return truck
     }
 
     fun upgrade11() {
@@ -291,7 +173,7 @@ class SqlTableEntry(
                 }
                 if (!cursor.isNull(idxPictureCollectionId)) {
                     val pictureCollectionId = cursor.getLong(idxPictureCollectionId)
-                    entry.pictureCollection = db.tablePictureCollection.query(pictureCollectionId)
+                    entry.pictures = db.tablePicture.query(pictureCollectionId, null)
                 }
                 if (!cursor.isNull(idxNoteCollectionId)) {
                     entry.noteCollectionId = cursor.getLong(idxNoteCollectionId)
@@ -316,7 +198,7 @@ class SqlTableEntry(
             sbuf.append(" [")
             if (where != null) {
                 sbuf.append(where)
-                if (whereArgs != null && whereArgs.size > 0) {
+                if (whereArgs != null && whereArgs.isNotEmpty()) {
                     for (arg in whereArgs) {
                         sbuf.append(", ")
                         sbuf.append(arg)
@@ -334,7 +216,7 @@ class SqlTableEntry(
         val count = Count()
         try {
             val selection = "$KEY_PROJECT_ADDRESS_COMBO_ID =?"
-            val selectionArgs = arrayOf(java.lang.Long.toString(comboId))
+            val selectionArgs = arrayOf(comboId.toString())
             val columns = arrayOf(KEY_UPLOADED_AWS, KEY_UPLOADED_MASTER)
             val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
             val idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS)
@@ -381,7 +263,7 @@ class SqlTableEntry(
         try {
             val columns = arrayOf(KEY_TRUCK_ID)
             val selection = "$KEY_TRUCK_ID=?"
-            val selectionArgs = arrayOf(java.lang.Long.toString(truckId))
+            val selectionArgs = arrayOf(truckId.toString())
             val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
             count = cursor.count
             cursor.close()
@@ -416,7 +298,7 @@ class SqlTableEntry(
         var count = 0
         try {
             val where = "$KEY_PROJECT_ADDRESS_COMBO_ID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(combo.id))
+            val whereArgs = arrayOf(combo.id.toString())
             val values = ContentValues()
             values.put(KEY_UPLOADED_MASTER, false)
             count = dbSql.update(TABLE_NAME, values, where, whereArgs)
@@ -431,9 +313,7 @@ class SqlTableEntry(
         dbSql.beginTransaction()
         try {
             db.tableCollectionEquipmentEntry.save(entry.equipmentCollection!!)
-            entry.pictureCollection?.let {
-                db.tablePictureCollection.add(it)
-            }
+            db.tablePicture.add(entry.pictures)
             if (entry.id == 0L) {
                 incNextCollectionID = true
             }
@@ -444,7 +324,7 @@ class SqlTableEntry(
             values.put(KEY_EQUIPMENT_COLLECTION_ID, entry.equipmentCollection!!.id)
             values.put(KEY_TRUCK_ID, entry.truckId)
             values.put(KEY_NOTE_COLLECTION_ID, entry.noteCollectionId)
-            values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollection!!.id)
+            values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollectionId)
             values.put(KEY_SERVER_ID, entry.serverId)
             values.put(KEY_SERVER_ERROR_COUNT, entry.serverErrorCount)
             values.put(KEY_UPLOADED_AWS, if (entry.uploadedAws) 1 else 0)
@@ -456,7 +336,7 @@ class SqlTableEntry(
             var insert = true
             if (entry.id > 0) {
                 val where = "$KEY_ROWID=?"
-                val whereArgs = arrayOf(java.lang.Long.toString(entry.id))
+                val whereArgs = arrayOf(entry.id.toString())
                 if (dbSql.update(TABLE_NAME, values, where, whereArgs) != 0) {
                     insert = false
                 }
@@ -486,7 +366,7 @@ class SqlTableEntry(
             values.put(KEY_UPLOADED_MASTER, if (entry.uploadedMaster) 1 else 0)
             values.put(KEY_HAD_ERROR, if (entry.hasError) 1 else 0)
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(entry.id))
+            val whereArgs = arrayOf(entry.id.toString())
             if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
                 Timber.e("SqlTableEntry.saveUploaded(): Unable to update tableEntry")
             }
@@ -505,7 +385,7 @@ class SqlTableEntry(
             values.put(KEY_UPLOADED_MASTER, if (entry.uploadedMaster) 1 else 0)
             values.put(KEY_PROJECT_ADDRESS_COMBO_ID, entry.projectAddressCombo!!.id)
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(entry.id))
+            val whereArgs = arrayOf(entry.id.toString())
             if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
                 Timber.e("SqlTableEntry.saveProjectAddressCombo(): Unable to update tableEntry")
             }
@@ -536,7 +416,7 @@ class SqlTableEntry(
 
     override fun remove(entry: DataEntry) {
         val where = "$KEY_ROWID=?"
-        val whereArgs = arrayOf(java.lang.Long.toString(entry.id))
+        val whereArgs = arrayOf(entry.id.toString())
         dbSql.delete(TABLE_NAME, where, whereArgs)
     }
 

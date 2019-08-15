@@ -2,7 +2,7 @@
  * Copyright 2019, FleetTLC. All rights reserved
  */
 
-package com.cartlc.tracker.fresh.ui.util.helper
+package com.cartlc.tracker.fresh.ui.common
 
 import android.annotation.TargetApi
 import android.app.Activity
@@ -10,7 +10,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.provider.Settings
 
 import java.util.ArrayList
 import java.util.HashMap

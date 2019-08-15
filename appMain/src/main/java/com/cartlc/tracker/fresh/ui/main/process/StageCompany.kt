@@ -1,9 +1,13 @@
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.fresh.ui.main.process
 
 import com.cartlc.tracker.fresh.model.core.data.DataAddress
 import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.fresh.model.flow.Flow
 import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.ui.util.helper.LocationHelper
@@ -88,4 +92,37 @@ class StageCompany(
         return list
     }
 
+    fun saveAdd(isNext: Boolean): Boolean {
+        with (shared) {
+            val entryText = entrySimpleUseCase.entryTextValue ?: ""
+            val newCompanyName = entryText.trim { it <= ' ' }
+            if (isNext) {
+                if (newCompanyName.isEmpty()) {
+                    errorValue = ErrorMessage.NEED_NEW_COMPANY
+                    return false
+                }
+                prefHelper.company = newCompanyName
+                repo.companyEditing?.let {
+                    val companies = db.tableAddress.queryByCompanyName(it)
+                    for (address in companies) {
+                        address.company = newCompanyName
+                        db.tableAddress.update(address)
+                    }
+                }
+            }
+        }
+        return true
+    }
+
+    fun save(isNext: Boolean): Boolean {
+        with (shared) {
+            if (isNext) {
+                if (prefHelper.company.isNullOrBlank()) {
+                    errorValue = ErrorMessage.NEED_COMPANY
+                    return false
+                }
+            }
+        }
+        return true
+    }
 }

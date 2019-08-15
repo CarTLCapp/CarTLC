@@ -3,7 +3,9 @@ package com.cartlc.tracker.fresh.ui.confirm
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,14 +15,15 @@ import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.SimpleListAdapter
+import com.cartlc.tracker.fresh.ui.picture.PictureListUseCase
 import com.cartlc.tracker.fresh.ui.picture.PictureListView
 import com.cartlc.tracker.ui.list.NoteListAdapter
 
-class ConfirmViewMvcImpl(
+class ConfirmFinalViewMvcImpl(
         inflater: LayoutInflater,
         container: ViewGroup?,
         factoryViewMvc: FactoryViewMvc
-) : ObservableViewMvcImpl<ConfirmViewMvc.Listener>(), ConfirmViewMvc
+) : ObservableViewMvcImpl<ConfirmFinalViewMvc.Listener>(), ConfirmFinalViewMvc
 {
 
     override val rootView: View = inflater.inflate(R.layout.frame_confirm, container, false) as ViewGroup
@@ -29,16 +32,17 @@ class ConfirmViewMvcImpl(
 
     private val equipmentGrid = findViewById<RecyclerView>(R.id.equipment_grid)
     private val notesList = findViewById<RecyclerView>(R.id.notes_list)
+    private val notesLabel = findViewById<TextView>(R.id.confirm_notes_label)
+    private val confirmPicturesLabel = findViewById<TextView>(R.id.confirm_pictures_label)
     private val confirmPictureList = findViewById<PictureListView>(R.id.confirm_pictures_list)
-    private val equipmentListAdapter: SimpleListAdapter = SimpleListAdapter(factoryViewMvc, R.layout.entry_item_confirm, null)
+    private val equipmentListAdapter: SimpleListAdapter = SimpleListAdapter(factoryViewMvc, R.layout.confirm_item, null)
     private val noteAdapter: NoteListAdapter
     private val projectNameValue = findViewById<TextView>(R.id.project_name_value)
     private val projectAddressValue = findViewById<TextView>(R.id.project_address_value)
     private val truckNumberValue = findViewById<TextView>(R.id.truck_number_value)
     private val statusValue = findViewById<TextView>(R.id.status_value)
-    private val confirmPicturesLabel = findViewById<TextView>(R.id.confirm_pictures_label)
 
-    private val pictureUseCase = confirmPictureList.control
+    private val pictureUseCase = confirmPictureList.control as PictureListUseCase
 
     init {
         equipmentGrid.adapter = equipmentListAdapter
@@ -86,6 +90,7 @@ class ConfirmViewMvcImpl(
         get() = TODO("not implemented")
         set(value) {
             noteAdapter.setItems(value)
+            notesLabel.visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
         }
 
     override var equipmentNames: List<String>
@@ -94,9 +99,15 @@ class ConfirmViewMvcImpl(
             equipmentListAdapter.items = value
         }
 
-    override var pictures: MutableList<DataPicture>
-        get() = TODO("not implemented")
+    override var pictures: List<DataPicture>
+        get() = pictureUseCase.pictureItems
         set(value) {
             pictureUseCase.pictureItems = value
+        }
+    override var pictureListHeight: Int
+        get() = confirmPictureList.height
+        set(value) {
+            val params = confirmPictureList.layoutParams
+//            confirmPictureList.layoutParams = ConstraintLayout.LayoutParams(params.width, value)
         }
 }

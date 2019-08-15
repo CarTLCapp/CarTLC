@@ -21,7 +21,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
         private const val DATABASE_NAME = "cartcl.db"
-        private const val DATABASE_VERSION = 19
+        private const val DATABASE_VERSION = 20
     }
 
     private var dbHelper: DatabaseHelper
@@ -48,7 +48,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
         lateinit var tableFlowElement: SqlTableFlowElement
         lateinit var tableFlowElementNote: SqlTableFlowElementNote
         lateinit var tableNote: SqlTableNote
-        lateinit var tablePictureCollection: SqlTablePictureCollection
+        lateinit var tablePicture: SqlTablePicture
         lateinit var tableProjects: SqlTableProjects
         lateinit var tableProjectAddressCombo: SqlTableProjectAddressCombo
         lateinit var tableTruck: SqlTableTruck
@@ -69,7 +69,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
                 tableNote.create()
                 tableCollectionNoteEntry.create()
                 tableCollectionNoteProject.create()
-                tablePictureCollection.create()
+                tablePicture.create()
                 tableProjectAddressCombo.create()
                 tableProjects.create()
                 tableCrash.create()
@@ -98,7 +98,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableFlowElementNote = SqlTableFlowElementNote(dm, db)
             tableCollectionNoteEntry = SqlTableCollectionNoteEntry(dm, db)
             tableCollectionNoteProject = SqlTableCollectionNoteProject(dm, db)
-            tablePictureCollection = SqlTablePictureCollection(db)
+            tablePicture = SqlTablePicture(db)
             tableProjectAddressCombo = SqlTableProjectAddressCombo(dm, db)
             tableProjects = SqlTableProjects(dm, db)
             tableCrash = SqlTableCrash(dm, db)
@@ -113,12 +113,13 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
             init(db)
             if (oldVersion == 1 || oldVersion == 2) {
-                tableCrash.create()
-                SqlTablePictureCollection.upgrade3(dm, db)
-                tableZipCode.create()
-                SqlTableNote.upgrade3(db)
-                tableTruck.create()
-                tableEntry.upgrade3()
+                // OBSOLETE:
+//                tableCrash.create()
+//                tablePicture.upgrade3()
+//                tableZipCode.create()
+//                SqlTableNote.upgrade3(db)
+//                tableTruck.create()
+//                tableEntry.upgrade3()
             } else if (oldVersion <= 9) {
                 SqlTableCrash.upgrade10(dm, db)
                 SqlTableTruckV13.instance.upgrade11()
@@ -145,6 +146,10 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
                 tableFlowElement.create()
                 tableFlowElementNote.create()
             }
+            if (oldVersion <= 19) {
+                tableTruck.upgrade20()
+                tablePicture.upgrade20()
+            }
         }
 
         override fun onOpen(db: SQLiteDatabase) {
@@ -155,7 +160,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableEntry.clearUploaded()
             tableEquipment.clearUploaded()
             tableNote.clearUploaded()
-            tablePictureCollection.clearUploaded()
+            tablePicture.clearUploaded()
             tableProjects.clearUploaded()
             tableAddress.clearUploaded()
             tableCollectionEquipmentEntry.clearUploaded()
@@ -212,8 +217,8 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
     override val tableCrash: TableCrash
         get() = dbHelper.tableCrash
 
-    override val tablePictureCollection: TablePictureCollection
-        get() = dbHelper.tablePictureCollection
+    override val tablePicture: TablePicture
+        get() = dbHelper.tablePicture
 
     override val tableProjectAddressCombo: TableProjectAddressCombo
         get() = dbHelper.tableProjectAddressCombo

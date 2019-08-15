@@ -40,9 +40,6 @@ public class FlowElement extends Model implements Comparable<FlowElement> {
     @Constraints.Required
     public byte request_image;
 
-    @Constraints.Required
-    public boolean generic_note;
-
     @Transient
     public boolean isFirst = false;
 

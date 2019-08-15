@@ -9,6 +9,7 @@ interface TableFlow {
 
     fun add(item: DataFlow): Long
     fun query(): List<DataFlow>
+    fun queryBySubProjectId(project_id: Int): DataFlow?
     fun queryByServerId(server_id: Int): DataFlow?
     fun update(item: DataFlow)
     fun remove(item: DataFlow)

@@ -19,7 +19,10 @@ class MessageHandlerImpl(
                 StringMessage.btn_another -> ctx.getString(R.string.btn_another)
                 StringMessage.btn_done -> ctx.getString(R.string.btn_done)
                 StringMessage.btn_confirm -> ctx.getString(R.string.btn_confirm)
+
                 StringMessage.error_picture_removed -> ctx.getString(R.string.error_picture_removed)
+                StringMessage.error_need_all_checked -> ctx.getString(R.string.error_need_all_checked)
+
                 StringMessage.title_current_project -> ctx.getString(R.string.title_current_project)
                 StringMessage.title_login -> ctx.getString(R.string.title_login)
                 StringMessage.title_root_project -> ctx.getString(R.string.title_root_project)
@@ -34,12 +37,30 @@ class MessageHandlerImpl(
                 StringMessage.title_notes -> ctx.getString(R.string.title_notes)
                 StringMessage.title_status -> ctx.getString(R.string.title_status)
                 StringMessage.title_confirmation -> ctx.getString(R.string.title_confirmation)
+                StringMessage.title_confirm_checklist -> ctx.getString(R.string.title_confirm_checklist)
                 StringMessage.title_photo -> ctx.getString(R.string.title_photo)
                 StringMessage.title_entries_ -> ctx.getString(R.string.title_entries_)
+
                 StringMessage.title_uploaded_done -> ctx.getString(R.string.title_uploaded_done)
+                StringMessage.truck_number_request -> ctx.getString(R.string.truck_number_request)
+                StringMessage.truck_number_enter -> ctx.getString(R.string.truck_number_enter)
+                StringMessage.truck_number_hint -> ctx.getString(R.string.truck_number_hint)
+
+                StringMessage.truck_damage_query -> ctx.getString(R.string.truck_damage_query)
+                StringMessage.truck_damage_request -> ctx.getString(R.string.truck_damage_request)
+                StringMessage.truck_damage_enter -> ctx.getString(R.string.truck_damage_enter)
+                StringMessage.truck_damage_hint -> ctx.getString(R.string.truck_damage_hint)
+
                 is StringMessage.dialog_dialog_entry_done -> ctx.getString(R.string.dialog_entry_done, msg.name)
                 is StringMessage.dialog_dialog_entry_done2 -> ctx.getString(R.string.dialog_entry_done2, msg.name, msg.name2)
-                is StringMessage.title_photos -> ctx.getString(R.string.title_photos, msg.count)
+
+                is StringMessage.prompt_custom_photo_1 -> ctx.getString(R.string.prompt_custom_photo_1, msg.prompt)
+                is StringMessage.prompt_custom_photo_N -> ctx.getString(R.string.prompt_custom_photo_N, msg.count, msg.prompt)
+                is StringMessage.prompt_custom_photo_more -> ctx.getString(R.string.prompt_custom_photo_more, msg.count, msg.prompt)
+                is StringMessage.prompt_notes -> ctx.getString(R.string.prompt_notes, msg.prompt)
+
+                is StringMessage.title_photos -> ctx.getString(R.string.title_photos, msg.count, msg.max)
+
                 is StringMessage.status_installed_equipments -> ctx.getString(R.string.status_installed_equipments, msg.checkedEquipment, msg.maxEquip)
                 is StringMessage.status_installed_pictures -> ctx.getString(R.string.status_installed_pictures, msg.countPictures)
                 is StringMessage.error_incorrect_note_count -> ctx.getString(R.string.error_incorrect_note_count, msg.length, msg.digits)

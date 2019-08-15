@@ -1,3 +1,6 @@
+/**
+ * Copyright 2019, FleetTLC. All rights reserved
+ */
 package com.cartlc.tracker.fresh.ui.mainlist.adapter.item
 
 import android.text.Editable
@@ -15,7 +18,7 @@ class NoteListEntryItemViewMvcImpl(
         container: ViewGroup?
 ) : ViewMvcImpl(), NoteListEntryItemViewMvc {
 
-    override val rootView = inflater.inflate(R.layout.entry_item_entry_note, container, false)
+    override val rootView = inflater.inflate(R.layout.mainlist_item_entry_note, container, false)
 
     private val labelView = findViewById<TextView>(R.id.label)
     private val entryView = findViewById<EditText>(R.id.entry)
@@ -50,7 +53,7 @@ class NoteListEntryItemViewMvcImpl(
             entryView.setLines(value)
         }
 
-// region TextWatcher
+    // region TextWatcher
 
     inner class ItemTextChangedWatcher(var listener: Listener) : TextWatcher {
 

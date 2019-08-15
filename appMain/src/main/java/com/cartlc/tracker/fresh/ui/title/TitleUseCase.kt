@@ -8,5 +8,4 @@ interface TitleUseCase {
     var subTitleVisible: Boolean
     var separatorVisible: Boolean
 
-    fun setPhotoTitleCount(count: Int)
 }

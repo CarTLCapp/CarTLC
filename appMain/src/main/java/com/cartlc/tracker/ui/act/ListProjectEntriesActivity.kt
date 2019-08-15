@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.ui.act
 
@@ -20,7 +20,7 @@ import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.ui.base.BaseActivity
 import kotlinx.android.synthetic.main.activity_list_entries.*
 
-class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListener {
+class ListProjectEntriesActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListener {
 
     lateinit var app: TBApplication
     private lateinit var mEntryListAdapter: ListEntryAdapter
@@ -106,7 +106,7 @@ class ListEntryActivity : BaseActivity(), ListEntryAdapter.OnItemSelectedListene
 
     override fun onEdit(entry: DataEntry) {
         prefHelper.setFromEntry(entry)
-        setResult(MainController.RESULT_EDIT_ENTRY)
+        setResult(MainController.RESULT_EDIT_PROJECT_ENTRY)
         finish()
     }
 }

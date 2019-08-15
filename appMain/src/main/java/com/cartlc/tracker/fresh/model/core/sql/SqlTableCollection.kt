@@ -22,6 +22,15 @@ abstract class SqlTableCollection(
         internal val mTableName: String
 ): TableCollection {
 
+    companion object {
+
+        private const val KEY_ROWID = "_id"
+        private const val KEY_COLLECTION_ID = "collection_id"
+        private const val KEY_VALUE_ID = "value_id"
+        private const val KEY_SERVER_ID = "server_id"
+        private const val KEY_IS_BOOT = "is_boot_strap"
+    }
+
     fun clear() {
         try {
             mDb.delete(mTableName, null, null)
@@ -63,11 +72,26 @@ abstract class SqlTableCollection(
         return count
     }
 
+    protected fun countCollection(collection_id: Long): Int {
+        var count = 0
+        try {
+            val columns = arrayOf(KEY_VALUE_ID)
+            val selection = "$KEY_COLLECTION_ID=?"
+            val selectionArgs = arrayOf(collection_id.toString())
+            val cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null, null)
+            count = cursor.count
+            cursor.close()
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableCollection::class.java, "query(id)", "db")
+        }
+        return count
+    }
+
     override fun countValues(valueId: Long): Int {
         var count = 0
         try {
             val where = "$KEY_VALUE_ID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(valueId))
+            val whereArgs = arrayOf(valueId.toString())
             val cursor = mDb.query(mTableName, null, where, whereArgs, null, null, null)
             count = cursor.count
             cursor.close()
@@ -163,7 +187,7 @@ abstract class SqlTableCollection(
             values.put(KEY_SERVER_ID, item.server_id)
             values.put(KEY_IS_BOOT, item.isBootstrap)
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(item.id))
+            val whereArgs = arrayOf(item.id.toString())
             mDb.update(mTableName, values, where, whereArgs)
             mDb.setTransactionSuccessful()
         } catch (ex: Exception) {
@@ -178,7 +202,7 @@ abstract class SqlTableCollection(
         try {
             val columns = arrayOf(KEY_VALUE_ID)
             val selection = "$KEY_COLLECTION_ID=?"
-            val selectionArgs = arrayOf(java.lang.Long.toString(collection_id))
+            val selectionArgs = arrayOf(collection_id.toString())
             val cursor = mDb.query(mTableName, columns, selection, selectionArgs, null, null, null, null)
             val idxValue = cursor.getColumnIndex(KEY_VALUE_ID)
             while (cursor.moveToNext()) {
@@ -188,7 +212,6 @@ abstract class SqlTableCollection(
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableCollection::class.java, "query(id)", "db")
         }
-
         return collection
     }
 
@@ -226,7 +249,7 @@ abstract class SqlTableCollection(
         mDb.beginTransaction()
         try {
             val selection = "$KEY_SERVER_ID=?"
-            val selectionArgs = arrayOf(Integer.toString(server_id))
+            val selectionArgs = arrayOf(server_id.toString())
             val cursor = mDb.query(mTableName, null, selection, selectionArgs, null, null, null, null)
             val idxValue = cursor.getColumnIndex(KEY_VALUE_ID)
             val idxRowId = cursor.getColumnIndex(KEY_ROWID)
@@ -282,15 +305,6 @@ abstract class SqlTableCollection(
         } finally {
             mDb.endTransaction()
         }
-    }
-
-    companion object {
-
-        internal val KEY_ROWID = "_id"
-        internal val KEY_COLLECTION_ID = "collection_id"
-        internal val KEY_VALUE_ID = "value_id"
-        internal val KEY_SERVER_ID = "server_id"
-        internal val KEY_IS_BOOT = "is_boot_strap"
     }
 
 }
