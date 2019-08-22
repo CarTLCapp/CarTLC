@@ -282,13 +282,6 @@ class SqlTablePicture(
         return count
     }
 
-//    private fun debug() {
-//        val list = query(String(), emptyArray())
-//        for (item in list) {
-//            Timber.d("MYDEBUG: $item")
-//        }
-//    }
-
     fun remove(item: DataPicture) {
         try {
             val where = "$KEY_ROWID=?"

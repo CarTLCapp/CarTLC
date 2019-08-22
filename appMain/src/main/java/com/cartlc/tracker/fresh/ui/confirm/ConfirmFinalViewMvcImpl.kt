@@ -3,9 +3,7 @@ package com.cartlc.tracker.fresh.ui.confirm
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -104,10 +102,5 @@ class ConfirmFinalViewMvcImpl(
         set(value) {
             pictureUseCase.pictureItems = value
         }
-    override var pictureListHeight: Int
-        get() = confirmPictureList.height
-        set(value) {
-            val params = confirmPictureList.layoutParams
-//            confirmPictureList.layoutParams = ConstraintLayout.LayoutParams(params.width, value)
-        }
+
 }

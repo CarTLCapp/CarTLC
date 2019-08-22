@@ -25,8 +25,6 @@ class ConfirmFinalController (
     private val componentRoot = boundFrag.componentRoot
     private val prefHelper = componentRoot.prefHelper
     private var curEntry: DataEntry? = null
-    // TODO: Would like a more universal way of handling this (see other references)
-    private val thumbnailHeight = boundFrag.act.resources.getDimension(R.dimen.image_thumbnail_max_height).toInt()
 
     init {
         boundFrag.bindObserver(this)
@@ -86,7 +84,6 @@ class ConfirmFinalController (
         viewMvc.pictures = entry.pictures.toMutableList()
         viewMvc.status = entry.getStatus(ctx)
         viewMvc.pictureLabel = ctx.getString(R.string.title_pictures_, entry.pictures.size)
-        viewMvc.pictureListHeight = thumbnailHeight * (viewMvc.pictures.size / PictureListViewMvcImpl.NUM_COLUMNS + 1)
     }
 
     override fun onConfirmOkay() {

@@ -6,6 +6,7 @@ package com.cartlc.tracker.fresh.ui.picture
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,10 +26,6 @@ class PictureListViewMvcImpl(
         PictureNoteAdapter.Listener
 {
 
-    companion object {
-        // TODO: Would like a more universal way of handling this:
-        const val NUM_COLUMNS = 4
-    }
     override val rootView: View = inflater.inflate(R.layout.frame_picture_list, container, false) as ViewGroup
 
     private val pictureList = findViewById<RecyclerView>(R.id.list_pictures)
@@ -38,19 +35,33 @@ class PictureListViewMvcImpl(
 
     override var listener: PictureListViewMvc.Listener? = null
 
-    private var wasThumbnail: Boolean? = null
-
     init {
         val linearLayoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         noteList.layoutManager = linearLayoutManager
         noteList.adapter = noteListAdapter
-        pictureList.layoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        pictureList.adapter = pictureListAdapter
+        layout()
     }
 
     override fun onPictureRefreshNeeded() {
         pictureListAdapter.notifyDataSetChanged()
         noteListAdapter.notifyDataSetChanged()
+        layout()
+    }
+
+    private fun layout() {
+        if (listener?.isThumbnail == true) {
+            pictureList.layoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            pictureList.adapter = pictureListAdapter
+            val params = pictureList.layoutParams as ConstraintLayout.LayoutParams
+            params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+            rootView.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        } else {
+            pictureList.layoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            pictureList.adapter = pictureListAdapter
+            val params = pictureList.layoutParams as ConstraintLayout.LayoutParams
+            params.height = 0
+            rootView.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+        }
     }
 
     // region PictureListAdapter.Listener & PictureListItemNoteAdapter.Listener
@@ -78,15 +89,4 @@ class PictureListViewMvcImpl(
 
     // endregion PictureListItemNoteAdapter.Listener
 
-    private fun layout() {
-        val isThumbnail = listener?.isThumbnail ?: false
-        if (wasThumbnail == null || wasThumbnail != isThumbnail) {
-            if (isThumbnail) {
-                pictureList.layoutManager = GridLayoutManager(context, NUM_COLUMNS)
-            } else {
-                pictureList.layoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            }
-            wasThumbnail = isThumbnail
-        }
-    }
 }

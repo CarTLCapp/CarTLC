@@ -468,11 +468,11 @@ class PrefHelper constructor(
                 return false  // Okay to have nothing selected
             }
         }
-        val zipcode = zipCode
+        val zipCode = zipCode
         var addressId: Long
-        addressId = db.tableAddress.queryAddressId(company, street, city, state, zipcode)
+        addressId = db.tableAddress.queryAddressId(company, street, city, state, zipCode)
         if (addressId < 0) {
-            val address = DataAddress(company, street, city, state, zipcode)
+            val address = DataAddress(company, street, city, state, zipCode)
             address.isLocal = true
             addressId = db.tableAddress.add(address)
             if (addressId < 0) {

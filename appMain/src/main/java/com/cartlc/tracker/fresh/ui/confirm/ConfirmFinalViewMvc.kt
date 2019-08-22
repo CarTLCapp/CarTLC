@@ -18,6 +18,5 @@ interface ConfirmFinalViewMvc : ObservableViewMvc<ConfirmFinalViewMvc.Listener> 
     var notes: List<DataNote>
     var equipmentNames: List<String>
     var pictures: List<DataPicture>
-    var pictureListHeight: Int
 
 }
