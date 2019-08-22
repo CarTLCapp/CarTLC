@@ -18,7 +18,7 @@ class DataPicture(
         val stage: Stage,
         private val _scaledFilename: String? = null,
         private val _uploaded: Boolean = false
-) {
+) : Comparable<DataPicture> {
 
     constructor(other: DataPicture, collectionId: Long) :
             this(other._id,
@@ -64,6 +64,15 @@ class DataPicture(
             } else unscaledFilename
         }
 
+    val file: File?
+        get() {
+            return when {
+                existsUnscaled -> unscaledFile
+                existsScaled -> scaledFile
+                else -> null
+            }
+        }
+
     fun remove() {
         unscaledFile.delete()
         scaledFile?.delete()
@@ -97,4 +106,26 @@ class DataPicture(
         }
         return sbuf.toString()
     }
+
+    override fun compareTo(other: DataPicture): Int {
+        return ordinal - other.ordinal
+    }
+
+    companion object {
+        private const val MULT = 10000
+    }
+
+    private val ordinal: Int
+        get() {
+            if (stage !is Stage.CUSTOM_FLOW) {
+                return stage.ord * MULT
+            }
+            if (stage.isFirstElement) {
+                return stage.ord * MULT
+            }
+            if (stage.isLastElement) {
+                return (stage.ord+1) * MULT - 1
+            }
+            return stage.ord * MULT + stage.flowElementId.toInt() + 1
+        }
 }

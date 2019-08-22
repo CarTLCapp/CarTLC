@@ -42,7 +42,7 @@
     <string name="title_zipcode">ZIP</string>
     <string name="title_current_project">Current Project</string>
     <string name="title_truck">Truck</string>
-    <string name="title_truck_number_">Truck:</string>
+    <string name="title_truck_">Truck:</string>
     <string name="title_equipment_installed">Equipment Installed</string>
     <string name="title_equipment_installed_">Equipment Installed:</string>
     <string name="title_equipment">Equipment</string>
@@ -57,7 +57,8 @@
     <string name="title_pictures_">Pictures: %d</string>
     <string name="title_status">Status</string>
     <string name="title_status_">Status:</string>
-    <string name="title_truck_">Truck:</string>
+    <string name="title_truck_number_">Truck Number:</string>
+    <string name="title_truck_damage_">Truck Damage:</string>
     <string name="title_activity_list_entries">Project Entries</string>
     <string name="title_elements">%d entries</string>
     <string name="title_element">one entry</string>

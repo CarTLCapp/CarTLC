@@ -1,7 +1,7 @@
-/**
+/*
  * Copyright 2019, FleetTLC. All rights reserved
  */
-package com.cartlc.tracker.fresh.ui.picture.item
+package com.cartlc.tracker.fresh.ui.confirm.item
 
 import android.view.LayoutInflater
 import android.view.View
@@ -13,25 +13,17 @@ import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import java.io.File
 
-class PictureListThumbnailItemViewMvcImpl(
+class ConfirmPictureItemViewMvcImpl(
         inflater: LayoutInflater,
         container: ViewGroup?
-) : ViewMvcImpl(), PictureListThumbnailItemViewMvc {
+) : ViewMvcImpl(), ConfirmPictureItemViewMvc {
 
-    override val rootView: View = inflater.inflate(R.layout.picture_list_item_thumbnail, container, false)
+    override val rootView: View = inflater.inflate(R.layout.confirm_picture_item, container, false)
 
     private val pictureView = findViewById<ImageView>(R.id.picture)
-    private val loadingView = findViewById<TextView>(R.id.loading)
     private val loadedHeight = context.resources.getDimension(R.dimen.image_thumbnail_max_height).toInt()
 
     // region PictureListThumbnailItemViewMvc
-
-    override var loading: String?
-        get() = loadingView.text.toString()
-        set(value) {
-            loadingView.text = value
-            loadingView.visibility = if (value == null) View.GONE else View.VISIBLE
-        }
 
     override fun bindPicture(pictureFile: File?) {
         if (pictureFile == null || !pictureFile.exists()) {

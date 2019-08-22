@@ -7,17 +7,12 @@ import android.os.Handler
 import android.os.Message
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
-import com.cartlc.tracker.fresh.model.core.sql.SqlTableNote
 import com.cartlc.tracker.fresh.model.core.table.TableNote
-import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
-import com.cartlc.tracker.fresh.ui.picture.item.PictureListItemViewMvc
-import com.cartlc.tracker.fresh.ui.picture.item.PictureListThumbnailItemViewMvc
 import com.cartlc.tracker.fresh.model.msg.StringMessage
-import com.cartlc.tracker.fresh.ui.picture.item.PictureNoteItemViewMvc
-import com.cartlc.tracker.fresh.ui.picture.item.PictureNoteThumbnailItemViewMvc
+import com.cartlc.tracker.fresh.ui.picture.item.*
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.HashMap
@@ -146,12 +141,7 @@ class PictureListController(
     private fun onBindPictureViewHolder(itemViewMvc: PictureListThumbnailItemViewMvc, position: Int) {
         val itemViewMvcRegular = itemViewMvc as? PictureListItemViewMvc
         val item = pictures[position]
-        val pictureFile: File?
-        when {
-            item.existsUnscaled -> pictureFile = item.unscaledFile
-            item.existsScaled -> pictureFile = item.scaledFile
-            else -> pictureFile = null
-        }
+        val pictureFile = item.file
         itemViewMvc.bindPicture(pictureFile)
 
         if (pictureFile == null || !pictureFile.exists()) {

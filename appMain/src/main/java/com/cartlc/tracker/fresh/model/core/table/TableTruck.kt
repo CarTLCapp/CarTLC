@@ -16,6 +16,7 @@ interface TableTruck {
              truckNumberPictureId: Int,
              truckDamageExists: Boolean,
              truckDamagePictureId: Int,
+             truckDamageValue: String,
              projectId: Long,
              companyName: String): Long
 }

@@ -30,6 +30,7 @@ class SqlTableTruck(
 
         private const val KEY_ROWID = "_id"
         private const val KEY_TRUCK_NUMBER_VALUE = "truck_number"
+        private const val KEY_TRUCK_DAMAGE_VALUE = "truck_damage"
         private const val KEY_TRUCK_NUMBER_PICTURE_ID = "truck_number_picture_id"
         private const val KEY_TRUCK_DAMAGE_PICTURE_ID = "truck_damage_picture_id"
         private const val KEY_SERVER_ID = "server_id"
@@ -48,6 +49,8 @@ class SqlTableTruck(
         sbuf.append(" integer primary key autoincrement, ")
         sbuf.append(KEY_TRUCK_NUMBER_VALUE)
         sbuf.append(" varchar(128), ")
+        sbuf.append(KEY_TRUCK_DAMAGE_VALUE)
+        sbuf.append(" varchar(1024), ")
         sbuf.append(KEY_SERVER_ID)
         sbuf.append(" integer, ")
         sbuf.append(KEY_PROJECT_ID)
@@ -70,6 +73,7 @@ class SqlTableTruck(
             dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_TRUCK_NUMBER_PICTURE_ID integer default 0")
             dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_TRUCK_DAMAGE_PICTURE_ID integer default 0")
             dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_HAS_DAMAGE bit default 0")
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_TRUCK_DAMAGE_VALUE varchar(1024)")
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableTruck::class.java, "upgrade20()", "db")
         }
@@ -82,6 +86,7 @@ class SqlTableTruck(
                       truckNumberPictureId: Int,
                       truckDamageExists: Boolean,
                       truckDamagePictureId: Int,
+                      truckDamageValue: String,
                       projectId: Long,
                       companyName: String): Long {
         val values = ContentValues()
@@ -102,6 +107,7 @@ class SqlTableTruck(
             values.put(KEY_HAS_DAMAGE, truckDamageExists)
             values.put(KEY_TRUCK_NUMBER_PICTURE_ID, truckNumberPictureId)
             values.put(KEY_TRUCK_DAMAGE_PICTURE_ID, truckDamagePictureId)
+            values.put(KEY_TRUCK_DAMAGE_VALUE, truckDamageValue)
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(truck.id.toString())
             dbSql.update(TABLE_NAME, values, where, whereArgs)
@@ -110,11 +116,13 @@ class SqlTableTruck(
             truck.truckNumberValue = truckNumberValue
             truck.truckNumberPictureId = truckNumberPictureId
             truck.truckDamagePictureId = truckDamagePictureId
+            truck.truckDamageValue = truckDamageValue
             truck.companyName = companyName
             truck.projectNameId = projectId
             truck.hasEntry = true
             truck.truckHasDamage = truckDamageExists
             values.put(KEY_TRUCK_NUMBER_VALUE, truckNumberValue)
+            values.put(KEY_TRUCK_DAMAGE_VALUE, truckDamageValue)
             values.put(KEY_TRUCK_NUMBER_PICTURE_ID, truckNumberPictureId)
             values.put(KEY_TRUCK_DAMAGE_PICTURE_ID, truckDamagePictureId)
             values.put(KEY_COMPANY_NAME, companyName)
@@ -130,6 +138,7 @@ class SqlTableTruck(
         try {
             val values = ContentValues()
             values.put(KEY_TRUCK_NUMBER_VALUE, truck.truckNumberValue)
+            values.put(KEY_TRUCK_DAMAGE_VALUE, truck.truckDamageValue)
             values.put(KEY_TRUCK_NUMBER_PICTURE_ID, truck.truckNumberPictureId)
             values.put(KEY_TRUCK_DAMAGE_PICTURE_ID, truck.truckDamagePictureId)
             values.put(KEY_PROJECT_ID, truck.projectNameId)
@@ -164,6 +173,7 @@ class SqlTableTruck(
         if (cursor.moveToNext()) {
             val idxId = cursor.getColumnIndex(KEY_ROWID)
             val idxTruckNumberValue = cursor.getColumnIndex(KEY_TRUCK_NUMBER_VALUE)
+            val idxTruckDamageValue = cursor.getColumnIndex(KEY_TRUCK_DAMAGE_VALUE)
             val idxTruckNumberPictureId = cursor.getColumnIndex(KEY_TRUCK_NUMBER_PICTURE_ID)
             val idxTruckDamagePictureId = cursor.getColumnIndex(KEY_TRUCK_DAMAGE_PICTURE_ID)
             val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
@@ -173,6 +183,7 @@ class SqlTableTruck(
             val idxHasDamage = cursor.getColumnIndex(KEY_HAS_DAMAGE)
             truck!!.id = cursor.getLong(idxId)
             truck.truckNumberValue = cursor.getString(idxTruckNumberValue)
+            truck.truckDamageValue = cursor.getString(idxTruckDamageValue)
             truck.truckNumberPictureId = cursor.getInt(idxTruckNumberPictureId)
             truck.truckDamagePictureId = cursor.getInt(idxTruckDamagePictureId)
             truck.serverId = cursor.getLong(idxServerId)
@@ -237,6 +248,7 @@ class SqlTableTruck(
         val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
         val idxId = cursor.getColumnIndex(KEY_ROWID)
         val idxTruckNumberValue = cursor.getColumnIndex(KEY_TRUCK_NUMBER_VALUE)
+        val idxTruckDamageValue = cursor.getColumnIndex(KEY_TRUCK_DAMAGE_VALUE)
         val idxTruckNumberPictureId = cursor.getColumnIndex(KEY_TRUCK_NUMBER_PICTURE_ID)
         val idxTruckDamagePictureId = cursor.getColumnIndex(KEY_TRUCK_DAMAGE_PICTURE_ID)
         val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
@@ -249,6 +261,7 @@ class SqlTableTruck(
             val truck = DataTruck()
             truck.id = cursor.getLong(idxId)
             truck.truckNumberValue = cursor.getString(idxTruckNumberValue)
+            truck.truckDamageValue = cursor.getString(idxTruckDamageValue)
             truck.truckNumberPictureId = cursor.getInt(idxTruckNumberPictureId)
             truck.truckDamagePictureId = cursor.getInt(idxTruckDamagePictureId)
             truck.serverId = cursor.getLong(idxServerId)
@@ -304,6 +317,7 @@ class SqlTableTruck(
         if (cursor.moveToNext()) {
             val idxId = cursor.getColumnIndex(KEY_ROWID)
             val idxTruckNumberValue = cursor.getColumnIndex(KEY_TRUCK_NUMBER_VALUE)
+            val idxTruckDamageValue = cursor.getColumnIndex(KEY_TRUCK_DAMAGE_VALUE)
             val idxTruckNumberPictureId = cursor.getColumnIndex(KEY_TRUCK_NUMBER_PICTURE_ID)
             val idxTruckDamagePictureId = cursor.getColumnIndex(KEY_TRUCK_DAMAGE_PICTURE_ID)
             val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
@@ -313,6 +327,7 @@ class SqlTableTruck(
             val idxHasDamage = cursor.getColumnIndex(KEY_HAS_DAMAGE)
             truck!!.id = cursor.getLong(idxId)
             truck.truckNumberValue = cursor.getString(idxTruckNumberValue)
+            truck.truckDamageValue = cursor.getString(idxTruckDamageValue)
             truck.truckNumberPictureId = cursor.getInt(idxTruckNumberPictureId)
             truck.truckDamagePictureId = cursor.getInt(idxTruckDamagePictureId)
             truck.serverId = cursor.getLong(idxServerId)

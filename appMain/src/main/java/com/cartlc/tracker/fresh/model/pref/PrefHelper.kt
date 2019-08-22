@@ -303,6 +303,9 @@ class PrefHelper constructor(
         get() = db.tableNote.noteTruckNumber?.value
         set(value) { db.tableNote.noteTruckNumber?.value = value }
 
+    val truckDamageValue: String?
+        get() = db.tableNote.noteTruckDamage?.value
+
     var truckHasDamage: Boolean?
         get() {
             return when (getInt(KEY_TRUCK_DAMAGE_EXISTS, 2)) {
@@ -572,6 +575,7 @@ class PrefHelper constructor(
                 truckNumberPictureId,
                 truckHasDamage ?: false,
                 truckDamagePictureId,
+                truckDamageValue ?: "",
                 projectGroup.projectNameId,
                 projectGroup.companyName!!)
         entry.status = status

@@ -35,7 +35,13 @@ class StageTruckNumber(
                     screenNavigator.showToast(messageHandler.getString(StringMessage.truck_number_request))
                 }
                 buttonsUseCase.nextVisible = false
-                taskPicture.dispatchPictureRequest()
+
+                if (taskPicture.takingPictureAborted) {
+                    buttonsUseCase.centerVisible = true
+                    buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_another)
+                } else {
+                    taskPicture.dispatchPictureRequest()
+                }
             } else {
                 if (!hasTruckNumberValue) {
                     if (showToast) {
@@ -70,6 +76,18 @@ class StageTruckNumber(
     fun pictureStateChanged() {
         with(shared) {
             buttonsUseCase.nextVisible = pictureUseCase.pictureItems.size == 1 && hasTruckNumberValue
+
+            val currentNumPictures = pictureUseCase.pictureItems.size
+            if (currentNumPictures == 0) {
+                buttonsUseCase.centerVisible = true
+                buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_another)
+            }
         }
     }
+
+    fun center() {
+        taskPicture.takingPictureAborted = false
+        taskPicture.dispatchPictureRequest()
+    }
+
 }

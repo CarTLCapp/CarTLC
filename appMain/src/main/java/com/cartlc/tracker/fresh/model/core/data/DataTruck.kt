@@ -17,6 +17,7 @@ class DataTruck : Comparable<DataTruck> {
     var truckNumberPictureId: Int = 0
     var truckHasDamage: Boolean = false
     var truckDamagePictureId: Int = 0
+    var truckDamageValue: String? = null
     var projectNameId: Long = 0
     var companyName: String? = null
     var hasEntry: Boolean = false
@@ -85,6 +86,10 @@ class DataTruck : Comparable<DataTruck> {
         other as DataTruck
 
         if (truckNumberValue != other.truckNumberValue) return false
+        if (truckNumberPictureId != other.truckNumberPictureId) return false
+        if (truckHasDamage != other.truckHasDamage) return false
+        if (truckDamagePictureId != other.truckDamagePictureId) return false
+        if (truckDamageValue != other.truckDamageValue) return false
         if (projectNameId != other.projectNameId) return false
         if (companyName != other.companyName) return false
         if (hasEntry != other.hasEntry) return false
@@ -94,10 +99,15 @@ class DataTruck : Comparable<DataTruck> {
 
     override fun hashCode(): Int {
         var result = truckNumberValue?.hashCode() ?: 0
+        result = 31 * result + truckNumberPictureId
+        result = 31 * result + truckHasDamage.hashCode()
+        result = 31 * result + truckDamagePictureId
+        result = 31 * result + (truckDamageValue?.hashCode() ?: 0)
         result = 31 * result + projectNameId.hashCode()
         result = 31 * result + (companyName?.hashCode() ?: 0)
         result = 31 * result + hasEntry.hashCode()
         return result
     }
+
 
 }

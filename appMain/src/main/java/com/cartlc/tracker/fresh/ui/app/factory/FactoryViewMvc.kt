@@ -15,6 +15,7 @@ import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvc
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvcImpl
+import com.cartlc.tracker.fresh.ui.confirm.item.*
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvc
 import com.cartlc.tracker.fresh.ui.login.LoginViewMvcImpl
 import com.cartlc.tracker.fresh.ui.main.MainViewMvc
@@ -110,4 +111,27 @@ class FactoryViewMvc(
         return MainViewMvcImpl(getInflater(container), container, factoryViewHelper)
     }
 
+    fun allocConfirmPictureItemViewMvc(container: ViewGroup?): ConfirmPictureItemViewMvc {
+        return ConfirmPictureItemViewMvcImpl(getInflater(container), container)
+    }
+
+    fun allocConfirmPictureNoteItemViewMvc(container: ViewGroup?): ConfirmPictureNoteItemViewMvc {
+        return ConfirmPictureNoteItemViewMvcImpl(getInflater(container), container)
+    }
+
+    fun allocConfirmBasicsViewMvc(container: ViewGroup?): ConfirmBasicsViewMvc {
+        return ConfirmBasicsViewMvcImpl(getInflater(container), container)
+    }
+
+    fun allocConfirmEquipmentViewMvc(container: ViewGroup?): ConfirmEquipmentViewMvc {
+        return ConfirmEquipmentViewMvcImpl(getInflater(container), container, this)
+    }
+
+    fun allocConfirmNotesViewMvc(container: ViewGroup?): ConfirmNotesViewMvc {
+        return ConfirmNotesViewMvcImpl(getInflater(container), container)
+    }
+
+    fun allocConfirmPictureViewMvc(container: ViewGroup?): ConfirmPictureViewMvc {
+        return ConfirmPictureViewMvcImpl(getInflater(container), container, this)
+    }
 }

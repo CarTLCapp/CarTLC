@@ -148,7 +148,6 @@ class SqlTableFlowElement(
         return rowId
     }
 
-
     override fun last(flow_id: Long): Long? {
         val selection = "$KEY_FLOW_ID=?"
         val selectionArgs = arrayOf(flow_id.toString())

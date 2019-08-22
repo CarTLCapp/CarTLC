@@ -20,7 +20,7 @@ import java.util.Date
 class DataEntry(private val db: DatabaseTable) {
 
     companion object {
-        internal val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
+        private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
     }
 
     var id: Long = 0

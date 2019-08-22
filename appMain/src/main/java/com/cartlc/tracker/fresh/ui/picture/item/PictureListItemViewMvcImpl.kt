@@ -65,7 +65,7 @@ class PictureListItemViewMvcImpl(
         dstPictureFile = pictureFile
         dstPictureFile?.let {
             if (it.exists()) {
-                BitmapHelper.loadBitmap(it.absolutePath, loadedHeight, pictureView) {
+                BitmapHelper.loadBitmap(it.absolutePath, loadedHeight, pictureView, false) {
                     buttonsVisible = true
                 }
             }

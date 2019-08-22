@@ -113,13 +113,14 @@ object BitmapHelper {
     private class LoadTask(
         imageView: ImageView,
         private val dstHeight: Int,
+        private val isSmall: Boolean,
         private val done: () -> Unit
     ) : AsyncTask<String, String, Bitmap>() {
 
         val ref = WeakReference(imageView)
 
         override fun onPreExecute() {
-            ref.get()?.setImageResource(R.drawable.loading)
+            ref.get()?.setImageResource(if (isSmall) R.drawable.loading_small else R.drawable.loading)
         }
 
         override fun doInBackground(vararg params: String): Bitmap {
@@ -132,8 +133,8 @@ object BitmapHelper {
         }
     }
 
-    fun loadBitmap(pathname: String, dstHeight: Int, imageView: ImageView, done: () -> Unit = {}) {
-        LoadTask(imageView, dstHeight, done).execute(pathname)
+    fun loadBitmap(pathname: String, dstHeight: Int, imageView: ImageView, isSmall: Boolean = false, done: () -> Unit = {}) {
+        LoadTask(imageView, dstHeight, isSmall, done).execute(pathname)
     }
 
 }

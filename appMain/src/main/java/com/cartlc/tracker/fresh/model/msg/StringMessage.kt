@@ -23,6 +23,8 @@ sealed class StringMessage {
     object title_street: StringMessage()
     object title_current_project: StringMessage()
     object title_truck: StringMessage()
+    object title_truck_number: StringMessage()
+    object title_truck_damage: StringMessage()
     object title_equipment_installed: StringMessage()
     object title_equipment: StringMessage()
     object title_notes: StringMessage()

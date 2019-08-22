@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2019, FleetTLC. All rights reserved
+  -->
+<GridLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/grid_confirmation"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingStart="15dp"
+    android:paddingEnd="5dp"
+    android:columnCount="2">
+
+    <TextView
+        style="@style/ConfirmTitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/title_project_" />
+
+    <TextView
+        android:id="@+id/project_name_value"
+        style="@style/ConfirmText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="fill"
+        android:paddingStart="@dimen/confirm_gap_left" />
+
+    <TextView
+        style="@style/ConfirmTitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/confirm_gap_height"
+        android:layout_marginEnd="3dp"
+        android:text="@string/title_address_" />
+
+    <TextView
+        android:id="@+id/project_address_value"
+        style="@style/ConfirmAddressText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="fill"
+        android:layout_marginTop="@dimen/confirm_gap_height"
+        android:paddingStart="@dimen/confirm_gap_left" />
+
+    <TextView
+        android:id="@+id/status_label"
+        style="@style/ConfirmTitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/confirm_gap_height"
+        android:text="@string/title_status" />
+
+    <TextView
+        android:id="@+id/status_value"
+        style="@style/ConfirmText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="fill"
+        android:layout_marginTop="@dimen/confirm_gap_height"
+        android:paddingStart="@dimen/confirm_gap_left" />
+</GridLayout>
+

@@ -71,9 +71,12 @@ class MainViewMvcImpl(
         set(value) {
             field = value
             when (value) {
-                FragmentType.LOGIN -> fragmentHelper.bind(loginFragment)
-                FragmentType.CONFIRM -> fragmentHelper.bind(confirmFragment)
-                else -> fragmentHelper.clear()
+                FragmentType.LOGIN -> fragmentHelper.bind(R.id.frame_login, loginFragment)
+                FragmentType.CONFIRM -> fragmentHelper.bind(R.id.frame_confirm, confirmFragment)
+                else -> {
+                    fragmentHelper.clear(R.id.frame_login)
+                    fragmentHelper.clear(R.id.frame_confirm)
+                }
             }
         }
 

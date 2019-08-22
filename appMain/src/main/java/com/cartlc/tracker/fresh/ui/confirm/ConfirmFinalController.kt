@@ -5,25 +5,30 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.fresh.model.flow.CurrentProjectFlow
 import com.cartlc.tracker.fresh.model.flow.Flow
 import com.cartlc.tracker.fresh.model.flow.FlowUseCase
 import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.model.msg.StringMessage
+import com.cartlc.tracker.fresh.ui.confirm.data.*
 import com.cartlc.tracker.fresh.ui.picture.PictureListViewMvcImpl
+import java.io.File
 
-class ConfirmFinalController (
+class ConfirmFinalController(
         boundFrag: BoundFrag,
         private val viewMvc: ConfirmFinalViewMvc
 ) : ConfirmFinalUseCase,
         LifecycleObserver,
-        ConfirmFinalViewMvc.Listener,
         FlowUseCase.Listener {
 
     private val ctx = boundFrag.act
     private val repo = boundFrag.repo
     private val componentRoot = boundFrag.componentRoot
     private val prefHelper = componentRoot.prefHelper
+    private val messageHandler = boundFrag.componentRoot.messageHandler
+    private val db = repo.db
     private var curEntry: DataEntry? = null
 
     init {
@@ -34,14 +39,12 @@ class ConfirmFinalController (
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
-        viewMvc.registerListener(this)
         repo.flowUseCase.registerListener(this)
         onStageChanged(repo.curFlowValue)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
-        viewMvc.unregisterListener(this)
         repo.flowUseCase.unregisterListener(this)
     }
 
@@ -66,24 +69,39 @@ class ConfirmFinalController (
     // endregion FlowUseCase.Listener
 
     private fun fill(entry: DataEntry) {
-        viewMvc.projectName = entry.projectDashName
-        val address = entry.addressBlock
-        if (address.isNullOrBlank()) {
-            viewMvc.projectAddress = null
-        } else {
-            viewMvc.projectAddress = address
+        val items = mutableListOf<ConfirmDataType>()
+        items.add(ConfirmDataType.BASICS(ConfirmDataBasics(
+                entry.projectDashName,
+                entry.addressBlock,
+                entry.getStatus(ctx)
+        )))
+        val notes = entry.notesWithValues
+        if (notes.isNotEmpty()) {
+            items.add(ConfirmDataType.NOTES(ConfirmDataNotes(notes)))
         }
-        viewMvc.notes = entry.notesWithValues
-        val truck = entry.truck
-        if (truck == null) {
-            viewMvc.truckNumber = null
-        } else {
-            viewMvc.truckNumber = truck.toString()
+        entry.equipmentNames?.let {
+            items.add(ConfirmDataType.EQUIPMENT(ConfirmDataEquipment(it)))
         }
-        viewMvc.equipmentNames = entry.equipmentNames ?: emptyList()
-        viewMvc.pictures = entry.pictures.toMutableList()
-        viewMvc.status = entry.getStatus(ctx)
-        viewMvc.pictureLabel = ctx.getString(R.string.title_pictures_, entry.pictures.size)
+        entry.truck?.let { truck ->
+            var title = messageHandler.getString(StringMessage.title_truck_number)
+            db.tablePicture.query(truck.truckNumberPictureId.toLong())?.let { picture ->
+                items.add(ConfirmDataType.PICTURES(ConfirmDataPicture(
+                        title,
+                        convert(picture.file),
+                        listOf(NoteLabelValue(title, truck.truckNumberValue)))))
+            }
+            if (truck.truckHasDamage) {
+                title = messageHandler.getString(StringMessage.title_truck_damage)
+                db.tablePicture.query(truck.truckDamagePictureId.toLong())?.let { picture ->
+                    items.add(ConfirmDataType.PICTURES(ConfirmDataPicture(
+                            title,
+                            convert(picture.file),
+                            listOf(NoteLabelValue(title, truck.truckDamageValue)))))
+                }
+            }
+        }
+        items.addAll(convert(groupByStage(entry.pictures)))
+        viewMvc.items = items
     }
 
     override fun onConfirmOkay() {
@@ -93,6 +111,65 @@ class ConfirmFinalController (
             curEntry = null
             repo.curFlowValue = CurrentProjectFlow()
         }
+    }
+
+    private fun convert(file: File?): List<File> {
+        return file?.let {
+            listOf(it)
+        } ?: emptyList()
+    }
+
+    private fun groupByStage(pictures: List<DataPicture>): List<ConfirmDataPicture> {
+        if (pictures.isEmpty()) {
+            return emptyList()
+        }
+        val sorted = pictures.toMutableList()
+        sorted.sort()
+        val list = mutableListOf<ConfirmDataPicture>()
+        var currentLabel: String? = null
+        var currentFlowElementId: Long = -100L
+        var currentPictures = mutableListOf<File>()
+        var currentNotes = mutableListOf<NoteLabelValue>()
+        for (picture in sorted) {
+            if (picture.stage !is Stage.CUSTOM_FLOW) {
+                continue
+            }
+            val flowElementId = picture.stage.flowElementId
+            if (flowElementId != currentFlowElementId) {
+                currentLabel?.let { label ->
+                    list.add(ConfirmDataPicture(
+                            label,
+                            currentPictures,
+                            currentNotes
+                    ))
+                }
+                currentFlowElementId = flowElementId
+                currentLabel = null
+                currentPictures = mutableListOf()
+                currentNotes = mutableListOf()
+            }
+            val file = picture.file ?: continue
+            currentPictures.add(file)
+            val flowElement = db.tableFlowElement.query(flowElementId) ?: continue
+            if (currentLabel == null) {
+                currentLabel = flowElement.prompt
+            }
+            // TODO: Notes later
+        }
+        list.add(ConfirmDataPicture(
+                currentLabel ?: "Unknown",
+                currentPictures,
+                currentNotes
+        ))
+        return list
+    }
+
+    private fun convert(items: List<ConfirmDataPicture>): List<ConfirmDataType> {
+        val list = mutableListOf<ConfirmDataType>()
+        for (item in items) {
+            list.add(ConfirmDataType.PICTURES(item))
+        }
+        return list
     }
 
 }

@@ -3,6 +3,8 @@
  */
 package com.cartlc.tracker.fresh.ui.common
 
+import androidx.annotation.IdRes
+import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.transition.Fade
@@ -12,19 +14,19 @@ class FragmentHelper(
         private val activity: FragmentActivity
 ) {
 
-    fun bind(fragment: Fragment) {
-        val previousFragment = activity.supportFragmentManager.findFragmentById(R.id.frame_fragment)
+    fun bind(@IdRes frame: Int, fragment: Fragment) {
+        val previousFragment = activity.supportFragmentManager.findFragmentById(frame)
         if (previousFragment != fragment) {
             previousFragment?.exitTransition = Fade()
             fragment.enterTransition = Fade()
             activity.supportFragmentManager.beginTransaction()
-                    .replace(R.id.frame_fragment, fragment)
+                    .replace(frame, fragment)
                     .commit()
         }
     }
 
-    fun clear() {
-        activity.supportFragmentManager.findFragmentById(R.id.frame_fragment)?.let {
+    fun clear(@IdRes frame: Int) {
+        activity.supportFragmentManager.findFragmentById(frame)?.let {
             it.exitTransition = Fade()
             activity.supportFragmentManager.beginTransaction()
                     .remove(it)

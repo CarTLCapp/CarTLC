@@ -32,6 +32,8 @@ class MessageHandlerImpl(
                 StringMessage.title_city -> ctx.getString(R.string.title_city)
                 StringMessage.title_street -> ctx.getString(R.string.title_street)
                 StringMessage.title_truck -> ctx.getString(R.string.title_truck)
+                StringMessage.title_truck_number -> ctx.getString(R.string.title_truck_number_)
+                StringMessage.title_truck_damage -> ctx.getString(R.string.title_truck_damage_)
                 StringMessage.title_equipment -> ctx.getString(R.string.title_equipment)
                 StringMessage.title_equipment_installed -> ctx.getString(R.string.title_equipment_installed)
                 StringMessage.title_notes -> ctx.getString(R.string.title_notes)

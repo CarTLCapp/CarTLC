@@ -51,8 +51,13 @@ class StageTruckDamage(
                     screenNavigator.showToast(messageHandler.getString(StringMessage.truck_damage_request))
                 }
                 buttonsUseCase.nextVisible = false
-                taskPicture.dispatchPictureRequest()
-            } else {
+
+                if (taskPicture.takingPictureAborted) {
+                    buttonsUseCase.centerVisible = true
+                    buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_another)
+                } else {
+                    taskPicture.dispatchPictureRequest()
+                }            } else {
                 if (!hasTruckDamageValue) {
                     if (showToast) {
                         screenNavigator.showToast(messageHandler.getString(StringMessage.truck_damage_enter))
@@ -86,6 +91,12 @@ class StageTruckDamage(
     fun pictureStateChanged() {
         with(shared) {
             buttonsUseCase.nextVisible = pictureUseCase.pictureItems.size == 1 && hasTruckDamageValue
+
+            val currentNumPictures = pictureUseCase.pictureItems.size
+            if (currentNumPictures == 0) {
+                buttonsUseCase.centerVisible = true
+                buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_another)
+            }
         }
     }
 
@@ -94,6 +105,11 @@ class StageTruckDamage(
             prefHelper.truckHasDamage = null
             process()
         }
+    }
+
+    fun center() {
+        taskPicture.takingPictureAborted = false
+        taskPicture.dispatchPictureRequest()
     }
 
 }

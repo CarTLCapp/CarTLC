@@ -196,11 +196,15 @@ class MainController(
 
         var progress: String?
             get() = viewMvc.customProgress
-            set(value) { viewMvc.customProgress = value }
+            set(value) {
+                viewMvc.customProgress = value
+            }
 
         var picturesVisible: Boolean
             get() = viewMvc.picturesVisible
-            set(value) { viewMvc.picturesVisible = value }
+            set(value) {
+                viewMvc.picturesVisible = value
+            }
 
         var curFlowValue: Flow
             get() = main.curFlowValue
@@ -428,6 +432,20 @@ class MainController(
             is Stage.CUSTOM_FLOW -> {
                 if (action == Button.BTN_CENTER) {
                     stageCustom.center()
+                } else {
+                    curFlowValue.process(action)
+                }
+            }
+            Stage.TRUCK_NUMBER_PICTURE -> {
+                if (action == Button.BTN_CENTER) {
+                    stageTruckNumber.center()
+                } else {
+                    curFlowValue.process(action)
+                }
+            }
+            Stage.TRUCK_DAMAGE_PICTURE -> {
+                if (action == Button.BTN_CENTER) {
+                    stageTruckDamage.center()
                 } else {
                     curFlowValue.process(action)
                 }
@@ -751,7 +769,7 @@ class MainController(
     }
 
     private fun pictureStateChanged() {
-        when(curFlowValue.stage) {
+        when (curFlowValue.stage) {
             Stage.TRUCK_NUMBER_PICTURE -> stageTruckNumber.pictureStateChanged()
             Stage.TRUCK_DAMAGE_PICTURE -> stageTruckDamage.pictureStateChanged()
             is Stage.CUSTOM_FLOW -> stageCustom.pictureStateChanged()

@@ -160,7 +160,6 @@ class StageCustom(
     fun pictureStateChanged() {
         with(shared) {
             buttonsUseCase.nextVisible = ready
-
             repo.currentFlowElement?.let { element ->
                 val currentNumPictures = pictureUseCase.pictureItems.size
                 if (element.numImages > 1 && currentNumPictures < element.numImages) {
