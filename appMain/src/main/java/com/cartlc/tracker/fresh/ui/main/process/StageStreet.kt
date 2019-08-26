@@ -3,7 +3,6 @@ package com.cartlc.tracker.fresh.ui.main.process
 import android.text.InputType
 import com.cartlc.tracker.fresh.model.flow.*
 import com.cartlc.tracker.fresh.ui.main.MainController
-import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 

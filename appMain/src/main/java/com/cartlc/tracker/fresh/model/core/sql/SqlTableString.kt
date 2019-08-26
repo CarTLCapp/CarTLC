@@ -105,7 +105,7 @@ class SqlTableString(
         var data: DataString? = null
         val columns = arrayOf(KEY_SERVER_ID, KEY_VALUE)
         val selection = "$KEY_ROWID=?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(id))
+        val selectionArgs = arrayOf(id.toString())
         val cursor = db.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null)
         val idxValue = cursor.getColumnIndex(KEY_VALUE)
         val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
@@ -123,7 +123,7 @@ class SqlTableString(
         var data: DataString? = null
         val columns = arrayOf(KEY_ROWID, KEY_VALUE)
         val selection = "$KEY_SERVER_ID=?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(id))
+        val selectionArgs = arrayOf(id.toString())
         val cursor = db.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null)
         val idxValue = cursor.getColumnIndex(KEY_VALUE)
         val idxId = cursor.getColumnIndex(KEY_ROWID)

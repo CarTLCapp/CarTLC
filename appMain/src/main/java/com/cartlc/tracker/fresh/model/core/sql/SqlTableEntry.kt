@@ -140,7 +140,7 @@ class SqlTableEntry(
 
     }
 
-    internal fun getTruck(truckNumber: Int, license_plate: String?): DataTruck? {
+    private fun getTruck(truckNumber: Int, license_plate: String?): DataTruck? {
         var truck: DataTruck? = null
         var trucks: List<DataTruck>
         license_plate?.let {
@@ -234,7 +234,7 @@ class SqlTableEntry(
 
     override fun queryForProjectAddressCombo(id: Long): List<DataEntry> {
         val where = "$KEY_PROJECT_ADDRESS_COMBO_ID=?"
-        val whereArgs = arrayOf(java.lang.Long.toString(id))
+        val whereArgs = arrayOf(id.toString())
         return query(where, whereArgs)
     }
 
@@ -249,9 +249,9 @@ class SqlTableEntry(
 
     override fun query(id: Long): DataEntry? {
         val where = "$KEY_ROWID=?"
-        val whereArgs = arrayOf(java.lang.Long.toString(id))
+        val whereArgs = arrayOf(id.toString())
         val list = query(where, whereArgs)
-        return if (list.size > 0) {
+        return if (list.isNotEmpty()) {
             list[0]
         } else null
     }

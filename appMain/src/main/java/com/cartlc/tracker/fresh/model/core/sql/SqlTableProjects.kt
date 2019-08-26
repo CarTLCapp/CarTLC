@@ -82,7 +82,7 @@ class SqlTableProjects(
     fun remove(id: Long) {
         try {
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(id))
+            val whereArgs = arrayOf(id.toString())
             dbSql.delete(TABLE_NAME, where, whereArgs)
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableProjects::class.java, "remove(id)", "db")
@@ -201,7 +201,7 @@ class SqlTableProjects(
         try {
             val columns = arrayOf(KEY_NAME, KEY_ROOT_PROJECT)
             val selection = "$KEY_ROWID=?"
-            val selectionArgs = arrayOf(java.lang.Long.toString(id))
+            val selectionArgs = arrayOf(id.toString())
             val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null)
             val idxValue = cursor.getColumnIndex(KEY_NAME)
             val idxRootProject = cursor.getColumnIndex(KEY_ROOT_PROJECT)
@@ -229,7 +229,7 @@ class SqlTableProjects(
 
     override fun queryById(id: Long): DataProject? {
         val selection = "$KEY_ROWID=?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(id))
+        val selectionArgs = arrayOf(id.toString())
         val list = query(selection, selectionArgs)
         return if (list.isNotEmpty()) {
             list[0]

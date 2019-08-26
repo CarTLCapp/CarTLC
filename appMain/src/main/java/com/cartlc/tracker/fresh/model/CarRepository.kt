@@ -12,7 +12,6 @@ import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.model.event.Action
-import com.cartlc.tracker.model.flow.*
 import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
@@ -214,7 +213,7 @@ open class CarRepository(
     fun isNotesComplete(items: List<DataNote>): Boolean {
         for (note in items) {
             if (!note.value.isNullOrBlank()) {
-                if (note.num_digits > 0 && note.value!!.length != note.num_digits.toInt()) {
+                if (note.numDigits > 0 && note.value!!.length != note.numDigits.toInt()) {
                     return false
                 }
             }

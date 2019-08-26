@@ -39,13 +39,18 @@
                 @b3.text(flowElementForm("prompt"), '_label -> "Prompt", 'class -> "longer")
                 <div style="clear:both;"></div>
                 @{
-                    val opts = Seq("T"->"Toast","D"->"Dialog","C"->"Confirm","N"->"Confirm Top")
+                    val opts = Seq("T"->"Toast","D"->"Dialog","C"->"Confirm","N"->"Confirm Top","Y"->"Category")
                     b3.radio(flowElementForm("type"), options = opts, '_label -> "Type", '_inline -> true)
                 }
                 <div style="clear:both;"></div>
-                @b3.checkbox(flowElementForm("hasImage"), '_label -> "Image Request")
+                @{
+                    val opts = Seq("0"->"None","1"->"1","2"->"2","3"->"3","4"->"4","5"->"5")
+                    b3.radio(flowElementForm("numImages"), options = opts, '_label -> "Image Request", '_inline -> true)
+                }
                 <div style="clear:both;"></div>
                 @b3.checkbox(flowElementForm("hasGenericNote"), '_label -> "Generic Note Allowed")
+                <div style="clear:both;"></div>
+                @b3.text(flowElementForm("line_num"), '_label -> "Line Number")
                 <div style="clear:both;"></div>
 
             </div>

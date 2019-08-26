@@ -21,7 +21,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
         private const val DATABASE_NAME = "cartcl.db"
-        private const val DATABASE_VERSION = 18
+        private const val DATABASE_VERSION = 19
     }
 
     private var dbHelper: DatabaseHelper
@@ -44,6 +44,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
         lateinit var tableCollectionEquipmentProject: SqlTableCollectionEquipmentProject
         lateinit var tableEntry: SqlTableEntry
         lateinit var tableEquipment: SqlTableEquipment
+        lateinit var tableFlow: SqlTableFlow
+        lateinit var tableFlowElement: SqlTableFlowElement
+        lateinit var tableFlowElementNote: SqlTableFlowElementNote
         lateinit var tableNote: SqlTableNote
         lateinit var tablePictureCollection: SqlTablePictureCollection
         lateinit var tableProjects: SqlTableProjects
@@ -73,6 +76,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
                 tableZipCode.create()
                 tableTruck.create()
                 tableString.create()
+                tableFlow.create()
+                tableFlowElement.create()
+                tableFlowElementNote.create()
                 tableVehicle.create()
                 tableVehicleName.create()
             } catch (ex: Exception) {
@@ -87,6 +93,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableCollectionEquipmentEntry = SqlTableCollectionEquipmentEntry(dm, db)
             tableCollectionEquipmentProject = SqlTableCollectionEquipmentProject(dm, db)
             tableNote = SqlTableNote(dm, db)
+            tableFlow = SqlTableFlow(dm, db)
+            tableFlowElement = SqlTableFlowElement(dm, db)
+            tableFlowElementNote = SqlTableFlowElementNote(dm, db)
             tableCollectionNoteEntry = SqlTableCollectionNoteEntry(dm, db)
             tableCollectionNoteProject = SqlTableCollectionNoteProject(dm, db)
             tablePictureCollection = SqlTablePictureCollection(db)
@@ -130,6 +139,11 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             }
             if (oldVersion <= 17) {
                 tableProjects.upgrade17()
+            }
+            if (oldVersion <= 18) {
+                tableFlow.create()
+                tableFlowElement.create()
+                tableFlowElementNote.create()
             }
         }
 
@@ -179,6 +193,15 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     override val tableEntry: TableEntry
         get() = dbHelper.tableEntry
+
+    override val tableFlow: TableFlow
+        get() = dbHelper.tableFlow
+
+    override val tableFlowElement: TableFlowElement
+        get() = dbHelper.tableFlowElement
+
+    override val tableFlowElementNote: TableFlowElementNote
+        get() = dbHelper.tableFlowElementNote
 
     override val tableCollectionEquipmentEntry: TableCollectionEquipmentEntry
         get() = dbHelper.tableCollectionEquipmentEntry

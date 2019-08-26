@@ -18,6 +18,9 @@ interface DatabaseTable {
     val tableString: TableString
     val tableVehicle: TableVehicle
     val tableVehicleName: TableVehicleName
+    val tableFlow: TableFlow
+    val tableFlowElement: TableFlowElement
+    val tableFlowElementNote: TableFlowElementNote
     val appVersion: String
     fun reportError(ex: Exception, claz: Class<*>, function: String, type: String): String
     fun reportDebugMessage(msg: String)

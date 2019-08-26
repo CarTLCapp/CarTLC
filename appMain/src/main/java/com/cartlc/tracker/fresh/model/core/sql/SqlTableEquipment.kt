@@ -176,7 +176,7 @@ class SqlTableEquipment(
 
     override fun query(id: Long): DataEquipment? {
         val selection = "$KEY_ROWID=?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(id))
+        val selectionArgs = arrayOf(id.toString())
         val list = query(selection, selectionArgs)
         return if (list.size > 0) {
             list[0]
@@ -190,9 +190,9 @@ class SqlTableEquipment(
 
     override fun queryByServerId(server_id: Int): DataEquipment? {
         val selection = "$KEY_SERVER_ID=?"
-        val selectionArgs = arrayOf(Integer.toString(server_id))
+        val selectionArgs = arrayOf(server_id.toString())
         val list = query(selection, selectionArgs)
-        return if (list.size > 0) {
+        return if (list.isNotEmpty()) {
             list[0]
         } else null
     }
@@ -271,7 +271,7 @@ class SqlTableEquipment(
             for (id in ids) {
                 val values = ContentValues()
                 val where = "$KEY_ROWID=?"
-                val whereArgs = arrayOf(java.lang.Long.toString(id))
+                val whereArgs = arrayOf(id.toString())
                 values.put(KEY_CHECKED, 1)
                 dbSql.update(TABLE_NAME, values, where, whereArgs)
             }
@@ -325,7 +325,7 @@ class SqlTableEquipment(
             values.put(KEY_DISABLED, if (item.disabled) 1 else 0)
             values.put(KEY_SERVER_ID, item.serverId)
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(item.id))
+            val whereArgs = arrayOf(item.id.toString())
             dbSql.update(TABLE_NAME, values, where, whereArgs)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
@@ -337,7 +337,7 @@ class SqlTableEquipment(
 
     internal fun remove(id: Long) {
         val where = "$KEY_ROWID=?"
-        val whereArgs = arrayOf(java.lang.Long.toString(id))
+        val whereArgs = arrayOf(id.toString())
         dbSql.delete(TABLE_NAME, where, whereArgs)
     }
 

@@ -107,14 +107,14 @@ class NoteListEntryController(
         }
         val entryHint: EntryHint
 
-        if (note.num_digits > 0) {
+        if (note.numDigits > 0) {
             if (note.value != null && note.value!!.isNotBlank()) {
                 val sbuf = StringBuilder()
                 val count = note.value!!.length
                 sbuf.append(count)
                 sbuf.append("/")
-                sbuf.append(note.num_digits.toInt())
-                entryHint = EntryHint(sbuf.toString(), (count > note.num_digits))
+                sbuf.append(note.numDigits.toInt())
+                entryHint = EntryHint(sbuf.toString(), (count > note.numDigits))
             } else {
                 entryHint = EntryHint("", false)
             }

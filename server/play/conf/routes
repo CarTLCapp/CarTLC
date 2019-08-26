@@ -115,7 +115,7 @@ GET     /flow/:id/edit_element/:elementId   controllers.FlowController.editEleme
 GET     /flow/:id/delete_element/:elementId controllers.FlowController.deleteElement(id:Long, elementId:Long)
 GET     /flow/:id/add_element               controllers.FlowController.addElement(id:Long)
 POST    /flow/:id/save_element/:elementId   controllers.FlowController.saveElement(id:Long, elementId: Long)
-POST    /flow                       controllers.FlowController.query()
+POST    /flows                      controllers.FlowController.query()
 
 ### CLIENTS ###
 

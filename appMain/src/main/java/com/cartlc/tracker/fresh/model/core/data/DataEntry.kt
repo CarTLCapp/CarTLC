@@ -85,7 +85,7 @@ class DataEntry(private val db: DatabaseTable) {
 
     // Get all the notes as indicated by the project.
     // This will also include any current edits in place as well.
-    val notesByProject: List<DataNote>
+    private val notesByProject: List<DataNote>
         get() = db.tableCollectionNoteProject.getNotes(projectAddressCombo!!.projectNameId)
 
     // Return only the notes with values.

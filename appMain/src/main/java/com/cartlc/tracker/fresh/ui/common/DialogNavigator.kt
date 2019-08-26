@@ -27,11 +27,11 @@ class DialogNavigator(
         builder.setTitle(R.string.title_notes)
         val sbuf = StringBuilder()
         for (note in notes) {
-            if (note.num_digits > 0 && note.valueLength() > 0 && note.valueLength() != note.num_digits.toInt()) {
+            if (note.numDigits > 0 && note.valueLength() > 0 && note.valueLength() != note.numDigits.toInt()) {
                 sbuf.append("    ")
                 sbuf.append(note.name)
                 sbuf.append(": ")
-                sbuf.append(messageHandler.getString(StringMessage.error_incorrect_note_count(note.valueLength(), note.num_digits.toInt())))
+                sbuf.append(messageHandler.getString(StringMessage.error_incorrect_note_count(note.valueLength(), note.numDigits.toInt())))
                 sbuf.append("\n")
             }
         }

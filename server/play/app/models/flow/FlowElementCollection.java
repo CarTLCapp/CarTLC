@@ -20,7 +20,7 @@ import play.db.ebean.Transactional;
  * A list of flow elements for a flow managed by Ebean
  */
 @Entity
-public class FlowElementCollection extends Model implements Comparable<FlowElementCollection> {
+public class FlowElementCollection extends Model {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,9 +32,6 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
 
     @Constraints.Required
     public Long flow_element_id;
-
-    @Constraints.Required
-    public int chain_order;
 
     public static Finder<Long, FlowElementCollection> find = new Finder<Long, FlowElementCollection>(FlowElementCollection.class);
 
@@ -53,8 +50,19 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
     public static List<FlowElementCollection> findByFlowId(long flow_id) {
         return find.where()
                 .eq("flow_id", flow_id)
-                .orderBy("chain_order asc")
                 .findList();
+    }
+
+    public static List<FlowElement> findByFlowIdAndLineNumber(long flow_id, int line_number) {
+        List<FlowElementCollection> items = findByFlowId(flow_id);
+        List<FlowElement> list = new ArrayList<FlowElement>();
+        for (FlowElementCollection item : items) {
+            FlowElement element = item.getFlowElement();
+            if (element.line_num == line_number) {
+                list.add(item.getFlowElement());
+            }
+        }
+        return list;
     }
 
     public static List<FlowElement> findElementsByFlowId(long flow_id) {
@@ -63,11 +71,43 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
         for (FlowElementCollection item : items) {
             list.add(item.getFlowElement());
         }
+        Collections.sort(list);
         if (list.size() > 0) {
             list.get(0).isFirst = true;
             list.get(list.size()-1).isLast = true;
         }
         return list;
+    }
+
+    @Transactional
+    public static void renumber(long flow_id, long newly_moved_id) {
+        FlowElement newly_moved = FlowElement.get(newly_moved_id);
+        List<FlowElement> hasLineNumber = findByFlowIdAndLineNumber(flow_id, newly_moved.line_num);
+        removeFromList(hasLineNumber, newly_moved_id);
+        ArrayList<FlowElement> elements = new ArrayList<FlowElement>(findElementsByFlowId(flow_id));
+        for (FlowElement element : hasLineNumber) {
+            removeFromList(elements, element.id);
+        }
+        int line_num = 1;
+        for (FlowElement element : elements) {
+            element.line_num = line_num++;
+            if (element.id == newly_moved_id) {
+                for (FlowElement place_below : hasLineNumber) {
+                    place_below.line_num = line_num++;
+                    place_below.update();
+                }
+            }
+            element.update();
+        }
+    }
+
+    private static void removeFromList(List<FlowElement> list, long element_id) {
+        for (FlowElement element : list) {
+            if (element.id == element_id) {
+                list.remove(element);
+                break;
+            }
+        }
     }
 
     @Transactional
@@ -103,19 +143,18 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
         FlowElementCollection flowElementCollection = new FlowElementCollection();
         flowElementCollection.flow_id = flow_id;
         flowElementCollection.flow_element_id = flow_element_id;
-        flowElementCollection.chain_order = getNextChainOrder(flow_id);
         flowElementCollection.save();
     }
 
-    private static int getNextChainOrder(long flow_id) {
-        List<FlowElementCollection> items = findByFlowId(flow_id);
-        int last_chain_order = 0;
-        for (FlowElementCollection item : items) {
-            if (item.chain_order > last_chain_order) {
-                last_chain_order = item.chain_order;
+    public static int getNextLineNumber(long flow_id) {
+        List<FlowElement> items = findElementsByFlowId(flow_id);
+        int last_line_number = 0;
+        for (FlowElement item : items) {
+            if (item.line_num > last_line_number) {
+                last_line_number = item.line_num;
             }
         }
-        return last_chain_order + 1;
+        return last_line_number + 1;
     }
 
     public FlowElement getFlowElement() {
@@ -140,11 +179,13 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
         if (element_pos <= 0) {
             return false;
         }
-        FlowElementCollection moving_element = items.get(element_pos);
-        FlowElementCollection previous_element = items.get(element_pos-1);
-        int saved_order = moving_element.chain_order;
-        moving_element.chain_order = previous_element.chain_order;
-        previous_element.chain_order = saved_order;
+        FlowElementCollection moving_element_holder = items.get(element_pos);
+        FlowElement moving_element = moving_element_holder.getFlowElement();
+        FlowElementCollection previous_element_holder = items.get(element_pos-1);
+        FlowElement previous_element = previous_element_holder.getFlowElement();
+        int saved_line_number = moving_element.line_num;
+        moving_element.line_num = previous_element.line_num;
+        previous_element.line_num = saved_line_number;
         moving_element.update();
         previous_element.update();
         return true;
@@ -168,31 +209,16 @@ public class FlowElementCollection extends Model implements Comparable<FlowEleme
         if (element_pos >= items.size()-1) {
             return false;
         }
-        FlowElementCollection moving_element = items.get(element_pos);
-        FlowElementCollection next_element = items.get(element_pos+1);
-        int saved_order = moving_element.chain_order;
-        moving_element.chain_order = next_element.chain_order;
-        next_element.chain_order = saved_order;
+        FlowElementCollection moving_element_holder = items.get(element_pos);
+        FlowElement moving_element = moving_element_holder.getFlowElement();
+        FlowElementCollection next_element_holder = items.get(element_pos+1);
+        FlowElement next_element = next_element_holder.getFlowElement();
+        int saved_line_number = moving_element.line_num;
+        moving_element.line_num = next_element.line_num;
+        next_element.line_num = saved_line_number;
         moving_element.update();
         next_element.update();
         return true;
-    }
-
-    @Override
-    public int compareTo(FlowElementCollection item) {
-        return chain_order - item.chain_order;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof FlowElementCollection) {
-            return equals((FlowElementCollection) other);
-        }
-        return super.equals(other);
-    }
-
-    public boolean equals(FlowElementCollection other) {
-        return chain_order == other.chain_order;
     }
 
 }

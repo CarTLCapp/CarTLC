@@ -128,7 +128,7 @@ class SqlTableTruck(
 
     override fun query(id: Long): DataTruck? {
         val selection = "$KEY_ROWID=?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(id))
+        val selectionArgs = arrayOf(id.toString())
         val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
         var truck: DataTruck? = DataTruck()
         if (cursor.moveToNext()) {
@@ -268,7 +268,7 @@ class SqlTableTruck(
 
     override fun queryByServerId(id: Long): DataTruck? {
         val selection = "$KEY_SERVER_ID=?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(id))
+        val selectionArgs = arrayOf(id.toString())
         val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
         var truck: DataTruck? = DataTruck()
         if (cursor.moveToNext()) {
@@ -295,7 +295,7 @@ class SqlTableTruck(
 
     internal fun remove(id: Long) {
         val where = "$KEY_ROWID=?"
-        val whereArgs = arrayOf(java.lang.Long.toString(id))
+        val whereArgs = arrayOf(id.toString())
         dbSql.delete(TABLE_NAME, where, whereArgs)
     }
 

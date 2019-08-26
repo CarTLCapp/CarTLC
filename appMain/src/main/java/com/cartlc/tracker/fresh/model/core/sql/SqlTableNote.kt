@@ -93,7 +93,7 @@ class SqlTableNote constructor(
                 values.put(KEY_NAME, value.name)
                 values.put(KEY_TYPE, value.type!!.ordinal)
                 values.put(KEY_VALUE, value.value)
-                values.put(KEY_NUM_DIGITS, value.num_digits)
+                values.put(KEY_NUM_DIGITS, value.numDigits)
                 values.put(KEY_SERVER_ID, value.serverId)
                 values.put(KEY_IS_BOOT, if (value.isBootStrap) 1 else 0)
                 dbSql.insert(TABLE_NAME, null, values)
@@ -114,7 +114,7 @@ class SqlTableNote constructor(
             values.put(KEY_NAME, item.name)
             values.put(KEY_TYPE, item.type!!.ordinal)
             values.put(KEY_VALUE, item.value)
-            values.put(KEY_NUM_DIGITS, item.num_digits)
+            values.put(KEY_NUM_DIGITS, item.numDigits)
             values.put(KEY_SERVER_ID, item.serverId)
             values.put(KEY_IS_BOOT, if (item.isBootStrap) 1 else 0)
             item.id = dbSql.insert(TABLE_NAME, null, values)
@@ -161,7 +161,7 @@ class SqlTableNote constructor(
 
     override fun query(id: Long): DataNote? {
         val selection = "$KEY_ROWID=?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(id))
+        val selectionArgs = arrayOf(id.toString())
         val list = query(selection, selectionArgs)
         return if (list.size > 0) {
             list[0]
@@ -194,7 +194,7 @@ class SqlTableNote constructor(
                 item.name = cursor.getString(idxName)
                 item.value = cursor.getString(idxValue)
                 item.type = DataNote.Type.from(cursor.getInt(idxType))
-                item.num_digits = cursor.getShort(idxNumDigits)
+                item.numDigits = cursor.getShort(idxNumDigits)
                 item.serverId = cursor.getInt(idxServerId)
                 item.isBootStrap = cursor.getShort(idxTest).toInt() != 0
                 list.add(item)
@@ -233,7 +233,7 @@ class SqlTableNote constructor(
             values.put(KEY_TYPE, item.type!!.ordinal)
             values.put(KEY_VALUE, item.value)
             values.put(KEY_SERVER_ID, item.serverId)
-            values.put(KEY_NUM_DIGITS, item.num_digits)
+            values.put(KEY_NUM_DIGITS, item.numDigits)
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(java.lang.Long.toString(item.id))
             dbSql.update(TABLE_NAME, values, where, whereArgs)
@@ -263,7 +263,7 @@ class SqlTableNote constructor(
 
     internal fun remove(id: Long) {
         val where = "$KEY_ROWID=?"
-        val whereArgs = arrayOf(java.lang.Long.toString(id))
+        val whereArgs = arrayOf(id.toString())
         dbSql.delete(TABLE_NAME, where, whereArgs)
     }
 

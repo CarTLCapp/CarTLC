@@ -33,7 +33,7 @@ public class Flow extends com.avaje.ebean.Model {
     public static Finder<Long, Flow> find = new Finder<Long, Flow>(Flow.class);
 
     public static List<Flow> list() {
-        return find.orderBy("id asc").findList();
+        return find.orderBy("sub_project_id asc").findList();
     }
 
     public static Flow get(long id) {

@@ -65,6 +65,7 @@ class PrefHelper constructor(
         const val VERSION_EQUIPMENT = "version_equipment"
         const val VERSION_NOTE = "version_note"
         const val VERSION_TRUCK = "version_truck"
+        const val VERSION_FLOW = "version_flow"
         const val VERSION_VEHICLE_NAMES = "version_vehicle_names"
 
         private const val PICTURE_DATE_FORMAT = "yy-MM-dd_HH:mm:ss"
@@ -207,6 +208,10 @@ class PrefHelper constructor(
     var versionTruck: Int
         get() = getInt(VERSION_TRUCK, VERSION_RESET)
         set(value) = setInt(VERSION_TRUCK, value)
+
+    var versionFlow: Int
+        get() = getInt(VERSION_FLOW, VERSION_RESET)
+        set(value) = setInt(VERSION_FLOW, value)
 
     var versionVehicleNames: Int
         get() = getInt(VERSION_VEHICLE_NAMES, VERSION_RESET)

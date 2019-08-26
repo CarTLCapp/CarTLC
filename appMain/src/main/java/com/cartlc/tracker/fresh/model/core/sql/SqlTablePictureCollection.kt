@@ -193,7 +193,7 @@ class SqlTablePictureCollection(
             cursor.close()
             val where = "$KEY_ROWID=?"
             for (id in delete) {
-                val whereArgs = arrayOf(java.lang.Long.toString(id))
+                val whereArgs = arrayOf(id.toString())
                 dbSql.delete(TABLE_NAME, where, whereArgs)
             }
         } catch (ex: Exception) {

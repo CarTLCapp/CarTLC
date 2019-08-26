@@ -4,9 +4,10 @@
 
 create table flow_element (
     id                int auto_increment primary key,
+    line_num          smallint default 0,
     prompt            text,
     prompt_type       tinyint default 0,
-    request_image     bit default 0,
+    request_image     tinyint default 0,
     generic_note      bit default 0
 );
 
@@ -29,8 +30,7 @@ alter table flow_note_collection add constraint c_fnc_note_id foreign key (note_
 create table flow_element_collection (
     id                int auto_increment primary key,
     flow_id           int,
-    flow_element_id   int,
-    chain_order       int
+    flow_element_id   int
 );
 
 alter table flow_element_collection add constraint c_fec_flow_id foreign key (flow_id) references flow (id) on delete restrict on update restrict;

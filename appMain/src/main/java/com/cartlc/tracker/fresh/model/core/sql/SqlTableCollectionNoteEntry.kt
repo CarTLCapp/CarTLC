@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.sql
 
@@ -17,19 +17,18 @@ import java.util.ArrayList
 /**
  * Created by dug on 5/16/17.
  */
-
 class SqlTableCollectionNoteEntry(
         private val db: DatabaseTable,
         private val dbSql: SQLiteDatabase
 ): TableCollectionNoteEntry {
 
     companion object {
-        internal const val TABLE_NAME = "note_entry_collection"
+        private const val TABLE_NAME = "note_entry_collection"
 
-        internal const val KEY_ROWID = "_id"
-        internal const val KEY_COLLECTION_ID = "collection_id"
-        internal const val KEY_NOTE_ID = "note_id"
-        internal const val KEY_VALUE = "value"
+        private const val KEY_ROWID = "_id"
+        private const val KEY_COLLECTION_ID = "collection_id"
+        private const val KEY_NOTE_ID = "note_id"
+        private const val KEY_VALUE = "value"
     }
 
     fun create() {

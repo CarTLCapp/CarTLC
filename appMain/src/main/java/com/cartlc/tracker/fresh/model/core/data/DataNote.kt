@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.data
 
@@ -9,14 +9,14 @@ import java.util.Locale
 /**
  * Created by dug on 5/16/17.
  */
-
 class DataNote {
 
     var id: Long = 0
     var name: String = ""
     var value: String? = null
     var type: Type? = null
-    var num_digits: Short = 0
+    var numDigits: Short = 0
+    var dataPictureId: Long = 0
     var serverId: Int = 0
     var isBootStrap: Boolean = false
 
@@ -65,7 +65,7 @@ class DataNote {
     constructor(name: String, type: Type, num_digits: Short, server_id: Int) {
         this.name = name
         this.type = type
-        this.num_digits = num_digits
+        this.numDigits = num_digits
         this.serverId = server_id
     }
 
@@ -90,7 +90,7 @@ class DataNote {
             sbuf.append(type!!.toString())
         }
         sbuf.append(", #DIGITS=")
-        sbuf.append(num_digits.toInt())
+        sbuf.append(numDigits.toInt())
         sbuf.append(" SID=")
         sbuf.append(serverId)
         return sbuf.toString()
@@ -100,7 +100,7 @@ class DataNote {
         return if (other is DataNote) {
             return (name == other.name
                     && type?.ordinal == other.type?.ordinal
-                    && num_digits == other.num_digits)
+                    && numDigits == other.numDigits)
         } else super.equals(other)
     }
 

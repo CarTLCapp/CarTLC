@@ -48,6 +48,7 @@
         <table class="companies zebra-striped">
             <thead>
                 <tr>
+                    <th>Line</th>
                     <th>ID</th>
                     <th>Type</th>
                     <th>Prompt</th>
@@ -62,6 +63,7 @@
 
                 @for(element <- FlowElementCollection.findElementsByFlowId(id)) {
                     <tr>
+                        <td>@element.line_num</td>
                         <td>@element.id</td>
                         <td>@element.getPromptTypeName()</td>
                         <td>

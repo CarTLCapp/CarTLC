@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.text.SimpleDateFormat;
 import java.util.Map;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -634,14 +635,14 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     EntryEquipmentCollection collection = new EntryEquipmentCollection();
                     collection.collection_id = (long) collection_id;
-                    JsonNode subvalue = ele.findValue("equipment_id");
-                    if (subvalue == null) {
-                        subvalue = ele.findValue("equipment_name");
-                        if (subvalue == null) {
+                    JsonNode subValue = ele.findValue("equipment_id");
+                    if (subValue == null) {
+                        subValue = ele.findValue("equipment_name");
+                        if (subValue == null) {
                             missing.add("equipment_id");
                             missing.add("equipment_name");
                         } else {
-                            String name = subvalue.textValue();
+                            String name = subValue.textValue();
                             List<Equipment> equipments = Equipment.findByName(name);
                             Equipment equipment;
                             if (equipments.size() == 0) {
@@ -664,7 +665,7 @@ public class EntryController extends Controller {
                             collection.equipment_id = equipment.id;
                         }
                     } else {
-                        collection.equipment_id = subvalue.longValue();
+                        collection.equipment_id = subValue.longValue();
                     }
                     collection.save();
                 }
@@ -674,6 +675,7 @@ public class EntryController extends Controller {
                 }
             }
         }
+        HashMap<Long,Long> pictureIdMap = new HashMap<Long,Long>(); // app-side pictureId, PictureCollection.id
         value = json.findValue("picture");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
@@ -691,16 +693,21 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     PictureCollection collection = new PictureCollection();
                     collection.collection_id = (long) collection_id;
-                    JsonNode subvalue = ele.findValue("note");
-                    if (subvalue != null) {
-                        collection.note = subvalue.textValue();
+                    JsonNode subValue = ele.findValue("note");
+                    if (subValue != null) {
+                        collection.note = subValue.textValue();
                     }
-                    subvalue = ele.findValue("filename");
-                    if (subvalue == null) {
+                    subValue = ele.findValue("filename");
+                    if (subValue == null) {
                         missing.add("filename");
                     } else {
-                        collection.picture = subvalue.textValue();
+                        collection.picture = subValue.textValue();
                         collection.save();
+                    }
+                    JsonNode idValue = ele.findValue("id");
+                    if (idValue != null) {
+                        long appId = idValue.longValue();
+                        pictureIdMap.put(appId, collection.id);
                     }
                 }
                 entry.picture_collection_id = collection_id;
@@ -723,13 +730,18 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     EntryNoteCollection collection = new EntryNoteCollection();
                     collection.collection_id = (long) collection_id;
-                    JsonNode subvalue = ele.findValue("id");
-                    if (subvalue == null) {
-                        subvalue = ele.findValue("name");
-                        if (subvalue == null) {
+                    JsonNode pictureValue = ele.findValue("picture");
+                    if (pictureValue != null) {
+                        long appId = pictureValue.longValue();
+                        collection.picture_collection_id = pictureIdMap.get(appId);
+                    }
+                    JsonNode subValue = ele.findValue("id");
+                    if (subValue == null) {
+                        subValue = ele.findValue("name");
+                        if (subValue == null) {
                             missing.add("note:id, note:name");
                         } else {
-                            String name = subvalue.textValue();
+                            String name = subValue.textValue();
                             List<Note> notes = Note.findByName(name);
                             if (notes == null || notes.size() == 0) {
                                 // A tech can get into a situation where they are effectively
@@ -753,13 +765,13 @@ public class EntryController extends Controller {
                             }
                         }
                     } else {
-                        collection.note_id = subvalue.longValue();
+                        collection.note_id = subValue.longValue();
                     }
-                    subvalue = ele.findValue("value");
+                    subValue = ele.findValue("value");
                     if (value == null) {
                         missing.add("note:value");
                     } else {
-                        collection.note_value = subvalue.textValue();
+                        collection.note_value = subValue.textValue();
                     }
                     collection.save();
                 }

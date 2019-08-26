@@ -253,7 +253,7 @@ abstract class SqlTableCollection(
     override fun remove(id: Long) {
         try {
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(id))
+            val whereArgs = arrayOf(id.toString())
             mDb.delete(mTableName, where, whereArgs)
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableCollection::class.java, "remove(id)", "db")
@@ -263,7 +263,7 @@ abstract class SqlTableCollection(
     fun removeByCollectionId(id: Long) {
         try {
             val where = "$KEY_COLLECTION_ID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(id))
+            val whereArgs = arrayOf(id.toString())
             mDb.delete(mTableName, where, whereArgs)
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableCollection::class.java, "removeByCollectionId(id)", "db")

@@ -192,7 +192,7 @@ class SqlTableProjectAddressCombo(
         try {
             val columns = arrayOf(KEY_PROJECT_ID, KEY_ADDRESS_ID)
             val selection = "$KEY_ROWID =?"
-            val selectionArgs = arrayOf(java.lang.Long.toString(id))
+            val selectionArgs = arrayOf(id.toString())
             val cursor = sqlDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
             val idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID)
             val idxAddressId = cursor.getColumnIndex(KEY_ADDRESS_ID)
@@ -241,7 +241,7 @@ class SqlTableProjectAddressCombo(
     override fun updateUsed(id: Long) {
         try {
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(id))
+            val whereArgs = arrayOf(id.toString())
             val values = ContentValues()
             values.put(KEY_LAST_USED, System.currentTimeMillis())
             sqlDb.update(TABLE_NAME, values, where, whereArgs)

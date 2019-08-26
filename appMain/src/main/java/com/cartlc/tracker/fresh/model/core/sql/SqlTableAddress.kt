@@ -54,7 +54,7 @@ class SqlTableAddress(
                 args.add(company)
             }
             if (state != null && state.isNotEmpty()) {
-                if (sbuf.length > 0) {
+                if (sbuf.isNotEmpty()) {
                     sbuf.append(" AND ")
                 }
                 val dstate = DataStates[state]
@@ -82,7 +82,7 @@ class SqlTableAddress(
                 }
             }
             if (city != null && city.isNotEmpty()) {
-                if (sbuf.length > 0) {
+                if (sbuf.isNotEmpty()) {
                     sbuf.append(" AND ")
                 }
                 sbuf.append("LOWER(")
@@ -93,7 +93,7 @@ class SqlTableAddress(
                 args.add(city.toLowerCase(Locale.getDefault()))
             }
             if (street != null && street.isNotEmpty()) {
-                if (sbuf.length > 0) {
+                if (sbuf.isNotEmpty()) {
                     sbuf.append(" AND ")
                 }
                 sbuf.append("LOWER(")
@@ -103,14 +103,14 @@ class SqlTableAddress(
                 args.add(street.toLowerCase(Locale.getDefault()))
             }
             if (zipcode != null && zipcode.isNotEmpty()) {
-                if (sbuf.length > 0) {
+                if (sbuf.isNotEmpty()) {
                     sbuf.append(" AND ")
                 }
                 sbuf.append(KEY_ZIPCODE)
                 sbuf.append("=?")
                 args.add(zipcode)
             }
-            if (sbuf.length > 0) {
+            if (sbuf.isNotEmpty()) {
                 selection = sbuf.toString()
                 selectionArgs = args.toTypedArray()
             } else {
@@ -285,9 +285,9 @@ class SqlTableAddress(
     override fun query(id: Long): DataAddress? {
         val orderBy = "$KEY_COMPANY ASC"
         val selection = "$KEY_ROWID =?"
-        val selectionArgs = arrayOf(java.lang.Long.toString(id))
+        val selectionArgs = arrayOf(id.toString())
         val list = query(selection, selectionArgs, orderBy)
-        return if (list.size > 0) {
+        return if (list.isNotEmpty()) {
             list[0]
         } else null
     }
@@ -305,9 +305,9 @@ class SqlTableAddress(
 
     override fun queryByServerId(serverId: Int): DataAddress? {
         val selection = "$KEY_SERVER_ID=?"
-        val selectionArgs = arrayOf(Integer.toString(serverId))
+        val selectionArgs = arrayOf(serverId.toString())
         val list = query(selection, selectionArgs, null)
-        return if (list.size > 0) {
+        return if (list.isNotEmpty()) {
             list[0]
         } else null
     }
@@ -419,7 +419,7 @@ class SqlTableAddress(
     fun remove(id: Long) {
         try {
             val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(id))
+            val whereArgs = arrayOf(id.toString())
             dbSql.delete(TABLE_NAME, where, whereArgs)
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableAddress::class.java, "remove()", "db")

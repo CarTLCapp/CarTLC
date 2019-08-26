@@ -190,7 +190,9 @@ public class FlowController extends Controller {
         if (!curClient.is_admin) {
             return HomeController.PROBLEM("Non administrators cannot change flows.");
         }
-        Form<InputFlowElement> flowElementForm = formFactory.form(InputFlowElement.class).fill(new InputFlowElement());
+        Form<InputFlowElement> flowElementForm = formFactory.form(InputFlowElement.class).fill(
+                new InputFlowElement(FlowElementCollection.getNextLineNumber(flowId))
+        );
         return ok(views.html.flow_editElementForm.render(0L, flowId, flowElementForm, curClient));
     }
 
@@ -225,9 +227,14 @@ public class FlowController extends Controller {
         }
         flowElement.prompt = inputFlowElement.prompt;
         flowElement.prompt_type = inputFlowElement.getPromptType().getCode();
-        flowElement.request_image = inputFlowElement.hasImage;
-        flowElement.generic_note = inputFlowElement.hasGenericNote;
+        flowElement.line_num = inputFlowElement.line_num;
 
+        try {
+            flowElement.request_image = Integer.valueOf(inputFlowElement.numImages).byteValue();
+        } catch (Exception ex) {
+            flowElement.request_image = 0;
+        }
+        flowElement.generic_note = inputFlowElement.hasGenericNote;
         if (elementId > 0) {
             flowElement.update();
         } else {
@@ -243,6 +250,7 @@ public class FlowController extends Controller {
             FlowElementCollection.create(flowId, elementId);
         }
         FlowNoteCollection.process(elementId, flowElementForm);
+        FlowElementCollection.renumber(flowId, elementId);
 
         return EDIT(flowId);
     }
@@ -257,17 +265,18 @@ public class FlowController extends Controller {
             ArrayNode elementsNode = node.putArray("elements");
             for (FlowElement element : flow.getFlowElements()) {
                 ObjectNode elementNode = elementsNode.addObject();
+                elementNode.put("id", element.id);
                 if (element.hasPrompt()) {
                     elementNode.put("prompt", element.prompt);
                 }
                 elementNode.put("type", element.getPromptType().getCodeString());
-                elementNode.put("requestImage", element.request_image);
-                elementNode.put("genericNote", element.generic_note);
+                elementNode.put("num_images", element.getNumImages());
+                elementNode.put("generic_note", element.generic_note);
                 if (element.hasNotes()) {
                     ArrayNode notesNote = elementNode.putArray("notes");
                     for (Note note : element.getNotes()) {
                         ObjectNode noteNode = notesNote.addObject();
-                        noteNode.put("node_id", note.id);
+                        noteNode.put("note_id", note.id);
                     }
                 }
             }
