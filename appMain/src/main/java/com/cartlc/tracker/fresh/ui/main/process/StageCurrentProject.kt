@@ -26,6 +26,7 @@ class StageCurrentProject(
             buttonsUseCase.prevText = messageHandler.getString(StringMessage.btn_edit)
             buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_new_project)
             titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_current_project)
+            pictureUseCase.clearCache()
         }
     }
 

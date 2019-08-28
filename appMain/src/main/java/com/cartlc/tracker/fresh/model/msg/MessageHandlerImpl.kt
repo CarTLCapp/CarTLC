@@ -23,6 +23,7 @@ class MessageHandlerImpl(
 
                 StringMessage.error_picture_removed -> ctx.getString(R.string.error_picture_removed)
                 StringMessage.error_need_all_checked -> ctx.getString(R.string.error_need_all_checked)
+                StringMessage.error_has_no_flows -> ctx.getString(R.string.error_has_no_flows)
 
                 StringMessage.title_current_project -> ctx.getString(R.string.title_current_project)
                 StringMessage.title_login -> ctx.getString(R.string.title_login)
@@ -68,6 +69,8 @@ class MessageHandlerImpl(
 
                 is StringMessage.status_installed_equipments -> ctx.getString(R.string.status_installed_equipments, msg.checkedEquipment, msg.maxEquip)
                 is StringMessage.status_installed_pictures -> ctx.getString(R.string.status_installed_pictures, msg.countPictures)
+                is StringMessage.status_notes_used -> ctx.getString(R.string.status_notes_used, msg.countNotes)
+
                 is StringMessage.error_incorrect_note_count -> ctx.getString(R.string.error_incorrect_note_count, msg.length, msg.digits)
                 is StringMessage.error_incorrect_digit_count -> ctx.getString(R.string.error_incorrect_digit_count, msg.msg)
             }

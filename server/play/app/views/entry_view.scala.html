@@ -69,9 +69,24 @@
 
         <h1 id="pictureTitle">Pictures</h1>
 
-        @for(element <- entry.getFlowElements()) {
+        @if(entry.hasTruckNumberPictureValue()) {
+            <h2>Truck Number</h2>
+
+            <img src='@routes.EntryController.getImage(entry.getTruckNumberPictureValue())'/>
+        }
+        @if(entry.hasTruckDamagePictureValue()) {
+            <h2>Truck Damage</h2>
+
+            <img src='@routes.EntryController.getImage(entry.getTruckDamagePictureValue())'/>
+        }
+
+        @for(element <- entry.getPictureFlowElements()) {
 
             <h2 id="sectionTitle">@element.prompt</h2>
+
+            @for(picture <- element.getPictures()) {
+                <img src='@routes.EntryController.getImage(picture.picture)'/>
+            }
 
             @if(element.hasNotes()) {
 
@@ -84,20 +99,15 @@
                     </thead>
 
                     <tbody>
-                        @for(note <- element.getNoteValues()) {
+                        @for(note <- entry.getNoteValuesForElement(client.id, element.id)) {
                             <tr>
                                 <td>@note.getName()</td>
-                                <td>@note.note_value</td>
+                                <td>@note.getValue()</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             }
-
-            @for(picture <- element.getPictures()) {
-                <img src='@routes.EntryController.getImage(picture.picture)'/>
-            }
-
         }
     }
 

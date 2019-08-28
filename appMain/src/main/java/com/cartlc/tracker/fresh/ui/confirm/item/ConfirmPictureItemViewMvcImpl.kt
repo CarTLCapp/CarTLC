@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.cartlc.tracker.R
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import java.io.File
@@ -23,13 +24,15 @@ class ConfirmPictureItemViewMvcImpl(
     private val pictureView = findViewById<ImageView>(R.id.picture)
     private val loadedHeight = context.resources.getDimension(R.dimen.image_thumbnail_max_height).toInt()
 
+    private val app = context.applicationContext as TBApplication
+    private val bitmapHelper = app.componentRoot.bitmapHelper
     // region PictureListThumbnailItemViewMvc
 
     override fun bindPicture(pictureFile: File?) {
         if (pictureFile == null || !pictureFile.exists()) {
             pictureView.setImageResource(android.R.color.transparent)
         } else {
-            BitmapHelper.loadBitmap(pictureFile.absolutePath, loadedHeight, pictureView, true)
+            bitmapHelper.loadBitmap(pictureFile.absolutePath, loadedHeight, pictureView, true)
         }
     }
 

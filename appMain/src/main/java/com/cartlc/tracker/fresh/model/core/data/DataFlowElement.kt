@@ -48,6 +48,7 @@ class DataFlowElement(
         other as DataFlowElement
 
         if (flowId != other.flowId) return false
+        if (order != other.order) return false
         if (prompt != other.prompt) return false
         if (type != other.type) return false
         if (numImages != other.numImages) return false
@@ -57,14 +58,15 @@ class DataFlowElement(
 
     override fun hashCode(): Int {
         var result = flowId.hashCode()
+        result = 31 * result + order
         result = 31 * result + (prompt?.hashCode() ?: 0)
         result = 31 * result + type.hashCode()
-        result = 31 * result + numImages.hashCode()
+        result = 31 * result + numImages
         return result
     }
 
     override fun toString(): String {
-        return "DataFlowElement(id=$id, serverId=$serverId, flowId=$flowId, prompt=$prompt, type=$type, numImages=$numImages)"
+        return "DataFlowElement(id=$id, serverId=$serverId, flowId=$flowId, order=$order, prompt=$prompt, type=$type, numImages=$numImages)"
     }
 
 }

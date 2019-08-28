@@ -10,6 +10,7 @@ import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableFlowElement
 import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.ui.app.TBApplication
+import timber.log.Timber
 
 /**
  * Created by dug on 8/31/17.
@@ -148,6 +149,7 @@ class SqlTableFlowElement(
         return rowId
     }
 
+    // TODO: Should have just used KEY_ORDER desc
     override fun last(flow_id: Long): Long? {
         val selection = "$KEY_FLOW_ID=?"
         val selectionArgs = arrayOf(flow_id.toString())
@@ -176,7 +178,8 @@ class SqlTableFlowElement(
         val selection = "$KEY_ROWID=?"
         val selectionArgs = arrayOf(flow_element_id.toString())
         val columns = arrayOf(KEY_FLOW_ID)
-        val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
+        val sortBy = "$KEY_ORDER asc"
+        val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, sortBy, null)
         var flowId: Long? = null
         if (cursor.moveToFirst()) {
             flowId = cursor.getLong(cursor.getColumnIndex(KEY_FLOW_ID))
@@ -222,7 +225,8 @@ class SqlTableFlowElement(
         val selection = "$KEY_ROWID=?"
         val selectionArgs = arrayOf(flow_element_id.toString())
         val columns = arrayOf(KEY_FLOW_ID)
-        val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
+        val sortBy = "$KEY_ORDER asc"
+        val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, sortBy, null)
         var flowId: Long? = null
         if (cursor.moveToFirst()) {
             flowId = cursor.getLong(cursor.getColumnIndex(KEY_FLOW_ID))

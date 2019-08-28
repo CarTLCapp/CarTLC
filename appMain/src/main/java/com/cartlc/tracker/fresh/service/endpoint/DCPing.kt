@@ -265,12 +265,14 @@ class DCPing(
         val version_company = blob.getInt(PrefHelper.VERSION_COMPANY)
         val version_flow = blob.getInt(PrefHelper.VERSION_FLOW)
         val version_vehicle_names = blob.getInt(PrefHelper.VERSION_VEHICLE_NAMES)
+        var refresh = false
         if (prefHelper.versionProject != version_project) {
             Timber.i("New project version $version_project")
             if (!queryProjects()) {
                 return
             }
             prefHelper.versionProject = version_project
+            // Login may be waiting for this, so do it immediately:
             EventBus.getDefault().post(EventRefreshProjects())
         }
         if (prefHelper.versionVehicleNames != version_vehicle_names) {
@@ -286,6 +288,7 @@ class DCPing(
                 return
             }
             prefHelper.versionCompany = version_company
+            refresh = true
         }
         if (prefHelper.versionEquipment != version_equipment) {
             Timber.i("New equipment version $version_equipment")
@@ -293,6 +296,7 @@ class DCPing(
                 return
             }
             prefHelper.versionEquipment = version_equipment
+            refresh = true
         }
         if (prefHelper.versionNote != version_note) {
             Timber.i("New note version $version_note")
@@ -300,6 +304,7 @@ class DCPing(
                 return
             }
             prefHelper.versionNote = version_note
+            refresh = true
         }
         if (prefHelper.versionFlow != version_flow) {
             Timber.i("New flow version $version_flow")
@@ -307,6 +312,7 @@ class DCPing(
                 return
             }
             prefHelper.versionFlow = version_flow
+            refresh = true
         }
         var entries = db.tableEntry.queryPendingDataToUploadToMaster()
         var count = 0
@@ -314,12 +320,12 @@ class DCPing(
             count = sendEntries(entries)
         }
         if (count > 0) {
-            EventBus.getDefault().post(EventRefreshProjects())
+            refresh = true
         }
         entries = db.tableEntry.queryPendingPicturesToUpload()
         if (entries.isNotEmpty()) {
             if (app.amazonHelper.sendPictures(context, entries)) {
-                EventBus.getDefault().post(EventRefreshProjects())
+                refresh = true
             }
         }
         db.tablePicture.clearUploadedUnscaledPhotos()
@@ -344,6 +350,9 @@ class DCPing(
         if (strings.isNotEmpty()) {
             Timber.i("Query strings needed.")
             queryStrings()
+        }
+        if (refresh) {
+            EventBus.getDefault().post(EventRefreshProjects())
         }
     }
 
@@ -376,11 +385,16 @@ class DCPing(
                 if (project == null) {
                     if (unprocessed.contains(rootProject, subProject)) {
                         // If this name already exists, convert the existing one by simply giving it the server_id.
-                        val existing = db.tableProjects.queryByName(rootProject, subProject)
-                        existing!!.serverId = serverId
-                        existing.isBootStrap = false
-                        existing.disabled = disabled
-                        db.tableProjects.update(existing)
+                        db.tableProjects.queryByName(rootProject, subProject)?.let { existing ->
+                            existing.serverId = serverId
+                            existing.isBootStrap = false
+                            existing.disabled = disabled
+                            db.tableProjects.update(existing)
+                        }
+                        db.tableProjects.queryByName(rootProject)?.let { existing ->
+                            existing.disabled = false
+                            db.tableProjects.update(existing)
+                        }
                         unprocessed.delete(rootProject, subProject)
                     } else {
                         // Otherwise just add the new project.
@@ -389,11 +403,11 @@ class DCPing(
                 } else {
                     // Name change?
                     when {
-                        subProject != project.name || rootProject != project.rootProject -> {
+                        subProject != project.subProject || rootProject != project.rootProject -> {
                             Timber.i("New name. Root: $rootProject Sub: $subProject")
-                            unprocessed.delete(project.name, project.rootProject)
+                            unprocessed.delete(project.subProject, project.rootProject)
 
-                            project.name = subProject
+                            project.subProject = subProject
                             project.rootProject = rootProject
                             project.disabled = disabled
                             db.tableProjects.update(project)
@@ -403,7 +417,9 @@ class DCPing(
                             project.disabled = disabled
                             db.tableProjects.update(project)
                         }
-                        else -> Timber.i("No change to project: $rootProject - $subProject")
+                        else -> {
+                            Timber.i("No change to project: $rootProject - $subProject")
+                        }
                     }
                     unprocessed.delete(rootProject, subProject)
                 }
@@ -593,7 +609,7 @@ class DCPing(
                             Timber.e(sbuf.toString())
                             prefHelper.reloadProjects()
                         } else {
-                            Timber.e("Can't find any equipment with server ID $serverEquipmentId for project ${project.name}")
+                            Timber.e("Can't find any equipment with server ID $serverEquipmentId for project ${project.subProject}")
                             prefHelper.reloadEquipments()
                         }
                         continue
@@ -876,7 +892,7 @@ class DCPing(
                 val project = db.tableProjects.queryByServerId(serverSubProjectId)
                 if (project == null) {
                     Timber.e("queryFlows(): Can't find project with server ID $serverSubProjectId")
-                    return false
+                    continue
                 }
                 incomingFlow.subProjectId = project.id
                 val itemFlow = db.tableFlow.queryByServerId(incomingFlow.serverId)
@@ -888,6 +904,7 @@ class DCPing(
                         db.tableFlow.update(match)
                         Timber.i("Commandeer local: $match")
                         unprocessedFlow.remove(match)
+                        incomingFlow.id = match.id
                     } else {
                         // Otherwise just add the new entry.
                         db.tableFlow.add(incomingFlow)
@@ -896,7 +913,7 @@ class DCPing(
                 } else {
                     // Change of data
                     if (incomingFlow != itemFlow) {
-                        Timber.i("Change: [$incomingFlow] from [$itemFlow]")
+                        Timber.i("Change: $incomingFlow from $itemFlow")
                         incomingFlow.id = itemFlow.id
                         db.tableFlow.update(incomingFlow)
                     } else {
@@ -926,6 +943,7 @@ class DCPing(
                             // If this already exists, convert the existing one by simply giving it the serverId.
                             match.serverId = incomingEle.serverId
                             db.tableFlowElement.update(match)
+                            incomingEle.id = match.id
                             Timber.i("Commandeer local: $match")
                             unprocessedFlowElement.remove(match)
                         } else {
@@ -934,13 +952,12 @@ class DCPing(
                             Timber.i("New flow element: $incomingEle")
                         }
                     } else {
-                        // Change of data
+                        incomingEle.id = itemElement.id
                         if (incomingEle != itemElement) {
-                            Timber.i("Change: [$incomingEle] from [$itemElement]")
-                            incomingEle.id = itemElement.id
                             db.tableFlowElement.update(incomingEle)
+                            Timber.i("Change: $incomingEle from $itemElement")
                         } else {
-                            Timber.i("No change: $itemElement")
+                            Timber.i("No change: $itemElement of $itemFlow")
                         }
                         unprocessedFlowElement.remove(incomingEle)
                     }
@@ -1049,7 +1066,7 @@ class DCPing(
             if (project.serverId > 0) {
                 jsonObject.accumulate("project_id", project.serverId)
             } else {
-                jsonObject.accumulate("project_name", project.name)
+                jsonObject.accumulate("project_name", project.subProject)
             }
             val address = entry.address
             if (address == null) {
@@ -1387,13 +1404,15 @@ class DCPing(
         val unprocessed = db.tableProjects.query().toMutableList()
 
         fun contains(rootName: String, subProject: String): Boolean {
-            return find(rootName, subProject) != null
+            return find(rootName, subProject).isNotEmpty()
         }
 
         fun delete(rootName: String?, subProject: String?) {
             if (rootName != null && subProject != null) {
-                val ele = find(rootName, subProject)
-                if (ele != null) {
+                for (ele in find(rootName, subProject)) {
+                    unprocessed.remove(ele)
+                }
+                for (ele in find(rootName)) {
                     unprocessed.remove(ele)
                 }
             }
@@ -1407,13 +1426,24 @@ class DCPing(
             }
         }
 
-        private fun find(rootName: String, subProject: String): DataProject? {
+        private fun find(rootName: String, subProject: String): List<DataProject> {
+            val result = mutableListOf<DataProject>()
             for (ele in unprocessed) {
-                if (ele.name == subProject && ele.rootProject == rootName) {
-                    return ele
+                if (ele.subProject == subProject && ele.rootProject == rootName) {
+                    result.add(ele)
                 }
             }
-            return null
+            return result
+        }
+
+        private fun find(rootName: String): List<DataProject> {
+            val result = mutableListOf<DataProject>()
+            for (ele in unprocessed) {
+                if (ele.rootProject == rootName && ele.subProject.isNullOrEmpty()) {
+                    result.add(ele)
+                }
+            }
+            return result
         }
     }
 

@@ -9,6 +9,7 @@ import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.ProjectGroupItemViewMvc
 import com.cartlc.tracker.fresh.model.CarRepository
 import com.cartlc.tracker.fresh.model.msg.MessageHandler
 import com.cartlc.tracker.fresh.model.msg.StringMessage
+import timber.log.Timber
 
 class ProjectGroupListController(
         private val repo: CarRepository,
@@ -26,10 +27,10 @@ class ProjectGroupListController(
     private val filteredProjectGroups = mutableListOf<DataProjectAddressCombo>()
     private val currentProjectGroupId: Long
         get() = prefHandler.currentProjectGroupId
-
+    private val currentProjectGroup: DataProjectAddressCombo?
+        get() = prefHandler.currentProjectGroup
     override val itemCount: Int
         get() = filteredProjectGroups.size
-
     private val projectGroups: List<DataProjectAddressCombo>
         get() = repo.db.tableProjectAddressCombo.query()
 
@@ -63,14 +64,26 @@ class ProjectGroupListController(
         } else {
             viewMvc.projectAddress = address.block
         }
-        viewMvc.highlight = (projectGroup.id == currentProjectGroupId)
+        viewMvc.highlight = doHighlightFor(projectGroup)
         viewMvc.bind(projectGroup, this)
+    }
+
+    private fun doHighlightFor(projectGroup: DataProjectAddressCombo): Boolean {
+        return if (currentProjectGroupId == projectGroup.id) {
+            true
+        } else {
+            currentProjectGroup?.let { combo ->
+                combo.rootName == projectGroup.rootName && combo.addressId == projectGroup.addressId
+            } ?: false
+        }
     }
 
     // region ProjectGroupItemViewMvc.Listener
 
     override fun onProjectGroupSelected(projectGroup: DataProjectAddressCombo) {
         prefHandler.currentProjectGroup = projectGroup
+        prefHandler.projectRootName = projectGroup.rootName
+        prefHandler.projectSubName = projectGroup.projectName?.second
         listener.onProjectGroupSelected(projectGroup)
         listener.onProjectRefreshNeeded()
     }
@@ -99,6 +112,7 @@ class ProjectGroupListController(
     override fun onProjectDataChanged() {
         allProjectGroups = projectGroups
         filterGroups()
+        detectSelected()
         listener.onProjectRefreshNeeded()
     }
 
@@ -110,6 +124,21 @@ class ProjectGroupListController(
             if (projectGroup.isRootProject) {
                 filteredProjectGroups.add(projectGroup)
             }
+        }
+    }
+
+    private fun detectSelected() {
+        prefHandler.currentProjectGroup?.let { combo ->
+            combo.projectName?.let { name ->
+                prefHandler.projectRootName = name.first
+                prefHandler.projectSubName = name.second
+            } ?: run {
+                prefHandler.projectRootName = null
+                prefHandler.projectSubName = null
+            }
+        } ?: run {
+            prefHandler.projectRootName = null
+            prefHandler.projectSubName = null
         }
     }
 

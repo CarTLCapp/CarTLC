@@ -6,15 +6,12 @@ package com.cartlc.tracker.fresh.ui.picture
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
-import com.cartlc.tracker.fresh.ui.bits.AutoLinearLayoutManager
 
 class PictureListViewMvcImpl(
         inflater: LayoutInflater,
@@ -23,8 +20,7 @@ class PictureListViewMvcImpl(
 ) : ViewMvcImpl(),
         PictureListViewMvc,
         PictureListAdapter.Listener,
-        PictureNoteAdapter.Listener
-{
+        PictureNoteAdapter.Listener {
 
     override val rootView: View = inflater.inflate(R.layout.frame_picture_list, container, false) as ViewGroup
 
@@ -36,17 +32,15 @@ class PictureListViewMvcImpl(
     override var listener: PictureListViewMvc.Listener? = null
 
     init {
-        val linearLayoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        noteList.layoutManager = linearLayoutManager
+        noteList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         noteList.adapter = noteListAdapter
-        pictureList.layoutManager = AutoLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        pictureList.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         pictureList.adapter = pictureListAdapter
     }
 
     override fun onPictureRefreshNeeded() {
         pictureListAdapter.notifyDataSetChanged()
         noteListAdapter.notifyDataSetChanged()
-
     }
 
     // region PictureListAdapter.Listener & PictureListItemNoteAdapter.Listener

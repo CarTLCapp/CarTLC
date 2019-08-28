@@ -29,7 +29,9 @@ class StageCompany(
                     val companies = db.tableAddress.query()
                     autoNarrowCompanies(companies.toMutableList())
                     val companyNames = getNames(companies)
-                    if (companyNames.size == 1 && isAutoNarrowOkay) {
+                    if (companyNames.isEmpty()) {
+                        buttonsUseCase.back()
+                    } else if (companyNames.size == 1 && isAutoNarrowOkay) {
                         prefHelper.company = companyNames[0]
                         buttonsUseCase.skip()
                     } else {

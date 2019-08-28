@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.cartlc.tracker.R
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
 import timber.log.Timber
@@ -31,7 +32,10 @@ class PictureListItemViewMvcImpl(
     private var dstPictureFile: File? = null
     private val loadedHeight = context.resources.getDimension(R.dimen.image_full_max_height).toInt()
 
-    private var buttonsVisible: Boolean
+    private val app = context.applicationContext as TBApplication
+    private val bitmapHelper = app.componentRoot.bitmapHelper
+
+    override var buttonsVisible: Boolean
         get() = removeButton.visibility == View.VISIBLE
         set(value) {
             removeButton.visibility = if (value) View.VISIBLE else View.GONE
@@ -40,7 +44,14 @@ class PictureListItemViewMvcImpl(
         }
 
     init {
-        buttonsVisible = false
+        pictureView.addOnLayoutChangeListener { v: View, left: Int, top: Int, right: Int, bottom: Int,
+                                                oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int ->
+            onPictureViewSizeChanged(right - left, bottom - top)
+        }
+    }
+
+    private fun onPictureViewSizeChanged(width: Int, height: Int) {
+        listener?.onImageLoaded(pictureView.height)
     }
 
     // region PictureListItemViewMvc
@@ -60,13 +71,12 @@ class PictureListItemViewMvcImpl(
     }
 
     override fun bindPicture(pictureFile: File?) {
-        buttonsVisible = false
         pictureView.setImageResource(android.R.color.transparent)
         dstPictureFile = pictureFile
         dstPictureFile?.let {
             if (it.exists()) {
-                BitmapHelper.loadBitmap(it.absolutePath, loadedHeight, pictureView, false) {
-                    buttonsVisible = true
+                bitmapHelper.loadBitmap(it.absolutePath, loadedHeight, pictureView, false) {
+                    listener?.onImageLoaded(pictureView.height)
                 }
             }
         }

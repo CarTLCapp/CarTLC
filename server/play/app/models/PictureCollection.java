@@ -64,6 +64,13 @@ public class PictureCollection extends Model {
                 .findList();
     }
 
+    public static List<PictureCollection> locate(long collection_id, long flow_element_id) {
+        return find.where()
+                .eq("collection_id", collection_id)
+                .eq("flow_element_id", flow_element_id)
+                .findList();
+    }
+
     public static void deleteByCollectionId(long collection_id, AmazonHelper.DeleteAction amazonAction) {
         List<PictureCollection> items = find.where()
                 .eq("collection_id", collection_id)

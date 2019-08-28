@@ -206,6 +206,12 @@ open class ButtonsController(
         }
     }
 
+
+    override fun back() {
+        wasNext = false
+        skip()
+    }
+
     override fun dispatch(button: Button) {
         dispatchButtonEvent(button)
     }

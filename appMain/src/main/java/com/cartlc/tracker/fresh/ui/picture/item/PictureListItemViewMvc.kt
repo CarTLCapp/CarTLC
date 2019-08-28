@@ -3,6 +3,7 @@
  */
 package com.cartlc.tracker.fresh.ui.picture.item
 
+import android.widget.ImageView
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 import java.io.File
 
@@ -12,8 +13,10 @@ interface PictureListItemViewMvc: ViewMvc {
         fun onRemoveClicked()
         fun onCwClicked()
         fun onCcwClicked()
+        fun onImageLoaded(imageHeight: Int)
     }
 
+    var buttonsVisible: Boolean
     var loading: String?
     fun bindPicture(pictureFile: File?)
     fun bindListener(listener: Listener)

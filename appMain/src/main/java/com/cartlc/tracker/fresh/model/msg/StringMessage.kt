@@ -15,8 +15,10 @@ sealed class StringMessage {
     object btn_another: StringMessage()
     object btn_done: StringMessage()
     object btn_confirm: StringMessage()
+
     object error_picture_removed: StringMessage()
     object error_need_all_checked: StringMessage()
+    object error_has_no_flows: StringMessage()
 
     object title_login: StringMessage()
     object title_root_project: StringMessage()
@@ -59,6 +61,8 @@ sealed class StringMessage {
 
     data class status_installed_equipments(val checkedEquipment: Int, val maxEquip: Int) : StringMessage()
     data class status_installed_pictures(val countPictures: Int) : StringMessage()
+    data class status_notes_used(val countNotes: Int): StringMessage()
+
     data class error_incorrect_note_count(val length: Int, val digits: Int): StringMessage()
     data class error_incorrect_digit_count(val msg: String): StringMessage()
 }

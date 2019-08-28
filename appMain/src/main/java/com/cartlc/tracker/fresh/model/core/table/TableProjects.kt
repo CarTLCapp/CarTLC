@@ -10,9 +10,10 @@ interface TableProjects {
     fun isDisabled(id: Long): Boolean
     fun query(activeOnly: Boolean = false): List<DataProject>
     fun queryRootProjectNames(): List<String>
-    fun querySubProjectNames(rootName: String): List<String>
+    fun querySubProjects(rootName: String): List<DataProject>
     fun queryById(id: Long): DataProject?
     fun queryByName(rootName: String, subProject: String): DataProject?
+    fun queryByName(rootName: String): DataProject?
     fun queryByServerId(server_id: Int): DataProject?
     fun queryProjectName(id: Long): Pair<String, String>?
     fun queryProjectId(rootName: String, subProject: String): Long

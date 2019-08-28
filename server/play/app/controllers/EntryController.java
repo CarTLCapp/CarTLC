@@ -707,7 +707,16 @@ public class EntryController extends Controller {
                         collection.flow_element_id = flowElementId;
                     } else {
                         JsonNode flowStageValue = ele.findValue("flow_stage");
-
+                        if (flowStageValue != null) {
+                            String flowStage = flowStageValue.textValue();
+                            if (flowStage != null) {
+                                if (flowStage.equals("truck_number")) {
+                                    collection.flow_element_id = PictureCollection.FLOW_TRUCK_NUMBER_ID;
+                                } else if (flowStage.equals("truck_damage")) {
+                                    collection.flow_element_id = PictureCollection.FLOW_TRUCK_DAMAGE_ID;
+                                }
+                            }
+                        }
                     }
                     subValue = ele.findValue("filename");
                     if (subValue == null) {

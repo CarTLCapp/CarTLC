@@ -6,6 +6,7 @@ package com.cartlc.tracker.fresh.model.core.sql
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import com.cartlc.tracker.fresh.model.core.data.DataFlow
+import com.cartlc.tracker.fresh.model.core.data.DataProject
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableFlow
 import com.cartlc.tracker.fresh.ui.app.TBApplication
@@ -96,6 +97,25 @@ class SqlTableFlow(
         return if (list.isNotEmpty()) {
             list[0]
         } else null
+    }
+
+    override fun filterHasFlow(incoming: List<DataProject>): List<DataProject> {
+        val list = mutableListOf<DataProject>()
+        for (project in incoming) {
+            if (count(project.id) > 0) {
+                list.add(project)
+            }
+        }
+        return list
+    }
+
+    private fun count(project_id: Long): Int {
+        val selection = "$KEY_SUB_PROJECT_ID=?"
+        val selectionArgs = arrayOf(project_id.toString())
+        val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
+        val count = cursor.count
+        cursor.close()
+        return count
     }
 
     override fun update(item: DataFlow) {

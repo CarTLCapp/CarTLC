@@ -130,15 +130,6 @@ public class FlowElement extends Model implements Comparable<FlowElement> {
         return PictureCollection.findByFlowElementId(id);
     }
 
-    public List<EntryNoteCollection> getNoteValues() {
-        List<Note> notes = getNotes();
-        List<EntryNoteCollection> collection = new ArrayList<EntryNoteCollection>();
-        for (Note note : notes) {
-            collection.addAll(EntryNoteCollection.findByNoteId(note.id));
-        }
-        return collection;
-    }
-
     public static void delete(long elementId) {
         FlowElementCollection.deleteByFlowElementId(elementId);
         FlowNoteCollection.deleteByFlowElementId(elementId);

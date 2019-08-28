@@ -95,18 +95,30 @@ class DataNote {
         return sbuf.toString()
     }
 
-    override fun equals(other: Any?): Boolean {
-        return if (other is DataNote) {
-            return (name == other.name
-                    && type?.ordinal == other.type?.ordinal
-                    && numDigits == other.numDigits)
-        } else super.equals(other)
-    }
-
     fun valueLength(): Int {
         return if (value == null) {
             0
         } else value!!.length
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DataNote
+
+        if (name != other.name) return false
+        if (type != other.type) return false
+        if (numDigits != other.numDigits) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + (type?.hashCode() ?: 0)
+        result = 31 * result + numDigits
+        return result
     }
 
 }

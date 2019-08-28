@@ -224,6 +224,50 @@ public class Entry extends com.avaje.ebean.Model {
         return new ArrayList<FlowElement>();
     }
 
+    public List<FlowElement> getPictureFlowElements() {
+        ArrayList<FlowElement> result = new ArrayList<FlowElement>();
+        for (FlowElement element : getFlowElements()) {
+            if (element.getNumImages() > 0 || element.getPromptType() == PromptType.CATEGORY) {
+                result.add(element);
+            }
+        }
+        return result;
+    }
+
+    public ArrayList<EntryNoteCollection> getNoteValuesForElement(long client_id, long element_id) {
+        ArrayList<EntryNoteCollection> notes = new ArrayList<EntryNoteCollection>();
+        for (EntryNoteCollection note : getNotes(client_id)) {
+            if (FlowNoteCollection.hasNote(element_id, note.note_id)) {
+                notes.add(note);
+            }
+        }
+        return notes;
+    }
+
+    public boolean hasTruckNumberPictureValue() {
+        return getTruckNumberPictureValue() != null;
+    }
+
+    public String getTruckNumberPictureValue() {
+        List<PictureCollection> list = PictureCollection.locate(picture_collection_id, PictureCollection.FLOW_TRUCK_NUMBER_ID);
+        if (list.size() > 0) {
+            return list.get(0).picture;
+        }
+        return null;
+    }
+
+    public boolean hasTruckDamagePictureValue() {
+        return getTruckDamagePictureValue() != null;
+    }
+
+    public String getTruckDamagePictureValue() {
+        List<PictureCollection> list = PictureCollection.locate(picture_collection_id, PictureCollection.FLOW_TRUCK_DAMAGE_ID);
+        if (list.size() > 0) {
+            return list.get(0).picture;
+        }
+        return null;
+    }
+
     public String getAddressLine() {
         Company company = Company.get(company_id);
         if (company == null) {

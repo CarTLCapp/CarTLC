@@ -3,6 +3,7 @@
  */
 package com.cartlc.tracker.fresh.ui.main.process
 
+import com.cartlc.tracker.fresh.model.core.data.DataProject
 import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.fresh.model.flow.Flow
 import com.cartlc.tracker.fresh.model.flow.RootProjectFlow
@@ -32,12 +33,24 @@ class StageSelectProject(
                         mainListUseCase.visible = true
                         titleUseCase.subTitleText = curProjectHint
                         buttonsUseCase.nextVisible = hasProjectSubName
-                        setList(StringMessage.title_sub_project, PrefHelper.KEY_SUB_PROJECT, db.tableProjects.querySubProjectNames(rootName))
+                        setList(StringMessage.title_sub_project, PrefHelper.KEY_SUB_PROJECT,
+                                getNames(db.tableFlow.filterHasFlow(db.tableProjects.querySubProjects(rootName)))
+                        )
                     } ?: run {
                         curFlowValue = RootProjectFlow()
                     }
                 }
             }
         }
+    }
+
+    private fun getNames(list: List<DataProject>): List<String> {
+        val names = mutableListOf<String>()
+        for (project in list) {
+            project.subProject?.let { name ->
+                names.add(name)
+            }
+        }
+        return names
     }
 }

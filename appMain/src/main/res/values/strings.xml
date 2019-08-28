@@ -84,6 +84,7 @@
     <string name="error_missing_truck_long">The following entry is missing a truck number. Would you like to correct or delete this entry?</string>
     <string name="error_missing_truck_short">Missing Truck</string>
     <string name="error_need_all_checked">All elements must be checked.</string>
+    <string name="error_has_no_flows">Has no sub projects with flows.</string>
 
     <string name="dialog_confirm_delete">Are you sure you want to delete this entry?</string>
     <string name="dialog_entry_done">Logged in as %s</string>
@@ -116,6 +117,7 @@
     <string name="status_installed_equipments">%1$d of %2$d equipments checked.</string>
     <string name="status_installed_pictures">%1$d pictures taken.</string>
     <string name="status_no_equipment">No equipment checked</string>
+    <string name="status_notes_used">%d notes used.</string>
 
     <string name="perm_read_external_storage">Grant external read storage permission to help storage uploaded files.</string>
     <string name="perm_write_external_storage">Grant external write storage permission to help storage uploaded files.</string>

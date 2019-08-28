@@ -14,7 +14,6 @@ interface PictureListUseCase : BaseObservable<PictureListUseCase.Listener> {
         fun onPictureNoteChanged(note: DataNote)
     }
 
-    var isThumbnail: Boolean
     var pictureItems: List<DataPicture>
     var pictureNotes: List<DataNote>
     val commonRotation: Int
@@ -22,5 +21,5 @@ interface PictureListUseCase : BaseObservable<PictureListUseCase.Listener> {
     val notesReady: Boolean
 
     fun onPictureRefreshNeeded()
-
+    fun clearCache()
 }

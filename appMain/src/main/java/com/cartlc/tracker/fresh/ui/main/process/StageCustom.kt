@@ -9,15 +9,20 @@ import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.flow.CustomFlow
 import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.fresh.model.msg.StringMessage
+import timber.log.Timber
 
 class StageCustom(
         shared: MainController.Shared,
         private val taskPicture: TaskPicture
 ) : ProcessBase(shared) {
 
+    private var showingDialog = 0L
+
     fun process() {
         with(shared) {
-            repo.currentFlowElement?.let { element -> process(element) }
+            repo.currentFlowElement?.let { element -> process(element) } ?: run {
+                buttonsUseCase.skip()
+            }
         }
     }
 
@@ -48,10 +53,8 @@ class StageCustom(
                     if (currentNumPictures == 0 && !taskPicture.takingPictureAborted) {
                         taskPicture.dispatchPictureRequest()
                     }
-                    buttonsUseCase.nextVisible = false
-                } else {
-                    buttonsUseCase.nextVisible = true
                 }
+                buttonsUseCase.nextVisible = ready
                 if (taskPicture.takingPictureAborted) {
                     showToast = true
                 }
@@ -74,9 +77,12 @@ class StageCustom(
                     } else {
                     }
                 Type.DIALOG ->
-                    element.prompt?.let {
-                        dialogNavigator.showDialog(it) {
-                            repo.curFlowValue.next()
+                    if (showingDialog != element.id) {
+                        element.prompt?.let {
+                            showingDialog = element.id
+                            dialogNavigator.showDialog(it) {
+                                showingDialog = 0L
+                            }
                         }
                     }
                 Type.CONFIRM,
@@ -92,17 +98,9 @@ class StageCustom(
         }
     }
 
-    // TODO: Perhaps if this is an existing value (see DataEntry.notesWithValues), then overlay those values
     private fun getNotes(elementId: Long): List<DataNote> {
-        return with(shared) {
-            val notes = mutableListOf<DataNote>()
-            val elements = repo.db.tableFlowElementNote.query(elementId)
-            for (element in elements) {
-                repo.db.tableNote.query(element.noteId)?.let {
-                    notes.add(it)
-                }
-            }
-            notes
+        with(shared) {
+            return db.noteHelper.getNotesOverlaidFrom(elementId, prefHelper.currentEditEntry)
         }
     }
 
@@ -136,6 +134,7 @@ class StageCustom(
                 }
                 if (hasNotes) {
                     prefHelper.currentEditEntry?.let {
+                        Timber.d("MYDEBUG: save(${it.noteCollectionId}, ${notes.size}) ABOUT TO CALL")
                         db.tableCollectionNoteEntry.save(it.noteCollectionId, notes)
                     }
                 }
@@ -175,20 +174,25 @@ class StageCustom(
             with(shared) {
                 repo.currentFlowElement?.let { element ->
                     val stage = repo.curFlowValueStage
-                    when (element.type) {
-                        Type.NONE -> {
-                            val hasNotes = db.tableFlowElementNote.hasNotes(element.id)
-                            if (hasNotes) {
-                                val notesComplete = mainListUseCase.areNotesComplete
-                                if (!notesComplete) {
+                    val hasNotes = db.tableFlowElementNote.hasNotes(element.id)
+                    if (hasNotes) {
+                        when (element.type) {
+                            Type.NONE -> {
+                                if (!mainListUseCase.areNotesComplete) {
                                     return false
                                 }
                             }
-                        }
-                        else -> {
+                            else -> {
+                                if (element.numImages > 0) {
+                                    if (!pictureUseCase.notesReady) {
+                                        return false
+                                    }
+                                }
+                            }
                         }
                     }
-                    val currentNumPictures = db.tablePicture.countPendingPictures(stage)
+                    val currentNumPictures =
+                            db.tablePicture.countPictures(prefHelper.currentPictureCollectionId, stage)
                     if (currentNumPictures < element.numImages) {
                         return false
                     }

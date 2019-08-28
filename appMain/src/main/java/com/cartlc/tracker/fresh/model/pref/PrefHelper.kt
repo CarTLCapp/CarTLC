@@ -83,11 +83,15 @@ class PrefHelper constructor(
 
     var techFirstName: String?
         get() = getString(KEY_TECH_FIRST_NAME, null)
-        set(value) { setString(KEY_TECH_FIRST_NAME, value) }
+        set(value) {
+            setString(KEY_TECH_FIRST_NAME, value)
+        }
 
     var techLastName: String?
         get() = getString(KEY_TECH_LAST_NAME, null)
-        set(value) { setString(KEY_TECH_LAST_NAME, value) }
+        set(value) {
+            setString(KEY_TECH_LAST_NAME, value)
+        }
 
     val techName: String
         get() {
@@ -102,11 +106,15 @@ class PrefHelper constructor(
 
     var secondaryTechFirstName: String?
         get() = getString(KEY_SECONDARY_TECH_FIRST_NAME, null)
-        set(value) { setString(KEY_SECONDARY_TECH_FIRST_NAME, value) }
+        set(value) {
+            setString(KEY_SECONDARY_TECH_FIRST_NAME, value)
+        }
 
     var secondaryTechLastName: String?
         get() = getString(KEY_SECONDARY_TECH_LAST_NAME, null)
-        set(value) { setString(KEY_SECONDARY_TECH_LAST_NAME, value) }
+        set(value) {
+            setString(KEY_SECONDARY_TECH_LAST_NAME, value)
+        }
 
     val secondaryTechName: String
         get() {
@@ -162,10 +170,6 @@ class PrefHelper constructor(
                 if (id >= 0) id else null
             } else null
         }
-
-    var currentProjectGroupId: Long
-        get() = getLong(KEY_CURRENT_PROJECT_GROUP_ID, -1L)
-        set(id) = setLong(KEY_CURRENT_PROJECT_GROUP_ID, id)
 
     private var savedProjectGroupId: Long
         get() = getLong(KEY_SAVED_PROJECT_GROUP_ID, -1L)
@@ -233,6 +237,10 @@ class PrefHelper constructor(
     val isDevelopment: Boolean
         get() = getInt(KEY_IS_DEVELOPMENT, if (TBApplication.IsDevelopmentServer()) 1 else 0) != 0
 
+    var currentProjectGroupId: Long
+        get() = getLong(KEY_CURRENT_PROJECT_GROUP_ID, -1L)
+        set(id) = setLong(KEY_CURRENT_PROJECT_GROUP_ID, id)
+
     var currentProjectGroup: DataProjectAddressCombo?
         get() = db.tableProjectAddressCombo.query(currentProjectGroupId)
         set(group) {
@@ -299,13 +307,25 @@ class PrefHelper constructor(
             return sbuf.toString()
         }
 
+    // region truck support
+
     var truckNumberValue: String?
         get() = db.tableNote.noteTruckNumber?.value
-        set(value) { db.tableNote.noteTruckNumber?.value = value }
+        set(value) {
+            db.tableNote.noteTruckNumber?.let { truck ->
+                truck.value = value
+                db.tableNote.updateValue(truck)
+            }
+        }
 
     private var truckDamageValue: String?
         get() = db.tableNote.noteTruckDamage?.value
-        set(value) { db.tableNote.noteTruckDamage?.value = value }
+        set(value) {
+            db.tableNote.noteTruckDamage?.let { truck ->
+                truck.value = value
+                db.tableNote.updateValue(truck)
+            }
+        }
 
     var truckHasDamage: Boolean?
         get() {
@@ -321,7 +341,7 @@ class PrefHelper constructor(
             } ?: setInt(KEY_TRUCK_DAMAGE_EXISTS, 2)
         }
 
-    private val truckNumberPictureId: Int
+    private var truckNumberPictureId: Int
         get() {
             val items = db.tablePicture.removeFileDoesNotExist(
                     db.tablePicture.query(currentPictureCollectionId, Stage.TRUCK_NUMBER_PICTURE)
@@ -331,8 +351,11 @@ class PrefHelper constructor(
             }
             return 0
         }
+        set(value) {
+            setTruckValue(Stage.TRUCK_NUMBER_PICTURE, value.toLong())
+        }
 
-    private val truckDamagePictureId: Int
+    private var truckDamagePictureId: Int
         get() {
             val items = db.tablePicture.removeFileDoesNotExist(
                     db.tablePicture.query(currentPictureCollectionId, Stage.TRUCK_DAMAGE_PICTURE)
@@ -342,6 +365,37 @@ class PrefHelper constructor(
             }
             return 0
         }
+        set(value) {
+            setTruckValue(Stage.TRUCK_DAMAGE_PICTURE, value.toLong())
+        }
+
+    private fun setTruckValue(stage: Stage, value: Long) {
+        db.tablePicture.query(value)?.let { from ->
+            if (from.collectionId != currentPictureCollectionId || from.stage != stage) {
+                queryFirst(stage)?.let { existing ->
+                    val to = DataPicture(existing.id,
+                            from.unscaledFilename,
+                            currentPictureCollectionId,
+                            stage)
+                    db.tablePicture.update(to)
+                } ?: run {
+                    db.tablePicture.add(from.unscaledFile, currentPictureCollectionId, stage)
+                }
+            } /* else already existing just the way we need it */
+        } ?: run {
+            db.tablePicture.remove(currentPictureCollectionId, stage)
+        }
+    }
+
+    private fun queryFirst(stage: Stage): DataPicture? {
+        val list = db.tablePicture.query(currentPictureCollectionId, stage)
+        if (list.isEmpty()) {
+            return null
+        }
+        return list[0]
+    }
+
+    // endregion truck support
 
     val numPicturesTaken: Int
         get() = db.tablePicture.countPictures(currentPictureCollectionId, null)
@@ -352,8 +406,9 @@ class PrefHelper constructor(
             return collection.equipment.size
         }
 
-    val autoRotatePicture: Int
+    var autoRotatePicture: Int
         get() = getInt(KEY_AUTO_ROTATE_PICTURE, 0)
+        set(value) { setInt(KEY_AUTO_ROTATE_PICTURE, value) }
 
     val hasCode: Boolean
         get() = !TextUtils.isEmpty(firstTechCode)
@@ -393,11 +448,7 @@ class PrefHelper constructor(
     // endregion CONFIRM
 
     fun reloadFromServer() {
-        versionEquipment = VERSION_RESET
-        versionProject = VERSION_RESET
-        versionNote = VERSION_RESET
-        versionCompany = VERSION_RESET
-        versionTruck = VERSION_RESET
+        clearUploaded()
     }
 
     fun detectOneTimeReloadFromServerCheck(): Boolean {
@@ -467,7 +518,7 @@ class PrefHelper constructor(
         val state = state
         val street = street
         val city = city
-        if (company.isNullOrBlank() || state.isNullOrBlank()|| street.isNullOrBlank() || city.isNullOrBlank()) {
+        if (company.isNullOrBlank() || state.isNullOrBlank() || street.isNullOrBlank() || city.isNullOrBlank()) {
             setFromCurrentProjectId()
             if (company.isNullOrBlank() || state.isNullOrBlank() || street.isNullOrBlank() || city.isNullOrBlank()) {
                 return false  // Okay to have nothing selected
@@ -505,7 +556,7 @@ class PrefHelper constructor(
         }
         if (needsValidServerId) {
             if (!db.tableProjects.hasServerId(rootName, subName)) {
-                Timber.e("saveProjectAndAddressCombo(): current project does not associated with the server: $rootName - $subName")
+                Timber.e("saveProjectAndAddressCombo(): current project is not associated with anything on the server: $rootName - $subName")
                 clearCurProject()
                 return false
             }
@@ -587,19 +638,33 @@ class PrefHelper constructor(
     }
 
     fun setFromEntry(entry: DataEntry) {
+        db.tableNote.clearValues()
         currentEditEntryId = entry.id
         currentProjectGroupId = entry.projectAddressCombo!!.id
         currentPictureCollectionId = entry.pictureCollectionId
+        entry.project?.let { project ->
+            projectRootName = project.rootProject
+            projectSubName = project.subProject
+        } ?: run {
+            projectRootName = null
+            projectSubName = null
+        }
+        setAddress(entry.address)
         entry.equipmentCollection!!.setChecked()
-        val truck = entry.truck
-        if (truck != null) {
+        entry.truck?.let { truck ->
             truckNumberValue = truck.truckNumberValue
+            truckNumberPictureId = truck.truckNumberPictureId
             truckHasDamage = truck.truckHasDamage
-        } else {
+            truckDamageValue = truck.truckDamageValue
+            truckDamagePictureId = truck.truckDamagePictureId
+        } ?: run {
             truckNumberValue = null
+            truckHasDamage = false
+            truckDamageValue = null
+            truckNumberPictureId = 0
+            truckDamagePictureId = 0
         }
         status = entry.status
-        db.tableNote.clearValues()
     }
 
     fun saveEntry(): DataEntry? {
@@ -653,6 +718,7 @@ class PrefHelper constructor(
         versionEquipment = VERSION_RESET
         versionCompany = VERSION_RESET
         versionTruck = VERSION_RESET
+        versionFlow = VERSION_RESET
     }
 
     fun reloadProjects() {

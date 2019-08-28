@@ -204,12 +204,10 @@ class SqlTablePicture(
     private fun countPictures(selection: String, selectionArgs: Array<String>): Int {
         var count = 0
         try {
-            val columns = arrayOf(KEY_ROWID, KEY_PICTURE_FILENAME, KEY_UPLOADING_FILENAME)
+            val columns = arrayOf(KEY_PICTURE_FILENAME, KEY_UPLOADING_FILENAME)
             val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
             val idxPicture = cursor.getColumnIndex(KEY_PICTURE_FILENAME)
             val idxUploading = cursor.getColumnIndex(KEY_UPLOADING_FILENAME)
-            val idxRowId = cursor.getColumnIndex(KEY_ROWID)
-            val delete = ArrayList<Long>()
             while (cursor.moveToNext()) {
                 val unscaled = cursor.getString(idxPicture)
                 val uploading = cursor.getString(idxUploading)
@@ -227,16 +225,9 @@ class SqlTablePicture(
                 }
                 if (unscaledFile != null && unscaledFile.exists() || uploadingFile != null && uploadingFile.exists()) {
                     count++
-                } else {
-                    delete.add(cursor.getLong(idxRowId))
                 }
             }
             cursor.close()
-            val where = "$KEY_ROWID=?"
-            for (id in delete) {
-                val whereArgs = arrayOf(id.toString())
-                dbSql.delete(TABLE_NAME, where, whereArgs)
-            }
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTablePicture::class.java, "countPictures()", "db")
         }
@@ -261,27 +252,6 @@ class SqlTablePicture(
         }
     }
 
-    override fun countPendingPictures(stage: Stage): Int {
-        var count = -1
-        try {
-            val selection: String
-            val selectionArgs: Array<String>
-            if (stage is Stage.CUSTOM_FLOW) {
-                selection = "$KEY_COLLECTION_ID=0 AND $KEY_STAGE_ORD=? AND $KEY_FLOW_ELEMENT_ID=?"
-                selectionArgs = arrayOf(stage.ord.toString(), stage.flowElementId.toString())
-            } else {
-                selection = "$KEY_COLLECTION_ID=0 AND $KEY_STAGE_ORD=?"
-                selectionArgs = arrayOf(stage.ord.toString())
-            }
-            val cursor = dbSql.query(TABLE_NAME, null, selection, selectionArgs, null, null, null)
-            count = cursor.count
-            cursor.close()
-        } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTablePicture::class.java, "countPendingPictures()", "db")
-        }
-        return count
-    }
-
     fun remove(item: DataPicture) {
         try {
             val where = "$KEY_ROWID=?"
@@ -289,6 +259,23 @@ class SqlTablePicture(
             dbSql.delete(TABLE_NAME, where, whereArgs)
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTablePicture::class.java, "remove()", "db")
+        }
+    }
+
+    override fun remove(collection_id: Long, stage: Stage) {
+        try {
+            val selection: String
+            val selectionArgs: Array<String>
+            if (stage is Stage.CUSTOM_FLOW) {
+                selection = "$KEY_COLLECTION_ID=? AND $KEY_STAGE_ORD=? AND $KEY_FLOW_ELEMENT_ID=?"
+                selectionArgs = arrayOf(collection_id.toString(), stage.ord.toString(), stage.flowElementId.toString())
+            } else {
+                selection = "$KEY_COLLECTION_ID=? AND $KEY_STAGE_ORD=?"
+                selectionArgs = arrayOf(collection_id.toString(), stage.ord.toString())
+            }
+            dbSql.delete(TABLE_NAME, selection, selectionArgs)
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTablePicture::class.java, "remove($collection_id, $stage)", "db")
         }
     }
 

@@ -5,18 +5,12 @@ package com.cartlc.tracker.fresh.ui.mainlist.adapter
 
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.model.core.data.DataNote
-import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.NoteListEntryItemViewMvc
 import com.cartlc.tracker.fresh.model.CarRepository
-import com.cartlc.tracker.fresh.model.flow.Flow
-import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.model.misc.EntryHint
-import com.cartlc.tracker.fresh.model.misc.NotesHelper
-import java.util.ArrayList
 
 class NoteListEntryController(
         private val repo: CarRepository,
-        private val notesHelper: NotesHelper,
         private val listener: Listener
 ) : NoteListEntryAdapter.Listener,
         NoteListEntryUseCase {
@@ -144,7 +138,7 @@ class NoteListEntryController(
     }
 
     // TODO: Perhaps if this is an existing value (see DataEntry.notesWithValues), then overlay those values
-    private fun queryNotes(): List<DataNote> = notesHelper.notesFromCurrentFlowElementId
+    private fun queryNotes(): List<DataNote> = repo.db.noteHelper.getNotesFromCurrentFlowElementId(repo.currentFlowElementId)
 
     // endregion NoteListEntryUseCase
 }

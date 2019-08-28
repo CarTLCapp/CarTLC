@@ -16,6 +16,7 @@ import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.listentries.item.ListEntriesItemViewMvc
 import com.cartlc.tracker.fresh.ui.main.MainController
+import timber.log.Timber
 
 class ListEntriesController(
         private val boundAct: BoundAct,
@@ -98,6 +99,7 @@ class ListEntriesController(
     override fun onDelete() {
         val projectGroup = prefHelper.currentProjectGroup
         if (projectGroup != null) {
+            Timber.i("Deleting project group $projectGroup")
             db.tableProjectAddressCombo.remove(projectGroup.id)
         }
         screenNavigator.finish(MainController.RESULT_DELETE_PROJECT)

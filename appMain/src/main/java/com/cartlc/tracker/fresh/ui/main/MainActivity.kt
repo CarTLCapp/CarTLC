@@ -81,4 +81,8 @@ class MainActivity : BaseActivity() {
     }
 
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        controller.onTrimMemory(level)
+    }
 }

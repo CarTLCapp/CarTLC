@@ -98,7 +98,7 @@ class LoginController(
         when (flow.stage) {
             Stage.LOGIN -> {
                 buttonsUseCase.prevVisible = false
-                buttonsUseCase.centerVisible = true
+                buttonsUseCase.centerVisible = false
                 buttonsUseCase.centerText = messageHandler.getString(StringMessage.title_login)
                 buttonsUseCase.nextVisible = loginSuccess
             }
@@ -151,6 +151,7 @@ class LoginController(
                     }
                     if (loginSuccess) {
                         buttonsUseCase.nextVisible = true
+                        buttonsUseCase.centerVisible = false
                         viewMvc.firstTechName = prefHelper.techName
                         viewMvc.secondaryTechName = prefHelper.secondaryTechName
                         if (prefHelper.secondaryTechName.isNotBlank()) {
@@ -183,12 +184,14 @@ class LoginController(
         firstCodeEdit = value
         viewMvc.firstTechName = ""
         detectShowNext()
+        buttonsUseCase.centerVisible = true
     }
 
     override fun onSecondaryTechCodeChanged(value: String) {
         secondaryCodeEdit = value
         viewMvc.secondaryTechName = ""
         detectShowNext()
+        buttonsUseCase.centerVisible = true
     }
 
     override fun onSecondaryCheckBoxChanged(value: Boolean) {

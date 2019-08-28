@@ -8,6 +8,7 @@ import android.content.Context
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import timber.log.Timber
 
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -89,13 +90,16 @@ class DataEntry(private val db: DatabaseTable) {
         return result
     }
 
+    fun overlayNoteValue(noteId: Long): DataNote? {
+        return db.tableCollectionNoteEntry.query(noteCollectionId, noteId)
+    }
+
     // Get all the notes as indicated by the project.
     // This will also include any current edits in place as well.
     private val pendingNotes: List<DataNote>
         get() = db.noteHelper.getPendingNotes(projectAddressCombo!!.projectNameId)
 
     // Return the notes for the collection along with their values.
-    // TODO: This should only be done if noteCollectionId is > 0?
     val notesWithValues: List<DataNote>
         get() = db.tableCollectionNoteEntry.query(noteCollectionId)
 
@@ -147,7 +151,10 @@ class DataEntry(private val db: DatabaseTable) {
     }
 
     fun saveNotes() {
-        db.tableCollectionNoteEntry.save(noteCollectionId, pendingNotes)
+        val useNotes = pendingNotes
+        Timber.d("MYDEBUG: saveNotes($noteCollectionId, ${useNotes.size})")
+        db.tableCollectionNoteEntry.remove(noteCollectionId)
+        db.tableCollectionNoteEntry.save(noteCollectionId, useNotes)
     }
 
     fun checkPictureUploadComplete(): Boolean {

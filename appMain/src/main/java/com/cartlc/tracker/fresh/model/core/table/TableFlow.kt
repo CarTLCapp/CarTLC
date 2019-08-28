@@ -4,6 +4,7 @@
 package com.cartlc.tracker.fresh.model.core.table
 
 import com.cartlc.tracker.fresh.model.core.data.DataFlow
+import com.cartlc.tracker.fresh.model.core.data.DataProject
 
 interface TableFlow {
 
@@ -11,6 +12,7 @@ interface TableFlow {
     fun query(): List<DataFlow>
     fun queryBySubProjectId(project_id: Int): DataFlow?
     fun queryByServerId(server_id: Int): DataFlow?
+    fun filterHasFlow(incoming: List<DataProject>): List<DataProject>
     fun update(item: DataFlow)
     fun remove(item: DataFlow)
     override fun toString(): String

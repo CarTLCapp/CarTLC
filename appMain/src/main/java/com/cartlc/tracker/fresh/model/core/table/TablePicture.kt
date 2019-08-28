@@ -9,11 +9,11 @@ interface TablePicture {
     fun add(picture: File, collection_id: Long, stage: Stage): DataPicture
     fun clearPendingPictures()
     fun clearUploadedUnscaledPhotos()
-    fun countPendingPictures(stage: Stage): Int
     fun countPictures(collection_id: Long, stage: Stage?): Int
     fun createCollectionFromPending(nextPictureCollectionID: Long): List<DataPicture>
     fun query(collection_id: Long, stage: Stage?): List<DataPicture>
     fun query(picture_id: Long): DataPicture?
+    fun remove(collection_id: Long, stage: Stage)
     fun removeFileDoesNotExist()
     fun removeFileDoesNotExist(list: List<DataPicture>): List<DataPicture>
     fun setUploaded(item: DataPicture)

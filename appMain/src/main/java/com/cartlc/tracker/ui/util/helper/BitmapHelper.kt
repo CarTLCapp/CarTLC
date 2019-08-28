@@ -99,42 +99,4 @@ object BitmapHelper {
         }
     }
 
-    fun loadBitmap(pathname: String, dstHeight: Int): Bitmap {
-        val options = BitmapFactory.Options()
-        options.inJustDecodeBounds = true
-        BitmapFactory.decodeFile(pathname, options)
-        val origHeight = options.outHeight
-        options.inJustDecodeBounds = false
-        val sampleSize = 1f / (dstHeight.toFloat() / origHeight.toFloat())
-        options.inSampleSize = sampleSize.roundToInt()
-        return BitmapFactory.decodeFile(pathname, options)
-    }
-
-    private class LoadTask(
-        imageView: ImageView,
-        private val dstHeight: Int,
-        private val isSmall: Boolean,
-        private val done: () -> Unit
-    ) : AsyncTask<String, String, Bitmap>() {
-
-        val ref = WeakReference(imageView)
-
-        override fun onPreExecute() {
-            ref.get()?.setImageResource(if (isSmall) R.drawable.loading_small else R.drawable.loading)
-        }
-
-        override fun doInBackground(vararg params: String): Bitmap {
-            return loadBitmap(params[0], dstHeight)
-        }
-
-        override fun onPostExecute(result: Bitmap) {
-            ref.get()?.setImageBitmap(result)
-            done()
-        }
-    }
-
-    fun loadBitmap(pathname: String, dstHeight: Int, imageView: ImageView, isSmall: Boolean = false, done: () -> Unit = {}) {
-        LoadTask(imageView, dstHeight, isSmall, done).execute(pathname)
-    }
-
 }

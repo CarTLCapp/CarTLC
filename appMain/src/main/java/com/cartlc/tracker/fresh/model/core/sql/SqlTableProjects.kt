@@ -150,7 +150,7 @@ class SqlTableProjects(
         dbSql.beginTransaction()
         try {
             val values = ContentValues()
-            values.put(KEY_NAME, project.name)
+            values.put(KEY_NAME, project.subProject)
             values.put(KEY_ROOT_PROJECT, project.rootProject)
             values.put(KEY_SERVER_ID, project.serverId)
             values.put(KEY_DISABLED, if (project.disabled) 1 else 0)
@@ -247,6 +247,15 @@ class SqlTableProjects(
         } else null
     }
 
+    override fun queryByName(rootName: String): DataProject? {
+        val selection = "$KEY_ROOT_PROJECT=? AND $KEY_NAME=?"
+        val selectionArgs = arrayOf(rootName, "")
+        val list = query(selection, selectionArgs)
+        return if (list.isNotEmpty()) {
+            list[0]
+        } else null
+    }
+
     private fun query(selection: String?, selectionArgs: Array<String>?): List<DataProject> {
         val list = mutableListOf<DataProject>()
         try {
@@ -259,7 +268,7 @@ class SqlTableProjects(
             val idxTest = cursor.getColumnIndex(KEY_IS_BOOT)
             while (cursor.moveToNext()) {
                 val project = DataProject()
-                project.name = cursor.getString(idxValue)
+                project.subProject = cursor.getString(idxValue)
                 project.rootProject = cursor.getString(idxRootProject)
                 project.disabled = cursor.getShort(idxDisabled).toInt() != 0
                 project.isBootStrap = cursor.getShort(idxTest).toInt() != 0
@@ -278,30 +287,19 @@ class SqlTableProjects(
         val projects = query(true)
         val names = mutableListOf<String>()
         for (project in projects) {
-            if (project.name != null) {
-                project.rootProject?.let { name ->
-                    if (!names.contains(name)) {
-                        names.add(name)
-                    }
+            project.rootProject?.let { name ->
+                if (!names.contains(name)) {
+                    names.add(name)
                 }
             }
         }
         return names
     }
 
-    override fun querySubProjectNames(rootName: String): List<String> {
+    override fun querySubProjects(rootName: String): List<DataProject> {
         val selection = "$KEY_ROOT_PROJECT=?"
         val selectionArgs = arrayOf(rootName)
-        val list = query(selection, selectionArgs)
-        val names = mutableListOf<String>()
-        for (project in list) {
-            project.name?.let {
-                if (it.isNotEmpty()) {
-                    names.add(it)
-                }
-            }
-        }
-        return names
+        return query(selection, selectionArgs)
     }
 
     override fun queryProjectId(rootName: String, subProject: String): Long {

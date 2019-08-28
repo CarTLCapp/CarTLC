@@ -111,7 +111,7 @@ class SqlTableProjectAddressCombo(
         identicals.remove(projectGroup.id)
         for (other_id in identicals) {
             val entries = db.tableEntry.queryForProjectAddressCombo(other_id)
-            Timber.i("Found " + entries.size + " entries with matching combo id " + other_id + " to " + projectGroup.id)
+            Timber.i("Found ${entries.size} entries with matching combo id $other_id to ${projectGroup.id}")
             for (entry in entries) {
                 entry.projectAddressCombo = projectGroup
                 entry.uploadedMaster = false
@@ -137,7 +137,7 @@ class SqlTableProjectAddressCombo(
         var count = 0
         try {
             val selection = "$KEY_ADDRESS_ID=?"
-            val selectionArgs = arrayOf(java.lang.Long.toString(addressId))
+            val selectionArgs = arrayOf(addressId.toString())
             val cursor = sqlDb.query(true, TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
             count = cursor.count
             cursor.close()
@@ -151,7 +151,7 @@ class SqlTableProjectAddressCombo(
         var count = 0
         try {
             val selection = "$KEY_PROJECT_ID=?"
-            val selectionArgs = arrayOf(java.lang.Long.toString(projectId))
+            val selectionArgs = arrayOf(projectId.toString())
             val cursor = sqlDb.query(true, TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
             count = cursor.count
             cursor.close()
@@ -191,7 +191,7 @@ class SqlTableProjectAddressCombo(
         var item: DataProjectAddressCombo? = null
         try {
             val columns = arrayOf(KEY_PROJECT_ID, KEY_ADDRESS_ID)
-            val selection = "$KEY_ROWID =?"
+            val selection = "$KEY_ROWID=?"
             val selectionArgs = arrayOf(id.toString())
             val cursor = sqlDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
             val idxProjectId = cursor.getColumnIndex(KEY_PROJECT_ID)
@@ -221,11 +221,11 @@ class SqlTableProjectAddressCombo(
             val columns = arrayOf(KEY_ROWID)
             val sbuf = StringBuilder()
             sbuf.append(KEY_PROJECT_ID)
-            sbuf.append(" =? AND ")
+            sbuf.append("=? AND ")
             sbuf.append(KEY_ADDRESS_ID)
-            sbuf.append(" =?")
+            sbuf.append("=?")
             val selection = sbuf.toString()
-            val selectionArgs = arrayOf(java.lang.Long.toString(projectNameId), java.lang.Long.toString(addressId))
+            val selectionArgs = arrayOf(projectNameId.toString(), addressId.toString())
             val cursor = sqlDb.query(true, TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
             val idxRowId = cursor.getColumnIndex(KEY_ROWID)
             while (cursor.moveToNext()) {
@@ -252,7 +252,7 @@ class SqlTableProjectAddressCombo(
 
     override fun remove(combo_id: Long) {
         val where = "$KEY_ROWID=?"
-        val whereArgs = arrayOf(java.lang.Long.toString(combo_id))
+        val whereArgs = arrayOf(combo_id.toString())
         sqlDb.delete(TABLE_NAME, where, whereArgs)
     }
 

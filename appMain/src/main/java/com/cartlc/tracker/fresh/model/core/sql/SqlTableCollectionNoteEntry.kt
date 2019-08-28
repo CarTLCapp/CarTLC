@@ -11,6 +11,7 @@ import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableCollectionNoteEntry
 
 import com.cartlc.tracker.fresh.ui.app.TBApplication
+import timber.log.Timber
 
 import java.util.ArrayList
 
@@ -20,7 +21,7 @@ import java.util.ArrayList
 class SqlTableCollectionNoteEntry(
         private val db: DatabaseTable,
         private val dbSql: SQLiteDatabase
-): TableCollectionNoteEntry {
+) : TableCollectionNoteEntry {
 
     companion object {
         private const val TABLE_NAME = "note_entry_collection"
@@ -52,7 +53,7 @@ class SqlTableCollectionNoteEntry(
         var count = 0
         try {
             val where = "$KEY_NOTE_ID=?"
-            val whereArgs = arrayOf(java.lang.Long.toString(noteId))
+            val whereArgs = arrayOf(noteId.toString())
             val cursor = dbSql.query(TABLE_NAME, null, where, whereArgs, null, null, null)
             count = cursor.count
             cursor.close()
@@ -63,7 +64,7 @@ class SqlTableCollectionNoteEntry(
         return count
     }
 
-    // There are TWO note tables. One is TableCollectionnNoteProject which stores the
+    // There are TWO note tables. One is TableCollectionNoteProject which stores the
     // defined notes for each project. The other is this one which stores the values.
     //
     // The values are stored right now in the SqlTableNote table which is represented by the incoming
@@ -75,15 +76,26 @@ class SqlTableCollectionNoteEntry(
     override fun save(collectionId: Long, notes: List<DataNote>) {
         dbSql.beginTransaction()
         try {
-            removeCollection(collectionId)
+            Timber.d("MYDEBUG: TableCollectionNoteEntry.save($collectionId, ${notes.size})")
             val values = ContentValues()
             for (note in notes) {
-                if (!TextUtils.isEmpty(note.value)) {
+                if (!note.value.isNullOrEmpty()) {
+                    Timber.d("MYDEBUG: saving note $note for collection $collectionId")
                     values.clear()
                     values.put(KEY_COLLECTION_ID, collectionId)
                     values.put(KEY_NOTE_ID, note.id)
                     values.put(KEY_VALUE, note.value)
-                    dbSql.insert(TABLE_NAME, null, values)
+                    query(collectionId, note.id)?.let { existing ->
+                        val where = "$KEY_ROWID=?"
+                        val whereArgs = arrayOf(existing.id.toString())
+                        if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
+                            dbSql.insert(TABLE_NAME, null, values)
+                        }
+                    } ?: run {
+                        dbSql.insert(TABLE_NAME, null, values)
+                    }
+                } else {
+                    Timber.d("MYDEBUG: ignore note $note for collection $collectionId")
                 }
             }
             dbSql.setTransactionSuccessful()
@@ -136,9 +148,9 @@ class SqlTableCollectionNoteEntry(
         return note
     }
 
-    private fun removeCollection(collection_id: Long) {
+    override fun remove(collection_id: Long) {
         val where = "$KEY_COLLECTION_ID=?"
-        val whereArgs = arrayOf(java.lang.Long.toString(collection_id))
+        val whereArgs = arrayOf(collection_id.toString())
         dbSql.delete(TABLE_NAME, where, whereArgs)
     }
 

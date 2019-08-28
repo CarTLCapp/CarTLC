@@ -20,7 +20,7 @@ import play.db.ebean.Transactional;
  * A list of flow elements for a flow managed by Ebean
  */
 @Entity
-public class FlowElementCollection extends Model {
+public class FlowElementCollection extends Model implements Comparable<FlowElementCollection> {
 
     private static final long serialVersionUID = 1L;
 
@@ -88,6 +88,7 @@ public class FlowElementCollection extends Model {
         for (FlowElement element : hasLineNumber) {
             removeFromList(elements, element.id);
         }
+        Collections.sort(elements);
         int line_num = 1;
         for (FlowElement element : elements) {
             element.line_num = line_num++;
@@ -164,6 +165,7 @@ public class FlowElementCollection extends Model {
     @Transactional
     public static boolean moveUp(long flow_id, long flow_element_id) {
         List<FlowElementCollection> items = findByFlowId(flow_id);
+        Collections.sort(items);
         int element_pos = -1;
         int pos = 0;
         for (FlowElementCollection element : items) {
@@ -194,6 +196,7 @@ public class FlowElementCollection extends Model {
     @Transactional
     public static boolean moveDown(long flow_id, long flow_element_id) {
         List<FlowElementCollection> items = findByFlowId(flow_id);
+        Collections.sort(items);
         int element_pos = -1;
         int pos = 0;
         for (FlowElementCollection element : items) {
@@ -221,5 +224,21 @@ public class FlowElementCollection extends Model {
         return true;
     }
 
+    @Override
+    public int compareTo(FlowElementCollection item) {
+        return getFlowElement().line_num - item.getFlowElement().line_num;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof FlowElementCollection) {
+            return equals((FlowElementCollection) other);
+        }
+        return super.equals(other);
+    }
+
+    public boolean equals(FlowElementCollection other) {
+        return  getFlowElement().line_num == other. getFlowElement().line_num;
+    }
 }
 

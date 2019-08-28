@@ -3,8 +3,6 @@
  */
 package com.cartlc.tracker.fresh.ui.main.process
 
-import com.cartlc.tracker.fresh.model.core.data.DataNote
-import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 

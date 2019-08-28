@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.fresh.model.flow.CurrentProjectFlow
@@ -27,7 +28,8 @@ class ConfirmFinalController(
     private val repo = boundFrag.repo
     private val componentRoot = boundFrag.componentRoot
     private val prefHelper = componentRoot.prefHelper
-    private val messageHandler = boundFrag.componentRoot.messageHandler
+    private val messageHandler = componentRoot.messageHandler
+    private val bitmapHelper = componentRoot.bitmapHelper
     private val db = repo.db
     private var curEntry: DataEntry? = null
 
@@ -46,6 +48,7 @@ class ConfirmFinalController(
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
         repo.flowUseCase.unregisterListener(this)
+        bitmapHelper.clearCache()
     }
 
     // endregion lifecycle functions
@@ -129,7 +132,7 @@ class ConfirmFinalController(
         var currentLabel: String? = null
         var currentFlowElementId: Long = -100L
         var currentPictures = mutableListOf<File>()
-        var currentNotes = mutableListOf<NoteLabelValue>()
+        var currentNotes = listOf<NoteLabelValue>()
         for (picture in sorted) {
             if (picture.stage !is Stage.CUSTOM_FLOW) {
                 continue
@@ -154,7 +157,7 @@ class ConfirmFinalController(
             if (currentLabel == null) {
                 currentLabel = flowElement.prompt
             }
-            // TODO: Notes later
+            currentNotes = getNotes(flowElementId)
         }
         list.add(ConfirmDataPicture(
                 currentLabel ?: "Unknown",
@@ -170,6 +173,17 @@ class ConfirmFinalController(
             list.add(ConfirmDataType.PICTURES(item))
         }
         return list
+    }
+
+    private fun getNotes(elementId: Long): List<NoteLabelValue> {
+        val notes = mutableListOf<NoteLabelValue>()
+        val elements = repo.db.tableFlowElementNote.query(elementId)
+        for (element in elements) {
+            repo.db.tableNote.query(element.noteId)?.let { note ->
+                notes.add(NoteLabelValue(note.name, note.value))
+            }
+        }
+        return notes
     }
 
 }

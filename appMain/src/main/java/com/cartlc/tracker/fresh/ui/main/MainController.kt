@@ -4,6 +4,7 @@
 package com.cartlc.tracker.fresh.ui.main
 
 import android.app.Activity
+import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.location.Address
 import androidx.lifecycle.Lifecycle
@@ -64,16 +65,17 @@ class MainController(
     private val repo = boundAct.repo
     private val prefHelper: PrefHelper = repo.prefHelper
     private val db: DatabaseTable = repo.db
-
-    private val contextWrapper = boundAct.componentRoot.contextWrapper
-    private val messageHandler = boundAct.componentRoot.messageHandler
-    private val serviceUseCase = boundAct.componentRoot.serviceUseCase
+    private val componentRoot = boundAct.componentRoot
+    private val contextWrapper = componentRoot.contextWrapper
+    private val messageHandler = componentRoot.messageHandler
+    private val serviceUseCase = componentRoot.serviceUseCase
     private val locationUseCase = boundAct.locationUseCase
     private val screenNavigator = boundAct.screenNavigator
-    private val deviceHelper = boundAct.componentRoot.deviceHelper
+    private val deviceHelper = componentRoot.deviceHelper
     private val dialogHelper = boundAct.dialogHelper
     private val dialogNavigator = boundAct.dialogNavigator
-    private val permissionHelper = boundAct.componentRoot.permissionHelper
+    private val permissionHelper = componentRoot.permissionHelper
+    private val bitmapHelper = componentRoot.bitmapHelper
 
     private val buttonsUseCase = viewMvc.buttonsUseCase
     private val titleUseCase = viewMvc.titleUseCase
@@ -154,18 +156,6 @@ class MainController(
 
     private val hasCurrentProject: Boolean
         get() = prefHelper.currentProjectGroup != null
-
-    private val statusHint: String
-        get() {
-            val sbuf = StringBuilder()
-            val countPictures = prefHelper.numPicturesTaken
-            val maxEquip = prefHelper.numEquipPossible
-            val checkedEquipment = db.tableEquipment.queryChecked().size
-            sbuf.append(messageHandler.getString(StringMessage.status_installed_equipments(checkedEquipment, maxEquip)))
-            sbuf.append("\n")
-            sbuf.append(messageHandler.getString(StringMessage.status_installed_pictures(countPictures)))
-            return sbuf.toString()
-        }
 
     private var autoNarrowOkay = true
 
@@ -276,6 +266,7 @@ class MainController(
     private val stageEquipment = StageEquipment(shared)
     private val stageCustom = StageCustom(shared, taskPicture)
     private val stageConfirm = StageFinalConfirm(shared)
+    private val stageStatus = StageStatus(shared)
 
     // endregion Shared
 
@@ -322,6 +313,20 @@ class MainController(
         actionUseCase.unregisterListener(this)
         buttonsUseCase.unregisterListener(this)
         viewMvc.unregisterListener(this)
+        viewMvc.fragmentVisible = MainViewMvc.FragmentType.NONE
+        pictureUseCase.clearCache()
+    }
+
+    fun onTrimMemory(level: Int) {
+        // On any complaint no longer cache images.
+        bitmapHelper.cacheOkay = false
+
+        if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+            Timber.e("onTrimMemory(): Ran critically low on memory: so no cache and push back to current project flow")
+            curFlowValue = CurrentProjectFlow()
+        } else {
+            Timber.e("onTrimMemory($level): disabled cache")
+        }
     }
 
     // endregion Lifecycle
@@ -406,10 +411,7 @@ class MainController(
                 stageCustom.process()
             }
             Stage.STATUS -> {
-                buttonsUseCase.nextText = messageHandler.getString(StringMessage.btn_done)
-                mainListUseCase.visible = true
-                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_status)
-                titleUseCase.subTitleText = statusHint
+                stageStatus.process()
             }
             Stage.CONFIRM -> {
                 stageConfirm.process()
@@ -513,7 +515,17 @@ class MainController(
         if (prefHelper.currentEditEntryId != 0L) {
             prefHelper.clearLastEntry()
         }
-        curFlowValue = SubProjectFlow()
+        if (hasSubProjects()) {
+            curFlowValue = SubProjectFlow()
+        } else {
+            screenNavigator.showToast(messageHandler.getString(StringMessage.error_has_no_flows))
+        }
+    }
+
+    private fun hasSubProjects(): Boolean {
+        return prefHelper.projectRootName?.let { rootName ->
+            db.tableFlow.filterHasFlow(db.tableProjects.querySubProjects(rootName)).isNotEmpty()
+        } ?: false
     }
 
     // endregion MainListViewMvc.Listener
@@ -548,7 +560,7 @@ class MainController(
 
     private fun checkAddButtonVisible() {
         addButtonVisible = prefHelper.currentProjectGroup != null &&
-                db.tableProjectAddressCombo.count() > 0 &&
+                db.tableProjectAddressCombo.count() > 0 && hasSubProjects() &&
                 curFlowValue.stage == Stage.CURRENT_PROJECT
     }
 
@@ -769,7 +781,7 @@ class MainController(
 
     // region PictureListUseCase.Listener
 
-    override fun onPictureRemoveDone(remaining: Int) {
+    override fun onPictureRemoveDone(numPictures: Int) {
 //        titleUseCase.setPhotoTitleCount(remaining)
         if (curFlowValue.stage == Stage.TRUCK_DAMAGE_PICTURE) {
             stageTruckDamage.clearDamage()
@@ -809,6 +821,7 @@ class MainController(
     fun onEvent(event: EventRefreshProjects) {
         Timber.d("onEvent(EventRefreshProjects)")
         repo.flowUseCase.notifyListeners()
+        checkAddButtonVisible()
     }
 
     private var showServerError = true

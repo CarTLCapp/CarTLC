@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.data
 
@@ -36,7 +36,7 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
             val name = db.tableProjects.queryProjectName(projectNameId) ?: return "-"
             val rootProject = name.first
             val subProject = name.second
-            if (subProject.isEmpty()) {
+            if (subProject.isBlank()) {
                 return rootProject
             }
             return "$rootProject - $subProject"
@@ -81,15 +81,6 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
         get() {
             val address = address
             return address?.company
-        }
-
-    val hintLine: String
-        get() {
-            val sbuf = StringBuffer()
-            sbuf.append(projectName)
-            sbuf.append("\n")
-            sbuf.append(companyName)
-            return sbuf.toString()
         }
 
     val entries: List<DataEntry>
@@ -137,17 +128,4 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
         }
         return sbuf.toString()
     }
-
-
-//    val hasValidState: Boolean
-//        get() = address?.hasValidState() ?: false
-//
-//    fun fix(): DataAddress? {
-//        address?.let {
-//            if (it.fix()) {
-//                return it
-//            }
-//        }
-//        return null
-//    }
 }

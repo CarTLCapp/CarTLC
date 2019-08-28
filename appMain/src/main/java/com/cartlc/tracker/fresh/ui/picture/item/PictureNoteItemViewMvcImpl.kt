@@ -52,7 +52,7 @@ class PictureNoteItemViewMvcImpl(
         noteValueView.addTextChangedListener(textWatcher)
         this.listener = listener
         this.note = note
-        listener.getHint(note)?.let { noteValueView.hint = it }
+        listener.getHint(note).let { noteValueView.hint = it }
     }
 
     override fun clear() {

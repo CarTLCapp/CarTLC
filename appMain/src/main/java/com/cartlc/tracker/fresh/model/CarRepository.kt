@@ -14,6 +14,7 @@ import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.flow.*
+import timber.log.Timber
 
 // TODO: was open class for testing
 class CarRepository(
@@ -225,21 +226,12 @@ class CarRepository(
             return null
         }
 
-    val currentFlowElementProgress: Pair<Int, Int>?
-        get() {
-            val stage = curFlowValue.stage
-            if (stage is Stage.CUSTOM_FLOW) {
-                return db.tableFlowElement.progress(stage.flowElementId)
-            }
-            return null
-        }
-
     private val firstFlowElementId: Long?
         get() {
             prefHelper.currentProjectGroup?.let { combo ->
                 combo.project?.let { project ->
                     db.tableFlow.queryBySubProjectId(project.id.toInt())?.let { flow ->
-                        return db.tableFlowElement.first(flow.id)
+                        return db.tableFlowElement.first(flow.id)?.let { it }
                     }
                 }
             }

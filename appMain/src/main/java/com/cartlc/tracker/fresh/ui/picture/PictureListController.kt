@@ -5,6 +5,7 @@ package com.cartlc.tracker.fresh.ui.picture
 
 import android.os.Handler
 import android.os.Message
+import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.model.core.table.TableNote
@@ -44,10 +45,13 @@ class PictureListController(
     }
 
     private val messageHandler = boundAct.componentRoot.messageHandler
+    private val bitmapHelper = boundAct.componentRoot.bitmapHelper
     private var handler = MyHandler(this)
     private var rotationMap: HashMap<String, Int> = HashMap()
     private var pictures: MutableList<DataPicture> = mutableListOf()
     private val repo = boundAct.repo
+    private val prefHelper = repo.prefHelper
+    private val showButtonMinImageSize = boundAct.act.resources.getDimension(R.dimen.image_show_button_min_size).toInt()
 
     init {
         viewMvc.listener = this
@@ -70,8 +74,6 @@ class PictureListController(
             notes = value
             viewMvc.onPictureRefreshNeeded()
         }
-
-    override var isThumbnail: Boolean = false
 
     override val commonRotation: Int
         get() {
@@ -115,7 +117,19 @@ class PictureListController(
             return true
         }
 
-    // endregion PicturListUseCase
+    override fun clearCache() {
+        bitmapHelper.clearCache()
+    }
+
+//    override fun clearUnmarkedCache() {
+//        bitmapHelper.clearUnmarkedCache()
+//    }
+//
+//    override fun clearMarks() {
+//        bitmapHelper.clearMarks()
+//    }
+
+    // endregion PictureListUseCase
 
     // region PictureListAdapter.Listener
 
@@ -136,6 +150,7 @@ class PictureListController(
     private fun onBindPictureViewHolder(itemViewMvc: PictureListItemViewMvc, position: Int) {
         val item = pictures[position]
         val pictureFile = item.file
+        itemViewMvc.buttonsVisible = false
         itemViewMvc.bindPicture(pictureFile)
 
         if (pictureFile == null || !pictureFile.exists()) {
@@ -159,6 +174,10 @@ class PictureListController(
                 override fun onCcwClicked() {
                     incRotation(item, item.rotateCCW())
                     viewMvc.onPictureRefreshNeeded()
+                }
+
+                override fun onImageLoaded(imageHeight: Int) {
+                    itemViewMvc.buttonsVisible = imageHeight > showButtonMinImageSize
                 }
             })
         }
@@ -203,5 +222,6 @@ class PictureListController(
         } else {
             rotationMap[path] = degrees
         }
+        prefHelper.autoRotatePicture = degrees
     }
 }

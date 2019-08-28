@@ -6,6 +6,7 @@ package controllers;
 import com.avaje.ebean.Ebean;
 
 import play.db.ebean.Transactional;
+
 import com.avaje.ebean.Transaction;
 
 import play.mvc.*;
@@ -23,6 +24,8 @@ import javax.persistence.PersistenceException;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+
 import play.Logger;
 
 import play.libs.Json;
@@ -127,15 +130,18 @@ public class FlowController extends Controller {
                 editFlow.sub_project_id = project.id;
                 if (flowId > 0) {
                     editFlow.update();
-                } else {
+                } else if (Flow.getByProjectId(project.id) != null) {
                     editFlow.save();
                     flowId = editFlow.id;
+                } else {
+                    message = "Already created: " + inputFlow.root_project_name + " - " + inputFlow.sub_project_name;
                 }
                 Ebean.commitTransaction();
             }
         } finally {
             Ebean.endTransaction();
         }
+        Version.inc(Version.VERSION_FLOW);
         return EDIT(flowId, message);
     }
 
@@ -147,6 +153,9 @@ public class FlowController extends Controller {
             return HomeController.PROBLEM("Non administrators cannot change flows.");
         }
         Flow.delete(flowId);
+
+        Version.inc(Version.VERSION_FLOW);
+
         return LIST();
     }
 
@@ -159,6 +168,9 @@ public class FlowController extends Controller {
             return HomeController.PROBLEM("Non administrators cannot change flows.");
         }
         FlowElementCollection.moveUp(flowId, elementId);
+
+        Version.inc(Version.VERSION_FLOW);
+
         return EDIT(flowId);
     }
 
@@ -171,6 +183,9 @@ public class FlowController extends Controller {
             return HomeController.PROBLEM("Non administrators cannot change flows.");
         }
         FlowElementCollection.moveDown(flowId, elementId);
+
+        Version.inc(Version.VERSION_FLOW);
+
         return EDIT(flowId);
     }
 
@@ -204,6 +219,9 @@ public class FlowController extends Controller {
             return HomeController.PROBLEM("Non administrators cannot change flows.");
         }
         FlowElement.delete(elementId);
+
+        Version.inc(Version.VERSION_FLOW);
+
         return EDIT(flowId);
     }
 
@@ -251,6 +269,8 @@ public class FlowController extends Controller {
         FlowNoteCollection.process(elementId, flowElementForm);
         FlowElementCollection.renumber(flowId, elementId);
 
+        Version.inc(Version.VERSION_FLOW);
+
         return EDIT(flowId);
     }
 
@@ -262,7 +282,9 @@ public class FlowController extends Controller {
             node.put("flow_id", flow.id);
             node.put("sub_project_id", flow.sub_project_id);
             ArrayNode elementsNode = node.putArray("elements");
-            for (FlowElement element : flow.getFlowElements()) {
+            List<FlowElement> elements = flow.getFlowElements();
+            Collections.sort(elements);
+            for (FlowElement element : elements) {
                 ObjectNode elementNode = elementsNode.addObject();
                 elementNode.put("id", element.id);
                 elementNode.put("order", element.line_num);

@@ -22,6 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
+        android:paddingBottom="4dp"
         android:textSize="21sp"
         android:layout_marginTop="3dp"
         app:layout_constraintLeft_toLeftOf="parent"
