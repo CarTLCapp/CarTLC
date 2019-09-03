@@ -74,8 +74,8 @@ class MainViewMvcImpl(
                 FragmentType.LOGIN -> fragmentHelper.bind(R.id.frame_login, loginFragment)
                 FragmentType.CONFIRM -> fragmentHelper.bind(R.id.frame_confirm, confirmFragment)
                 else -> {
-                    fragmentHelper.clear(R.id.frame_login)
                     fragmentHelper.clear(R.id.frame_confirm)
+                    fragmentHelper.clear(R.id.frame_login)
                 }
             }
         }

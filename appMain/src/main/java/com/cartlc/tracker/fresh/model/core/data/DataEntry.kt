@@ -152,7 +152,6 @@ class DataEntry(private val db: DatabaseTable) {
 
     fun saveNotes() {
         val useNotes = pendingNotes
-        Timber.d("MYDEBUG: saveNotes($noteCollectionId, ${useNotes.size})")
         db.tableCollectionNoteEntry.remove(noteCollectionId)
         db.tableCollectionNoteEntry.save(noteCollectionId, useNotes)
     }

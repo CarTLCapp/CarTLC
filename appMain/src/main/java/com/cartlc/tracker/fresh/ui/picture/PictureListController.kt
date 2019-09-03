@@ -15,7 +15,6 @@ import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.ui.picture.item.*
 import java.lang.ref.WeakReference
-import java.util.HashMap
 
 class PictureListController(
         boundAct: BoundAct,
@@ -47,7 +46,6 @@ class PictureListController(
     private val messageHandler = boundAct.componentRoot.messageHandler
     private val bitmapHelper = boundAct.componentRoot.bitmapHelper
     private var handler = MyHandler(this)
-    private var rotationMap: HashMap<String, Int> = HashMap()
     private var pictures: MutableList<DataPicture> = mutableListOf()
     private val repo = boundAct.repo
     private val prefHelper = repo.prefHelper
@@ -73,34 +71,6 @@ class PictureListController(
         set(value) {
             notes = value
             viewMvc.onPictureRefreshNeeded()
-        }
-
-    override val commonRotation: Int
-        get() {
-            var commonRotation = 0
-            for (picture in pictures) {
-                val path = picture.unscaledFile.absolutePath
-                if (!rotationMap.containsKey(path)) {
-                    return 0
-                }
-                val rotation = rotationMap[path]
-                if (commonRotation == 0 && rotation != null) {
-                    commonRotation = rotation
-                } else if (commonRotation != rotation) {
-                    return 0
-                }
-            }
-            return commonRotation
-        }
-
-    override val hadSomeRotations: Boolean
-        get() {
-            for (key in rotationMap.keys) {
-                if (rotationMap[key] != 0) {
-                    return true
-                }
-            }
-            return false
         }
 
     override fun onPictureRefreshNeeded() {
@@ -167,12 +137,12 @@ class PictureListController(
                 }
 
                 override fun onCwClicked() {
-                    incRotation(item, item.rotateCW())
+                    incAutoRotate(item.rotateCW())
                     viewMvc.onPictureRefreshNeeded()
                 }
 
                 override fun onCcwClicked() {
-                    incRotation(item, item.rotateCCW())
+                    incAutoRotate(item.rotateCCW())
                     viewMvc.onPictureRefreshNeeded()
                 }
 
@@ -214,14 +184,7 @@ class PictureListController(
         }
     }
 
-    private fun incRotation(item: DataPicture, degrees: Int) {
-        val file = item.unscaledFile
-        val path = file.absolutePath
-        if (rotationMap.containsKey(path)) {
-            rotationMap[path] = (rotationMap[path]!! + degrees) % 360
-        } else {
-            rotationMap[path] = degrees
-        }
-        prefHelper.autoRotatePicture = degrees
+    private fun incAutoRotate(degrees: Int) {
+        prefHelper.autoRotatePicture = prefHelper.autoRotatePicture + degrees
     }
 }

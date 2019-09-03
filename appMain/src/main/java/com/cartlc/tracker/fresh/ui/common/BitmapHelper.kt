@@ -99,6 +99,7 @@ class BitmapHelper {
         val key = BitmapKey(pathname, dstHeight)
         if (cache.contains(key)) {
             imageView.setImageBitmap(cache.query(key))
+            done()
         } else {
             LoadTask(this, imageView, pathname, dstHeight, isSmall, done).execute()
         }

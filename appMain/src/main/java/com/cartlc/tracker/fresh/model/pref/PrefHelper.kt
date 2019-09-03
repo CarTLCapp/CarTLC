@@ -729,13 +729,4 @@ class PrefHelper constructor(
         versionEquipment = VERSION_RESET
     }
 
-    fun incAutoRotatePicture(degrees: Int) {
-        val newValue = (autoRotatePicture + degrees) % 360
-        setInt(KEY_AUTO_ROTATE_PICTURE, newValue)
-    }
-
-    fun clearAutoRotatePicture() {
-        setInt(KEY_AUTO_ROTATE_PICTURE, 0)
-    }
-
 }

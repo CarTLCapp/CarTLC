@@ -7,6 +7,7 @@ import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.transition.Fade
+import timber.log.Timber
 
 class FragmentHelper(
         private val activity: FragmentActivity

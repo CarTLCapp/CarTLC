@@ -76,11 +76,9 @@ class SqlTableCollectionNoteEntry(
     override fun save(collectionId: Long, notes: List<DataNote>) {
         dbSql.beginTransaction()
         try {
-            Timber.d("MYDEBUG: TableCollectionNoteEntry.save($collectionId, ${notes.size})")
             val values = ContentValues()
             for (note in notes) {
                 if (!note.value.isNullOrEmpty()) {
-                    Timber.d("MYDEBUG: saving note $note for collection $collectionId")
                     values.clear()
                     values.put(KEY_COLLECTION_ID, collectionId)
                     values.put(KEY_NOTE_ID, note.id)
@@ -94,8 +92,6 @@ class SqlTableCollectionNoteEntry(
                     } ?: run {
                         dbSql.insert(TABLE_NAME, null, values)
                     }
-                } else {
-                    Timber.d("MYDEBUG: ignore note $note for collection $collectionId")
                 }
             }
             dbSql.setTransactionSuccessful()

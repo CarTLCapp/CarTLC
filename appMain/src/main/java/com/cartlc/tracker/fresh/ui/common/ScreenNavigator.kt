@@ -67,7 +67,7 @@ class ScreenNavigator(
 //    }
 
     fun showToast(msg: String) {
-        val toast = Toast.makeText(act, msg, Toast.LENGTH_LONG)
+        val toast = Toast.makeText(act.applicationContext, msg, Toast.LENGTH_LONG)
         val top = toast.view as ViewGroup
         val view = top.getChildAt(0)
         if (view is TextView) {

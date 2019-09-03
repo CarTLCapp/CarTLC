@@ -39,7 +39,6 @@ class NoteHelperImpl(
                 val addTo = db.tableFlowElementNote.queryNotes(element.id)
                 for (note in addTo) {
                     if (!notes.contains(note)) {
-                        Timber.d("MYDEBUG pending addTo(${element.id}): $note")
                         notes.add(note)
                     }
                 }

@@ -134,7 +134,6 @@ class StageCustom(
                 }
                 if (hasNotes) {
                     prefHelper.currentEditEntry?.let {
-                        Timber.d("MYDEBUG: save(${it.noteCollectionId}, ${notes.size}) ABOUT TO CALL")
                         db.tableCollectionNoteEntry.save(it.noteCollectionId, notes)
                     }
                 }
@@ -165,6 +164,7 @@ class StageCustom(
                     buttonsUseCase.centerVisible = true
                     buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_another)
                 }
+                titleUseCase.mainTitleText = getPhotoTitle(element.prompt, currentNumPictures, element.numImages.toInt())
             }
         }
     }

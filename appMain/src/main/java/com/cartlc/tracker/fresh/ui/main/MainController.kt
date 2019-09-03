@@ -782,7 +782,6 @@ class MainController(
     // region PictureListUseCase.Listener
 
     override fun onPictureRemoveDone(numPictures: Int) {
-//        titleUseCase.setPhotoTitleCount(remaining)
         if (curFlowValue.stage == Stage.TRUCK_DAMAGE_PICTURE) {
             stageTruckDamage.clearDamage()
         } else {
