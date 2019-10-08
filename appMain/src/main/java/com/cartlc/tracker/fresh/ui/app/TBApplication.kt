@@ -47,7 +47,7 @@ class TBApplication : Application() {
 
     companion object {
 
-        private val OVERRIDE_IS_DEVELOPMENT_SERVER: Boolean? = null
+        private val OVERRIDE_IS_DEVELOPMENT_SERVER: Boolean? = true
 
         @VisibleForTesting
         var DEBUG_TREE = false
