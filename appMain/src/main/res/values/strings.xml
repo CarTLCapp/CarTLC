@@ -28,6 +28,7 @@
     <string name="entry_hint_truck">Can be just Truck Number\nor Truck Number : License Plate</string>
 
     <string name="title_profile">Profile</string>
+    <string name="title_feedback">Feedback</string>
     <string name="title_upload">Upload</string>
     <string name="title_login">Login</string>
     <string name="title_secondary_login">Optional Secondary Login</string>

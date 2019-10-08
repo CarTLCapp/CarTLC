@@ -32,6 +32,7 @@ import com.cartlc.tracker.fresh.service.endpoint.DCServerRxImpl
 import com.cartlc.tracker.fresh.service.endpoint.DCService
 import com.cartlc.tracker.fresh.service.help.AmazonHelper
 import com.cartlc.tracker.fresh.service.help.ServerHelper
+import com.cartlc.tracker.fresh.service.instabug.InstaBugUseCase
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
 import com.cartlc.tracker.fresh.ui.common.PermissionHelper.PermissionListener
 import com.cartlc.tracker.fresh.ui.common.PermissionHelper.PermissionRequest
@@ -128,8 +129,6 @@ class TBApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
-        MyInstaBug.init(this)
 
         dm = DatabaseManager(this)
         prefHelper = PrefHelper(this, dm)

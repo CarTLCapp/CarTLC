@@ -76,6 +76,7 @@ class MainController(
     private val dialogNavigator = boundAct.dialogNavigator
     private val permissionHelper = componentRoot.permissionHelper
     private val bitmapHelper = componentRoot.bitmapHelper
+    private val instaBugUseCase = componentRoot.instaBugUseCase
 
     private val buttonsUseCase = viewMvc.buttonsUseCase
     private val titleUseCase = viewMvc.titleUseCase
@@ -715,6 +716,9 @@ class MainController(
             }
             R.id.privacy -> {
                 screenNavigator.showPrivacyPolicy()
+            }
+            R.id.feedback -> {
+                instaBugUseCase.show()
             }
             else -> {
                 return false
