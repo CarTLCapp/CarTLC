@@ -59,6 +59,7 @@ class PrefHelper constructor(
         private const val KEY_RELOAD_FROM_SERVER = "reload_from_server"
         private const val KEY_DO_ERROR_CHECK = "do_error_check"
         private const val KEY_AUTO_ROTATE_PICTURE = "auto_rotate_picture"
+        private const val KEY_LAST_ACTIVITY_TIME = "last_activity_time"
 
         const val VERSION_PROJECT = "version_project"
         const val VERSION_COMPANY = "version_company"
@@ -174,6 +175,10 @@ class PrefHelper constructor(
     private var savedProjectGroupId: Long
         get() = getLong(KEY_SAVED_PROJECT_GROUP_ID, -1L)
         set(id) = setLong(KEY_SAVED_PROJECT_GROUP_ID, id)
+
+    var lastActivityTime: Long
+        get() = getLong(KEY_LAST_ACTIVITY_TIME, 0L)
+        private set(value) = setLong(KEY_LAST_ACTIVITY_TIME, value)
 
     var currentPictureCollectionId: Long
         get() = getLong(KEY_CURRENT_PICTURE_COLLECTION_ID, 0)
@@ -446,6 +451,10 @@ class PrefHelper constructor(
     }
 
     // endregion CONFIRM
+
+    fun activityDetect() {
+        lastActivityTime = System.currentTimeMillis()
+    }
 
     fun reloadFromServer() {
         clearUploaded()

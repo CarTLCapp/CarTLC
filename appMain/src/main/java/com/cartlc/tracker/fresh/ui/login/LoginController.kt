@@ -12,6 +12,7 @@ import com.cartlc.tracker.fresh.model.flow.FlowUseCase
 import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.model.msg.MessageHandler
 import com.cartlc.tracker.fresh.model.msg.StringMessage
+import com.cartlc.tracker.fresh.service.alarm.AlarmController
 import com.cartlc.tracker.fresh.service.endpoint.DCServerRx
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
@@ -31,6 +32,7 @@ class LoginController(
         ButtonsUseCase.Listener {
 
     private val repo = boundFrag.repo
+    private val context = boundFrag.act
     private val prefHelper = repo.prefHelper
     private val messageHandler: MessageHandler = boundFrag.componentRoot.messageHandler
     private val dialogHelper = boundFrag.dialogHelper
@@ -135,11 +137,10 @@ class LoginController(
 
     private fun login() {
         val firstCode = firstCodeEdit
-        val secondCode: String?
-        if (isSecondaryPromptsEnabled) {
-            secondCode = secondaryCodeEdit
+        val secondCode = if (isSecondaryPromptsEnabled) {
+            secondaryCodeEdit
         } else {
-            secondCode = null
+            null
         }
         @Suppress("UNUSED_PARAMETER")
         dcRx.sendRegistration(firstCode, secondCode)
@@ -166,6 +167,7 @@ class LoginController(
                                     messageHandler.getString(StringMessage.dialog_dialog_entry_done(prefHelper.techName))
                             )
                         }
+                        AlarmController.justLoggedIn(context)
                     } else {
                         buttonsUseCase.nextVisible = false
                         viewMvc.firstTechName = ""

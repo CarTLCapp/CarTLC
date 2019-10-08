@@ -16,7 +16,7 @@ class TestDataAddress {
 
     companion object {
         const val COMPANY = "Company"
-        const val STREET = "1555 W. Pratt Blvd"
+          const val STREET = "1555 W. Pratt Blvd"
         const val CITY = "Chicago"
         const val STATE = "Illinois"
         const val ZIPCODE = "60626"

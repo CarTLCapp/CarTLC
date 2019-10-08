@@ -15,6 +15,7 @@ import com.cartlc.tracker.fresh.model.flow.FlowUseCase
 import com.cartlc.tracker.fresh.model.msg.MessageHandler
 import com.cartlc.tracker.fresh.model.msg.MessageHandlerImpl
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.service.alarm.AlarmController
 import com.cartlc.tracker.fresh.service.endpoint.DCPing
 import com.cartlc.tracker.fresh.service.endpoint.DCServerRx
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryController
@@ -30,19 +31,20 @@ class ComponentRoot(
         val flowUseCase: FlowUseCase,
         val repo: CarRepository,
         val ping: DCPing,
-        val dcRx: DCServerRx
+        dcRx: DCServerRx
 ) {
 
     val contextWrapper: ContextWrapper = ContextWrapper(context)
     val messageHandler: MessageHandler = MessageHandlerImpl(context)
-    val factoryAdapterController = FactoryAdapterController(repo, messageHandler)
+    private val factoryAdapterController = FactoryAdapterController(repo, messageHandler)
     val factoryViewMvc = FactoryViewMvc(LayoutInflater.from(context), factoryAdapterController)
-    val schedulerPlan: SchedulerPlan = SchedulerPlanImpl()
+    private val schedulerPlan: SchedulerPlan = SchedulerPlanImpl()
     val factoryController = FactoryController(dcRx, schedulerPlan)
     val eventController = EventController()
     val serviceUseCase = ServiceUseCaseImpl(context)
     val permissionHelper = PermissionHelper(context)
     val deviceHelper = DeviceHelper(context)
     val bitmapHelper = BitmapHelper()
+    val alarmController = AlarmController(context, repo)
 
 }

@@ -419,6 +419,7 @@ class MainController(
             else -> {
             }
         }
+        repo.prefHelper.activityDetect()
     }
 
     // endregion FlowUseCase.Listener

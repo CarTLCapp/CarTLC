@@ -10,25 +10,22 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.core.content.FileProvider
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.VisibleForTesting
+import androidx.core.content.FileProvider
 import androidx.multidex.MultiDex
-
 import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.CarRepository
 import com.cartlc.tracker.fresh.model.VehicleRepository
-import com.cartlc.tracker.ui.util.CheckError
-import com.cartlc.tracker.fresh.model.pref.PrefHelper
-import com.cartlc.tracker.fresh.model.event.EventError
-import com.cartlc.tracker.fresh.model.flow.FlowUseCaseImpl
 import com.cartlc.tracker.fresh.model.core.sql.DatabaseManager
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.event.EventError
 import com.cartlc.tracker.fresh.model.flow.FlowUseCase
+import com.cartlc.tracker.fresh.model.flow.FlowUseCaseImpl
+import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.service.endpoint.DCPing
 import com.cartlc.tracker.fresh.service.endpoint.DCServerRx
 import com.cartlc.tracker.fresh.service.endpoint.DCServerRxImpl
@@ -36,8 +33,9 @@ import com.cartlc.tracker.fresh.service.endpoint.DCService
 import com.cartlc.tracker.fresh.service.help.AmazonHelper
 import com.cartlc.tracker.fresh.service.help.ServerHelper
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
-import com.cartlc.tracker.fresh.ui.common.PermissionHelper.PermissionRequest
 import com.cartlc.tracker.fresh.ui.common.PermissionHelper.PermissionListener
+import com.cartlc.tracker.fresh.ui.common.PermissionHelper.PermissionRequest
+import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.ui.util.helper.LocationHelper
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 import org.greenrobot.eventbus.EventBus
@@ -130,6 +128,8 @@ class TBApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        MyInstaBug.init(this)
 
         dm = DatabaseManager(this)
         prefHelper = PrefHelper(this, dm)

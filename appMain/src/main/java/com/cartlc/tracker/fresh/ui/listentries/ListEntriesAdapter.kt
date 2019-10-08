@@ -13,7 +13,6 @@ class ListEntriesAdapter(
         private val listener: Listener
 ) : RecyclerView.Adapter<ListEntriesAdapter.MyViewHolder>() {
 
-
     interface Listener {
         val itemCount: Int
         fun onBindViewHolder(itemViewMvc: ListEntriesItemViewMvc, position: Int)

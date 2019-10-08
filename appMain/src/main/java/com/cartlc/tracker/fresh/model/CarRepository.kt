@@ -135,9 +135,10 @@ class CarRepository(
     // region COMPUTE
 
     fun computeCurStage() {
-        if (db.tableProjects.query().isEmpty()) {
+        if (prefHelper.firstTechCode.isNullOrBlank()) {
+            curFlowValue = LoginFlow()
+        } else if (db.tableProjects.query().isEmpty()) {
             when {
-                prefHelper.firstTechCode.isNullOrBlank() -> curFlowValue = LoginFlow()
                 prefHelper.projectRootName.isNullOrBlank() -> curFlowValue = RootProjectFlow()
                 prefHelper.company.isNullOrBlank() -> {
                     if (db.tableAddress.count > 0) {

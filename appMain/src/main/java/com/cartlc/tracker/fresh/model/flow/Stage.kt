@@ -41,7 +41,7 @@ sealed class Stage(
             return NONE
         }
 
-        fun values(flowElementId: Long): List<Stage> {
+        fun values(flowElementId: Long = 0): List<Stage> {
             return arrayListOf(
                     LOGIN,
                     ROOT_PROJECT,
