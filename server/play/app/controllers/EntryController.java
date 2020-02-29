@@ -75,6 +75,7 @@ public class EntryController extends Controller {
         mExecutionContext = executionContext;
     }
 
+    @Security.Authenticated(Secured.class)
     public Result list(int page, String sortBy, String order) {
         if (mGlobals.isClearSearch()) {
             mEntryList.clearSearch();
@@ -96,6 +97,7 @@ public class EntryController extends Controller {
         return list(0, null, null);
     }
 
+    @Security.Authenticated(Secured.class)
     public Result search() {
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).bindFromRequest();
         InputSearch search = searchForm.get();
@@ -106,6 +108,7 @@ public class EntryController extends Controller {
                 mEntryList.getSortBy(), mEntryList.getOrder(), searchForm, Secured.getClient(ctx())));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result searchClear() {
         mEntryList.clearSearch();
         mEntryList.clearCache();
@@ -275,6 +278,7 @@ public class EntryController extends Controller {
     /**
      * Display details for the entry including delete button.
      */
+    /** Note: intentionally NOT secure **/
     public Result view(Long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry == null) {
@@ -312,6 +316,7 @@ public class EntryController extends Controller {
         return list();
     }
 
+    @Security.Authenticated(Secured.class)
     public Result edit(Long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry == null) {
@@ -323,6 +328,7 @@ public class EntryController extends Controller {
         return ok(views.html.entry_editForm.render(entry.id, entryForm, noteValues, home, Secured.getClient(ctx())));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
         Client client = Secured.getClient(ctx());
         Form<EntryFormData> entryForm = mFormFactory.form(EntryFormData.class).bindFromRequest();

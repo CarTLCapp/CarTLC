@@ -17,7 +17,7 @@
                 <th>Root Project</th>
                 <th>Sub Project</th>
                 <th>Address</th>
-                @if(Client.canViewTrucks(client.id)) {
+                @if(Client.canViewTrucks(client)) {
                     <th>Truck</th>
                 }
                 <th>Equipment</th>
@@ -33,16 +33,16 @@
                 <td>@entry.getRootProjectName()</td>
                 <td>@entry.getSubProjectName()</td>
                 <td>@entry.getAddressLine()</td>
-                @if(Client.canViewTrucks(client.id)) {
+                @if(Client.canViewTrucks(client)) {
                     <td>@entry.getTruckLine()</td>
                 }
-                <td>@entry.getEquipmentLine(client.id)</td>
+                <td>@entry.getEquipmentLine(client)</td>
                 <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
             </tr>
         </tbody>
     </table>
 
-    @if(entry.hasNotes(client.id)) {
+    @if(entry.hasNotes(client)) {
 
         <h1 id="noteTitle">Notes</h1>
 
@@ -65,7 +65,7 @@
         </table>
     }
 
-    @if(Client.canViewPictures(client.id)) {
+    @if(Client.canViewPictures(client)) {
 
         <h1 id="pictureTitle">Pictures</h1>
 

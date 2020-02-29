@@ -183,8 +183,16 @@ public class Client extends com.avaje.ebean.Model {
         return isAdmin(client_id) || ClientAssociation.hasShowPictures(client_id);
     }
 
+    public static boolean canViewPictures(Client client) {
+        return client.id != null && canViewPictures(client.id);
+    }
+
     public static boolean canViewTrucks(long client_id) {
         return isAdmin(client_id) || ClientAssociation.hasShowTrucks(client_id);
+    }
+
+    public static boolean canViewTrucks(Client client) {
+        return client.id != null && canViewTrucks(client.id);
     }
 
     public static boolean isAdmin(long client_id) {

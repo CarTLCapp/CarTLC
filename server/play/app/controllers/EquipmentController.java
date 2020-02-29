@@ -123,6 +123,7 @@ public class EquipmentController extends Controller {
      *
      * @param id Id of the equipment to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
         Form<Equipment> equipmentForm = formFactory.form(Equipment.class).bindFromRequest();
         if (equipmentForm.hasErrors()) {
@@ -246,6 +247,7 @@ public class EquipmentController extends Controller {
     /**
      * Handle equipment deletion
      */
+    @Security.Authenticated(Secured.class)
     public Result delete(Long id) {
         Equipment equipment = Equipment.find.byId(id);
         if (Entry.hasEntryForEquipment(id)) {

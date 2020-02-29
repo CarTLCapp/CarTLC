@@ -387,6 +387,14 @@ public class Entry extends com.avaje.ebean.Model {
         return -1;
     }
 
+    public String getEquipmentLine(Client client) {
+	if (client.id != null) {
+	    return getEquipmentLine(client.id);
+	} else {
+	    return ""; 
+	}
+    }
+
     public String getEquipmentLine(long client_id) {
         boolean is_admin = Client.isAdmin(client_id);
         List<Equipment> equipments = EntryEquipmentCollection.findEquipments(equipment_collection_id);
@@ -421,6 +429,13 @@ public class Entry extends com.avaje.ebean.Model {
             }
         }
         return sbuf.toString();
+    }
+
+    public String getNoteAddendum(Client client) {
+	if (client.id != null) {
+	    return getNoteAddendum(client.id);
+	}
+	return "";
     }
 
     public String getNoteAddendum(long client_id) {
@@ -476,6 +491,10 @@ public class Entry extends com.avaje.ebean.Model {
 
     public boolean hasPictures() {
         return getPictures().size() > 0;
+    }
+
+    public boolean hasNotes(Client client) {
+        return client.id != null && hasNotes(client.id);
     }
 
     public boolean hasNotes(long client_id) {

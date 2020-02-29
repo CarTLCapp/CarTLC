@@ -303,9 +303,9 @@ public class EntryPagedList {
             canViewPictures = true;
             mForClientId = 0;
         } else {
-            canViewTrucks = ClientAssociation.hasShowTrucks(client.id);
-            canViewPictures = ClientAssociation.hasShowPictures(client.id);
-            mForClientId = client.id;
+            canViewTrucks = ClientAssociation.hasShowTrucks(client);
+            canViewPictures = ClientAssociation.hasShowPictures(client);
+            mForClientId = client.id != null ? client.id : 0;
         }
     }
 

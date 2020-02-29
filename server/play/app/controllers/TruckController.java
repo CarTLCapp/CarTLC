@@ -48,6 +48,7 @@ public class TruckController extends Controller {
     /**
      * Display the list of trucks.
      */
+    @Security.Authenticated(Secured.class)
     public Result list(int page) {
         if (mFilter) {
             return ok(views.html.truck_list.render(Truck.listFiltered(page), Secured.getClient(ctx()), FILTER_HIDE));

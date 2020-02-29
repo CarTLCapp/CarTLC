@@ -59,6 +59,10 @@ public class ClientAssociation extends Model {
         }
     }
 
+    public static boolean hasShowPictures(Client client) {
+	return client.id != null && hasShowPictures(client.id);
+    }
+
     public static boolean hasShowPictures(long client_id) {
         List<ClientAssociation> items = find.where()
                 .eq("client_id", client_id)
@@ -71,6 +75,10 @@ public class ClientAssociation extends Model {
             }
         }
         return false;
+    }
+
+    public static boolean hasShowTrucks(Client client) {
+	return client.id != null && hasShowTrucks(client.id);
     }
 
     public static boolean hasShowTrucks(long client_id) {

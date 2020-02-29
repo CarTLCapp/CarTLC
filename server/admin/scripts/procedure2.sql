@@ -1,8 +1,8 @@
 
 1. Dump all data from the server
 
-2. Edit the dump file, delete play_evolutions line from the dump file. You don't want this table to modified
-   when you will eventually source this file.
+2. Edit the dump file, delete all references to play_evolutions from the dump file. 
+   You do not want this table to be modified when you will eventually source this file.
 
 3. Now empty everything in the database:
 
@@ -21,6 +21,7 @@ use cartlc
 source dump-...
 
 6. Now the data is in there, but unfortunately against the wrong evolution version.
+   That is the database still needs some modifications or the existing data will fail against it.
    And the new tables have not been removed by the source.
    So execute this:
 	DELETE FROM `play_evolutions` WHERE `play_evolutions`.`id` = 2;

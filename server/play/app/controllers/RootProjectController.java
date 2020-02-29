@@ -55,6 +55,7 @@ public class RootProjectController extends Controller {
     /**
      * Display the list of active or disabled root projects.
      */
+    @Security.Authenticated(Secured.class)
     public Result list(boolean disabled) {
         return ok(views.html.root_project_list.render(RootProject.list(disabled), Secured.getClient(ctx()), disabled));
     }

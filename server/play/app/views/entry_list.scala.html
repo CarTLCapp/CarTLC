@@ -122,7 +122,7 @@
                         @if(currentPage.canViewPictures) {
                             <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
                         }
-                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum(client.id)</a></td>
+                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum(client)</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
                         <td bgcolor="@entry.getCellColor()">@currentPage.highlightSearch(entry.getStatus())</td>
                     </tr>

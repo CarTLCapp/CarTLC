@@ -66,6 +66,7 @@ public class HomeController extends Controller {
         return Results.redirect(routes.HomeController.index());
     }
 
+    @Security.Authenticated(Secured.class)
     public Result problem(String msg) {
         return badRequest(views.html.home.render(Secured.getClient(ctx()), mVersion, msg, daily()));
     }
@@ -204,4 +205,3 @@ public class HomeController extends Controller {
         return orphaned.size();
     }
 }
-            

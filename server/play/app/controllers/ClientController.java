@@ -38,6 +38,7 @@ public class ClientController extends Controller {
     /**
      * Display the list of users.
      */
+    @Security.Authenticated(Secured.class)
     public Result list() {
         return ok(views.html.client_list.render(Client.list(), Secured.getClient(ctx())));
     }
@@ -217,4 +218,3 @@ public class ClientController extends Controller {
     }
 
 }
-            
