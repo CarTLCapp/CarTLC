@@ -53,6 +53,7 @@ public class VehicleController extends Controller {
     /**
      * Display the list of trucks.
      */
+    @Security.Authenticated(Secured.class)
     public Result list(int page, String sortBy, String order) {
         return ok(views.html.vehicle_list.render(Vehicle.list(page, PAGE_SIZE, sortBy, order), sortBy, order, Secured.getClient(ctx())));
     }

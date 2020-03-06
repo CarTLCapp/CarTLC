@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Run this script directly on the machine
+#
+kill `cat $HOME/server/active/play*/RUNNING_PID`
+DATE=`date +%F`
+FILE=`ls server/play/target/universal/*.zip`
+TGT="$HOME/server/$DATE"
+mkdir -p $TGT
+rm -f $TGT/*.zip
+cp $FILE $TGT
+cd $TGT
+unzip *.zip
+cd $HOME/server
+rm -f active
+ln -s $DATE active
+echo "READY. Now do this:"
+echo "run-server"

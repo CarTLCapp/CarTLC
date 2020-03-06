@@ -232,6 +232,7 @@ public class WorkOrderController extends Controller {
      *
      * @param id Id of the work order to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
         Client client = Secured.getClient(ctx());
         Form<WorkOrderFormData> workOrderForm = formFactory.form(WorkOrderFormData.class).bindFromRequest();

@@ -53,20 +53,6 @@ public class TruckV6 extends com.avaje.ebean.Model {
     // and the database can be cleaned up by removing this table.
     @Transactional
     public static void transfer() {
-        List<TruckV6> list = find.findList();
-        for (TruckV6 truck6 : list) {
-            Truck truck = new Truck();
-            truck.id = truck6.id;
-            truck.truck_number = Integer.toString(truck6.truck_number);
-            truck.license_plate = truck6.license_plate;
-            truck.upload_id = truck6.upload_id;
-            truck.created_by = truck6.created_by;
-            truck.created_by_client = truck6.created_by_client;
-            truck.project_id = truck6.project_id;
-            truck.company_name_id = truck6.company_name_id;
-            truck.save();
-            truck6.delete();
-        }
     }
 
 }

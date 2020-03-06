@@ -31,6 +31,7 @@ public class TechnicianController extends Controller {
     /**
      * Display the list of users.
      */
+    @Security.Authenticated(Secured.class)
     public Result list() {
         return ok(views.html.technician_list.render(Technician.listEnabled(), Secured.getClient(ctx())));
     }
@@ -66,6 +67,7 @@ public class TechnicianController extends Controller {
      *
      * @param id Id of the user to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
         Form<Technician> technicianForm = formFactory.form(Technician.class).bindFromRequest();
         if (technicianForm.hasErrors()) {

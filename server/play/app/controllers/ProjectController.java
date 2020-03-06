@@ -54,6 +54,7 @@ public class ProjectController extends Controller {
     /**
      * Display the list of active or disabled projects.
      */
+    @Security.Authenticated(Secured.class)
     public Result list(boolean disabled) {
         return ok(views.html.project_list.render(Project.list(disabled), Secured.getClient(ctx()), disabled));
     }
@@ -74,6 +75,7 @@ public class ProjectController extends Controller {
      *
      * @param id Id of the project to edit
      */
+    @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
         Form<InputProject> projectForm = formFactory.form(InputProject.class).bindFromRequest();
         if (projectForm.hasErrors()) {

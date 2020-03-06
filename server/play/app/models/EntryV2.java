@@ -52,25 +52,6 @@ public class EntryV2 extends com.avaje.ebean.Model {
     // TODO: Once data has been transfered, this code can be removed
     // and the database can be cleaned up by removing this table.
     public static void transfer() {
-        List<EntryV2> list = find.findList();
-        for (EntryV2 entry2 : list) {
-            Entry entry = new Entry();
-            entry.tech_id = entry2.tech_id;
-            entry.entry_time = entry2.entry_time;
-            entry.project_id = entry2.project_id;
-            entry.company_id = entry2.address_id;
-            entry.equipment_collection_id = entry2.equipment_collection_id;
-            entry.picture_collection_id = entry2.picture_collection_id;
-            entry.note_collection_id = entry2.note_collection_id;
-            if (entry2.truck_number != 0 || entry2.license_plate != null) {
-                Truck truck = Truck.add(entry2.project_id, entry2.address_id, 0,
-                        Integer.toString(entry2.truck_number),
-                        entry2.license_plate, entry.tech_id);
-                entry.truck_id = truck.id;
-            }
-            entry.save();
-            entry2.delete();
-        }
     }
 }
 
