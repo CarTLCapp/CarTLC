@@ -570,9 +570,15 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public void remove(AmazonHelper.DeleteAction amazonAction) {
-        EntryEquipmentCollection.deleteByCollectionId(equipment_collection_id);
-        PictureCollection.deleteByCollectionId(picture_collection_id, amazonAction);
-        EntryNoteCollection.deleteByCollectionId(note_collection_id);
+        if (countEntryForEquipment(equipment_collection_id) <= 1) {
+            EntryEquipmentCollection.deleteByCollectionId(equipment_collection_id);
+        }
+        if (countEntryForPictureCollectionId(picture_collection_id) <= 1) {
+            PictureCollection.deleteByCollectionId(picture_collection_id, amazonAction);
+        }
+        if (countEntryforNote(note_collection_id) <= 1) {
+            EntryNoteCollection.deleteByCollectionId(note_collection_id);
+        }
         delete();
     }
 
@@ -666,15 +672,17 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasEntryForEquipment(final long equipment_id) {
+        return countEntryForEquipment(equipment_id) > 0;
+    }
+
+    private static int countEntryForEquipment(final long equipment_id) {
         List<EntryEquipmentCollection> collections = EntryEquipmentCollection.findCollectionsFor(equipment_id);
         for (EntryEquipmentCollection collection : collections) {
-            if (find.where()
+            return find.where()
                     .eq("equipment_collection_id", collection.collection_id)
-                    .findRowCount() > 0) {
-                return true;
-            }
+                    .findRowCount();
         }
-        return false;
+        return 0;
     }
 
     public static boolean hasEntryForEquipmentCollectionId(final long collection_id) {
@@ -695,15 +703,17 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasEntryForNote(final long note_id) {
+        return countEntryForNote(note_id) > 0;
+    }
+
+    public static int countEntryForNote(final long note_id) {
         List<EntryNoteCollection> collections = EntryNoteCollection.findByNoteId(note_id);
         for (EntryNoteCollection collection : collections) {
-            if (find.where()
+            return find.where()
                     .eq("note_collection_id", collection.collection_id)
-                    .findRowCount() > 0) {
-                return true;
-            }
+                    .findRowCount();
         }
-        return false;
+        return 0;
     }
 
     public static boolean hasEntryForNoteCollectionId(final long collection_id) {
@@ -735,9 +745,13 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasEntryForPictureCollectionId(long picture_collection_id) {
+        return countEntryForPictureCollectionId(picture_collection_id);
+    }
+
+    private static int countEntryForPictureCollectionId(long picture_collection_id) {
         return find.where()
                 .eq("picture_collection_id", picture_collection_id)
-                .findRowCount() > 0;
+                .findRowCount();
     }
 
     public static Entry getFulfilledBy(WorkOrder order) {

@@ -38,7 +38,7 @@ open class ProcessBase(
                 Stage.STREET,
                 Stage.CITY,
                 Stage.EQUIPMENT,
-                Stage.STATE -> buttonsUseCase.dispatch(Button.BTN_CENTER)
+                Stage.STATE -> buttonsUseCase.center()
                 else -> {
                 }
             }

@@ -448,10 +448,21 @@ class MainController(
             Stage.LOGIN -> {
             }
             is Stage.CUSTOM_FLOW -> {
-                if (action == Button.BTN_CENTER) {
-                    stageCustom.center()
-                } else {
-                    curFlowValue.process(action)
+                when (action) {
+                    Button.BTN_CENTER -> {
+                        stageCustom.center()
+                    }
+                    Button.BTN_PREV -> {
+                        if (!stageCustom.prev()) {
+                            curFlowValue.process(action)
+                        }
+                    }
+                    Button.BTN_NEXT -> {
+                        if (!stageCustom.next()) {
+                            curFlowValue.process(action)
+                        }
+                    }
+                    else -> {}
                 }
             }
             Stage.TRUCK_NUMBER_PICTURE -> {
@@ -628,7 +639,7 @@ class MainController(
     private fun doSimpleEntryReturn(value: String) {
         when (curFlowValue.stage) {
             Stage.LOGIN -> {
-                buttonsUseCase.dispatch(Button.BTN_CENTER)
+                buttonsUseCase.center()
                 return
             }
             Stage.COMPANY, Stage.ADD_COMPANY -> prefHelper.company = value
@@ -637,7 +648,7 @@ class MainController(
             else -> {
             }
         }
-        buttonsUseCase.dispatch(Button.BTN_NEXT)
+        buttonsUseCase.next()
     }
 
     // endregion Action Events

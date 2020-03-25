@@ -61,6 +61,9 @@ class EquipmentSelectController(
         currentProjectGroup?.let {
             val collection = queryForProject(it)
             items = collection.equipment.toMutableList()
+            if (items.isEmpty()) {
+                items = repo.db.tableEquipment.query().toMutableList()
+            }
             items.sort()
             listener.onEquipmentDataChanged(items)
         }

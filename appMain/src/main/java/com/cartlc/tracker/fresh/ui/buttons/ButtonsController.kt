@@ -206,15 +206,26 @@ open class ButtonsController(
         }
     }
 
+    override fun prev() {
+        dispatch(Button.BTN_PREV)
+    }
 
+    override fun next() {
+        dispatch(Button.BTN_NEXT)
+    }
+
+    override fun center() {
+        dispatch(Button.BTN_CENTER)
+    }
     override fun back() {
         wasNext = false
         skip()
     }
 
-    override fun dispatch(button: Button) {
+    // endregion support for ButtonsUseCase
+
+    private fun dispatch(button: Button) {
         dispatchButtonEvent(button)
     }
 
-    // endregion support for ButtonsUseCase
 }

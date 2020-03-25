@@ -431,12 +431,12 @@ class PrefHelper constructor(
 
     // region CONFIRM
 
-    fun getConfirmValue(prompt: String): Boolean {
-        return getInt(CONFIRM_PROMPT_PREFIX + prompt, 0) != 0
+    fun getConfirmValue(id: Long): Boolean {
+        return getInt(CONFIRM_PROMPT_PREFIX + id.toString(), 0) != 0
     }
 
-    fun setConfirmValue(prompt: String, value: Boolean) {
-        setInt(CONFIRM_PROMPT_PREFIX + prompt, if (value) 1 else 0)
+    fun setConfirmValue(id: Long, value: Boolean) {
+        setInt(CONFIRM_PROMPT_PREFIX + id.toString(), if (value) 1 else 0)
     }
 
     private fun clearConfirmValues() {

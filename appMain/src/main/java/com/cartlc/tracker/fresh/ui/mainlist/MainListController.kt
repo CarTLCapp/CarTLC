@@ -19,7 +19,8 @@ import com.cartlc.tracker.fresh.model.misc.TruckStatus
 class MainListController(
         boundAct: BoundAct,
         private val viewMvc: MainListViewMvc
-) : BaseObservableImpl<MainListUseCase.Listener>(), LifecycleObserver,
+) : BaseObservableImpl<MainListUseCase.Listener>(),
+        LifecycleObserver,
         MainListUseCase,
         MainListViewMvc.Listener,
         FlowUseCase.Listener {
@@ -30,6 +31,7 @@ class MainListController(
     private val status: TruckStatus?
         get() = prefHelper.status
     private val checkBoxItemEnabled = mutableListOf<Boolean>()
+    private val checkBoxItems = mutableListOf<DataFlowElement>()
 
     init {
         boundAct.bindObserver(this)
@@ -120,7 +122,9 @@ class MainListController(
                             }
                         Type.CONFIRM_NEW,
                         Type.CONFIRM -> {
-                            viewMvc.checkBoxItems = convert(repo.db.tableFlowElement.queryConfirmBatch(element.flowId, element.id))
+                            checkBoxItems.clear()
+                            checkBoxItems.addAll(repo.db.tableFlowElement.queryConfirmBatch(element.flowId, element.id))
+                            viewMvc.checkBoxItems = convert(checkBoxItems)
                             buildCheckBoxMemory()
                             notifyConfirmListeners()
                         }
@@ -148,8 +152,8 @@ class MainListController(
 
     private fun buildCheckBoxMemory() {
         checkBoxItemEnabled.clear()
-        for (item in viewMvc.checkBoxItems) {
-            checkBoxItemEnabled.add(prefHelper.getConfirmValue(item))
+        for (item in checkBoxItems) {
+            checkBoxItemEnabled.add(prefHelper.getConfirmValue(item.id))
         }
     }
 
@@ -177,10 +181,21 @@ class MainListController(
         prefHelper.status = TruckStatus.from(ctx, text)
     }
 
-    override fun onCheckBoxItemChanged(position: Int, item: String, isChecked: Boolean) {
+    override fun onCheckBoxItemChanged(position: Int, prompt: String, isChecked: Boolean) {
         checkBoxItemEnabled[position] = isChecked
-        prefHelper.setConfirmValue(item, isChecked)
+        lookupFlowElementId(prompt)?.let { id ->
+            prefHelper.setConfirmValue(id, isChecked)
+        }
         notifyConfirmListeners()
+    }
+
+    private fun lookupFlowElementId(prompt: String): Long? {
+        for (item in checkBoxItems) {
+            if (item.prompt == prompt) {
+                return item.id
+            }
+        }
+        return null
     }
 
     private fun notifyConfirmListeners() {

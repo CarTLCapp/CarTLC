@@ -31,7 +31,6 @@ class StageCustom(
             var showToast = false
             if (buttonsUseCase.wasNext) {
                 showToast = true
-                buttonsUseCase.wasNext = false
             }
             val currentNumPictures: Int
             if (element.numImages > 0) {
@@ -82,6 +81,7 @@ class StageCustom(
                             showingDialog = element.id
                             dialogNavigator.showDialog(it) {
                                 showingDialog = 0L
+                                buttonsUseCase.skip()
                             }
                         }
                     }
@@ -138,21 +138,31 @@ class StageCustom(
                     }
                 }
                 taskPicture.takingPictureAborted = false
-
-                if (isNext) {
-                    db.tableFlowElement.next(element.id)?.let {
-                        repo.curFlowValue = CustomFlow(it)
-                    } ?: return true
-                } else {
-                    db.tableFlowElement.prev(element.id)?.let {
-                        repo.curFlowValue = CustomFlow(it)
-                    } ?: return true
-                }
             } ?: return true
         }
-        // Note: returning false here is very important. I am NOT using the normal
-        // prev & next stages because custom is special and has it's own idea of that.
-        return false
+        return true
+    }
+
+    fun next(): Boolean {
+        return with (shared) {
+            repo.currentFlowElement?.let { element ->
+                db.tableFlowElement.next(element.id)?.let {
+                    repo.curFlowValue = CustomFlow(it)
+                    true
+                } ?: false
+            } ?: false
+        }
+    }
+
+    fun prev(): Boolean {
+        return with (shared) {
+            repo.currentFlowElement?.let { element ->
+                db.tableFlowElement.prev(element.id)?.let {
+                    repo.curFlowValue = CustomFlow(it)
+                    true
+                } ?: false
+            } ?: false
+        }
     }
 
     fun pictureStateChanged() {

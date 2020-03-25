@@ -12,7 +12,7 @@ interface MainListViewMvc : ObservableViewMvc<MainListViewMvc.Listener> {
         fun onSimpleItemClicked(position: Int, value: String)
         fun onProjectGroupSelected(projectGroup: DataProjectAddressCombo)
         fun onRadioItemSelected(text: String)
-        fun onCheckBoxItemChanged(position: Int, item: String, isChecked: Boolean)
+        fun onCheckBoxItemChanged(position: Int, prompt: String, isChecked: Boolean)
         fun isCheckBoxItemSelected(position: Int): Boolean
     }
 
