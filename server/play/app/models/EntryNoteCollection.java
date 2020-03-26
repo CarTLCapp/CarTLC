@@ -83,6 +83,18 @@ public class EntryNoteCollection extends Model {
         return list;
     }
 
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(id);
+        sbuf.append(": C");
+        sbuf.append(collection_id);
+        sbuf.append(", ");
+        sbuf.append(getName());
+        sbuf.append(" = ");
+        sbuf.append(getValue());
+        return sbuf.toString();
+    }
+
     public static int countNotes(long note_id) {
         return find.where().eq("note_id", note_id).findRowCount();
     }
@@ -113,6 +125,14 @@ public class EntryNoteCollection extends Model {
             }
             Logger.info(sbuf.toString());
         }
+    }
+
+    public String idValueString() {
+        Note note = Note.find.byId(note_id);
+        if (note != null) {
+            return "VALUE" + note.id;
+        }
+        return "UNKNOWN";
     }
 
     public static void replace(long collection_id, List<Note> notes) {

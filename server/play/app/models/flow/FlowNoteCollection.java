@@ -16,6 +16,7 @@ import modules.AmazonHelper;
 
 import java.io.File;
 import models.Note;
+import models.ClientAssociation;
 
 /**
  * Groups of notes for a particular flow element managed by Ebean
@@ -88,26 +89,13 @@ public class FlowNoteCollection extends Model {
     public static void process(long flow_element_id, Form flowElementForm) {
         deleteByFlowElementId(flow_element_id);
         for (Note note : Note.list()) {
-            if (isTrue(flowElementForm, note.idString())) {
+            if (ClientAssociation.isTrue(flowElementForm, note.idString())) {
                 FlowNoteCollection item = new FlowNoteCollection();
                 item.flow_element_id = flow_element_id;
                 item.note_id = note.id;
                 item.save();
             }
         }
-    }
-
-    private static boolean isTrue(Form flowElementForm, String field) {
-        try {
-            Optional<String> value = flowElementForm.field(field).getValue();
-            if (value.isPresent()) {
-                if (value.get().equals("true")) {
-                    return true;
-                }
-            }
-        } catch (Exception ex) {
-        }
-        return false;
     }
 
 }

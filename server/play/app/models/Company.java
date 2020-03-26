@@ -83,6 +83,24 @@ public class Company extends Model {
         }
     }
 
+    private static List<Company> find(Company company) {
+        return find.where()
+                .eq("name", company.name)
+                .eq("street", company.street)
+                .eq("city", company.city)
+                .eq("state", company.state)
+                .eq("zipcode", company.zipcode)
+                .findList();
+    }
+
+    public static Company findOne(Company company) {
+        List<Company> list = find(company);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
     /**
      * Return a list of companies, but since we are only showing the names of each company
      * filter results such that only the first company is returned with a distinct name.

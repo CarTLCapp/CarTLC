@@ -52,9 +52,9 @@
             @for(equipment <- Equipment.list()) {
                 <div class="checkbox-item">
                     @if(Entry.hasEquipment(id, equipment.id)) {
-                        @b3.checkbox(entryForm(equipment.name), '_label -> equipment.name, 'checked -> true)
+                        @b3.checkbox(entryForm(equipment.idString()), '_label -> equipment.name, 'checked -> true)
                     } else {
-                        @b3.checkbox(entryForm(equipment.name), '_label -> equipment.name)
+                        @b3.checkbox(entryForm(equipment.idString()), '_label -> equipment.name)
                     }
                 </div>
                 <div style="clear:both;"></div>
@@ -69,9 +69,9 @@
             @for(note <- Note.list()) {
                 <div class="checkbox-item">
                     @if(Entry.hasNote(id, note.id)) {
-                        @b3.checkbox(entryForm(note.name), '_label -> note.name, 'checked -> true)
+                        @b3.checkbox(entryForm(note.idString()), '_label -> note.name, 'checked -> true)
                     } else {
-                        @b3.checkbox(entryForm(note.name), '_label -> note.name)
+                        @b3.checkbox(entryForm(note.idString()), '_label -> note.name)
                     }
                 </div>
                 <div style="clear:both;"></div>
@@ -84,11 +84,7 @@
         <div>
 
             @for(note <- Entry.getNotesForId(client.id, id)) {
-                @{
-                    val name = note.getName()
-                    val valueName = "value_" + name
-                    b3.text(noteValues(valueName), '_label -> name, '_help -> "")
-                }
+                @b3.text(noteValues(note.idValueString()), '_label -> note.getName(), '_help -> "")
             }
 
         </div>

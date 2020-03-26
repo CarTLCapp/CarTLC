@@ -268,6 +268,10 @@ public class Entry extends com.avaje.ebean.Model {
         return null;
     }
 
+    public boolean isFlowEntry() {
+        return getFlow() != null;
+    }
+
     public String getAddressLine() {
         Company company = Company.get(company_id);
         if (company == null) {
@@ -388,11 +392,11 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getEquipmentLine(Client client) {
-	if (client.id != null) {
-	    return getEquipmentLine(client.id);
-	} else {
-	    return ""; 
-	}
+        if (client.id != null) {
+            return getEquipmentLine(client.id);
+        } else {
+            return "";
+        }
     }
 
     public String getEquipmentLine(long client_id) {
@@ -465,8 +469,7 @@ public class Entry extends com.avaje.ebean.Model {
     public HashMap<String, Object> getNoteValues(long client_id) {
         HashMap<String, Object> map = new HashMap<String, Object>();
         for (EntryNoteCollection note : getNotes(client_id)) {
-            String valueName = "value_" + note.getName();
-            map.put(valueName, note.getValue());
+            map.put(note.idValueString(), note.getValue());
         }
         return map;
     }
@@ -481,7 +484,7 @@ public class Entry extends com.avaje.ebean.Model {
 
     public void applyToNotes(long client_id, Form entryForm) {
         for (EntryNoteCollection note : getNotes(client_id)) {
-            String valueName = "value_" + note.getName();
+            String valueName = note.idValueString();
             Optional<String> value = entryForm.field(valueName).getValue();
             if (value.isPresent()) {
                 note.setValue(value.get());
@@ -576,7 +579,7 @@ public class Entry extends com.avaje.ebean.Model {
         if (countEntryForPictureCollectionId(picture_collection_id) <= 1) {
             PictureCollection.deleteByCollectionId(picture_collection_id, amazonAction);
         }
-        if (countEntryforNote(note_collection_id) <= 1) {
+        if (countEntryForNote(note_collection_id) <= 1) {
             EntryNoteCollection.deleteByCollectionId(note_collection_id);
         }
         delete();
@@ -745,7 +748,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasEntryForPictureCollectionId(long picture_collection_id) {
-        return countEntryForPictureCollectionId(picture_collection_id);
+        return countEntryForPictureCollectionId(picture_collection_id) > 0;
     }
 
     private static int countEntryForPictureCollectionId(long picture_collection_id) {
@@ -800,8 +803,35 @@ public class Entry extends com.avaje.ebean.Model {
         sbuf.append(getAddressLine());
         sbuf.append(",");
         sbuf.append(getTruckLine());
+        return sbuf.toString();
+    }
+
+    public String toString(long client_id) {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(id);
+        sbuf.append(":");
+        sbuf.append(getDate());
+        sbuf.append(",");
+        sbuf.append(getAddressLine());
+        sbuf.append(",");
+        sbuf.append(getTruckLine());
         sbuf.append(",");
         sbuf.append(getTechName());
+        sbuf.append(" E='");
+        sbuf.append(getEquipmentLine(client_id));
+        sbuf.append("'");
+        sbuf.append(" [N");
+        sbuf.append(note_collection_id);
+        if (hasNotes(client_id)) {
+            sbuf.append(" TRUE");
+        }
+        sbuf.append(", E");
+        sbuf.append(equipment_collection_id);
+        sbuf.append(", P");
+        sbuf.append(picture_collection_id);
+        sbuf.append(", T");
+        sbuf.append(truck_id);
+        sbuf.append("] ");
         return sbuf.toString();
     }
 

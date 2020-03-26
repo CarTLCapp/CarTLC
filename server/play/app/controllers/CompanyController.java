@@ -106,7 +106,13 @@ public class CompanyController extends Controller {
             return badRequest(views.html.company_createForm.render(companyForm));
         }
         Client client = Secured.getClient(ctx());
+
         Company company = companyForm.get();
+        Company useCompany = Company.findOne(company);
+        if (useCompany != null) {
+            flash("success", "Company '" + company.getLine() + "' has already been saved");
+            return LIST();
+        }
         Company savedCompany = new Company();
         if (client != null && client.id > 0) {
             savedCompany.created_by = Long.valueOf(client.id).intValue();
@@ -119,7 +125,7 @@ public class CompanyController extends Controller {
         savedCompany.city = company.city;
         savedCompany.zipcode = company.zipcode;
         savedCompany.save();
-        flash("success", "Company " + companyForm.get().name + " has been created");
+        flash("success", "Company '" + savedCompany.getLine() + "' has been created");
         return LIST();
     }
 

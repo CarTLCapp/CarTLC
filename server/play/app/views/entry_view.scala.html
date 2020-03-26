@@ -11,6 +11,7 @@
     <table>
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Name</th>
                 <th>Date</th>
                 <th>Time</th>
@@ -27,6 +28,7 @@
         </thead>
         <tbody>
             <tr>
+                <td>@entry.id</td>
                 <td>@entry.getTechName()</td>
                 <td>@entry.getDate()</td>
                 <td>@entry.getTime()</td>
@@ -49,6 +51,7 @@
         <table class="notes zebra-striped">
             <thead>
                 <tr>
+                    <th style="width:100px">ID</th>
                     <th>Name</th>
                     <th>Value</th>
                 </tr>
@@ -57,6 +60,7 @@
 
             @for(note <- entry.getNotes(client.id)) {
                 <tr>
+                    <td style="width:100px">@note.id</td>
                     <td>@note.getName()</td>
                     <td>@note.note_value</td>
                 </tr>
@@ -69,45 +73,64 @@
 
         <h1 id="pictureTitle">Pictures</h1>
 
-        @if(entry.hasTruckNumberPictureValue()) {
-            <h2>Truck Number</h2>
+        @if(entry.isFlowEntry()) {
+            @if(entry.hasTruckNumberPictureValue()) {
+                <h2>Truck Number</h2>
 
-            <img src='@routes.EntryController.getImage(entry.getTruckNumberPictureValue())'/>
-        }
-        @if(entry.hasTruckDamagePictureValue()) {
-            <h2>Truck Damage</h2>
+                <img src='@routes.EntryController.getImage(entry.getTruckNumberPictureValue())'/>
+            }
+            @if(entry.hasTruckDamagePictureValue()) {
+                <h2>Truck Damage</h2>
 
-            <img src='@routes.EntryController.getImage(entry.getTruckDamagePictureValue())'/>
-        }
-
-        @for(element <- entry.getPictureFlowElements()) {
-
-            <h2 id="sectionTitle">@element.prompt</h2>
-
-            @for(picture <- element.getPictures()) {
-                <img src='@routes.EntryController.getImage(picture.picture)'/>
+                <img src='@routes.EntryController.getImage(entry.getTruckDamagePictureValue())'/>
             }
 
-            @if(element.hasNotes()) {
+            @for(element <- entry.getPictureFlowElements()) {
 
-                <table class="notes zebra-striped">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
+                <h2 id="sectionTitle">@element.prompt</h2>
 
-                    <tbody>
-                        @for(note <- entry.getNoteValuesForElement(client.id, element.id)) {
+                @for(picture <- element.getPictures()) {
+                    <img src='@routes.EntryController.getImage(picture.picture)'/>
+                }
+
+                @if(element.hasNotes()) {
+
+                    <table class="notes zebra-striped">
+                        <thead>
                             <tr>
-                                <td>@note.getName()</td>
-                                <td>@note.getValue()</td>
+                                <th>Name</th>
+                                <th>Value</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+
+                        <tbody>
+                            @for(note <- entry.getNoteValuesForElement(client.id, element.id)) {
+                                <tr>
+                                    <td>@note.getName()</td>
+                                    <td>@note.getValue()</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
             }
+        } else {
+            <table class="pictures zebra-striped">
+                <thead>
+                    <tr>
+                        <th>Picture</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(item <- entry.getPictures()) {
+                        <tr>
+                            <td><img src='@routes.EntryController.getImage(item.picture)'/></td>
+                            <td>@item.note</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
     }
 

@@ -328,6 +328,7 @@ public class EntryController extends Controller {
         return ok(views.html.entry_editForm.render(entry.id, entryForm, noteValues, home, Secured.getClient(ctx())));
     }
 
+    @Transactional
     @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
         Client client = Secured.getClient(ctx());
@@ -389,10 +390,14 @@ public class EntryController extends Controller {
                 entry.status = status;
             }
             EntryEquipmentCollection.replace(entry.equipment_collection_id, Equipment.getChecked(entryForm));
+
+            // Don't know how this happened, but somehow very occassionally note_collection_id became 0.
+            if (entry.note_collection_id == 0) {
+                entry.note_collection_id = Version.inc(Version.NEXT_NOTE_COLLECTION_ID);
+            }
             EntryNoteCollection.replace(entry.note_collection_id, Note.getChecked(entryForm));
             entry.applyToNotes(client.id, entryForm);
             entry.update();
-            Logger.info("Entry updated: " + entry.toString());
         } catch (ParseException ex) {
             Logger.error(ex.getMessage());
             return badRequest(ex.getMessage());

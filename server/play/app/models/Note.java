@@ -297,6 +297,10 @@ public class Note extends Model implements Comparable<Note> {
         return "N" + id;
     }
 
+    public String idValueString() {
+        return "VALUE" + id;
+    }
+
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(id);
