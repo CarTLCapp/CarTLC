@@ -130,7 +130,7 @@ public class FlowController extends Controller {
                 editFlow.sub_project_id = project.id;
                 if (flowId > 0) {
                     editFlow.update();
-                } else if (Flow.getByProjectId(project.id) != null) {
+                } else if (Flow.getByProjectId(project.id) == null) {
                     editFlow.save();
                     flowId = editFlow.id;
                 } else {
