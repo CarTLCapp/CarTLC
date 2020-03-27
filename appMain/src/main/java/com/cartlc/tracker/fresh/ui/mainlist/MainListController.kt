@@ -112,14 +112,6 @@ class MainListController(
             is Stage.CUSTOM_FLOW -> {
                 repo.currentFlowElement?.let { element ->
                     when (element.type) {
-                        Type.NONE ->
-                            if (repo.db.tableFlowElementNote.hasNotes(element.id)) {
-                                viewMvc.adapter = MainListViewMvc.Adapter.NOTE_ENTRY
-                                viewMvc.visible = true
-                            } else {
-                                viewMvc.visible = false
-                                viewMvc.emptyVisible = true
-                            }
                         Type.CONFIRM_NEW,
                         Type.CONFIRM -> {
                             checkBoxItems.clear()
@@ -129,8 +121,13 @@ class MainListController(
                             notifyConfirmListeners()
                         }
                         else -> {
-                            viewMvc.visible = false
-                            viewMvc.emptyVisible = false
+                            if (!element.hasImages && repo.db.tableFlowElementNote.hasNotes(element.id)) {
+                                viewMvc.adapter = MainListViewMvc.Adapter.NOTE_ENTRY
+                                viewMvc.visible = true
+                            } else {
+                                viewMvc.visible = false
+                                viewMvc.emptyVisible = false
+                            }
                         }
                     }
                 }

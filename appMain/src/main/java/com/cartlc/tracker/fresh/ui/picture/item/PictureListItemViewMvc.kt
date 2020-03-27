@@ -16,7 +16,9 @@ interface PictureListItemViewMvc: ViewMvc {
         fun onImageLoaded(imageHeight: Int)
     }
 
-    var buttonsVisible: Boolean
+    var btnRemoveVisible: Boolean
+    var btnCcwVisible: Boolean
+    var btnCwVisible: Boolean
     var loading: String?
     fun bindPicture(pictureFile: File?)
     fun bindListener(listener: Listener)

@@ -69,4 +69,10 @@ class DataFlowElement(
         return "DataFlowElement(id=$id, serverId=$serverId, flowId=$flowId, order=$order, prompt=$prompt, type=$type, numImages=$numImages)"
     }
 
+    val hasImages: Boolean
+        get() = numImages > 0
+
+    val isConfirmType: Boolean
+        get() = type == Type.CONFIRM_NEW || type == Type.CONFIRM
+
 }

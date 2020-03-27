@@ -33,9 +33,15 @@ class TaskPicture (
 
     var takingPictureFile: File? = null
     var takingPictureAborted = false
+    var takingPictureSuccess = false
 
     private val isPictureStage: Boolean
         get() = shared.curFlowValue.isPictureStage
+
+    fun clearFlags() {
+        takingPictureSuccess = false
+        takingPictureAborted = false
+    }
 
     fun dispatchPictureRequest() {
         with(shared) {
@@ -68,6 +74,7 @@ class TaskPicture (
     }
 
     fun onPictureRequestComplete() {
+        takingPictureSuccess = true
         shared.repo.flowUseCase.notifyListeners()
     }
 

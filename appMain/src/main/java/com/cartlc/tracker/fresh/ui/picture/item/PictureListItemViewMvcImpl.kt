@@ -35,13 +35,18 @@ class PictureListItemViewMvcImpl(
     private val app = context.applicationContext as TBApplication
     private val bitmapHelper = app.componentRoot.bitmapHelper
 
-    override var buttonsVisible: Boolean
+    override var btnRemoveVisible: Boolean
         get() = removeButton.visibility == View.VISIBLE
-        set(value) {
-            removeButton.visibility = if (value) View.VISIBLE else View.GONE
-            rotateCwButton.visibility = if (value) View.VISIBLE else View.GONE
-            rotateCcwButton.visibility = if (value) View.VISIBLE else View.GONE
-        }
+        set(value) { removeButton.visibility = if (value) View.VISIBLE else View.GONE }
+
+    override var btnCcwVisible: Boolean
+        get() = rotateCcwButton.visibility == View.VISIBLE
+        set(value) { rotateCcwButton.visibility = if (value) View.VISIBLE else View.GONE }
+
+    override var btnCwVisible: Boolean
+        get() = rotateCwButton.visibility == View.VISIBLE
+        set(value) { rotateCwButton.visibility = if (value) View.VISIBLE else View.GONE }
+
 
     init {
         pictureView.addOnLayoutChangeListener { v: View, left: Int, top: Int, right: Int, bottom: Int,

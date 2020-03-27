@@ -48,7 +48,7 @@ class DCPing(
 
     companion object {
 
-        private const val TAG = "DCPing"
+        private val TAG = DCPing::class.simpleName
         private const val LOG = true
 
         private const val SERVER_URL_DEVELOPMENT = "https://fleetdev.arqnetworks.com/"
@@ -911,15 +911,15 @@ class DCPing(
                         Timber.i("New flow: $incomingFlow")
                     }
                 } else {
+                    incomingFlow.id = itemFlow.id
                     // Change of data
                     if (incomingFlow != itemFlow) {
                         Timber.i("Change: $incomingFlow from $itemFlow")
-                        incomingFlow.id = itemFlow.id
                         db.tableFlow.update(incomingFlow)
                     } else {
                         Timber.i("No change: $itemFlow")
                     }
-                    unprocessedFlow.remove(incomingFlow)
+                    unprocessedFlow.remove(itemFlow)
                 }
                 val elementsArray = eleFlow.getJSONArray("elements")
                 for (e in 0 until elementsArray.length()) {
@@ -959,7 +959,7 @@ class DCPing(
                         } else {
                             Timber.i("No change: $itemElement of $itemFlow")
                         }
-                        unprocessedFlowElement.remove(incomingEle)
+                        unprocessedFlowElement.remove(itemElement)
                     }
                     if (eleElement.has("notes")) {
                         val notesArray = eleElement.getJSONArray("notes")
@@ -995,6 +995,7 @@ class DCPing(
                 }
             }
             // Remove or disable unprocessed elements
+            Timber.i("removing unprocessed: ${unprocessedFlow.size} flows, ${unprocessedFlowElement.size} flow elements, and ${unprocessedFlowElementNote.size} flow notes")
             for (item in unprocessedFlow) {
                 db.tableFlow.remove(item)
             }

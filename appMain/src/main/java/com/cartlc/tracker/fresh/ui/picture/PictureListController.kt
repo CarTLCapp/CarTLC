@@ -120,7 +120,9 @@ class PictureListController(
     private fun onBindPictureViewHolder(itemViewMvc: PictureListItemViewMvc, position: Int) {
         val item = pictures[position]
         val pictureFile = item.file
-        itemViewMvc.buttonsVisible = false
+        itemViewMvc.btnRemoveVisible = false
+        itemViewMvc.btnCcwVisible = false
+        itemViewMvc.btnCwVisible = false
         itemViewMvc.bindPicture(pictureFile)
 
         if (pictureFile == null || !pictureFile.exists()) {
@@ -147,7 +149,14 @@ class PictureListController(
                 }
 
                 override fun onImageLoaded(imageHeight: Int) {
-                    itemViewMvc.buttonsVisible = imageHeight > showButtonMinImageSize
+                    if (imageHeight > showButtonMinImageSize) {
+                        itemViewMvc.btnRemoveVisible = true
+                        itemViewMvc.btnCcwVisible = true
+                        itemViewMvc.btnCwVisible = true
+                    } else {
+                        itemViewMvc.btnRemoveVisible = true
+                        itemViewMvc.btnCwVisible = true
+                    }
                 }
             })
         }

@@ -28,12 +28,12 @@ class StageCustom(
 
     private fun process(element: DataFlowElement) {
         with(shared) {
-            var showToast = false
-            if (buttonsUseCase.wasNext) {
-                showToast = true
-            }
             val currentNumPictures: Int
-            if (element.numImages > 0) {
+            var hasNotes = false
+            var hasPictures = false
+
+            if (element.hasImages && !element.isConfirmType) {
+                hasPictures = true
                 picturesVisible = true
                 pictureUseCase.pictureItems = db.tablePicture.removeFileDoesNotExist(
                         db.tablePicture.query(prefHelper.currentPictureCollectionId, repo.curFlowValueStage)
@@ -54,43 +54,54 @@ class StageCustom(
                     }
                 }
                 buttonsUseCase.nextVisible = ready
-                if (taskPicture.takingPictureAborted) {
-                    showToast = true
-                }
             } else {
                 currentNumPictures = 0
             }
+
+            // Process list -- if any
             when (element.type) {
-                Type.NONE -> {
-                    if (db.tableFlowElementNote.hasNotes(element.id)) {
-                        titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_notes)
-                        mainListUseCase.visible = true
-                    } else {
-                    }
-                }
-                Type.TOAST ->
-                    if (showToast) {
-                        getToastMessage(element, currentNumPictures)?.let {
-                            screenNavigator.showToast(it)
-                        }
-                    } else {
-                    }
-                Type.DIALOG ->
-                    if (showingDialog != element.id) {
-                        element.prompt?.let {
-                            showingDialog = element.id
-                            dialogNavigator.showDialog(it) {
-                                showingDialog = 0L
-                                buttonsUseCase.skip()
-                            }
-                        }
-                    }
                 Type.CONFIRM,
                 Type.CONFIRM_NEW -> {
                     mainListUseCase.visible = true
                     titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_confirm_checklist)
                     titleUseCase.mainTitleVisible = true
                 }
+                else -> {
+                    if (!hasPictures && db.tableFlowElementNote.hasNotes(element.id)) {
+                        titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_notes)
+                        mainListUseCase.visible = true
+                        hasNotes = true
+                    } else {
+                        mainListUseCase.visible = false
+                    }
+                }
+            }
+
+            // Process messages -- if any
+            when (element.type) {
+                Type.NONE -> {
+                    if (!hasPictures && !hasNotes) {
+                        buttonsUseCase.skip()
+                    }
+                }
+                Type.TOAST ->
+                    if (!taskPicture.takingPictureSuccess) {
+                        getToastMessage(element, currentNumPictures)?.let {
+                            screenNavigator.showToast(it)
+                        }
+                    }
+                Type.DIALOG ->
+                    if (showingDialog != element.id && !taskPicture.takingPictureSuccess) {
+                        element.prompt?.let {
+                            showingDialog = element.id
+                            dialogNavigator.showDialog(it) {
+                                showingDialog = 0L
+                                if (!hasPictures && !hasNotes) {
+                                    buttonsUseCase.skip()
+                                }
+                            }
+                        }
+                    }
                 else -> {
                 }
             }
@@ -124,7 +135,7 @@ class StageCustom(
                     }
                     Type.CONFIRM,
                     Type.CONFIRM_NEW -> {
-                        if (!mainListUseCase.isConfirmReady) {
+                        if (!mainListUseCase.isConfirmReady && isNext) {
                             screenNavigator.showToast(messageHandler.getString(StringMessage.error_need_all_checked))
                             return false
                         }
@@ -137,14 +148,14 @@ class StageCustom(
                         db.tableCollectionNoteEntry.save(it.noteCollectionId, notes)
                     }
                 }
-                taskPicture.takingPictureAborted = false
+                taskPicture.clearFlags()
             } ?: return true
         }
         return true
     }
 
     fun next(): Boolean {
-        return with (shared) {
+        return with(shared) {
             repo.currentFlowElement?.let { element ->
                 db.tableFlowElement.next(element.id)?.let {
                     repo.curFlowValue = CustomFlow(it)
@@ -155,7 +166,7 @@ class StageCustom(
     }
 
     fun prev(): Boolean {
-        return with (shared) {
+        return with(shared) {
             repo.currentFlowElement?.let { element ->
                 db.tableFlowElement.prev(element.id)?.let {
                     repo.curFlowValue = CustomFlow(it)
@@ -257,7 +268,7 @@ class StageCustom(
     }
 
     fun center() {
-        taskPicture.takingPictureAborted = false
+        taskPicture.clearFlags()
         taskPicture.dispatchPictureRequest()
     }
 }

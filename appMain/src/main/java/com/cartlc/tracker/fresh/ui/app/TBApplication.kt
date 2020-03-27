@@ -32,7 +32,6 @@ import com.cartlc.tracker.fresh.service.endpoint.DCServerRxImpl
 import com.cartlc.tracker.fresh.service.endpoint.DCService
 import com.cartlc.tracker.fresh.service.help.AmazonHelper
 import com.cartlc.tracker.fresh.service.help.ServerHelper
-import com.cartlc.tracker.fresh.service.instabug.InstaBugUseCase
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
 import com.cartlc.tracker.fresh.ui.common.PermissionHelper.PermissionListener
 import com.cartlc.tracker.fresh.ui.common.PermissionHelper.PermissionRequest
@@ -50,7 +49,7 @@ class TBApplication : Application() {
         private val OVERRIDE_IS_DEVELOPMENT_SERVER: Boolean? = true
 
         @VisibleForTesting
-        var DEBUG_TREE = false
+        var DEBUG_TREE = BuildConfig.DEBUG
 
         const val REPORT_LOCATION = false
 

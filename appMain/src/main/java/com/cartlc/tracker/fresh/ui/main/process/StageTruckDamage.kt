@@ -108,7 +108,7 @@ class StageTruckDamage(
     }
 
     fun center() {
-        taskPicture.takingPictureAborted = false
+        taskPicture.clearFlags()
         taskPicture.dispatchPictureRequest()
     }
 
