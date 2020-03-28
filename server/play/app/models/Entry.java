@@ -226,9 +226,21 @@ public class Entry extends com.avaje.ebean.Model {
 
     public List<FlowElement> getPictureFlowElements() {
         ArrayList<FlowElement> result = new ArrayList<FlowElement>();
+        FlowElement dialogElement = null;
         for (FlowElement element : getFlowElements()) {
-            if (element.getNumImages() > 0 || element.getPromptType() == PromptType.CATEGORY) {
+            if (element.isDialog()) {
+                dialogElement = element;
+            } else if (element.isConfirm()) {
+                if (dialogElement != null) {
+                    result.add(dialogElement);
+                    dialogElement = null;
+                }
                 result.add(element);
+            } else if (element.getNumImages() > 0) {
+                dialogElement = null;
+                result.add(element);
+            } else {
+                dialogElement = null;
             }
         }
         return result;
@@ -506,6 +518,10 @@ public class Entry extends com.avaje.ebean.Model {
 
     public List<PictureCollection> getPictures() {
         return PictureCollection.findByCollectionId(picture_collection_id);
+    }
+
+    public List<PictureCollection> getFlowPictures(long element_id) {
+        return PictureCollection.locate(picture_collection_id, element_id);
     }
 
     static List<Entry> findByProjectId(long project_id) {

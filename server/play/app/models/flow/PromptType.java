@@ -10,8 +10,7 @@ public enum PromptType {
     TOAST('T', "Toast"),
     DIALOG('D', "Dialog"),
     CONFIRM('C', "Confirm"),
-    CONFIRM_NEW('N', "Confirm Top"),
-    CATEGORY('Y', "Category");
+    CONFIRM_NEW('N', "Confirm Top");
 
     PromptType(char code, String desc) {
         this.code = code;

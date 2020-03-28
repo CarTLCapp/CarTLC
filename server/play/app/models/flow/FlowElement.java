@@ -66,6 +66,10 @@ public class FlowElement extends Model implements Comparable<FlowElement> {
 
     public String getPromptTypeName() { return getPromptType().getDesc(); }
 
+    public boolean isConfirm() { return getPromptType() == PromptType.CONFIRM || getPromptType() == PromptType.CONFIRM_NEW; }
+
+    public boolean isDialog() { return getPromptType() == PromptType.DIALOG; }
+
     public boolean hasNotes() { return FlowNoteCollection.hasNotes(id); }
 
     public List<Note> getNotes() { return FlowNoteCollection.findNotesByFlowElementId(id); }
@@ -86,6 +90,8 @@ public class FlowElement extends Model implements Comparable<FlowElement> {
         }
         return sbuf.toString();
     }
+
+    public String getPromptIndent() { return String.format("-- %s", prompt); }
 
     public String getPromptId() {
         return String.format("prompt%d", id);

@@ -24,8 +24,7 @@ class DataFlowElement(
         TOAST('T'),
         DIALOG('D'),
         CONFIRM('C'),
-        CONFIRM_NEW('N'),
-        CATEGORY('Y');
+        CONFIRM_NEW('N');
 
         companion object {
 

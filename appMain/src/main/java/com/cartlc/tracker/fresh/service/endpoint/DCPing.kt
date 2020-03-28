@@ -931,7 +931,7 @@ class DCPing(
                         incomingEle.prompt = eleElement.getString("prompt")
                     }
                     incomingEle.type = DataFlowElement.Type.from(eleElement.getString("type"))
-                    if (incomingEle.type == DataFlowElement.Type.UNSET || incomingEle.type == DataFlowElement.Type.CATEGORY) {
+                    if (incomingEle.type == DataFlowElement.Type.UNSET) {
                         continue
                     }
                     incomingEle.numImages = eleElement.getInt("num_images").toShort()
