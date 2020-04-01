@@ -90,32 +90,32 @@ public class EntryListWriter {
 
     public int writeNext() throws IOException {
         for (Entry entry : mList.getList()) {
-            mBR.write(entry.getDate());
+            mBR.write(chkNull(entry.getDate()));
             mBR.write(",");
-            mBR.write(entry.getTechName());
+            mBR.write(chkNull(entry.getTechName()));
             mBR.write(",");
-            mBR.write(entry.getRootProjectName());
+            mBR.write(chkNull(entry.getRootProjectName()));
             mBR.write(",");
-            mBR.write(entry.getSubProjectName());
+            mBR.write(chkNull(entry.getSubProjectName()));
             mBR.write(",");
-            mBR.write(entry.getCompany());
+            mBR.write(chkNull(entry.getCompany()));
             mBR.write(",");
-            mBR.write(entry.getStreet());
+            mBR.write(chkNull(entry.getStreet()));
             mBR.write(",");
-            mBR.write(entry.getCity());
+            mBR.write(chkNull(entry.getCity()));
             mBR.write(",");
-            mBR.write(entry.getState());
+            mBR.write(chkNull(entry.getState()));
             mBR.write(",");
-            mBR.write(entry.getZipCode());
+            mBR.write(chkNull(entry.getZipCode()));
             mBR.write(",");
             if (mList.canViewTrucks) {
-                mBR.write(entry.getTruckLine());
+                mBR.write(chkNull(entry.getTruckLine()));
                 mBR.write(",");
             }
             mBR.write(chkComma(entry.getEquipmentLine(mList.mForClientId)));
             mBR.write(",");
-            mBR.write(entry.getStatus());
-            mBR.write(mNoteColumns.getValues(entry));
+            mBR.write(chkNull(entry.getStatus()));
+            mBR.write(chkNull(mNoteColumns.getValues(entry)));
             mBR.write("\n");
             mCount++;
         }
@@ -130,7 +130,17 @@ public class EntryListWriter {
         mBR.close();
     }
 
+    private String chkNull(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value;
+    }
+
     private String chkComma(String line) {
+        if (line == null) {
+            return "";
+        }
         if (hasComma(line)) {
             StringBuilder sbuf = new StringBuilder();
             sbuf.append('"');
