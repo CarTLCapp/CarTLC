@@ -281,7 +281,14 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public boolean isFlowEntry() {
-        return getFlow() != null;
+        if (getFlow() == null) {
+            return false;
+        }
+        List<PictureCollection> pictures = getPictures();
+        if (pictures.size() > 0) {
+            return pictures.get(0).flow_element_id > 0;
+        }
+        return true;
     }
 
     public String getAddressLine() {

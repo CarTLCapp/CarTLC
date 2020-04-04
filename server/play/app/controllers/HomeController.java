@@ -150,7 +150,6 @@ public class HomeController extends Controller {
         mAmazonHelper.deleteAction().host(host).deleteLocalFile(true).listener((deleted, errors) -> {
             pictureCleanup2(host, completableFuture, deleted);
         }).delete(missing);
-
         Logger.warn("DONE");
     }
 
