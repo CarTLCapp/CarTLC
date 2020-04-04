@@ -103,7 +103,7 @@ public class Entry extends com.avaje.ebean.Model {
     public long note_collection_id;
 
     @Constraints.Required
-    public long truck_id; // Not used anymore in Flow style.
+    public long truck_id; // Not used anymore in Flow style. See PictureCollection.FLOW_TRUCK_NUMBER_ID
 
     @Constraints.Required
     public Status status;
@@ -286,7 +286,12 @@ public class Entry extends com.avaje.ebean.Model {
         }
         List<PictureCollection> pictures = getPictures();
         if (pictures.size() > 0) {
-            return pictures.get(0).flow_element_id > 0;
+            for (PictureCollection collection : pictures) {
+                if (collection.flow_element_id > 0) {
+                    return true;
+                }
+            }
+            return false;
         }
         return true;
     }
@@ -650,6 +655,10 @@ public class Entry extends com.avaje.ebean.Model {
         return find.where().eq("truck_id", truck_id).findRowCount();
     }
 
+    public List<Entry> getEntriesForTruck() {
+        return find.where().eq("truck_id", truck_id).findList();
+    }
+
     public static int countEntriesForNote(long note_id) {
         return EntryNoteCollection.countNotes(note_id);
     }
@@ -824,7 +833,7 @@ public class Entry extends com.avaje.ebean.Model {
         sbuf.append(getDate());
         sbuf.append(",");
         sbuf.append(getAddressLine());
-        sbuf.append(",");
+        sbuf.append(" T=");
         sbuf.append(getTruckLine());
         return sbuf.toString();
     }
@@ -905,5 +914,6 @@ public class Entry extends com.avaje.ebean.Model {
     public static boolean isValidStatus(String match) {
         return findStatus(match) != null;
     }
+
 }
 

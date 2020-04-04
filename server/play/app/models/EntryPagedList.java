@@ -202,6 +202,7 @@ public class EntryPagedList {
         long mNumTotalRows;
     }
 
+    static final boolean VERBOSE = false;
     static final int[] PAGE_SIZES = {100, 200, 300, 400, 500};
 
     Parameters mParams = new Parameters();
@@ -582,7 +583,9 @@ public class EntryPagedList {
         List<SqlRow> entries;
         String query;
         query = buildQuery(true);
-        Logger.debug("Query: " + query);
+        if (VERBOSE) {
+            Logger.debug("Query: " + query);
+        }
         entries = Ebean.createSqlQuery(query).findList();
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
