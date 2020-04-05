@@ -271,7 +271,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
 
     public static void fixTrucks() {
         List<WorkOrder> list = list();
-        boolean didOne = false;
+	int count = 0;
         for (WorkOrder order : list) {
             Truck truck = Truck.get(order.truck_id);
             boolean changed = false;
@@ -286,10 +286,11 @@ public class WorkOrder extends com.avaje.ebean.Model {
             }
             if (changed) {
                 truck.update();
-                didOne = true;
+		count++;
             }
         }
-        if (didOne) {
+        if (count > 0) {
+            Logger.warn("WorkOrder.fixed project and company name for " + count + " trucks");
             Version.inc(Version.VERSION_TRUCK);
         }
     }

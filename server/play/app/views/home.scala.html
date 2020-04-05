@@ -72,6 +72,10 @@
 
 		<p id="cleanup_result"></p>
 
+		<a id="truck_cleanup" href="@routes.HomeController.index()" class="light">Truck Cleanup</a>
+
+		<p id="truck_cleanup_result"></p>
+
 	}
 
     <script type="text/javascript">
@@ -96,6 +100,29 @@
         }
 
         document.getElementById("picture_cleanup").onclick = myConfirmPictureCleanup;
+
+
+
+      function myTruckCleanup() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    document.getElementById("truck_cleanup_result").innerHTML = this.responseText;
+                    document.getElementById("truck_cleanup").innerHTML = "Truck Cleanup";
+                }
+            };
+            xhttp.open("GET", "@routes.HomeController.truckCleanup()", true);
+            xhttp.send();
+            document.getElementById("truck_cleanup").innerHTML = "";
+        }
+
+        function myConfirmTruckCleanup() {
+            if (confirm('This will confirm all entries have no duplicate truck records between them and cannot be undone. Are you sure?')) {
+                myTruckCleanup();
+            }
+        }
+
+        document.getElementById("truck_cleanup").onclick = myConfirmTruckCleanup;
 
     </script>
 }

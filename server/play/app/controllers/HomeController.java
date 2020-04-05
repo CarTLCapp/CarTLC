@@ -29,6 +29,8 @@ import modules.Globals;
 
 import javax.inject.Inject;
 
+import play.db.ebean.Transactional;
+
 public class HomeController extends Controller {
 
     private AmazonHelper mAmazonHelper;
@@ -190,5 +192,92 @@ public class HomeController extends Controller {
         }
         return orphaned.size();
     }
+
+    /**
+     * Clean up the list of entries with the same truck id. This is an error.
+     * Note: in the new flow style this problem will no longer be an issue as this field is obsolete.
+     *
+     * @return
+     */
+    @Security.Authenticated(Secured.class)
+    public CompletionStage<Result> truckCleanup() {
+        String host = request().host();
+        final CompletableFuture<Result> completableFuture = new CompletableFuture<>();
+        Executors.newCachedThreadPool().submit(() -> {
+            truckCleanup1(host, completableFuture);
+            return null;
+        });
+        return completableFuture;
+    }
+
+    private void truckCleanup1(String host, CompletableFuture<Result> completableFuture) {
+        EntryPagedList entryList = new EntryPagedList();
+        entryList.setPage(0);
+        entryList.compute();
+        entryList.computeTotalNumRows();
+        int curRow = 0;
+        int curPage = 0;
+        int pageRow = -1;
+        int reassignCount = 0;
+        List<Entry> page = entryList.getList();
+        List<Entry> instancesWithTruckId;
+        List<Entry> needsReassignment = new ArrayList<Entry>();
+        Entry entry;
+        Logger.warn("Found " + entryList.getTotalRowCount() + " total rows");
+        for (curRow = 0; curRow <= entryList.getTotalRowCount(); curRow++) {
+            if (++pageRow >= page.size()) {
+                pageRow = 0;
+                entryList.setPage(++curPage);
+                entryList.compute();
+                page = entryList.getList();
+                if (needsReassignment.size() > 0) {
+                    Logger.warn("Processed " + curRow + " of " + entryList.getTotalRowCount() + " rows. Reassigned " + needsReassignment.size());
+                    reassignCount += needsReassignment.size();
+                    reassignTruckValues(needsReassignment);
+                    needsReassignment.clear();
+                } else {
+                    Logger.warn("Processed " + curRow + " of " + entryList.getTotalRowCount() + " rows.");
+                }
+            }
+            entry = page.get(pageRow);
+            instancesWithTruckId = entry.getEntriesForTruck();
+            if (instancesWithTruckId.size() > 1) {
+                for (int i = 1; i < instancesWithTruckId.size(); i++) {
+                    needsReassignment.add(instancesWithTruckId.get(i));
+                }
+            }
+        }
+        reassignCount += needsReassignment.size();
+        reassignTruckValues(needsReassignment);
+        needsReassignment.clear();
+
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("REASSIGNED ");
+        sbuf.append(reassignCount);
+        sbuf.append(" TRUCKS");
+        completableFuture.complete(ok(sbuf.toString()));
+        Logger.warn(sbuf.toString());
+    }
+
+    private void reassignTruckValues(List<Entry> list) {
+        for (Entry entry : list) {
+            reassignTruckValue(entry);
+        }
+    }
+
+    @Transactional
+    private void reassignTruckValue(Entry entry) {
+        Truck existing = entry.getTruck();
+        Truck truck = new Truck();
+        truck.truck_number = existing.truck_number;
+        truck.project_id = existing.project_id;
+        truck.company_name_id = existing.company_name_id;
+        truck.license_plate = existing.license_plate;
+        truck.created_by = existing.created_by;
+        truck.created_by_client = existing.created_by_client;
+        truck.upload_id = existing.upload_id;
+        truck.save();
+        entry.truck_id = truck.id;
+        entry.update();
+    }
 }
-            

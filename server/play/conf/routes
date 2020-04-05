@@ -13,6 +13,7 @@ POST    /login                    controllers.HomeController.postLogin()
 GET     /logout                   controllers.HomeController.logout()
 GET     /problem                  controllers.HomeController.problem(msg : String)
 GET     /picture_cleanup          controllers.HomeController.pictureCleanup()
+GET     /truck_cleanup            controllers.HomeController.truckCleanup()
 
 ### TECHNICIANS ###
 

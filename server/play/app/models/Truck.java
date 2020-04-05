@@ -114,6 +114,10 @@ public class Truck extends com.avaje.ebean.Model {
                 Logger.info("Cannot delete truck, has entries: " + truck.toString());
                 continue;
             }
+	    if (WorkOrder.countWorkOrdersForTruck(truck.id) > 0) {
+                Logger.info("Cannot delete truck, used in work orders: " + truck.toString());
+                continue;
+            }
             Logger.info("Deleting truck: " + truck.toString());
             truck.delete();
             count++;
@@ -156,6 +160,7 @@ public class Truck extends com.avaje.ebean.Model {
                 truck = null;
             }
         }
+	/**
         if (truck == null) {
             if (truck_number != null) {
                 if (project_id > 0 && company_name_id > 0) {
@@ -214,7 +219,7 @@ public class Truck extends com.avaje.ebean.Model {
                     truck = list.get(0);
                 }
             }
-        }
+        }**/
         if (truck == null) {
             truck = new Truck();
             truck.truck_number = truck_number;
