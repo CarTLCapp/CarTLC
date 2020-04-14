@@ -202,7 +202,9 @@ public class EntryListWriter {
                 mColumns[i] = null;
             }
             for (EntryNoteCollection note : entry.getNotes(mList.mForClientId)) {
-                mColumns[mNoteColumns.get(note.getName())] = note.getValue();
+		if (note.getName() != null && mNoteColumns.containsKey(note.getName())) {
+                    mColumns[mNoteColumns.get(note.getName())] = note.getValue();
+		}
             }
             StringBuilder sbuf = new StringBuilder();
             for (int i = 0; i < mColumns.length; i++) {
