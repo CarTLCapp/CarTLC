@@ -1,19 +1,25 @@
-@(id: Long, projectForm: Form[InputProject], client : Client)
+@(id: Long, projectForm: Form[views.formdata.InputProject], client : Client)
 
 @import helper._
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - Edit Project", client, "/project") {
+@main("FleetTLC - Edit Sub Project", client, "/project") {
     
-    <h1>Edit project</h1>
+    <h1>Edit Sub Project</h1>
     
     @b3.form(routes.ProjectController.update(id)) {
 
         @CSRF.formField
 
         <fieldset>
-        
+
+            @b3.select(
+                projectForm("rootProject"),
+                options(Entry.optionsRootProject),
+                '_label -> "Root Project", '_default -> "-- Choose Root Project --",
+                '_showConstraints -> false
+            )
             @b3.text(projectForm("name"), '_label -> "Name", '_help -> "")
 
         </fieldset>
@@ -24,10 +30,8 @@
 
             @for(equipment <- Equipment.list()) {
                 <div class="checkbox-item">
-                    @if(ProjectEquipmentCollection.hasEquipment(id, equipment.id)) {
-                        @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name, 'checked -> true)
-                    } else {
-                        @b3.checkbox(projectForm(equipment.name), '_label -> equipment.name)
+                    @defining(ProjectEquipmentCollection.hasEquipment(id, equipment.id)) { flag =>
+                        @b3.checkbox(projectForm(equipment.idString()), '_label -> equipment.name, 'checked -> flag)
                     }
                 </div>
                 <div style="clear:both;"></div>
@@ -41,10 +45,8 @@
 
             @for(note <- Note.list()) {
                 <div class="checkbox-item">
-                    @if(ProjectNoteCollection.hasNote(id, note.id)) {
-                        @b3.checkbox(projectForm(note.name), '_label -> note.name, 'checked -> true)
-                    } else {
-                        @b3.checkbox(projectForm(note.name), '_label -> note.name)
+                    @defining(ProjectNoteCollection.hasNote(id, note.id)) { flag =>
+                        @b3.checkbox(projectForm(note.idString()), '_label -> note.name, 'checked -> flag)
                     }
                 </div>
                 <div style="clear:both;"></div>
@@ -53,7 +55,7 @@
         </div>
 
         <div class="actions">
-            <input type="submit" value="Save this project" class="btn primary"> or
+            <input type="submit" value="Save this sub project" class="btn primary"> or
             <a href="@routes.ProjectController.list()" class="btn">Cancel</a>
         </div>
     }
@@ -64,12 +66,12 @@
             @CSRF.formField
 
             @if(Project.isDisabled(id)) {
-                <a href="@routes.ProjectController.enable(id)" class="btn">Enable Project</a>
+                <a href="@routes.ProjectController.enable(id)" class="btn">Enable Sub Project</a>
             } else {
                 @if(Entry.hasEntryForProject(id)) {
-                    <input type="submit" value="Disable Project" class="btn danger" onclick="return alert('The project, since it has entries, will be moved to the disabled list.');">
+                    <input type="submit" value="Disable Sub Project" class="btn danger" onclick="return alert('The sub project, since it has entries, will be moved to the disabled list.');">
                 } else {
-                    <input type="submit" value="Delete Project" class="btn danger" onclick="return confirm('Are you sure you wish to delete this project?');">
+                    <input type="submit" value="Delete Sub Project" class="btn danger" onclick="return confirm('Are you sure you wish to delete this sub project?');">
                 }
             }
         }

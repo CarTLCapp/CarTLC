@@ -26,7 +26,8 @@
                 <tr>
                     <th>Truck Number</th>
                     <th>License Plate</th>
-                    <th>Project</th>
+                    <th>Root Project</th>
+                    <th>Sub Project</th>
                     <th>Company</th>
                     <th>Entries</th>
                     <th>Work Orders</th>
@@ -40,7 +41,8 @@
                     <tr>
                         <td>@truck.getTruckNumber()</td>
                         <td>@truck.getLicensePlate()</td>
-                        <td>@truck.getProjectName()</td>
+                        <td>@truck.getRootProjectName()</td>
+                        <td>@truck.getSubProjectName()</td>
                         <td>@truck.getCompanyName()</td>
                         <td><a href="@routes.EntryController.showByTruck(truck.id)">@truck.countEntries()</a></td>
                         <td>@truck.countWorkOrders()</td>

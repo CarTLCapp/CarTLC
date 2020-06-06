@@ -29,7 +29,7 @@
             <tbody>
                 @for(project <- Project.list()) {
                     <tr>
-                        <td>@project.name</td>
+                        <td>@project.getFullProjectName()</td>
                         <td>
                             @if(Equipment.hasProject(id, project.id)) {
                                 <a href="@routes.EquipmentController.removeProject(id, project.id)">Delete</a>

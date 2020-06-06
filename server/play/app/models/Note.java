@@ -12,6 +12,7 @@ import com.avaje.ebean.Model;
 import play.data.format.*;
 import play.data.validation.*;
 import play.data.Form;
+import play.db.ebean.Transactional;
 
 import com.avaje.ebean.*;
 
@@ -84,13 +85,51 @@ public class Note extends Model implements Comparable<Note> {
 
     @Constraints.Required
     public short num_digits;
+
+    /**
+     * General purpose notes
+     */
+
+    public static final String NOTE_TRUCK_NUMBER_NAME = "Truck Number";
+    public static final String NOTE_TRUCK_DAMAGE_NAME = "Truck Damage";
+
+    @Transactional
+    public static void initGeneralPurpose() {
+        final boolean hasNumber = hasNoteWithName(NOTE_TRUCK_NUMBER_NAME);
+        final boolean hasDamage = hasNoteWithName(NOTE_TRUCK_DAMAGE_NAME);
+        if (!hasNumber || !hasDamage) {
+            final int client_id = Client.getAdmin().id.intValue();
+            if (!hasNumber) {
+                Note note = new Note();
+                note.created_by = client_id;
+                note.created_by_client = false;
+                note.disabled = false;
+                note.name = NOTE_TRUCK_NUMBER_NAME;
+                note.type = Type.ALPHANUMERIC;
+                note.save();
+                Logger.info("ADDED " + note.name);
+            }
+            if (!hasDamage) {
+                Note note = new Note();
+                note.created_by = client_id;
+                note.created_by_client = false;
+                note.disabled = false;
+                note.name = NOTE_TRUCK_DAMAGE_NAME;
+                note.type = Type.TEXT;
+                note.save();
+                Logger.info("ADDED " + note.name);
+            }
+            Version.inc(Version.VERSION_NOTE);
+        }
+    }
+
     /**
      * Generic query helper for entity Computer with id Long
      */
     public static Finder<Long, Note> find = new Finder<Long, Note>(Note.class);
 
     public static List<Note> list() {
-        return list(false );
+        return list(false);
     }
 
     public static List<Note> list(boolean disabled) {
@@ -104,8 +143,12 @@ public class Note extends Model implements Comparable<Note> {
                 .findList();
     }
 
+    public static Note get(long id) {
+        return find.byId(id);
+    }
+
     public static boolean isDisabled(long note_id) {
-        Note note = find.ref(note_id);
+        Note note = find.byId(note_id);
         if (note == null) {
             return true;
         }
@@ -139,7 +182,7 @@ public class Note extends Model implements Comparable<Note> {
             if (sbuf.length() > 0) {
                 sbuf.append(", ");
             }
-            sbuf.append(project.name);
+            sbuf.append(project.getFullProjectName());
         }
         return sbuf.toString();
     }
@@ -177,7 +220,7 @@ public class Note extends Model implements Comparable<Note> {
     }
 
     public static boolean isDisabled(Long id) {
-        Note note = find.ref(id);
+        Note note = find.byId(id);
         if (note == null) {
             return false;
         }
@@ -185,15 +228,20 @@ public class Note extends Model implements Comparable<Note> {
     }
 
     public static boolean hasDisabled() {
-        return find.where().eq("disabled", true).findList().size() > 0;
+        return find.where().eq("disabled", true).findRowCount() > 0;
     }
 
     public static boolean hasNoteWithName(String name, long ignoreId) {
-        List<Note> notes = find.where()
+        return find.where()
                 .eq("name", name)
                 .ne("id", ignoreId)
-                .findList();
-        return notes.size() > 0;
+                .findRowCount() > 0;
+    }
+
+    public static boolean hasNoteWithName(String name) {
+        return find.where()
+                .eq("name", name)
+                .findRowCount() > 0;
     }
 
     public static Map<String, String> options() {
@@ -245,6 +293,14 @@ public class Note extends Model implements Comparable<Note> {
         return super.equals(other);
     }
 
+    public String idString() {
+        return "N" + id;
+    }
+
+    public String idValueString() {
+        return "VALUE" + id;
+    }
+
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(id);
@@ -264,14 +320,8 @@ public class Note extends Model implements Comparable<Note> {
     public static List<Note> getChecked(Form entryForm) {
         List<Note> notes = new ArrayList<Note>();
         for (Note note : Note.list()) {
-            try {
-                Optional<String> value = entryForm.field(note.name).getValue();
-                if (value.isPresent()) {
-                    if (value.get().equals("true")) {
-                        notes.add(note);
-                    }
-                }
-            } catch (Exception ex) {
+            if (ClientAssociation.isTrue(entryForm, note.idString())) {
+                notes.add(note);
             }
         }
         return notes;

@@ -22,6 +22,9 @@ public class PictureCollection extends Model {
 
     private static final long serialVersionUID = 1L;
 
+    public static long FLOW_TRUCK_NUMBER_ID = -1L;
+    public static long FLOW_TRUCK_DAMAGE_ID = -2L;
+
     @Id
     public Long id;
 
@@ -32,7 +35,10 @@ public class PictureCollection extends Model {
     public String picture;
 
     @Constraints.Required
-    public String note;
+    public String note; // Old school. Not used in the new flow style.
+
+    @Constraints.Required
+    public Long flow_element_id;
 
     public static Finder<Long, PictureCollection> find = new Finder<Long, PictureCollection>(PictureCollection.class);
 
@@ -49,6 +55,19 @@ public class PictureCollection extends Model {
     public static List<PictureCollection> findByPictureName(String picture) {
         return find.where()
                 .like("picture", picture)
+                .findList();
+    }
+
+    public static List<PictureCollection> findByFlowElementId(long flow_element_id) {
+        return find.where()
+                .eq("flow_element_id", flow_element_id)
+                .findList();
+    }
+
+    public static List<PictureCollection> locate(long collection_id, long flow_element_id) {
+        return find.where()
+                .eq("collection_id", collection_id)
+                .eq("flow_element_id", flow_element_id)
                 .findList();
     }
 

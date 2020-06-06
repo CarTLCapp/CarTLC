@@ -1,4 +1,4 @@
-@(importForm: Form[ImportWorkOrder], client : Client, message : String = "")
+@(importForm: Form[views.formdata.ImportWorkOrder], client : Client, message : String = "")
 
 @import helper._
 
@@ -6,7 +6,7 @@
 
 @import play.twirl.api.HtmlFormat;
 
-@main("FleetTLC - Import Work Orders", client, "/work/list") {
+@main("FleetTLC - Import Work Orders", client, "/work/summary/list") {
     
     <h1>Import Work Orders</h1>
 
@@ -31,7 +31,13 @@
         <fieldset>
 
             <p style="text-indent: 73px">Filename:<input type="file" name="filename"></p>
-            @helper.select(importForm("project"), options = options(ClientProjectAssociation.findProjectNames(client.id)), args = '_label -> "Project:")
+            @helper.select(importForm("rootProject"),
+                        options = options(ClientProjectAssociation.findRootProjectNames(client.id)),
+                        args =
+                            '_default -> "Select Root Project",
+                            '_label -> "Root Project:",
+                            'onchange -> "onRootProjectSelected()")
+            @helper.select(importForm("subProject"), options = options(), args = '_label -> "Sub Project:")
             @helper.select(importForm("company"), options = options(CompanyName.getNames()), args = '_label -> "Company:")
 
         </fieldset>
@@ -49,4 +55,32 @@
 
     <p>Notes: When importing a work order, if there is already an entry with the same project/company/truck-number then that entry will be replaced.</p>
 
+    <script type="text/javascript">
+
+        function onRootProjectSelected() {
+            var e = document.getElementById("rootProject");
+            var selected = e.options[e.selectedIndex].value;
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    var line = this.responseText;
+                    var words = line.split("\n");
+                    var e2 = document.getElementById("subProject");
+                    for (var i = e2.options.length-1; i >= 0; i--) {
+                        e2.remove(i);
+                    }
+                    for (var i2 = 0; i2 < words.length; i2++) {
+                        var option = document.createElement("option");
+                        option.text = words[i2];
+                        e2.add(option);
+                    }
+                }
+            };
+            var call = "/project/root/sub/" + e.selectedIndex.toString();
+            xhttp.open("GET", call, true);
+            xhttp.send();
+        }
+
+    </script>
 }

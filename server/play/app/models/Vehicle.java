@@ -5,17 +5,17 @@ package models;
 
 import com.avaje.ebean.PagedList;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import play.data.format.Formats;
 import play.data.validation.Constraints;
+
+import modules.TimeHelper;
 
 /**
  * User entity managed by Ebean
@@ -82,7 +82,7 @@ public class Vehicle extends com.avaje.ebean.Model {
     public String getTechName() {
         Technician tech = null;
         try {
-            tech = Technician.find.ref((long) tech_id);
+            tech = Technician.find.byId((long) tech_id);
         } catch (Exception ex) {
         }
         if (tech == null) {
@@ -95,23 +95,9 @@ public class Vehicle extends com.avaje.ebean.Model {
         }
     }
 
-    static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a z";
+    public String getDate() { return new TimeHelper().getDate(entry_time, time_zone); }
 
-    public String getDate() {
-        SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
-        if (time_zone != null) {
-            if (time_zone.startsWith("-") || time_zone.startsWith("+")) {
-                format.setTimeZone(TimeZone.getTimeZone("GMT" + time_zone));
-            } else if (time_zone.equals("CDT") || time_zone.equals("Central Daylight Time")) {
-                format.setTimeZone(TimeZone.getTimeZone("GMT-5:00"));
-            } else if (time_zone.equals("EDT")) {
-                format.setTimeZone(TimeZone.getTimeZone("GMT-4:00"));
-            } else {
-                format.setTimeZone(TimeZone.getTimeZone(time_zone));
-            }
-        }
-        return format.format(entry_time);
-    }
+    public String getTime() { return new TimeHelper().getTime(entry_time, time_zone); }
 
     public String getInspecting() {
         return Strings.get(inspecting);

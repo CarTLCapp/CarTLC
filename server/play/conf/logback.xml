@@ -38,4 +38,6 @@
         <appender-ref ref="ASYNCSTDOUT" />
     </root>
 
+    <!--<logger name="org.avaje.ebean.SQL" level="TRACE" />-->
+
 </configuration>

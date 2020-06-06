@@ -25,6 +25,8 @@ public class Globals {
         mDidInit = true;
         Client.initClient();
         Company.saveNames();
+        Technician.fixCodeZeros();
+        Note.initGeneralPurpose();
         Calendar c1 = Calendar.getInstance();
         if (c1.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
             superInit();
@@ -32,10 +34,8 @@ public class Globals {
     }
 
     private void superInit() {
-        EntryV2.transfer();
         EntryEquipmentCollection.removeUnused();
         EntryNoteCollection.removeUnused();
-        TruckV6.transfer();
         WorkOrder.fixTrucks();
         Logger.info("SUPER INIT DONE");
     }

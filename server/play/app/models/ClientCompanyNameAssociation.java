@@ -11,10 +11,14 @@ import com.avaje.ebean.Model;
 
 import play.data.format.*;
 import play.data.validation.*;
+import play.data.Form;
+
 import play.Logger;
 
 import com.avaje.ebean.*;
+
 import play.db.ebean.Transactional;
+import views.formdata.InputClient;
 
 /**
  * Project entity managed by Ebean
@@ -37,6 +41,14 @@ public class ClientCompanyNameAssociation extends Model {
 
     public static List<ClientCompanyNameAssociation> list() {
         return find.all();
+    }
+
+    public static boolean hasCompanyName(long client_id, long company_name_id) {
+        List<ClientCompanyNameAssociation> items = find.where()
+                .eq("client_id", client_id)
+                .eq("company_name_id", company_name_id)
+                .findList();
+        return items.size() > 0;
     }
 
     public static String findCompanyNameFor(long client_id) {
@@ -84,12 +96,16 @@ public class ClientCompanyNameAssociation extends Model {
         }
     }
 
-    public static void save(long client_id, String companyName) {
+    public static void process(long client_id, Form entryForm) {
         deleteEntries(client_id);
-        ClientCompanyNameAssociation entry = new ClientCompanyNameAssociation();
-        entry.client_id = client_id;
-        entry.company_name_id = CompanyName.save(companyName);
-        entry.save();
+        for (CompanyName item : CompanyName.list()) {
+            if (ClientAssociation.isTrue(entryForm, item.idString())) {
+                ClientCompanyNameAssociation entry = new ClientCompanyNameAssociation();
+                entry.client_id = client_id;
+                entry.company_name_id = item.id;
+                entry.save();
+            }
+        }
     }
 
 }

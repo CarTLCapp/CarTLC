@@ -1,4 +1,4 @@
-@(linesForm: Form[InputLines], client : Client)
+@(linesForm: Form[views.formdata.InputLines], client : Client)
 
 @import helper._
 
@@ -8,7 +8,7 @@
     
     <h1>Edit Vehicle Names</h1>
 
-    <p>Replace the vehicle name list with what is specified here.<br>Optionally use #1 notation to indcate it's order. One vehicle name per line.</p>
+    <p>Replace the vehicle name list with what is specified here.<br>Optionally use #1 notation to indicate it's order. One vehicle name per line.</p>
 
     @helper.form(routes.VehicleController.saveNames()) {
 

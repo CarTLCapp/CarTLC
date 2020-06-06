@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package controllers;
 
@@ -14,6 +14,7 @@ import play.data.*;
 import static play.data.Form.*;
 
 import models.*;
+import views.formdata.InputClient;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -40,6 +41,10 @@ public class ClientController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result list() {
         return ok(views.html.client_list.render(Client.list(), Secured.getClient(ctx())));
+    }
+
+    public Result LIST() {
+        return Results.redirect(routes.ClientController.list());
     }
 
     /**
@@ -83,18 +88,15 @@ public class ClientController extends Controller {
         client.password = updateClient.password;
         client.update();
 
-        ClientProjectAssociation.addNew(id, getCheckedProjects(clientForm));
-        Logger.info("Client " + client.name + " has been updated");
-        Logger.info("Company value was " + updateClient.company);
+        ClientProjectAssociation.process(id, getCheckedProjects(clientForm));
+        ClientCompanyNameAssociation.process(id, clientForm);
+        ClientAssociation.process(client, clientForm);
 
-        if (updateClient.company != null && !updateClient.company.trim().isEmpty()) {
-            ClientCompanyNameAssociation.save(id, updateClient.company);
-        }
-        return list();
+        return LIST();
     }
 
     /**
-     * Display the 'new user form'.
+     * Display the 'new client form'.
      */
     @Security.Authenticated(Secured.class)
     public Result create() {
@@ -103,7 +105,7 @@ public class ClientController extends Controller {
     }
 
     /**
-     * Handle the 'new user form' submission
+     * Handle the 'new client form' submission
      */
     @Security.Authenticated(Secured.class)
     @Transactional
@@ -131,20 +133,21 @@ public class ClientController extends Controller {
         newClient.name = inputClient.name;
         newClient.password = inputClient.password;
         newClient.save();
-        ClientProjectAssociation.addNew(newClient.id, getCheckedProjects(clientForm));
-        Logger.info("Client " + newClient.name + " has been created");
-        Logger.info("Company value was " + inputClient.company);
-        if (inputClient.company != null && !inputClient.company.trim().isEmpty()) {
-            ClientCompanyNameAssociation.save(newClient.id, inputClient.company);
-        }
-        return list();
+
+        long id = newClient.id;
+
+        ClientProjectAssociation.process(id, getCheckedProjects(clientForm));
+        ClientCompanyNameAssociation.process(id, clientForm);
+        ClientAssociation.process(newClient, clientForm);
+
+        return LIST();
     }
 
     List<Project> getCheckedProjects(Form<InputClient> clientForm) {
         List<Project> projects = new ArrayList<Project>();
         for (Project project : Project.list()) {
             try {
-                if (clientForm.field(project.name).getValue().get().equals("true")) {
+                if (clientForm.field(project.getFullProjectName()).getValue().get().equals("true")) {
                     projects.add(project);
                 }
             } catch (Exception ex) {
@@ -204,12 +207,14 @@ public class ClientController extends Controller {
             client.update();
             flash("success", "Client has been disabled");
         } else {
+            ClientAssociation.deleteEntries(id);
             ClientCompanyNameAssociation.deleteEntries(id);
+            ClientEquipmentAssociation.deleteEntries(id);
+            ClientNoteAssociation.deleteEntries(id);
             Client.find.ref(id).delete();
             flash("success", "Client has been deleted");
         }
-        return list();
+        return LIST();
     }
 
 }
-            

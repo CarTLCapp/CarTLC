@@ -1,33 +1,29 @@
-@(currentPage: com.avaje.ebean.PagedList[Company], currentSortBy: String, currentOrder: String, currentFilter: String, client : Client, disabled : Boolean)
+@(list: List[Company], currentOrder: String, client : Client, disabled : Boolean)
 
-@link(newPage:Int, newSortBy:String) = @{
-    var sortBy = currentSortBy
+@link(keyName:String) = @{
     var order = currentOrder
-    if(newSortBy != null) {
-        sortBy = newSortBy
-        if(currentSortBy == newSortBy) {
-            if(currentOrder == "asc") {
-                order = "desc"
-            } else {
-                order = "asc"
-            }
+    if(keyName != null) {
+        if(currentOrder == "asc") {
+            order = "desc"
         } else {
             order = "asc"
         }
     }
     // Generate the link
-    routes.CompanyController.list(newPage, sortBy, order, currentFilter, disabled)
+    routes.CompanyController.list(order, disabled)
 }
 
 @header(key:String, title:String) = {
-    <th class="@key.replace(".","_") header @if(currentSortBy == key) @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
-        <a href="@link(0, key)">@title</a>
+    <th class="@key.replace(".","_") header @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
+        <a href="@link(key)">@title</a>
     </th>
 }
 
-@title = { @Messages("company.list.title", currentPage.getTotalRowCount) }
+@topTitle() = @{ if (disabled) "FleetTLC - List Disabled Companies" else "FleetTLC - List Companies" }
 
-@main("FleetTLC - List Companies", client) {
+@title = { @Messages("company.list.title", list.size()) }
+
+@main(topTitle(), client) {
 
     @if(Company.hasDisabled()) {
         @if(disabled) {
@@ -47,7 +43,7 @@
         <h1 id="homeTitle">@title</h1>
     }
 
-    @if(currentPage.getTotalRowCount == 0) {
+    @if(list.size() == 0) {
 
         <div class="well">
             <em>Nothing to display</em>
@@ -59,18 +55,14 @@
             <thead>
                 <tr>
                     @header("name", "Name")
-                    @header("street", "Street / Plant Name")
-                    @header("city", "City")
-                    @header("state", "State")
-                    @header("zipcode", "ZIP")
+                    <th>Addresses</th>
                     <th>Entries</th>
-                    <th>Edit</th>
-                    <th>Created By</th>
+                    <th>View</th>
                 </tr>
             </thead>
             <tbody>
 
-                @for(company <- currentPage.getList) {
+                @for(company <- list) {
                     <tr>
                         <td>
                             @if(company.getName() == null) {
@@ -79,42 +71,10 @@
                                 @company.getName()
                             }
                         </td>
+                        <td>@company.countAddresses()</td>
+                        <td>@company.countNameEntries()</td>
                         <td>
-                            @if(company.street == null) {
-                                <em>-</em>
-                            } else {
-                                @company.street
-                            }
-                        </td>
-                        <td>
-                            @if(company.city == null) {
-                             <em>-</em>
-                            } else {
-                                @company.city
-                            }
-                        </td>
-                        <td>
-                            @if(company.state == null) {
-                                <em>-</em>
-                            } else {
-                                @company.state
-                            }
-                        </td>
-                        <td>
-                            @if(company.zipcode == null) {
-                                <em>-</em>
-                            } else {
-                                @company.zipcode
-                            }
-                        </td>
-                        <td>
-                            @company.countEntries()
-                        </td>
-                        <td>
-                            <a href="@routes.CompanyController.edit(company.id)">Edit</a>
-                        </td>
-                        <td>
-                            @company.getCreatedBy()
+                            <a href="@routes.CompanyController.view(company.id)">View</a>
                         </td>
                     </tr>
                 }
@@ -122,31 +82,6 @@
             </tbody>
         </table>
 
-        <div id="pagination" class="pagination">
-            <ul>
-                @if(currentPage.hasPrev) {
-                <li class="prev">
-                    <a href="@link(currentPage.getPageIndex - 1, null)">&larr; Previous</a>
-                </li>
-                } else {
-                <li class="prev disabled">
-                    <a>&larr; Previous</a>
-                </li>
-                }
-                <li class="current">
-                    <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
-                </li>
-                @if(currentPage.hasNext) {
-                <li class="next">
-                    <a href="@link(currentPage.getPageIndex + 1, null)">Next &rarr;</a>
-                </li>
-                } else {
-                <li class="next disabled">
-                    <a>Next &rarr;</a>
-                </li>
-                }
-            </ul>
-        </div>
     }
 
     @if(!disabled) {

@@ -54,26 +54,23 @@ public class EntryEquipmentCollection extends Model {
         return list;
     }
 
+    public static List<EntryEquipmentCollection> findCollectionsFor(long equipment_id) {
+        return find.where().eq("equipment_id", equipment_id).findList();
+    }
+
     public static int countEquipments(long equipment_id) {
-        return find.where().eq("equipment_id", equipment_id).findList().size();
+        return find.where().eq("equipment_id", equipment_id).findRowCount();
     }
 
     public static boolean has(EntryEquipmentCollection collection) {
-        List<EntryEquipmentCollection> items =
-                find.where()
-                        .eq("collection_id", collection.collection_id)
-                        .eq("equipment_id", collection.equipment_id)
-                        .findList();
-        return items.size() > 0;
+        return has(collection.collection_id, collection.equipment_id);
     }
 
     public static boolean has(long collection_id, long equipment_id) {
-        List<EntryEquipmentCollection> items =
-                find.where()
+        return find.where()
                         .eq("collection_id", collection_id)
                         .eq("equipment_id", equipment_id)
-                        .findList();
-        return items.size() > 0;
+                        .findRowCount() > 0;
     }
 
     public static void deleteByCollectionId(long collection_id) {

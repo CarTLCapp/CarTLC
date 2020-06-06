@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:hint="@string/picture_note_hint"
+        android:hint="@string/picture_note_hint_generic"
         android:inputType="text"/>
 
 </LinearLayout>

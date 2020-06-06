@@ -11,11 +11,16 @@
     <table>
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Name</th>
                 <th>Date</th>
-                <th>Project</th>
+                <th>Time</th>
+                <th>Root Project</th>
+                <th>Sub Project</th>
                 <th>Address</th>
-                <th>Truck</th>
+                @if(Client.canViewTrucks(client)) {
+                    <th>Truck</th>
+                }
                 <th>Equipment</th>
                 <th>Status</th>
 
@@ -23,54 +28,116 @@
         </thead>
         <tbody>
             <tr>
+                <td>@entry.id</td>
                 <td>@entry.getTechName()</td>
-                <td>@entry.entry_time.format("yyyy-MM-dd kk:mm")</td>
-                <td>@entry.getProjectLine()</td>
+                <td>@entry.getDate()</td>
+                <td>@entry.getTime()</td>
+                <td>@entry.getRootProjectName()</td>
+                <td>@entry.getSubProjectName()</td>
                 <td>@entry.getAddressLine()</td>
-                <td>@entry.getTruckLine()</td>
-                <td>@entry.getEquipmentLine()</td>
+                @if(Client.canViewTrucks(client)) {
+                    <td>@entry.getTruckLine()</td>
+                }
+                <td>@entry.getEquipmentLine(client)</td>
                 <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
             </tr>
         </tbody>
     </table>
 
-    <h1 id="noteTitle">Notes</h1>
+    @if(entry.hasNotes(client)) {
 
-    <table class="notes zebra-striped">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-        @for(note <- entry.getNotes()) {
-            <tr>
-                <td>@note.getName()</td>
-                <td>@note.note_value</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+        <h1 id="noteTitle">Notes</h1>
 
-    <h1 id="pictureTitle">Pictures</h1>
-
-    <table class="pictures zebra-striped">
-        <thead>
-        <tr>
-            <th>Picture</th>
-            <th>Note</th>
-        </tr>
-        </thead>
-        <tbody>
-            @for(item <- entry.getPictures()) {
+        <table class="notes zebra-striped">
+            <thead>
                 <tr>
-                    <td><img src='@routes.EntryController.getImage(item.picture)'/></td>
-                    <td>@item.note</td>
+                    <th style="width:100px">ID</th>
+                    <th>Name</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            @for(note <- entry.getNotes(client.id)) {
+                <tr>
+                    <td style="width:100px">@note.id</td>
+                    <td>@note.getName()</td>
+                    <td>@note.note_value</td>
                 </tr>
             }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    }
+
+    @if(Client.canViewPictures(client)) {
+
+        <h1 id="pictureTitle">Pictures</h1>
+
+        @if(entry.isFlowEntry()) {
+            @if(entry.hasTruckNumberPictureValue()) {
+                <h2>Truck Number</h2>
+
+                <img src='@routes.EntryController.getImage(entry.getTruckNumberPictureValue())'/>
+            }
+            @if(entry.hasTruckDamagePictureValue()) {
+                <h2>Truck Damage</h2>
+
+                <img src='@routes.EntryController.getImage(entry.getTruckDamagePictureValue())'/>
+            }
+
+            @for(element <- entry.getPictureFlowElements()) {
+
+                @if(element.isConfirm()) {
+                    <h3 id="sectionTitle">@element.getPromptIndent()</h3>
+                } else if (element.isDialog()) {
+                    <h2 id="sectionTitle">@element.prompt</h2>
+                } else {
+                    <h2 id="sectionTitle">@element.prompt</h2>
+
+                    @for(picture <- entry.getFlowPictures(element.id)) {
+                        <img src='@routes.EntryController.getImage(picture.picture)'/>
+                    }
+                }
+                @if(element.hasNotes()) {
+
+                    <table class="notes zebra-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @for(note <- entry.getNoteValuesForElement(client.id, element.id)) {
+                                <tr>
+                                    <td>@note.getName()</td>
+                                    <td>@note.getValue()</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            }
+        } else {
+            <table class="pictures zebra-striped">
+                <thead>
+                    <tr>
+                        <th>Picture</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(item <- entry.getPictures()) {
+                        <tr>
+                            <td><img src='@routes.EntryController.getImage(item.picture)'/></td>
+                            <td>@item.note</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
 
     @if(client.is_admin) {
         <div class="actions">

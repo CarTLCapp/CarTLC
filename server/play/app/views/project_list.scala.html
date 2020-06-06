@@ -8,13 +8,16 @@
         @if(disabled) {
             <h1 id="homeTitle" class="fill">@header
                 <span style="float:right;font-size:16px">
-                    <a href="@routes.ProjectController.list()">Show Active Projects</a>
+                    <a href="@routes.ProjectController.list()">Show Active Sub Projects</a>
                 </span>
             </h1>
         } else {
             <h1 id="homeTitle" class="fill">@header
                 <span style="float:right;font-size:16px">
-                    <a href="@routes.ProjectController.list_disabled()">Show Disabled Projects</a>
+                    <a href="@routes.ProjectController.list_disabled()">Show Disabled Sub Projects</a>
+                </span>
+                <span style="float:right;font-size:16px;padding-right:20px">
+                    <a href="@routes.RootProjectController.list()">Root Projects</a>
                 </span>
             </h1>
         }
@@ -33,6 +36,7 @@
         <table class="projects zebra-striped">
             <thead>
                 <tr>
+                    <th>Root</th>
                     <th>Name</th>
                     <th>Equipment</th>
                     <th>Notes</th>
@@ -44,13 +48,8 @@
 
                 @for(project <- currentPage) {
                     <tr>
-                        <td>
-                            @if(project.name == null) {
-                                <em>-</em>
-                            } else {
-                                @project.name
-                            }
-                        </td>
+                        <td>@project.getRootProjectName()</td>
+                        <td>@project.getProjectNameOrDash()</td>
                         <td>@project.getEquipmentsLine()</td>
                         <td>@project.getNotesLine()</td>
                         <td>@project.countEntries()</td>

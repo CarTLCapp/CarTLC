@@ -1,4 +1,4 @@
-@(linesForm: Form[InputLines])
+@(linesForm: Form[views.formdata.InputLines])
 
 @import helper._
 
@@ -10,7 +10,9 @@
 
     <p>You may create several equipments at once. One equipment name per line.</p>
 
-    <p>The first line must begin with the string 'Project:' followed by a legal project name.
+    <p>The first line must begin with the string 'Project:' followed by a project line.
+        A project line is first a legal root project name, followed by a dash, then a legal sub project name.
+        For example, "Alamo - Five Cubits".
         This indicates the project to associated the following equipment lines with.
         To switch projects, just include a project line again.
         Subsequent lines will be the equipment names to associate with that project. One equipment name per line.</p>
@@ -20,7 +22,7 @@
         @CSRF.formField
 
         <fieldset>
-            @helper.textarea(linesForm("lines"), 'rows -> 10, 'cols -> 80, '_label -> "")
+            @helper.textarea(linesForm("line"), 'rows -> 10, 'cols -> 80, '_label -> "")
         </fieldset>
 
         <div class="actions">

@@ -36,7 +36,7 @@
             <tbody>
                 @for(project <- Project.list()) {
                     <tr>
-                        <td>@project.name</td>
+                        <td>@project.getFullProjectName()</td>
                         <td>
                             @if(Note.hasProject(id, project.id)) {
                                 <a href="@routes.NoteController.removeProject(id, project.id)">Delete</a>

@@ -1,0 +1,160 @@
+@import models.flow.Flow
+@import models.flow.FlowElementCollection
+@import helper._
+@import b3.vertical.fieldConstructor
+
+@(id: Long, flowForm: Form[views.formdata.InputFlow], message: String, client : Client)
+
+@titleOf(id: Long) = @{
+    if (id > 0) {
+        "Fleet TLC - Edit Flow";
+    } else {
+        "Fleet TLC - Add Flow";
+    }
+}
+
+@main(titleOf(id), home = "/flow") {
+
+    @if(id > 0) {
+        <h1>Edit a flow</h1>
+    } else {
+        <h1>Add a flow</h1>
+    }
+
+    @b3.form(routes.FlowController.save(id)) {
+
+        @if(!message.isEmpty()) {
+            <p>@message</p>
+        }
+
+        @CSRF.formField
+
+        <fieldset>
+
+            @b3.select(flowForm("root_project_name"),
+                options = options(RootProject.listNamesWithBlank()),
+                args =
+                    '_label -> "Root Project:",
+                    'onchange -> "onRootProjectSelected()")
+            @b3.select(flowForm("sub_project_name"), options = options(flowForm.get().optionsSubProject), args = '_label -> "Sub Project:")
+
+        </fieldset>
+
+        <input type="submit" value="Save" class="btn primary" style="margin-left:60px">
+    }
+
+    @if(Flow.hasElements(id)) {
+
+        <table class="companies zebra-striped">
+            <thead>
+                <tr>
+                    <th>Step</th>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Prompt</th>
+                    <th>Flags</th>
+                    <th>Notes</th>
+                    <th>Move Up</th>
+                    <th>Move Down</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(element <- FlowElementCollection.findElementsByFlowId(id)) {
+                    <tr>
+                        <td>@element.line_num</td>
+                        <td>@element.id</td>
+                        <td>@element.getPromptTypeName()</td>
+                        <td>
+                            @if(element.hasPromptPopup()) {
+                                <a class="popup" onclick="popupElementBit(this)" data-id="@element.getPromptId()"><font color="blue">@element.getPromptSummary()</font>
+                                    <span class="popuptext" id="@element.getPromptId()">@element.prompt</span>
+                                </a>
+                            } else {
+                                @element.prompt
+                            }
+                        </td>
+                        <td>@element.getFlags()</td>
+                        @if(element.hasNotes()) {
+                            <td>
+                                <a class="popup" onclick="popupElementBit(this)" data-id="@element.getNotesId()"><font color="blue">@element.getNotesSummary()</font>
+                                    <span class="popuptext" id="@element.getNotesId()">@element.getNotesLine()</span>
+                                </a>
+                            </td>
+                        } else {
+                            <td>-</td>
+                        }
+                        @if(element.isFirst) {
+                            <td>-</td>
+                        } else {
+                            <td><a href="@routes.FlowController.moveUp(id, element.id)">Up</a></td>
+                        }
+                        @if(element.isLast) {
+                            <td>-</td>
+                        } else {
+                            <td><a href="@routes.FlowController.moveDown(id, element.id)">Down</a></td>
+                        }
+                        <td><a href="@routes.FlowController.editElement(id, element.id)">Edit</a></td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+    }
+
+    <p><a href="@routes.FlowController.addElement(id)">Add Element</a></p>
+
+    @if(client.is_admin) {
+        @b3.form(routes.FlowController.delete(id), 'class -> "topRight") {
+            @CSRF.formField
+            <input type="submit" value="Delete Flow" class="btn danger" onclick="return confirm('Are you sure you wish to delete this flow?');">
+        }
+    }
+
+    <script type="text/javascript">
+
+        function onRootProjectSelected() {
+            var e = document.getElementById("root_project_name");
+            var selected = e.options[e.selectedIndex].value;
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    var line = this.responseText;
+                    var words = line.split("\n");
+                    var e2 = document.getElementById("sub_project_name");
+                    for (var i = e2.options.length-1; i >= 0; i--) {
+                        e2.remove(i);
+                    }
+                    for (var i2 = 0; i2 < words.length; i2++) {
+                        var option = document.createElement("option");
+                        option.text = words[i2];
+                        e2.add(option);
+                    }
+                }
+            };
+            var call = "/project/root/sub/" + e.selectedIndex.toString();
+            xhttp.open("GET", call, true);
+            xhttp.send();
+        }
+
+        function popupElementBit(bit) {
+            var id = bit.getAttribute("data-id");
+            var popup = document.getElementById(id);
+            popup.classList.toggle("show");
+            setTimeout(function(){hide(bit)}, 3000);
+        }
+
+        function hide(bit) {
+            var id = bit.getAttribute("data-id");
+            var popup = document.getElementById(id);
+            popup.classList.remove("show");
+        }
+
+        function saveForm() {
+        }
+
+    </script>
+}

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package models;
 
@@ -11,13 +11,15 @@ import play.db.ebean.*;
 import play.Logger;
 
 import play.twirl.api.Html;
+import views.formdata.InputSearch;
 
 public class EntryPagedList {
 
     public enum PagedSortBy {
         TECH("tech", "te.last_name"),
+        DATE("date", "e.entry_time"),
         TIME("time", "e.entry_time"),
-        PROJECT_ID("project", "p.name"),
+        SUB_PROJECT_ID("sub_project", "p.name"),
         TRUCK_NUMBER("truck", "tr.truck_number"),
         COMPANY_NAME("company", "c.name"),
         STREET("street", "c.street"),
@@ -180,7 +182,7 @@ public class EntryPagedList {
             ArrayList<Entry> outgoing = new ArrayList<>();
             List<String> subterms = mTerms.subList(1, mTerms.size());
             for (Entry entry : mResult.mList) {
-                if (entry.match(subterms)) {
+                if (entry.match(subterms, mForClientId)) {
                     outgoing.add(entry);
                 }
             }
@@ -200,6 +202,7 @@ public class EntryPagedList {
         long mNumTotalRows;
     }
 
+    static final boolean VERBOSE = false;
     static final int[] PAGE_SIZES = {100, 200, 300, 400, 500};
 
     Parameters mParams = new Parameters();
@@ -210,6 +213,10 @@ public class EntryPagedList {
     long mByTruckId;
     int mRowNumber;
     int mDefaultPageSize = PAGE_SIZES[0];
+
+    public boolean canViewTrucks = true;
+    public boolean canViewPictures = true;
+    public long mForClientId = 0;
 
     public EntryPagedList() {
     }
@@ -291,6 +298,20 @@ public class EntryPagedList {
     public void computeFilters(Client client) {
         setProjects(client);
         setCompanies(client);
+
+        if (client.is_admin) {
+            canViewTrucks = true;
+            canViewPictures = true;
+            mForClientId = 0;
+        } else {
+            canViewTrucks = ClientAssociation.hasShowTrucks(client);
+            canViewPictures = ClientAssociation.hasShowPictures(client);
+            mForClientId = client.id != null ? client.id : 0;
+        }
+    }
+
+    public String getEquipmentLine(Entry entry) {
+        return entry.getEquipmentLine(mForClientId);
     }
 
     void setProjects(Client client) {
@@ -324,7 +345,7 @@ public class EntryPagedList {
         return "";
     }
 
-    String buildQuery(boolean useLimit) {
+    private String buildQuery(boolean useLimit) {
         StringBuilder query = new StringBuilder();
 
         query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
@@ -335,7 +356,7 @@ public class EntryPagedList {
 
         switch (mParams.mSortBy) {
             case TECH:
-            case PROJECT_ID:
+            case SUB_PROJECT_ID:
             case TRUCK_NUMBER:
             case COMPANY_NAME:
             case STREET:
@@ -355,7 +376,7 @@ public class EntryPagedList {
             case TECH:
                 query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
                 break;
-            case PROJECT_ID:
+            case SUB_PROJECT_ID:
                 query.append(" INNER JOIN project AS p ON e.project_id = p.id");
                 break;
             case TRUCK_NUMBER:
@@ -411,7 +432,6 @@ public class EntryPagedList {
         }
         return query.toString();
     }
-
 
     private String getWhereSearch() {
         StringBuilder query = new StringBuilder();
@@ -563,7 +583,9 @@ public class EntryPagedList {
         List<SqlRow> entries;
         String query;
         query = buildQuery(true);
-        Logger.debug("Query: " + query);
+        if (VERBOSE) {
+            Logger.debug("Query: " + query);
+        }
         entries = Ebean.createSqlQuery(query).findList();
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
@@ -598,7 +620,7 @@ public class EntryPagedList {
         return mResult.mNumTotalRows;
     }
 
-    Entry parseEntry(SqlRow row) {
+    private Entry parseEntry(SqlRow row) {
         Entry entry = new Entry();
         entry.id = row.getLong("id");
         entry.tech_id = row.getInteger("tech_id");
@@ -616,9 +638,9 @@ public class EntryPagedList {
         return entry;
     }
 
-    boolean hasEquipmentMatch(List<Entry> entries) {
+    private boolean hasEquipmentMatch(List<Entry> entries) {
         for (Entry entry : entries) {
-            String line = entry.getEquipmentLine();
+            String line = entry.getEquipmentLine(mForClientId);
             if (mSearch.hasMatch(line)) {
                 return true;
             }

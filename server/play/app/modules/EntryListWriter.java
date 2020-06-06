@@ -20,7 +20,8 @@ public class EntryListWriter {
 
     static final String TECH_NAME = "Name";
     static final String DATE = "Date";
-    static final String PROJECT = "Project";
+    static final String ROOT_PROJECT = "Root";
+    static final String SUB_PROJECT = "Sub";
     static final String COMPANY = "Company";
     static final String STREET = "Street";
     static final String CITY = "City";
@@ -50,7 +51,9 @@ public class EntryListWriter {
         mBR.write(",");
         mBR.write(TECH_NAME);
         mBR.write(",");
-        mBR.write(PROJECT);
+        mBR.write(ROOT_PROJECT);
+        mBR.write(",");
+        mBR.write(SUB_PROJECT);
         mBR.write(",");
         mBR.write(COMPANY);
         mBR.write(",");
@@ -91,7 +94,9 @@ public class EntryListWriter {
             mBR.write(",");
             mBR.write(chkNull(entry.getTechName()));
             mBR.write(",");
-            mBR.write(chkNull(entry.getProjectLine()));
+            mBR.write(chkNull(entry.getRootProjectName()));
+            mBR.write(",");
+            mBR.write(chkNull(entry.getSubProjectName()));
             mBR.write(",");
             mBR.write(chkNull(entry.getCompany()));
             mBR.write(",");
@@ -103,9 +108,11 @@ public class EntryListWriter {
             mBR.write(",");
             mBR.write(chkNull(entry.getZipCode()));
             mBR.write(",");
-            mBR.write(chkNull(entry.getTruckLine()));
-            mBR.write(",");
-            mBR.write(chkComma(entry.getEquipmentLine()));
+            if (mList.canViewTrucks) {
+                mBR.write(chkNull(entry.getTruckLine()));
+                mBR.write(",");
+            }
+            mBR.write(chkComma(entry.getEquipmentLine(mList.mForClientId)));
             mBR.write(",");
             mBR.write(chkNull(entry.getStatus()));
             mBR.write(chkNull(mNoteColumns.getValues(entry)));
@@ -160,7 +167,7 @@ public class EntryListWriter {
             mNextColumn = 0;
             mNoteColumns.clear();
             for (Entry entry : mList.getList()) {
-                prepare(entry.getNotes());
+                prepare(entry.getNotes(mList.mForClientId));
             }
             mColumns = new String[mNextColumn];
         }
@@ -194,7 +201,7 @@ public class EntryListWriter {
             for (int i = 0; i < mColumns.length; i++) {
                 mColumns[i] = null;
             }
-            for (EntryNoteCollection note : entry.getNotes()) {
+            for (EntryNoteCollection note : entry.getNotes(mList.mForClientId)) {
 		if (note.getName() != null && mNoteColumns.containsKey(note.getName())) {
                     mColumns[mNoteColumns.get(note.getName())] = note.getValue();
 		}

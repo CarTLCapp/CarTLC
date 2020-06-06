@@ -71,6 +71,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
     public static PagedList<Equipment> list(int page, boolean disabled) {
         return find.where()
                 .eq("disabled", disabled)
+                .orderBy("name asc")
                 .findPagedList(page, PAGE_SIZE);
     }
 
@@ -102,7 +103,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
 
     public static Equipment get(long id) {
         if (id > 0) {
-            return find.ref(id);
+            return find.byId(id);
         }
         return null;
     }
@@ -123,7 +124,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
             if (sbuf.length() > 0) {
                 sbuf.append(", ");
             }
-            sbuf.append(project.name);
+            sbuf.append(project.getFullProjectName());
         }
         return sbuf.toString();
     }
@@ -198,7 +199,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
     }
 
     public static boolean isDisabled(Long id) {
-        Equipment equipment = find.ref(id);
+        Equipment equipment = find.byId(id);
         if (equipment == null) {
             return false;
         }
@@ -234,6 +235,10 @@ public class Equipment extends Model implements Comparable<Equipment> {
         delete();
     }
 
+    public String idString() {
+        return "E" + id;
+    }
+
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(id);
@@ -260,14 +265,8 @@ public class Equipment extends Model implements Comparable<Equipment> {
     public static List<Equipment> getChecked(Form entryForm) {
         List<Equipment> equipments = new ArrayList<Equipment>();
         for (Equipment equipment : Equipment.list()) {
-            try {
-                Optional<String> value = entryForm.field(equipment.name).getValue();
-                if (value.isPresent()) {
-                    if (value.get().equals("true")) {
-                        equipments.add(equipment);
-                    }
-                }
-            } catch (Exception ex) {
+            if (ClientAssociation.isTrue(entryForm, equipment.idString())) {
+                equipments.add(equipment);
             }
         }
         return equipments;

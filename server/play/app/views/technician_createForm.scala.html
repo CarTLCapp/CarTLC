@@ -1,0 +1,28 @@
+@(techForm: Form[views.formdata.InputTechnician])
+
+@import helper._
+
+@import b3.vertical.fieldConstructor
+
+@main("Fleet TLC - New Technician", home = "/tech") {
+    
+    <h1>Add a client</h1>
+    
+    @b3.form(routes.TechnicianController.save()) {
+
+        @CSRF.formField
+
+        <fieldset>
+            @b3.text(techForm("first_name"), '_label -> "First name:  ", '_help -> "")
+            @b3.text(techForm("last_name"), '_label -> "Last name:  ", '_help -> "")
+            @b3.text(techForm("code"), '_label -> "Login Code:  ", '_help -> "")
+        </fieldset>
+        
+        <div class="actions">
+            <input type="submit" value="Create this technician" class="btn primary"> or
+            <a href="@routes.TechnicianController.list()" class="btn">Cancel</a>
+        </div>
+        
+    }
+
+}

@@ -1,4 +1,4 @@
-@(currentPage: EntryPagedList, currentSortBy: String, currentOrder: String, searchForm : Form[InputSearch], client : Client)
+@(currentPage: EntryPagedList, currentSortBy: String, currentOrder: String, searchForm : Form[views.formdata.InputSearch], client : Client)
 
 @import helper._
 
@@ -76,16 +76,23 @@
                 <tr>
                     <th style="width:55px"><input style="margin-right:5px" id="all" type="checkbox" value="ALL">Row</th>
                     @header("tech", "Name")
-                    @header("time", "Date")
-                    @header("project", "Project")
+                    @header("date", "Date")
+                    @header("time", "Time")
+                    <th>Root</th>
+                    @header("sub_project", "Sub Project")
                     @header("company", "Company")
                     @header("street", "Street / Plant Name")
                     @header("city", "City")
                     @header("state", "State")
                     @header("zipcode", "ZIP")
-                    <th>Truck</th>
+
+                    @if(currentPage.canViewTrucks) {
+                        <th>Truck</th>
+                    }
                     <th>Equipment</th>
-                    <th>Pictures</th>
+                    @if(currentPage.canViewPictures) {
+                        <th>Pictures</th>
+                    }
                     <th>Notes</th>
                     <th>View</th>
                     <th>Status</th>
@@ -100,16 +107,22 @@
                         <td><input class="entryCheckbox" style="margin-right:5px" type="checkbox" value="@entry.id">@currentPage.getRowNumber()</td>
                         <td>@currentPage.highlightSearch(entry.getTechName())</td>
                         <td>@entry.getDate()</td>
-                        <td>@currentPage.highlightSearch(entry.getProjectLine())</td>
+                        <td>@entry.getTime()</td>
+                        <td>@currentPage.highlightSearch(entry.getRootProjectName())</td>
+                        <td>@currentPage.highlightSearch(entry.getSubProjectName())</td>
                         <td>@currentPage.highlightSearch(entry.getCompany())</td>
                         <td>@currentPage.highlightSearch(entry.getStreet())</td>
                         <td>@currentPage.highlightSearch(entry.getCity())</td>
                         <td>@currentPage.highlightSearch(entry.getState())</td>
                         <td>@currentPage.highlightSearch(entry.getZipCode())</td>
-                        <td>@currentPage.highlightSearch(entry.getTruckLine())</td>
-                        <td>@currentPage.highlightSearch(entry.getEquipmentLine())</td>
-                        <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
-                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum()</a></td>
+                        @if(currentPage.canViewTrucks) {
+                            <td>@currentPage.highlightSearch(entry.getTruckLine())</td>
+                        }
+                        <td>@currentPage.highlightSearch(currentPage.getEquipmentLine(entry))</td>
+                        @if(currentPage.canViewPictures) {
+                            <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
+                        }
+                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum(client)</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
                         <td bgcolor="@entry.getCellColor()">@currentPage.highlightSearch(entry.getStatus())</td>
                     </tr>

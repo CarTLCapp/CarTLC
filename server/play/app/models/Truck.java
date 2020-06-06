@@ -1,10 +1,12 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package models;
 
 import java.util.*;
 import java.lang.Long;
+
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 
@@ -12,12 +14,17 @@ import play.db.ebean.*;
 import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
+
 import com.avaje.ebean.PagedList;
 
 import play.Logger;
 
 /**
  * User entity managed by Ebean
+ * <p>
+ * NOTE: This whole class is an obsolete idea.
+ * What has replaced this, is a unique note data value with an associated unique picture. No need
+ * for an entire table.
  */
 @Entity
 public class Truck extends com.avaje.ebean.Model {
@@ -53,7 +60,7 @@ public class Truck extends com.avaje.ebean.Model {
 
     public static Truck get(long id) {
         if (id > 0) {
-            return find.ref(id);
+            return find.byId(id);
         }
         return null;
     }
@@ -104,7 +111,7 @@ public class Truck extends com.avaje.ebean.Model {
         List<Truck> list = find.all();
         int count = 0;
         for (Truck truck : list) {
-            if (truck.getProjectName().length() > 0) {
+            if (truck.getSubProjectName().length() > 0) {
                 continue;
             }
             if (truck.getCompanyName().length() > 0) {
@@ -114,13 +121,27 @@ public class Truck extends com.avaje.ebean.Model {
                 Logger.info("Cannot delete truck, has entries: " + truck.toString());
                 continue;
             }
-	    if (WorkOrder.countWorkOrdersForTruck(truck.id) > 0) {
+            if (WorkOrder.countWorkOrdersForTruck(truck.id) > 0) {
                 Logger.info("Cannot delete truck, used in work orders: " + truck.toString());
                 continue;
             }
             Logger.info("Deleting truck: " + truck.toString());
             truck.delete();
             count++;
+        }
+        Logger.info("Deleted " + count + " trucks");
+        return count;
+    }
+
+    public static int cleanup2() {
+        int count = 0;
+        List<Truck> list = find.all();
+        Logger.info("Found " + list.size() + " trucks");
+        for (Truck truck : list) {
+            if (truck.countEntries() == 0 && WorkOrder.countWorkOrdersForTruck(truck.id) == 0) {
+                truck.delete();
+                count++;
+            }
         }
         Logger.info("Deleted " + count + " trucks");
         return count;
@@ -137,19 +158,19 @@ public class Truck extends com.avaje.ebean.Model {
     public static Truck add(long project_id, long company_id, long truck_id, String truck_number, String license_plate, int tech_id) {
         long company_name_id = 0;
         if (company_id > 0) {
-           Company company = Company.get(company_id);
-           if (company != null) {
-               company_name_id = CompanyName.save(company.name);
-           }
+            Company company = Company.get(company_id);
+            if (company != null) {
+                company_name_id = CompanyName.save(company.name);
+            }
         }
         Truck truck = null;
         List<Truck> list;
         if (truck_id > 0) {
             truck = get(truck_id);
-            if (truck.truck_number != null && truck_number != null && !truck.truck_number.equals(truck_number)) {
+            if (!StringUtils.isEmpty(truck.truck_number) && !StringUtils.isEmpty(truck_number) && !truck.truck_number.equals(truck_number)) {
                 Logger.error("TRUCK ID " + truck_id + " mismatch number: " + truck_number + " != " + truck.truck_number);
                 truck = null;
-            } else if (truck.license_plate != null && license_plate != null && !truck.license_plate.equals(license_plate)) {
+            } else if (!StringUtils.isEmpty(truck.license_plate) && !StringUtils.isEmpty(license_plate) && !truck.license_plate.equals(license_plate)) {
                 Logger.error("TRUCK ID " + truck_id + " mismatch license: " + license_plate + " != " + truck.license_plate);
                 truck = null;
             } else if (truck.project_id > 0 && project_id > 0 && truck.project_id != project_id) {
@@ -160,66 +181,65 @@ public class Truck extends com.avaje.ebean.Model {
                 truck = null;
             }
         }
-	/**
-        if (truck == null) {
-            if (truck_number != null) {
-                if (project_id > 0 && company_name_id > 0) {
-                    list = find.where()
-                            .eq("project_id", project_id)
-                            .eq("company_name_id", company_name_id)
-                            .eq("truck_number", truck_number)
-                            .findList();
-                } else if (project_id > 0) {
-                    list = find.where()
-                            .eq("project_id", project_id)
-                            .eq("truck_number", truck_number)
-                            .findList();
-                } else if (company_name_id > 0) {
-                    list = find.where()
-                            .eq("company_name_id", company_name_id)
-                            .eq("truck_number", truck_number)
-                            .findList();
-                } else {
-                    list = find.where()
-                            .eq("truck_number", truck_number)
-                            .findList();
-                }
-            } else {
-                if (project_id > 0 && company_name_id > 0) {
-                    list = find.where()
-                            .eq("project_id", project_id)
-                            .eq("company_name_id", company_name_id)
-                            .eq("license_plate", license_plate)
-                            .findList();
-                } else if (project_id > 0) {
-                    list = find.where()
-                            .eq("project_id", project_id)
-                            .eq("license_plate", license_plate)
-                            .findList();
-                } else if (company_name_id > 0) {
-                    list = find.where()
-                            .eq("company_name_id", company_name_id)
-                            .eq("license_plate", license_plate)
-                            .findList();
-                } else {
-                    list = find.where()
-                            .eq("license_plate", license_plate)
-                            .findList();
-                }
-            }
-            if (list != null) {
-                if (list.size() > 1) {
-                    Logger.error("Found too many trucks with "
-                            + truck_number + ", " + license_plate + ", project_id=" + project_id + ", company_name_id=" + company_name_id);
-                    for (Truck t : list) {
-                        Logger.error(t.toString());
-                    }
-                    truck = list.get(0);
-                } else if (list.size() == 1) {
-                    truck = list.get(0);
-                }
-            }
-        }**/
+//        if (truck == null) {
+//            if (!StringUtils.isEmpty(truck_number)) {
+//                if (project_id > 0 && company_name_id > 0) {
+//                    list = find.where()
+//                            .eq("project_id", project_id)
+//                            .eq("company_name_id", company_name_id)
+//                            .eq("truck_number", truck_number)
+//                            .findList();
+//                } else if (project_id > 0) {
+//                    list = find.where()
+//                            .eq("project_id", project_id)
+//                            .eq("truck_number", truck_number)
+//                            .findList();
+//                } else if (company_name_id > 0) {
+//                    list = find.where()
+//                            .eq("company_name_id", company_name_id)
+//                            .eq("truck_number", truck_number)
+//                            .findList();
+//                } else {
+//                    list = find.where()
+//                            .eq("truck_number", truck_number)
+//                            .findList();
+//                }
+//            } else {
+//                if (project_id > 0 && company_name_id > 0) {
+//                    list = find.where()
+//                            .eq("project_id", project_id)
+//                            .eq("company_name_id", company_name_id)
+//                            .eq("license_plate", license_plate)
+//                            .findList();
+//                } else if (project_id > 0) {
+//                    list = find.where()
+//                            .eq("project_id", project_id)
+//                            .eq("license_plate", license_plate)
+//                            .findList();
+//                } else if (company_name_id > 0) {
+//                    list = find.where()
+//                            .eq("company_name_id", company_name_id)
+//                            .eq("license_plate", license_plate)
+//                            .findList();
+//                } else {
+//                    list = find.where()
+//                            .eq("license_plate", license_plate)
+//                            .findList();
+//                }
+//            }
+//            if (list != null) {
+//                if (list.size() > 1) {
+//                    Logger.error("Found too many trucks with "
+//                            + truck_number + ", " + license_plate + ", project_id=" + project_id + ", company_name_id=" + company_name_id);
+//                    for (Truck t : list) {
+//                        Logger.error(t.toString());
+//                    }
+//                    truck = list.get(0);
+//                } else if (list.size() == 1) {
+//                    truck = list.get(0);
+//                }
+//            }
+//        }
         if (truck == null) {
             truck = new Truck();
             truck.truck_number = truck_number;
@@ -265,11 +285,22 @@ public class Truck extends com.avaje.ebean.Model {
         return "";
     }
 
-    public String getProjectName() {
+    public String getRootProjectName() {
         if (project_id == 0) {
             return "";
         }
-        Project project = Project.find.ref(project_id);
+        Project project = Project.find.byId(project_id);
+        if (project == null) {
+            return Long.toString(project_id) + "?";
+        }
+        return project.getRootProjectName();
+    }
+
+    public String getSubProjectName() {
+        if (project_id == 0) {
+            return "";
+        }
+        Project project = Project.find.byId(project_id);
         if (project == null) {
             return Long.toString(project_id) + "?";
         }
@@ -327,10 +358,21 @@ public class Truck extends com.avaje.ebean.Model {
             sbuf.append(" : ");
             sbuf.append(bit);
         }
-        bit = getProjectName();
+        bit = getRootProjectName();
         if (bit.length() > 0) {
             sbuf.append(", ");
             sbuf.append(bit);
+            bit = getSubProjectName();
+            if (bit.length() > 0) {
+                sbuf.append(" - ");
+                sbuf.append(bit);
+            }
+        } else {
+            bit = getSubProjectName();
+            if (bit.length() > 0) {
+                sbuf.append(", ");
+                sbuf.append(bit);
+            }
         }
         bit = getCompanyName();
         if (bit.length() > 0) {
@@ -370,17 +412,21 @@ public class Truck extends com.avaje.ebean.Model {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("ID ");
         sbuf.append(id);
-        sbuf.append(" ");
-        if (truck_number != null) {
+        sbuf.append(" NUMBER ");
+        if (truck_number != null && !truck_number.isEmpty()) {
             sbuf.append(truck_number);
         }
-        if (license_plate != null) {
+        if (license_plate != null && !license_plate.isEmpty()) {
             sbuf.append(" : ");
             sbuf.append(license_plate);
         }
         if (project_id > 0) {
-            sbuf.append(", PROJECT ");
-            sbuf.append(getProjectName());
+            if (getRootProjectName() != null) {
+                sbuf.append(", PROJECT ");
+                sbuf.append(getRootProjectName());
+                sbuf.append(" - ");
+            }
+            sbuf.append(getSubProjectName());
         }
         if (company_name_id > 0) {
             sbuf.append(", COMPANY ");

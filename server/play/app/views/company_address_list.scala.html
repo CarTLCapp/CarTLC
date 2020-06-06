@@ -1,0 +1,123 @@
+@(list: List[Company], owner: Company, currentSortBy: String, currentOrder: String, client : Client)
+
+@link(newSortBy:String) = @{
+    var sortBy = currentSortBy
+    var order = currentOrder
+    if(newSortBy != null) {
+        sortBy = newSortBy
+        if(currentSortBy == newSortBy) {
+            if(currentOrder == "asc") {
+                order = "desc"
+            } else {
+                order = "asc"
+            }
+        } else {
+            order = "asc"
+        }
+    }
+    // Generate the link
+    routes.CompanyController.view(owner.id, sortBy, order)
+}
+
+@header(key:String, title:String) = {
+    <th class="@key.replace(".","_") header @if(currentSortBy == key) @{if(currentOrder == "asc") "headerSortDown" else "headerSortUp"}">
+        <a href="@link(key)">@title</a>
+    </th>
+}
+
+@topTitle() = @{ if (owner.disabled) "FleetTLC - List Disabled Company Addresses" else "FleetTLC - List Company Addresses" }
+
+@title = { @Messages("company.list.title", list.size()) for @owner.name }
+
+@main(topTitle(), client, "/company") {
+
+    <h1 id="homeTitle">@title</h1>
+
+    @if(list.size() == 0) {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+    } else {
+
+        <table class="companies zebra-striped">
+            <thead>
+                <tr>
+                    @header("name", "Name")
+                    @header("street", "Street / Plant Name")
+                    @header("city", "City")
+                    @header("state", "State")
+                    @header("zipcode", "ZIP")
+                    <th>Entries</th>
+                    <th>Edit</th>
+                    <th>Created By</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(company <- list) {
+                    <tr>
+                        <td>
+                            @if(company.getName() == null) {
+                                <em>-</em>
+                            } else {
+                                @company.getName()
+                            }
+                        </td>
+                        <td>
+                            @if(company.street == null) {
+                                <em>-</em>
+                            } else {
+                                @company.street
+                            }
+                        </td>
+                        <td>
+                            @if(company.city == null) {
+                             <em>-</em>
+                            } else {
+                                @company.city
+                            }
+                        </td>
+                        <td>
+                            @if(company.state == null) {
+                                <em>-</em>
+                            } else {
+                                @company.state
+                            }
+                        </td>
+                        <td>
+                            @if(company.zipcode == null) {
+                                <em>-</em>
+                            } else {
+                                @company.zipcode
+                            }
+                        </td>
+                        <td>
+                            @company.countEntries()
+                        </td>
+                        <td>
+                            <a href="@routes.CompanyController.edit(company.id)">Edit</a>
+                        </td>
+                        <td>
+                            @company.getCreatedBy()
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+    }
+
+    @if(!owner.disabled) {
+        <a class="btn success" id="add" href="@routes.CompanyController.create()">Add a new company</a>
+
+        @if(client.is_admin) {
+            <a class="btn success" id="addMany" href="@routes.CompanyController.createMany()">Add many companies</a>
+        }
+    }
+
+}
+
+            

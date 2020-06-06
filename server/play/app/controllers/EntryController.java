@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package controllers;
 
@@ -10,6 +10,7 @@ import play.data.validation.ValidationError;
 import models.*;
 import modules.WorkerExecutionContext;
 import views.formdata.EntryFormData;
+import views.formdata.InputSearch;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.text.SimpleDateFormat;
 import java.util.Map;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -32,6 +34,7 @@ import modules.AmazonHelper;
 import modules.AmazonHelper.OnDownloadComplete;
 import modules.Globals;
 import modules.EntryListWriter;
+import modules.TimeHelper;
 
 import java.io.File;
 
@@ -293,7 +296,12 @@ public class EntryController extends Controller {
         if (entry == null) {
             return badRequest2("Could not find entry ID " + entry_id);
         }
-        return ok(views.html.entry_list_note.render(entry.getNotes()));
+        return ok(views.html.entry_list_note.render(entry.getNotes(getClientId())));
+    }
+
+    private long getClientId() {
+        Client client = Secured.getClient(ctx());
+        return client == null ? 0 : client.id;
     }
 
     @Security.Authenticated(Secured.class)
@@ -316,10 +324,11 @@ public class EntryController extends Controller {
         }
         String home = "/entry/" + entry_id + "/view";
         Form<EntryFormData> entryForm = mFormFactory.form(EntryFormData.class).fill(new EntryFormData(entry));
-        DynamicForm noteValues = mFormFactory.form().fill(entry.getNoteValues());
+        DynamicForm noteValues = mFormFactory.form().fill(entry.getNoteValues(getClientId()));
         return ok(views.html.entry_editForm.render(entry.id, entryForm, noteValues, home, Secured.getClient(ctx())));
     }
 
+    @Transactional
     @Security.Authenticated(Secured.class)
     public Result update(Long id) throws PersistenceException {
         Client client = Secured.getClient(ctx());
@@ -342,9 +351,9 @@ public class EntryController extends Controller {
             if (tech != null) {
                 entry.tech_id = tech.id.intValue();
             }
-            SimpleDateFormat format = new SimpleDateFormat(Entry.DATE_FORMAT);
+            SimpleDateFormat format = new SimpleDateFormat(TimeHelper.DATE_TIME_FORMAT);
             entry.entry_time = format.parse(data.date);
-            Project project = Project.findByName(data.project);
+            Project project = Project.findByName(data.rootProject, data.subProject);
             if (project != null) {
                 entry.project_id = project.id;
             }
@@ -381,10 +390,14 @@ public class EntryController extends Controller {
                 entry.status = status;
             }
             EntryEquipmentCollection.replace(entry.equipment_collection_id, Equipment.getChecked(entryForm));
+
+            // Don't know how this happened, but somehow very occassionally note_collection_id became 0.
+            if (entry.note_collection_id == 0) {
+                entry.note_collection_id = Version.inc(Version.NEXT_NOTE_COLLECTION_ID);
+            }
             EntryNoteCollection.replace(entry.note_collection_id, Note.getChecked(entryForm));
-            entry.applyToNotes(entryForm);
+            entry.applyToNotes(client.id, entryForm);
             entry.update();
-            Logger.info("Entry updated: " + entry.toString());
         } catch (ParseException ex) {
             Logger.error(ex.getMessage());
             return badRequest(ex.getMessage());
@@ -534,6 +547,7 @@ public class EntryController extends Controller {
                 entry = existing;
             }
         }
+        // This is OLD SCHOOL:
         int truck_id;
         String truck_number;
         String license_plate;
@@ -560,6 +574,17 @@ public class EntryController extends Controller {
         } else {
             license_plate = null;
         }
+        if (truck_number == null && license_plate == null && truck_id == 0) {
+            // In flow style this is okay. So just ignore this.
+        } else {
+            // Old pre-flow school:
+
+            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
+            // The reason is that other techs don't need to know about a local techs truck updates.
+            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_id, truck_number, license_plate, entry.tech_id);
+            entry.truck_id = truck.id;
+        }
+
         value = json.findValue("project_id");
         if (value == null) {
             missing.add("project_id");
@@ -605,16 +630,6 @@ public class EntryController extends Controller {
                 return badRequest2("address: no such company with ID " + entry.company_id);
             }
         }
-        if (truck_number == null && license_plate == null && truck_id == 0) {
-            missing.add("truck_id");
-            missing.add("truck_number");
-            missing.add("license_plate");
-        } else {
-            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
-            // The reason is that other techs don't need to know about a local techs truck updates.
-            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_id, truck_number, license_plate, entry.tech_id);
-            entry.truck_id = truck.id;
-        }
         value = json.findValue("equipment");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
@@ -633,14 +648,14 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     EntryEquipmentCollection collection = new EntryEquipmentCollection();
                     collection.collection_id = (long) collection_id;
-                    JsonNode subvalue = ele.findValue("equipment_id");
-                    if (subvalue == null) {
-                        subvalue = ele.findValue("equipment_name");
-                        if (subvalue == null) {
+                    JsonNode subValue = ele.findValue("equipment_id");
+                    if (subValue == null) {
+                        subValue = ele.findValue("equipment_name");
+                        if (subValue == null) {
                             missing.add("equipment_id");
                             missing.add("equipment_name");
                         } else {
-                            String name = subvalue.textValue();
+                            String name = subValue.textValue();
                             List<Equipment> equipments = Equipment.findByName(name);
                             Equipment equipment;
                             if (equipments.size() == 0) {
@@ -663,7 +678,7 @@ public class EntryController extends Controller {
                             collection.equipment_id = equipment.id;
                         }
                     } else {
-                        collection.equipment_id = subvalue.longValue();
+                        collection.equipment_id = subValue.longValue();
                     }
                     collection.save();
                 }
@@ -673,6 +688,7 @@ public class EntryController extends Controller {
                 }
             }
         }
+        HashMap<Long,Long> pictureIdMap = new HashMap<Long,Long>(); // app-side pictureId, PictureCollection.id
         value = json.findValue("picture");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
@@ -690,16 +706,40 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     PictureCollection collection = new PictureCollection();
                     collection.collection_id = (long) collection_id;
-                    JsonNode subvalue = ele.findValue("note");
-                    if (subvalue != null) {
-                        collection.note = subvalue.textValue();
+                    // This reference is old school. Will not be seen in flow style:
+                    JsonNode subValue = ele.findValue("note");
+                    if (subValue != null) {
+                        collection.note = subValue.textValue();
                     }
-                    subvalue = ele.findValue("filename");
-                    if (subvalue == null) {
+                    // The new way:
+                    JsonNode flowElementIdValue = ele.findValue("flow_element_id");
+                    if (flowElementIdValue != null) {
+                        long flowElementId = flowElementIdValue.longValue();
+                        collection.flow_element_id = flowElementId;
+                    } else {
+                        JsonNode flowStageValue = ele.findValue("flow_stage");
+                        if (flowStageValue != null) {
+                            String flowStage = flowStageValue.textValue();
+                            if (flowStage != null) {
+                                if (flowStage.equals("truck_number")) {
+                                    collection.flow_element_id = PictureCollection.FLOW_TRUCK_NUMBER_ID;
+                                } else if (flowStage.equals("truck_damage")) {
+                                    collection.flow_element_id = PictureCollection.FLOW_TRUCK_DAMAGE_ID;
+                                }
+                            }
+                        }
+                    }
+                    subValue = ele.findValue("filename");
+                    if (subValue == null) {
                         missing.add("filename");
                     } else {
-                        collection.picture = subvalue.textValue();
+                        collection.picture = subValue.textValue();
                         collection.save();
+                    }
+                    JsonNode idValue = ele.findValue("id");
+                    if (idValue != null) {
+                        long appId = idValue.longValue();
+                        pictureIdMap.put(appId, collection.id);
                     }
                 }
                 entry.picture_collection_id = collection_id;
@@ -722,13 +762,13 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     EntryNoteCollection collection = new EntryNoteCollection();
                     collection.collection_id = (long) collection_id;
-                    JsonNode subvalue = ele.findValue("id");
-                    if (subvalue == null) {
-                        subvalue = ele.findValue("name");
-                        if (subvalue == null) {
+                    JsonNode subValue = ele.findValue("id");
+                    if (subValue == null) {
+                        subValue = ele.findValue("name");
+                        if (subValue == null) {
                             missing.add("note:id, note:name");
                         } else {
-                            String name = subvalue.textValue();
+                            String name = subValue.textValue();
                             List<Note> notes = Note.findByName(name);
                             if (notes == null || notes.size() == 0) {
                                 // A tech can get into a situation where they are effectively
@@ -752,13 +792,13 @@ public class EntryController extends Controller {
                             }
                         }
                     } else {
-                        collection.note_id = subvalue.longValue();
+                        collection.note_id = subValue.longValue();
                     }
-                    subvalue = ele.findValue("value");
+                    subValue = ele.findValue("value");
                     if (value == null) {
                         missing.add("note:value");
                     } else {
-                        collection.note_value = subvalue.textValue();
+                        collection.note_value = subValue.textValue();
                     }
                     collection.save();
                 }

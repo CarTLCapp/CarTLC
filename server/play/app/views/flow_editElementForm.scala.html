@@ -1,0 +1,83 @@
+@import models.flow.FlowNoteCollection
+@import helper._
+@import b3.vertical.fieldConstructor
+
+@(id: Long, flow_id: Long, flowElementForm: Form[views.formdata.InputFlowElement], client : Client)
+
+@titleOf(id: Long) = @{
+    if (id > 0) {
+        "Fleet TLC - Edit Element Flow";
+    } else {
+        "Fleet TLC - Add Element Flow";
+    }
+}
+
+@buttonOf(id: Long) = @{
+    if (id > 0) {
+        "Update this flow element";
+    } else {
+        "Create this flow element";
+    }
+}
+
+@homeValue() = @{ "/flow/" + flow_id }
+
+@main(titleOf(id), home = homeValue()) {
+    
+    <h1>Add an element to a flow</h1>
+    
+    @b3.form(routes.FlowController.saveElement(flow_id, id)) {
+
+        @CSRF.formField
+
+        <fieldset>
+
+            <h3>Options</h3>
+
+            <div class="checkbox-container">
+
+                @b3.text(flowElementForm("prompt"), '_label -> "Prompt", 'class -> "longer")
+                <div style="clear:both;"></div>
+                @{
+                    val opts = Seq("X"->"None","T"->"Toast","D"->"Dialog","C"->"Confirm","N"->"Confirm Top")
+                    b3.radio(flowElementForm("type"), options = opts, '_label -> "Type", '_inline -> true)
+                }
+                <div style="clear:both;"></div>
+                @{
+                    val opts = Seq("0"->"None","1"->"1","2"->"2","3"->"3","4"->"4","5"->"5")
+                    b3.radio(flowElementForm("numImages"), options = opts, '_label -> "Image Request", '_inline -> true)
+                }
+                <div style="clear:both;"></div>
+                @b3.text(flowElementForm("line_num"), '_label -> "Step Number")
+                <div style="clear:both;"></div>
+
+            </div>
+
+            <h3>Notes</h3>
+
+            <div class="checkbox-container-columns">
+
+                @for(note <- Note.list()) {
+                    @defining(FlowNoteCollection.hasNote(id, note.id)) { flag =>
+                        @b3.checkbox(flowElementForm(note.idString()), '_label -> note.name, 'checked -> flag)
+                    }
+                    <div style="clear:both;"></div>
+                }
+
+            </div>
+
+        <div class="actions">
+            <input type="submit" value="@buttonOf(id)" class="btn primary"> or
+            <a href="@routes.FlowController.edit(flow_id)" class="btn">Cancel</a>
+        </div>
+
+    }
+
+    @if(client.is_admin) {
+        @b3.form(routes.FlowController.deleteElement(flow_id, id), 'class -> "topRight") {
+            @CSRF.formField
+            <input type="submit" value="Delete Element" class="btn danger" onclick="return confirm('Are you sure you wish to delete this element?');">
+        }
+    }
+
+}

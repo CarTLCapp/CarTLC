@@ -104,7 +104,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
     }
 
     public static int countWorkOrdersForTruck(long truck_id) {
-        return find.where().eq("truck_id", truck_id).findList().size();
+        return find.where().eq("truck_id", truck_id).findRowCount();
     }
 
     public String getClientName() {
@@ -120,7 +120,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
         if (project == null) {
             return "";
         }
-        return project.name;
+        return project.getFullProjectName();
     }
 
     public Company getCompany() {
@@ -198,7 +198,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
         if (entry == null) {
             return "";
         }
-        return entry.getDate();
+        return entry.getDateTime();
     }
 
     public boolean isFulfilled() {
@@ -271,7 +271,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
 
     public static void fixTrucks() {
         List<WorkOrder> list = list();
-	int count = 0;
+        int count = 0;
         for (WorkOrder order : list) {
             Truck truck = Truck.get(order.truck_id);
             boolean changed = false;
@@ -286,7 +286,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
             }
             if (changed) {
                 truck.update();
-		count++;
+                count++;
             }
         }
         if (count > 0) {

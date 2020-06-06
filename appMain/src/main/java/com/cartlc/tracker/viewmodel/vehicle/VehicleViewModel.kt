@@ -5,11 +5,11 @@ package com.cartlc.tracker.viewmodel.vehicle
 
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
-import com.cartlc.tracker.model.VehicleRepository
-import com.cartlc.tracker.model.event.Action
-import com.cartlc.tracker.model.event.Button
-import com.cartlc.tracker.model.event.ButtonDialog
-import com.cartlc.tracker.model.flow.VehicleStage
+import com.cartlc.tracker.fresh.model.VehicleRepository
+import com.cartlc.tracker.fresh.model.event.Action
+import com.cartlc.tracker.fresh.model.event.Button
+import com.cartlc.tracker.fresh.model.event.ButtonDialog
+import com.cartlc.tracker.fresh.model.flow.VehicleStage
 import com.cartlc.tracker.viewmodel.BaseViewModel
 import java.lang.NumberFormatException
 
@@ -54,7 +54,7 @@ class VehicleViewModel(
 
     fun dispatchActionEvent(action: Action) = repo.dispatchActionEvent(action)
 
-    fun handleActionEvent() = repo.handleActionEvent()
+    val actionUseCase = repo.actionUseCase
 
     fun doSimpleEntryReturn(value: String) {
         store(value)

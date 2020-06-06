@@ -13,11 +13,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import models.InputLines;
 import models.Strings;
 import models.Vehicle;
 import models.VehicleName;
 import models.Version;
+import views.formdata.InputLines;
+
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -26,6 +27,7 @@ import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.Results;
 import play.mvc.Security;
 
 /**
@@ -36,7 +38,7 @@ public class VehicleController extends Controller {
     private static final int PAGE_SIZE = 100;
 
     private SimpleDateFormat mDateFormat;
-    private static final String DATE_FORMAT = EntryController.DATE_FORMAT;
+    private static final String DATE_FORMAT = "yyyy-MM-dd KK:mm a z";
 
     private FormFactory formFactory;
 
@@ -46,8 +48,8 @@ public class VehicleController extends Controller {
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
     }
 
-    public Result list() {
-        return list(0, "entry_time", "desc");
+    public Result LIST() {
+        return Results.redirect(routes.VehicleController.list(0, "entry_time", "desc"));
     }
 
     /**
@@ -62,6 +64,10 @@ public class VehicleController extends Controller {
     public Result names() {
         List<VehicleName> list = VehicleName.list();
         return ok(views.html.vehicle_names_list.render(list, Secured.getClient(ctx())));
+    }
+
+    public Result NAMES() {
+        return Results.redirect(routes.VehicleController.names());
     }
 
     @Security.Authenticated(Secured.class)
@@ -93,7 +99,7 @@ public class VehicleController extends Controller {
         String[] lines = linesForm.get().getLines();
         VehicleName.setLines(lines);
         Version.inc(Version.VERSION_VEHICLE_NAMES);
-        return names();
+        return NAMES();
     }
 
     @Transactional
@@ -217,6 +223,7 @@ public class VehicleController extends Controller {
         }
         long ret_id;
         ret_id = vehicle.id;
+        // TODO: This needs to be a redirect
         return ok(Long.toString(ret_id));
     }
 
@@ -299,7 +306,7 @@ public class VehicleController extends Controller {
             return badRequest2("Could not find vehicle ID " + vehicle_id);
         }
         vehicle.delete();
-        return list();
+        return LIST();
     }
 }
             

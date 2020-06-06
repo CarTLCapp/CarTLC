@@ -8,8 +8,8 @@ import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.data.DataEntry
-import com.cartlc.tracker.model.event.EventRefreshProjects
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.event.EventRefreshProjects
 import org.greenrobot.eventbus.EventBus
 
 /**
@@ -78,13 +78,13 @@ class CheckError {
             mDialog!!.show()
         }
 
-        fun getMissingTruckError(act: Activity, entry: DataEntry): String {
+        private fun getMissingTruckError(act: Activity, entry: DataEntry): String {
             val sbuf = StringBuilder()
             sbuf.append(act.getString(R.string.error_missing_truck_long))
             sbuf.append("\n  ")
             sbuf.append(act.getString(R.string.title_project_))
             sbuf.append(" ")
-            sbuf.append(entry.projectName)
+            sbuf.append(entry.projectDashName)
             sbuf.append("\n  ")
             sbuf.append(entry.addressLine)
             sbuf.append("\n  ")

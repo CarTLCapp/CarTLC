@@ -4,10 +4,12 @@
 
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
 
-@main("FleetTLC - Edit Company", client, "/company") {
+@computeHome() = @{ "/company/" + id + "/view" }
+
+@main("FleetTLC - Edit Company", client, computeHome()) {
     
     <h1>Edit company</h1>
-    
+
     @b3.form(routes.CompanyController.update(id)) {
 
         @CSRF.formField

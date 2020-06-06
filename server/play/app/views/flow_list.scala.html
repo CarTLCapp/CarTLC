@@ -1,0 +1,46 @@
+@import models.flow.Flow
+
+@(currentPage: List[Flow], client : Client)
+
+@main("FleetTLC - List Flows", client) {
+
+    <h1 id="homeTitle">@Messages("flow.list.title", currentPage.size())</h1>
+
+    @if(currentPage.size() == 0) {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+    } else {
+
+        <table class="clients zebra-striped">
+            <thead>
+                <tr>
+                    <th>Root</th>
+                    <th>Project</th>
+                    <th>Chain Size</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(flow <- currentPage) {
+                    <tr>
+                        <td>@flow.getRootProjectName()</td>
+                        <td>@flow.getSubProjectName()</td>
+                        <td>@flow.getChainSize()</td>
+                        <td><a href="@routes.FlowController.edit(flow.id)">Edit</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    }
+
+    @if(client.is_admin) {
+        <a class="btn success" id="add" href="@routes.FlowController.create()">Add a new flow</a>
+    }
+
+}
+
+            

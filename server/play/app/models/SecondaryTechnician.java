@@ -53,7 +53,7 @@ public class SecondaryTechnician extends com.avaje.ebean.Model {
         if (tech_id == 0) {
             return null;
         }
-        return Technician.find.ref(tech_id);
+        return Technician.find.byId(tech_id);
     }
 
     public static void save(long entry_id, long secondary_tech_id) {

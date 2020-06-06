@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.cartlc.tracker">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.cartlc.tracker">
 
     <!-- To access Google+ APIs: -->
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -9,12 +10,17 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
+    <!-- InstaBug: -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true"/>
 
     <application
-        android:name=".ui.app.TBApplication"
+        android:name=".fresh.ui.app.TBApplication"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
@@ -30,11 +36,12 @@
             android:value="fdf2c9c4ee8de1171d7114f9b5301d02d13abeb6" />
 
         <activity
-            android:name=".ui.act.MainActivity"
+            android:name=".fresh.ui.main.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN"/>
@@ -43,11 +50,12 @@
         </activity>
 
         <activity
-            android:name=".ui.act.ListEntryActivity"
+            android:name=".fresh.ui.listentries.ListEntriesActivity"
             android:label="@string/title_activity_list_entries"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="LockedOrientationActivity">
         </activity>
 
         <activity
@@ -55,7 +63,8 @@
             android:label="@string/vehicle_title_vehicles"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="LockedOrientationActivity">
         </activity>
 
         <provider
@@ -69,12 +78,13 @@
         </provider>
 
         <service
-            android:name=".model.server.DCService"
+            android:name=".fresh.service.endpoint.DCService"
             android:exported="false">
         </service>
         <service
             android:name="com.amazonaws.mobileconnectors.s3.transferutility.TransferService"
             android:enabled="true"/>
+        <receiver android:name=".fresh.service.alarm.AlarmReceiver" />
 
     </application>
 

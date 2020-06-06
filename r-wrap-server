@@ -20,8 +20,8 @@ do
 	case $key in
 		-r)
 			SERVER="ubuntu@fleettlc.arqnetworks.com"
-    		shift
-    	;;
+	    		shift
+    	 	;;
 		-d)
 			shift
 		;;

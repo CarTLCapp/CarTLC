@@ -14,21 +14,25 @@ GET     /logout                   controllers.HomeController.logout()
 GET     /problem                  controllers.HomeController.problem(msg : String)
 GET     /picture_cleanup          controllers.HomeController.pictureCleanup()
 GET     /truck_cleanup            controllers.HomeController.truckCleanup()
+GET     /daily/:date              controllers.HomeController.daily(date:Long)
 
 ### TECHNICIANS ###
 
 GET     /tech                    controllers.TechnicianController.list()
+GET     /tech/new                controllers.TechnicianController.create()
+POST    /tech/save               controllers.TechnicianController.save()
 GET     /tech/:id                controllers.TechnicianController.edit(id:Long)
 POST    /tech/:id                controllers.TechnicianController.update(id:Long)
 GET     /tech/:id/delete         controllers.TechnicianController.delete(id:Long)
 GET     /tech/:id/reset_upload   controllers.TechnicianController.resetUpload(id:Long)
+# POST    /techs                   controllers.TechnicianController.query()
 
 ### PROJECTS ###
 
 GET     /project                    controllers.ProjectController.list()
 GET     /project/disabled           controllers.ProjectController.list_disabled()
 GET     /project/new                controllers.ProjectController.create()
-POST    /project                    controllers.ProjectController.save()
+POST    /project/save               controllers.ProjectController.save()
 GET     /project/new/many           controllers.ProjectController.createMany()
 POST    /project/many               controllers.ProjectController.saveMany()
 GET     /project/:id                controllers.ProjectController.edit(id:Long)
@@ -37,9 +41,22 @@ POST    /project/:id/delete         controllers.ProjectController.delete(id:Long
 GET     /project/:id/enable         controllers.ProjectController.enable(id:Long)
 POST    /projects                   controllers.ProjectController.query()
 
+### ROOT PROJECTS ###
+
+GET     /project/root/list          controllers.RootProjectController.list()
+GET     /project/root/disabled      controllers.RootProjectController.list_disabled()
+POST    /project/root/save          controllers.RootProjectController.save()
+GET     /project/:id/root           controllers.RootProjectController.edit(id:Long)
+POST    /project/:id/root           controllers.RootProjectController.update(id:Long)
+POST    /project/:id/root/delete    controllers.RootProjectController.delete(id:Long)
+GET     /project/:id/root/enable    controllers.RootProjectController.enable(id:Long)
+GET     /project/root/new           controllers.RootProjectController.create()
+GET     /project/root/sub/:index    controllers.RootProjectController.listSubProjects(index:Int)
+POST    /projects/root              controllers.RootProjectController.query()
+
 ### COMPANIES ###
 
-GET     /company                    controllers.CompanyController.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "", disabled:Boolean ?= false)
+GET     /company                    controllers.CompanyController.list(o ?= "asc", disabled:Boolean ?= false)
 GET     /company/new                controllers.CompanyController.create()
 POST    /company                    controllers.CompanyController.save()
 GET     /company/new/many           controllers.CompanyController.createMany()
@@ -48,6 +65,7 @@ GET     /company/:id                controllers.CompanyController.edit(id:Long)
 POST    /company/:id                controllers.CompanyController.update(id:Long)
 POST    /company/:id/delete         controllers.CompanyController.delete(id:Long)
 GET     /company/:id/enable         controllers.CompanyController.enable(id:Long)
+GET     /company/:id/view           controllers.CompanyController.view(id:Long, sortBy ?= "name", o ?= "asc")
 POST    /companies                  controllers.CompanyController.query()
 
 ### EQUIPMENTS ###
@@ -64,7 +82,8 @@ GET     /equipment/:id/project/:projectId/remove    controllers.EquipmentControl
 POST    /equipment/:id/delete       controllers.EquipmentController.delete(id:Long)
 GET     /equipment/:id/enable       controllers.EquipmentController.enable(id:Long)
 GET     /equipment/num_entries/next controllers.EquipmentController.fillNext()
-POST    /equipments                 controllers.EquipmentController.query()
+POST    /equipments                 controllers.EquipmentController.queryOldWay()
+POST    /equipments/root            controllers.EquipmentController.queryWithRoot()
 
 ### NOTES ###
 
@@ -80,7 +99,24 @@ GET     /note/:id/project/:projectId/add       controllers.NoteController.addPro
 GET     /note/:id/project/:projectId/remove    controllers.NoteController.removeProject(id:Long, projectId:Long)
 POST    /note/:id/delete       controllers.NoteController.delete(id:Long)
 GET     /note/:id/enable       controllers.NoteController.enable(id:Long)
-POST    /notes                 controllers.NoteController.query()
+POST    /notes                 controllers.NoteController.queryOldWay()
+POST    /notes/root            controllers.NoteController.queryWithRoot()
+
+### FLOWS ###
+
+GET     /flow                       controllers.FlowController.list()
+GET     /flow/new                   controllers.FlowController.create()
+GET     /flow/:id                   controllers.FlowController.edit(id:Long)
+GET     /flow/:id/edit_message/:message     controllers.FlowController.editWithMessage(id:Long, message: String)
+POST    /flow/:id                           controllers.FlowController.save(id:Long)
+GET     /flow/:id/delete                    controllers.FlowController.delete(id:Long)
+GET     /flow/:id/up/:elementId             controllers.FlowController.moveUp(id:Long, elementId:Long)
+GET     /flow/:id/down/:elementId           controllers.FlowController.moveDown(id:Long, elementId:Long)
+GET     /flow/:id/edit_element/:elementId   controllers.FlowController.editElement(id:Long, elementId:Long)
+GET     /flow/:id/delete_element/:elementId controllers.FlowController.deleteElement(id:Long, elementId:Long)
+GET     /flow/:id/add_element               controllers.FlowController.addElement(id:Long)
+POST    /flow/:id/save_element/:elementId   controllers.FlowController.saveElement(id:Long, elementId: Long)
+POST    /flows                      controllers.FlowController.query()
 
 ### CLIENTS ###
 
@@ -95,7 +131,7 @@ POST    /client/:id/delete     controllers.ClientController.delete(id:Long)
 
 GET     /work/summary/list       controllers.WorkOrderController.list(p:Int ?= 0, s ?= "last_modified", o ?= "desc", message ?= "")
 GET     /work/summary/:id/delete controllers.WorkOrderController.deleteSummary(id:Integer)
-GET     /work/import/form      controllers.WorkOrderController.importWorkOrdersForm()
+GET     /work/import/form      controllers.WorkOrderController.importWorkOrdersForm(message ?= "")
 POST    /work/import           controllers.WorkOrderController.importWorkOrders()
 GET     /work/export           controllers.WorkOrderController.exportWorkOrders()
 
@@ -144,7 +180,7 @@ POST    /message               controllers.MessageController.message()
 GET     /truck                 controllers.TruckController.list(p:Int ?= 0)
 GET     /truck/cleanup         controllers.TruckController.cleanup()
 GET     /truck/toggle_filter   controllers.TruckController.toggleFilter()
-GET     /truck/:id/delete      controllers.TruckController.delete(id:Long)
+POST    /truck/:id/delete      controllers.TruckController.delete(id:Long)
 GET     /truck/:id             controllers.TruckController.edit(id:Long)
 POST    /truck/:id             controllers.TruckController.update(id:Long)
 POST    /trucks                controllers.TruckController.query()
@@ -154,7 +190,7 @@ POST    /trucks                controllers.TruckController.query()
 GET     /vehicles/list         controllers.VehicleController.list(p:Int ?= 0, s ?= "entry_time", o ?= "desc")
 GET     /vehicles/names        controllers.VehicleController.names()
 GET     /vehicles/names/edit   controllers.VehicleController.editNames()
-GET     /vehicles/:id/delete   controllers.VehicleController.delete(id:Long)
+POST    /vehicles/:id/delete   controllers.VehicleController.delete(id:Long)
 POST    /vehicles/names/save   controllers.VehicleController.saveNames()
 POST    /vehicle               controllers.VehicleController.enter()
 POST    /strings               controllers.VehicleController.strings()

@@ -17,6 +17,7 @@ import play.mvc.Http.MultipartFormData.*;
 import play.mvc.Security;
 
 import models.*;
+import views.formdata.ImportWorkOrder;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -47,12 +48,16 @@ public class WorkOrderController extends Controller {
         this.formFactory = formFactory;
     }
 
-    public Result INDEX() {
+    public Result index() {
         return list(0, "last_modified", "desc", "");
     }
 
-    public Result INDEX(String msg) {
+    public Result index(String msg) {
         return list(0, "last_modified", "desc", msg);
+    }
+
+    public Result LIST() {
+        return Results.redirect(routes.WorkOrderController.list(0, "last_modified", "desc", ""));
     }
 
     @Security.Authenticated(Secured.class)
@@ -102,8 +107,8 @@ public class WorkOrderController extends Controller {
         return ok(views.html.progress_grid.render(progressGrid, Secured.getClient(ctx()), home));
     }
 
-    public Result importWorkOrdersForm() {
-        return importWorkOrdersForm("");
+    public Result ImportWorkOrdersForm(String msg) {
+        return Results.redirect(routes.WorkOrderController.importWorkOrdersForm(msg));
     }
 
     @Security.Authenticated(Secured.class)
@@ -116,7 +121,8 @@ public class WorkOrderController extends Controller {
     public Result importWorkOrders() {
         Form<ImportWorkOrder> importForm = formFactory.form(ImportWorkOrder.class).bindFromRequest();
         StringBuilder sbuf = new StringBuilder();
-        String projectName = importForm.get().project;
+        String rootProjectName = importForm.get().rootProject;
+        String subProjectName = importForm.get().subProject;
         String companyName = importForm.get().company;
         MultipartFormData<File> body = request().body().asMultipartFormData();
         if (body != null) {
@@ -126,19 +132,23 @@ public class WorkOrderController extends Controller {
                 if (fileName.trim().length() > 0) {
                     File file = importname.getFile();
                     if (file.exists()) {
-                        Project project = Project.findByName(projectName);
-                        Client client = Secured.getClient(ctx());
-                        WorkOrderReader reader = new WorkOrderReader(client, project, companyName);
-                        if (!reader.load(file)) {
-                            sbuf.append("Errors:\n");
-                            sbuf.append(reader.getErrors());
-                            String warnings = reader.getWarnings();
-                            if (warnings.length() > 0) {
-                                sbuf.append("\nWarnings:\n");
-                                sbuf.append(warnings);
-                            }
+                        Project project = Project.findByName(rootProjectName, subProjectName);
+                        if (project == null) {
+                            sbuf.append("Project does not exist: " + rootProjectName + "-" + subProjectName);
                         } else {
-                            return INDEX(reader.getWarnings());
+                            Client client = Secured.getClient(ctx());
+                            WorkOrderReader reader = new WorkOrderReader(client, project, companyName);
+                            if (!reader.load(file)) {
+                                sbuf.append("Errors:\n");
+                                sbuf.append(reader.getErrors());
+                                String warnings = reader.getWarnings();
+                                if (warnings.length() > 0) {
+                                    sbuf.append("\nWarnings:\n");
+                                    sbuf.append(warnings);
+                                }
+                            } else {
+                                return index(reader.getWarnings());
+                            }
                         }
                     } else {
                         sbuf.append("File does not exist: " + fileName);
@@ -153,9 +163,9 @@ public class WorkOrderController extends Controller {
             sbuf.append("Invalid call");
         }
         if (sbuf.length() == 0) {
-            return INDEX();
+            return LIST();
         } else {
-            return importWorkOrdersForm(sbuf.toString());
+            return ImportWorkOrdersForm(sbuf.toString());
         }
     }
 
@@ -165,7 +175,7 @@ public class WorkOrderController extends Controller {
         File file = new File(EXPORT_FILENAME);
         WorkOrderWriter writer = new WorkOrderWriter(client);
         if (!writer.save(file)) {
-            INDEX("Errors: " + writer.getError());
+            index("Errors: " + writer.getError());
         }
         return ok(file);
     }
@@ -188,7 +198,7 @@ public class WorkOrderController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result deleteSummary(Integer upload_id) {
         int count = WorkOrder.deleteByUploadId(upload_id, Secured.getClient(ctx()));
-        return INDEX(count + " work orders deleted");
+        return index(count + " work orders deleted");
     }
 
     /**
@@ -203,7 +213,7 @@ public class WorkOrderController extends Controller {
             return ok(message);
         }
         WorkOrder.find.byId(id).delete();
-        return INDEX();
+        return index();
     }
 
     /**
@@ -269,7 +279,7 @@ public class WorkOrderController extends Controller {
         } catch (Exception ex) {
             Logger.error(ex.getMessage());
         }
-        return INDEX();
+        return index();
     }
 
     public static boolean isValidTruckNumber(String line) {

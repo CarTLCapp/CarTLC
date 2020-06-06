@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package controllers;
 
@@ -37,6 +37,7 @@ public class HomeController extends Controller {
     private FormFactory mFormFactory;
     private Globals mGlobals;
     private String mVersion;
+    private Daily mDaily;
 
     @Inject
     public HomeController(
@@ -54,7 +55,13 @@ public class HomeController extends Controller {
     public Result index() {
         mGlobals.checkInit();
         mGlobals.setClearSearch(true);
-        return ok(views.html.home.render(Secured.getClient(ctx()), mVersion));
+        return ok(views.html.home.render(Secured.getClient(ctx()), mVersion, "", daily()));
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result daily(long date) {
+        daily().resetTo(date);
+        return HOME();
     }
 
     public static Result HOME() {
@@ -63,11 +70,18 @@ public class HomeController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result problem(String msg) {
-        return badRequest(views.html.home.render(Secured.getClient(ctx()), mVersion));
+        return badRequest(views.html.home.render(Secured.getClient(ctx()), mVersion, msg, daily()));
     }
 
     public static Result PROBLEM(String msg) {
         return Results.redirect(routes.HomeController.problem(msg));
+    }
+
+    private Daily daily() {
+        if (mDaily == null) {
+            mDaily = new Daily();
+        }
+        return mDaily;
     }
 
     /**
@@ -100,7 +114,7 @@ public class HomeController extends Controller {
         } else {
             session().clear();
             session("username", formData.get().username);
-            return index();
+            return HOME();
         }
     }
 
@@ -138,7 +152,6 @@ public class HomeController extends Controller {
         mAmazonHelper.deleteAction().host(host).deleteLocalFile(true).listener((deleted, errors) -> {
             pictureCleanup2(host, completableFuture, deleted);
         }).delete(missing);
-
         Logger.warn("DONE");
     }
 

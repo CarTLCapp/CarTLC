@@ -70,16 +70,14 @@ public class ProjectNoteCollection extends Model {
         return find.where()
                 .eq("note_id", note_id)
                 .eq("project_id", project_id)
-                .findList().size() > 0;
+                .findRowCount() > 0;
     }
 
     public static boolean has(ProjectNoteCollection collection) {
-        List<ProjectNoteCollection> items =
-                find.where()
+        return find.where()
                         .eq("project_id", collection.project_id)
                         .eq("note_id", collection.note_id)
-                        .findList();
-        return items.size() > 0;
+                        .findRowCount() > 0;
     }
 
     public static ProjectNoteCollection get(ProjectNoteCollection collection) {

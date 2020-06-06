@@ -22,6 +22,9 @@ public class Client extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String NAME_ADMIN = "admin";
+    private static final String NAME_GUEST = "guest";
+
     @Id
     public Long id;
 
@@ -45,7 +48,7 @@ public class Client extends com.avaje.ebean.Model {
 
     public static Client get(long id) {
         if (id > 0) {
-            return find.ref(id);
+            return find.byId(id);
         }
         return null;
     }
@@ -116,8 +119,12 @@ public class Client extends com.avaje.ebean.Model {
     }
 
     public static void initClient() {
-        Client.addClient("admin", "admintlc", true);
-        Client.addClient("guest", "tlc", false);
+        Client.addClient(NAME_ADMIN, "admintlc", true);
+        Client.addClient(NAME_GUEST, "tlc", false);
+    }
+
+    public static Client getAdmin() {
+        return getUser(NAME_ADMIN);
     }
 
     public String getProjectsLine() {
@@ -138,10 +145,12 @@ public class Client extends com.avaje.ebean.Model {
             if (sbuf.length() > 0) {
                 sbuf.append(split);
             }
-            sbuf.append(project.name);
+            sbuf.append(project.getFullProjectName());
         }
         return sbuf.toString();
     }
+
+    // HAS PROJECT
 
     public static boolean hasProject(long client_id, long project_id) {
         Client client = find.byId(client_id);
@@ -155,7 +164,9 @@ public class Client extends com.avaje.ebean.Model {
         return ClientProjectAssociation.hasProject(id, project_id);
     }
 
-    public String getCompanyName() {
+    // COMPANY NAMES
+
+    public String getCompanyLine() {
         return ClientCompanyNameAssociation.getCompanyLine(id);
     }
 
@@ -165,5 +176,89 @@ public class Client extends com.avaje.ebean.Model {
         }
         return ClientCompanyNameAssociation.findCompaniesFor(id);
     }
+
+    // VISIBLES
+
+    public static boolean canViewPictures(long client_id) {
+        return isAdmin(client_id) || ClientAssociation.hasShowPictures(client_id);
+    }
+
+    public static boolean canViewPictures(Client client) {
+        return client.id != null && canViewPictures(client.id);
+    }
+
+    public static boolean canViewTrucks(long client_id) {
+        return isAdmin(client_id) || ClientAssociation.hasShowTrucks(client_id);
+    }
+
+    public static boolean canViewTrucks(Client client) {
+        return client.id != null && canViewTrucks(client.id);
+    }
+
+    public static boolean isAdmin(long client_id) {
+        Client client = find.byId(client_id);
+        return client != null && client.is_admin;
+    }
+
+    public static boolean canViewAllNotes(long client_id) {
+        return client_id == 0 || isAdmin(client_id) || ClientAssociation.hasShowAllNotes(client_id);
+    }
+
+    public static boolean canViewAllEquipments(long client_id) {
+        return client_id == 0 || isAdmin(client_id) || ClientAssociation.hasShowAllEquipments(client_id);
+    }
+
+    public String getCanViewPictures() {
+        return is_admin || ClientAssociation.hasShowPictures(id) ? "True" : "False";
+    }
+
+    public String getCanViewTrucks() {
+        return is_admin || ClientAssociation.hasShowTrucks(id) ? "True" : "False";
+    }
+
+    public String getViewableNotes() {
+        if (canViewAllNotes(id)) {
+            return "ALL";
+        } else {
+            StringBuilder sbuf = new StringBuilder();
+            List<Note> notes = ClientNoteAssociation.getNotes(id);
+            boolean first = true;
+            for (Note note : notes) {
+                if (first) {
+                    first = false;
+                } else {
+                    sbuf.append(", ");
+                }
+                sbuf.append(note.name);
+            }
+            if (sbuf.length() == 0) {
+                return "NONE";
+            }
+            return sbuf.toString();
+        }
+    }
+
+    public String getViewableEquipments() {
+        if (canViewAllEquipments(id)) {
+            return "ALL";
+        } else {
+            StringBuilder sbuf = new StringBuilder();
+            List<Equipment> items = ClientEquipmentAssociation.getEquipments(id);
+            boolean first = true;
+            for (Equipment equipment : items) {
+                if (first) {
+                    first = false;
+                } else {
+                    sbuf.append(", ");
+                }
+                sbuf.append(equipment.name);
+            }
+            if (sbuf.length() == 0) {
+                return "NONE";
+            }
+            return sbuf.toString();
+        }
+    }
+
 }
 

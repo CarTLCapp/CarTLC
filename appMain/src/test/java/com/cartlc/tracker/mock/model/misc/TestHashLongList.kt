@@ -3,9 +3,9 @@
  */
 package com.cartlc.tracker.mock.model.misc
 
-import com.cartlc.tracker.model.data.DataString
-import com.cartlc.tracker.model.misc.HashLongList
-import com.cartlc.tracker.model.table.TableString
+import com.cartlc.tracker.fresh.model.core.data.DataString
+import com.cartlc.tracker.fresh.model.misc.HashLongList
+import com.cartlc.tracker.fresh.model.core.table.TableString
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -98,7 +98,7 @@ class TestHashLongList {
         var comma = false
         for (i in 1..10) {
             Mockito.`when`(db.add("Sample$i")).thenReturn(i.toLong())
-            Mockito.`when`(db.query(i.toLong())).thenReturn(DataString(i.toLong(), "Sample$i", 100+i.toLong()))
+            Mockito.`when`(db.query(i.toLong())).thenReturn(DataString(i.toLong(), "Sample$i", 100 + i.toLong()))
             hashLongList.add("Sample$i")
             if (comma) {
                 expected += ","
@@ -119,7 +119,7 @@ class TestHashLongList {
         for (i in 1..5) {
             val text = "Sample%02d".format(i)
             Mockito.`when`(db.add(text)).thenReturn(i.toLong())
-            Mockito.`when`(db.query(i.toLong())).thenReturn(DataString(i.toLong(), text, 100+i.toLong()))
+            Mockito.`when`(db.query(i.toLong())).thenReturn(DataString(i.toLong(), text, 100 + i.toLong()))
             hashLongList.add(text)
             if (comma) {
                 expected += ","

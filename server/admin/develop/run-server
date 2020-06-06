@@ -8,5 +8,5 @@ H=/home/ubuntu
 ACTIVE=$H/server/active/play*/bin/play
 LOG=$H/logs/run-`date +%Y-%m-%d`.log
 mkdir -p $H/logs
-$ACTIVE -J-Xms256M -J-Xmx1024m -Dhttps.port=9443 -Dplay.evolutions.db.default.autoApply=true -Dplay.evolutions.db.default.autoApplyDowns=true -Dplay -Dplay.http.secret.key='${APPLICATION_SECRET}' >& $LOG &
+$ACTIVE -J-Xms256M -J-Xmx1024m -Dplay.evolutions.db.default.autoApply=true -Dplay.evolutions.db.default.autoApplyDowns=true -Dplay -Dplay.http.secret.key='${APPLICATION_SECRET}' >& $LOG &
 

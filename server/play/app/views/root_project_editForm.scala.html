@@ -1,0 +1,43 @@
+@(id: Long, projectForm: Form[views.formdata.InputRootProject], client : Client)
+
+@import helper._
+
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+@main("FleetTLC - Edit Root Project", client, "/project/root/list") {
+    
+    <h1>Edit root project</h1>
+    
+    @b3.form(routes.RootProjectController.update(id)) {
+
+        @CSRF.formField
+
+        <fieldset>
+
+            @b3.text(projectForm("name"), '_label -> "Name", '_help -> "")
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Save this root project" class="btn primary"> or
+            <a href="@routes.RootProjectController.list()" class="btn">Cancel</a>
+        </div>
+    }
+
+    @if(client.is_admin) {
+        @b3.form(routes.RootProjectController.delete(id), 'class -> "topRight") {
+
+            @CSRF.formField
+
+            @if(Project.isDisabled(id)) {
+                <a href="@routes.RootProjectController.enable(id)" class="btn">Enable Project</a>
+            } else {
+                @if(Entry.hasEntryForRootProject(id)) {
+                    <input type="submit" value="Disable Root Project" class="btn danger" onclick="return alert('The root project, since it has entries, will be moved to the disabled list.');">
+                } else {
+                    <input type="submit" value="Delete Root Project" class="btn danger" onclick="return confirm('Are you sure you wish to delete this root project?');">
+                }
+            }
+        }
+    }
+}

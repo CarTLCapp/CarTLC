@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2019, FleetTLC. All rights reserved
  */
 package controllers;
 
@@ -8,9 +8,11 @@ import com.avaje.ebean.Transaction;
 import play.mvc.*;
 import play.data.*;
 import static play.data.Form.*;
+import com.avaje.ebean.PagedList;
 import play.Logger;
 
 import models.*;
+import views.formdata.InputLines;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -36,12 +38,26 @@ public class CompanyController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result list(int page, String sortBy, String order, String filter, boolean disabled) {
-        return ok(views.html.company_list.render(Company.list(page, sortBy, order, filter, disabled), sortBy, order, filter, Secured.getClient(ctx()), disabled));
+    public Result list(String order, boolean disabled) {
+        return ok(views.html.company_list.render(
+                Company.list(order, disabled),
+                order, Secured.getClient(ctx()), disabled)
+        );
     }
 
-    public Result list() {
-        return list(0, "name", "asc", "", false);
+    @Security.Authenticated(Secured.class)
+    public Result view(Long id, String sortBy, String order) {
+        Company company = Company.find.byId(id);
+        if (company == null) {
+            return badRequest("could not locate company with id " + id);
+        }
+        return ok(views.html.company_address_list.render(
+                Company.listAddresses(company.name, sortBy, order, company.disabled), company, sortBy, order, Secured.getClient(ctx()))
+        );
+    }
+
+    public Result LIST() {
+        return Results.redirect(routes.CompanyController.list("asc", false));
     }
 
     @Security.Authenticated(Secured.class)
@@ -74,7 +90,7 @@ public class CompanyController extends Controller {
         } finally {
             txn.end();
         }
-        return list();
+        return LIST();
     }
 
     @Security.Authenticated(Secured.class)
@@ -90,7 +106,13 @@ public class CompanyController extends Controller {
             return badRequest(views.html.company_createForm.render(companyForm));
         }
         Client client = Secured.getClient(ctx());
+
         Company company = companyForm.get();
+        Company useCompany = Company.findOne(company);
+        if (useCompany != null) {
+            flash("success", "Company '" + company.getLine() + "' has already been saved");
+            return LIST();
+        }
         Company savedCompany = new Company();
         if (client != null && client.id > 0) {
             savedCompany.created_by = Long.valueOf(client.id).intValue();
@@ -103,8 +125,8 @@ public class CompanyController extends Controller {
         savedCompany.city = company.city;
         savedCompany.zipcode = company.zipcode;
         savedCompany.save();
-        flash("success", "Company " + companyForm.get().name + " has been created");
-        return list();
+        flash("success", "Company '" + savedCompany.getLine() + "' has been created");
+        return LIST();
     }
 
     @Security.Authenticated(Secured.class)
@@ -136,7 +158,7 @@ public class CompanyController extends Controller {
             linesForm.withError("lines", ex.getMessage());
             return badRequest(views.html.companies_createForm.render(linesForm));
         }
-        return list();
+        return LIST();
     }
 
     public Result query() {
@@ -224,7 +246,7 @@ public class CompanyController extends Controller {
             Logger.info("Company has been deleted");
         }
         Version.inc(Version.VERSION_COMPANY);
-        return list();
+        return LIST();
     }
 
     @Security.Authenticated(Secured.class)
@@ -237,7 +259,7 @@ public class CompanyController extends Controller {
         company.disabled = false;
         company.update();
         Version.inc(Version.VERSION_COMPANY);
-        return list();
+        return LIST();
     }
 }
 

@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cartlc.tracker.R
-import com.cartlc.tracker.model.data.DataNote
+import com.cartlc.tracker.fresh.model.core.data.DataNote
 import kotlinx.android.synthetic.main.entry_item_note.view.*
 
 /**
@@ -19,7 +19,7 @@ import kotlinx.android.synthetic.main.entry_item_note.view.*
 
 class NoteListAdapter(mContext: Context) : RecyclerView.Adapter<NoteListAdapter.CustomViewHolder>() {
 
-    private val mLayoutInflater: LayoutInflater
+    private val mLayoutInflater: LayoutInflater = LayoutInflater.from(mContext)
     private var mItems: List<DataNote> = mutableListOf()
 
     inner class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
@@ -30,10 +30,6 @@ class NoteListAdapter(mContext: Context) : RecyclerView.Adapter<NoteListAdapter.
                 value!!.text = item.value
             }
         }
-    }
-
-    init {
-        mLayoutInflater = LayoutInflater.from(mContext)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {

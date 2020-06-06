@@ -1,4 +1,4 @@
-@(linesForm: Form[InputLines], client : Client)
+@(linesForm: Form[views.formdata.InputLines], client : Client)
 
 @import helper._
 
@@ -8,18 +8,22 @@
     
     <h1>Add many projects</h1>
 
-    <p>You may create several projects at once. One project name per line.</p>
+    <p>You may create several projects at once. One project pair per line.<br>
+        A project pair is a root project name followed by a dash, followed by a new sub project name.<br>
+        For example: Alamo - New Sub Project Name<br>
+        The root project name must exist. The sub project is expected not to exist.
+    </p>
 
     @helper.form(routes.ProjectController.saveMany()) {
 
         @CSRF.formField
 
         <fieldset>
-            @helper.textarea(linesForm("lines"), 'rows -> 10, 'cols -> 80, '_label -> "")
+            @helper.textarea(linesForm("line"), 'rows -> 10, 'cols -> 80, '_label -> "")
         </fieldset>
 
         <div class="actions">
-            <input type="submit" value="Add these projects" class="btn primary"> or
+            <input type="submit" value="Create these sub projects" class="btn primary"> or
             <a href="@routes.ProjectController.list()" class="btn">Cancel</a>
         </div>
     }

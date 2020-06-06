@@ -1,7 +1,7 @@
 
 ssh -i ~/.ssh/FleetTLC.pem ubuntu@fleettlc.arqnetworks.com
 
-ubuntu@ec2-18-217-15-185.us-east-2.compute.amazonaws.com/phpmyadmin
+fleettlc.arqnetworks.com/phpmyadmin
 cartlc/cartlc
 root/cartlc
 
@@ -10,8 +10,8 @@ https://play.google.com/apps/publish
 === Amazon ===
 
 https://us-east-2.console.aws.amazon.com/ec2/v2/home
-FleetTLCApp@gmail.com
-Cowboys12$
+service@fleettlc.com
+jh285ME1$
 Bucket: https://s3.console.aws.amazon.com/s3/home?region=us-east-2#
 
 Copy files from S3 server to local machine.

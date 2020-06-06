@@ -61,6 +61,12 @@ public class EntryNoteCollection extends Model {
                 .findList();
     }
 
+    public static List<EntryNoteCollection> findByNoteId(long note_id) {
+        return find.where()
+                .eq("note_id", note_id)
+                .findList();
+    }
+
     public static List<Note> findNotes(long collection_id) {
         List<EntryNoteCollection> items = find.where()
                 .eq("collection_id", collection_id)
@@ -77,8 +83,20 @@ public class EntryNoteCollection extends Model {
         return list;
     }
 
+    public String toString() {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(id);
+        sbuf.append(": C");
+        sbuf.append(collection_id);
+        sbuf.append(", ");
+        sbuf.append(getName());
+        sbuf.append(" = ");
+        sbuf.append(getValue());
+        return sbuf.toString();
+    }
+
     public static int countNotes(long note_id) {
-        return find.where().eq("note_id", note_id).findList().size();
+        return find.where().eq("note_id", note_id).findRowCount();
     }
 
     public static void deleteByCollectionId(long collection_id) {
@@ -109,6 +127,13 @@ public class EntryNoteCollection extends Model {
         }
     }
 
+    public String idValueString() {
+        Note note = Note.find.byId(note_id);
+        if (note != null) {
+            return "VALUE" + note.id;
+        }
+        return "UNKNOWN";
+    }
 
     public static void replace(long collection_id, List<Note> notes) {
         deleteByCollectionId(collection_id);

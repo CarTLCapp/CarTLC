@@ -1,0 +1,129 @@
+
+INSTRUCTIONS,
+SELF-SIGNED CERTIFICATES (DEVELOPMENT ONLY!):
+---------------------------------------------
+
+https://www.linux.com/learn/creating-self-signed-ssl-certificates-apache-linux
+
+Step 1:
+
+sudo openssl req -new > fleet.ssl.csr
+
+PW = CowboysFacelifT
+C = US
+ST = IL
+L = Chicago
+O = FleetTLC
+OU = FleetTLC
+CN = fleetCA
+
+douglasselph@gmail.com
+
+[BLANK]
+[BLANK]
+
+
+Step 2:
+
+sudo openssl rsa -in fleet.privkey.pem -out fleet.cert.key
+sudo openssl x509 -in fleet.ssl.csr -out fleet.cert.cert -req -signkey fleet.cert.key -days 9999
+
+sudo cp fleet.cert.cert /etc/ssl/certs/server.crt
+sudo cp fleet.cert.key /etc/ssl/private/server.key
+
+sudo chmod 400 /etc/ssl/private/server.key
+sudo chmod 444 /etc/ssl/certs/server.crt
+
+/etc/apache2/sites-available/000-default.conf:
+
+NameVirtualHost *:443
+NameVirtualHost *:80
+
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule ssl_module modules/mod_ssl.so
+
+<VirtualHost *:80>
+
+        ServerName fleetdev.com
+        ServerAlias www.fleetdev.com
+
+	DocumentRoot /var/www/html
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+	ProxyPreserveHost On
+        ProxyPassMatch ^/phpmyadmin ! 
+	ProxyPass / http://127.0.0.1:9000/
+	ProxyPassReverse / http://127.0.0.1:9000/
+
+	Redirect permanent / https://fleetdev.com/
+
+	# OR:
+
+	ServerName fleetdev.com
+        ServerAlias www.fleetdev.com
+	DocumentRoot /var/www/html
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+        SSLProxyEngine On
+        RequestHeader set Front-End-Https "On"
+        CacheDisable *
+        ProxyPass / https://127.0.0.1:9443/
+        ProxyPassReverse / https://127.0.0.1:9443/
+        RedirectMatch ^/$ http://fleetdev.com/
+
+	# OR:
+
+	ServerName fleetdev.com
+        ServerAlias www.fleetdev.com
+        RedirectMatch ^/$ https://fleetdev.com/
+
+	# OR:
+	ServerName fleetdev.com
+        ServerAlias www.fleetdev.com
+	Redirect permanent / https://fleetdev.com/
+
+</VirtualHost>
+
+<VirtualHost *:443>
+
+	ServerAdmin douglasselph@gmail.com
+
+	ServerName fleetdev.com
+	ServerAlias www.fleetdev.com
+	DocumentRoot /var/www/html
+
+	ErrorLog ${APACHE_LOG_DIR}/secure_error.log
+	CustomLog ${APACHE_LOG_DIR}/secure_access.log combined
+
+	SSLEngine on
+	SSLOptions +StrictRequire
+	SSLCertificateFile /etc/ssl/certs/server.crt
+	SSLCertificateKeyFile /etc/ssl/private/server.key
+
+	ProxyPreserveHost On
+        ProxyPassMatch ^/phpmyadmin ! 
+	ProxyPass / http://127.0.0.1:9000/
+	ProxyPassReverse / http://127.0.0.1:9000/
+        RedirectMatch ^/$ https://fleetdev.com/
+
+	# OTHER IDEAS:
+
+	SSLProxyEngine on
+
+</VirtualHost>
+
+
+Restart:
+sudo apachectl -k graceful
+
+Logs:
+/var/log/apache2/error.log
+/var/log/apache2/access.log
+
+FOR SIGNED CERTIFICATES SEE:
+---------------------------
+
+http://www.howto-expert.com/how-to-get-https-setting-up-ssl-on-your-website/
