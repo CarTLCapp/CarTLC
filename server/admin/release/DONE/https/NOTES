@@ -1,0 +1,27 @@
+
+(1)
+Ensure SECURITY group on AWS server has HTTPS configured. See Enable Inbound HTTPS Connections:
+https://docs.aws.amazon.com/cloudhsm/latest/userguide/ssl-offload-enable-traffic-and-verify-certificate.html
+
+(2)
+Copy https/000-default.conf file to /etc/apache2/sites-available/
+
+sudo a2enmod proxy	
+sudo a2enmod proxy_http
+sudo service apache2 restart
+
+(3) SSL certification
+
+https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-ubuntu-16-04
+
+(4) Use, don't use SSL for apache:
+
+Disable:
+
+sudo a2dismod ssl
+sudo service apache2 restart
+
+Enable:
+
+sudo a2enmod ssl
+sudo service apache2 restart
