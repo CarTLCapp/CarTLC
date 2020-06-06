@@ -19,6 +19,13 @@ cp credentials ~/.aws
 cd ~/fleet/s3/fleettlc
 aws s3 sync s3://fleettlc .
 
+=== Up Version: ===
+
+server/play/build.sbt
+remove old:
+rm ~/cartlc/CarTLC/server/play/target/universal/play-*-SNAPSHOT.zip
+rm ~/cartlc/wrap/`date +%Y-%m-%d`/play-*-SNAPSHOT.zip
+
 === Database Save: ===
 
 mysqldump -u cartlc -p cartlc > dump-`date +%Y-%m-%d`.sql

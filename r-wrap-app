@@ -8,7 +8,7 @@ VERSION=`grep versionName appMain/build.gradle | awk '{gsub(/"/, "", $2); print 
 SRCFILE=`ls appMain/release/*.apk`
 TGTFILE="CarTLC-r${VERSION}.apk"
 WRAP=../wrap/$DATE
-DROPBOX=~/Dropbox/Publish
+DROPBOX=~/Downloads
 
 while [[ $# -gt 0 ]]
 do
