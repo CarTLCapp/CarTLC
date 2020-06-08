@@ -52,7 +52,7 @@ class DCPing(
         private const val LOG = true
 
         private const val SERVER_URL_DEVELOPMENT = "https://fleetdev.arqnetworks.com/"
-        private const val SERVER_URL_RELEASE = "http://fleettlc.arqnetworks.com/"
+        private const val SERVER_URL_RELEASE = "https://fleettlc.arqnetworks.com/"
 
         private const val registerSuffix: String = "register"
         private const val enterSuffix: String = "enter"

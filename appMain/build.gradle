@@ -12,12 +12,20 @@ repositories {
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+    signingConfigs {
+        releasekey {
+            keyAlias 'cartlc'
+            keyPassword 'Volcano77'
+            storeFile file('keystore')
+            storePassword 'Tornado98'
+        }
+    }
     defaultConfig {
         applicationId "com.cartlc.tracker"
         minSdkVersion 21
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 52
-        versionName "3.24"
+        versionCode 53
+        versionName "3.25"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }

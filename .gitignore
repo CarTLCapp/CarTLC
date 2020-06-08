@@ -21,6 +21,7 @@ GCResample/obj
 GCResample/jni/frameworks
 GCResample/jni/system
 appMain/release
+appMain/keystore
 captures/
 
 # Gradle files
