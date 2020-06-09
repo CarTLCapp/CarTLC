@@ -46,7 +46,8 @@ class TBApplication : Application() {
 
     companion object {
 
-        private val OVERRIDE_IS_DEVELOPMENT_SERVER: Boolean? = false
+        private val OVERRIDE_IS_DEVELOPMENT_SERVER: Boolean = false
+        private val OVERRIDE_IS_RELEASE_SERVER: Boolean = true
 
         @VisibleForTesting
         var DEBUG_TREE = BuildConfig.DEBUG
@@ -62,8 +63,7 @@ class TBApplication : Application() {
                         R.string.perm_location))
 
         fun IsDevelopmentServer(): Boolean {
-            return OVERRIDE_IS_DEVELOPMENT_SERVER
-                    ?: BuildConfig.DEBUG
+            return if (OVERRIDE_IS_DEVELOPMENT_SERVER) true else if (OVERRIDE_IS_RELEASE_SERVER) false else BuildConfig.DEBUG
         }
 
         fun getUri(ctx: Context, file: File): Uri {

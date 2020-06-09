@@ -68,7 +68,10 @@ public class FlowNoteCollection extends Model {
         List<FlowNoteCollection> items = findByFlowElementId(flow_element_id);
         List<Note> list = new ArrayList<Note>();
         for (FlowNoteCollection item : items) {
-            list.add(item.getNote());
+            Note note = item.getNote();
+            if (note != null) {
+                list.add(item.getNote());
+            }
         }
         return list;
     }
