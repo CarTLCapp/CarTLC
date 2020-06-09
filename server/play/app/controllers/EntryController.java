@@ -59,7 +59,9 @@ public class EntryController extends Controller {
     private EntryListWriter mExportWriter;
     private boolean mExporting;
     private boolean mAborted;
-    private boolean mDownloading;
+    private long mDownloadPicturesForEntryId;
+    private long mDownloadPicturesLastAttemptEntryId;
+    private ArrayList<Long> mDownloaded = new ArrayList<>();
     private ArrayList<Long> mDeleting = new ArrayList<>();
     private ArrayList<CompletableFuture<Result>> mDownloadStatusRequests = new ArrayList<>();
 
@@ -228,14 +230,30 @@ public class EntryController extends Controller {
     /**
      * Load pictures in background
      */
+    public Result reloadImages() {
+        mDownloaded.clear();
+        return Results.redirect(routes.EntryController.pictures(mDownloadPicturesLastAttemptEntryId));
+    }
+
     public CompletionStage<Result> checkLoadingPictures() {
         CompletableFuture<Result> completableFuture = new CompletableFuture<>();
-        if (mDownloading) {
+        if (mDownloadPicturesForEntryId > 0) {
+            downloadPicturesFor(mDownloadPicturesForEntryId);
+            mDownloadPicturesForEntryId = 0;
             mDownloadStatusRequests.add(completableFuture);
         } else {
             completableFuture.complete(ok("0"));
         }
         return completableFuture;
+    }
+
+    private void downloadPicturesFor(long entry_id) {
+        Entry entry = Entry.find.byId(entry_id);
+        if (entry == null) {
+            Logger.error("Could not find entry ID " + entry_id);
+        } else {
+            loadPictures(entry);
+        }
     }
 
     /**
@@ -246,18 +264,22 @@ public class EntryController extends Controller {
         if (entry == null) {
             return badRequest2("Could not find entry ID " + entry_id);
         }
-        loadPictures(entry);
+        mDownloadPicturesLastAttemptEntryId = entry_id;
+        if (!mDownloaded.contains(entry_id)) {
+            Logger.info("pictures(" + entry_id + "): permitted size=" + mDownloaded.size());
+            mDownloaded.add(entry_id);
+            mDownloadPicturesForEntryId = entry_id;
+        } else {
+            Logger.info("pictures(" + entry_id + "): already done");
+        }
         return ok(views.html.entry_list_picture.render(entry.getPictures()));
     }
 
     private void loadPictures(Entry entry) {
-        if (entry.loadPictures(request().host(), mAmazonHelper, () -> loadPicturesDone())) {
-            mDownloading = true;
-        }
+        entry.loadPictures(request().host(), mAmazonHelper, () -> loadPicturesDone());
     }
 
     private void loadPicturesDone() {
-        mDownloading = false;
         if (mDownloadStatusRequests.size() > 0) {
             for (CompletableFuture<Result> completableFuture : mDownloadStatusRequests) {
                 completableFuture.complete(ok("1"));
@@ -278,7 +300,9 @@ public class EntryController extends Controller {
     /**
      * Display details for the entry including delete button.
      */
-    /** Note: intentionally NOT secure **/
+    /**
+     * Note: intentionally NOT secure
+     **/
     public Result view(Long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry == null) {
@@ -688,7 +712,7 @@ public class EntryController extends Controller {
                 }
             }
         }
-        HashMap<Long,Long> pictureIdMap = new HashMap<Long,Long>(); // app-side pictureId, PictureCollection.id
+        HashMap<Long, Long> pictureIdMap = new HashMap<Long, Long>(); // app-side pictureId, PictureCollection.id
         value = json.findValue("picture");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {

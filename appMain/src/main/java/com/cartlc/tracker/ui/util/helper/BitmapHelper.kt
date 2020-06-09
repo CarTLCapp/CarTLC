@@ -46,7 +46,7 @@ object BitmapHelper {
                 return false
             }
             if (!unscaledFile.exists()) {
-                Timber.e("File does not exist: $unscaledFile.absolutePath")
+                Timber.e("File does not exist: $unscaledFile")
                 return false
             }
             val bitmap = loadScaledFile(unscaledFile.absolutePath, SCALED_SIZE, SCALED_SIZE)

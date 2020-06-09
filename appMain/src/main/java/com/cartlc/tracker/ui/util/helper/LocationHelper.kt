@@ -253,7 +253,9 @@ class LocationHelper(
 
     fun reduceStreets(address: Address, streets: List<String>): List<String> {
         val reduced = ArrayList<String>()
-        val compareWith = stripNumbers(replaceOrdinals(address.thoroughfare))
+        val thoroughfare1: String? = address.thoroughfare
+        val thoroughfare: String = thoroughfare1 ?: return streets
+        val compareWith = stripNumbers(replaceOrdinals(thoroughfare))
         for (street in streets) {
             if (replaceOrdinals(stripNumbers(street)).compareTo(compareWith, ignoreCase = true) == 0) {
                 reduced.add(street)

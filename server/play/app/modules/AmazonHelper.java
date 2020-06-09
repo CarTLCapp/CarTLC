@@ -38,7 +38,7 @@ import com.typesafe.config.Config;
 @Singleton
 public class AmazonHelper {
 
-    static private final String BUCKET_NAME_DEVELOP = "fleetdev2";
+//    static private final String BUCKET_NAME_DEVELOP = "fleetdev2";
     static private final String BUCKET_NAME_RELEASE = "fleettlc";
     static private final String REGION = "us-east-2";
 
@@ -53,11 +53,13 @@ public class AmazonHelper {
 
         CommonActivity(String host) {
             this.host = host;
-            if (host.startsWith("fleettlc")) {
-                bucketName = BUCKET_NAME_RELEASE;
-            } else {
-                bucketName = BUCKET_NAME_DEVELOP;
-            }
+            bucketName = BUCKET_NAME_RELEASE;
+
+//            if (host.startsWith("fleettlc")) {
+//                bucketName = BUCKET_NAME_RELEASE;
+//            } else {
+//                bucketName = BUCKET_NAME_DEVELOP;
+//            }
         }
     }
 

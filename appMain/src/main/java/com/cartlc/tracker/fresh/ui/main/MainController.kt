@@ -319,14 +319,13 @@ class MainController(
     }
 
     fun onTrimMemory(level: Int) {
-        // On any complaint no longer cache images.
-        bitmapHelper.cacheOkay = false
-
         if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
             Timber.e("onTrimMemory(): Ran critically low on memory: so no cache and push back to current project flow")
             curFlowValue = CurrentProjectFlow()
-        } else {
+            bitmapHelper.cacheOkay = false
+        } else if (bitmapHelper.cacheOkay) {
             Timber.e("onTrimMemory($level): disabled cache")
+            bitmapHelper.cacheOkay = false
         }
     }
 
@@ -462,7 +461,8 @@ class MainController(
                             curFlowValue.process(action)
                         }
                     }
-                    else -> {}
+                    else -> {
+                    }
                 }
             }
             Stage.TRUCK_NUMBER_PICTURE -> {

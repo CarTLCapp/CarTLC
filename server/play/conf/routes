@@ -165,6 +165,7 @@ GET     /entry/export_download        controllers.EntryController.exportDownload
 GET     /entry/delete_entries/:rows   controllers.EntryController.deleteEntries(rows:String)
 GET     /entry/page_size/:size        controllers.EntryController.pageSize(size:String)
 GET     /entry/check_loading_pictures controllers.EntryController.checkLoadingPictures()
+GET     /entry/reload_images          controllers.EntryController.reloadImages()
 POST    /enter                        controllers.EntryController.enter()
 
 ### MESSAGES ###
