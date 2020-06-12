@@ -1,4 +1,4 @@
-@(currentPage: com.avaje.ebean.PagedList[Message], currentSortBy: String, currentOrder: String, client : Client)
+@(currentPage: MessageList, currentSortBy: String, currentOrder: String, client : Client)
 
 @link(newPage:Int, newSortBy:String) = @{
     var sortBy = currentSortBy
@@ -27,7 +27,18 @@
 
 @main("FleetTLC - List Error Messages", client) {
 
-    <h1 id="homeTitle">@Messages("message.list.title", currentPage.getTotalRowCount())</h1>
+    <h1 id="homeTitle">@Messages("message.list.title", currentPage.getTotalRowCount())
+        <span style="float:right;font-size:16px">
+                    <div>
+                        <select style="width:80px" id="pageSizeSelect" onchange="onPageSizeSelect()">
+                            @for(option <- currentPage.getPageSizes()) {
+                                <option value="@option.text" @option.selected>@option.text</option>
+                            }
+                        </select>
+                    </div>
+                </span>
+        <span style="float:right;font-size:16px"><div class="search">Page Size:</div></span>
+    </h1>
 
     @if(currentPage.getTotalRowCount() == 0) {
 
@@ -50,7 +61,7 @@
             </thead>
             <tbody>
 
-                @for(message <- currentPage.getList) {
+                @for(message <- currentPage.getList()) {
                     <tr>
                         <td>@message.getTechName()</td>
                         <td>@message.log_time.format("MM/dd kk:mm")</td>
@@ -73,25 +84,25 @@
         <div id="pagination" class="pagination">
             <ul>
                 @if(currentPage.hasPrev) {
-                <li class="prev">
-                    <a href="@link(currentPage.getPageIndex - 1, null)">&larr; Previous</a>
-                </li>
+                    <li class="prev">
+                        <a href="@link(currentPage.getPageIndex - 1, null)">&larr; Previous</a>
+                    </li>
                 } else {
-                <li class="prev disabled">
-                    <a>&larr; Previous</a>
-                </li>
+                    <li class="prev disabled">
+                        <a>&larr; Previous</a>
+                    </li>
                 }
                 <li class="current">
                     <a>Displaying @currentPage.getDisplayXtoYofZ(" to "," of ")</a>
                 </li>
                 @if(currentPage.hasNext) {
-                <li class="next">
-                    <a href="@link(currentPage.getPageIndex + 1, null)">Next &rarr;</a>
-                </li>
+                    <li class="next">
+                        <a href="@link(currentPage.getPageIndex + 1, null)">Next &rarr;</a>
+                    </li>
                 } else {
-                <li class="next disabled">
-                    <a>Next &rarr;</a>
-                </li>
+                    <li class="next disabled">
+                        <a>Next &rarr;</a>
+                    </li>
                 }
             </ul>
         </div>
@@ -100,8 +111,30 @@
     @if(client.is_admin) {
         <div class="actions">
             <a href="@routes.MessageController.deleteAll()" class="btn danger" onclick="return confirm('This cannot be undone. Are you sure?');">Delete all messages</a>
+            <a href="@routes.MessageController.deletePage()" class="btn danger" onclick="return confirm('This cannot be undone. Are you sure?');">Delete all messages on page</a>
         </div>
     }
+
+    <script type="text/javascript">
+
+        <!-- PAGE SIZE SELECT -->
+
+        function onPageSizeSelect() {
+            var e = document.getElementById("pageSizeSelect");
+            var selected = e.options[e.selectedIndex].value;
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    location.reload(true);
+                }
+            };
+            var call = "/entry/page_size/" + selected;
+            xhttp.open("GET", call, true);
+            xhttp.send();
+        }
+
+    </script>
+
 }
 
             

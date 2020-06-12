@@ -170,11 +170,13 @@ POST    /enter                        controllers.EntryController.enter()
 
 ### MESSAGES ###
 
-GET     /messages              controllers.MessageController.list(p:Int ?= 0, s ?= "log_time", o ?= "desc")
-GET     /messages/:id/view     controllers.MessageController.view(id:Long)
-GET     /messages/:id/delete   controllers.MessageController.delete(id:Long)
-GET     /messages/delete_all   controllers.MessageController.deleteAll()
-POST    /message               controllers.MessageController.message()
+GET     /messages                controllers.MessageController.list(p:Int ?= 0, s ?= "log_time", o ?= "desc")
+GET     /messages/:id/view       controllers.MessageController.view(id:Long)
+GET     /messages/:id/delete     controllers.MessageController.delete(id:Long)
+GET     /messages/delete_all     controllers.MessageController.deleteAll()
+GET     /messages/delete_page    controllers.MessageController.deletePage()
+POST    /message                 controllers.MessageController.message()
+GET     /message/page_size/:size controllers.MessageController.pageSize(size:String)
 
 ### TRUCKS ###
 

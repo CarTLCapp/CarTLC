@@ -30,8 +30,11 @@ public class MessageController extends Controller {
 
     private static final int PAGE_SIZE = 100;
 
+    private MessageList mMessages;
+
     public Result list(int page, String sortBy, String order) {
-        return ok(views.html.message_list.render(Message.list(page, PAGE_SIZE, sortBy, order), sortBy, order, Secured.getClient(ctx())));
+        mMessages = new MessageList(page, sortBy, order);
+        return ok(views.html.message_list.render(mMessages, sortBy, order, Secured.getClient(ctx())));
     }
 
     public Result LIST() {
@@ -65,6 +68,24 @@ public class MessageController extends Controller {
             message.delete();
         }
         return LIST();
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result deletePage() {
+        for (Message message : mMessages.getList()) {
+            message.delete();
+        }
+        return LIST();
+    }
+    
+    public Result pageSize(String size) {
+        try {
+            int pageSize = Integer.parseInt(size);
+            mMessages.setPageSize(pageSize);
+        } catch (NumberFormatException ex) {
+            Logger.error(ex.getMessage());
+        }
+        return ok("Done");
     }
 
     @Transactional
