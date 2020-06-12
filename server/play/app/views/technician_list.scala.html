@@ -1,8 +1,20 @@
-@(currentPage: List[Technician], client : Client)
+@(currentPage: List[Technician], client : Client, disabled : Boolean)
 
 @main("FleetTLC - List Technicians", client) {
 
-    <h1 id="homeTitle">@Messages("technicians.list.title", currentPage.size())</h1>
+    @if(disabled) {
+        <h1 id="homeTitle">@Messages("technicians.list.title.disabled", currentPage.size())
+            <span style="float:right;font-size:16px">
+                    <a href="@routes.TechnicianController.list()">Show Active Technicians</a>
+            </span>
+        </h1>
+    } else {
+        <h1 id="homeTitle">@Messages("technicians.list.title", currentPage.size())
+            <span style="float:right;font-size:16px">
+                    <a href="@routes.TechnicianController.listDisabled()">Show Disabled Technicians</a>
+            </span>
+        </h1>
+    }
 
     @if(currentPage.size() == 0) {
         
@@ -65,8 +77,10 @@
         
     }
 
-    @if(client.is_admin) {
-        <a class="btn success" id="add" href="@routes.TechnicianController.create()">Add a new technician</a>
+    @if(!disabled) {
+        @if(client.is_admin) {
+            <a class="btn success" id="add" href="@routes.TechnicianController.create()">Add a new technician</a>
+        }
     }
 
 }

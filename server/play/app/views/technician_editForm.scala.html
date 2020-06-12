@@ -11,9 +11,10 @@
         @if(client.is_admin) {
             <a href="@routes.TechnicianController.resetUpload(id)">Reset Upload</a>
         }
-        &nbsp;&nbsp;
 
-        @if(Technician.techBeingUsed(id)) {
+        @if(Technician.isDisabled(id)) {
+            <a href="@routes.TechnicianController.enable(id)" class="btn">Enable Technician</a>
+        } else if(Technician.techBeingUsed(id)) {
             <a href="@routes.TechnicianController.delete(id)" class="btn danger" onclick="return confirm('This technician will no longer be shown in this list. Are you sure?');">Disable this technician</a>
         } else {
             <a href="@routes.TechnicianController.delete(id)" class="btn danger" onclick="return confirm('Are you sure?');">Delete this technician</a>

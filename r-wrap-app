@@ -8,8 +8,7 @@ VERSION=`grep versionName appMain/build.gradle | awk '{gsub(/"/, "", $2); print 
 SRCFILE=`ls appMain/release/*.apk`
 TGTFILE="CarTLC-r${VERSION}.apk"
 WRAP=../wrap/$DATE
-DROPBOX=~/Dropbox/Publish
-TGT=~/Downloads
+TGT=~/wrap/target
 
 while [[ $# -gt 0 ]]
 do
@@ -38,6 +37,5 @@ ls $SRCFILE
 
 cp $SRCFILE $WRAP/$TGTFILE
 cp $WRAP/$TGTFILE $TGT/
-cp $WRAP/$TGTFILE $DROPBOX/
 
-echo "Created $TGTFILE in $WRAP and $DROPBOX and $TGT"
+echo "Created $TGTFILE in $WRAP and $TGT"

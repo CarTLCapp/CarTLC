@@ -43,7 +43,15 @@ public class TechnicianController extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public Result list() {
-        return ok(views.html.technician_list.render(Technician.listEnabled(), Secured.getClient(ctx())));
+        return ok(views.html.technician_list.render(Technician.listEnabled(), Secured.getClient(ctx()), false));
+    }
+
+    /**
+     * Display the list of disabled users.
+     */
+    @Security.Authenticated(Secured.class)
+    public Result listDisabled() {
+        return ok(views.html.technician_list.render(Technician.listDisabled(), Secured.getClient(ctx()), true));
     }
 
     public static Result LIST() {
@@ -169,6 +177,21 @@ public class TechnicianController extends Controller {
             } finally {
                 txn.end();
             }
+        }
+        return LIST();
+    }
+
+    /**
+     * Handle user deletion
+     */
+    @Security.Authenticated(Secured.class)
+    @Transactional
+    public Result enable(Long id) {
+        try {
+            Technician tech = Technician.find.byId(id);
+            tech.disabled = false;
+            tech.update();
+        } catch (Exception ex) {
         }
         return LIST();
     }

@@ -19,11 +19,13 @@ GET     /daily/:date              controllers.HomeController.daily(date:Long)
 ### TECHNICIANS ###
 
 GET     /tech                    controllers.TechnicianController.list()
+GET     /tech/disabled           controllers.TechnicianController.listDisabled()
 GET     /tech/new                controllers.TechnicianController.create()
 POST    /tech/save               controllers.TechnicianController.save()
 GET     /tech/:id                controllers.TechnicianController.edit(id:Long)
 POST    /tech/:id                controllers.TechnicianController.update(id:Long)
 GET     /tech/:id/delete         controllers.TechnicianController.delete(id:Long)
+GET     /tech/:id/enable         controllers.TechnicianController.enable(id:Long)
 GET     /tech/:id/reset_upload   controllers.TechnicianController.resetUpload(id:Long)
 # POST    /techs                   controllers.TechnicianController.query()
 

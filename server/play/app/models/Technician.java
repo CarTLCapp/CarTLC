@@ -86,6 +86,12 @@ public class Technician extends com.avaje.ebean.Model {
                 .findList();
     }
 
+    public static List<Technician> listDisabled() {
+        return find.where()
+                .eq("disabled", true)
+                .findList();
+    }
+
     public static List<Technician> listWithCode(int code) {
         return find.where()
                 .eq("code", code)
@@ -236,6 +242,14 @@ public class Technician extends com.avaje.ebean.Model {
 
     public static boolean isValid(String full_name) {
         return findMatch(full_name) != null;
+    }
+
+    public static boolean isDisabled(long tech_id) {
+        Technician tech = find.byId(tech_id);
+        if (tech == null) {
+            return true;
+        }
+        return tech.disabled;
     }
 
 }
