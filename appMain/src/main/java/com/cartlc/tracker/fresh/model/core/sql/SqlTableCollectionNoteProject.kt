@@ -26,6 +26,35 @@ class SqlTableCollectionNoteProject(
         internal const val TABLE_NAME = "note_project_collection"
     }
 
+    private var complainedAbout = mutableListOf<Long>()
+
+    // Get the list of notes associated with the project.
+    override fun getNotes(projectNameId: Long): List<DataNote> {
+        val noteIds = query(projectNameId)
+        val list = ArrayList<DataNote>()
+        for (noteId in noteIds) {
+            val note = db.tableNote.query(noteId)
+            if (note == null) {
+                if (!complainedAbout.contains(noteId)) {
+                    complainedAbout.add(noteId)
+                    Timber.e("Could not find note with ID $noteId from project ID $projectNameId")
+                }
+            } else {
+                list.add(note)
+            }
+        }
+        return list
+    }
+
+    override fun removeIfGone(item: DataCollectionItem) {
+        if (item.isBootstrap) {
+            if (db.tableNote.query(item.value_id) == null) {
+                Timber.i("remove(${item.id}, $item)")
+                remove(item.id)
+            }
+        }
+    }
+
 //    fun addByName(projectName: String, notes: List<DataNote>) {
 //        var projectNameId = db.tableProjects.queryProjectName(projectName)
 //        if (projectNameId < 0) {
@@ -45,29 +74,5 @@ class SqlTableCollectionNoteProject(
 //        }
 //        addTest(projectNameId, list)
 //    }
-
-    // Get the list of notes associated with the project.
-    override fun getNotes(projectNameId: Long): List<DataNote> {
-        val noteIds = query(projectNameId)
-        val list = ArrayList<DataNote>()
-        for (noteId in noteIds) {
-            val note = db.tableNote.query(noteId)
-            if (note == null) {
-                Timber.e("Could not find note with ID $noteId")
-            } else {
-                list.add(note)
-            }
-        }
-        return list
-    }
-
-    override fun removeIfGone(item: DataCollectionItem) {
-        if (item.isBootstrap) {
-            if (db.tableNote.query(item.value_id) == null) {
-                Timber.i("remove(${item.id}, $item)")
-                remove(item.id)
-            }
-        }
-    }
 
 }

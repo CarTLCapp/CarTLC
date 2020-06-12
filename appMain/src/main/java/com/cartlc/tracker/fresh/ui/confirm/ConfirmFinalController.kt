@@ -111,6 +111,8 @@ class ConfirmFinalController(
         curEntry?.let {
             repo.add(it)
             prefHelper.clearLastEntry()
+            // TODO: perhaps try and retain the root project. Don't know how yet.
+            prefHelper.clearCurProject()
             curEntry = null
             repo.curFlowValue = CurrentProjectFlow()
         }

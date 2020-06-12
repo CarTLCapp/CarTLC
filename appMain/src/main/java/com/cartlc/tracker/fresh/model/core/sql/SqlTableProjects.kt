@@ -315,7 +315,25 @@ class SqlTableProjects(
             }
             cursor.close()
         } catch (ex: SQLiteException) {
-            TBApplication.ReportError(ex, SqlTableProjects::class.java, "queryProjectName()", "$rootName - $subProject")
+            TBApplication.ReportError(ex, SqlTableProjects::class.java, "queryProjectId()", "$rootName - $subProject")
+        }
+        return rowId
+    }
+
+    override fun queryRootProjectId(rootName: String): Long {
+        var rowId = -1L
+        try {
+            val columns = arrayOf(KEY_ROWID)
+            val selection = "$KEY_ROOT_PROJECT IS NULL AND $KEY_NAME=?"
+            val selectionArgs = arrayOf(rootName)
+            val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null)
+            val idxValue = cursor.getColumnIndex(KEY_ROWID)
+            if (cursor.moveToFirst()) {
+                rowId = cursor.getLong(idxValue)
+            }
+            cursor.close()
+        } catch (ex: SQLiteException) {
+            TBApplication.ReportError(ex, SqlTableProjects::class.java, "queryRootProjectId()", "$rootName")
         }
         return rowId
     }

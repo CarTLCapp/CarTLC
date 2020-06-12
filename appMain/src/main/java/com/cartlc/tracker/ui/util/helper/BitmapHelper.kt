@@ -45,7 +45,7 @@ object BitmapHelper {
                 return BitmapResult.MEDIA_NOT_MOUNTED
             }
             if (!unscaledFile.exists()) {
-                return BitmapResult.FILE_NOT_FOUND(unscaledFile.absolutePath)
+                return BitmapResult.FILE_NOT_FOUND(unscaledFile.name)
             }
             val bitmap = loadScaledFile(unscaledFile.absolutePath, SCALED_SIZE, SCALED_SIZE)
             val fos = FileOutputStream(scaledFilename)

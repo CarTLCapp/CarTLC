@@ -54,8 +54,8 @@ class DataPicture(
         get() = scaledFilename?.let { return File(scaledFilename) }
 
     fun buildScaledFile(): BitmapResult {
-        return scaledFilename?.let {
-            BitmapHelper.createScaled(unscaledFile, it)
+        return scaledFilename?.let { targetFilename ->
+            BitmapHelper.createScaled(unscaledFile, targetFilename)
         } ?: run {
             BitmapResult.FILE_NAME_NULL
         }
@@ -129,7 +129,7 @@ class DataPicture(
                 return stage.ord * MULT
             }
             if (stage.isLastElement) {
-                return (stage.ord+1) * MULT - 1
+                return (stage.ord + 1) * MULT - 1
             }
             return stage.ord * MULT + stage.flowElementId.toInt() + 1
         }

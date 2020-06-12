@@ -30,10 +30,10 @@ public class MessageController extends Controller {
 
     private static final int PAGE_SIZE = 100;
 
-    private MessageList mMessages;
+    private MessageList mMessages = new MessageList();
 
     public Result list(int page, String sortBy, String order) {
-        mMessages = new MessageList(page, sortBy, order);
+        mMessages.compute(page, sortBy, order);
         return ok(views.html.message_list.render(mMessages, sortBy, order, Secured.getClient(ctx())));
     }
 

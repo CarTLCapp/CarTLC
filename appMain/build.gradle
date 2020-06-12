@@ -78,7 +78,7 @@ dependencies {
     implementation "com.jakewharton.timber:timber:$timber_version"
 
     // Picasso
-    implementation "com.squareup.picasso:picasso:$picasso_version"
+//    implementation "com.squareup.picasso:picasso:$picasso_version"
 
     // EventBus
     implementation 'org.greenrobot:eventbus:3.2.0'

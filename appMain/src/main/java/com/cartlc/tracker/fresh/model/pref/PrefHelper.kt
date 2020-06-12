@@ -172,6 +172,15 @@ class PrefHelper constructor(
             } else null
         }
 
+    val rootProjectId: Long?
+        get() {
+            val rootName = projectRootName
+            return if (rootName != null) {
+                val id = db.tableProjects.queryRootProjectId(rootName)
+                if (id >= 0) id else null
+            } else null
+        }
+
     private var savedProjectGroupId: Long
         get() = getLong(KEY_SAVED_PROJECT_GROUP_ID, -1L)
         set(id) = setLong(KEY_SAVED_PROJECT_GROUP_ID, id)

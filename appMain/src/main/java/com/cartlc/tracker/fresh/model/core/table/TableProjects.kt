@@ -17,6 +17,7 @@ interface TableProjects {
     fun queryByServerId(server_id: Int): DataProject?
     fun queryProjectName(id: Long): Pair<String, String>?
     fun queryProjectId(rootName: String, subProject: String): Long
+    fun queryRootProjectId(rootName: String): Long
     fun removeOrDisable(project: DataProject)
     fun update(project: DataProject): Long
 }

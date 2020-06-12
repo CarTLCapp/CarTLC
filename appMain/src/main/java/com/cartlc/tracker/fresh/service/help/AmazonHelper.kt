@@ -86,23 +86,34 @@ class AmazonHelper(
     }
 
     private fun sendPictures(ctx: Context, entry: DataEntry): Int {
-        var count = 0
-        val fileErrors = mutableListOf<String>()
+        var countUploading = 0
+        val fileNotFound = mutableListOf<String>()
         for (item in entry.pictures) {
             if (!item.uploaded) {
                 when (val result = sendPicture(ctx, entry, item)) {
                     is BitmapResult.FILE_NOT_FOUND -> {
-                        fileErrors.add(result.filename)
+                        fileNotFound.add(result.filename)
+                    }
+                    BitmapResult.FILE_NAME_NULL -> {
+                        Timber.e("UPLOAD null file found")
+                    }
+                    BitmapResult.MEDIA_NOT_MOUNTED -> {
+                        Timber.e("UPLOAD media not mounted")
+                    }
+                    is BitmapResult.EXCEPTION -> {
+                        Timber.e("UPLOAD exception ${result.message}")
+                    }
+                    BitmapResult.OK -> {
+                        countUploading++
                     }
                 }
-                count++
             }
         }
-        if (fileErrors.isNotEmpty()) {
-            val files = fileErrors.joinToString(", ")
-            Timber.e("Missing files: $files")
+        if (fileNotFound.isNotEmpty()) {
+            val files = fileNotFound.joinToString(", ")
+            Timber.e("UPLOAD missing files: $files")
         }
-        return count
+        return countUploading
     }
 
     private fun sendPicture(ctx: Context, entry: DataEntry, item: DataPicture): BitmapResult {
