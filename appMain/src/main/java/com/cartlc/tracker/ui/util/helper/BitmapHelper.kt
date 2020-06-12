@@ -38,16 +38,14 @@ object BitmapHelper {
         return sbuf.toString()
     }
 
-    fun createScaled(unscaledFile: File, scaledFilename: String): Boolean {
+    fun createScaled(unscaledFile: File, scaledFilename: String): BitmapResult {
         try {
             val state = Environment.getExternalStorageState()
             if (Environment.MEDIA_MOUNTED != state) {
-                Timber.e("No external media was mounted")
-                return false
+                return BitmapResult.MEDIA_NOT_MOUNTED
             }
             if (!unscaledFile.exists()) {
-                Timber.e("File does not exist: $unscaledFile")
-                return false
+                return BitmapResult.FILE_NOT_FOUND(unscaledFile.absolutePath)
             }
             val bitmap = loadScaledFile(unscaledFile.absolutePath, SCALED_SIZE, SCALED_SIZE)
             val fos = FileOutputStream(scaledFilename)
@@ -57,9 +55,9 @@ object BitmapHelper {
             bitmap.recycle()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, BitmapHelper::class.java, "createScaled()", unscaledFile.absolutePath)
-            return false
+            return BitmapResult.EXCEPTION(ex.message ?: "exception")
         }
-        return true
+        return BitmapResult.OK
     }
 
     private fun loadScaledFile(pathname: String, dstWidth: Int, dstHeight: Int): Bitmap {

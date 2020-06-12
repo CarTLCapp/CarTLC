@@ -5,6 +5,7 @@ package com.cartlc.tracker.fresh.model.core.data
 
 import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.ui.util.helper.BitmapHelper
+import com.cartlc.tracker.ui.util.helper.BitmapResult
 
 import java.io.File
 
@@ -52,9 +53,13 @@ class DataPicture(
     val scaledFile: File?
         get() = scaledFilename?.let { return File(scaledFilename) }
 
-    fun buildScaledFile() = scaledFilename?.let {
-        BitmapHelper.createScaled(unscaledFile, it)
-    } ?: false
+    fun buildScaledFile(): BitmapResult {
+        return scaledFilename?.let {
+            BitmapHelper.createScaled(unscaledFile, it)
+        } ?: run {
+            BitmapResult.FILE_NAME_NULL
+        }
+    }
 
     val tailname: String
         get() {

@@ -21,7 +21,9 @@ import com.cartlc.tracker.fresh.model.event.EventRefreshProjects
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import com.cartlc.tracker.ui.util.helper.BitmapResult
 import org.greenrobot.eventbus.EventBus
+import timber.log.Timber
 
 /**
  * Created by dug on 5/31/17.
@@ -85,20 +87,30 @@ class AmazonHelper(
 
     private fun sendPictures(ctx: Context, entry: DataEntry): Int {
         var count = 0
+        val fileErrors = mutableListOf<String>()
         for (item in entry.pictures) {
             if (!item.uploaded) {
-                sendPicture(ctx, entry, item)
+                when (val result = sendPicture(ctx, entry, item)) {
+                    is BitmapResult.FILE_NOT_FOUND -> {
+                        fileErrors.add(result.filename)
+                    }
+                }
                 count++
             }
+        }
+        if (fileErrors.isNotEmpty()) {
+            val files = fileErrors.joinToString(", ")
+            Timber.e("Missing files: $files")
         }
         return count
     }
 
-    private fun sendPicture(ctx: Context, entry: DataEntry, item: DataPicture) {
-        if (!item.buildScaledFile()) {
-            return
+    private fun sendPicture(ctx: Context, entry: DataEntry, item: DataPicture): BitmapResult {
+        val result = item.buildScaledFile()
+        if (result != BitmapResult.OK) {
+            return result
         }
-        val uploadingFile = item.scaledFile ?: return
+        val uploadingFile = item.scaledFile ?: return BitmapResult.FILE_NAME_NULL
 
         init(ctx)
 
@@ -123,6 +135,7 @@ class AmazonHelper(
                 TBApplication.ReportError(ex, AmazonHelper::class.java, "sendPicture()", "amazon")
             }
         })
+        return BitmapResult.OK
     }
 
     @Synchronized
