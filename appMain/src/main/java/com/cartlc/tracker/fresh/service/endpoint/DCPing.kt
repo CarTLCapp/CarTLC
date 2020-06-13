@@ -601,9 +601,9 @@ class DCPing(
                             sbuf.append(" for tableEquipment ")
                             sbuf.append(equipment!!.name)
                             sbuf.append(". Projects=")
-                            for (name in db.tableProjects.query()) {
-                                sbuf.append(name)
-                                sbuf.append(":")
+                            for (project in db.tableProjects.query()) {
+                                sbuf.append(project.serverId)
+                                sbuf.append(" ")
                             }
                             sbuf.append(".")
                             Timber.e(sbuf.toString())

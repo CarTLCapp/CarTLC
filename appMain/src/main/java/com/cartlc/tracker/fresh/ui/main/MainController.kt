@@ -405,6 +405,7 @@ class MainController(
                 stageTruckDamage.process()
             }
             Stage.EQUIPMENT, Stage.ADD_EQUIPMENT -> {
+                taskPicture.clearFlags()
                 stageEquipment.process(flow)
             }
             is Stage.CUSTOM_FLOW -> {

@@ -13,7 +13,7 @@ class DataAddress {
         this.isBootStrap = true
     }
 
-    constructor(company: String, street: String, city: String, state: String, zipcode: String?) {
+    constructor(company: String, street: String, city: String?, state: String?, zipcode: String?) {
         this.company = company
         this.street = street
         this.city = city
@@ -21,7 +21,7 @@ class DataAddress {
         this.zipcode = zipcode
     }
 
-    constructor(server_id: Int, company: String, street: String, city: String, state: String, zipcode: String?) {
+    constructor(server_id: Int, company: String, street: String, city: String?, state: String?, zipcode: String?) {
         this.serverId = server_id
         this.company = company
         this.street = street
@@ -30,7 +30,7 @@ class DataAddress {
         this.zipcode = zipcode
     }
 
-    constructor(id: Long, server_id: Int, company: String, street: String, city: String, state: String, zipcode: String?) {
+    constructor(id: Long, server_id: Int, company: String, street: String?, city: String?, state: String?, zipcode: String?) {
         this.id = id
         this.serverId = server_id
         this.company = company
