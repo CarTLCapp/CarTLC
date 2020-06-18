@@ -22,7 +22,7 @@ class DataEntry(private val db: DatabaseTable) {
 
     companion object {
         private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
-        private const val UPLOAD_DEBUG = true
+        const val UPLOAD_DEBUG = true
     }
 
     var id: Long = 0
@@ -158,17 +158,21 @@ class DataEntry(private val db: DatabaseTable) {
     }
 
     fun checkPictureUploadComplete(): Boolean {
+        if (UPLOAD_DEBUG) {
+            val files = mutableListOf<String>()
+            for (picture in pictures) {
+                if (picture.uploaded) {
+                    files.add(picture.scaledFilename ?: "null")
+                } else {
+                    files.add("NOT UPLOADED: " + picture.scaledFilename ?: "null")
+                }
+            }
+            Timber.e("UPLOAD DEBUG: " + pictures.size + " for files: " + files.joinToString(","))
+        }
         for (item in pictures) {
             if (!item.uploaded) {
                 return false
             }
-        }
-        if (UPLOAD_DEBUG) {
-            val files = mutableListOf<String>()
-            for (picture in pictures) {
-                files.add(picture.scaledFilename ?: "null")
-            }
-            Timber.e("UPLOAD DEBUG: " + pictures.size + " for files: " + files.joinToString(","))
         }
         uploadedAws = true
         db.tableEntry.saveUploaded(this)

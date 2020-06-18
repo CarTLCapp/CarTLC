@@ -47,7 +47,7 @@ class TBApplication : Application() {
     companion object {
 
         private const val FORCE_DEVELOPMENT_SERVER: Boolean = false
-        private const val FORCE_RELEASE_SERVER: Boolean = false
+        private const val FORCE_RELEASE_SERVER: Boolean = true
 
         @VisibleForTesting
         var DEBUG_TREE = false

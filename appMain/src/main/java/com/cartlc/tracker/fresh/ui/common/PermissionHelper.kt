@@ -212,7 +212,7 @@ class PermissionHelper(
                     }
                 }
             }
-            else -> Timber.e("Ignoring request code : $requestCode")
+            else -> Timber.d("Ignoring request code : $requestCode")
         }
         if (lastRequests.isEmpty()) {
             initiateNextRequest()

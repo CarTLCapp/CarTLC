@@ -75,12 +75,18 @@ class AmazonHelper(
 
     fun sendPictures(ctx: Context, list: List<DataEntry>): Boolean {
         var flag = false
+        var count = 0
         for (entry in list) {
             if (sendPictures(ctx, entry) == 0) {
                 if (entry.checkPictureUploadComplete()) {
                     flag = true
                 }
+            } else {
+                count++
             }
+        }
+        if (DataEntry.UPLOAD_DEBUG) {
+            Timber.e("UPLOAD DEBUG: after checking " + list.size + " entries, complete flag was $flag, with $count entries still working")
         }
         return flag
     }
@@ -109,9 +115,11 @@ class AmazonHelper(
                 }
             }
         }
-        if (fileNotFound.isNotEmpty()) {
-            val files = fileNotFound.joinToString(", ")
-            Timber.e("UPLOAD missing files: $files")
+        if (DataEntry.UPLOAD_DEBUG) {
+            if (fileNotFound.isNotEmpty()) {
+                val files = fileNotFound.joinToString(", ")
+                Timber.e("UPLOAD missing files: $files")
+            }
         }
         return countUploading
     }
@@ -137,12 +145,15 @@ class AmazonHelper(
                     if (uploadComplete(entry, item)) {
                         EventBus.getDefault().post(EventRefreshProjects())
                     }
+                } else if (DataEntry.UPLOAD_DEBUG) {
+                    Timber.e("UPLOAD DEBUG: still working on picture with $state")
                 }
             }
 
             override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
 
             override fun onError(id: Int, ex: Exception) {
+                Timber.e("UPLOAD DEBUG: got error while working on picture upload: ${ex.message}")
                 TBApplication.ReportError(ex, AmazonHelper::class.java, "sendPicture()", "amazon")
             }
         })
