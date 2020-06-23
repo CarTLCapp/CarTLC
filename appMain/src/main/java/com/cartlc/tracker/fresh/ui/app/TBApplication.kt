@@ -157,7 +157,7 @@ class TBApplication : Application() {
             Timber.plant(CrashReportingTree(db))
         }
         ServerHelper.Init(this)
-        amazonHelper = AmazonHelper(db, prefHelper, componentRoot.eventController)
+        amazonHelper = AmazonHelper(db)
         CheckError.Init()
         LocationHelper.Init(this, db)
 

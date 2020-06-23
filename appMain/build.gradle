@@ -24,15 +24,16 @@ android {
         applicationId "com.cartlc.tracker"
         minSdkVersion 21
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 54
-        versionName "3.30"
+        versionCode 58
+        versionName "3.34q"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            // TODO: Problematic to turn these on, was getting all sort of crashes. proguard rules need to be reviewed.
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -64,15 +65,15 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Android
-    implementation 'androidx.appcompat:appcompat:1.2.0-alpha03'
-    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha01'
+    implementation 'androidx.appcompat:appcompat:1.3.0-alpha01'
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha03'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.vectordrawable:vectordrawable-animated:1.1.0'
-    implementation 'androidx.media:media:1.2.0-alpha01'
+    implementation 'androidx.media:media:1.2.0-alpha03'
     implementation 'androidx.exifinterface:exifinterface:1.3.0-alpha01'
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
-    implementation 'com.google.android.material:material:1.2.0-alpha05'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta7'
+    implementation 'com.google.android.material:material:1.3.0-alpha01'
 
     // Timber
     implementation "com.jakewharton.timber:timber:$timber_version"
@@ -98,7 +99,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Firebase
-    implementation 'com.google.firebase:firebase-core:17.2.3'
+    implementation 'com.google.firebase:firebase-core:17.4.3'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     // LeakCanary
@@ -111,7 +112,7 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxkotlin:2.4.0'
 
     // InstaBug
-    implementation 'com.instabug.library:instabug:9.1.0'
+//    implementation 'com.instabug.library:instabug:9.1.5'
 
     // Test
     testImplementation 'junit:junit:4.13'
@@ -121,9 +122,9 @@ dependencies {
     testImplementation "com.squareup.okhttp3:mockwebserver:$mockwebserver_version"
 
     // Android Testing
-    androidTestImplementation 'androidx.test:runner:1.3.0-alpha05'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2-alpha05'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0-alpha05'
+    androidTestImplementation 'androidx.test:runner:1.3.0-rc01'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2-rc01'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0-rc01'
     androidTestImplementation "org.mockito:mockito-core:$mockcore_version"
     androidTestImplementation "com.nhaarman:mockito-kotlin:$mockkot_version"
     androidTestImplementation "org.mockito:mockito-android:$mockcore_version"

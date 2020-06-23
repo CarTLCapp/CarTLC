@@ -87,6 +87,7 @@ class MainController(
     private val eventController = boundAct.componentRoot.eventController
     private val actionUseCase = repo.actionUseCase
 
+
     init {
         boundAct.bindObserver(this)
 
@@ -114,6 +115,8 @@ class MainController(
             field = value
             viewMvc.buttonsUseCase.softKeyboardDetect = value
         }
+
+    private var trimMemoryMessageDone = hashSetOf<Int>()
 
     // region support variables
 
@@ -320,13 +323,24 @@ class MainController(
 
     fun onTrimMemory(level: Int) {
         if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
-            Timber.e("onTrimMemory(): Ran critically low on memory: so no cache and push back to current project flow")
             curFlowValue = CurrentProjectFlow()
             bitmapHelper.cacheOkay = false
-        } else if (bitmapHelper.cacheOkay) {
-            Timber.e("onTrimMemory($level): disabled cache")
-            bitmapHelper.cacheOkay = false
         }
+        if (trimMemoryMessageDone.contains(level)) {
+            return
+        }
+        trimMemoryMessageDone.add(level)
+        val tag = when(level) {
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE -> "Running Moderate"
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL -> "Running Critical"
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW -> "Running Low"
+            ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN -> "UI Hidden"
+            ComponentCallbacks2.TRIM_MEMORY_BACKGROUND -> "Background"
+            ComponentCallbacks2.TRIM_MEMORY_MODERATE -> "Moderate"
+            ComponentCallbacks2.TRIM_MEMORY_COMPLETE -> "Complete"
+            else -> level.toString()
+        }
+        Timber.e("onTrimMemory($level): $tag")
     }
 
     // endregion Lifecycle

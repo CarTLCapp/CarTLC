@@ -6,7 +6,6 @@
 package com.cartlc.tracker.fresh.service.help
 
 import android.content.Context
-
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
@@ -16,11 +15,9 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3Client
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
-import com.cartlc.tracker.fresh.model.event.EventController
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.event.EventRefreshProjects
 import com.cartlc.tracker.fresh.ui.app.TBApplication
-import com.cartlc.tracker.fresh.model.pref.PrefHelper
-import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.ui.util.helper.BitmapResult
 import org.greenrobot.eventbus.EventBus
 import timber.log.Timber
@@ -30,18 +27,16 @@ import timber.log.Timber
  */
 
 class AmazonHelper(
-        private val db: DatabaseTable,
-        prefHelper: PrefHelper,
-        private val eventController: EventController
+        private val db: DatabaseTable
 ) {
 
     companion object {
 
 //        private val BUCKET_NAME_DEVELOP = "fleetdev2"
-        private val BUCKET_NAME_RELEASE = "fleettlc"
+        private const val BUCKET_NAME_RELEASE = "fleettlc"
 
         //        internal val IDENTITY_POOL_ID_DEVELOP = "us-east-2:38d2f2a2-9454-4472-9fec-9468f3700ba5"
-        private val IDENTITY_POOL_ID_RELEASE = "us-east-2:389282dd-de71-4849-a68b-2b126b3de5f3"
+        private const val IDENTITY_POOL_ID_RELEASE = "us-east-2:389282dd-de71-4849-a68b-2b126b3de5f3"
     }
 
     internal val BUCKET_NAME: String

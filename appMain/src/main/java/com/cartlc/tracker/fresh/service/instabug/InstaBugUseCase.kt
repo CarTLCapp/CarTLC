@@ -5,8 +5,8 @@
 package com.cartlc.tracker.fresh.service.instabug
 
 import android.app.Application
-import com.instabug.library.Instabug
-import com.instabug.library.invocation.InstabugInvocationEvent
+//import com.instabug.library.Instabug
+//import com.instabug.library.invocation.InstabugInvocationEvent
 
 class InstaBugUseCase(
         app: Application
@@ -17,13 +17,13 @@ class InstaBugUseCase(
     }
 
     init {
-        Instabug.Builder(app, TOKEN)
-                .setInvocationEvents(InstabugInvocationEvent.SCREENSHOT)
-                .build()
+//        Instabug.Builder(app, TOKEN)
+//                .setInvocationEvents(InstabugInvocationEvent.SCREENSHOT)
+//                .build()
     }
 
     fun show() {
-        Instabug.show()
+//        Instabug.show()
     }
 
 }

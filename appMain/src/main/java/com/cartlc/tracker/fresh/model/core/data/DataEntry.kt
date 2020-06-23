@@ -22,7 +22,7 @@ class DataEntry(private val db: DatabaseTable) {
 
     companion object {
         private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
-        const val UPLOAD_DEBUG = true
+        const val UPLOAD_DEBUG = false
     }
 
     var id: Long = 0
