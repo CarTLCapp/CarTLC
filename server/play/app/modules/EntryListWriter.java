@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2018, 2020, FleetTLC. All rights reserved
  */
 package modules;
 
@@ -31,6 +31,8 @@ public class EntryListWriter {
     static final String EQUIPMENT = "Equipment";
     static final String STATUS = "Status";
 
+    private static final String SEPARATOR =";";
+
     EntryPagedList mList;
     NoteColumns mNoteColumns;
     BufferedWriter mBR;
@@ -48,29 +50,31 @@ public class EntryListWriter {
         mFile = file;
         mBR = new BufferedWriter(new FileWriter(file));
         mBR.write(DATE);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
         mBR.write(TECH_NAME);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
         mBR.write(ROOT_PROJECT);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
         mBR.write(SUB_PROJECT);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
         mBR.write(COMPANY);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
         mBR.write(STREET);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
         mBR.write(CITY);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
         mBR.write(STATE);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
         mBR.write(ZIP);
-        mBR.write(",");
-        mBR.write(TRUCK);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
+        if (mList.canViewTrucks) {
+            mBR.write(TRUCK);
+            mBR.write(SEPARATOR);
+        }
         mBR.write(EQUIPMENT);
-        mBR.write(",");
+        mBR.write(SEPARATOR);
         mBR.write(STATUS);
-        mBR.write(mNoteColumns.getHeaders());
+        mBR.write(mNoteColumns.getHeaders(SEPARATOR));
         mBR.write("\n");
         mPage = 0;
         mCount = 0;
@@ -91,31 +95,31 @@ public class EntryListWriter {
     public int writeNext() throws IOException {
         for (Entry entry : mList.getList()) {
             mBR.write(chkNull(entry.getDate()));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             mBR.write(chkNull(entry.getTechName()));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             mBR.write(chkNull(entry.getRootProjectName()));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             mBR.write(chkNull(entry.getSubProjectName()));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             mBR.write(chkNull(entry.getCompany()));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             mBR.write(chkNull(entry.getStreet()));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             mBR.write(chkNull(entry.getCity()));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             mBR.write(chkNull(entry.getState()));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             mBR.write(chkNull(entry.getZipCode()));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             if (mList.canViewTrucks) {
                 mBR.write(chkNull(entry.getTruckLine()));
-                mBR.write(",");
+                mBR.write(SEPARATOR);
             }
             mBR.write(chkComma(entry.getEquipmentLine(mList.mForClientId)));
-            mBR.write(",");
+            mBR.write(SEPARATOR);
             mBR.write(chkNull(entry.getStatus()));
-            mBR.write(chkNull(mNoteColumns.getValues(entry)));
+            mBR.write(chkNull(mNoteColumns.getValues(entry, SEPARATOR)));
             mBR.write("\n");
             mCount++;
         }
@@ -159,9 +163,10 @@ public class EntryListWriter {
 
         HashMap<String, Integer> mNoteColumns = new HashMap<String, Integer>();
         int mNextColumn;
-        String [] mColumns;
+        String[] mColumns;
 
-        NoteColumns() {}
+        NoteColumns() {
+        }
 
         void prepare() {
             mNextColumn = 0;
@@ -182,33 +187,33 @@ public class EntryListWriter {
             }
         }
 
-        String getHeaders() {
+        String getHeaders(String separator) {
             for (int i = 0; i < mColumns.length; i++) {
                 mColumns[i] = null;
             }
-            for (String key: mNoteColumns.keySet()) {
+            for (String key : mNoteColumns.keySet()) {
                 mColumns[mNoteColumns.get(key)] = key;
             }
             StringBuilder sbuf = new StringBuilder();
             for (int i = 0; i < mColumns.length; i++) {
-                sbuf.append(",");
+                sbuf.append(separator);
                 sbuf.append(mColumns[i]);
             }
             return sbuf.toString();
         }
 
-        String getValues(Entry entry) {
+        String getValues(Entry entry, String separator) {
             for (int i = 0; i < mColumns.length; i++) {
                 mColumns[i] = null;
             }
             for (EntryNoteCollection note : entry.getNotes(mList.mForClientId)) {
-		if (note.getName() != null && mNoteColumns.containsKey(note.getName())) {
+                if (note.getName() != null && mNoteColumns.containsKey(note.getName())) {
                     mColumns[mNoteColumns.get(note.getName())] = note.getValue();
-		}
+                }
             }
             StringBuilder sbuf = new StringBuilder();
             for (int i = 0; i < mColumns.length; i++) {
-                sbuf.append(",");
+                sbuf.append(separator);
                 if (mColumns[i] != null) {
                     sbuf.append(mColumns[i]);
                 }
