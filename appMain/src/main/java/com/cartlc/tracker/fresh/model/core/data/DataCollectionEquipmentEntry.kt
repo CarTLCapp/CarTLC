@@ -21,4 +21,7 @@ class DataCollectionEquipmentEntry(
     fun setChecked() {
         db.tableEquipment.setChecked(equipmentListIds)
     }
+
+    val hasChecked: Boolean
+        get() = db.tableEquipment.queryIdsChecked().isNotEmpty()
 }

@@ -11,7 +11,7 @@ import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import timber.log.Timber
 
-class StageCustom(
+class StageCustomFlow(
         shared: MainController.Shared,
         private val taskPicture: TaskPicture
 ) : ProcessBase(shared) {
@@ -154,6 +154,10 @@ class StageCustom(
         return true
     }
 
+    /**
+     * Move to the next flow element.
+     * @return false if there is no next flow element.
+     */
     fun next(): Boolean {
         return with(shared) {
             repo.currentFlowElement?.let { element ->
@@ -165,6 +169,10 @@ class StageCustom(
         }
     }
 
+    /**
+     * Move to the previous flow element
+     * @return false if there was no previous flow element.
+     */
     fun prev(): Boolean {
         return with(shared) {
             repo.currentFlowElement?.let { element ->
@@ -204,7 +212,7 @@ class StageCustom(
                                 }
                             }
                             else -> {
-                                if (element.numImages > 0) {
+                                if (element.hasImages) {
                                     if (!pictureUseCase.notesReady) {
                                         return false
                                     }

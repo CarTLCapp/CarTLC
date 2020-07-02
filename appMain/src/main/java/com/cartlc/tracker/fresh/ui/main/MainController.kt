@@ -57,7 +57,7 @@ class MainController(
         const val REQUEST_IMAGE_CAPTURE = 1
         private const val REQUEST_EDIT_ENTRY = 2
 
-        const val RESULT_EDIT_PROJECT_ENTRY = 2
+        const val RESULT_EDIT_ENTRY = 2
         const val RESULT_EDIT_PROJECT = 3
         const val RESULT_DELETE_PROJECT = 4
     }
@@ -254,7 +254,7 @@ class MainController(
 
         fun getLocation() = locationUseCase.getLocation { address -> fabAddress = address }
 
-        fun onEditEntry() = main.onEditProjectEntry()
+        fun onEditEntry() = main.onEditEntry()
     }
 
     private val shared = Shared()
@@ -268,7 +268,7 @@ class MainController(
     private val stageTruckNumber = StageTruckNumber(shared, taskPicture)
     private val stageTruckDamage = StageTruckDamage(shared, taskPicture)
     private val stageEquipment = StageEquipment(shared)
-    private val stageCustom = StageCustom(shared, taskPicture)
+    private val stageCustomFlow = StageCustomFlow(shared, taskPicture)
     private val stageConfirm = StageFinalConfirm(shared)
     private val stageStatus = StageStatus(shared)
 
@@ -381,6 +381,7 @@ class MainController(
             }
         }
         viewMvc.customProgress = null
+        viewMvc.entryHint = MainViewMvc.EntryHint()
     }
 
     override fun onStageChanged(flow: Flow) {
@@ -423,7 +424,7 @@ class MainController(
                 stageEquipment.process(flow)
             }
             is Stage.CUSTOM_FLOW -> {
-                stageCustom.process()
+                stageCustomFlow.process()
             }
             Stage.STATUS -> {
                 stageStatus.process()
@@ -464,16 +465,16 @@ class MainController(
             is Stage.CUSTOM_FLOW -> {
                 when (action) {
                     Button.BTN_CENTER -> {
-                        stageCustom.center()
+                        stageCustomFlow.center()
                     }
                     Button.BTN_PREV -> {
-                        if (!stageCustom.prev()) {
-                            curFlowValue.process(action)
+                        if (!stageCustomFlow.prev()) { // if false no previous flow
+                            curFlowValue.process(action) // will move to the previous stage.
                         }
                     }
                     Button.BTN_NEXT -> {
-                        if (!stageCustom.next()) {
-                            curFlowValue.process(action)
+                        if (!stageCustomFlow.next()) { // if false no next flow
+                            curFlowValue.process(action) // will move to the next stage.
                         }
                     }
                     else -> {
@@ -522,7 +523,7 @@ class MainController(
             Stage.COMPANY -> stageCompany.save(isNext)
             Stage.TRUCK_NUMBER_PICTURE -> stageTruckNumber.save()
             Stage.TRUCK_DAMAGE_PICTURE -> stageTruckDamage.save()
-            is Stage.CUSTOM_FLOW -> stageCustom.save(isNext)
+            is Stage.CUSTOM_FLOW -> stageCustomFlow.save(isNext)
             Stage.STATUS ->
                 return if (isNext) {
                     if (prefHelper.status === TruckStatus.UNKNOWN) {
@@ -674,7 +675,7 @@ class MainController(
         when (requestCode) {
             REQUEST_EDIT_ENTRY ->
                 when (resultCode) {
-                    RESULT_EDIT_PROJECT_ENTRY -> onEditProjectEntry()
+                    RESULT_EDIT_ENTRY -> onEditEntry()
                     RESULT_EDIT_PROJECT -> onEditProject()
                     RESULT_DELETE_PROJECT -> onDeletedProject()
                     else -> onAbort()
@@ -695,8 +696,12 @@ class MainController(
     }
 
     // The user wants to change some data from a previously entered & uploaded entry
-    private fun onEditProjectEntry() {
-        curFlowValue = TruckNumberPictureFlow()
+    private fun onEditEntry() {
+        if (prefHelper.isCurrentEditEntryComplete) {
+            curFlowValue = TruckNumberPictureFlow()
+        } else {
+            repo.computeCurStage()
+        }
     }
 
     private fun onEditProject() {
@@ -737,6 +742,9 @@ class MainController(
             R.id.upload -> {
                 serviceUseCase.reloadFromServer()
             }
+            R.id.save -> {
+                onSaveEntryPressed()
+            }
             R.id.fleet_vehicles -> {
                 onVehiclesPressed()
             }
@@ -763,6 +771,16 @@ class MainController(
             screenNavigator.showVehiclesActivity()
         } else {
             screenNavigator.showVehiclesPendingDialog()
+        }
+    }
+
+    private fun onSaveEntryPressed() {
+        save(false)
+        prefHelper.saveEntry()?.let { entry ->
+            repo.setIncomplete(entry)
+            repo.store(entry)
+            prefHelper.clearCurProject()
+            curFlowValue = CurrentProjectFlow()
         }
     }
 
@@ -821,6 +839,7 @@ class MainController(
     }
 
     override fun onPictureNoteChanged(note: DataNote) {
+        onEntryHintChanged(note.entryHint)
         pictureStateChanged()
     }
 
@@ -828,7 +847,7 @@ class MainController(
         when (curFlowValue.stage) {
             Stage.TRUCK_NUMBER_PICTURE -> stageTruckNumber.pictureStateChanged()
             Stage.TRUCK_DAMAGE_PICTURE -> stageTruckDamage.pictureStateChanged()
-            is Stage.CUSTOM_FLOW -> stageCustom.pictureStateChanged()
+            is Stage.CUSTOM_FLOW -> stageCustomFlow.pictureStateChanged()
         }
     }
 

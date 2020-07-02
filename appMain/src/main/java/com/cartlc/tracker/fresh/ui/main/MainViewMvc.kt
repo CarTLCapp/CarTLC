@@ -25,8 +25,8 @@ interface MainViewMvc : ObservableViewMvc<MainViewMvc.Listener> {
     }
 
     data class EntryHint(
-            val msg: String?,
-            @ColorRes val textColor: Int
+            val msg: String? = null,
+            @ColorRes val textColor: Int = 0
     )
 
     var fragmentVisible: FragmentType

@@ -246,7 +246,6 @@ class SqlTableEquipment(
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableEquipment::class.java, "queryIdsChecked()", "db")
         }
-
         return list
     }
 

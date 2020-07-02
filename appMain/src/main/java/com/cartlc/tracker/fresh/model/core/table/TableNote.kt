@@ -22,4 +22,5 @@ interface TableNote {
     fun removeIfUnused(note: DataNote)
     fun update(item: DataNote)
     fun updateValue(item: DataNote)
+    fun updateValues(notes: List<DataNote>)
 }

@@ -14,7 +14,6 @@ import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.flow.*
-import timber.log.Timber
 
 // TODO: was open class for testing
 class CarRepository(
@@ -113,8 +112,11 @@ class CarRepository(
         prefHelper.clearUploaded()
     }
 
-    fun add(entry: DataEntry) {
-        if (db.tableEntry.add(entry)) {
+    /**
+     * Add a new saved entry to the database.
+     */
+    fun store(entry: DataEntry) {
+        if (db.tableEntry.updateOrInsert(entry)) {
             prefHelper.incNextEquipmentCollectionID()
             prefHelper.incNextPictureCollectionID()
             prefHelper.incNextNoteCollectionID()
@@ -128,6 +130,13 @@ class CarRepository(
         prefHelper.company = null
         prefHelper.street = null
         prefHelper.zipCode = null
+    }
+
+    fun setIncomplete(entry: DataEntry) {
+        entry.isComplete = false
+        currentFlowElement?.let { element ->
+            entry.flowProgress = (db.tableFlowElement.progress(element.id)?.first ?: 0).toShort()
+        }
     }
 
     // endregion ActionEvent
@@ -160,21 +169,21 @@ class CarRepository(
                 val hasTruckNumberValue = !prefHelper.truckNumberValue.isNullOrEmpty()
                 val hasTruckNumberPicture = db.tablePicture.countPictures(prefHelper.currentPictureCollectionId, Stage.TRUCK_NUMBER_PICTURE) > 0
                 val hasTruckDamagePicture = db.tablePicture.countPictures(prefHelper.currentPictureCollectionId, Stage.TRUCK_DAMAGE_PICTURE) > 0
+                val hasTruckDamage = prefHelper.truckHasDamage ?: false
                 val hasTruckDamageValue = prefHelper.truckHasDamage != null
                 val hasEquipment = prefHelper.projectId?.let { projectId ->
                     db.tableCollectionEquipmentProject.hasEquipment(projectId)
                 } ?: false
-                if (!hasTruckNumberValue || !hasTruckNumberPicture) {
-                    curFlowValue = TruckNumberPictureFlow()
-                } else if (!hasTruckDamageValue || (hasTruckNumberValue && !hasTruckDamagePicture)) {
-                    curFlowValue = TruckDamagePictureFlow()
-                } else if (hasEquipment) {
-                    curFlowValue = EquipmentFlow()
+                val hasEquipmentChecked = prefHelper.currentEditEntry?.equipmentCollection?.hasChecked
+                        ?: false
+                curFlowValue = if (!hasTruckNumberValue || !hasTruckNumberPicture) {
+                    TruckNumberPictureFlow()
+                } else if (!hasTruckDamageValue || (hasTruckDamageValue && hasTruckDamage && !hasTruckDamagePicture)) {
+                    TruckDamagePictureFlow()
+                } else if (hasEquipment && !hasEquipmentChecked) {
+                    EquipmentFlow()
                 } else {
-                    curFlowValue = TruckNumberPictureFlow()
-                    // TODO: This it the eventual, yet not with a 0 for flowElementId, but having that
-                    // computed based on what is not yet filled up.
-//                    curFlowValue = CustomFlow(0)
+                    CustomFlow(computeFirstIncompleteFlowElementId)
                 }
             } else {
                 curFlowValue = CurrentProjectFlow()
@@ -198,10 +207,14 @@ class CarRepository(
 
     fun isNotesComplete(items: List<DataNote>): Boolean {
         for (note in items) {
-            if (!note.value.isNullOrBlank()) {
-                if (note.numDigits > 0 && note.value!!.length != note.numDigits.toInt()) {
-                    return false
-                }
+            if (note.numDigits > 0) {
+                note.value?.let { value ->
+                    if (value.length < note.numDigits.toInt()) {
+                        return false
+                    }
+                } ?: return false
+            } else if (note.value.isNullOrEmpty()) {
+                return false
             }
         }
         return true
@@ -266,6 +279,50 @@ class CarRepository(
                 }
             }
             return flow.stage
+        }
+
+    private val computeFirstIncompleteFlowElementId: Long
+        get() {
+            val currentEntry = prefHelper.currentEditEntry ?: return Stage.FIRST_ELEMENT
+            var elementId = firstFlowElementId ?: Stage.FIRST_ELEMENT
+            val lastProgressMade = currentEntry.flowProgress
+            var progress = 0
+            while (progress < lastProgressMade) {
+                db.tableFlowElement.query(elementId)?.let { element ->
+                    val stage = Stage.CUSTOM_FLOW(element.id)
+                    if (element.hasImages) {
+                        val currentNumPictures = db.tablePicture.countPictures(currentEntry.pictureCollectionId, stage)
+                        if (currentNumPictures < element.numImages) {
+                            return element.id
+                        }
+                    }
+                    val hasNotes = db.tableFlowElementNote.hasNotes(element.id)
+                    if (hasNotes) {
+                        when (element.type) {
+                            DataFlowElement.Type.NONE -> {
+                                val notes = db.noteHelper.getNotesFromCurrentFlowElementId(element.id)
+                                val notesWithValues = currentEntry.overlayNoteValues(notes)
+                                if (!isNotesComplete(notesWithValues)) {
+                                    return element.id
+                                }
+                            }
+                            else -> {
+                                if (element.hasImages) {
+                                    val notes = db.noteHelper.getNotesOverlaidFrom(element.id, currentEntry)
+                                    if (notes.isNotEmpty()) {
+                                        if (!isNotesComplete(notes)) {
+                                            return element.id
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                elementId = db.tableFlowElement.next(elementId) ?: return elementId
+                progress = db.tableFlowElement.progress(elementId)?.first ?: return elementId
+            }
+            return elementId
         }
 
     // endregion flow element support

@@ -222,7 +222,7 @@ class SqlTableNote constructor(
             val values = ContentValues()
             values.clear()
             values.put(KEY_NAME, item.name)
-            values.put(KEY_TYPE, item.type!!.ordinal)
+            values.put(KEY_TYPE, item.type?.ordinal)
             values.put(KEY_VALUE, item.value)
             values.put(KEY_SERVER_ID, item.serverId)
             values.put(KEY_NUM_DIGITS, item.numDigits)
@@ -238,13 +238,19 @@ class SqlTableNote constructor(
     }
 
     override fun updateValue(item: DataNote) {
+        updateValues(listOf(item))
+    }
+
+    override fun updateValues(notes: List<DataNote>) {
         dbSql.beginTransaction()
         try {
-            val values = ContentValues()
-            values.put(KEY_VALUE, item.value)
-            val where = "$KEY_ROWID=?"
-            val whereArgs = arrayOf(item.id.toString())
-            dbSql.update(TABLE_NAME, values, where, whereArgs)
+            notes.forEach { note ->
+                val values = ContentValues()
+                values.put(KEY_VALUE, note.value)
+                val where = "$KEY_ROWID=?"
+                val whereArgs = arrayOf(note.id.toString())
+                dbSql.update(TABLE_NAME, values, where, whereArgs)
+            }
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableNote::class.java, "updateValue()", "db")

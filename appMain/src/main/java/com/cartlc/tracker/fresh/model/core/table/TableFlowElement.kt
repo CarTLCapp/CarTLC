@@ -31,6 +31,7 @@ interface TableFlowElement {
     fun next(flow_element_id: Long): Long?
     fun prev(flow_element_id: Long): Long?
     fun progress(flow_element_id: Long): Pair<Int,Int>?
+    fun flowSize(flow_id: Long): Int
     fun isConfirmTop(flow_id: Long, flow_element_id: Long): Boolean
     fun queryByServerId(server_id: Int): DataFlowElement?
     fun queryByFlowId(flow_id: Long): List<DataFlowElement>

@@ -12,6 +12,11 @@
         android:title="@string/title_upload"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/save"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="@string/title_save"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/profile"
         android:icon="@drawable/icon_profile"
         android:title="@string/title_profile"

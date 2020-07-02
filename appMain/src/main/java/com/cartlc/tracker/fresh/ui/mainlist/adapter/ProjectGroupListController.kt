@@ -43,16 +43,22 @@ class ProjectGroupListController(
             sbuf.append(messageHandler.getString(StringMessage.title_entries_))
             sbuf.append(" ")
             sbuf.append(count.totalEntries.toString())
-            sbuf.append("   ")
+            sbuf.append(", ")
             if (count.uploadedAll()) {
                 sbuf.append(messageHandler.getString(StringMessage.title_uploaded_done))
             } else {
+                sbuf.append(messageHandler.getString(StringMessage.title_uploaded_))
                 sbuf.append(" ")
                 sbuf.append(count.totalUploadedMaster.toString())
                 if (count.totalUploadedMaster != count.totalUploadedAws) {
                     sbuf.append("/")
                     sbuf.append(count.totalUploadedAws.toString())
                 }
+            }
+            if (count.totalIncomplete > 0) {
+                sbuf.append(", ")
+                sbuf.append(messageHandler.getString(StringMessage.title_saved_))
+                sbuf.append(count.totalIncomplete)
             }
             viewMvc.projectNotes = sbuf.toString()
         } else {
@@ -98,6 +104,7 @@ class ProjectGroupListController(
                 val subCount = countProjectAddressCombo(item)
                 count.totalUploadedAws += subCount.totalUploadedAws
                 count.totalUploadedMaster += subCount.totalUploadedMaster
+                count.totalIncomplete += subCount.totalIncomplete
                 count.totalEntries += subCount.totalEntries
             }
         }

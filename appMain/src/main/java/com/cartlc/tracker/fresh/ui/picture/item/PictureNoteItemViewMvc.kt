@@ -11,6 +11,7 @@ interface PictureNoteItemViewMvc : ViewMvc {
     interface Listener {
         fun getHint(note: DataNote): String?
         fun onNoteValueChanged(note: DataNote)
+        fun onNoteFocused(note: DataNote, hasFocus: Boolean)
     }
 
     fun clear()

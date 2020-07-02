@@ -5,7 +5,6 @@
 package com.cartlc.tracker.fresh.ui.listentries
 
 import android.app.Activity
-import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -109,14 +108,21 @@ class ListEntriesController(
         get() = items.size
 
     override fun onBindViewHolder(itemViewMvc: ListEntriesItemViewMvc, position: Int) {
-        val item = items[position]
-        itemViewMvc.truckValue = item.getTruckLine(boundAct.act)
-        itemViewMvc.status = item.getStatus(boundAct.act)
-        itemViewMvc.notesLine = item.notesLine
-        itemViewMvc.equipmentLine = item.getEquipmentLine(boundAct.act)
+        val entry = items[position]
+        itemViewMvc.truckValue = entry.getTruckLine(boundAct.act)
+        itemViewMvc.status = entry.getStatus(boundAct.act)
+        itemViewMvc.notesLine = entry.notesLine
+        itemViewMvc.equipmentLine = entry.getEquipmentLine(boundAct.act)
+        itemViewMvc.subProjectValue = entry.projectAddressCombo?.project?.subProject ?: ""
+        if (entry.isComplete) {
+            itemViewMvc.incompleteVisible = false
+        } else {
+            itemViewMvc.incompleteVisible = true
+            itemViewMvc.incompleteText = messageHandler.getString(buildIncompleteText(entry))
+        }
         itemViewMvc.bindOnEditListener {
-            prefHelper.setFromEntry(item)
-            screenNavigator.finish(MainController.RESULT_EDIT_PROJECT_ENTRY)
+            prefHelper.setFromEntry(entry)
+            screenNavigator.finish(MainController.RESULT_EDIT_ENTRY)
         }
     }
 
@@ -126,5 +132,17 @@ class ListEntriesController(
         items = prefHelper.currentProjectGroup?.entries ?: emptyList()
         viewMvc.deleteVisible = items.isEmpty()
         listener?.titleString = titleString
+    }
+
+    private fun buildIncompleteText(entry: DataEntry): StringMessage {
+        entry.projectAddressCombo?.let { combo ->
+            combo.project?.let { project ->
+                db.tableFlow.queryBySubProjectId(project.id.toInt())?.let { flow ->
+                    val size = db.tableFlowElement.flowSize(flow.id)
+                    return StringMessage.note_incomplete(entry.flowProgress.toInt(), size)
+                }
+            }
+        }
+        return StringMessage.note_incomplete(entry.flowProgress.toInt())
     }
 }

@@ -244,6 +244,11 @@ class PrefHelper constructor(
     val currentEditEntry: DataEntry?
         get() = db.tableEntry.query(currentEditEntryId)
 
+    val isCurrentEditEntryComplete: Boolean
+        get() {
+            return currentEditEntry?.isComplete ?: false
+        }
+
     var doErrorCheck: Boolean
         get() = getInt(KEY_DO_ERROR_CHECK, 1) != 0
         set(flag) = setInt(KEY_DO_ERROR_CHECK, if (flag) 1 else 0)
@@ -630,6 +635,11 @@ class PrefHelper constructor(
         setLong(KEY_NEXT_NOTE_COLLECTION_ID, nextEquipmentCollectionID + 1)
     }
 
+    /**
+     * Store a new entry into the database that is ready to be uploaded.
+     * Entry data is stored directly in the DataEntry object, or by a reference
+     * to the table which has the unique entry values.
+     */
     private fun createEntry(): DataEntry? {
         val projectGroupId = currentProjectGroupId
         if (projectGroupId < 0) {
@@ -657,8 +667,9 @@ class PrefHelper constructor(
 
     fun setFromEntry(entry: DataEntry) {
         db.tableNote.clearValues()
+        db.tableNote.updateValues(entry.notesWithValues)
         currentEditEntryId = entry.id
-        currentProjectGroupId = entry.projectAddressCombo!!.id
+        currentProjectGroupId = entry.projectAddressCombo?.id ?: 0
         currentPictureCollectionId = entry.pictureCollectionId
         entry.project?.let { project ->
             projectRootName = project.rootProject
@@ -668,7 +679,7 @@ class PrefHelper constructor(
             projectSubName = null
         }
         setAddress(entry.address)
-        entry.equipmentCollection!!.setChecked()
+        entry.equipmentCollection?.setChecked()
         entry.truck?.let { truck ->
             truckNumberValue = truck.truckNumberValue
             truckNumberPictureId = truck.truckNumberPictureId
@@ -685,9 +696,12 @@ class PrefHelper constructor(
         status = entry.status
     }
 
+    /**
+     * Save the data entered for either a currently edited entry, or save a new entry.
+     */
     fun saveEntry(): DataEntry? {
         val entry = currentEditEntry ?: return createEntry()
-        entry.equipmentCollection!!.addChecked()
+        entry.equipmentCollection?.addChecked()
         var truck = entry.truck
         if (truck == null) {
             truck = DataTruck()

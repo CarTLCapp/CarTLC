@@ -74,7 +74,6 @@ class NoteListEntryController(
                 viewMvc.maxLines = 1
             }
         }
-
     }
 
     private fun onAfterTextChanged(viewMvc: NoteListEntryItemViewMvc, item: DataNote, text: String?) {
@@ -100,21 +99,7 @@ class NoteListEntryController(
         if (!isInNotes) {
             return
         }
-        val entryHint = if (note.numDigits > 0) {
-            if (note.value != null && note.value!!.isNotBlank()) {
-                val sbuf = StringBuilder()
-                val count = note.value!!.length
-                sbuf.append(count)
-                sbuf.append("/")
-                sbuf.append(note.numDigits.toInt())
-                EntryHint(sbuf.toString(), (count > note.numDigits))
-            } else {
-                EntryHint("", false)
-            }
-        } else {
-            EntryHint("", false)
-        }
-        listener.onEntryHintChanged(entryHint)
+        listener.onEntryHintChanged(note.entryHint)
     }
 
     private fun updateNoteValue(note: DataNote) {

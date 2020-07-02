@@ -16,7 +16,6 @@ class StageTruckDamage(
     fun process() {
         with(shared) {
             picturesVisible = true
-
             prefHelper.truckHasDamage?.let { hasDamage ->
                 if (!hasDamage) {
                     if (buttonsUseCase.wasPrev) {

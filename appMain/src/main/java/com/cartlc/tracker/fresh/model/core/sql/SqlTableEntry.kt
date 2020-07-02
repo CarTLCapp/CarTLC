@@ -39,15 +39,18 @@ class SqlTableEntry(
         private const val KEY_STATUS = "status"
         private const val KEY_SERVER_ID = "server_id"
         private const val KEY_SERVER_ERROR_COUNT = "server_error_count"
+        private const val KEY_FLOW_PROGRESS = "flow_progress"
         private const val KEY_UPLOADED_MASTER = "uploaded_master"
         private const val KEY_UPLOADED_AWS = "uploaded_aws"
         private const val KEY_HAD_ERROR = "had_error"
+        private const val KEY_IS_COMPLETE = "is_complete"
     }
 
     data class Count(
             var totalEntries: Int = 0,
             var totalUploadedAws: Int = 0,
-            var totalUploadedMaster: Int = 0
+            var totalUploadedMaster: Int = 0,
+            var totalIncomplete: Int = 0
     ) {
         fun uploadedAll(): Boolean {
             return totalUploadedAws >= totalEntries && totalUploadedMaster >= totalEntries
@@ -61,6 +64,16 @@ class SqlTableEntry(
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableEntry::class.java, "upgrade11()", "db")
         }
+    }
+
+    fun upgrade21() {
+        try {
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_IS_COMPLETE bit default 0")
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_FLOW_PROGRESS smallint default 0")
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableEntry::class.java, "upgrade21()", "db")
+        }
+        setAllComplete()
     }
 
     fun clear() {
@@ -95,11 +108,15 @@ class SqlTableEntry(
         sbuf.append(" long default 0, ")
         sbuf.append(KEY_SERVER_ERROR_COUNT)
         sbuf.append(" smallint default 0, ")
+        sbuf.append(KEY_FLOW_PROGRESS)
+        sbuf.append(" smallint default 0, ")
         sbuf.append(KEY_UPLOADED_MASTER)
         sbuf.append(" bit default 0, ")
         sbuf.append(KEY_UPLOADED_AWS)
         sbuf.append(" bit default 0, ")
         sbuf.append(KEY_HAD_ERROR)
+        sbuf.append(" bit default 0)")
+        sbuf.append(KEY_IS_COMPLETE)
         sbuf.append(" bit default 0)")
         dbSql.execSQL(sbuf.toString())
     }
@@ -153,9 +170,11 @@ class SqlTableEntry(
             val idxStatus = cursor.getColumnIndex(KEY_STATUS)
             val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
             val idxServerErrorCount = cursor.getColumnIndex(KEY_SERVER_ERROR_COUNT)
+            val idxFlowProgress = cursor.getColumnIndex(KEY_FLOW_PROGRESS)
             val idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER)
             val idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS)
             val idxHasError = cursor.getColumnIndex(KEY_HAD_ERROR)
+            val idxIsComplete = cursor.getColumnIndex(KEY_IS_COMPLETE)
             var entry: DataEntry
             while (cursor.moveToNext()) {
                 entry = DataEntry(db)
@@ -186,9 +205,11 @@ class SqlTableEntry(
                 }
                 entry.serverId = cursor.getInt(idxServerId)
                 entry.serverErrorCount = cursor.getShort(idxServerErrorCount)
+                entry.flowProgress = cursor.getShort(idxFlowProgress)
                 entry.uploadedMaster = cursor.getShort(idxUploadedMaster).toInt() != 0
                 entry.uploadedAws = cursor.getShort(idxUploadedAws).toInt() != 0
                 entry.hasError = cursor.getShort(idxHasError).toInt() != 0
+                entry.isComplete = cursor.getShort(idxIsComplete).toInt() != 0
                 list.add(entry)
             }
             cursor.close()
@@ -217,16 +238,20 @@ class SqlTableEntry(
         try {
             val selection = "$KEY_PROJECT_ADDRESS_COMBO_ID =?"
             val selectionArgs = arrayOf(comboId.toString())
-            val columns = arrayOf(KEY_UPLOADED_AWS, KEY_UPLOADED_MASTER)
+            val columns = arrayOf(KEY_UPLOADED_AWS, KEY_UPLOADED_MASTER, KEY_IS_COMPLETE)
             val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null, null)
             val idxUploadedAws = cursor.getColumnIndex(KEY_UPLOADED_AWS)
             val idxUploadedMaster = cursor.getColumnIndex(KEY_UPLOADED_MASTER)
+            val idxIsComplete = cursor.getColumnIndex(KEY_IS_COMPLETE)
             while (cursor.moveToNext()) {
                 if (cursor.getShort(idxUploadedAws).toInt() != 0) {
                     count.totalUploadedAws++
                 }
                 if (cursor.getShort(idxUploadedMaster).toInt() != 0) {
                     count.totalUploadedMaster++
+                }
+                if (cursor.getShort(idxIsComplete).toInt() == 0) {
+                    count.totalIncomplete++
                 }
                 count.totalEntries++
             }
@@ -308,7 +333,7 @@ class SqlTableEntry(
         return count
     }
 
-    override fun add(entry: DataEntry): Boolean {
+    override fun updateOrInsert(entry: DataEntry): Boolean {
         var incNextCollectionID = false
         dbSql.beginTransaction()
         try {
@@ -327,9 +352,11 @@ class SqlTableEntry(
             values.put(KEY_PICTURE_COLLECTION_ID, entry.pictureCollectionId)
             values.put(KEY_SERVER_ID, entry.serverId)
             values.put(KEY_SERVER_ERROR_COUNT, entry.serverErrorCount)
+            values.put(KEY_FLOW_PROGRESS, entry.flowProgress)
             values.put(KEY_UPLOADED_AWS, if (entry.uploadedAws) 1 else 0)
             values.put(KEY_UPLOADED_MASTER, if (entry.uploadedMaster) 1 else 0)
             values.put(KEY_HAD_ERROR, if (entry.hasError) 1 else 0)
+            values.put(KEY_IS_COMPLETE, if (entry.isComplete) 1 else 0)
             if (entry.status != null) {
                 values.put(KEY_STATUS, entry.status!!.ordinal)
             }
@@ -409,6 +436,20 @@ class SqlTableEntry(
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTableEntry::class.java, "clearUploaded()", "db")
+        } finally {
+            dbSql.endTransaction()
+        }
+    }
+
+    private fun setAllComplete() {
+        dbSql.beginTransaction()
+        try {
+            val values = ContentValues()
+            values.put(KEY_IS_COMPLETE, 1)
+            dbSql.update(TABLE_NAME, values, null, null)
+            dbSql.setTransactionSuccessful()
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableEntry::class.java, "setAllComplete()", "db")
         } finally {
             dbSql.endTransaction()
         }

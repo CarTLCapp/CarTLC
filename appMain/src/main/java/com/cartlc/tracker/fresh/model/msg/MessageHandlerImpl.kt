@@ -45,6 +45,8 @@ class MessageHandlerImpl(
                 StringMessage.title_confirm_checklist -> ctx.getString(R.string.title_confirm_checklist)
                 StringMessage.title_photo -> ctx.getString(R.string.title_photo)
                 StringMessage.title_entries_ -> ctx.getString(R.string.title_entries_)
+                StringMessage.title_saved_ -> ctx.getString(R.string.title_saved_)
+                StringMessage.title_uploaded_ -> ctx.getString(R.string.title_uploaded_)
 
                 StringMessage.title_uploaded_done -> ctx.getString(R.string.title_uploaded_done)
                 StringMessage.truck_number_request -> ctx.getString(R.string.truck_number_request)
@@ -73,6 +75,20 @@ class MessageHandlerImpl(
 
                 is StringMessage.error_incorrect_note_count -> ctx.getString(R.string.error_incorrect_note_count, msg.length, msg.digits)
                 is StringMessage.error_incorrect_digit_count -> ctx.getString(R.string.error_incorrect_digit_count, msg.msg)
+
+                is StringMessage.note_incomplete -> {
+                    when {
+                        msg.size > 0 -> {
+                            ctx.getString(R.string.entry_incomplete2, msg.progress, msg.size)
+                        }
+                        msg.progress > 0 -> {
+                            ctx.getString(R.string.entry_incomplete1, msg.progress)
+                        }
+                        else -> {
+                            ctx.getString(R.string.entry_incomplete)
+                        }
+                    }
+                }
             }
 
     override fun getErrorMessage(error: ErrorMessage): String =

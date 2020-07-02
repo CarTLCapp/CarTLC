@@ -21,7 +21,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
         private const val DATABASE_NAME = "cartcl.db"
-        private const val DATABASE_VERSION = 20
+        private const val DATABASE_VERSION = 21
     }
 
     private val dbHelper: DatabaseHelper by lazy {
@@ -152,6 +152,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             if (oldVersion <= 19) {
                 tableTruck.upgrade20()
                 tablePicture.upgrade20()
+            }
+            if (oldVersion <= 20) {
+                tableEntry.upgrade21()
             }
         }
 

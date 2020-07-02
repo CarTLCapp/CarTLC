@@ -1017,9 +1017,12 @@ class DCPing(
 
     private fun sendEntries(list: List<DataEntry>): Int {
         var count = 0
+        var incomplete = 0
         for (entry in list) {
             if (entry.hasError) {
                 prefHelper.doErrorCheck = true
+            } else if (!entry.isComplete) {
+                incomplete++
             } else if (sendEntry(entry)) {
                 count++
             } else {

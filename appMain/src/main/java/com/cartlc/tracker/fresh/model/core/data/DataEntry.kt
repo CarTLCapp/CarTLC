@@ -35,8 +35,10 @@ class DataEntry(private val db: DatabaseTable) {
     var status: TruckStatus? = null
     var serverId: Int = 0
     var serverErrorCount: Short = 0
+    var flowProgress: Short = 0
     var uploadedMaster: Boolean = false
     var uploadedAws: Boolean = false
+    var isComplete: Boolean = false
     var hasError: Boolean = false
 
     val dateString: String
@@ -98,7 +100,7 @@ class DataEntry(private val db: DatabaseTable) {
     // Get all the notes as indicated by the project.
     // This will also include any current edits in place as well.
     private val pendingNotes: List<DataNote>
-        get() = db.noteHelper.getPendingNotes(projectAddressCombo!!.projectNameId)
+        get() = projectAddressCombo?.projectNameId?.let { db.noteHelper.getPendingNotes(it) } ?: emptyList()
 
     // Return the notes for the collection along with their values.
     val notesWithValues: List<DataNote>

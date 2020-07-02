@@ -3,9 +3,7 @@ package com.cartlc.tracker.fresh.ui.confirm
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
-import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
 import com.cartlc.tracker.fresh.model.flow.CurrentProjectFlow
@@ -14,7 +12,6 @@ import com.cartlc.tracker.fresh.model.flow.FlowUseCase
 import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.ui.confirm.data.*
-import com.cartlc.tracker.fresh.ui.picture.PictureListViewMvcImpl
 import java.io.File
 
 class ConfirmFinalController(
@@ -71,6 +68,9 @@ class ConfirmFinalController(
 
     // endregion FlowUseCase.Listener
 
+    /**
+     * Fill up the UI elements with all the data acquired from the given DataEntry.
+     */
     private fun fill(entry: DataEntry) {
         val items = mutableListOf<ConfirmDataType>()
         items.add(ConfirmDataType.BASICS(ConfirmDataBasics(
@@ -108,12 +108,11 @@ class ConfirmFinalController(
     }
 
     override fun onConfirmOkay() {
-        curEntry?.let {
-            repo.add(it)
-            prefHelper.clearLastEntry()
-            // TODO: perhaps try and retain the root project. Don't know how yet.
-            prefHelper.clearCurProject()
+        curEntry?.let { entry ->
+            entry.isComplete = true
+            repo.store(entry)
             curEntry = null
+            prefHelper.clearCurProject()
             repo.curFlowValue = CurrentProjectFlow()
         }
     }

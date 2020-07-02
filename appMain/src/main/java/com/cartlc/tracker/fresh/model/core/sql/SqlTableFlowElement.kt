@@ -5,13 +5,11 @@ package com.cartlc.tracker.fresh.model.core.sql
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import com.cartlc.tracker.fresh.model.core.data.DataFlowElement
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableFlowElement
 import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.ui.app.TBApplication
-import timber.log.Timber
 
 /**
  * Created by dug on 8/31/17.
@@ -175,6 +173,9 @@ class SqlTableFlowElement(
         return rowId
     }
 
+    /**
+     * Find the next flow element just beyond the passed flow element.
+     */
     override fun next(flow_element_id: Long): Long? {
         val selection = "$KEY_ROWID=?"
         val selectionArgs = arrayOf(flow_element_id.toString())
@@ -201,20 +202,27 @@ class SqlTableFlowElement(
         var rowId: Long? = null
         val idxRowId = cursor.getColumnIndex(KEY_ROWID)
         val idxType = cursor.getColumnIndex(KEY_TYPE)
-        var isNext = false
+        var foundElement = false
         var wasConfirm = false
         while (cursor.moveToNext()) {
             val testRowId = cursor.getLong(idxRowId)
             val testType = DataFlowElement.Type.from(cursor.getString(idxType))
-            if (isNext) {
+            if (foundElement) {
                 rowId = testRowId
+                /**
+                 * If the element was a confirm element, then we need to skip over confirm elements until the next
+                 * non-confirm element, because consecutive confirm elements are grouped together as one element.
+                 */
                 if (wasConfirm && testType == DataFlowElement.Type.CONFIRM) {
                     rowId = null
                     continue
                 }
                 break
             } else if (testRowId == flow_element_id || flow_element_id == Stage.FIRST_ELEMENT) {
-                isNext = true
+                /**
+                 * Found element, so the very next element will be the next element.
+                 */
+                foundElement = true
                 wasConfirm = testType == DataFlowElement.Type.CONFIRM_NEW || testType == DataFlowElement.Type.CONFIRM
             }
         }
@@ -222,6 +230,11 @@ class SqlTableFlowElement(
         return rowId
     }
 
+    /**
+     * Find the previous flow element just before the current flow element.
+     * Take into account CONFIRM elements, in which sequential confirm elements are grouped
+     * together as a single element.
+     */
     override fun prev(flow_element_id: Long): Long? {
         val selection = "$KEY_ROWID=?"
         val selectionArgs = arrayOf(flow_element_id.toString())
@@ -313,6 +326,27 @@ class SqlTableFlowElement(
         }
         cursor.close()
         return Pair(positionInChain, chainSize)
+    }
+
+    override fun flowSize(flow_id: Long): Int {
+        val selection = "$KEY_FLOW_ID=?"
+        val selectionArgs = arrayOf(flow_id.toString())
+        val columns = arrayOf(KEY_ROWID, KEY_TYPE)
+        val sortBy = "$KEY_ORDER asc"
+        val cursor = dbSql.query(TABLE_NAME, columns, selection, selectionArgs, null, null, sortBy, null)
+        val idxType = cursor.getColumnIndex(KEY_TYPE)
+        var wasConfirm = false
+        var chainSize = 0
+        while (cursor.moveToNext()) {
+            val testType = DataFlowElement.Type.from(cursor.getString(idxType))
+            if (wasConfirm && testType == DataFlowElement.Type.CONFIRM) {
+                continue
+            }
+            wasConfirm = testType == DataFlowElement.Type.CONFIRM_NEW || testType == DataFlowElement.Type.CONFIRM
+            chainSize++
+        }
+        cursor.close()
+        return chainSize
     }
 
     override fun update(item: DataFlowElement) {

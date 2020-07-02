@@ -168,9 +168,7 @@ class PictureListController(
 
     override fun onNoteValueChanged(note: DataNote) {
         repo.db.tableNote.updateValue(note)
-        for (listener in listeners) {
-            listener.onPictureNoteChanged(note)
-        }
+        listeners.forEach { it.onPictureNoteChanged(note) }
     }
 
     override fun getHint(note: DataNote): String? {
@@ -178,6 +176,12 @@ class PictureListController(
             TableNote.NOTE_TRUCK_DAMAGE_NAME -> messageHandler.getString(StringMessage.truck_damage_hint)
             TableNote.NOTE_TRUCK_NUMBER_NAME -> messageHandler.getString(StringMessage.truck_number_hint)
             else -> null
+        }
+    }
+
+    override fun onNoteFocused(note: DataNote, hasFocus: Boolean) {
+        if (hasFocus) {
+            listeners.forEach { it.onPictureNoteChanged(note) }
         }
     }
 

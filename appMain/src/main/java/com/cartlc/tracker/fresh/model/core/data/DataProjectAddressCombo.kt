@@ -85,7 +85,7 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
 
     val entries: List<DataEntry>
         get() {
-            return if (isRootProject) {
+            return sortIncompleteToTop(if (isRootProject) {
                 val list = mutableListOf<DataEntry>()
                 for (item in db.tableProjectAddressCombo.query()) {
                     if (!item.isRootProject && item.rootName == rootName && item.addressId == addressId) {
@@ -95,13 +95,12 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
                 list
             } else {
                 db.tableEntry.queryForProjectAddressCombo(id)
-            }
+            })
         }
 
     fun reset(projectNameId: Long, addressId: Long) {
         this.projectNameId = projectNameId
         this.addressId = addressId
-//        mProjectName = null
         mAddress = null
     }
 
@@ -128,4 +127,12 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
         }
         return sbuf.toString()
     }
+
+    private fun sortIncompleteToTop(list: List<DataEntry>): List<DataEntry> {
+        val result = mutableListOf<DataEntry>()
+        result.addAll(list.filter { !it.isComplete })
+        result.addAll(list.filter { it.isComplete })
+        return result
+    }
+
 }

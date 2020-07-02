@@ -53,6 +53,9 @@ class PictureNoteItemViewMvcImpl(
         this.listener = listener
         this.note = note
         listener.getHint(note).let { noteValueView.hint = it }
+        noteValueView.onFocusChangeListener = android.view.View.OnFocusChangeListener { _, hasFocus ->
+            listener.onNoteFocused(note, hasFocus)
+        }
     }
 
     override fun clear() {

@@ -26,11 +26,16 @@
     <string name="entry_hint_skip_zip">Enter ZIP or hit NEXT</string>
     <string name="entry_hint_edit_project">Changing Existing Project:</string>
     <string name="entry_hint_truck">Can be just Truck Number\nor Truck Number : License Plate</string>
+    <string name="entry_incomplete">Incomplete</string>
+    <string name="entry_incomplete1">Incomplete %d</string>
+    <string name="entry_incomplete2">Incomplete %d/%d</string>
 
     <string name="title_profile">Profile</string>
     <string name="title_feedback">Feedback</string>
     <string name="title_upload">Upload</string>
     <string name="title_login">Login</string>
+    <string name="title_save">Save</string>
+    <string name="title_saved_">Saved:</string>
     <string name="title_secondary_login">Optional Secondary Login</string>
     <string name="title_root_project">Root Project</string>
     <string name="title_sub_project">Sub Project</string>

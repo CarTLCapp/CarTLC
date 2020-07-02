@@ -5,7 +5,7 @@ import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.model.core.sql.SqlTableEntry
 
 interface TableEntry {
-    fun add(entry: DataEntry): Boolean
+    fun updateOrInsert(entry: DataEntry): Boolean
     fun countAddresses(addressId: Long): Int
     fun countTrucks(truckId: Long): Int
     fun countProjects(projectId: Long): Int

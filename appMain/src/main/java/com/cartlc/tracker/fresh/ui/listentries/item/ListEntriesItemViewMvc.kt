@@ -10,9 +10,12 @@ interface ListEntriesItemViewMvc: ViewMvc {
 
     fun bindOnEditListener(listener: () -> Unit)
 
+    var subProjectValue: String
     var truckValue: String?
     var status: String?
     var notesLine: String?
     var equipmentLine: String?
+    var incompleteVisible: Boolean
+    var incompleteText: String
 
 }

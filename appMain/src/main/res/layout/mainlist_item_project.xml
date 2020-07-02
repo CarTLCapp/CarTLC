@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@color/project_normal">
 
     <View
         android:id="@+id/separator"
-        android:background="@android:color/white"
         android:layout_width="match_parent"
         android:layout_height="2dp"
+        android:background="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <TextView
         android:id="@+id/project_notes"
@@ -24,17 +24,19 @@
         android:paddingEnd="10dp"
         app:layout_constraintBottom_toTopOf="@id/separator"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent"
+        tools:text="Entries: 1  Uploaded: ALL  Saved: 2" />
 
     <TextView
         android:id="@+id/project_name"
         style="@style/ProjectNameText"
         android:layout_width="@dimen/project_list_width"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginEnd="2dp"
         app:layout_constraintBottom_toTopOf="@id/project_notes"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginEnd="2dp"/>
+        tools:text="Verify V3" />
 
     <TextView
         android:id="@+id/project_address"
@@ -42,10 +44,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="2dp"
+        android:gravity="start|center_vertical"
+        app:layout_constraintBottom_toTopOf="@id/project_notes"
         app:layout_constraintLeft_toRightOf="@id/project_name"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/project_notes"
-        android:gravity="left|center_vertical"/>
+        tools:text="Sardina Concrete\n911 US Route 50,\nMilford, Ohio 45150" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

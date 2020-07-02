@@ -40,7 +40,9 @@ sealed class StringMessage {
     object title_confirm_checklist: StringMessage()
     object title_photo: StringMessage()
     object title_entries_: StringMessage()
+    object title_uploaded_: StringMessage()
     object title_uploaded_done: StringMessage()
+    object title_saved_: StringMessage()
     object truck_number_request: StringMessage()
     object truck_number_enter: StringMessage()
     object truck_number_hint: StringMessage()
@@ -55,6 +57,7 @@ sealed class StringMessage {
     data class prompt_custom_photo_N(val count: Int, val prompt: String): StringMessage()
     data class prompt_custom_photo_more(val count: Int, val prompt: String): StringMessage()
     data class prompt_notes(val prompt: String): StringMessage()
+    data class note_incomplete(val progress: Int, val size: Int = 0): StringMessage()
 
     data class title_elements(val count: Int): StringMessage()
     data class title_photos(val count: Int, val max: Int): StringMessage()

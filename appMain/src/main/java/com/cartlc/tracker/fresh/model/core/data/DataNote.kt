@@ -4,6 +4,7 @@
 package com.cartlc.tracker.fresh.model.core.data
 
 import androidx.annotation.VisibleForTesting
+import com.cartlc.tracker.fresh.model.misc.EntryHint
 import java.util.Locale
 
 /**
@@ -121,4 +122,21 @@ class DataNote {
         return result
     }
 
+    val entryHint: EntryHint
+        get() {
+            return if (numDigits > 0) {
+                if (!value.isNullOrBlank()) {
+                    val sbuf = StringBuilder()
+                    val count = value?.length ?: 0
+                    sbuf.append(count)
+                    sbuf.append("/")
+                    sbuf.append(numDigits.toInt())
+                    EntryHint(sbuf.toString(), (count > numDigits))
+                } else {
+                    EntryHint("", false)
+                }
+            } else {
+                EntryHint("", false)
+            }
+        }
 }
