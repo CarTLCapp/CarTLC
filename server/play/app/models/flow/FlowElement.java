@@ -91,7 +91,7 @@ public class FlowElement extends Model implements Comparable<FlowElement> {
         return sbuf.toString();
     }
 
-    public String getPromptIndent() { return String.format("-- %s", prompt); }
+    public String getPromptIndent() { return String.format(" %s", prompt); }
 
     public String getPromptId() {
         return String.format("prompt%d", id);
