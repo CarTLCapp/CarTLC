@@ -115,7 +115,7 @@ class SqlTableEntry(
         sbuf.append(KEY_UPLOADED_AWS)
         sbuf.append(" bit default 0, ")
         sbuf.append(KEY_HAD_ERROR)
-        sbuf.append(" bit default 0)")
+        sbuf.append(" bit default 0, ")
         sbuf.append(KEY_IS_COMPLETE)
         sbuf.append(" bit default 0)")
         dbSql.execSQL(sbuf.toString())

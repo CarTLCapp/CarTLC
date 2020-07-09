@@ -132,7 +132,7 @@ class AmazonHelper(
         val observer = mTrans?.upload(
                 BUCKET_NAME, /* The bucket to upload to */
                 key, /* The key for the uploaded object */
-                uploadingFile       /* The file where the data to upload existsUnscaled */
+                uploadingFile /* The file where the data to upload existsUnscaled */
         )
         observer?.setTransferListener(object : TransferListener {
             override fun onStateChanged(id: Int, state: TransferState) {

@@ -888,6 +888,10 @@ class DCPing(
                 val eleFlow = arrayFlow.getJSONObject(f)
                 val incomingFlow = DataFlow()
                 incomingFlow.serverId = eleFlow.getInt("flow_id")
+                if (!eleFlow.has("sub_project_id")) {
+                    Timber.e("queryFlows(): invalid flow id ${incomingFlow.serverId}: no sub project id")
+                    continue
+                }
                 val serverSubProjectId = eleFlow.getInt("sub_project_id")
                 val project = db.tableProjects.queryByServerId(serverSubProjectId)
                 if (project == null) {

@@ -278,6 +278,9 @@ public class FlowController extends Controller {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("flows");
         for (Flow flow : Flow.list()) {
+            if (flow.id == null || flow.sub_project_id == null || flow.id == 0 || flow.sub_project_id == 0) {
+                continue;
+            }
             ObjectNode node = array.addObject();
             node.put("flow_id", flow.id);
             node.put("sub_project_id", flow.sub_project_id);

@@ -90,8 +90,14 @@ public class Note extends Model implements Comparable<Note> {
      * General purpose notes
      */
 
+    /**
+     * NOTE_TRUCK_NUMBER_NAME and the damage is the obsolete way of identifying these NOTE values.
+     * Instead they are tracked using a flow stage. See EntryController "truck_number" and "truck_damage".
+     */
     public static final String NOTE_TRUCK_NUMBER_NAME = "Truck Number";
     public static final String NOTE_TRUCK_DAMAGE_NAME = "Truck Damage";
+
+    public static final String NOTE_PARTIAL_INSTALL = "Partial Install";
 
     @Transactional
     public static void initGeneralPurpose() {
