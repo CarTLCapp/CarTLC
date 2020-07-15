@@ -48,7 +48,7 @@ public class State {
             new State("Ohio", "OH"),
             new State("Oklahoma", "OK"),
             new State("Oregon", "OR"),
-            new State("Pennslyvania", "PA"),
+            new State("Pennsylvania", "PA"),
             new State("Rhode Island", "RI"),
             new State("South Carolina", "SC"),
             new State("South Dakota", "SD"),
