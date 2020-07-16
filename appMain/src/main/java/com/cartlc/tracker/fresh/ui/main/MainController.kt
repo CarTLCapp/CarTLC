@@ -330,7 +330,8 @@ class MainController(
             return
         }
         trimMemoryMessageDone.add(level)
-        val tag = when(level) {
+
+        val tag = when (level) {
             ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE -> "Running Moderate"
             ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL -> "Running Critical"
             ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW -> "Running Low"
@@ -340,7 +341,10 @@ class MainController(
             ComponentCallbacks2.TRIM_MEMORY_COMPLETE -> "Complete"
             else -> level.toString()
         }
-        Timber.e("onTrimMemory($level): $tag")
+        when (level) {
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL -> Timber.e("onTrimMemory($level): $tag")
+        }
+
     }
 
     // endregion Lifecycle

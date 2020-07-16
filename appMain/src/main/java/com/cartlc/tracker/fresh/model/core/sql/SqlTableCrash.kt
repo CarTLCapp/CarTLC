@@ -40,6 +40,8 @@ class SqlTableCrash(
                 db.reportError(ex, SqlTableCrash::class.java, "upgrade10()", "db")
             }
         }
+
+        private const val MAX_MESSAGE_SIZE = 10000
     }
 
     class CrashLine {
@@ -116,14 +118,22 @@ class SqlTableCrash(
     }
 
     override fun message(code: Int, message: String, trace: String?) {
+        val useMessage = if (message.length > MAX_MESSAGE_SIZE) {
+            message.substring(0, MAX_MESSAGE_SIZE)
+        } else message
+        val useTrace = trace?.let {
+            if (trace.length > MAX_MESSAGE_SIZE) {
+                trace.substring(0, MAX_MESSAGE_SIZE)
+            } else trace
+        }
         dbSql.beginTransaction()
         try {
             val values = ContentValues()
             values.clear()
             values.put(KEY_DATE, System.currentTimeMillis())
             values.put(KEY_CODE, code)
-            values.put(KEY_MESSAGE, message)
-            values.put(KEY_TRACE, trace)
+            values.put(KEY_MESSAGE, useMessage)
+            values.put(KEY_TRACE, useTrace)
             values.put(KEY_VERSION, db.appVersion)
             dbSql.insert(TABLE_NAME, null, values)
             dbSql.setTransactionSuccessful()

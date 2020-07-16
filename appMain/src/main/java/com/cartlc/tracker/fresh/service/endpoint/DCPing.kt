@@ -32,6 +32,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 import org.greenrobot.eventbus.EventBus
+import org.json.JSONException
 import timber.log.Timber
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -78,6 +79,7 @@ class DCPing(
         private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
 
         private const val COMPANY_PAGE_SIZE = 100
+        private const val FLOW_PAGE_SIZE = 10
     }
 
     private val serverUrl: String
@@ -454,7 +456,7 @@ class DCPing(
     }
 
     private fun queryCompanies(page: Int, unprocessed: MutableList<DataAddress>): Int {
-        Timber.i("queryCompanies()")
+        Timber.i("queryCompanies($page)")
         val numPages: Int
         try {
             val response = post(url(companiesSuffix), page, COMPANY_PAGE_SIZE)
@@ -874,15 +876,48 @@ class DCPing(
         return true
     }
 
+    private inner class UnprocessedFlowData {
+        val unprocessedFlow = db.tableFlow.query().toMutableList()
+        val unprocessedFlowElement = db.tableFlowElement.query().toMutableList()
+        val unprocessedFlowElementNote = db.tableFlowElementNote.query().toMutableList()
+
+        fun deleteUnused() {
+            // Remove or disable unprocessed elements
+            Timber.i("removing unprocessed: ${unprocessedFlow.size} flows, ${unprocessedFlowElement.size} flow elements, and ${unprocessedFlowElementNote.size} flow notes")
+            for (item in unprocessedFlow) {
+                db.tableFlow.remove(item)
+            }
+            for (item in unprocessedFlowElement) {
+                db.tableFlowElement.remove(item)
+            }
+            for (item in unprocessedFlowElementNote) {
+                db.tableFlowElementNote.remove(item)
+            }
+        }
+    }
+
     private fun queryFlows(): Boolean {
         Timber.i("queryFlows()")
-        try {
-            val unprocessedFlow = db.tableFlow.query().toMutableList()
-            val unprocessedFlowElement = db.tableFlowElement.query().toMutableList()
-            val unprocessedFlowElementNote = db.tableFlowElementNote.query().toMutableList()
+        val unprocessed = UnprocessedFlowData()
+        val numPages = queryFlows(0, unprocessed)
+        if (numPages == 0) {
+            return false
+        }
+        for (page in 1 until numPages) {
+            if (queryFlows(page, unprocessed) == 0) {
+                return false
+            }
+        }
+        unprocessed.deleteUnused()
+        return true
+    }
 
-            val response = post(url(flowsSuffix)) ?: return false
+    private fun queryFlows(page: Int, unprocessed: UnprocessedFlowData): Int {
+        val numPages: Int
+        try {
+            val response = post(url(flowsSuffix), page, FLOW_PAGE_SIZE)
             val objFlow = parseResult(response)
+            numPages = objFlow.getInt("numPages")
             val arrayFlow = objFlow.getJSONArray("flows")
             for (f in 0 until arrayFlow.length()) {
                 val eleFlow = arrayFlow.getJSONObject(f)
@@ -901,13 +936,13 @@ class DCPing(
                 incomingFlow.subProjectId = project.id
                 val itemFlow = db.tableFlow.queryByServerId(incomingFlow.serverId)
                 if (itemFlow == null) {
-                    val match = get(unprocessedFlow, incomingFlow)
+                    val match = get(unprocessed.unprocessedFlow, incomingFlow)
                     if (match != null) {
                         // If this already exists, convert the existing one by simply giving it the serverId.
                         match.serverId = incomingFlow.serverId
                         db.tableFlow.update(match)
                         Timber.i("Commandeer local: $match")
-                        unprocessedFlow.remove(match)
+                        unprocessed.unprocessedFlow.remove(match)
                         incomingFlow.id = match.id
                     } else {
                         // Otherwise just add the new entry.
@@ -923,7 +958,7 @@ class DCPing(
                     } else {
                         Timber.i("No change: $itemFlow")
                     }
-                    unprocessedFlow.remove(itemFlow)
+                    unprocessed.unprocessedFlow.remove(itemFlow)
                 }
                 val elementsArray = eleFlow.getJSONArray("elements")
                 for (e in 0 until elementsArray.length()) {
@@ -942,14 +977,14 @@ class DCPing(
                     incomingEle.order = eleElement.getInt("order").toShort()
                     val itemElement = db.tableFlowElement.queryByServerId(incomingEle.serverId)
                     if (itemElement == null) {
-                        val match = get(unprocessedFlowElement, incomingEle)
+                        val match = get(unprocessed.unprocessedFlowElement, incomingEle)
                         if (match != null) {
                             // If this already exists, convert the existing one by simply giving it the serverId.
                             match.serverId = incomingEle.serverId
                             db.tableFlowElement.update(match)
                             incomingEle.id = match.id
                             Timber.i("Commandeer local: $match")
-                            unprocessedFlowElement.remove(match)
+                            unprocessed.unprocessedFlowElement.remove(match)
                         } else {
                             // Otherwise just add the new entry.
                             db.tableFlowElement.add(incomingEle)
@@ -963,7 +998,7 @@ class DCPing(
                         } else {
                             Timber.i("No change: $itemElement of $itemFlow")
                         }
-                        unprocessedFlowElement.remove(itemElement)
+                        unprocessed.unprocessedFlowElement.remove(itemElement)
                     }
                     if (eleElement.has("notes")) {
                         val notesArray = eleElement.getJSONArray("notes")
@@ -979,11 +1014,11 @@ class DCPing(
                                 incomingNote.noteId = itemNote.id
                                 val itemElementNote = db.tableFlowElementNote.query(incomingNote.flowElementId, incomingNote.noteId)
                                 if (itemElementNote == null) {
-                                    val match = get(unprocessedFlowElementNote, incomingNote)
+                                    val match = get(unprocessed.unprocessedFlowElementNote, incomingNote)
                                     if (match != null) {
                                         // If this already exists we're good to go.
                                         Timber.i("Found already: $match")
-                                        unprocessedFlowElementNote.remove(match)
+                                        unprocessed.unprocessedFlowElementNote.remove(match)
                                     } else {
                                         // Otherwise just add the new entry.
                                         db.tableFlowElementNote.add(incomingNote)
@@ -991,32 +1026,21 @@ class DCPing(
                                     }
                                 } else {
                                     Timber.i("No change: $itemElementNote")
-                                    unprocessedFlowElementNote.remove(itemElementNote)
+                                    unprocessed.unprocessedFlowElementNote.remove(itemElementNote)
                                 }
                             }
                         }
                     }
                 }
             }
-            // Remove or disable unprocessed elements
-            Timber.i("removing unprocessed: ${unprocessedFlow.size} flows, ${unprocessedFlowElement.size} flow elements, and ${unprocessedFlowElementNote.size} flow notes")
-            for (item in unprocessedFlow) {
-                db.tableFlow.remove(item)
-            }
-            for (item in unprocessedFlowElement) {
-                db.tableFlowElement.remove(item)
-            }
-            for (item in unprocessedFlowElementNote) {
-                db.tableFlowElementNote.remove(item)
-            }
         } catch (ex: IOException) {
-            return false
+            return 0
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "queryFlows()", "server")
-            return false
+            return 0
         }
-        Timber.d("QUERY FLOWS: ${db.tableFlow}")
-        return true
+        Timber.d("QUERY FLOWS($page): ${db.tableFlow}")
+        return numPages
     }
 
     private fun sendEntries(list: List<DataEntry>): Int {
@@ -1294,11 +1318,15 @@ class DCPing(
     private fun parseResult(result: String): JSONObject {
         try {
             return JSONObject(result)
-        } catch (ex: Exception) {
-            Timber.e("Got bad result back from server: $result\n$ex.message")
+        } catch (ex: JSONException) {
+            Timber.e("Got bad result back from server: ${ex.message}")
+            if (result.length > 65000) {
+                Timber.e("It's likely the server tried to return a result that was too large: ${result.length}")
+            }
         }
         return JSONObject()
     }
+
 
     private fun sendCrashLines(lines: List<SqlTableCrash.CrashLine>) {
         for (line in lines) {

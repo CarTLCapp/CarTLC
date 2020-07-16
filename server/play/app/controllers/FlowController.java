@@ -32,6 +32,8 @@ import play.libs.Json;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.JsonNode;
+
 
 /**
  * Manage a database of users
@@ -275,9 +277,46 @@ public class FlowController extends Controller {
     }
 
     public Result query() {
+        JsonNode json = request().body().asJson();
+        JsonNode value = json.findValue("page");
+        int page;
+        if (value != null) {
+            page = value.intValue();
+        } else {
+            page = -1;
+        }
+        int pageSize;
+        value = json.findValue("page_size");
+        if (value != null) {
+            pageSize = value.intValue();
+        } else {
+            pageSize = -1;
+        }
+        return query(page, pageSize);
+    }
+
+    public Result query(int page, int pageSize) {
         ObjectNode top = Json.newObject();
         ArrayNode array = top.putArray("flows");
-        for (Flow flow : Flow.list()) {
+        List<Flow> list = Flow.list();
+        int numPages = list.size() / pageSize + ((list.size() % pageSize) == 0 ? 0 : 1);
+        List<Flow> subList;
+        if (pageSize > 0 && page >= 0) {
+            try {
+                int fromIndex = page * pageSize;
+                int toIndex = fromIndex + pageSize;
+                if (toIndex > list.size()) {
+                    toIndex = list.size();
+                }
+                subList = list.subList(fromIndex, toIndex);
+            } catch (IndexOutOfBoundsException ex) {
+                Logger.error(ex.getMessage());
+                subList = new ArrayList<Flow>();
+            }
+        } else {
+            subList = list;
+        }
+        for (Flow flow : subList) {
             if (flow.id == null || flow.sub_project_id == null || flow.id == 0 || flow.sub_project_id == 0) {
                 continue;
             }
@@ -292,7 +331,11 @@ public class FlowController extends Controller {
                 elementNode.put("id", element.id);
                 elementNode.put("order", element.line_num);
                 if (element.hasPrompt()) {
-                    elementNode.put("prompt", element.prompt);
+                    if (element.prompt.contains("\"")) {
+                        Logger.error("Ignoring prompt value with quote: " + element.prompt);
+                    } else {
+                        elementNode.put("prompt", element.prompt);
+                    }
                 }
                 elementNode.put("type", element.getPromptType().getCodeString());
                 elementNode.put("num_images", element.getNumImages());
@@ -305,6 +348,8 @@ public class FlowController extends Controller {
                 }
             }
         }
+        top.put("numPages", numPages);
+        top.put("page", page);
         return ok(top);
     }
 
