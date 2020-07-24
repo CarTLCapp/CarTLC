@@ -5,13 +5,15 @@ import com.cartlc.tracker.fresh.model.core.data.DataNote
 interface TableNote {
 
     companion object {
-        // Note: this two strings must match the constants found in Note.java on the server side.
+        // Note: these strings must match the constants found in Note.java on the server side.
         const val NOTE_TRUCK_NUMBER_NAME = "Truck Number"
         const val NOTE_TRUCK_DAMAGE_NAME = "Truck Damage"
+        const val NOTE_PARTIAL_INSTALL_REASON = "Partial Install"
     }
 
     val noteTruckNumber: DataNote?
     val noteTruckDamage: DataNote?
+    val notePartialInstall: DataNote?
 
     fun add(item: DataNote): Long
     fun clearValues()

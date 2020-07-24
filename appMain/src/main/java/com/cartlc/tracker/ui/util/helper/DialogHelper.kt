@@ -78,7 +78,7 @@ class DialogHelper(
         var mQuestions = arrayOfNulls<CheckBox>(7)
 
         init {
-            view = mAct.layoutInflater.inflate(R.layout.final_confirm_dialog, null)
+            view = mAct.layoutInflater.inflate(R.layout.dialog_final_confirm, null)
             setup(0, R.id.question_1)
             setup(1, R.id.question_2)
             setup(2, R.id.question_3)

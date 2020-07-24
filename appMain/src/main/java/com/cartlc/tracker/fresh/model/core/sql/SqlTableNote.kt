@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableNote
+import com.cartlc.tracker.fresh.model.core.table.TableNote.Companion.NOTE_PARTIAL_INSTALL_REASON
 import com.cartlc.tracker.fresh.model.core.table.TableNote.Companion.NOTE_TRUCK_DAMAGE_NAME
 import com.cartlc.tracker.fresh.model.core.table.TableNote.Companion.NOTE_TRUCK_NUMBER_NAME
 
@@ -42,6 +43,9 @@ class SqlTableNote constructor(
 
     override val noteTruckDamage: DataNote?
         get() = queryByName(NOTE_TRUCK_DAMAGE_NAME)
+
+    override val notePartialInstall: DataNote?
+        get() = queryByName(NOTE_PARTIAL_INSTALL_REASON)
 
     fun create() {
         val sbuf = StringBuilder()

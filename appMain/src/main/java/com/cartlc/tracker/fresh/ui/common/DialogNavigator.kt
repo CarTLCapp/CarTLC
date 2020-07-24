@@ -13,9 +13,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.CheckBox
-import android.widget.CompoundButton
 import android.widget.EditText
-import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 
 class DialogNavigator(
@@ -50,25 +48,6 @@ class DialogNavigator(
         dialog.dismiss()
     }
 
-//    fun showPictureNoteDialog(item: DataPicture, onDone: () -> Unit) {
-//        val builder = android.app.AlertDialog.Builder(context)
-//        val noteView = layoutInflater.inflate(R.layout.picture_note, null)
-//        builder.setView(noteView)
-//
-//        val edt = noteView.findViewById<View>(R.id.note) as EditText
-//        edt.setText(item.note)
-//
-//        builder.setTitle(R.string.picture_note_title)
-//        builder.setPositiveButton("Done") { dialog, _ ->
-//            item.note = edt.text.toString().trim { it <= ' ' }
-//            dialog.dismiss()
-//            onDone()
-//        }
-//        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-//        val b = builder.create()
-//        b.show()
-//    }
-
     fun showDialog(msg: String, onDone: () -> Unit) {
         val builder = android.app.AlertDialog.Builder(context)
         builder.setMessage(msg)
@@ -93,12 +72,27 @@ class DialogNavigator(
         builder.create().show()
     }
 
+    fun showPartialInstallReasonDialog(initialValue: String?, onDone: (reason: String?) -> Unit) {
+        val builder = android.app.AlertDialog.Builder(context)
+        builder.setTitle(R.string.dialog_partial_install_title)
+        val view: View = layoutInflater.inflate(R.layout.dialog_partial_install, null)
+        val editView = view.findViewById<EditText>(R.id.value)
+        editView.setText(initialValue)
+        builder.setView(view)
+        builder.setPositiveButton(R.string.btn_done) { dialog, _ ->
+            val reason = editView.text.toString()
+            dialog.dismiss()
+            onDone(reason)
+        }
+        builder.create().show()
+    }
+
     // region showFinalConfirmDialog()
 
     private var dialog: AlertDialog? = null
 
     private inner class FinalConfirmDialogData {
-        var view: View = layoutInflater.inflate(R.layout.final_confirm_dialog, null)
+        var view: View = layoutInflater.inflate(R.layout.dialog_final_confirm, null)
         var mQuestions = arrayOfNulls<CheckBox>(7)
 
         init {
@@ -155,6 +149,26 @@ class DialogNavigator(
     }
 
     // endregion showFinalConfirmDialog()
+
+
+//    fun showPictureNoteDialog(item: DataPicture, onDone: () -> Unit) {
+//        val builder = android.app.AlertDialog.Builder(context)
+//        val noteView = layoutInflater.inflate(R.layout.picture_note, null)
+//        builder.setView(noteView)
+//
+//        val edt = noteView.findViewById<View>(R.id.note) as EditText
+//        edt.setText(item.note)
+//
+//        builder.setTitle(R.string.picture_note_title)
+//        builder.setPositiveButton("Done") { dialog, _ ->
+//            item.note = edt.text.toString().trim { it <= ' ' }
+//            dialog.dismiss()
+//            onDone()
+//        }
+//        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+//        val b = builder.create()
+//        b.show()
+//    }
 
 }
 

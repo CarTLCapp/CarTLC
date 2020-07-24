@@ -745,9 +745,9 @@ public class EntryController extends Controller {
                         if (flowStageValue != null) {
                             String flowStage = flowStageValue.textValue();
                             if (flowStage != null) {
-                                if (flowStage.equals("truck_number")) {
+                                if (flowStage.equals("truck_number")) { // See DCPing for the "truck_number" flow reference
                                     collection.flow_element_id = PictureCollection.FLOW_TRUCK_NUMBER_ID;
-                                } else if (flowStage.equals("truck_damage")) {
+                                } else if (flowStage.equals("truck_damage")) { // See DCPing for the track_damage flow reference
                                     collection.flow_element_id = PictureCollection.FLOW_TRUCK_DAMAGE_ID;
                                 }
                             }

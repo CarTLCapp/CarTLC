@@ -528,13 +528,7 @@ class MainController(
             Stage.TRUCK_NUMBER_PICTURE -> stageTruckNumber.save()
             Stage.TRUCK_DAMAGE_PICTURE -> stageTruckDamage.save()
             is Stage.CUSTOM_FLOW -> stageCustomFlow.save(isNext)
-            Stage.STATUS ->
-                return if (isNext) {
-                    if (prefHelper.status === TruckStatus.UNKNOWN) {
-                        errorValue = ErrorMessage.NEED_STATUS
-                        false
-                    } else true
-                } else true
+            Stage.STATUS -> stageStatus.save(isNext)
             Stage.CONFIRM -> stageConfirm.save(viewMvc, isNext)
             else -> true
         }

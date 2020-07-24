@@ -76,7 +76,8 @@ class ConfirmFinalController(
         items.add(ConfirmDataType.BASICS(ConfirmDataBasics(
                 entry.projectDashName,
                 entry.addressBlock,
-                entry.getStatus(ctx)
+                entry.getStatus(ctx),
+                partialInstallReason
         )))
         val notes = entry.notesWithValues
         if (notes.isNotEmpty()) {
@@ -106,6 +107,13 @@ class ConfirmFinalController(
         items.addAll(convert(groupByStage(entry.pictures)))
         viewMvc.items = items
     }
+
+    private val partialInstallReason: String?
+        get() {
+            return if (prefHelper.statusIsPartialInstall) {
+                db.tableNote.notePartialInstall?.value
+            } else null
+        }
 
     override fun onConfirmOkay() {
         curEntry?.let { entry ->

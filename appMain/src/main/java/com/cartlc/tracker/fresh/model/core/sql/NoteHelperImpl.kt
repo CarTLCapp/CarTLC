@@ -8,7 +8,6 @@ import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.NoteHelper
-import timber.log.Timber
 
 class NoteHelperImpl(
         private val db: DatabaseTable
@@ -20,9 +19,7 @@ class NoteHelperImpl(
         } ?: emptyList()
     }
 
-    override fun getPendingNotes(projectNameId: Long): List<DataNote> {
-        // Note: was this:
-//        val notes = db.tableCollectionNoteProject.getNotes(projectNameId).toMutableList()
+    override fun getPendingNotes(projectNameId: Long, withPartialInstallReason: Boolean): List<DataNote> {
         val notes = mutableListOf<DataNote>()
         db.tableNote.noteTruckNumber?.let {
             notes.add(it)
@@ -31,6 +28,14 @@ class NoteHelperImpl(
         db.tableNote.noteTruckDamage?.let { note ->
             note.value?.let {
                 notes.add(note)
+            }
+        }
+        // If partial damage was added, use it
+        if (withPartialInstallReason) {
+            db.tableNote.notePartialInstall?.let { note ->
+                note.value?.let {
+                    notes.add(note)
+                }
             }
         }
         db.tableFlow.queryBySubProjectId(projectNameId.toInt())?.let { flow ->

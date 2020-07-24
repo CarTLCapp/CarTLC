@@ -11,6 +11,6 @@ interface NoteHelper {
 
     fun getNotesFromCurrentFlowElementId(elementId: Long?): List<DataNote>
     fun getNotesOverlaidFrom(elementId: Long, entry: DataEntry?): List<DataNote>
-    fun getPendingNotes(projectNameId: Long): List<DataNote>
+    fun getPendingNotes(projectNameId: Long, withPartialInstallReason: Boolean): List<DataNote>
 
 }

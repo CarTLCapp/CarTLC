@@ -21,17 +21,26 @@ class ConfirmBasicsViewMvcImpl(
     private val projectNameValue = findViewById<TextView>(R.id.project_name_value)
     private val projectAddressValue = findViewById<TextView>(R.id.project_address_value)
     private val statusValue = findViewById<TextView>(R.id.status_value)
+    private val statusReasonLabel = findViewById<TextView>(R.id.status_reason_label)
+    private val statusReasonValue = findViewById<TextView>(R.id.status_reason_value)
 
     // region ConfirmBasicsViewMvc
 
+    // TODO: This control logic should not be in the ViewMvc class -- oh well.
     override var data: ConfirmDataBasics
         get() {
-            return ConfirmDataBasics(projectName, projectAddress, status)
+            return ConfirmDataBasics(projectName, projectAddress, status, statusReason)
         }
         set(value) {
             projectName = value.projectName
             projectAddress = value.projectAddress
             status = value.status
+            if (value.reason.isNullOrEmpty()) {
+                statusReasonVisible = false
+            } else {
+                statusReasonVisible = true
+                statusReason = value.reason
+            }
         }
 
     private var projectName: String
@@ -51,6 +60,23 @@ class ConfirmBasicsViewMvcImpl(
         get() = statusValue.text.toString()
         set(value) {
             statusValue.text = value
+        }
+
+    private var statusReasonVisible: Boolean
+        get() = statusReasonLabel.visibility == View.VISIBLE
+        set(value) {
+            if (value) {
+                statusReasonLabel.visibility = View.VISIBLE
+                statusReasonValue.visibility = View.VISIBLE
+            } else {
+                statusReasonLabel.visibility = View.GONE
+                statusReasonValue.visibility = View.GONE
+            }
+        }
+    private var statusReason: String
+        get() = statusReasonValue.text.toString()
+        set(value) {
+            statusReasonValue.text = value
         }
 
     // endregion ConfirmBasicsViewMvc

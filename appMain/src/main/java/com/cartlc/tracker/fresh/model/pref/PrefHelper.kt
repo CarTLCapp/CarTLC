@@ -388,6 +388,9 @@ class PrefHelper constructor(
             setTruckValue(Stage.TRUCK_DAMAGE_PICTURE, value.toLong())
         }
 
+    val statusIsPartialInstall: Boolean
+        get() = status == TruckStatus.PARTIAL
+
     private fun setTruckValue(stage: Stage, value: Long) {
         db.tablePicture.query(value)?.let { from ->
             if (from.collectionId != currentPictureCollectionId || from.stage != stage) {
@@ -660,7 +663,7 @@ class PrefHelper constructor(
                 projectGroup.projectNameId,
                 projectGroup.companyName!!)
         entry.status = status
-        entry.saveNotes(nextNoteCollectionID)
+        entry.saveNotes(nextNoteCollectionID, statusIsPartialInstall)
         entry.date = System.currentTimeMillis()
         return entry
     }
@@ -721,7 +724,7 @@ class PrefHelper constructor(
         if (entry.serverId > 0) {
             entry.date = System.currentTimeMillis()
         }
-        entry.saveNotes()
+        entry.saveNotes(statusIsPartialInstall)
         return entry
     }
 

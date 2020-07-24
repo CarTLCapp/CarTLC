@@ -99,8 +99,10 @@ class DataEntry(private val db: DatabaseTable) {
 
     // Get all the notes as indicated by the project.
     // This will also include any current edits in place as well.
-    private val pendingNotes: List<DataNote>
-        get() = projectAddressCombo?.projectNameId?.let { db.noteHelper.getPendingNotes(it) } ?: emptyList()
+    private fun pendingNotes(withPartialInstallReason: Boolean): List<DataNote> {
+        return projectAddressCombo?.projectNameId?.let { db.noteHelper.getPendingNotes(it, withPartialInstallReason) }
+                ?: emptyList()
+    }
 
     // Return the notes for the collection along with their values.
     val notesWithValues: List<DataNote>
@@ -148,13 +150,13 @@ class DataEntry(private val db: DatabaseTable) {
         return null
     }
 
-    fun saveNotes(collectionId: Long) {
+    fun saveNotes(collectionId: Long, withPartialInstallReason: Boolean) {
         noteCollectionId = collectionId
-        saveNotes()
+        saveNotes(withPartialInstallReason)
     }
 
-    fun saveNotes() {
-        val useNotes = pendingNotes
+    fun saveNotes(withPartialInstallReason: Boolean) {
+        val useNotes = pendingNotes(withPartialInstallReason)
         db.tableCollectionNoteEntry.remove(noteCollectionId)
         db.tableCollectionNoteEntry.save(noteCollectionId, useNotes)
     }

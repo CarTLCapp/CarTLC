@@ -1340,7 +1340,7 @@ class DCPing(
             jsonObject.accumulate("tech_id", prefHelper.techID)
             jsonObject.accumulate("date", line.date)
             jsonObject.accumulate("code", line.code)
-            jsonObject.accumulate("message", line.message)
+            jsonObject.accumulate("message", line.message?.take(10000))
             jsonObject.accumulate("trace", line.trace)
             jsonObject.accumulate("app_version", line.version)
             val result = post(url(messageSuffix), jsonObject, false)

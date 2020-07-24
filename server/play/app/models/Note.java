@@ -91,19 +91,23 @@ public class Note extends Model implements Comparable<Note> {
      */
 
     /**
-     * NOTE_TRUCK_NUMBER_NAME and the damage is the obsolete way of identifying these NOTE values.
-     * Instead they are tracked using a flow stage. See EntryController "truck_number" and "truck_damage".
+     * NOTE_TRUCK_NUMBER_NAME and NOTE_TRUCK_DAMAGE_NAME identifies the textual portion of these values.
+     * They are used along with the pictures which are tracked as part of a flow. See EntryController
+     * "truck_number" and "truck_damage".
      */
     public static final String NOTE_TRUCK_NUMBER_NAME = "Truck Number";
     public static final String NOTE_TRUCK_DAMAGE_NAME = "Truck Damage";
-
-    public static final String NOTE_PARTIAL_INSTALL = "Partial Install";
+    /**
+     * NOTE_PARTIAL_INSTALL_REASON identifies the note associated with the reason for the partial install.
+     */
+    public static final String NOTE_PARTIAL_INSTALL_REASON = "Partial Install";
 
     @Transactional
     public static void initGeneralPurpose() {
         final boolean hasNumber = hasNoteWithName(NOTE_TRUCK_NUMBER_NAME);
         final boolean hasDamage = hasNoteWithName(NOTE_TRUCK_DAMAGE_NAME);
-        if (!hasNumber || !hasDamage) {
+        final boolean hasPartialInstall = hasNoteWithName(NOTE_PARTIAL_INSTALL_REASON);
+        if (!hasNumber || !hasDamage || !hasPartialInstall) {
             final int client_id = Client.getAdmin().id.intValue();
             if (!hasNumber) {
                 Note note = new Note();
@@ -121,6 +125,16 @@ public class Note extends Model implements Comparable<Note> {
                 note.created_by_client = false;
                 note.disabled = false;
                 note.name = NOTE_TRUCK_DAMAGE_NAME;
+                note.type = Type.TEXT;
+                note.save();
+                Logger.info("ADDED " + note.name);
+            }
+            if (!hasPartialInstall) {
+                Note note = new Note();
+                note.created_by = client_id;
+                note.created_by_client = false;
+                note.disabled = false;
+                note.name = NOTE_PARTIAL_INSTALL_REASON;
                 note.type = Type.TEXT;
                 note.save();
                 Logger.info("ADDED " + note.name);
