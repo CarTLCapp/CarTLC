@@ -50,7 +50,7 @@ public class PostController extends Controller {
                 }
                 List<Technician> found = Technician.listWithCode(code);
                 if (found.size() == 0) {
-                    mErrorMessage = "No such technician with code: " + code;
+                    mErrorMessage = String.format("No such technician with code: %04d", code);
                     return null;
                 }
                 tech = found.get(0);

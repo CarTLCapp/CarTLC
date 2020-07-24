@@ -27,7 +27,7 @@ public class Technician extends com.avaje.ebean.Model {
     private static final long serialVersionUID = 1L;
 
     public static String RIP = "Inactive";
-    public static int BASE_CODE = 1000;
+    public static int BASE_CODE = 0;
 
     @Id
     public Long id;
@@ -134,6 +134,10 @@ public class Technician extends com.avaje.ebean.Model {
         sbuf.append(" ");
         sbuf.append(last_name);
         return sbuf.toString();
+    }
+
+    public String getCode() {
+        return String.format("%04d", code);
     }
 
     public int countEntries() {

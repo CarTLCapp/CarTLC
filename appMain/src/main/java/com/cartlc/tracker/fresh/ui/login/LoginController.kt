@@ -149,8 +149,11 @@ class LoginController(
                 .subscribe { result: DCServerRx.Result ->
                     if (result.errorMessage != null) {
                         TBApplication.ShowError(result.errorMessage)
+                        buttonsUseCase.nextVisible = false
+                        viewMvc.firstTechName = ""
+                        viewMvc.secondaryTechName = ""
                     }
-                    if (loginSuccess) {
+                    else if (loginSuccess) {
                         buttonsUseCase.nextVisible = true
                         buttonsUseCase.centerVisible = false
                         viewMvc.firstTechName = prefHelper.techName
