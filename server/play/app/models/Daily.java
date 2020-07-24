@@ -11,7 +11,9 @@ import java.util.Collections;
 import java.lang.Comparable;
 import java.lang.System;
 import java.text.SimpleDateFormat;
+import java.util.concurrent.TimeUnit;
 
+import modules.TimeHelper;
 /**
  * For each sub-project list the number of entries installed on the indicated date.
  */
@@ -19,10 +21,16 @@ public class Daily {
 
     private static final int NUMBER_DAYS = 30;
     private static final String DATE_FORMAT = "MM/dd/yy";
+    /**
+     * Need to adjust the time requested to account for the entry_time being off from the
+     * server time because of it coming from a different time zone.
+     */
+    private static final long ADJUST_TIME_MS = TimeUnit.HOURS.toMillis(6);
 
     private long mStartTime;
     private long mEndTime;
     private Date mDate;
+    private TimeHelper timeHelper = new TimeHelper();
 
     public class ProjectCount implements Comparable<ProjectCount> {
 
@@ -31,7 +39,16 @@ public class Daily {
 
         public ProjectCount(Project project) {
             name = project.name;
-            count = Entry.countEntriesForProjectWithinRange(project.id, mStartTime, mEndTime);
+            long useStartTime = mStartTime - ADJUST_TIME_MS;
+            long useEndTime = mEndTime + ADJUST_TIME_MS;
+            List<Entry> entries = Entry.findEntriesForProjectWithinRange(project.id, useStartTime, useEndTime);
+            count = 0;
+            for (Entry entry : entries) {
+                long time = getTimeAdjustedToServerTimeZone(entry);
+                if (time >= mStartTime && time <= mEndTime) {
+                    count++;
+                }
+            }
         }
 
         @Override
@@ -136,6 +153,7 @@ public class Daily {
         calendar.set(Calendar.HOUR, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.AM_PM, Calendar.AM);
         mStartTime = calendar.getTimeInMillis();
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
@@ -174,4 +192,15 @@ public class Daily {
         }
         return dates;
     }
+
+
+    /**
+     * This is very confusing but the entry_time is the value against the time_zone that it was entered
+     * in according to the tablet's time. Not the current server's time.
+     * @return
+     */
+    public long getTimeAdjustedToServerTimeZone(Entry entry) {
+        return timeHelper.getTimeAdjustedToServerTimeZone(entry.entry_time, entry.time_zone);
+    }
+
 }
