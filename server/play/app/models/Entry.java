@@ -287,7 +287,7 @@ public class Entry extends com.avaje.ebean.Model {
         List<PictureCollection> pictures = getPictures();
         if (pictures.size() > 0) {
             for (PictureCollection collection : pictures) {
-                if (collection.flow_element_id > 0) {
+                if (collection.flow_element_id != null && collection.flow_element_id > 0) {
                     return true;
                 }
             }
