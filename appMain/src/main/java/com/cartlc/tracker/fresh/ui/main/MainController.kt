@@ -7,33 +7,29 @@ import android.app.Activity
 import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.location.Address
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.OnLifecycleEvent
+import android.os.Handler
+import androidx.lifecycle.*
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
-import com.cartlc.tracker.fresh.model.flow.*
-import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
-import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
-import com.cartlc.tracker.fresh.ui.main.process.*
-import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
-import com.cartlc.tracker.fresh.ui.picture.PictureListUseCase
 import com.cartlc.tracker.fresh.model.event.Action
 import com.cartlc.tracker.fresh.model.event.Button
 import com.cartlc.tracker.fresh.model.event.EventError
 import com.cartlc.tracker.fresh.model.event.EventRefreshProjects
+import com.cartlc.tracker.fresh.model.flow.*
 import com.cartlc.tracker.fresh.model.misc.EntryHint
-import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
 import com.cartlc.tracker.fresh.ui.common.PermissionHelper
+import com.cartlc.tracker.fresh.ui.main.process.*
+import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
+import com.cartlc.tracker.fresh.ui.picture.PictureListUseCase
 import com.cartlc.tracker.ui.util.CheckError
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 import com.cartlc.tracker.ui.util.helper.LocationHelper
@@ -41,6 +37,8 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import timber.log.Timber
 import java.io.File
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 class MainController(
         private val boundAct: BoundAct,
@@ -60,6 +58,8 @@ class MainController(
         const val RESULT_EDIT_ENTRY = 2
         const val RESULT_EDIT_PROJECT = 3
         const val RESULT_DELETE_PROJECT = 4
+
+        private val CLEAR_UPLOAD_WORKING = TimeUnit.SECONDS.toMillis(45)
     }
 
     private val repo = boundAct.repo
@@ -86,7 +86,9 @@ class MainController(
 
     private val eventController = boundAct.componentRoot.eventController
     private val actionUseCase = repo.actionUseCase
-
+    private val uploadWorking = AtomicBoolean(false)
+    private var showServerError = true
+    private val handler = Handler()
 
     init {
         boundAct.bindObserver(this)
@@ -619,16 +621,6 @@ class MainController(
         })
     }
 
-//    private fun onErrorDialogOkay() {
-//        when (curFlowValue.stage) {
-//            Stage.PICTURE_1,
-//            Stage.PICTURE_2,
-//            Stage.PICTURE_3 -> buttonsUseCase.dispatch(Button.BTN_NEXT)
-//            else -> {
-//            }
-//        }
-//    }
-
     // endregion error
 
     // region Action Events
@@ -738,7 +730,7 @@ class MainController(
         when (itemId) {
             R.id.profile -> btnProfile()
             R.id.upload -> {
-                serviceUseCase.reloadFromServer()
+                ping()
             }
             R.id.save -> {
                 onSaveEntryPressed()
@@ -757,6 +749,18 @@ class MainController(
             }
         }
         return true
+    }
+
+    private fun ping() {
+        if (!uploadWorking.get()) {
+            uploadWorking.set(true)
+            handler.postDelayed({
+                uploadWorking.set(false)
+            }, CLEAR_UPLOAD_WORKING)
+            serviceUseCase.reloadFromServer()
+        } else {
+            screenNavigator.showToast("Upload already working")
+        }
     }
 
     private fun btnProfile() {
@@ -869,9 +873,12 @@ class MainController(
         Timber.d("onEvent(EventRefreshProjects)")
         repo.flowUseCase.notifyListeners()
         checkAddButtonVisible()
+        if (event.allDone) {
+            screenNavigator.showToast("Upload Complete")
+            uploadWorking.set(false)
+        }
     }
 
-    private var showServerError = true
 
     @Suppress("UNUSED_PARAMETER")
     @Subscribe(threadMode = ThreadMode.MAIN)
