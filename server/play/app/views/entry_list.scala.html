@@ -1,4 +1,4 @@
-@(currentPage: EntryPagedList, currentSortBy: String, currentOrder: String, searchForm : Form[views.formdata.InputSearch], client : Client)
+@(currentPage: EntryPagedList, currentSortBy: String, currentOrder: String, currentSearch: String, searchForm : Form[views.formdata.InputSearch], client : Client)
 
 @import helper._
 
@@ -18,7 +18,7 @@
         }
     }
     // Generate the link
-    routes.EntryController.list(newPage, sortBy, order)
+    routes.EntryController.list(newPage, currentPage.getPageSize(), sortBy, order, currentSearch)
 }
 
 @header(key:String, title:String) = {
@@ -32,7 +32,7 @@
     @if(currentPage.isByTruck()) {
         <h1>TRUCK @currentPage.getByTruckLine()</h1>
     } else {
-        @helper.form(action = routes.EntryController.search()) {
+        @helper.form(action = routes.EntryController.search(currentPage.getPageIndex(), currentPage.getPageSize(), currentSortBy, currentOrder)) {
             <h1 id="homeTitle">
                 <span id="homeCount">...</span>
                 <span style="float:right;font-size:16px;padding-left:20px">
@@ -48,7 +48,7 @@
                 <span style="float:right;font-size:16px;padding-left:20px"><div class="search">Search:</div></span>
                 <span style="float:right;font-size:16px">
                     <div>
-                        <select style="width:80px" id="pageSizeSelect" onchange="onPageSizeSelect()">
+                        <select style="width:80px" id="pageSizeSelect" data-sortby="@currentSortBy" data-order="@currentOrder" data-search="@currentSearch" onchange="onPageSizeSelect()">
                             @for(option <- currentPage.getPageSizes()) {
                                 <option value="@option.text" @option.selected>@option.text</option>
                             }
@@ -78,7 +78,7 @@
                     @header("tech", "Name")
                     @header("date", "Date")
                     @header("time", "Time")
-                    <th>Root</th>
+                    @header("root_project", "Root")
                     @header("sub_project", "Sub Project")
                     @header("company", "Company")
                     @header("street", "Street / Plant Name")
@@ -134,13 +134,13 @@
         @if(!currentPage.isByTruck()) {
             <div id="pagination" class="pagination">
                 <ul>
-                    <li id="previous" class="prev disabled">
+                    <li id="previous" class="@currentPage.getPrevClass()">
                         <a href="@link(currentPage.getPageIndex() - 1, null)">&larr; Previous</a>
                     </li>
                     <li class="current">
-                        <a id="currentPage"></a>
+                        <a id="currentPage">@currentPage.getDisplayingXtoYofZ()</a>
                     </li>
-                    <li id="next" class="next disabled">
+                    <li id="next" class="@currentPage.getNextClass()">
                         <a href="@link(currentPage.getPageIndex() + 1, null)">Next &rarr;</a>
                     </li>
                 </ul>
@@ -167,7 +167,7 @@
             <h4>
                 <span>
                     <div id="div_delete_checked" class="actions">
-                    <a id="delete_checked" class="btn danger">Delete checked entries</a>
+                        <a id="delete_checked" class="btn danger">Delete checked entries</a>
                     </div>
                 </span>
                 <span id="delete_progress"></span>
@@ -198,7 +198,7 @@
                         }
                     }
                 };
-                xhttp.open("GET", "@routes.EntryController.export()", true);
+                xhttp.open("GET", "@routes.EntryController.export(currentSearch)", true);
                 xhttp.send();
             }
             document.getElementById("export").onclick = myExport;
@@ -210,37 +210,22 @@
                 document.getElementById("div_delete_checked").style.display = "none";
                 var checkedValues = [];
                 var inputElements = document.getElementsByClassName('entryCheckbox');
-                var lastChecked = -10;
-                var range = false;
                 for (var i=0; inputElements[i]; ++i) {
                     if (inputElements[i].checked) {
-                        inputElements[i].checked = false;
-                        if (lastChecked != (i-1)) {
-                            checkedValues.push(i.toString());
-                            range = false;
-                        } else if (!range) {
-                            checkedValues.push("R");
-                            range = true;
-                        }
-                        lastChecked = i;
-                    } else if (range) {
-                        checkedValues.push((i-1).toString());
-                        range = false;
+                        checkedValues.push(inputElements[i].value);
                     }
                 }
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
-                    if (this.responseText.length > 0 && this.status == 200) {
+                    if (this.status == 200) {
                         var line = this.responseText;
-                        var key = line.substring(0, 1);
-                        var value = line.substring(1);
-                        if (key == "E") {
+                        if (line.length == 0) {
                             location.reload(true);
                             document.getElementById("delete_progress").innerHTML = "";
                             document.getElementById("div_delete_checked").style.display = "block";
-                        } else if (key == "#") {
-                            document.getElementById("delete_progress").innerHTML = value;
-                            var call = "/entry/delete_entries/next";
+                        } else {
+                            document.getElementById("delete_progress").innerHTML = line;
+                            var call = "/entry/delete_entries/" + line;
                             xhttp.open("GET", call, true);
                             xhttp.send();
                         }
@@ -249,7 +234,6 @@
                 var call = "/entry/delete_entries/" + checkedValues.join();
                 xhttp.open("GET", call, true);
                 xhttp.send();
-
             }
 
             function myConfirmDelete() {
@@ -290,17 +274,22 @@
             <!-- PAGE SIZE SELECT -->
 
             function onPageSizeSelect() {
-            	var e = document.getElementById("pageSizeSelect");
+                var e = document.getElementById("pageSizeSelect");
                 var selected = e.options[e.selectedIndex].value;
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (this.responseText.length > 0 && this.status == 200) {
-                        location.reload(true);
-                    }
-                };
-                var call = "/entry/page_size/" + selected;
-                xhttp.open("GET", call, true);
-                xhttp.send();
+                var dataSortBy = e.getAttribute('data-sortby');
+                var dataOrder = e.getAttribute('data-order');
+                var dataSearch = e.getAttribute('data-search');
+                if (dataSearch.length == 0) {
+                    dataSearch = "null";
+                }
+                var pageSize = selected;
+                var call = "/entry/list/0/" + pageSize + "/" + dataSortBy + "/" + dataOrder + "/" + encodeURIComponent(dataSearch);
+                var location = window.location.href;
+                var pathArray = location.split('/');
+                var protocol = pathArray[0];
+                var host = pathArray[2];
+                var longCall = protocol + "//" + host + call;
+                window.location.href = longCall;
             }
 
        </script>

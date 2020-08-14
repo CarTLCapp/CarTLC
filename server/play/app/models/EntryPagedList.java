@@ -19,6 +19,7 @@ public class EntryPagedList {
         TECH("tech", "te.last_name"),
         DATE("date", "e.entry_time"),
         TIME("time", "e.entry_time"),
+        ROOT_PROJECT_ID("root_project", "r.name"),
         SUB_PROJECT_ID("sub_project", "p.name"),
         TRUCK_NUMBER("truck", "tr.truck_number"),
         COMPANY_NAME("company", "c.name"),
@@ -204,6 +205,10 @@ public class EntryPagedList {
 
     static final boolean VERBOSE = false;
     static final int[] PAGE_SIZES = {100, 200, 300, 400, 500};
+    static final String CLASS_PREV = "prev";
+    static final String CLASS_PREV_DISABLED = "prev disabled";
+    static final String CLASS_NEXT = "next";
+    static final String CLASS_NEXT_DISABLED = "next disabled";
 
     Parameters mParams = new Parameters();
     Result mResult = new Result();
@@ -235,11 +240,6 @@ public class EntryPagedList {
     public void setPage(int page) {
         if (page < 0) {
             page = 0;
-        } else {
-            int next = page * mParams.mPageSize;
-            if (next >= mResult.mNumTotalRows) {
-                page = mParams.mPage;
-            }
         }
         mParams.mPage = page;
     }
@@ -247,6 +247,10 @@ public class EntryPagedList {
     public void setPageSize(int pageSize) {
         mDefaultPageSize = pageSize;
         mParams.mPageSize = pageSize;
+    }
+
+    public int getPageSize() {
+        return mParams.mPageSize;
     }
 
     public static class Option {
@@ -357,6 +361,7 @@ public class EntryPagedList {
         switch (mParams.mSortBy) {
             case TECH:
             case SUB_PROJECT_ID:
+            case ROOT_PROJECT_ID:
             case TRUCK_NUMBER:
             case COMPANY_NAME:
             case STREET:
@@ -375,6 +380,10 @@ public class EntryPagedList {
         switch (mParams.mSortBy) {
             case TECH:
                 query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
+                break;
+            case ROOT_PROJECT_ID:
+                query.append(" INNER JOIN project AS p ON e.project_id = p.id");
+                query.append(" INNER JOIN root_project AS r ON p.root_project_id = r.id");
                 break;
             case SUB_PROJECT_ID:
                 query.append(" INNER JOIN project AS p ON e.project_id = p.id");
@@ -475,6 +484,9 @@ public class EntryPagedList {
         for (String term : mSearch.mTerms) {
             set.addAll(Project.findMatches(term));
         }
+        for (Long rootProjectId : getSearchByRootProject()) {
+            set.addAll(Project.findWithRootProjectId(rootProjectId));
+        }
         List<Long> list = new ArrayList<Long>();
         list.addAll(set);
         return list;
@@ -521,9 +533,28 @@ public class EntryPagedList {
         return list;
     }
 
+    private List<Long> getSearchByRootProject() {
+        HashSet<Long> set = new HashSet<Long>();
+        for (String term : mSearch.mTerms) {
+            set.addAll(RootProject.findMatches(term));
+        }
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(set);
+        return list;
+    }
+
     private boolean hasSearchByEquipment() {
         for (String term : mSearch.mTerms) {
             if (!Equipment.findMatches(term).isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasSearchByRootProject() {
+        for (String term : mSearch.mTerms) {
+            if (!RootProject.findMatches(term).isEmpty()) {
                 return true;
             }
         }
@@ -688,9 +719,25 @@ public class EntryPagedList {
         return mParams.mPage > 0;
     }
 
+    public String getPrevClass() {
+        if (hasPrev()) {
+            return CLASS_PREV;
+        } else {
+            return CLASS_PREV_DISABLED;
+        }
+    }
+
     public boolean hasNext() {
         int next = (mParams.mPage + 1) * mParams.mPageSize;
         return (next < mResult.mNumTotalRows);
+    }
+
+    public String getNextClass() {
+        if (hasNext()) {
+            return CLASS_NEXT;
+        } else {
+            return CLASS_NEXT_DISABLED;
+        }
     }
 
     public int getPageIndex() {
@@ -705,9 +752,9 @@ public class EntryPagedList {
         if (last >= mResult.mNumTotalRows) {
             last = mResult.mNumTotalRows - 1;
         }
-        sbuf.append(start+1);
+        sbuf.append(start + 1);
         sbuf.append(" - ");
-        sbuf.append(last+1);
+        sbuf.append(last + 1);
         sbuf.append(" of ");
         sbuf.append(mResult.mNumTotalRows);
         return sbuf.toString();
@@ -722,9 +769,49 @@ public class EntryPagedList {
     }
 
     public void setSearch(String search) {
-        mSearch.setSearch(search);
+        if (search != null && search.length() > 0 && !search.equals("null")) {
+            mSearch.setSearch(search);
+        } else {
+            mSearch.setSearch(null);
+        }
         mByTruckId = 0;
-        mParams.mPage = 0;
-        mParams.mPageSize = mDefaultPageSize;
     }
+
+    public String getSearch() {
+        return mSearch.getAll();
+    }
+
+//    public List<Long> parseIds(String rows) {
+//        ArrayList<Long> ids = new ArrayList<>();
+//        String[] rowIds = rows.split(",");
+//        try {
+//            int lastRow = -1;
+//            boolean range = false;
+//            for (String rowId : rowIds) {
+//                if (rowId.equals("R")) {
+//                    range = true;
+//                } else {
+//                    int row = Integer.parseInt(rowId);
+//                    if (range) {
+//                        for (int r = lastRow + 1; r <= row; r++) {
+//                            ids.add(mEntryList.getList().get(r).id);
+//                        }
+//                    } else {
+//                        ids.add(mEntryList.getList().get(row).id);
+//                    }
+//                    lastRow = row;
+//                    range = false;
+//                }
+//            }
+//            if (range) {
+//                for (int r = lastRow + 1; r < mEntryList.getList().size(); r++) {
+//                    ids.add(mEntryList.getList().get(r).id);
+//                }
+//            }
+//        } catch (NumberFormatException ex) {
+//            Logger.error(ex.getMessage());
+//        }
+//        Logger.warn("Total entries to delete now is: " + ids.size());
+//        return ids;
+//    }
 }

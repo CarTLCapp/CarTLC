@@ -1,5 +1,5 @@
 /**
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2020, FleetTLC. All rights reserved
  */
 package controllers;
 
@@ -15,6 +15,7 @@ import views.formdata.InputSearch;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.text.SimpleDateFormat;
@@ -51,7 +52,7 @@ public class EntryController extends Controller {
     private static final String EXPORT_FILENAME = "/tmp/export.csv";
 
     private AmazonHelper mAmazonHelper;
-    private EntryPagedList mEntryList = new EntryPagedList();
+    private EntryPagedList mLastEntryList;
     private FormFactory mFormFactory;
     private SimpleDateFormat mDateFormat;
     private Globals mGlobals;
@@ -62,7 +63,6 @@ public class EntryController extends Controller {
     private long mDownloadPicturesForEntryId;
     private long mDownloadPicturesLastAttemptEntryId;
     private ArrayList<Long> mDownloaded = new ArrayList<>();
-    private ArrayList<Long> mDeleting = new ArrayList<>();
     private ArrayList<CompletableFuture<Result>> mDownloadStatusRequests = new ArrayList<>();
 
     @Inject
@@ -78,83 +78,126 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result list(int page, String sortBy, String order) {
-        if (mGlobals.isClearSearch()) {
-            mEntryList.clearSearch();
-            mGlobals.setClearSearch(false);
-            mEntryList.clearCache();
-        } else if (page == 0) {
-            mEntryList.clearCache();
-        }
-        mEntryList.setPage(page);
-        mEntryList.setSortBy(sortBy);
-        mEntryList.setOrder(order);
-        mEntryList.computeFilters(Secured.getClient(ctx()));
-        mEntryList.compute();
-        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).fill(mEntryList.getInputSearch());
-        return ok(views.html.entry_list.render(mEntryList, sortBy, order, searchForm, Secured.getClient(ctx())));
-    }
-
-    public Result list() {
-        return list(0, null, null);
+    public Result list2(int page, int pageSize, String sortBy, String order, String search) {
+        return list(page, pageSize, sortBy, order, search);
     }
 
     @Security.Authenticated(Secured.class)
-    public Result search() {
+    public Result list(int page, int pageSize, String sortBy, String order, String search) {
+        EntryPagedList list = new EntryPagedList();
+
+        Logger.info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + search + ")");
+
+        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
+
+        list.setSearch(search);
+        list.setPage(page);
+        list.setPageSize(pageSize);
+        list.setSortBy(sortBy);
+        list.setOrder(order);
+        list.computeFilters(Secured.getClient(ctx()));
+        list.compute();
+
+        mLastEntryList = list;
+
+        InputSearch isearch = new InputSearch(search);
+        searchForm.fill(isearch);
+
+        return ok(views.html.entry_list.render(list, sortBy, order, search, searchForm, Secured.getClient(ctx())));
+    }
+
+    public Result list() {
+        return list(0, 100, "date", "desc", "null");
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result search(int page, int pageSize, String sortBy, String order) {
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).bindFromRequest();
-        InputSearch search = searchForm.get();
-        mEntryList.setSearch(search.search);
-        mEntryList.clearCache();
-        mEntryList.compute();
-        return ok(views.html.entry_list.render(mEntryList,
-                mEntryList.getSortBy(), mEntryList.getOrder(), searchForm, Secured.getClient(ctx())));
+        InputSearch isearch = searchForm.get();
+        String search = isearch.search;
+
+        EntryPagedList list = new EntryPagedList();
+        list.setSearch(search);
+        list.setPage(page);
+        list.setPageSize(pageSize);
+        list.setSortBy(sortBy);
+        list.setOrder(order);
+        list.computeFilters(Secured.getClient(ctx()));
+        list.clearCache();
+        list.compute();
+
+        mLastEntryList = list;
+
+        searchForm.fill(isearch);
+
+        return ok(views.html.entry_list.render(list, list.getSortBy(), list.getOrder(), search, searchForm, Secured.getClient(ctx())));
     }
 
     @Security.Authenticated(Secured.class)
     public Result searchClear() {
-        mEntryList.clearSearch();
-        mEntryList.clearCache();
-        mEntryList.compute();
+        EntryPagedList list = new EntryPagedList();
+        list.computeFilters(Secured.getClient(ctx()));
+        list.compute();
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
-        return ok(views.html.entry_list.render(mEntryList,
-                mEntryList.getSortBy(), mEntryList.getOrder(), searchForm, Secured.getClient(ctx())));
+
+        mLastEntryList = list;
+
+        return ok(views.html.entry_list.render(list, list.getSortBy(), list.getOrder(), "", searchForm, Secured.getClient(ctx())));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result showByTruck(long truck_id) {
         mGlobals.setClearSearch(false);
-        mEntryList.setSearch(null);
-        mEntryList.setByTruckId(truck_id);
-        return list();
+        EntryPagedList list = new EntryPagedList();
+        list.setByTruckId(truck_id);
+        list.computeFilters(Secured.getClient(ctx()));
+        list.compute();
+
+        mLastEntryList = list;
+
+        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
+        return ok(views.html.entry_list.render(list, list.getSortBy(), list.getOrder(), "", searchForm, Secured.getClient(ctx())));
     }
 
+    @Security.Authenticated(Secured.class)
     public Result pageSize(String size) {
-        mEntryList.clearCache();
+        return pageSize2(size, "");
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result pageSize2(String size, String search) {
+        EntryPagedList list = new EntryPagedList();
+        list.computeFilters(Secured.getClient(ctx()));
+        list.setSearch(search);
         try {
             int pageSize = Integer.parseInt(size);
-            mEntryList.setPageSize(pageSize);
+            list.setPageSize(pageSize);
         } catch (NumberFormatException ex) {
             Logger.error(ex.getMessage());
         }
-        return ok("Done");
+        list.setSortBy(mLastEntryList.getSortBy());
+        list.setOrder(mLastEntryList.getOrder());
+        list.computeFilters(Secured.getClient(ctx()));
+        list.compute();
+
+        mLastEntryList = list;
+
+        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
+        InputSearch isearch = new InputSearch(search);
+        searchForm.fill(isearch);
+
+        return ok(views.html.entry_list.render(list, list.getSortBy(), list.getOrder(), list.getSearch(), searchForm, Secured.getClient(ctx())));
     }
 
     public CompletionStage<Result> computeTotalNumRows() {
         Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
-        return CompletableFuture.completedFuture(mEntryList.computeTotalNumRows()).thenApplyAsync(result -> {
+        return CompletableFuture.completedFuture(mLastEntryList.computeTotalNumRows()).thenApplyAsync(result -> {
             StringBuilder sbuf = new StringBuilder();
-            if (mEntryList.hasPrev()) {
-                sbuf.append("prev");
-            } else {
-                sbuf.append("prev disabled");
-            }
+            sbuf.append(mLastEntryList.getPrevClass());
             sbuf.append("|");
-            sbuf.append(mEntryList.getDisplayingXtoYofZ());
+            sbuf.append(mLastEntryList.getDisplayingXtoYofZ());
             sbuf.append("|");
-            if (mEntryList.hasNext()) {
-                sbuf.append("next");
-            } else {
-                sbuf.append("next disabled");
-            }
+            sbuf.append(mLastEntryList.getNextClass());
             sbuf.append("|");
             if (result == 0) {
                 sbuf.append("No entries");
@@ -169,7 +212,7 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result export() {
+    public Result export(String search) {
         if (mExporting) {
             mAborted = true;
             mExporting = false;
@@ -180,8 +223,9 @@ public class EntryController extends Controller {
         mAborted = false;
         Client client = Secured.getClient(ctx());
         Logger.info("export() START");
-        EntryPagedList entryList = new EntryPagedList(mEntryList);
+        EntryPagedList entryList = new EntryPagedList();
         entryList.computeFilters(client);
+        entryList.setSearch(search);
         entryList.compute();
         entryList.computeTotalNumRows();
         mExportWriter = new EntryListWriter(entryList);
@@ -431,80 +475,48 @@ public class EntryController extends Controller {
 
     @Security.Authenticated(Secured.class)
     synchronized
-    public CompletionStage<Result> deleteEntries(String rows) {
-        if (rows.equals("next")) {
-            return deleteNext();
-        }
-        Logger.warn("Will delete these entries: " + rows);
-        String[] rowIds = rows.split(",");
-        try {
-            int lastRow = -1;
-            boolean range = false;
-            for (String rowId : rowIds) {
-                if (rowId.equals("R")) {
-                    range = true;
-                } else {
-                    int row = Integer.parseInt(rowId);
-                    if (range) {
-                        for (int r = lastRow + 1; r <= row; r++) {
-                            mDeleting.add(mEntryList.getList().get(r).id);
-                        }
-                    } else {
-                        mDeleting.add(mEntryList.getList().get(row).id);
-                    }
-                    lastRow = row;
-                    range = false;
-                }
+    public CompletionStage<Result> deleteEntries(String idsLine) {
+        String[] idsArray = idsLine.split(",");
+        List<String> idsList = new ArrayList<String>(Arrays.asList(idsArray));
+        String commaSeparated;
+        Logger.info("Delete request " + idsLine);
+        if (idsList.size() > 0) {
+            String idsText = idsList.get(0);
+            try {
+                long id = Long.parseLong(idsText);
+                deleteNext(id);
+                idsList.remove(0);
+                commaSeparated = String.join(",", idsList);
+            } catch (NumberFormatException ex) {
+                Logger.error(ex.getMessage());
+                commaSeparated = "";
             }
-            if (range) {
-                for (int r = lastRow + 1; r < mEntryList.getList().size(); r++) {
-                    mDeleting.add(mEntryList.getList().get(r).id);
-                }
+        } else {
+            commaSeparated = "";
+        }
+        CompletableFuture<Result> completableFuture = new CompletableFuture<>();
+        completableFuture.complete(ok(commaSeparated));
+        return completableFuture;
+    }
+
+    private boolean deleteNext(Long id) {
+        try {
+            String host = request().host();
+            Logger.debug("Deleting ENTRY ID " + id);
+            Entry entry = Entry.find.byId(id);
+            if (entry != null) {
+                entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
+                    Logger.warn("Remote entry has been deleted: " + id);
+                }));
+            } else {
+                Logger.error("Called deleteNext() with bad ID " + id);
+                return false;
             }
         } catch (NumberFormatException ex) {
             Logger.error(ex.getMessage());
+            return false;
         }
-        Logger.warn("Total entries to delete now is: " + mDeleting.size());
-        CompletableFuture<Result> completableFuture = new CompletableFuture<>();
-        completableFuture.complete(deleteResult());
-        return completableFuture;
-    }
-
-    private CompletionStage<Result> deleteNext() {
-        CompletableFuture<Result> completableFuture = new CompletableFuture<>();
-        if (mDeleting.size() == 0) {
-            Logger.error("Called deleteNext() when there were no elements");
-            completableFuture.complete(deleteResult());
-        } else {
-            try {
-                String host = request().host();
-                long id = mDeleting.get(0);
-                Logger.debug("Deleting ENTRY ID " + id + ". Total left=" + mDeleting.size());
-                mDeleting.remove(0);
-                Entry entry = Entry.find.byId(id);
-                if (entry != null) {
-                    entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
-                        Logger.warn("Remote entry has been deleted: " + id);
-                        completableFuture.complete(deleteResult());
-                    }));
-                } else {
-                    Logger.error("Called deleteNext() with bad ID " + id);
-                    completableFuture.complete(deleteResult());
-                }
-            } catch (NumberFormatException ex) {
-                Logger.error(ex.getMessage());
-                completableFuture.complete(deleteResult());
-            }
-        }
-        return completableFuture;
-    }
-
-    private Result deleteResult() {
-        if (mDeleting.size() == 0) {
-            return ok("E");
-        } else {
-            return ok("#" + mDeleting.size() + "...");
-        }
+        return true;
     }
 
     @Transactional

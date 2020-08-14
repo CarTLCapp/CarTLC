@@ -18,11 +18,11 @@ public class InputSearch extends Model {
     public String search;
 
     public InputSearch(String search) {
-        this.search = search;
+        setSearch(search);
     }
 
     public InputSearch() {
-        this.search = "";
+        this.search = "null";
     }
 
     public String getSearch() {
@@ -30,7 +30,11 @@ public class InputSearch extends Model {
     }
 
     public void setSearch(String search) {
-        this.search = search;
+        if (search.equals("null")) {
+            this.search = null;
+        } else {
+            this.search = search;
+        }
     }
 
 }

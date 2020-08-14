@@ -180,6 +180,17 @@ public class Project extends Model implements Comparable<Project> {
         return result;
     }
 
+    public static List<Long> findWithRootProjectId(Long rootProjectId) {
+        List<Project> projects = find.where()
+                .eq("root_project_id", rootProjectId)
+                .findList();
+        List<Long> result = new ArrayList<Long>();
+        for (Project project : projects) {
+            result.add(project.id);
+        }
+        return result;
+    }
+
     public String getEquipmentsLine() {
         List<Equipment> items = ProjectEquipmentCollection.findEquipments(id);
         Collections.sort(items);
