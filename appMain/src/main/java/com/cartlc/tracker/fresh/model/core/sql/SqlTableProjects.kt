@@ -217,7 +217,7 @@ class SqlTableProjects(
 
     override fun queryByServerId(server_id: Int): DataProject? {
         val selection = "$KEY_SERVER_ID=?"
-        val selectionArgs = arrayOf(Integer.toString(server_id))
+        val selectionArgs = arrayOf(server_id.toString())
         val list = query(selection, selectionArgs)
         return if (list.isNotEmpty()) {
             list[0]

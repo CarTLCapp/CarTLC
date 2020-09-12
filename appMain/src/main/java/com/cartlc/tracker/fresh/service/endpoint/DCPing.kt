@@ -369,10 +369,10 @@ class DCPing(
     }
 
     private fun queryProjects(): String? {
-        Timber.i("queryProjects()")
+        Timber.e("queryProjects()") // TEMPORARY DEBUG
         try {
             val response = post(url(projectsSuffix))
-                    ?: return "queryProjects(): Unexpected NULL response from server"
+            Timber.e("queryProjects(): response was $response")
             val unprocessed = ProjectProcessed(db)
             val obj = parseResult(response)
             val array = obj.getJSONArray("projects")
@@ -413,7 +413,7 @@ class DCPing(
                     // Name change?
                     when {
                         subProject != project.subProject || rootProject != project.rootProject -> {
-                            Timber.i("New name. Root: $rootProject Sub: $subProject")
+                            Timber.e("New name. Root: $rootProject Sub: $subProject") // TEMPORARY DEBUG
                             unprocessed.delete(project.subProject, project.rootProject)
 
                             project.subProject = subProject
@@ -422,12 +422,12 @@ class DCPing(
                             db.tableProjects.update(project)
                         }
                         project.disabled != disabled -> {
-                            Timber.i("Disable flag change. Root: $rootProject Sub: $subProject Disabled now: $disabled")
+                            Timber.e("Disable flag change. Root: $rootProject Sub: $subProject Disabled now: $disabled") // TEMPORARY DEBUG
                             project.disabled = disabled
                             db.tableProjects.update(project)
                         }
                         else -> {
-                            Timber.i("No change to project: $rootProject - $subProject")
+                            Timber.e("No change to project: $rootProject - $subProject") // TEMPORARY DEBUG
                         }
                     }
                     unprocessed.delete(rootProject, subProject)
@@ -945,6 +945,13 @@ class DCPing(
                 val project = db.tableProjects.queryByServerId(serverSubProjectId)
                 if (project == null) {
                     Timber.e("queryFlows(): Can't find project with server ID $serverSubProjectId")
+                    val sbuf = StringBuffer()
+                    sbuf.append(". Projects=")
+                    for (project in db.tableProjects.query()) {
+                        sbuf.append(project.serverId)
+                        sbuf.append(" ")
+                    }
+                    Timber.e("Existing projects: $sbuf")
                     continue
                 }
                 incomingFlow.subProjectId = project.id
@@ -1100,7 +1107,7 @@ class DCPing(
                     jsonObject.accumulate("truck_number_string", truck.truckNumberValue)
                 }
                 if (truck.truckNumberPictureId > 0) {
-                    Timber.e("truckNumberPictureId?")
+                    Timber.e("truckNumberPictureId? ${truck.toLongString(db)}") // TODO: This is happening, need to think as to why.
                 }
             } else {
                 prefHelper.doErrorCheck = true
