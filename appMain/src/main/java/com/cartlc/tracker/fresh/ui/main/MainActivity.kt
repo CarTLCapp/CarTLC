@@ -12,8 +12,6 @@ import com.cartlc.tracker.fresh.ui.app.factory.FactoryController
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.base.BaseActivity
 import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
-import com.crashlytics.android.Crashlytics
-import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity() {
@@ -32,8 +30,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Fabric.with(this, Crashlytics()) // CRASHLYTICS
-
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar_main))
 
@@ -48,6 +44,7 @@ class MainActivity : BaseActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
                                             grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         controller.handlePermissionResult(requestCode, permissions, grantResults)
     }
 

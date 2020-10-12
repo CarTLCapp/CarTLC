@@ -148,7 +148,6 @@ class AmazonHelper(
             override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
 
             override fun onError(id: Int, ex: Exception) {
-                Timber.e("UPLOAD DEBUG: got error while working on picture upload: ${ex.message}")
                 TBApplication.ReportError(ex, AmazonHelper::class.java, "sendPicture()", "amazon")
             }
         })
