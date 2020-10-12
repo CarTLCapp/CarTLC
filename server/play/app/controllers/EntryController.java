@@ -610,17 +610,6 @@ public class EntryController extends Controller {
         } else {
             license_plate = null;
         }
-        if (truck_number == null && license_plate == null && truck_id == 0) {
-            // In flow style this is okay. So just ignore this.
-        } else {
-            // Old pre-flow school:
-
-            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
-            // The reason is that other techs don't need to know about a local techs truck updates.
-            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_id, truck_number, license_plate, entry.tech_id);
-            entry.truck_id = truck.id;
-        }
-
         value = json.findValue("project_id");
         if (value == null) {
             value = json.findValue("project_name");
@@ -638,6 +627,16 @@ public class EntryController extends Controller {
             }
         } else {
             entry.project_id = value.longValue();
+        }
+        if (truck_number == null && license_plate == null && truck_id == 0) {
+            // In flow style this is okay. So just ignore this.
+        } else {
+            // Old pre-flow school:
+
+            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
+            // The reason is that other techs don't need to know about a local techs truck updates.
+            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_id, truck_number, license_plate, entry.tech_id);
+            entry.truck_id = truck.id;
         }
         value = json.findValue("status");
         if (value != null) {
