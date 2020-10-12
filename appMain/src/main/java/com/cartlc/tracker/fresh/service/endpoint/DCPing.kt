@@ -369,10 +369,8 @@ class DCPing(
     }
 
     private fun queryProjects(): String? {
-        Timber.e("queryProjects()") // TEMPORARY DEBUG
         try {
             val response = post(url(projectsSuffix))
-            Timber.e("queryProjects(): response was $response")
             val unprocessed = ProjectProcessed(db)
             val obj = parseResult(response)
             val array = obj.getJSONArray("projects")
@@ -413,7 +411,7 @@ class DCPing(
                     // Name change?
                     when {
                         subProject != project.subProject || rootProject != project.rootProject -> {
-                            Timber.e("New name. Root: $rootProject Sub: $subProject") // TEMPORARY DEBUG
+                            Timber.i("New name. Root: $rootProject Sub: $subProject") // TEMPORARY DEBUG
                             unprocessed.delete(project.subProject, project.rootProject)
 
                             project.subProject = subProject
@@ -422,12 +420,12 @@ class DCPing(
                             db.tableProjects.update(project)
                         }
                         project.disabled != disabled -> {
-                            Timber.e("Disable flag change. Root: $rootProject Sub: $subProject Disabled now: $disabled") // TEMPORARY DEBUG
+                            Timber.i("Disable flag change. Root: $rootProject Sub: $subProject Disabled now: $disabled") // TEMPORARY DEBUG
                             project.disabled = disabled
                             db.tableProjects.update(project)
                         }
                         else -> {
-                            Timber.e("No change to project: $rootProject - $subProject") // TEMPORARY DEBUG
+                            Timber.i("No change to project: $rootProject - $subProject") // TEMPORARY DEBUG
                         }
                     }
                     unprocessed.delete(rootProject, subProject)

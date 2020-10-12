@@ -623,7 +623,19 @@ public class EntryController extends Controller {
 
         value = json.findValue("project_id");
         if (value == null) {
-            missing.add("project_id");
+            value = json.findValue("project_name");
+            if (value == null) {
+                missing.add("project_id");
+                missing.add("project_name");
+            } else {
+                String projectName = value.textValue();
+                Project project = Project.findByName(projectName);
+                if (project != null) {
+                    entry.project_id = project.id;
+                } else {
+                    missing.add("project named '" + projectName + "'");
+                }
+            }
         } else {
             entry.project_id = value.longValue();
         }
