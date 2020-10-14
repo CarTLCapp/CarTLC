@@ -111,7 +111,7 @@ public class Project extends Model implements Comparable<Project> {
         if (names.length == 0) {
             return null;
         }
-        return findByName(names[0]);
+        return findByName(null, names[0]);
     }
 
     public static Project findByName(String root, String subproject) {
