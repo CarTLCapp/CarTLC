@@ -115,7 +115,7 @@ public class RootProject extends Model implements Comparable<RootProject> {
 
     public static List<Long> findMatches(String name) {
         List<RootProject> projects = find.where()
-                .ilike("name", "%" + name + "%")
+                .eq("name", name)
                 .findList();
         List<Long> result = new ArrayList<Long>();
         for (RootProject project : projects) {

@@ -15,25 +15,34 @@ import com.avaje.ebean.*;
 public class InputSearch extends Model {
     private static final long serialVersionUID = 1L;
 
-    public String search;
+    public String searchTerm;
+    public String searchField;
 
-    public InputSearch(String search) {
-        setSearch(search);
+    public InputSearch(String search, String field) {
+        setSearch(search, field);
     }
 
     public InputSearch() {
-        this.search = "null";
+        this.searchTerm = "null";
+        this.searchField = "null";
     }
 
-    public String getSearch() {
-        return search;
+    public String getTerm() {
+        return searchTerm;
     }
 
-    public void setSearch(String search) {
+    public String getField() { return searchField; }
+
+    public void setSearch(String search, String field) {
         if (search.equals("null")) {
-            this.search = null;
+            searchTerm = null;
         } else {
-            this.search = search;
+            searchTerm = search;
+        }
+        if (field.equals("null")) {
+            searchField = null;
+        } else {
+            searchField = field;
         }
     }
 

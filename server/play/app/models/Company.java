@@ -296,25 +296,24 @@ public class Company extends Model {
         return find.where().eq("disabled", true).findList().size() > 0;
     }
 
-    public static List<Long> findMatches(String name) {
-        List<Company> companies = find.where()
-                .disjunction()
-                .ilike("name", "%" + name + "%")
-                .ilike("street", "%" + name + "%")
-                .ilike("city", "%" + name + "%")
-                .ilike("state", "%" + name + "%")
-                .ilike("zipcode", "%" + name + "%")
-                .endJunction()
-                .findList();
-        List<Long> result = new ArrayList<Long>();
-        for (Company company : companies) {
-            result.add(company.id);
-        }
-        return result;
-    }
-
     public static List<Company> findByName(String name) {
         return find.where().eq("name", name).findList();
+    }
+
+    public static List<Company> findByStreet(String street) {
+        return find.where().ilike("street", "%" + street + "%").findList();
+    }
+
+    public static List<Company> findByCity(String name) {
+        return find.where().eq("city", name).findList();
+    }
+
+    public static List<Company> findByState(String name) {
+        return find.where().eq("state", name).findList();
+    }
+
+    public static List<Company> findByZip(String name) {
+        return find.where().eq("zipcode", name).findList();
     }
 
     public static Company findByAddress(String address) {
@@ -324,6 +323,14 @@ public class Company extends Model {
             }
         }
         return null;
+    }
+
+    public static List<Long> convert(List<Company> companies) {
+        List<Long> result = new ArrayList<Long>();
+        for (Company company : companies) {
+            result.add(company.id);
+        }
+        return result;
     }
 
     public static boolean isValidAddress(String address) {

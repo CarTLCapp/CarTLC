@@ -438,8 +438,8 @@ public class Truck extends com.avaje.ebean.Model {
     public static List<Long> findMatches(String name) {
         List<Truck> trucks = find.where()
                 .disjunction()
-                .ilike("truck_number", "%" + name + "%")
-                .ilike("license_plate", "%" + name + "%")
+                .eq("truck_number", name)
+                .eq("license_plate", name)
                 .endJunction()
                 .findList();
         List<Long> result = new ArrayList<Long>();

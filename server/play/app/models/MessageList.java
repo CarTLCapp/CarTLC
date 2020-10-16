@@ -11,7 +11,6 @@ import play.db.ebean.*;
 import play.Logger;
 
 import play.twirl.api.Html;
-import views.formdata.InputSearch;
 
 public class MessageList {
 

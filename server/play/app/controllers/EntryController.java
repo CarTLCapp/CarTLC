@@ -78,19 +78,19 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result list2(int page, int pageSize, String sortBy, String order, String search) {
-        return list(page, pageSize, sortBy, order, search);
+    public Result list2(int page, int pageSize, String sortBy, String order, String searchTerm, String searchField) {
+        return list(page, pageSize, sortBy, order, searchTerm, searchField);
     }
 
     @Security.Authenticated(Secured.class)
-    public Result list(int page, int pageSize, String sortBy, String order, String search) {
+    public Result list(int page, int pageSize, String sortBy, String order, String searchTerm, String searchField) {
         EntryPagedList list = new EntryPagedList();
 
-        Logger.info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + search + ")");
+        Logger.info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
 
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
 
-        list.setSearch(search);
+        list.setSearch(searchTerm, searchField);
         list.setPage(page);
         list.setPageSize(pageSize);
         list.setSortBy(sortBy);
@@ -100,24 +100,25 @@ public class EntryController extends Controller {
 
         mLastEntryList = list;
 
-        InputSearch isearch = new InputSearch(search);
+        InputSearch isearch = new InputSearch(searchTerm, searchField);
         searchForm.fill(isearch);
 
-        return ok(views.html.entry_list.render(list, sortBy, order, search, searchForm, Secured.getClient(ctx())));
+        return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
     }
 
     public Result list() {
-        return list(0, 100, "date", "desc", "null");
+        return list(0, 100, "date", "desc", "null", "null");
     }
 
     @Security.Authenticated(Secured.class)
     public Result search(int page, int pageSize, String sortBy, String order) {
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class).bindFromRequest();
         InputSearch isearch = searchForm.get();
-        String search = isearch.search;
+        String searchTerm = isearch.searchTerm;
+        String searchField = isearch.searchField;
 
         EntryPagedList list = new EntryPagedList();
-        list.setSearch(search);
+        list.setSearch(searchTerm, searchField);
         list.setPage(page);
         list.setPageSize(pageSize);
         list.setSortBy(sortBy);
@@ -130,7 +131,7 @@ public class EntryController extends Controller {
 
         searchForm.fill(isearch);
 
-        return ok(views.html.entry_list.render(list, list.getSortBy(), list.getOrder(), search, searchForm, Secured.getClient(ctx())));
+        return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
     }
 
     @Security.Authenticated(Secured.class)
@@ -142,7 +143,7 @@ public class EntryController extends Controller {
 
         mLastEntryList = list;
 
-        return ok(views.html.entry_list.render(list, list.getSortBy(), list.getOrder(), "", searchForm, Secured.getClient(ctx())));
+        return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
     }
 
     @Security.Authenticated(Secured.class)
@@ -156,38 +157,38 @@ public class EntryController extends Controller {
         mLastEntryList = list;
 
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
-        return ok(views.html.entry_list.render(list, list.getSortBy(), list.getOrder(), "", searchForm, Secured.getClient(ctx())));
+        return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
     }
 
-    @Security.Authenticated(Secured.class)
-    public Result pageSize(String size) {
-        return pageSize2(size, "");
-    }
-
-    @Security.Authenticated(Secured.class)
-    public Result pageSize2(String size, String search) {
-        EntryPagedList list = new EntryPagedList();
-        list.computeFilters(Secured.getClient(ctx()));
-        list.setSearch(search);
-        try {
-            int pageSize = Integer.parseInt(size);
-            list.setPageSize(pageSize);
-        } catch (NumberFormatException ex) {
-            Logger.error(ex.getMessage());
-        }
-        list.setSortBy(mLastEntryList.getSortBy());
-        list.setOrder(mLastEntryList.getOrder());
-        list.computeFilters(Secured.getClient(ctx()));
-        list.compute();
-
-        mLastEntryList = list;
-
-        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
-        InputSearch isearch = new InputSearch(search);
-        searchForm.fill(isearch);
-
-        return ok(views.html.entry_list.render(list, list.getSortBy(), list.getOrder(), list.getSearch(), searchForm, Secured.getClient(ctx())));
-    }
+//    @Security.Authenticated(Secured.class)
+//    public Result pageSize(String size) {
+//        return pageSize2(size, "");
+//    }
+//
+//    @Security.Authenticated(Secured.class)
+//    public Result pageSize2(String size, String searchTerm, String searchField) {
+//        EntryPagedList list = new EntryPagedList();
+//        list.computeFilters(Secured.getClient(ctx()));
+//        list.setSearch(searchTerm, searchField);
+//        try {
+//            int pageSize = Integer.parseInt(size);
+//            list.setPageSize(pageSize);
+//        } catch (NumberFormatException ex) {
+//            Logger.error(ex.getMessage());
+//        }
+//        list.setSortBy(mLastEntryList.getSortBy());
+//        list.setOrder(mLastEntryList.getOrder());
+//        list.computeFilters(Secured.getClient(ctx()));
+//        list.compute();
+//
+//        mLastEntryList = list;
+//
+//        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
+//        InputSearch isearch = new InputSearch(search);
+//        searchForm.fill(isearch);
+//
+//        return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
+//    }
 
     public CompletionStage<Result> computeTotalNumRows() {
         Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
@@ -212,7 +213,7 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result export(String search) {
+    public Result export(String searchTerm, String searchField) {
         if (mExporting) {
             mAborted = true;
             mExporting = false;
@@ -225,7 +226,7 @@ public class EntryController extends Controller {
         Logger.info("export() START");
         EntryPagedList entryList = new EntryPagedList();
         entryList.computeFilters(client);
-        entryList.setSearch(search);
+        entryList.setSearch(searchTerm, searchField);
         entryList.compute();
         entryList.computeTotalNumRows();
         mExportWriter = new EntryListWriter(entryList);

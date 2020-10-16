@@ -171,7 +171,7 @@ public class Project extends Model implements Comparable<Project> {
 
     public static List<Long> findMatches(String name) {
         List<Project> projects = find.where()
-                .ilike("name", "%" + name + "%")
+                .eq("name", name)
                 .findList();
         List<Long> result = new ArrayList<Long>();
         for (Project project : projects) {

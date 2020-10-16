@@ -209,8 +209,8 @@ public class Technician extends com.avaje.ebean.Model {
     public static List<Long> findMatches(String name) {
         List<Technician> technicians = find.where()
                 .disjunction()
-                .ilike("first_name", "%" + name + "%")
-                .ilike("last_name", "%" + name + "%")
+                .eq("first_name", name)
+                .eq("last_name", name)
                 .endJunction()
                 .findList();
         List<Long> result = new ArrayList<Long>();
@@ -222,8 +222,8 @@ public class Technician extends com.avaje.ebean.Model {
 
     public static List<Long> findMatches(String first_name, String last_name) {
         List<Technician> technicians = find.where()
-                .ilike("first_name", "%" + first_name + "%")
-                .ilike("last_name", "%" + last_name + "%")
+                .eq("first_name", first_name)
+                .eq("last_name", last_name)
                 .findList();
         List<Long> result = new ArrayList<Long>();
         for (Technician tech : technicians) {

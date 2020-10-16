@@ -15,34 +15,38 @@ import views.formdata.InputSearch;
 
 public class EntryPagedList {
 
-    public enum PagedSortBy {
-        TECH("tech", "te.last_name"),
-        DATE("date", "e.entry_time"),
-        TIME("time", "e.entry_time"),
-        ROOT_PROJECT_ID("root_project", "r.name"),
-        SUB_PROJECT_ID("sub_project", "p.name"),
-        TRUCK_NUMBER("truck", "tr.truck_number"),
-        COMPANY_NAME("company", "c.name"),
-        STREET("street", "c.street"),
-        CITY("city", "c.city"),
-        STATE("state", "c.state"),
-        ZIP("zipcode", "c.zipcode");
+    public enum ColumnSelector {
+        ALL("All", "all", null),
+        TECH("Technician", "tech", "te.last_name"),
+        DATE("", "date", "e.entry_time"),
+        TIME("", "time", "e.entry_time"),
+        ROOT_PROJECT_ID("Root Project", "root_project", "r.name"),
+        SUB_PROJECT_ID("Sub Project", "sub_project", "p.name"),
+        COMPANY_NAME("Company Name", "company", "c.name"),
+        STREET("Street", "street", "c.street"),
+        CITY("City", "city", "c.city"),
+        STATE("State", "state", "c.state"),
+        ZIP("Zip Code", "zipcode", "c.zipcode"),
+        TRUCK_NUMBER("Truck", "truck", "tr.truck_number"),
+        EQUIPMENT("Equipment", "equip", "eq.name");
 
+        String text;
         String alias;
-        String code;
+        String column;
 
-        PagedSortBy(String alias, String code) {
-            this.code = code;
+        ColumnSelector(String text, String alias, String column) {
+            this.text = text;
             this.alias = alias;
+            this.column = column;
         }
 
         public String toString() {
-            return code;
+            return alias;
         }
 
-        public static PagedSortBy from(String match) {
-            for (PagedSortBy item : values()) {
-                if (item.code.equals(match) || item.alias.equals(match)) {
+        public static ColumnSelector from(String match) {
+            for (ColumnSelector item : values()) {
+                if (item.alias.equals(match) || item.text.equals(match)) {
                     return item;
                 }
             }
@@ -85,116 +89,113 @@ public class EntryPagedList {
         }
     }
 
-    class SearchTerms {
-        List<String> mTerms;
+    class SearchInfo {
+        String mSearchTerm;
+        ColumnSelector mColumnSelector;
 
-        SearchTerms() {
-            mTerms = new ArrayList<>();
+        SearchInfo() {
         }
 
-        public SearchTerms(SearchTerms other) {
-            mTerms = new ArrayList<>(other.mTerms);
+        public SearchInfo(SearchInfo other) {
+            mSearchTerm = other.mSearchTerm;
+            mColumnSelector = other.mColumnSelector;
         }
 
         boolean hasSearch() {
-            return mTerms.size() > 0;
+            return mSearchTerm != null && mSearchTerm.length() > 0;
         }
 
-        boolean hasMultipleTerms() {
-            return mTerms.size() > 1;
+        public void setSearchTerm(String search) {
+            mSearchTerm = search;
         }
 
-        public void setSearch(String search) {
-            mTerms.clear();
-            if (search != null) {
-                String[] terms = search.trim().toLowerCase().split(" +");
-                for (String term : terms) {
-                    if (term.trim().length() > 0) {
-                        mTerms.add(term.trim().toLowerCase());
-                    }
-                }
-            }
+        public void setSearchField(ColumnSelector selector) {
+            mColumnSelector = selector;
+        }
+
+        boolean hasPartialMatch(String element) {
+            return element.contains(mSearchTerm);
         }
 
         boolean hasMatch(String element) {
-            String elementNoCase = element.toLowerCase();
-            for (String term : mTerms) {
-                int pos = elementNoCase.indexOf(term);
-                if (pos >= 0) {
-                    return true;
-                }
-            }
-            return false;
+            return element.equals(mSearchTerm);
         }
 
-        ArrayList<TermMatch> match(String element) {
-            ArrayList<TermMatch> matches = new ArrayList<>();
-            String elementNoCase = element.toLowerCase();
-            TermMatch match;
-            int startPos = 0;
-            for (String term : mTerms) {
-                int pos = elementNoCase.indexOf(term, startPos);
-                if (pos >= 0) {
-                    match = new TermMatch(term, pos);
-                    matches.add(match);
-                    startPos = match.end();
-                }
-            }
-            Collections.sort(matches);
-            return matches;
-
+        boolean hasSearchBy(ColumnSelector selector) {
+            return (mColumnSelector == ColumnSelector.ALL || mColumnSelector == selector);
         }
 
-        public Html highlight(String element) {
+        String getTerm() {
+            return mSearchTerm;
+        }
+
+        String getTerm2() {
+            if (mSearchTerm != null) {
+                return mSearchTerm;
+            }
+            return "";
+        }
+
+        String getField() {
+            if (mColumnSelector == null) {
+                return ColumnSelector.ALL.alias;
+            }
+            return mColumnSelector.alias;
+        }
+
+        public Html highlight(String element, ColumnSelector selector) {
             if (!hasSearch() || element == null) {
                 return Html.apply(element);
             }
-            List<TermMatch> matches = match(element);
-            StringBuilder sbuf = new StringBuilder();
-            int curPos = 0;
-            for (TermMatch match : matches) {
-                sbuf.append(element.substring(curPos, match.start()));
+            if (selector == mColumnSelector || mColumnSelector == ColumnSelector.ALL) {
+                if (selector == ColumnSelector.TECH) {
+                    if (hasPartialMatch(element)) {
+                        return highlightPartial(element);
+                    }
+                }
+                if (hasMatch(element)) {
+                    StringBuilder sbuf = new StringBuilder();
+                    sbuf.append("<mark>");
+                    sbuf.append(element);
+                    sbuf.append("</mark>");
+                    return Html.apply(sbuf.toString());
+                }
+            }
+            return Html.apply(element);
+        }
+
+        private Html highlightPartial(String element) {
+            TermMatch match = matchPartial(element);
+            if (match != null) {
+                StringBuilder sbuf = new StringBuilder();
+                sbuf.append(element.substring(0, match.start()));
                 sbuf.append("<mark>");
                 sbuf.append(element.substring(match.start(), match.end()));
                 sbuf.append("</mark>");
-                curPos = match.end();
+                int curPos = match.end();
+                sbuf.append(element.substring(curPos));
+                return Html.apply(sbuf.toString());
             }
-            sbuf.append(element.substring(curPos));
-            return Html.apply(sbuf.toString());
+            return Html.apply(element);
         }
 
-        String getPrimary() {
-            return mTerms.get(0);
+        TermMatch matchPartial(String element) {
+            ArrayList<TermMatch> matches = new ArrayList<>();
+            String elementNoCase = element.toLowerCase();
+            String term = mSearchTerm;
+            int pos = elementNoCase.indexOf(term, 0);
+            if (pos >= 0) {
+                return new TermMatch(term, pos);
+            }
+            return null;
         }
 
-        String getAll() {
-            StringBuilder sbuf = new StringBuilder();
-            for (String term : mTerms) {
-                if (sbuf.length() > 0) {
-                    sbuf.append(" ");
-                }
-                sbuf.append(term);
-            }
-            return sbuf.toString();
-        }
-
-        // Logical AND for multiple terms.
-        void refine() {
-            ArrayList<Entry> outgoing = new ArrayList<>();
-            List<String> subterms = mTerms.subList(1, mTerms.size());
-            for (Entry entry : mResult.mList) {
-                if (entry.match(subterms, mForClientId)) {
-                    outgoing.add(entry);
-                }
-            }
-            mResult.mList = outgoing;
-        }
     }
 
     class Parameters {
         int mPage;
         int mPageSize = mDefaultPageSize;
-        PagedSortBy mSortBy = PagedSortBy.from("time");
+        ColumnSelector mSortBy = ColumnSelector.from("time");
         String mOrder = "desc";
     }
 
@@ -203,7 +204,7 @@ public class EntryPagedList {
         long mNumTotalRows;
     }
 
-    static final boolean VERBOSE = false;
+    static final boolean VERBOSE = true;
     static final int[] PAGE_SIZES = {100, 200, 300, 400, 500};
     static final String CLASS_PREV = "prev";
     static final String CLASS_PREV_DISABLED = "prev disabled";
@@ -212,7 +213,7 @@ public class EntryPagedList {
 
     Parameters mParams = new Parameters();
     Result mResult = new Result();
-    SearchTerms mSearch = new SearchTerms();
+    SearchInfo mSearch = new SearchInfo();
     List<Long> mLimitByProject = new ArrayList<Long>();
     List<String> mLimitByCompanyName = new ArrayList<String>();
     long mByTruckId;
@@ -229,7 +230,7 @@ public class EntryPagedList {
     public EntryPagedList(EntryPagedList other) {
         mParams.mSortBy = other.mParams.mSortBy;
         mParams.mOrder = other.mParams.mOrder;
-        mSearch = new SearchTerms(other.mSearch);
+        mSearch = new SearchInfo(other.mSearch);
         mLimitByProject = new ArrayList<>(other.mLimitByProject);
         mLimitByCompanyName = new ArrayList<>(other.mLimitByCompanyName);
         mByTruckId = other.mByTruckId;
@@ -255,10 +256,18 @@ public class EntryPagedList {
 
     public static class Option {
         public String text;
+        public String value;
         public String selected;
 
         public Option(int pageSize, boolean selected) {
             this.text = Integer.toString(pageSize);
+            this.value = this.text;
+            this.selected = selected ? "selected" : "";
+        }
+
+        public Option(String text, String value, boolean selected) {
+            this.text = text;
+            this.value = value;
             this.selected = selected ? "selected" : "";
         }
     }
@@ -271,16 +280,30 @@ public class EntryPagedList {
         return list;
     }
 
+    public List<Option> getSearchFieldOptions() {
+        ArrayList<Option> list = new ArrayList<>();
+        for (ColumnSelector field : ColumnSelector.values()) {
+            if (field.text != null && field.text.length() > 0) {
+                list.add(new Option(field.text, field.alias, field.alias == getSearchField()));
+            }
+        }
+        return list;
+    }
+
     public void setSortBy(String sortBy) {
         if (sortBy == null) {
-            mParams.mSortBy = PagedSortBy.TIME;
+            mParams.mSortBy = ColumnSelector.TIME;
         } else {
-            mParams.mSortBy = PagedSortBy.from(sortBy);
+            mParams.mSortBy = ColumnSelector.from(sortBy);
         }
     }
 
     public String getSortBy() {
-        return mParams.mSortBy.toString();
+        return mParams.mSortBy.alias;
+    }
+
+    public String getSortByColumn() {
+        return mParams.mSortBy.column;
     }
 
     public void setOrder(String order) {
@@ -368,12 +391,12 @@ public class EntryPagedList {
             case CITY:
             case STATE:
             case ZIP:
-                query.append(" , " + getSortBy());
+                query.append(" , " + getSortByColumn());
                 break;
         }
         query.append(" FROM entry AS e");
 
-        if (hasSearchByEquipment()) {
+        if (mSearch.hasSearch() && mSearch.hasSearchBy(ColumnSelector.EQUIPMENT)) {
             query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
             query.append(" INNER JOIN equipment AS eq ON eqc.equipment_id = eq.id");
         }
@@ -426,7 +449,7 @@ public class EntryPagedList {
             }
         }
         query.append(" ORDER BY ");
-        query.append(getSortBy());
+        query.append(getSortByColumn());
         query.append(" ");
         query.append(getOrder());
         if (useLimit) {
@@ -444,22 +467,36 @@ public class EntryPagedList {
 
     private String getWhereSearch() {
         StringBuilder query = new StringBuilder();
-        appendSearch(query, "e.project_id", getSearchByProject());
-        appendSearch(query, "e.company_id", getSearchByCompany());
-        appendSearch(query, "e.truck_id", getSearchByTruck());
-        appendSearch(query, "eq.id", getSearchByEquipment());
-        List<Long> techs = getSearchByTechnician();
-        appendSearch(query, "e.tech_id", techs);
-        if (techs.size() > 0) {
-            List<Long> entries_ids = SecondaryTechnician.findMatches(techs);
-            appendSearch(query, "e.id", entries_ids);
+        if (mSearch.hasSearch()) {
+            if (mSearch.hasSearchBy(ColumnSelector.ROOT_PROJECT_ID) || mSearch.hasSearchBy(ColumnSelector.SUB_PROJECT_ID)) {
+                appendSearch(query, "e.project_id", getSearchByProject());
+            }
+            if (hasSearchByCompany()) {
+                appendSearch(query, "e.company_id", getSearchByCompany());
+            }
+            if (mSearch.hasSearchBy(ColumnSelector.TRUCK_NUMBER)) {
+                appendSearch(query, "e.truck_id", getSearchByTruck());
+            }
+            if (mSearch.hasSearchBy(ColumnSelector.EQUIPMENT)) {
+                appendSearch(query, "eq.id", getSearchByEquipment());
+            }
+            if (mSearch.hasSearchBy(ColumnSelector.TECH)) {
+                List<Long> techs = getSearchByTechnician();
+                appendSearch(query, "e.tech_id", techs);
+                if (techs.size() > 0) {
+                    List<Long> entries_ids = SecondaryTechnician.findMatches(techs);
+                    appendSearch(query, "e.id", entries_ids);
+                }
+            }
         }
         return query.toString();
     }
 
     private void appendSearch(StringBuilder query, String prefix, List<Long> items) {
         if (items.size() == 0) {
-            return;
+            if (mSearch.mColumnSelector == ColumnSelector.ALL) {
+                return;
+            }
         }
         if (query.length() > 0) {
             query.append(" OR ");
@@ -468,65 +505,30 @@ public class EntryPagedList {
         query.append(" IN ");
         query.append("(");
         boolean first = true;
-        for (long id : items) {
-            if (first) {
-                first = false;
-            } else {
-                query.append(", ");
+        if (items.size() == 0) {
+            query.append("0");
+        } else {
+            for (long id : items) {
+                if (first) {
+                    first = false;
+                } else {
+                    query.append(", ");
+                }
+                query.append(id);
             }
-            query.append(id);
         }
         query.append(")");
     }
 
     private List<Long> getSearchByProject() {
         HashSet<Long> set = new HashSet<Long>();
-        for (String term : mSearch.mTerms) {
-            set.addAll(Project.findMatches(term));
+        if (mSearch.hasSearchBy(ColumnSelector.SUB_PROJECT_ID)) {
+            set.addAll(Project.findMatches(mSearch.getTerm()));
         }
-        for (Long rootProjectId : getSearchByRootProject()) {
-            set.addAll(Project.findWithRootProjectId(rootProjectId));
-        }
-        List<Long> list = new ArrayList<Long>();
-        list.addAll(set);
-        return list;
-    }
-
-    private List<Long> getSearchByCompany() {
-        HashSet<Long> set = new HashSet<Long>();
-
-        for (String term : mSearch.mTerms) {
-            set.addAll(Company.findMatches(term));
-        }
-        List<Long> list = new ArrayList<Long>();
-        list.addAll(set);
-        return list;
-    }
-
-    private List<Long> getSearchByTechnician() {
-        HashSet<Long> set = new HashSet<Long>();
-        for (String term : mSearch.mTerms) {
-            set.addAll(Technician.findMatches(term));
-        }
-        List<Long> list = new ArrayList<Long>();
-        list.addAll(set);
-        return list;
-    }
-
-    private List<Long> getSearchByTruck() {
-        HashSet<Long> set = new HashSet<Long>();
-        for (String term : mSearch.mTerms) {
-            set.addAll(Truck.findMatches(term));
-        }
-        List<Long> list = new ArrayList<Long>();
-        list.addAll(set);
-        return list;
-    }
-
-    private List<Long> getSearchByEquipment() {
-        HashSet<Long> set = new HashSet<Long>();
-        for (String term : mSearch.mTerms) {
-            set.addAll(Equipment.findMatches(term));
+        if (mSearch.hasSearchBy(ColumnSelector.ROOT_PROJECT_ID)) {
+            for (Long rootProjectId : getSearchByRootProject()) {
+                set.addAll(Project.findWithRootProjectId(rootProjectId));
+            }
         }
         List<Long> list = new ArrayList<Long>();
         list.addAll(set);
@@ -534,27 +536,72 @@ public class EntryPagedList {
     }
 
     private List<Long> getSearchByRootProject() {
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(RootProject.findMatches(mSearch.getTerm()));
+        return list;
+    }
+
+    private List<Long> getSearchByCompany() {
         HashSet<Long> set = new HashSet<Long>();
-        for (String term : mSearch.mTerms) {
-            set.addAll(RootProject.findMatches(term));
+        if (mSearch.hasSearchBy(ColumnSelector.COMPANY_NAME)) {
+            set.addAll(Company.convert(Company.findByName(mSearch.getTerm())));
+        }
+        if (mSearch.hasSearchBy(ColumnSelector.STREET)) {
+            set.addAll(Company.convert(Company.findByStreet(mSearch.getTerm())));
+        }
+        if (mSearch.hasSearchBy(ColumnSelector.CITY)) {
+            set.addAll(Company.convert(Company.findByCity(mSearch.getTerm())));
+        }
+        if (mSearch.hasSearchBy(ColumnSelector.STATE)) {
+            set.addAll(Company.convert(Company.findByState(mSearch.getTerm())));
+        }
+        if (mSearch.hasSearchBy(ColumnSelector.ZIP)) {
+            set.addAll(Company.convert(Company.findByZip(mSearch.getTerm())));
         }
         List<Long> list = new ArrayList<Long>();
         list.addAll(set);
         return list;
     }
 
-    private boolean hasSearchByEquipment() {
-        for (String term : mSearch.mTerms) {
-            if (!Equipment.findMatches(term).isEmpty()) {
-                return true;
-            }
+    private boolean hasSearchByCompany() {
+        return mSearch.hasSearchBy(ColumnSelector.COMPANY_NAME) ||
+                mSearch.hasSearchBy(ColumnSelector.STREET) ||
+                mSearch.hasSearchBy(ColumnSelector.CITY) ||
+                mSearch.hasSearchBy(ColumnSelector.STATE) ||
+                mSearch.hasSearchBy(ColumnSelector.ZIP);
+    }
+
+    private List<Long> getSearchByTechnician() {
+        List<Long> list = new ArrayList<Long>();
+        String term = mSearch.getTerm();
+        String[] terms = term.split(" ");
+        if (terms.length > 1) {
+            list.addAll(Technician.findMatches(terms[0], terms[1]));
+        } else {
+            list.addAll(Technician.findMatches(term));
         }
-        return false;
+        return list;
+    }
+
+    private List<Long> getSearchByTruck() {
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(Truck.findMatches(mSearch.getTerm()));
+        return list;
+    }
+
+    private List<Long> getSearchByEquipment() {
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(Equipment.findMatches(mSearch.getTerm()));
+        return list;
+    }
+
+    private boolean hasSearchByEquipment() {
+        return mSearch.hasSearchBy(ColumnSelector.EQUIPMENT);
     }
 
     private boolean hasSearchByRootProject() {
-        for (String term : mSearch.mTerms) {
-            if (!RootProject.findMatches(term).isEmpty()) {
+        if (mSearch.hasSearchBy(ColumnSelector.ROOT_PROJECT_ID)) {
+            if (!RootProject.findMatches(mSearch.getTerm()).isEmpty()) {
                 return true;
             }
         }
@@ -603,7 +650,7 @@ public class EntryPagedList {
     }
 
     public InputSearch getInputSearch() {
-        return new InputSearch(mSearch.getAll());
+        return new InputSearch(mSearch.getTerm2(), mSearch.getField());
     }
 
     public void clearCache() {
@@ -626,12 +673,6 @@ public class EntryPagedList {
         for (SqlRow row : entries) {
             mResult.mList.add(parseEntry(row));
         }
-        if (mSearch.hasMultipleTerms()) {
-            mSearch.refine();
-            mResult.mNumTotalRows = mResult.mList.size();
-            mParams.mPageSize = mResult.mList.size();
-            mParams.mPage = 0;
-        }
     }
 
     public boolean hasRows() {
@@ -640,13 +681,9 @@ public class EntryPagedList {
 
     public long computeTotalNumRows() {
         if (mResult.mNumTotalRows == 0) {
-            if (mSearch.hasMultipleTerms()) {
-                mResult.mNumTotalRows = mResult.mList.size();
-            } else {
-                String query = buildQuery(false);
-                List<SqlRow> entries = Ebean.createSqlQuery(query).findList();
-                mResult.mNumTotalRows = entries.size();
-            }
+            String query = buildQuery(false);
+            List<SqlRow> entries = Ebean.createSqlQuery(query).findList();
+            mResult.mNumTotalRows = entries.size();
         }
         return mResult.mNumTotalRows;
     }
@@ -698,6 +735,10 @@ public class EntryPagedList {
         }
         return mResult.mList;
     }
+
+    ///////////////////
+    // PAGE SELECTION
+    ///////////////////
 
     public long getTotalRowCount() {
         return mResult.mNumTotalRows;
@@ -760,25 +801,39 @@ public class EntryPagedList {
         return sbuf.toString();
     }
 
-    public Html highlightSearch(String element) {
-        return mSearch.highlight(element);
+    ///////////////////
+    // SEARCH
+    ///////////////////
+
+    public Html highlightSearch(String element, ColumnSelector selector) {
+        return mSearch.highlight(element, selector);
     }
 
     public void clearSearch() {
-        setSearch(null);
+        setSearch(null, null);
     }
 
-    public void setSearch(String search) {
-        if (search != null && search.length() > 0 && !search.equals("null")) {
-            mSearch.setSearch(search);
+    public void setSearch(String searchTerm, String columnSelector) {
+        Logger.debug("setSearch(" + searchTerm + ", " + columnSelector.toString() + ")");
+        if (searchTerm != null && searchTerm.length() > 0 && !searchTerm.equals("null")) {
+            mSearch.setSearchTerm(searchTerm);
         } else {
-            mSearch.setSearch(null);
+            mSearch.setSearchTerm(null);
+        }
+        if (columnSelector != null && columnSelector.length() > 0 && !columnSelector.equals("null")) {
+            mSearch.setSearchField(ColumnSelector.from(columnSelector));
+        } else {
+            mSearch.setSearchField(ColumnSelector.ALL);
         }
         mByTruckId = 0;
     }
 
-    public String getSearch() {
-        return mSearch.getAll();
+    public String getSearchTerm() {
+        return mSearch.getTerm2();
+    }
+
+    public String getSearchField() {
+        return mSearch.getField();
     }
 
 //    public List<Long> parseIds(String rows) {
