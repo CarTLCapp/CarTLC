@@ -93,13 +93,11 @@
                     <h2 id="sectionTitle">@element.prompt</h2>
                 } else {
                     <h2 id="sectionTitle">@element.prompt</h2>
-
-                    @for(picture <- entry.getFlowPictures(element.id)) {
-                        <img src='@routes.EntryController.getImage(picture.picture)'/>
-                    }
+                }
+                @for(picture <- entry.getFlowPictures(element.id)) {
+                    <img src='@routes.EntryController.getImage(picture.picture)'/>
                 }
                 @if(element.hasNotes()) {
-
                     <table class="notes zebra-striped">
                         <thead>
                             <tr>
