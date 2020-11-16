@@ -129,7 +129,7 @@ public class EntryPagedList {
             return mSearchTerm;
         }
 
-        String getTerm2() {
+        String getTermChkNull() {
             if (mSearchTerm != null) {
                 return mSearchTerm;
             }
@@ -650,7 +650,7 @@ public class EntryPagedList {
     }
 
     public InputSearch getInputSearch() {
-        return new InputSearch(mSearch.getTerm2(), mSearch.getField());
+        return new InputSearch(mSearch.getTermChkNull(), mSearch.getField());
     }
 
     public void clearCache() {
@@ -829,7 +829,7 @@ public class EntryPagedList {
     }
 
     public String getSearchTerm() {
-        return mSearch.getTerm2();
+        return mSearch.getTermChkNull();
     }
 
     public String getSearchField() {

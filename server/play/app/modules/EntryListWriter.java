@@ -179,7 +179,7 @@ public class EntryListWriter {
 
         void prepare(List<EntryNoteCollection> notes) {
             for (EntryNoteCollection note : notes) {
-                if (!note.getValue().isEmpty()) {
+                if (note.getValue() != null && !note.getValue().isEmpty()) {
                     if (!mNoteColumns.containsKey(note.getName())) {
                         mNoteColumns.put(note.getName(), mNextColumn++);
                     }

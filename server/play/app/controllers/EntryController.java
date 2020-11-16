@@ -39,6 +39,9 @@ import modules.TimeHelper;
 
 import java.io.File;
 
+// import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import play.db.ebean.Transactional;
 import play.Logger;
 import play.libs.concurrent.HttpExecution;
@@ -86,11 +89,13 @@ public class EntryController extends Controller {
     public Result list(int page, int pageSize, String sortBy, String order, String searchTerm, String searchField) {
         EntryPagedList list = new EntryPagedList();
 
-        Logger.info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
+        String decodedSearchTerm = decode(searchTerm);
+
+        Logger.info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + decodedSearchTerm + ", " + searchField + ")");
 
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
 
-        list.setSearch(searchTerm, searchField);
+        list.setSearch(decodedSearchTerm, searchField);
         list.setPage(page);
         list.setPageSize(pageSize);
         list.setSortBy(sortBy);
@@ -100,10 +105,19 @@ public class EntryController extends Controller {
 
         mLastEntryList = list;
 
-        InputSearch isearch = new InputSearch(searchTerm, searchField);
+        InputSearch isearch = new InputSearch(decodedSearchTerm, searchField);
         searchForm.fill(isearch);
 
         return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
+    }
+
+    private String decode(String ele) {
+        try {
+            return StringEscapeUtils.unescapeHtml4(ele);
+        } catch (Exception ex) {
+            Logger.error(ex.getMessage());
+            return ele;
+        }
     }
 
     public Result list() {
@@ -116,6 +130,8 @@ public class EntryController extends Controller {
         InputSearch isearch = searchForm.get();
         String searchTerm = isearch.searchTerm;
         String searchField = isearch.searchField;
+
+        Logger.info("search(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
 
         EntryPagedList list = new EntryPagedList();
         list.setSearch(searchTerm, searchField);
@@ -160,36 +176,6 @@ public class EntryController extends Controller {
         return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
     }
 
-//    @Security.Authenticated(Secured.class)
-//    public Result pageSize(String size) {
-//        return pageSize2(size, "");
-//    }
-//
-//    @Security.Authenticated(Secured.class)
-//    public Result pageSize2(String size, String searchTerm, String searchField) {
-//        EntryPagedList list = new EntryPagedList();
-//        list.computeFilters(Secured.getClient(ctx()));
-//        list.setSearch(searchTerm, searchField);
-//        try {
-//            int pageSize = Integer.parseInt(size);
-//            list.setPageSize(pageSize);
-//        } catch (NumberFormatException ex) {
-//            Logger.error(ex.getMessage());
-//        }
-//        list.setSortBy(mLastEntryList.getSortBy());
-//        list.setOrder(mLastEntryList.getOrder());
-//        list.computeFilters(Secured.getClient(ctx()));
-//        list.compute();
-//
-//        mLastEntryList = list;
-//
-//        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
-//        InputSearch isearch = new InputSearch(search);
-//        searchForm.fill(isearch);
-//
-//        return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
-//    }
-
     public CompletionStage<Result> computeTotalNumRows() {
         Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
         return CompletableFuture.completedFuture(mLastEntryList.computeTotalNumRows()).thenApplyAsync(result -> {
@@ -223,10 +209,15 @@ public class EntryController extends Controller {
         mExporting = true;
         mAborted = false;
         Client client = Secured.getClient(ctx());
-        Logger.info("export() START");
+
+        String decodedSearchTerm = decode(searchTerm);
+
+        Logger.info("export(" + decodedSearchTerm + ", " + searchField + ") START");
+
         EntryPagedList entryList = new EntryPagedList();
         entryList.computeFilters(client);
-        entryList.setSearch(searchTerm, searchField);
+        entryList.setSearch(decodedSearchTerm, searchField);
+        entryList.computeFilters(Secured.getClient(ctx()));
         entryList.compute();
         entryList.computeTotalNumRows();
         mExportWriter = new EntryListWriter(entryList);
@@ -933,5 +924,34 @@ public class EntryController extends Controller {
 //    }
 
 
+//    @Security.Authenticated(Secured.class)
+//    public Result pageSize(String size) {
+//        return pageSize2(size, "");
+//    }
+//
+//    @Security.Authenticated(Secured.class)
+//    public Result pageSize2(String size, String searchTerm, String searchField) {
+//        EntryPagedList list = new EntryPagedList();
+//        list.computeFilters(Secured.getClient(ctx()));
+//        list.setSearch(searchTerm, searchField);
+//        try {
+//            int pageSize = Integer.parseInt(size);
+//            list.setPageSize(pageSize);
+//        } catch (NumberFormatException ex) {
+//            Logger.error(ex.getMessage());
+//        }
+//        list.setSortBy(mLastEntryList.getSortBy());
+//        list.setOrder(mLastEntryList.getOrder());
+//        list.computeFilters(Secured.getClient(ctx()));
+//        list.compute();
+//
+//        mLastEntryList = list;
+//
+//        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
+//        InputSearch isearch = new InputSearch(search);
+//        searchForm.fill(isearch);
+//
+//        return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
+//    }
 }
 
