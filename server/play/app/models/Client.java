@@ -200,6 +200,17 @@ public class Client extends com.avaje.ebean.Model {
         return client != null && client.is_admin;
     }
 
+    public boolean isRootAdmin() {
+        return is_admin && name.equals(NAME_ADMIN);
+    }
+
+    public String getIsAdmin() {
+        if (is_admin) {
+            return "Admin";
+        }
+        return "";
+    }
+
     public static boolean canViewAllNotes(long client_id) {
         return client_id == 0 || isAdmin(client_id) || ClientAssociation.hasShowAllNotes(client_id);
     }

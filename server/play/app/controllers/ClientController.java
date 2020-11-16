@@ -86,6 +86,7 @@ public class ClientController extends Controller {
         Client client = Client.find.byId(id);
         client.name = updateClient.name;
         client.password = updateClient.password;
+        client.is_admin = updateClient.isAdmin;
         client.update();
 
         ClientProjectAssociation.process(id, getCheckedProjects(clientForm));
@@ -132,6 +133,7 @@ public class ClientController extends Controller {
         Client newClient = new Client();
         newClient.name = inputClient.name;
         newClient.password = inputClient.password;
+        newClient.is_admin = inputClient.isAdmin;
         newClient.save();
 
         long id = newClient.id;

@@ -21,6 +21,11 @@
 
                 <div class="checkbox-container">
 
+                @defining(Client.isAdmin(id)) { flag =>
+                    @b3.checkbox(techForm("isAdmin"), '_label -> "Administrator", 'checked -> flag)
+                }
+                <div style="clear:both;"></div>
+
                 @defining(ClientAssociation.hasShowPictures(id)) { flag =>
                     @b3.checkbox(techForm("hasShowPictures"), '_label -> "Show Pictures", 'checked -> flag)
                 }

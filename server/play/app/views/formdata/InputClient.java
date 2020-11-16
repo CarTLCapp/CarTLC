@@ -20,11 +20,13 @@ public class InputClient extends Model {
     public String name;
     public String password;
     public String company;
+    public boolean isAdmin;
 
     public InputClient(Client client) {
         name = client.name;
         password = client.password;
         company = ClientCompanyNameAssociation.findCompanyNameFor(client.id);
+        isAdmin = client.is_admin;
     }
 
     public InputClient() {
