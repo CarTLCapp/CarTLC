@@ -221,10 +221,10 @@ public class EntryController extends Controller {
         entryList.compute();
         entryList.computeTotalNumRows();
         mExportWriter = new EntryListWriter(entryList);
-        File file = new File(EXPORT_FILENAME);
+
         int count;
         try {
-            mExportWriter.open(file);
+            mExportWriter.open();
             count = mExportWriter.writeNext();
         } catch (IOException ex) {
             mExporting = false;
@@ -249,6 +249,7 @@ public class EntryController extends Controller {
                 return ok("#" + Integer.toString(count) + "...");
             } else {
                 Logger.info("exportNext() DONE!");
+                mExportWriter.finish(EXPORT_FILENAME);
                 mExporting = false;
                 return ok("E" + mExportWriter.getFile().getName());
             }
