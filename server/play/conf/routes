@@ -68,6 +68,7 @@ POST    /company/:id                controllers.CompanyController.update(id:Long
 POST    /company/:id/delete         controllers.CompanyController.delete(id:Long)
 GET     /company/:id/enable         controllers.CompanyController.enable(id:Long)
 GET     /company/:id/view           controllers.CompanyController.view(id:Long, sortBy ?= "name", o ?= "asc")
+GET     /company/address/:index     controllers.CompanyController.listStreetAddresses(index:Int)
 POST    /companies                  controllers.CompanyController.query()
 
 ### EQUIPMENTS ###

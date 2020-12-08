@@ -296,6 +296,14 @@ public class Entry extends com.avaje.ebean.Model {
         return true;
     }
 
+    public String getStreetAddress() {
+        Company company = Company.get(company_id);
+        if (company == null) {
+            return "NOT FOUND: " + company_id;
+        }
+        return company.getStreetAddress();
+    }
+
     public String getAddressLine() {
         Company company = Company.get(company_id);
         if (company == null) {
@@ -460,10 +468,10 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getNoteAddendum(Client client) {
-	if (client.id != null) {
-	    return getNoteAddendum(client.id);
-	}
-	return "";
+        if (client.id != null) {
+            return getNoteAddendum(client.id);
+        }
+        return "";
     }
 
     public String getNoteAddendum(long client_id) {
@@ -892,11 +900,12 @@ public class Entry extends com.avaje.ebean.Model {
         return options;
     }
 
-    public static Map<String, String> optionsProject(String rootProject) {
+    public static Map<String, String> optionsCompanyName() {
         LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
-        for (Project proj : Project.list()) {
-            options.put(proj.name, proj.name);
+        for (CompanyName companyName : CompanyName.list()) {
+            options.put(companyName.name, companyName.name);
         }
+        options.put("", "");
         return options;
     }
 

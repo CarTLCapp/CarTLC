@@ -418,9 +418,11 @@ public class EntryController extends Controller {
             if (project != null) {
                 entry.project_id = project.id;
             }
-            Company company = Company.findByAddress(data.address);
+            Company company = Company.findByNameAndAddress(data.companyName, data.address);
             if (company != null) {
                 entry.company_id = company.id;
+            } else {
+                Logger.error("Could not find company with name='" + data.companyName + "', address='" + data.address + "'");
             }
             Truck truck = Truck.getTruckByID(data.truck);
             if (truck != null) {

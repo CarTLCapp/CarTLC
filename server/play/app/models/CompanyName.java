@@ -45,6 +45,20 @@ public class CompanyName extends Model {
                 .findList();
     }
 
+    public static ArrayList<String> listNames() {
+        ArrayList<String> names = new ArrayList<String>();
+        for (CompanyName companyName : list()) {
+            names.add(companyName.name);
+        }
+        return names;
+    }
+
+    public static ArrayList<String> listNamesWithBlank() {
+        ArrayList<String> names = listNames();
+        names.add(0, "");
+        return names;
+    }
+
     public String idString() {
         return "C" + id;
     }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import models.Entry;
 import models.Project;
+import models.Company;
 /**
  * Backing class for the entry form.
  */
@@ -13,6 +14,7 @@ public class EntryFormData {
     public String date = "";
     public String rootProject = "";
     public String subProject = "";
+    public String companyName = "";
     public String address = "";
     public String truck = "";
     public String status = "";
@@ -24,7 +26,8 @@ public class EntryFormData {
         date = entry.getDateTime();
         rootProject = entry.getRootProjectName();
         subProject = entry.getSubProjectName();
-        address = entry.getAddressLine();
+        companyName = entry.getCompany();
+        address = entry.getStreetAddress();
         truck = entry.getTruckLine();
         status = entry.getStatus();
     }
@@ -37,6 +40,9 @@ public class EntryFormData {
 
     public List<String> optionsSubProject() {
         return Project.listSubProjectNames(rootProject);
+    }
+    public List<String> optionsStreetAddresses() {
+        return Company.listStreetAddresses(companyName);
     }
 
 }

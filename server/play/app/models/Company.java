@@ -133,6 +133,19 @@ public class Company extends Model {
                 .findList();
     }
 
+    public static List<String> listStreetAddresses(String companyName) {
+        List<Company> items = find.where()
+                .eq("disabled", false)
+                .eq("name", companyName)
+                .orderBy("city asc")
+                .findList();
+        ArrayList<String> result = new ArrayList<String>();
+        for (Company company : items) {
+            result.add(company.getStreetAddress());
+        }
+        return result;
+    }
+
     public static List<Company> appList(int tech_id) {
         List<Company> items = find.where()
                 .eq("disabled", false)
@@ -237,6 +250,12 @@ public class Company extends Model {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(getName());
         sbuf.append(", ");
+        sbuf.append(getStreetAddress());
+        return sbuf.toString();
+    }
+
+    public String getStreetAddress() {
+        StringBuilder sbuf = new StringBuilder();
         if (street != null) {
             sbuf.append(street);
         }
@@ -314,6 +333,15 @@ public class Company extends Model {
 
     public static List<Company> findByZip(String name) {
         return find.where().eq("zipcode", name).findList();
+    }
+
+    public static Company findByNameAndAddress(String companyName, String address) {
+        for (Company company : find.where().findList()) {
+            if (company.name.equals(companyName) && company.getStreetAddress().equals(address)) {
+                return company;
+            }
+        }
+        return null;
     }
 
     public static Company findByAddress(String address) {

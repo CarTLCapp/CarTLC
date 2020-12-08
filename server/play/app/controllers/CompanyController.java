@@ -261,5 +261,21 @@ public class CompanyController extends Controller {
         Version.inc(Version.VERSION_COMPANY);
         return LIST();
     }
+
+    @Security.Authenticated(Secured.class)
+    public Result listStreetAddresses(int index) {
+        List<String> companyNamesWithBlank = CompanyName.listNamesWithBlank();
+        String selected = companyNamesWithBlank.get(index);
+        List<String> addresses = Company.listStreetAddresses(selected);
+        StringBuilder sbuf = new StringBuilder();
+        for (String address : addresses) {
+            if (sbuf.length() > 0) {
+                sbuf.append("\n");
+            }
+            sbuf.append(address);
+        }
+        return ok(sbuf.toString());
+    }
+
 }
 
