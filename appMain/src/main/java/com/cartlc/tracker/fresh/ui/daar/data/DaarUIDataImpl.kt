@@ -193,5 +193,4 @@ class DaarUIDataImpl(
 
     // endregion DaarData
 
-
 }

@@ -7,6 +7,7 @@ import com.cartlc.tracker.fresh.model.core.sql.SqlTableEntry
 interface TableEntry {
 
     fun clearAll()
+    val hasEntriesToUpload: Boolean
     fun countAddresses(addressId: Long): Int
     fun countTrucks(truckId: Long): Int
     fun countProjects(projectId: Long): Int
@@ -15,9 +16,9 @@ interface TableEntry {
     fun query(id: Long): DataEntry?
     fun querySince(since: Long): List<DataEntry>
     fun queryForProjectAddressCombo(id: Long): List<DataEntry>
-    fun queryPendingDataToUploadToMaster(): List<DataEntry>
+    fun queryPendingEntriesToUpload(): List<DataEntry>
     fun queryPendingPicturesToUpload(): List<DataEntry>
-    fun queryServerIds(): List<DataEntry>
+    fun queryEmptyServerIds(): List<DataEntry>
     fun remove(entry: DataEntry)
     fun reUploadEntries(combo: DataProjectAddressCombo): Int
     fun saveProjectAddressCombo(entry: DataEntry)

@@ -6,7 +6,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.msg.StringMessage
-import com.cartlc.tracker.fresh.service.ServiceUseCase
+import com.cartlc.tracker.fresh.service.endpoint.post.DCPostUseCase
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.bits.HideOnSoftKeyboard
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
@@ -30,8 +30,8 @@ class DaarController(
     private var daarUIData: DaarUIData = DaarUIDataImpl(dm, messageHandler)
     private val db: DatabaseTable = boundAct.repo.db
     private val screenNavigator = boundAct.screenNavigator
-    private val serviceUseCase: ServiceUseCase
-        get() = boundAct.componentRoot.serviceUseCase
+    private val postUseCase: DCPostUseCase
+        get() = boundAct.componentRoot.postUseCase
     private var isSaved = false
     private val daarDataProjects = DaarDataProjectsImpl(dm)
 
@@ -286,7 +286,7 @@ class DaarController(
         val data = daarUIData.data
         data.isReady = daarUIData.isComplete
         db.tableDaar.save(data)
-        serviceUseCase.ping()
+        postUseCase.ping()
     }
 
     private fun preserve() {

@@ -23,7 +23,7 @@ class StageSelectProject(
                     titleUseCase.subTitleText = null
                     titleUseCase.mainTitleVisible = true
                     titleUseCase.subTitleVisible = true
-                    buttonsUseCase.nextVisible = hasProjectRootName
+                    buttonsController.nextVisible = hasProjectRootName
                     setList(StringMessage.title_root_project, PrefHelper.KEY_ROOT_PROJECT, db.tableProjects.queryRootProjectNames())
                     getLocation()
                 }
@@ -32,7 +32,7 @@ class StageSelectProject(
                     prefHelper.projectRootName?.let { rootName ->
                         mainListUseCase.visible = true
                         titleUseCase.subTitleText = curProjectHint
-                        buttonsUseCase.nextVisible = hasProjectSubName
+                        buttonsController.nextVisible = hasProjectSubName
                         setList(StringMessage.title_sub_project, PrefHelper.KEY_SUB_PROJECT,
                                 getNames(db.tableFlow.filterHasFlow(db.tableProjects.querySubProjects(rootName)))
                         )
@@ -52,6 +52,7 @@ class StageSelectProject(
                 names.add(name)
             }
         }
+        names.sort()
         return names
     }
 }

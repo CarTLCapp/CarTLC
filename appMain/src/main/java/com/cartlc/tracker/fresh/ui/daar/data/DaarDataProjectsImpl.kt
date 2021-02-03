@@ -82,7 +82,7 @@ class DaarDataProjectsImpl(
         private set
 
     override val rootProjectNames: List<String>
-        get() =  db.tableProjects.queryRootProjectNames()
+        get() = db.tableProjects.queryRootProjectNames()
 
     override fun subProjectsOf(rootName: String): List<String> {
         val names = mutableListOf<String>()

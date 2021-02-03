@@ -19,7 +19,7 @@ class StageEquipment(
                 Stage.EQUIPMENT -> {
                     titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_equipment_installed)
                     mainListUseCase.visible = true
-                    buttonsUseCase.centerVisible = true
+                    buttonsController.centerVisible = true
                 }
                 Stage.ADD_EQUIPMENT -> {
                     titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_equipment)

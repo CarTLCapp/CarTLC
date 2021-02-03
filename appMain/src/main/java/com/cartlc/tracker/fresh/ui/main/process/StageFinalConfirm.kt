@@ -14,7 +14,7 @@ class StageFinalConfirm(
 
     fun process() {
         with(shared) {
-            buttonsUseCase.nextText = messageHandler.getString(StringMessage.btn_confirm)
+            buttonsController.nextText = messageHandler.getString(StringMessage.btn_confirm)
             titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_confirmation)
         }
     }
@@ -42,7 +42,7 @@ class StageFinalConfirm(
     private fun onConfirmOkay(viewMvc: MainViewMvc) {
         with(shared) {
             viewMvc.confirmUseCase?.onConfirmOkay()
-            serviceUseCase.ping()
+            postUseCase.ping()
         }
     }
 

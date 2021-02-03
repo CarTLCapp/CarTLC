@@ -27,11 +27,9 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.11.253"
 )
 
+libraryDependencies += "org.apache.commons" % "commons-text" % "1.9"
+
 javacOptions ++= Seq(
   "-Xlint:deprecation",
   "-Xlint:unchecked"
 )
-
-// libraryDependencies += Seq(
-//    "commons-text" % "commons-text" % "1.9"
-//)

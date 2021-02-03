@@ -15,16 +15,16 @@ class StageCurrentProject(
     fun process() {
         with(shared) {
             if (!repo.flowUseCase.wasFromNotify) {
-                serviceUseCase.ping()
+                postUseCase.ping()
             }
             checkErrors()
             mainListUseCase.visible = true
             titleUseCase.separatorVisible = true
             titleUseCase.mainTitleVisible = true
-            buttonsUseCase.centerVisible = true
-            buttonsUseCase.prevVisible = hasCurrentProject
-            buttonsUseCase.prevText = messageHandler.getString(StringMessage.btn_edit)
-            buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_new_project)
+            buttonsController.centerVisible = true
+            buttonsController.prevVisible = hasCurrentProject
+            buttonsController.prevText = messageHandler.getString(StringMessage.btn_edit)
+            buttonsController.centerText = messageHandler.getString(StringMessage.btn_new_project)
             titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_current_project)
             pictureUseCase.clearCache()
         }

@@ -5,12 +5,9 @@ package com.cartlc.tracker.fresh.ui.app.factory
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import com.cartlc.tracker.R
-import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvc
-import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvcImpl
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvc
@@ -18,6 +15,8 @@ import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.item.*
 import com.cartlc.tracker.fresh.ui.daar.DaarViewMvc
 import com.cartlc.tracker.fresh.ui.daar.DaarViewMvcImpl
+import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvc
+import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvcImpl
 import com.cartlc.tracker.fresh.ui.listentries.ListEntriesViewMvc
 import com.cartlc.tracker.fresh.ui.listentries.ListEntriesViewMvcImpl
 import com.cartlc.tracker.fresh.ui.listentries.item.ListEntriesItemViewMvc
@@ -31,7 +30,10 @@ import com.cartlc.tracker.fresh.ui.mainlist.MainListViewMvcImpl
 import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.*
 import com.cartlc.tracker.fresh.ui.picture.PictureListViewMvc
 import com.cartlc.tracker.fresh.ui.picture.PictureListViewMvcImpl
-import com.cartlc.tracker.fresh.ui.picture.item.*
+import com.cartlc.tracker.fresh.ui.picture.item.PictureListItemViewMvc
+import com.cartlc.tracker.fresh.ui.picture.item.PictureListItemViewMvcImpl
+import com.cartlc.tracker.fresh.ui.picture.item.PictureNoteItemViewMvc
+import com.cartlc.tracker.fresh.ui.picture.item.PictureNoteItemViewMvcImpl
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvcImpl
 
@@ -141,6 +143,10 @@ class FactoryViewMvc(
 
     fun allocListEntriesViewItemViewMvc(container: ViewGroup): ListEntriesItemViewMvc {
         return ListEntriesItemViewMvcImpl(getInflater(container), container)
+    }
+
+    fun allocSubFlowItemViewMvc(container: ViewGroup): SubFlowItemViewMvc {
+        return SubFlowItemViewMvcImpl(getInflater(container), container)
     }
 
     fun allocDaarViewMvc(container: ViewGroup?): DaarViewMvc {

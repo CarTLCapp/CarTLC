@@ -36,11 +36,9 @@ import modules.AmazonHelper.OnDownloadComplete;
 import modules.Globals;
 import modules.EntryListWriter;
 import modules.TimeHelper;
+import modules.StringHelper;
 
 import java.io.File;
-
-// import org.apache.commons.text.StringEscapeUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import play.db.ebean.Transactional;
 import play.Logger;
@@ -89,7 +87,7 @@ public class EntryController extends Controller {
     public Result list(int page, int pageSize, String sortBy, String order, String searchTerm, String searchField) {
         EntryPagedList list = new EntryPagedList();
 
-        String decodedSearchTerm = decode(searchTerm);
+        String decodedSearchTerm = StringHelper.decode(searchTerm);
 
         Logger.info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + decodedSearchTerm + ", " + searchField + ")");
 
@@ -109,15 +107,6 @@ public class EntryController extends Controller {
         searchForm.fill(isearch);
 
         return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
-    }
-
-    private String decode(String ele) {
-        try {
-            return StringEscapeUtils.unescapeHtml4(ele);
-        } catch (Exception ex) {
-            Logger.error(ex.getMessage());
-            return ele;
-        }
     }
 
     public Result list() {
@@ -210,7 +199,7 @@ public class EntryController extends Controller {
         mAborted = false;
         Client client = Secured.getClient(ctx());
 
-        String decodedSearchTerm = decode(searchTerm);
+        String decodedSearchTerm = StringHelper.decode(searchTerm);
 
         Logger.info("export(" + decodedSearchTerm + ", " + searchField + ") START");
 
@@ -336,10 +325,8 @@ public class EntryController extends Controller {
 
     /**
      * Display details for the entry including delete button.
-     */
-    /**
      * Note: intentionally NOT secure
-     **/
+     */
     public Result view(Long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry == null) {
@@ -541,7 +528,7 @@ public class EntryController extends Controller {
             String date_value = value.textValue();
             try {
                 entry.entry_time = mDateFormat.parse(date_value);
-                entry.time_zone = pickOutTimeZone(date_value, 'Z');
+                entry.time_zone = StringHelper.pickOutTimeZone(date_value, 'Z');
             } catch (Exception ex) {
                 Logger.error("While parsing " + date_value + ":" + ex.getMessage());
             }
@@ -868,14 +855,6 @@ public class EntryController extends Controller {
             ret_id = 0;
         }
         return ok(Long.toString(ret_id));
-    }
-
-    public static String pickOutTimeZone(String value, char sp) {
-        int pos = value.indexOf(sp);
-        if (pos >= 0) {
-            return value.substring(pos + 1);
-        }
-        return null;
     }
 
     Result missingRequest(ArrayList<String> missing) {

@@ -32,10 +32,6 @@ class DateUtil(
             return df.format(Date(time))
         }
 
-        fun getDateFormat(format: String, atTime: Long): String {
-            return SimpleDateFormat(format, Locale.getDefault()).format(atTime)
-        }
-
     }
 
     val is24Hour: Boolean
