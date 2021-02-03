@@ -155,6 +155,12 @@ class SqlTableEntry(
         } else null
     }
 
+    override fun querySince(since: Long): List<DataEntry> {
+        val where = "$KEY_DATE > ?"
+        val whereArgs = arrayOf(since.toString())
+        return query(where, whereArgs)
+    }
+
     internal fun query(where: String?, whereArgs: Array<String>?): List<DataEntry> {
         val list = ArrayList<DataEntry>()
         try {

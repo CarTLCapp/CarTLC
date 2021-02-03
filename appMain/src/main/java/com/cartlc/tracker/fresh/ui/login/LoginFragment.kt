@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryController
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
-import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsController
 import com.cartlc.tracker.fresh.ui.base.BaseFragment
 
 class LoginFragment(
-        private val buttonsUseCase: ButtonsUseCase
+        private val buttonsController: ButtonsController
 ) : BaseFragment() {
 
     private val componentRoot: ComponentRoot
@@ -25,7 +25,7 @@ class LoginFragment(
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val viewMvc = factoryViewMvc.allocLoginViewMvc(null)
-        controller = factoryController.allocLoginController(boundFrag, viewMvc, buttonsUseCase)
+        controller = factoryController.allocLoginController(boundFrag, viewMvc, buttonsController)
         return viewMvc.rootView
     }
 

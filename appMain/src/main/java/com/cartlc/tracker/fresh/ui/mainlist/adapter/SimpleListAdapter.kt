@@ -33,6 +33,8 @@ class SimpleListAdapter(
             notifyDataSetChanged()
         }
 
+    // region RecyclerView.Adapter
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         return MyViewHolder(viewMvcFactory.allocSimpleListItemViewMvc(parent, entryItemLayoutId))
     }
@@ -42,13 +44,19 @@ class SimpleListAdapter(
         listener?.let { holder.viewMvc.selected = position == selectedPos }
     }
 
+    override fun getItemCount(): Int {
+        return items.size
+    }
+
+    // endregion RecyclerView.Adapter
+
+    // region SimpleItemViewMvc.Listener
+
     override fun onClicked(position: Int, value: String) {
         listener?.onSimpleItemClicked(position, value)
     }
 
-    override fun getItemCount(): Int {
-        return items.size
-    }
+    // endregion SimpleItemViewMvc.Listener
 
     fun setSelected(value: String): Int {
         selectedPos = items.indexOf(value)

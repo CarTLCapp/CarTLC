@@ -40,6 +40,7 @@ class StageSelectProject(
                         curFlowValue = RootProjectFlow()
                     }
                 }
+                else -> {}
             }
         }
     }

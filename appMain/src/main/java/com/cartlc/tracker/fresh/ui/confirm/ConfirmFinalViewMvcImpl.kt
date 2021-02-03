@@ -3,22 +3,13 @@ package com.cartlc.tracker.fresh.ui.confirm
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.R
-import com.cartlc.tracker.fresh.model.core.data.DataNote
-import com.cartlc.tracker.fresh.model.core.data.DataPicture
 import com.cartlc.tracker.fresh.ui.app.factory.FactoryViewMvc
 import com.cartlc.tracker.fresh.ui.bits.AutoLinearLayoutManager
-import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.data.ConfirmDataType
-import com.cartlc.tracker.fresh.ui.mainlist.adapter.SimpleListAdapter
-import com.cartlc.tracker.fresh.ui.picture.PictureListUseCase
-import com.cartlc.tracker.fresh.ui.picture.PictureListView
-import com.cartlc.tracker.ui.list.NoteListAdapter
 
 class ConfirmFinalViewMvcImpl(
         inflater: LayoutInflater,

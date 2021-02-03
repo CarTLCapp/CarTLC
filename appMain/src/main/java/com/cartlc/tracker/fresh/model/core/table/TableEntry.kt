@@ -12,6 +12,7 @@ interface TableEntry {
     fun countProjectAddressCombo(comboId: Long): SqlTableEntry.Count
     fun query(): List<DataEntry>
     fun query(id: Long): DataEntry?
+    fun querySince(since: Long): List<DataEntry>
     fun queryForProjectAddressCombo(id: Long): List<DataEntry>
     fun queryPendingDataToUploadToMaster(): List<DataEntry>
     fun queryPendingPicturesToUpload(): List<DataEntry>

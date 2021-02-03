@@ -1,5 +1,5 @@
-/**
- * Copyright 2019, FleetTLC. All rights reserved
+/*
+ * Copyright 2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.ui.common
 
@@ -16,6 +16,7 @@ import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.ui.act.VehicleActivity
 import com.cartlc.tracker.fresh.ui.app.TBApplication
+import com.cartlc.tracker.fresh.ui.daar.DaarActivity
 import com.cartlc.tracker.fresh.ui.listentries.ListEntriesActivity
 import com.cartlc.tracker.ui.util.CheckError
 import java.io.File
@@ -93,6 +94,11 @@ class ScreenNavigator(
         builder.create().show()
     }
 
+    fun showDaarActivity() {
+        val intent = Intent(act, DaarActivity::class.java)
+        act.startActivity(intent)
+    }
+
     fun showPrivacyPolicy() {
         val i = Intent(Intent.ACTION_VIEW)
         i.data = Uri.parse(PRIVACY_POLICY_URL)
@@ -101,6 +107,10 @@ class ScreenNavigator(
 
     fun finish(result: Int) {
         act.setResult(result)
+        act.finish()
+    }
+
+    fun finish() {
         act.finish()
     }
 

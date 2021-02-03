@@ -1,6 +1,6 @@
-package com.cartlc.tracker.fresh.ui.title
+package com.cartlc.tracker.fresh.ui.main.title
 
-interface TitleUseCase {
+interface TitleController {
 
     var mainTitleText: String?
     var mainTitleVisible: Boolean

@@ -1,11 +1,8 @@
 package com.cartlc.tracker.fresh.ui.title
 
-import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvc
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvc
 
-interface TitleViewMvc : ObservableViewMvc<TitleViewMvc.Listener> {
-
-    interface Listener {
-    }
+interface TitleViewMvc : ViewMvc {
 
     var mainTitleText: String?
     var mainTitleVisible: Boolean

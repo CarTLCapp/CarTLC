@@ -1,7 +1,6 @@
 /*
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2021, FleetTLC. All rights reserved
  */
-
 package com.cartlc.tracker.fresh.ui.listentries.item
 
 import android.view.LayoutInflater
@@ -10,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import com.cartlc.tracker.R
-import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 
 class ListEntriesItemViewMvcImpl(inflater: LayoutInflater,

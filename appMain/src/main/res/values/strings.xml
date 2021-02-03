@@ -170,6 +170,23 @@
     <string name="vehicle_none">@string/word_no</string>
     <string name="vehicle_yes">@string/word_yes</string>
 
+    <!-- DAAR -->
+    <string name="daar_title">Daily After Action Report</string>
+    <string name="daar_sub_title">Please provide some details about the Team\'s work today. The more detail you put here, the less likely you will get a call asking questions :)</string>
+    <string name="daar_instruction_date">What date is this for?</string>
+    <string name="daar_instruction_project">What project are you on?</string>
+    <string name="daar_instruction_work_completed">What work did you complete? (e.g. 3 new SR4 installs, 2 CP4 repairs, 7 controller swaps)</string>
+    <string name="daar_instruction_missed_units">Did we miss anticipated units? Why?</string>
+    <string name="daar_instruction_issues">Any issues to report?</string>
+    <string name="daar_instruction_injuries">Any injuries?</string>
+    <string name="daar_instruction_starting_time_tomorrow">What time are you planning on starting tomorrow?"</string>
+    <string name="daar_entry_hint">Your answer</string>
+    <string name="daar_date_hint">Date</string>
+    <string name="daar_time_hint">Time</string>
+    <string name="daar_select_recent">Recent</string>
+    <string name="daar_select_all">All</string>
+    <string name="daar_select_other">Describe</string>
+
     <!-- Arrays -->
     <string-array name="type_of_inspection">
         <item>Pre-Trip</item>

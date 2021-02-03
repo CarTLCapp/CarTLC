@@ -70,11 +70,6 @@ class TBApplication : Application() {
             return FileProvider.getUriForFile(ctx, "com.cartcl.tracker.fileprovider", file)
         }
 
-        fun hideKeyboard(ctx: Context, v: View) {
-            val imm = ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(v.windowToken, 0)
-        }
-
         fun ReportError(ex: Exception, claz: Class<*>, function: String, type: String): String {
             return ReportError(ex.message
                     ?: "unknown", claz, function, type)

@@ -1,5 +1,5 @@
-/**
- * Copyright 2019, FleetTLC. All rights reserved
+/*
+ * Copyright 2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.ui.mainlist.adapter
 
@@ -9,7 +9,6 @@ import com.cartlc.tracker.fresh.ui.mainlist.adapter.item.ProjectGroupItemViewMvc
 import com.cartlc.tracker.fresh.model.CarRepository
 import com.cartlc.tracker.fresh.model.msg.MessageHandler
 import com.cartlc.tracker.fresh.model.msg.StringMessage
-import timber.log.Timber
 
 class ProjectGroupListController(
         private val repo: CarRepository,

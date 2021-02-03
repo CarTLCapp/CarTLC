@@ -48,4 +48,5 @@ open class PrefHelperBase constructor(protected val ctx: Context) {
         editor.putInt(key, value)
         editor.apply()
     }
+
 }

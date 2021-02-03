@@ -24,10 +24,11 @@ import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
-import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
-import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.bits.HideOnSoftKeyboard
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsController
 import com.cartlc.tracker.fresh.ui.common.PermissionHelper
 import com.cartlc.tracker.fresh.ui.main.process.*
+import com.cartlc.tracker.fresh.ui.main.title.TitleController
 import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
 import com.cartlc.tracker.fresh.ui.picture.PictureListUseCase
 import com.cartlc.tracker.ui.util.CheckError
@@ -42,12 +43,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class MainController(
         private val boundAct: BoundAct,
-        private val viewMvc: MainViewMvc
+        private val viewMvc: MainViewMvc,
+        private val titleController: TitleController,
+        override val buttonsController: ButtonsController
 ) : LifecycleObserver,
         MainViewMvc.Listener,
         FlowUseCase.Listener,
         ActionUseCase.Listener,
-        ButtonsUseCase.Listener,
+        ButtonsController.Listener,
         PictureListUseCase.Listener,
         MainListUseCase.Listener {
 
@@ -78,8 +81,6 @@ class MainController(
     private val bitmapHelper = componentRoot.bitmapHelper
     private val instaBugUseCase = componentRoot.instaBugUseCase
 
-    private val buttonsUseCase = viewMvc.buttonsUseCase
-    private val titleUseCase = viewMvc.titleUseCase
     private val pictureUseCase = viewMvc.pictureUseCase
     private val mainListUseCase = viewMvc.mainListUseCase
     private val entrySimpleUseCase = viewMvc.entrySimpleUseCase
@@ -96,7 +97,7 @@ class MainController(
         Flow.processActionEvent = { action -> processActionEvent(action) }
         Flow.processStageEvent = { flow -> curFlowValue = flow }
 
-        error.observe(boundAct.act, Observer<ErrorMessage> { message -> showError(message) })
+        error.observe(boundAct.act, { message -> showError(message) })
     }
 
     val versionedTitle: String
@@ -112,10 +113,10 @@ class MainController(
             return sbuf.toString()
         }
 
-    var softKeyboardDetect: SoftKeyboardDetect? = null
+    var hideOnSoftKeyboard: HideOnSoftKeyboard? = null
         set(value) {
             field = value
-            viewMvc.buttonsUseCase.softKeyboardDetect = value
+            buttonsController.hideOnSoftKeyboard = value
         }
 
     private var trimMemoryMessageDone = hashSetOf<Int>()
@@ -166,7 +167,7 @@ class MainController(
     private var autoNarrowOkay = true
 
     private val isAutoNarrowOkay: Boolean
-        get() = buttonsUseCase.wasNext && autoNarrowOkay
+        get() = buttonsController.wasNext && autoNarrowOkay
 
     private var addButtonVisible: Boolean
         get() = viewMvc.addButtonVisible
@@ -192,8 +193,8 @@ class MainController(
         val screenNavigator = main.screenNavigator
         val dialogNavigator = main.dialogNavigator
 
-        val buttonsUseCase = viewMvc.buttonsUseCase
-        val titleUseCase = viewMvc.titleUseCase
+        val titleUseCase = titleController
+        val buttonsUseCase = buttonsController
         val pictureUseCase = viewMvc.pictureUseCase
         val mainListUseCase = viewMvc.mainListUseCase
         val entrySimpleUseCase = viewMvc.entrySimpleUseCase
@@ -290,7 +291,7 @@ class MainController(
         actionUseCase.registerListener(this)
         prefHelper.onCurrentProjecGroupChanged = { checkAddButtonVisible() }
         prefHelper.setFromCurrentProjectId()
-        buttonsUseCase.registerListener(this)
+        buttonsController.registerListener(this)
         viewMvc.registerListener(this)
         permissionHelper.checkPermissions(boundAct.act, TBApplication.PERMISSIONS,
                 object : PermissionHelper.PermissionListener {
@@ -317,7 +318,7 @@ class MainController(
         CheckError.instance.cleanup()
         LocationHelper.instance.onDestroy()
         actionUseCase.unregisterListener(this)
-        buttonsUseCase.unregisterListener(this)
+        buttonsController.unregisterListener(this)
         viewMvc.unregisterListener(this)
         viewMvc.fragmentVisible = MainViewMvc.FragmentType.NONE
         pictureUseCase.clearCache()
@@ -369,7 +370,7 @@ class MainController(
                     }
                 }
 
-        buttonsUseCase.reset(flow)
+        buttonsController.reset(flow)
 
         when (flow.stage) {
             Stage.ROOT_PROJECT,
@@ -409,12 +410,14 @@ class MainController(
                 stageStreet.process(flow)
             }
             Stage.CONFIRM_ADDRESS -> {
-                titleUseCase.subTitleText = curProjectHint
-                titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_confirmation)
-                titleUseCase.mainTitleVisible = true
-                titleUseCase.subTitleVisible = true
-                buttonsUseCase.centerVisible = false
-                buttonsUseCase.nextVisible = true
+                with(titleController) {
+                    subTitleText = curProjectHint
+                    mainTitleText = messageHandler.getString(StringMessage.title_confirmation)
+                    mainTitleVisible = true
+                    subTitleVisible = true
+                }
+                buttonsController.centerVisible = false
+                buttonsController.nextVisible = true
             }
             Stage.CURRENT_PROJECT -> {
                 stageCurrentProject.process()
@@ -515,7 +518,7 @@ class MainController(
 
     private fun btnChangeCompany() {
         autoNarrowOkay = false
-        buttonsUseCase.wasNext = false
+        buttonsController.wasNext = false
         repo.onCompanyChanged()
     }
 
@@ -562,7 +565,7 @@ class MainController(
     // region support functions
 
     private fun checkCenterButtonIsEdit() {
-        buttonsUseCase.centerText = if (isCenterButtonEdit) {
+        buttonsController.centerText = if (isCenterButtonEdit) {
             messageHandler.getString(StringMessage.btn_edit)
         } else {
             messageHandler.getString(StringMessage.btn_add)
@@ -581,7 +584,7 @@ class MainController(
             Stage.ADD_STREET,
             Stage.ADD_CITY,
             Stage.ADD_EQUIPMENT,
-            Stage.ADD_STATE -> buttonsUseCase.nextVisible = value.isNotBlank()
+            Stage.ADD_STATE -> buttonsController.nextVisible = value.isNotBlank()
             else -> {
             }
         }
@@ -645,7 +648,7 @@ class MainController(
     private fun doSimpleEntryReturn(value: String) {
         when (curFlowValue.stage) {
             Stage.LOGIN -> {
-                buttonsUseCase.center()
+                buttonsController.center()
                 return
             }
             Stage.COMPANY, Stage.ADD_COMPANY -> prefHelper.company = value
@@ -654,7 +657,7 @@ class MainController(
             else -> {
             }
         }
-        buttonsUseCase.next()
+        buttonsController.next()
     }
 
     // endregion Action Events
@@ -729,6 +732,9 @@ class MainController(
     fun onOptionsItemSelected(itemId: Int): Boolean {
         when (itemId) {
             R.id.profile -> btnProfile()
+            R.id.fleet_daar -> {
+                onDaarPressed()
+            }
             R.id.upload -> {
                 ping()
             }
@@ -786,6 +792,10 @@ class MainController(
         }
     }
 
+    private fun onDaarPressed() {
+        screenNavigator.showDaarActivity()
+    }
+
     // endregion MenuItem
 
     // region MainListUseCase.Listener
@@ -807,13 +817,13 @@ class MainController(
             Stage.ADD_CITY,
             Stage.ADD_STATE,
             Stage.ADD_STREET -> {
-                buttonsUseCase.nextVisible = true
+                buttonsController.nextVisible = true
             }
             Stage.COMPANY -> {
-                buttonsUseCase.nextVisible = true
+                buttonsController.nextVisible = true
             }
             Stage.CURRENT_PROJECT -> {
-                buttonsUseCase.prevVisible = hasCurrentProject
+                buttonsController.prevVisible = hasCurrentProject
             }
             else -> {
             }
@@ -821,11 +831,11 @@ class MainController(
     }
 
     override fun onProjectGroupSelected(projectGroup: DataProjectAddressCombo) {
-        buttonsUseCase.prevVisible = hasCurrentProject
+        buttonsController.prevVisible = hasCurrentProject
     }
 
     override fun onConfirmItemChecked(isAllChecked: Boolean) {
-        buttonsUseCase.nextVisible = isAllChecked
+        buttonsController.nextVisible = isAllChecked
     }
 
     // endregion MainListUseCase.Listener

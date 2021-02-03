@@ -5,15 +5,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.cartlc.tracker.fresh.ui.main.MainActivity">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
-
-        <!--android:background="?android:attr/colorPrimary"-->
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_main"

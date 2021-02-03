@@ -30,13 +30,9 @@ class EntrySimpleViewMvcImpl(
 
     private val parent = container ?: rootView
 
-    private val autoNext = object : TextView.OnEditorActionListener {
-        override fun onEditorAction(p0: TextView?, p1: Int, p2: KeyEvent?): Boolean {
-            for (listener in listeners) {
-                listener.onEditTextReturn()
-            }
-            return false
-        }
+    private val autoNext = TextView.OnEditorActionListener { _, _, _ ->
+        listeners.forEach { it.onEditTextReturn() }
+        false
     }
 
     init {

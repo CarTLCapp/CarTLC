@@ -16,12 +16,12 @@ import com.cartlc.tracker.fresh.service.alarm.AlarmController
 import com.cartlc.tracker.fresh.service.endpoint.DCServerRx
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundFrag
-import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsController
 
 class LoginController(
         boundFrag: BoundFrag,
         private val viewMvc: LoginViewMvc,
-        private val buttonsUseCase: ButtonsUseCase,
+        private val buttonsController: ButtonsController,
         private val dcRx: DCServerRx,
         private val schedulerPlan: SchedulerPlan
 ) : LifecycleObserver,
@@ -29,7 +29,7 @@ class LoginController(
         LoginViewMvc.Listener,
         FlowUseCase.Listener,
         ActionUseCase.Listener,
-        ButtonsUseCase.Listener {
+        ButtonsController.Listener {
 
     private val repo = boundFrag.repo
     private val context = boundFrag.act
@@ -77,7 +77,7 @@ class LoginController(
         repo.actionUseCase.registerListener(this)
         onStageChangedAboutTo(repo.flowUseCase.curFlow)
         onStageChanged(repo.flowUseCase.curFlow)
-        buttonsUseCase.registerListener(this)
+        buttonsController.registerListener(this)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -85,7 +85,7 @@ class LoginController(
         viewMvc.unregisterListener(this)
         repo.flowUseCase.unregisterListener(this)
         repo.actionUseCase.unregisterListener(this)
-        buttonsUseCase.unregisterListener(this)
+        buttonsController.unregisterListener(this)
     }
 
     override fun onActionChanged(action: Action) {
@@ -99,10 +99,10 @@ class LoginController(
     override fun onStageChanged(flow: Flow) {
         when (flow.stage) {
             Stage.LOGIN -> {
-                buttonsUseCase.prevVisible = false
-                buttonsUseCase.centerVisible = false
-                buttonsUseCase.centerText = messageHandler.getString(StringMessage.title_login)
-                buttonsUseCase.nextVisible = loginSuccess
+                buttonsController.prevVisible = false
+                buttonsController.centerVisible = false
+                buttonsController.centerText = messageHandler.getString(StringMessage.title_login)
+                buttonsController.nextVisible = loginSuccess
             }
             else -> {
             }
@@ -149,13 +149,13 @@ class LoginController(
                 .subscribe { result: DCServerRx.Result ->
                     if (result.errorMessage != null) {
                         TBApplication.ShowError(result.errorMessage)
-                        buttonsUseCase.nextVisible = false
+                        buttonsController.nextVisible = false
                         viewMvc.firstTechName = ""
                         viewMvc.secondaryTechName = ""
                     }
                     else if (loginSuccess) {
-                        buttonsUseCase.nextVisible = true
-                        buttonsUseCase.centerVisible = false
+                        buttonsController.nextVisible = true
+                        buttonsController.centerVisible = false
                         viewMvc.firstTechName = prefHelper.techName
                         viewMvc.secondaryTechName = prefHelper.secondaryTechName
                         if (prefHelper.secondaryTechName.isNotBlank()) {
@@ -172,7 +172,7 @@ class LoginController(
                         }
                         AlarmController.justLoggedIn(context)
                     } else {
-                        buttonsUseCase.nextVisible = false
+                        buttonsController.nextVisible = false
                         viewMvc.firstTechName = ""
                         viewMvc.secondaryTechName = ""
                     }
@@ -189,14 +189,14 @@ class LoginController(
         firstCodeEdit = value
         viewMvc.firstTechName = ""
         detectShowNext()
-        buttonsUseCase.centerVisible = true
+        buttonsController.centerVisible = true
     }
 
     override fun onSecondaryTechCodeChanged(value: String) {
         secondaryCodeEdit = value
         viewMvc.secondaryTechName = ""
         detectShowNext()
-        buttonsUseCase.centerVisible = true
+        buttonsController.centerVisible = true
     }
 
     override fun onSecondaryCheckBoxChanged(value: Boolean) {
@@ -211,6 +211,6 @@ class LoginController(
     }
 
     private fun detectShowNext() {
-        buttonsUseCase.centerVisible = loginValid
+        buttonsController.centerVisible = loginValid
     }
 }
