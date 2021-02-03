@@ -8,12 +8,14 @@ package com.cartlc.tracker.fresh.model
 
 import android.os.Looper
 import androidx.lifecycle.MutableLiveData
-import com.cartlc.tracker.fresh.model.core.data.*
+import com.cartlc.tracker.fresh.model.core.data.DataEntry
+import com.cartlc.tracker.fresh.model.core.data.DataFlowElement
+import com.cartlc.tracker.fresh.model.core.data.DataNote
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.event.Action
+import com.cartlc.tracker.fresh.model.flow.*
 import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
-import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
-import com.cartlc.tracker.fresh.model.flow.*
 
 // TODO: was open class for testing
 class CarRepository(
@@ -21,8 +23,20 @@ class CarRepository(
         val prefHelper: PrefHelper,
         val flowUseCase: FlowUseCase
 ) {
+    companion object {
+        private const val SERVER_URL_DEVELOPMENT = "https://fleetdev.arqnetworks.com/"
+        private const val SERVER_URL_RELEASE = "https://fleettlc.arqnetworks.com/"
+    }
+
     val isDevelopment: Boolean
         get() = prefHelper.isDevelopment
+
+    val serverName: String
+        get() = if (isDevelopment) {
+            SERVER_URL_DEVELOPMENT
+        } else {
+            SERVER_URL_RELEASE
+        }
 
     var companyEditing: String? = null
     var editProject: Boolean = false
@@ -45,6 +59,10 @@ class CarRepository(
         } ?: run {
             computeCurStage()
         }
+    }
+
+    fun clearPreviousFlow() {
+        flowUseCase.previousFlowValue = null
     }
 
     // endregion Current Flow

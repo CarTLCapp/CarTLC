@@ -16,6 +16,7 @@ interface TableNote {
     val notePartialInstall: DataNote?
 
     fun add(item: DataNote): Long
+    fun clearAll()
     fun clearValues()
     fun query(id: Long): DataNote?
     fun query(name: String): Long

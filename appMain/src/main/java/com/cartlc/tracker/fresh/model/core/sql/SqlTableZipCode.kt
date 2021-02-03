@@ -29,6 +29,14 @@ class SqlTableZipCode(
         private const val KEY_CITY = "city"
     }
 
+    override fun clearAll() {
+        try {
+            dbSql.delete(TABLE_NAME, null, null)
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableZipCode::class.java, "clear()", "db")
+        }
+    }
+
     fun create() {
         val sbuf = StringBuilder()
         sbuf.append("create table ")

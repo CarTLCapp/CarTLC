@@ -7,9 +7,9 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.VisibleForTesting
 import com.cartlc.tracker.fresh.model.core.data.DataVehicle
-import com.cartlc.tracker.fresh.model.misc.HashLongList
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableVehicle
+import com.cartlc.tracker.fresh.model.misc.HashLongList
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import timber.log.Timber
 
@@ -234,4 +234,11 @@ open class SqlTableVehicle(
         }
     }
 
+    override fun clearAll() {
+        try {
+            dbSql.delete(TABLE_NAME, null, null)
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableVehicle::class.java, "clear()", "db")
+        }
+    }
 }

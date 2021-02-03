@@ -4,6 +4,7 @@ import com.cartlc.tracker.fresh.model.core.data.DataVehicleName
 
 interface TableVehicleName {
     val vehicleNames: List<String>
+    fun clearAll()
     fun query(): List<DataVehicleName>
     fun queryByNumber(number: Int): DataVehicleName?
     fun remove(name: DataVehicleName)

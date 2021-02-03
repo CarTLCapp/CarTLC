@@ -7,6 +7,7 @@ interface TableEquipment {
     fun addLocal(name: String): Long
     fun addTest(name: String): Long
     fun clearChecked()
+    fun clearAll()
     fun countChecked(): Int
     fun query(): List<DataEquipment>
     fun query(id: Long): DataEquipment?
@@ -19,4 +20,5 @@ interface TableEquipment {
     fun setChecked(ids: List<Long>)
     fun setChecked(item: DataEquipment, flag: Boolean)
     fun update(item: DataEquipment)
+
 }

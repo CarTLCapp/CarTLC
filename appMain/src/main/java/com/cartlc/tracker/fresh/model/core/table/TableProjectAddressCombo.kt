@@ -4,6 +4,7 @@ import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 
 interface TableProjectAddressCombo {
     fun add(projectGroup: DataProjectAddressCombo): Long
+    fun clearAll()
     fun count(): Int
     fun countAddress(addressId: Long): Int
     fun countProjects(projectId: Long): Int

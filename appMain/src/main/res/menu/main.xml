@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
-        android:id="@+id/fleet_vehicles"
-        android:icon="@drawable/ic_interstate_truck"
-        android:title="@string/vehicle_title_vehicles"
+        android:id="@+id/fleet_daar"
+        android:icon="@drawable/ic_noun_sunset"
+        android:title="@string/daar_title"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/upload"
         android:icon="@drawable/icon_upload"
         android:title="@string/title_upload"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/fleet_vehicles"
+        android:icon="@drawable/ic_interstate_truck"
+        android:title="@string/vehicle_title_vehicles"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/save"
@@ -22,9 +28,15 @@
         android:title="@string/title_profile"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/debug"
+        android:icon="@android:drawable/ic_menu_help"
+        android:title="@string/title_debug"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/feedback"
         android:icon="@android:drawable/ic_menu_help"
         android:title="@string/title_feedback"
+        android:visible="false"
         app:showAsAction="never" />
     <item
         android:id="@+id/privacy"

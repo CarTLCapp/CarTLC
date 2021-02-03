@@ -21,9 +21,11 @@ interface DatabaseTable {
     val tableFlow: TableFlow
     val tableFlowElement: TableFlowElement
     val tableFlowElementNote: TableFlowElementNote
+    val tableDaar: TableDaar
     val appVersion: String
     val noteHelper: NoteHelper
     fun reportError(ex: Exception, claz: Class<*>, function: String, type: String): String
     fun reportDebugMessage(msg: String)
     fun clearUploaded()
+    fun clearAll()
 }

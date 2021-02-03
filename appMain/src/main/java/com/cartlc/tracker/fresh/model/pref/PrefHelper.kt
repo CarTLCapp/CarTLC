@@ -7,15 +7,12 @@ import android.content.Context
 import android.os.Environment
 import android.text.TextUtils
 import com.cartlc.tracker.fresh.model.core.data.*
-import com.cartlc.tracker.fresh.model.misc.TruckStatus
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.flow.Stage
-import com.cartlc.tracker.fresh.ui.app.TBApplication
-
+import com.cartlc.tracker.fresh.model.misc.TruckStatus
+import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
-
-import timber.log.Timber
 import java.util.*
 
 /**
@@ -172,14 +169,14 @@ class PrefHelper constructor(
             } else null
         }
 
-    val rootProjectId: Long?
-        get() {
-            val rootName = projectRootName
-            return if (rootName != null) {
-                val id = db.tableProjects.queryRootProjectId(rootName)
-                if (id >= 0) id else null
-            } else null
-        }
+//    val rootProjectId: Long?
+//        get() {
+//            val rootName = projectRootName
+//            return if (rootName != null) {
+//                val id = db.tableProjects.queryRootProjectId(rootName)
+//                if (id >= 0) id else null
+//            } else null
+//        }
 
     private var savedProjectGroupId: Long
         get() = getLong(KEY_SAVED_PROJECT_GROUP_ID, -1L)
@@ -253,8 +250,9 @@ class PrefHelper constructor(
         get() = getInt(KEY_DO_ERROR_CHECK, 1) != 0
         set(flag) = setInt(KEY_DO_ERROR_CHECK, if (flag) 1 else 0)
 
-    val isDevelopment: Boolean
-        get() = getInt(KEY_IS_DEVELOPMENT, if (TBApplication.IsDevelopmentServer()) 1 else 0) != 0
+    var isDevelopment: Boolean
+        get() = getInt(KEY_IS_DEVELOPMENT, 0) != 0
+        set(value) { setInt(KEY_IS_DEVELOPMENT, if (value) 1 else 0) }
 
     var currentProjectGroupId: Long
         get() = getLong(KEY_CURRENT_PROJECT_GROUP_ID, -1L)
@@ -762,6 +760,12 @@ class PrefHelper constructor(
 
     fun reloadEquipments() {
         versionEquipment = VERSION_RESET
+    }
+
+    override fun clearAll() {
+        super.clearAll()
+        clearUploaded()
+        clearCurProject()
     }
 
 }

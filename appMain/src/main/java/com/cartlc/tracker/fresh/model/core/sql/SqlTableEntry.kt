@@ -76,7 +76,7 @@ class SqlTableEntry(
         setAllComplete()
     }
 
-    fun clear() {
+    override fun clearAll() {
         try {
             dbSql.delete(TABLE_NAME, null, null)
         } catch (ex: Exception) {
@@ -153,6 +153,12 @@ class SqlTableEntry(
         return if (list.isNotEmpty()) {
             list[0]
         } else null
+    }
+
+    override fun querySince(since: Long): List<DataEntry> {
+        val where = "$KEY_DATE > ?"
+        val whereArgs = arrayOf(since.toString())
+        return query(where, whereArgs)
     }
 
     internal fun query(where: String?, whereArgs: Array<String>?): List<DataEntry> {

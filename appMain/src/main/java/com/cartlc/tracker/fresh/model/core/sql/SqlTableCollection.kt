@@ -31,7 +31,7 @@ abstract class SqlTableCollection(
         private const val KEY_IS_BOOT = "is_boot_strap"
     }
 
-    fun clear() {
+    override fun clearAll() {
         try {
             mDb.delete(mTableName, null, null)
         } catch (ex: Exception) {

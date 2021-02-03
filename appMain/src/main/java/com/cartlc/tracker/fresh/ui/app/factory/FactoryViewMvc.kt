@@ -1,14 +1,14 @@
 /*
- * *
- *   * Copyright 2019, FleetTLC. All rights reserved
- *
+ * Copyright 2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.ui.app.factory
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
+import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvc
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvcImpl
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
@@ -16,6 +16,8 @@ import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvc
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.item.*
+import com.cartlc.tracker.fresh.ui.daar.DaarViewMvc
+import com.cartlc.tracker.fresh.ui.daar.DaarViewMvcImpl
 import com.cartlc.tracker.fresh.ui.listentries.ListEntriesViewMvc
 import com.cartlc.tracker.fresh.ui.listentries.ListEntriesViewMvcImpl
 import com.cartlc.tracker.fresh.ui.listentries.item.ListEntriesItemViewMvc
@@ -52,11 +54,13 @@ class FactoryViewMvc(
     }
 
     fun allocButtonsViewMvc(container: ViewGroup?): ButtonsViewMvc {
-        return ButtonsViewMvcImpl(getInflater(container), container)
+        val topView = container ?: inflater.inflate(R.layout.frame_buttons, container, false) as ViewGroup
+        return ButtonsViewMvcImpl(topView)
     }
 
-    fun allocTitleViewMvc(container: ViewGroup?): TitleViewMvc {
-        return TitleViewMvcImpl(getInflater(container), container)
+    fun allocTitleViewMvc(container: ViewGroup): TitleViewMvc {
+        val topView = getInflater(container).inflate(R.layout.frame_title, container, false) as ViewGroup
+        return TitleViewMvcImpl(topView)
     }
 
     fun allocConfirmViewMvc(context: Context): ConfirmFinalViewMvc {
@@ -137,6 +141,10 @@ class FactoryViewMvc(
 
     fun allocListEntriesViewItemViewMvc(container: ViewGroup): ListEntriesItemViewMvc {
         return ListEntriesItemViewMvcImpl(getInflater(container), container)
+    }
+
+    fun allocDaarViewMvc(container: ViewGroup?): DaarViewMvc {
+        return DaarViewMvcImpl(getInflater(container), container)
     }
 
 }

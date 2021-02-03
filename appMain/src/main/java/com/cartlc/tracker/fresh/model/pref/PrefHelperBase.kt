@@ -48,4 +48,11 @@ open class PrefHelperBase constructor(protected val ctx: Context) {
         editor.putInt(key, value)
         editor.apply()
     }
+
+    open fun clearAll() {
+        val editor = prefs.edit()
+        editor.clear()
+        editor.commit()
+    }
+
 }

@@ -1,13 +1,16 @@
 package com.cartlc.tracker.fresh.ui.bits
 
+import android.content.Context
 import android.graphics.Rect
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.inputmethod.InputMethodManager
 import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
 
-class SoftKeyboardDetect(
+class HideOnSoftKeyboard(
         private val root: ViewGroup
-) : BaseObservableImpl<SoftKeyboardDetect.Listener>(), ViewTreeObserver.OnGlobalLayoutListener {
+) : BaseObservableImpl<HideOnSoftKeyboard.Listener>(), ViewTreeObserver.OnGlobalLayoutListener {
 
     interface Listener {
 
@@ -18,6 +21,10 @@ class SoftKeyboardDetect(
 
     companion object {
         private const val ratio = 0.15
+    }
+
+    private val imm: InputMethodManager by lazy {
+        root.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
 
     init {
@@ -40,6 +47,10 @@ class SoftKeyboardDetect(
             }
         }
 
+    }
+
+    fun hideKeyboard(v: View) {
+        imm.hideSoftInputFromWindow(v.windowToken, 0)
     }
 
 }

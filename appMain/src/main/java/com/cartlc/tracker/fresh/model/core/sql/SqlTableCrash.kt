@@ -54,6 +54,13 @@ class SqlTableCrash(
         var uploaded: Boolean = false
     }
 
+    override fun clearAll() {
+        try {
+            dbSql.delete(TABLE_NAME, null, null)
+        } catch (ex: Exception) {
+        }
+    }
+
     fun create() {
         val sbuf = StringBuilder()
         sbuf.append("create table ")

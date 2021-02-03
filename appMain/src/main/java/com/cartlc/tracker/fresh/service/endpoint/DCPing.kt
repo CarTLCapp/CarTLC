@@ -52,9 +52,6 @@ class DCPing(
         private val TAG = DCPing::class.simpleName
         private const val LOG = true
 
-        private const val SERVER_URL_DEVELOPMENT = "https://fleetdev.arqnetworks.com/"
-        private const val SERVER_URL_RELEASE = "https://fleettlc.arqnetworks.com/"
-
         private const val registerSuffix: String = "register"
         private const val enterSuffix: String = "enter"
         private const val pingSuffix: String = "ping"
@@ -67,6 +64,7 @@ class DCPing(
         private const val vehiclesSuffix: String = "vehicles"
         private const val stringsSuffix: String = "strings"
         private const val flowsSuffix: String = "flows"
+        private const val daarSuffix: String = "daar/enter"
 
         private const val UPLOAD_RESET_TRIGGER = "reset_upload"
         private const val RE_REGISTER_TRIGGER = "re-register"
@@ -83,6 +81,8 @@ class DCPing(
     }
 
     private val serverUrl: String
+        get() = repo.serverName
+
     private var appVersion: String? = null
 
     private val prefHelper: PrefHelper
@@ -111,14 +111,6 @@ class DCPing(
 
     @VisibleForTesting
     var openConnection: (target: String) -> HttpURLConnection = { target -> openTargetConnection(target) }
-
-    init {
-        serverUrl = if (repo.isDevelopment) {
-            SERVER_URL_DEVELOPMENT
-        } else {
-            SERVER_URL_RELEASE
-        }
-    }
 
     private fun url(suffix: String): String {
         return serverUrl + suffix
@@ -362,6 +354,11 @@ class DCPing(
         if (strings.isNotEmpty()) {
             Timber.i("Query strings needed.")
             queryStrings()
+        }
+        val daarList = db.tableDaar.queryReadyAndNotUploaded()
+        if (daarList.isNotEmpty()) {
+            Timber.i("FOUND ${daarList.size} DAAR entries needing to be uploaded")
+            sendDaars(daarList)
         }
         if (refresh) {
             EventBus.getDefault().post(EventRefreshProjects(true))
@@ -1098,9 +1095,6 @@ class DCPing(
 
             val truck = entry.truck
             if (truck != null) {
-//                if (truck.serverId > 0) {
-//                    jsonObject.accumulate("truck_id", truck.serverId)
-//                }
                 if (truck.truckNumberValue != null) {
                     jsonObject.accumulate("truck_number_string", truck.truckNumberValue)
                 }
@@ -1261,6 +1255,67 @@ class DCPing(
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "sendVehicle()", "server")
             return ex.message ?: "Exception sendVehicle()"
+        }
+        return null
+    }
+
+    private fun sendDaars(list: List<DataDaar>): PageResponse {
+        val errors = mutableListOf<String>()
+        var count = 0
+        for (item in list) {
+            sendDaar(item)?.let { error ->
+                errors.add(error)
+            } ?: run {
+                count++
+            }
+        }
+        return if (errors.isEmpty()) PageResponse(count) else PageResponse(error = errors.joinToString(","))
+    }
+
+    private fun sendDaar(item: DataDaar): String? {
+        Timber.i("sendDaar($item)")
+        try {
+            val dateString = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(item.date))
+            val startTimeString = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(item.startTimeTomorrow))
+            val jsonObject = JSONObject()
+            jsonObject.accumulate("tech_id", prefHelper.techID)
+            jsonObject.accumulate("date_string", dateString)
+            jsonObject.accumulate("server_id", item.serverId)
+            item.projectDesc?.let { jsonObject.accumulate("project_desc", item.projectDesc)}
+            item.project?.let { project ->
+                if (project.serverId > 0) {
+                    jsonObject.accumulate("project_id", project.serverId)
+                } else {
+                    jsonObject.accumulate("project_name", project.subProject)
+                }
+            }
+            item.workCompleted?.let { jsonObject.accumulate("work_completed", item.workCompleted) }
+            item.missedUnits?.let { jsonObject.accumulate("missed_units", item.missedUnits) }
+            item.issues?.let { jsonObject.accumulate("issues", item.issues) }
+            item.injuries?.let { jsonObject.accumulate("injuries", item.injuries) }
+            jsonObject.accumulate("start_time_tomorrow_string", startTimeString)
+
+            Timber.i("SENDING $jsonObject")
+            val result = post(url(daarSuffix), jsonObject)
+            if (TextUtils.isDigitsOnly(result)) {
+                item.uploaded = true
+                item.serverId = result.toLong()
+                db.tableDaar.saveUploaded(item)
+                Timber.i("SUCCESS, DAAR SERVER ID is ${item.serverId}")
+            } else {
+                val sbuf = StringBuilder()
+                sbuf.append("While trying to send daar entry: ")
+                sbuf.append(item.toString())
+                sbuf.append("\nERROR: ")
+                sbuf.append(result)
+                TBApplication.ShowError(sbuf.toString())
+                Timber.e(sbuf.toString())
+            }
+        } catch (ex: IOException) {
+            return ex.message ?: "IOException sendDaar()"
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, DCPing::class.java, "sendDaar()", "server")
+            return ex.message ?: "Exception sendDaar()"
         }
         return null
     }

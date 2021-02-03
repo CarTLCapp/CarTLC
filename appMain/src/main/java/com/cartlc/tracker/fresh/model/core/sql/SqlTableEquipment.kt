@@ -35,7 +35,7 @@ class SqlTableEquipment(
         private const val KEY_DISABLED = "disabled"
     }
 
-    fun clear() {
+    override fun clearAll() {
         try {
             dbSql.delete(TABLE_NAME, null, null)
         } catch (ex: Exception) {

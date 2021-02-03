@@ -11,4 +11,6 @@ interface TableCollection {
     fun remove(id: Long)
     fun save(collection: DataCollectionEquipment)
     fun update(item: DataCollectionItem)
+    fun clearAll()
+
 }

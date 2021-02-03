@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase
 import com.cartlc.tracker.fresh.model.core.data.DataVehicleName
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableVehicleName
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 
 /**
  * Created by dug on 8/31/17.
@@ -114,5 +115,13 @@ class SqlTableVehicleName(
         val where = "$KEY_ROWID=?"
         val whereArgs = arrayOf(name.id.toString())
         dbSql.delete(TABLE_NAME, where, whereArgs)
+    }
+
+    override fun clearAll() {
+        try {
+            dbSql.delete(TABLE_NAME, null, null)
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableVehicleName::class.java, "clear()", "db")
+        }
     }
 }

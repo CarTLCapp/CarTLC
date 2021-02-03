@@ -32,7 +32,7 @@ class SqlTableProjectAddressCombo(
         private const val KEY_LAST_USED = "last_used"
     }
 
-    fun clear() {
+    override fun clearAll() {
         try {
             sqlDb.delete(TABLE_NAME, null, null)
         } catch (ex: Exception) {

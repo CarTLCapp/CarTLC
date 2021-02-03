@@ -40,6 +40,14 @@ class SqlTableTruck(
         private const val KEY_HAS_DAMAGE = "has_damage"
     }
 
+    override fun clearAll() {
+        try {
+            dbSql.delete(TABLE_NAME, null, null)
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableTruck::class.java, "clear()", "db")
+        }
+    }
+
     fun create() {
         val sbuf = StringBuilder()
         sbuf.append("create table ")

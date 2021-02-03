@@ -41,7 +41,7 @@ class SqlTableString(
         db.execSQL(sbuf.toString())
     }
 
-    fun clear() {
+    override fun clearAll() {
         try {
             db.delete(TABLE_NAME, null, null)
         } catch (ex: Exception) {

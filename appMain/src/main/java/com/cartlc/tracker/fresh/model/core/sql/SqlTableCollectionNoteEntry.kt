@@ -1,17 +1,15 @@
 /**
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.sql
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
-import android.text.TextUtils
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableCollectionNoteEntry
 
 import com.cartlc.tracker.fresh.ui.app.TBApplication
-import timber.log.Timber
 
 import java.util.ArrayList
 
@@ -30,6 +28,13 @@ class SqlTableCollectionNoteEntry(
         private const val KEY_COLLECTION_ID = "collection_id"
         private const val KEY_NOTE_ID = "note_id"
         private const val KEY_VALUE = "value"
+    }
+
+    override fun clearAll() {
+        try {
+            dbSql.delete(TABLE_NAME, null, null)
+        } catch (ex: Exception) {
+        }
     }
 
     fun create() {

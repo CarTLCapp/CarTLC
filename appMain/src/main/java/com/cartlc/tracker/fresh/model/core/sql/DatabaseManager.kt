@@ -11,8 +11,6 @@ import com.cartlc.tracker.fresh.model.core.table.*
 
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 
-import timber.log.Timber
-
 /**
  * Created by dug on 4/17/17.
  */
@@ -21,7 +19,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
         private const val DATABASE_NAME = "cartcl.db"
-        private const val DATABASE_VERSION = 21
+        private const val DATABASE_VERSION = 22
     }
 
     private val dbHelper: DatabaseHelper by lazy {
@@ -60,65 +58,63 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
         lateinit var tableString: SqlTableString
         lateinit var tableVehicle: SqlTableVehicle
         lateinit var tableVehicleName: SqlTableVehicleName
+        lateinit var tableDaar: SqlTableDaar
 
         override fun onCreate(db: SQLiteDatabase) {
             init(db)
             tableAddress.create()
+            tableCrash.create()
             tableEntry.create()
             tableEquipment.create()
             tableCollectionEquipmentEntry.create()
             tableCollectionEquipmentProject.create()
+            tableDaar.create()
+            tableFlow.create()
+            tableFlowElement.create()
+            tableFlowElementNote.create()
             tableNote.create()
             tableCollectionNoteEntry.create()
             tableCollectionNoteProject.create()
             tablePicture.create()
             tableProjectAddressCombo.create()
             tableProjects.create()
-            tableCrash.create()
-            tableZipCode.create()
-            tableTruck.create()
             tableString.create()
-            tableFlow.create()
-            tableFlowElement.create()
-            tableFlowElementNote.create()
+            tableTruck.create()
             tableVehicle.create()
             tableVehicleName.create()
+            tableZipCode.create()
+
         }
 
         fun init(db: SQLiteDatabase) {
             tableAddress = SqlTableAddress(dm, db)
+            tableCollectionNoteEntry = SqlTableCollectionNoteEntry(dm, db)
+            tableCollectionNoteProject = SqlTableCollectionNoteProject(dm, db)
+            tableCollectionEquipmentEntry = SqlTableCollectionEquipmentEntry(dm, db)
+            tableCrash = SqlTableCrash(dm, db)
+            tableDaar = SqlTableDaar(dm, db)
+            tableCollectionEquipmentProject = SqlTableCollectionEquipmentProject(dm, db)
             tableEntry = SqlTableEntry(dm, db)
             tableEquipment = SqlTableEquipment(dm, db)
-            tableCollectionEquipmentEntry = SqlTableCollectionEquipmentEntry(dm, db)
-            tableCollectionEquipmentProject = SqlTableCollectionEquipmentProject(dm, db)
-            tableNote = SqlTableNote(dm, db)
             tableFlow = SqlTableFlow(dm, db)
             tableFlowElement = SqlTableFlowElement(dm, db)
             tableFlowElementNote = SqlTableFlowElementNote(dm, db)
-            tableCollectionNoteEntry = SqlTableCollectionNoteEntry(dm, db)
-            tableCollectionNoteProject = SqlTableCollectionNoteProject(dm, db)
+            tableNote = SqlTableNote(dm, db)
             tablePicture = SqlTablePicture(db)
             tableProjectAddressCombo = SqlTableProjectAddressCombo(dm, db)
             tableProjects = SqlTableProjects(dm, db)
-            tableCrash = SqlTableCrash(dm, db)
-            tableZipCode = SqlTableZipCode(db)
             tableTruck = SqlTableTruck(dm, db)
             tableString = SqlTableString(db)
             tableVehicle = SqlTableVehicle(dm, db)
             tableVehicleName = SqlTableVehicleName(dm, db)
+            tableZipCode = SqlTableZipCode(db)
             SqlTableTruckV13.Init(dm, db)
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
             init(db)
             if (oldVersion == 1 || oldVersion == 2) {
-                // OBSOLETE:
-//                tableCrash.create()
-//                tablePicture.upgrade3()
-//                tableZipCode.create()
-//                SqlTableNote.upgrade3(db)
-//                tableTruck.create()
-//                tableEntry.upgrade3()
+                // NOTHING
             } else if (oldVersion <= 9) {
                 SqlTableCrash.upgrade10(dm, db)
                 SqlTableTruckV13.instance.upgrade11()
@@ -152,6 +148,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             if (oldVersion <= 20) {
                 tableEntry.upgrade21()
             }
+            if (oldVersion <= 21) {
+                tableDaar.create()
+            }
         }
 
         override fun onOpen(db: SQLiteDatabase) {
@@ -159,18 +158,43 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
         }
 
         fun clearUploaded() {
-            tableEntry.clearUploaded()
-            tableEquipment.clearUploaded()
-            tableNote.clearUploaded()
-            tablePicture.clearUploaded()
-            tableProjects.clearUploaded()
             tableAddress.clearUploaded()
             tableCollectionEquipmentEntry.clearUploaded()
             tableCollectionEquipmentProject.clearUploaded()
             tableCollectionNoteProject.clearUploaded()
             tableCrash.clearUploaded()
+            tableDaar.clearUploaded()
+            tableEntry.clearUploaded()
+            tableEquipment.clearUploaded()
+            tableNote.clearUploaded()
+            tablePicture.clearUploaded()
+            tableProjects.clearUploaded()
             tableVehicle.clearUploaded()
         }
+    }
+
+    override fun clearAll() {
+        tableAddress.clearAll()
+        tableCollectionEquipmentEntry.clearAll()
+        tableCollectionEquipmentProject.clearAll()
+        tableCollectionNoteEntry.clearAll()
+        tableCollectionNoteProject.clearAll()
+        tableCrash .clearAll()
+        tableDaar.clearAll()
+        tableEntry.clearAll()
+        tableEquipment.clearAll()
+        tableFlow.clearAll()
+        tableFlowElement.clearAll()
+        tableFlowElementNote.clearAll()
+        tableNote.clearAll()
+        tablePicture.clearAll()
+        tableProjectAddressCombo.clearAll()
+        tableProjects.clearAll()
+        tableString.clearAll()
+        tableTruck.clearAll()
+        tableVehicle.clearAll()
+        tableVehicleName.clearAll()
+        tableZipCode.clearAll()
     }
 
     override fun clearUploaded() {
@@ -227,6 +251,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     override val tableZipCode: TableZipCode
         get() = dbHelper.tableZipCode
+
+    override val tableDaar: TableDaar
+        get() = dbHelper.tableDaar
 
     override val appVersion: String
         get() = (ctx.applicationContext as TBApplication).version

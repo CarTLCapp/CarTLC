@@ -17,5 +17,5 @@
     <color name="confirm_color">#667307</color>
     <color name="note_background">#333333</color>
     <color name="incomplete">#A32B05</color>
-
+    <color name="selected">#FFE57F</color>
 </resources>

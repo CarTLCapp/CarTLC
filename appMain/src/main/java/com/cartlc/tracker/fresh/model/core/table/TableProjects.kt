@@ -6,6 +6,7 @@ interface TableProjects {
     fun add(rootProject: String, subProject: String, serverId: Int, disabled: Boolean): Long
     fun add(rootProject: String): Long
     fun addTest(item: String): Long
+    fun clearAll()
     fun hasServerId(rootName: String, subProject: String): Boolean
     fun isDisabled(id: Long): Boolean
     fun query(activeOnly: Boolean = false): List<DataProject>

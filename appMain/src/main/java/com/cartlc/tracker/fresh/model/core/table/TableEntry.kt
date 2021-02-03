@@ -5,13 +5,15 @@ import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.model.core.sql.SqlTableEntry
 
 interface TableEntry {
-    fun updateOrInsert(entry: DataEntry): Boolean
+
+    fun clearAll()
     fun countAddresses(addressId: Long): Int
     fun countTrucks(truckId: Long): Int
     fun countProjects(projectId: Long): Int
     fun countProjectAddressCombo(comboId: Long): SqlTableEntry.Count
     fun query(): List<DataEntry>
     fun query(id: Long): DataEntry?
+    fun querySince(since: Long): List<DataEntry>
     fun queryForProjectAddressCombo(id: Long): List<DataEntry>
     fun queryPendingDataToUploadToMaster(): List<DataEntry>
     fun queryPendingPicturesToUpload(): List<DataEntry>
@@ -20,4 +22,6 @@ interface TableEntry {
     fun reUploadEntries(combo: DataProjectAddressCombo): Int
     fun saveProjectAddressCombo(entry: DataEntry)
     fun saveUploaded(entry: DataEntry)
+    fun updateOrInsert(entry: DataEntry): Boolean
+
 }

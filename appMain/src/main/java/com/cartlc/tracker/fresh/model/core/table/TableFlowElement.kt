@@ -24,6 +24,7 @@ interface TableFlowElement {
     }
 
     fun add(item: DataFlowElement): Long
+    fun clearAll()
     fun query(): List<DataFlowElement>
     fun query(flow_element_id: Long): DataFlowElement?
     fun first(flow_id: Long): Long?

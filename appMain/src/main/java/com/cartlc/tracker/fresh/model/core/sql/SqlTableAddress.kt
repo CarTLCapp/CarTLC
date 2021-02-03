@@ -10,12 +10,9 @@ import com.cartlc.tracker.fresh.model.core.data.DataAddress
 import com.cartlc.tracker.fresh.model.core.data.DataStates
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableAddress
-
 import com.cartlc.tracker.fresh.ui.app.TBApplication
-
-import java.util.Locale
-
 import timber.log.Timber
+import java.util.*
 
 /**
  * Created by dug on 5/10/17.
@@ -120,15 +117,15 @@ class SqlTableAddress(
         }
     }
 
-    fun clear() {
+    fun drop() {
+        dbSql.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+    }
+
+    override fun clearAll() {
         try {
             dbSql.delete(TABLE_NAME, null, null)
         } catch (ex: Exception) {
         }
-    }
-
-    fun drop() {
-        dbSql.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
     }
 
     fun create() {

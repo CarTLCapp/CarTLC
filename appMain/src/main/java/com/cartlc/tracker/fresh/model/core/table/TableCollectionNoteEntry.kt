@@ -3,6 +3,7 @@ package com.cartlc.tracker.fresh.model.core.table
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 
 interface TableCollectionNoteEntry {
+    fun clearAll()
     fun countNotes(noteId: Long): Int
     fun query(collectionId: Long): List<DataNote>
     fun query(collectionId: Long, noteId: Long): DataNote?

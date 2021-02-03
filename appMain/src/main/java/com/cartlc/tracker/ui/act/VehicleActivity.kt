@@ -10,23 +10,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.R
 import com.cartlc.tracker.databinding.ActivityVehicleBinding
-import com.cartlc.tracker.fresh.ui.buttons.ButtonsUseCase
+import com.cartlc.tracker.fresh.ui.buttons.ButtonsController
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsView
 import com.cartlc.tracker.fresh.model.event.Action
 import com.cartlc.tracker.fresh.model.flow.ActionUseCase
 import com.cartlc.tracker.fresh.model.flow.VehicleStage
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.base.BaseActivity
-import com.cartlc.tracker.fresh.ui.bits.SoftKeyboardDetect
+import com.cartlc.tracker.fresh.ui.bits.HideOnSoftKeyboard
 import com.cartlc.tracker.ui.list.CheckBoxListAdapter
 import com.cartlc.tracker.ui.list.RadioListAdapter
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleView
-import com.cartlc.tracker.fresh.ui.title.TitleUseCase
+import com.cartlc.tracker.fresh.ui.main.title.TitleController
 import com.cartlc.tracker.fresh.ui.title.TitleView
 import com.cartlc.tracker.fresh.model.event.Button
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 
-class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.Listener {
+class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsController.Listener {
 
     private lateinit var app: TBApplication
 
@@ -41,8 +41,10 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
     private lateinit var stage2Entry: EntrySimpleView
     private lateinit var stage345Entry: EntrySimpleView
 
-    private lateinit var buttonsUseCase: ButtonsUseCase
-    private lateinit var titleUseCase: TitleUseCase
+    private lateinit var buttonsController: ButtonsController
+    private lateinit var titleController: TitleController
+
+    private val factoryController = componentRoot.factoryController
 
     lateinit var vm: VehicleViewModel
 
@@ -66,10 +68,13 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
         stage2Entry = findViewById(R.id.stage2_entry)
         stage345Entry = findViewById(R.id.stage345_entry_simple)
 
-        buttonsUseCase = buttonsView.useCase
-        buttonsUseCase.registerListener(this)
+        val titleView = findViewById<TitleView>(R.id.frame_title)
+        val buttonsView = findViewById<ButtonsView>(R.id.frame_buttons)
 
-        titleUseCase = titleView.useCase
+        buttonsController = factoryController.allocButtonsController(boundAct, buttonsView.viewMvc)
+        buttonsController.registerListener(this)
+
+        titleController = factoryController.allocTitleController(boundAct, titleView.viewMvc)
 
         setup(binding.stage12List)
         setup(binding.stage345List)
@@ -85,9 +90,9 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
         binding.stage345List.adapter = checkboxAdapter
         binding.stage345List2.adapter = checkboxAdapter2
 
-        buttonsUseCase.softKeyboardDetect = SoftKeyboardDetect(binding.root)
-        buttonsUseCase.centerVisible = false
-        buttonsUseCase.reset()
+        buttonsController.hideOnSoftKeyboard = HideOnSoftKeyboard(binding.root)
+        buttonsController.centerVisible = false
+        buttonsController.reset()
 
         stage2Entry.control.afterTextChangedListener = { value -> vm.onEntryChanged(value) }
         stage2Entry.control.emsValue = resources.getInteger(R.integer.entry_simple_ems)
@@ -102,7 +107,7 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
         stage345Entry.control.afterTextChangedListener = { value -> vm.onEntryChanged(value) }
         stage345Entry.control.showCheckedValue = true
         stage345Entry.control.dispatchActionEvent = { action -> vm.dispatchActionEvent(action) }
-        titleUseCase.mainTitleText = null
+        titleController.mainTitleText = null
 
         vm.repo.entered.clear()
         vm.repo.stage.observe(this, Observer { stage -> onStageChanged(stage) })
@@ -110,13 +115,13 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
         vm.mileageTextValue = { stage2Entry.control.entryTextValue ?: "" }
         vm.entryTextValue = { stage345Entry.control.entryTextValue ?: "" }
         vm.entryHasCheckedValue = { stage345Entry.control.hasCheckedValue }
-        vm.btnNextVisible = { flag -> buttonsUseCase.nextVisible = flag }
+        vm.btnNextVisible = { flag -> buttonsController.nextVisible = flag }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         vm.actionUseCase.unregisterListener(this)
-        buttonsUseCase.unregisterListener(this)
+        buttonsController.unregisterListener(this)
     }
 
     private fun setup(list: RecyclerView) {
@@ -142,15 +147,15 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
 
     private fun onStageChanged(stage: VehicleStage) {
 
-        titleUseCase.mainTitleText = null
-        titleUseCase.subTitleText = null
+        titleController.mainTitleText = null
+        titleController.subTitleText = null
         vm.showFrame12Value = false
         vm.showFrame345Value = false
         vm.stage3ListTitleValue = null
         vm.stage3List2TitleValue = null
-        buttonsUseCase.prevVisible = stage != VehicleStage.STAGE_1
-        buttonsUseCase.nextVisible = false
-        buttonsUseCase.nextText = getString(R.string.btn_next)
+        buttonsController.prevVisible = stage != VehicleStage.STAGE_1
+        buttonsController.nextVisible = false
+        buttonsController.nextText = getString(R.string.btn_next)
         stage2Entry.control.showing = false
         stage345Entry.control.titleValue = null
         stage345Entry.control.showEditTextValue = vm.show345EditText
@@ -173,8 +178,8 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
             }
             VehicleStage.STAGE_3 -> {
                 vm.showFrame345Value = true
-                titleUseCase.mainTitleText = getString(R.string.vehicle_lights)
-                titleUseCase.subTitleText = getString(R.string.vehicle_lights_description)
+                titleController.mainTitleText = getString(R.string.vehicle_lights)
+                titleController.subTitleText = getString(R.string.vehicle_lights_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_lights_head)
                 vm.stage3List2TitleValue = getString(R.string.vehicle_lights_tail)
                 checkboxAdapter.items = vm.repo.headLights.toList()
@@ -188,8 +193,8 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
             }
             VehicleStage.STAGE_4 -> {
                 vm.showFrame345Value = true
-                titleUseCase.mainTitleText = getString(R.string.vehicle_fluids)
-                titleUseCase.subTitleText = getString(R.string.vehicle_fluids_description)
+                titleController.mainTitleText = getString(R.string.vehicle_fluids)
+                titleController.subTitleText = getString(R.string.vehicle_fluids_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_fluids_checks)
                 checkboxAdapter.items = vm.repo.fluidChecks.toList()
                 checkboxAdapter.selectedItems = vm.repo.entered.vehicle.fluidChecksValue
@@ -200,8 +205,8 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
             }
             VehicleStage.STAGE_5 -> {
                 vm.showFrame345Value = true
-                titleUseCase.mainTitleText = getString(R.string.vehicle_exterior)
-                titleUseCase.subTitleText = getString(R.string.vehicle_exterior_description)
+                titleController.mainTitleText = getString(R.string.vehicle_exterior)
+                titleController.subTitleText = getString(R.string.vehicle_exterior_description)
                 vm.stage3ListTitleValue = getString(R.string.vehicle_tire_inspection)
                 checkboxAdapter.items = vm.repo.tireInspection.toList()
                 checkboxAdapter.selectedItems = vm.repo.entered.vehicle.tireInspectionValue
@@ -212,9 +217,9 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsUseCase.L
             }
             VehicleStage.STAGE_6 -> {
                 vm.showFrame345Value = true
-                titleUseCase.mainTitleText = getString(R.string.vehicle_other_title)
-                titleUseCase.subTitleText = getString(R.string.vehicle_other_description)
-                buttonsUseCase.nextText = getString(R.string.vehicle_submit)
+                titleController.mainTitleText = getString(R.string.vehicle_other_title)
+                titleController.subTitleText = getString(R.string.vehicle_other_description)
+                buttonsController.nextText = getString(R.string.vehicle_submit)
                 stage345Entry.control.entryTextValue = vm.repo.entered.vehicle.other
                 stage345Entry.control.checkedButtonBooleanValue = vm.repo.entered.hasIssuesOther
 //                stage345Entry.invalidateAll()

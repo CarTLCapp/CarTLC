@@ -1,4 +1,4 @@
-package com.cartlc.tracker.fresh.ui.title
+package com.cartlc.tracker.fresh.ui.main.title
 
 import androidx.lifecycle.Lifecycle
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
@@ -8,11 +8,12 @@ import com.cartlc.tracker.fresh.model.flow.Flow
 import com.cartlc.tracker.fresh.model.flow.FlowUseCase
 import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.model.msg.StringMessage
+import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
 
-class TitleController(
+class TitleControllerImpl(
         boundAct: BoundAct,
         private val viewMvc: TitleViewMvc
-) : LifecycleObserver, TitleUseCase, FlowUseCase.Listener {
+) : LifecycleObserver, TitleController, FlowUseCase.Listener {
 
     private val repo = boundAct.repo
     private val messageHandler = boundAct.componentRoot.messageHandler
@@ -44,6 +45,7 @@ class TitleController(
     override var mainTitleVisible: Boolean
         get() = viewMvc.mainTitleVisible
         set(value) { viewMvc.mainTitleVisible = value }
+
     override var subTitleText: String?
         get() = viewMvc.subTitleText
         set(value) {

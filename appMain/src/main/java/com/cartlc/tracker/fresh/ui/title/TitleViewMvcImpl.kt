@@ -1,18 +1,13 @@
 package com.cartlc.tracker.fresh.ui.title
 
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import com.cartlc.tracker.R
-import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
+import com.cartlc.tracker.fresh.ui.common.viewmvc.ViewMvcImpl
 
-class TitleViewMvcImpl (
-        inflater: LayoutInflater,
-        container: ViewGroup?
-) : ObservableViewMvcImpl<TitleViewMvc.Listener>(), TitleViewMvc {
-
-    override val rootView: View = inflater.inflate(R.layout.frame_title, container, false) as ViewGroup
+class TitleViewMvcImpl(
+        override val rootView: View
+) : ViewMvcImpl(), TitleViewMvc {
 
     private val mainTitleTextView = findViewById<TextView>(R.id.main_title_text)
     private val subTitleTextView = findViewById<TextView>(R.id.sub_title)

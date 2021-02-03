@@ -29,6 +29,13 @@ class SqlTableFlow(
         private const val KEY_SUB_PROJECT_ID = "sub_project_id"
     }
 
+    override fun clearAll() {
+        try {
+            dbSql.delete(TABLE_NAME, null, null)
+        } catch (ex: Exception) {
+        }
+    }
+
     fun create() {
         val sbuf = StringBuilder()
         sbuf.append("create table ")

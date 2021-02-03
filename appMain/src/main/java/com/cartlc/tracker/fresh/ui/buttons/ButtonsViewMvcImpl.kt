@@ -1,6 +1,5 @@
 package com.cartlc.tracker.fresh.ui.buttons
 
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -8,11 +7,10 @@ import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
 
 class ButtonsViewMvcImpl(
-        inflater: LayoutInflater,
-        container: ViewGroup?
+        topView: ViewGroup
 ) : ObservableViewMvcImpl<ButtonsViewMvc.Listener>(), ButtonsViewMvc {
 
-    override val rootView: View = inflater.inflate(R.layout.frame_buttons, container, false) as ViewGroup
+    override val rootView: View = topView
 
     private val btnPrev = findViewById<Button>(R.id.btn_prev)
     private val btnNext = findViewById<Button>(R.id.btn_next)
@@ -20,26 +18,10 @@ class ButtonsViewMvcImpl(
     private val btnChange = findViewById<Button>(R.id.btn_change)
 
     init {
-        btnPrev.setOnClickListener { view ->
-            for (listener in listeners) {
-                listener.onBtnPrevClicked(view)
-            }
-        }
-        btnNext.setOnClickListener { view ->
-            for (listener in listeners) {
-                listener.onBtnNextClicked(view)
-            }
-        }
-        btnCenter.setOnClickListener { view ->
-            for (listener in listeners) {
-                listener.onBtnCenterClicked(view)
-            }
-        }
-        btnChange.setOnClickListener { view ->
-            for (listener in listeners) {
-                listener.onBtnChangeClicked(view)
-            }
-        }
+        btnPrev.setOnClickListener { view -> listeners.forEach { it.onBtnPrevClicked(view) } }
+        btnNext.setOnClickListener { view -> listeners.forEach { it.onBtnNextClicked(view) } }
+        btnCenter.setOnClickListener { view -> listeners.forEach { it.onBtnCenterClicked(view) } }
+        btnChange.setOnClickListener { view -> listeners.forEach { it.onBtnChangeClicked(view) } }
     }
 
     override var showing: Boolean
@@ -90,6 +72,4 @@ class ButtonsViewMvcImpl(
             btnCenter.text = value
         }
 
-    // region supporting classes
-    // endregion supporting classes
 }

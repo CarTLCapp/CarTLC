@@ -7,6 +7,7 @@ interface TableAddress {
 
     fun add(list: List<DataAddress>)
     fun add(address: DataAddress): Long
+    fun clearAll()
     fun isLocalCompanyOnly(company: String?): Boolean
     fun query(): List<DataAddress>
     fun query(id: Long): DataAddress?

@@ -7,6 +7,7 @@ import java.io.File
 interface TablePicture {
     fun add(pictures: List<DataPicture>)
     fun add(picture: File, collection_id: Long, stage: Stage): DataPicture
+    fun clearAll()
     fun clearPendingPictures()
     fun clearUploadedUnscaledPhotos()
     fun countPictures(collection_id: Long, stage: Stage?): Int

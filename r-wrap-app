@@ -28,6 +28,15 @@ do
 			TGTFILE="CarTLC-r${VERSION}.apk"
     		shift
 		;;
+		-clean)
+			SRCFILE="./appMain/build/outputs/apk/debug/appMain-debug.apk"
+			rm -f ${SRCFILE}
+			SRCFILE=`ls appMain/release/*.aab`
+			rm -f ${SRCFILE}
+			SRCFILE=`ls appMain/release/*.apk`
+			rm -f ${SRCFILE}
+                        shift # past argument
+			;;
 		*)
 			print "Unknown opton: $key"
 			exit 1;

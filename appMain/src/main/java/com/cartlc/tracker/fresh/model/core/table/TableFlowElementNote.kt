@@ -9,6 +9,7 @@ import com.cartlc.tracker.fresh.model.core.data.DataNote
 interface TableFlowElementNote {
 
     fun add(item: DataFlowElementNote): Long
+    fun clearAll()
     fun query(): List<DataFlowElementNote>
     fun query(flowElementId: Long, noteId: Long): DataFlowElementNote?
     fun query(flowElementId: Long): List<DataFlowElementNote>

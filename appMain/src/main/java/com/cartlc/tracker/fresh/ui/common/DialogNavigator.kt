@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.TextView
 import com.cartlc.tracker.ui.util.helper.DialogHelper
 
 class DialogNavigator(
@@ -83,6 +84,22 @@ class DialogNavigator(
             val reason = editView.text.toString()
             dialog.dismiss()
             onDone(reason)
+        }
+        builder.create().show()
+    }
+
+    fun showDebugDialog(key: String, onDone: (code: String?) -> Unit) {
+        val builder = android.app.AlertDialog.Builder(context)
+        builder.setTitle(R.string.title_debug)
+        val view: View = layoutInflater.inflate(R.layout.dialog_debug, null)
+        val labelView = view.findViewById<TextView>(R.id.label)
+        labelView.text = context.getString(R.string.dialog_debug_code, key)
+        val editView = view.findViewById<EditText>(R.id.value)
+        builder.setView(view)
+        builder.setPositiveButton(R.string.btn_done) { dialog, _ ->
+            val code = editView.text.toString()
+            dialog.dismiss()
+            onDone(code)
         }
         builder.create().show()
     }

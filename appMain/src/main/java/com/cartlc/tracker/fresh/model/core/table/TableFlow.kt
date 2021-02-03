@@ -9,6 +9,7 @@ import com.cartlc.tracker.fresh.model.core.data.DataProject
 interface TableFlow {
 
     fun add(item: DataFlow): Long
+    fun clearAll()
     fun query(): List<DataFlow>
     fun queryBySubProjectId(project_id: Int): DataFlow?
     fun queryByServerId(server_id: Int): DataFlow?

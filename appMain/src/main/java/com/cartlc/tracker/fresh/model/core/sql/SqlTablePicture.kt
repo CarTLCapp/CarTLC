@@ -35,7 +35,7 @@ class SqlTablePicture(
         private const val KEY_UPLOADED = "uploaded"
     }
 
-    fun clear() {
+    override fun clearAll() {
         try {
             dbSql.delete(TABLE_NAME, null, null)
         } catch (ex: Exception) {
