@@ -18,7 +18,7 @@ class StageStatus(
     fun process() {
         with(shared) {
             askAgain = true
-            buttonsUseCase.nextText = messageHandler.getString(StringMessage.btn_done)
+            buttonsController.nextText = messageHandler.getString(StringMessage.btn_done)
             mainListUseCase.visible = true
             titleUseCase.mainTitleText = messageHandler.getString(StringMessage.title_status)
             titleUseCase.subTitleText = statusHint

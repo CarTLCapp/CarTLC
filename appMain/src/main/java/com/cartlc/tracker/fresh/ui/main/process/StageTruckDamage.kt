@@ -16,7 +16,7 @@ class StageTruckDamage(
             picturesVisible = true
             prefHelper.truckHasDamage?.let { hasDamage ->
                 if (!hasDamage) {
-                    if (buttonsUseCase.wasPrev) {
+                    if (buttonsController.wasPrev) {
                         prefHelper.truckHasDamage = null
                         curFlowValue.prev()
                     } else {
@@ -32,9 +32,9 @@ class StageTruckDamage(
                 return
             }
             var showToast = false
-            if (buttonsUseCase.wasNext) {
+            if (buttonsController.wasNext) {
                 showToast = true
-                buttonsUseCase.wasNext = false
+                buttonsController.wasNext = false
             }
             pictureUseCase.pictureItems = db.tablePicture.removeFileDoesNotExist(
                     db.tablePicture.query(prefHelper.currentPictureCollectionId, repo.curFlowValueStage)
@@ -47,11 +47,11 @@ class StageTruckDamage(
                 if (showToast) {
                     screenNavigator.showToast(messageHandler.getString(StringMessage.truck_damage_request))
                 }
-                buttonsUseCase.nextVisible = false
+                buttonsController.nextVisible = false
 
                 if (taskPicture.takingPictureAborted) {
-                    buttonsUseCase.centerVisible = true
-                    buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_another)
+                    buttonsController.centerVisible = true
+                    buttonsController.centerText = messageHandler.getString(StringMessage.btn_another)
                 } else {
                     taskPicture.dispatchPictureRequest()
                 }            } else {
@@ -59,7 +59,7 @@ class StageTruckDamage(
                     if (showToast) {
                         screenNavigator.showToast(messageHandler.getString(StringMessage.truck_damage_enter))
                     }
-                    buttonsUseCase.nextVisible = false
+                    buttonsController.nextVisible = false
                 }
             }
             titleUseCase.mainTitleText = title
@@ -87,12 +87,12 @@ class StageTruckDamage(
 
     fun pictureStateChanged() {
         with(shared) {
-            buttonsUseCase.nextVisible = pictureUseCase.pictureItems.size == 1 && hasTruckDamageValue
+            buttonsController.nextVisible = pictureUseCase.pictureItems.size == 1 && hasTruckDamageValue
 
             val currentNumPictures = pictureUseCase.pictureItems.size
             if (currentNumPictures == 0) {
-                buttonsUseCase.centerVisible = true
-                buttonsUseCase.centerText = messageHandler.getString(StringMessage.btn_another)
+                buttonsController.centerVisible = true
+                buttonsController.centerText = messageHandler.getString(StringMessage.btn_another)
             }
         }
     }

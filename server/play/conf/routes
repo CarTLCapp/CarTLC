@@ -204,6 +204,17 @@ POST    /vehicle               controllers.VehicleController.enter()
 POST    /strings               controllers.VehicleController.strings()
 POST    /vehicles              controllers.VehicleController.queryNames()
 
+### DAAR ###
+
+GET     /daar/list             controllers.DaarController.list(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc", searchTerm ?= "null", searchField ?= "null")
+GET     /daar/:id/view         controllers.DaarController.view(id:Long)
+GET     /daar/search           controllers.DaarController.search(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc")
+GET     /daar/search/clear     controllers.DaarController.searchClear()
+POST    /daar/enter            controllers.DaarController.enter()
+
+# Long form
+GET     /daar/list/:page/:pageSize/:sort/:order/:searchField/:searchTerm  controllers.DaarController.list2(page:Int, pageSize:Int, sort: String, order: String, searchTerm: String, searchField: String)
+
 ### APP SIDE MISC REQUESTS ###
 
 POST    /register              controllers.PostController.register()

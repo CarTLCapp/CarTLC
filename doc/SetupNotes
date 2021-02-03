@@ -1,0 +1,7 @@
+Add:
+export TERM=xterm-color
+
+to the top of the sbt script to get rid of the annoying:
+
+"sbt Failed to construct terminal; falling back to unsupported"
+

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2021, FleetTLC. All rights reserved
  */
 package models;
 
@@ -204,7 +204,7 @@ public class EntryPagedList {
         long mNumTotalRows;
     }
 
-    static final boolean VERBOSE = true;
+    static final boolean VERBOSE = false;
     static final int[] PAGE_SIZES = {100, 200, 300, 400, 500};
     static final String CLASS_PREV = "prev";
     static final String CLASS_PREV_DISABLED = "prev disabled";
@@ -595,18 +595,18 @@ public class EntryPagedList {
         return list;
     }
 
-    private boolean hasSearchByEquipment() {
-        return mSearch.hasSearchBy(ColumnSelector.EQUIPMENT);
-    }
+//    private boolean hasSearchByEquipment() {
+//        return mSearch.hasSearchBy(ColumnSelector.EQUIPMENT);
+//    }
 
-    private boolean hasSearchByRootProject() {
-        if (mSearch.hasSearchBy(ColumnSelector.ROOT_PROJECT_ID)) {
-            if (!RootProject.findMatches(mSearch.getTerm()).isEmpty()) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    private boolean hasSearchByRootProject() {
+//        if (mSearch.hasSearchBy(ColumnSelector.ROOT_PROJECT_ID)) {
+//            if (!RootProject.findMatches(mSearch.getTerm()).isEmpty()) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     private String getLimitFilters() {
         StringBuilder projects = new StringBuilder();

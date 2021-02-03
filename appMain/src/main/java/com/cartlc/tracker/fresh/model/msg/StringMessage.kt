@@ -27,6 +27,7 @@ sealed class StringMessage(
     object title_login: StringMessage(R.string.title_login)
     object title_root_project: StringMessage(R.string.title_root_project)
     object title_sub_project: StringMessage(R.string.title_sub_project)
+    object title_sub_flows: StringMessage(R.string.title_sub_flows)
     object title_company: StringMessage(R.string.title_company)
     object title_state: StringMessage(R.string.title_state)
     object title_city: StringMessage(R.string.title_city)
@@ -47,9 +48,11 @@ sealed class StringMessage(
     object title_uploaded_: StringMessage(R.string.title_uploaded_)
     object title_uploaded_done: StringMessage(R.string.title_uploaded_done)
     object title_saved_: StringMessage(R.string.title_saved_)
+
     object truck_number_request: StringMessage(R.string.truck_number_request)
     object truck_number_enter: StringMessage(R.string.truck_number_enter)
     object truck_number_hint: StringMessage(R.string.truck_number_hint)
+
     object truck_damage_query: StringMessage(R.string.truck_damage_query)
     object truck_damage_request: StringMessage(R.string.truck_damage_request)
     object truck_damage_enter: StringMessage(R.string.truck_damage_enter)

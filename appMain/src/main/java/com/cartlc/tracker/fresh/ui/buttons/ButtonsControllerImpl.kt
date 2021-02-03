@@ -1,15 +1,13 @@
 package com.cartlc.tracker.fresh.ui.buttons
 
 import android.view.View
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.*
 import com.cartlc.tracker.fresh.model.event.Button
 import com.cartlc.tracker.fresh.model.flow.Flow
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
-import com.cartlc.tracker.fresh.ui.bits.HideOnSoftKeyboard
 import com.cartlc.tracker.fresh.ui.common.observable.BaseObservableImpl
+import com.cartlc.tracker.fresh.ui.bits.HideOnSoftKeyboard
 
 open class ButtonsControllerImpl(
         boundAct: BoundAct,
@@ -153,10 +151,6 @@ open class ButtonsControllerImpl(
     }
 
     // endregion SoftKeyboardDetect.Listener
-
-    // region HideOnSoftKeyboard.Listener
-
-    // endregion HideOnSoftKeyboard.Listener
 
     // region support for ButtonsUseCase
 

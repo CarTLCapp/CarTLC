@@ -1,5 +1,5 @@
-/**
- * Copyright 2018, FleetTLC. All rights reserved
+/*
+ * Copyright 2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.pref
 
@@ -25,9 +25,11 @@ class PrefHelper constructor(
 ) : PrefHelperBase(ctx) {
 
     companion object {
+        private val TAG = PrefHelper::class.simpleName
 
         const val KEY_ROOT_PROJECT = "root_project"
         const val KEY_SUB_PROJECT = "sub_project"
+        const val KEY_SUB_FLOW_ELEMENT_ID = "sub_flow_element_id"
         const val KEY_COMPANY = "company"
         const val KEY_STREET = "street"
         const val KEY_STATE = "state"
@@ -169,14 +171,20 @@ class PrefHelper constructor(
             } else null
         }
 
-//    val rootProjectId: Long?
-//        get() {
-//            val rootName = projectRootName
-//            return if (rootName != null) {
-//                val id = db.tableProjects.queryRootProjectId(rootName)
-//                if (id >= 0) id else null
-//            } else null
-//        }
+    var subFlowSelectedElementId: Long
+        get() = getLong(KEY_SUB_FLOW_ELEMENT_ID, 0L)
+        set(value) = setLong(KEY_SUB_FLOW_ELEMENT_ID, value)
+
+    val subFlowSelectedElementName: String?
+        get() {
+            return subFlowSelectedElementId.let { id ->
+                if (id != 0L) {
+                    db.tableFlowElement.query(id)?.prompt
+                } else {
+                    null
+                }
+            }
+        }
 
     private var savedProjectGroupId: Long
         get() = getLong(KEY_SAVED_PROJECT_GROUP_ID, -1L)
@@ -556,7 +564,7 @@ class PrefHelper constructor(
             address.isLocal = true
             addressId = db.tableAddress.add(address)
             if (addressId < 0) {
-                Timber.e("saveProjectAndAddressCombo(): could not find address: $address")
+                error("saveProjectAndAddressCombo(): could not find address: $address")
                 clearCurProject()
                 return false
             }
@@ -567,7 +575,7 @@ class PrefHelper constructor(
             if (subName.isEmpty()) {
                 projectNameId = db.tableProjects.add(rootName)
             } else {
-                Timber.e("saveProjectAndAddressCombo(): could not find project: $rootName - $subName")
+                error("saveProjectAndAddressCombo(): could not find project: $rootName - $subName")
                 clearCurProject()
                 return false
             }
@@ -580,7 +588,7 @@ class PrefHelper constructor(
         }
         if (needsValidServerId) {
             if (!db.tableProjects.hasServerId(rootName, subName)) {
-                Timber.e("saveProjectAndAddressCombo(): current project is not associated with anything on the server: $rootName - $subName")
+                error("saveProjectAndAddressCombo(): current project is not associated with anything on the server: $rootName - $subName")
                 clearCurProject()
                 return false
             }
@@ -589,19 +597,19 @@ class PrefHelper constructor(
         if (modifyCurrent) {
             projectGroupId = currentProjectGroupId
             if (projectGroupId < 0) {
-                Timber.e("saveProjectAndAddressCombo(): could not modify current project, none is alive")
+                error("saveProjectAndAddressCombo(): could not modify current project, none is alive")
                 return false
             }
             val combo = db.tableProjectAddressCombo.query(projectGroupId) ?: return false
             combo.reset(projectNameId, addressId)
             if (!db.tableProjectAddressCombo.save(combo)) {
-                Timber.e("saveProjectAndAddressCombo(): could not update project combo")
+                error("saveProjectAndAddressCombo(): could not update project combo")
                 return false
             }
             db.tableProjectAddressCombo.mergeIdenticals(combo)
             val count = db.tableEntry.reUploadEntries(combo)
             if (count > 0) {
-                Timber.i("saveProjectAddressCombo(): re-upload $count entries")
+                msg("saveProjectAddressCombo(): re-upload $count entries")
             }
             db.tableProjectAddressCombo.updateUsed(projectGroupId)
         } else {
@@ -624,15 +632,22 @@ class PrefHelper constructor(
         zipCode = address.zipcode
     }
 
-    fun incNextPictureCollectionID() {
+
+    private fun inc() {
+        incNextEquipmentCollectionID()
+        incNextPictureCollectionID()
+        incNextNoteCollectionID()
+    }
+
+    private fun incNextPictureCollectionID() {
         setLong(KEY_NEXT_PICTURE_COLLECTION_ID, nextPictureCollectionID + 1)
     }
 
-    fun incNextEquipmentCollectionID() {
+    private fun incNextEquipmentCollectionID() {
         setLong(KEY_NEXT_EQUIPMENT_COLLECTION_ID, nextEquipmentCollectionID + 1)
     }
 
-    fun incNextNoteCollectionID() {
+    private fun incNextNoteCollectionID() {
         setLong(KEY_NEXT_NOTE_COLLECTION_ID, nextEquipmentCollectionID + 1)
     }
 
@@ -641,7 +656,7 @@ class PrefHelper constructor(
      * Entry data is stored directly in the DataEntry object, or by a reference
      * to the table which has the unique entry values.
      */
-    private fun createEntry(): DataEntry? {
+    private fun createEntry(incOkay: Boolean): DataEntry? {
         val projectGroupId = currentProjectGroupId
         if (projectGroupId < 0) {
             return null
@@ -663,6 +678,9 @@ class PrefHelper constructor(
         entry.status = status
         entry.saveNotes(nextNoteCollectionID, statusIsPartialInstall)
         entry.date = System.currentTimeMillis()
+        if (incOkay) {
+            inc()
+        }
         return entry
     }
 
@@ -700,8 +718,8 @@ class PrefHelper constructor(
     /**
      * Save the data entered for either a currently edited entry, or save a new entry.
      */
-    fun saveEntry(): DataEntry? {
-        val entry = currentEditEntry ?: return createEntry()
+    fun saveEntry(incOkay: Boolean): DataEntry? {
+        val entry = currentEditEntry ?: return createEntry(incOkay)
         entry.equipmentCollection?.addChecked()
         var truck = entry.truck
         if (truck == null) {
@@ -768,4 +786,15 @@ class PrefHelper constructor(
         clearCurProject()
     }
 
+    private fun msg(msg: String) {
+        Timber.tag(TAG).i(msg)
+    }
+
+    private fun verbose(msg: String) {
+        Timber.tag(TAG).d(msg)
+    }
+
+    private fun error(msg: String) {
+        Timber.tag(TAG).e(msg)
+    }
 }

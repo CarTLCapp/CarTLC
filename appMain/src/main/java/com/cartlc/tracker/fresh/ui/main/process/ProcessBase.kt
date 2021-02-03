@@ -13,7 +13,6 @@ open class ProcessBase(
 ) {
 
     protected fun setList(msg: StringMessage, key: String, list: List<String>) {
-
         with(shared) {
             titleUseCase.mainTitleText = messageHandler.getString(msg)
             mainListUseCase.key = key
@@ -31,13 +30,13 @@ open class ProcessBase(
             when (curFlowValue.stage) {
                 Stage.ROOT_PROJECT -> {
                     prefHelper.reloadProjects()
-                    serviceUseCase.ping()
+                    postUseCase.ping()
                 }
                 Stage.SUB_PROJECT -> curFlowValue = RootProjectFlow()
                 Stage.STREET,
                 Stage.CITY,
                 Stage.EQUIPMENT,
-                Stage.STATE -> buttonsUseCase.center()
+                Stage.STATE -> buttonsController.center()
                 else -> {
                 }
             }

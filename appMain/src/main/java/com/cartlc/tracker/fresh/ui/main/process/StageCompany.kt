@@ -25,15 +25,15 @@ class StageCompany(
                     mainListUseCase.visible = true
                     titleUseCase.subTitleText = null
                     titleUseCase.mainTitleVisible = true
-                    buttonsUseCase.nextVisible = hasCompanyName
+                    buttonsController.nextVisible = hasCompanyName
                     val companies = db.tableAddress.query()
                     autoNarrowCompanies(companies.toMutableList())
                     val companyNames = getNames(companies)
                     if (companyNames.isEmpty()) {
-                        buttonsUseCase.back()
+                        buttonsController.back()
                     } else if (companyNames.size == 1 && isAutoNarrowOkay) {
                         prefHelper.company = companyNames[0]
-                        buttonsUseCase.skip()
+                        buttonsController.skip()
                     } else {
                         setList(StringMessage.title_company, PrefHelper.KEY_COMPANY, companyNames)
                         checkCenterButtonIsEdit()

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2020, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.ui.main.process
 
@@ -23,7 +23,7 @@ class StageState(
             titleUseCase.mainTitleVisible = true
             titleUseCase.subTitleVisible = true
             mainListUseCase.visible = true
-            buttonsUseCase.nextVisible = false
+            buttonsController.nextVisible = false
             val company = prefHelper.company
             val zipcode = prefHelper.zipCode
             if (company == null) {
@@ -47,7 +47,7 @@ class StageState(
                 autoNarrowStates(states)
                 if (states.size == 1 && isAutoNarrowOkay) {
                     prefHelper.state = states[0]
-                    buttonsUseCase.skip()
+                    buttonsController.skip()
                     return
                 }
             }
@@ -56,9 +56,9 @@ class StageState(
             } else {
                 setList(StringMessage.title_state, PrefHelper.KEY_STATE, states)
                 if (mainListUseCase.keyValue != null) {
-                    buttonsUseCase.nextVisible = true
+                    buttonsController.nextVisible = true
                 }
-                buttonsUseCase.centerVisible = true
+                buttonsController.centerVisible = true
             }
         }
     }
@@ -77,6 +77,7 @@ class StageState(
                     states.clear()
                     states.add(state)
                 }
+                states.sort()
             }
         }
     }
