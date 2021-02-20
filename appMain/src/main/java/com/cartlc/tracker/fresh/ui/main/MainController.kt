@@ -63,6 +63,7 @@ class MainController(
         const val RESULT_DELETE_PROJECT = 4
 
         private val CLEAR_UPLOAD_WORKING = TimeUnit.SECONDS.toMillis(45)
+        private const val DEBUG_CODE = "roach"
     }
 
     private val repo = boundAct.repo
@@ -118,6 +119,8 @@ class MainController(
             field = value
             buttonsController.hideOnSoftKeyboard = value
         }
+
+    var updateTitle: () -> Unit = {}
 
     private var trimMemoryMessageDone = hashSetOf<Int>()
 
@@ -750,6 +753,9 @@ class MainController(
             R.id.feedback -> {
                 instaBugUseCase.show()
             }
+            R.id.debug -> {
+                showDebugDialog()
+            }
             else -> {
                 return false
             }
@@ -889,7 +895,6 @@ class MainController(
         }
     }
 
-
     @Suppress("UNUSED_PARAMETER")
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onEvent(event: EventError) {
@@ -911,4 +916,13 @@ class MainController(
 
     // endregion EventController
 
+    private fun showDebugDialog() {
+        dialogNavigator.showDebugDialog { code ->
+            if (code == DEBUG_CODE) {
+                prefHelper.isDevelopment = !prefHelper.isDevelopment
+                screenNavigator.showToast(repo.serverName)
+                updateTitle()
+            }
+        }
+    }
 }

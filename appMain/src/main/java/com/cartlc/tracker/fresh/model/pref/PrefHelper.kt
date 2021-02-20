@@ -253,8 +253,9 @@ class PrefHelper constructor(
         get() = getInt(KEY_DO_ERROR_CHECK, 1) != 0
         set(flag) = setInt(KEY_DO_ERROR_CHECK, if (flag) 1 else 0)
 
-    val isDevelopment: Boolean
-        get() = getInt(KEY_IS_DEVELOPMENT, if (TBApplication.IsDevelopmentServer()) 1 else 0) != 0
+    var isDevelopment: Boolean
+        get() = getInt(KEY_IS_DEVELOPMENT, 0) != 0
+        set(value) { setInt(KEY_IS_DEVELOPMENT, if (value) 1 else 0) }
 
     var currentProjectGroupId: Long
         get() = getLong(KEY_CURRENT_PROJECT_GROUP_ID, -1L)

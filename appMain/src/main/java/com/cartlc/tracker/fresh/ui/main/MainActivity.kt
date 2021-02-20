@@ -44,9 +44,14 @@ class MainActivity : BaseActivity() {
 
         mainController = factoryController.allocMainController(boundAct, mainViewMvc, titleController, buttonController)
         mainController.hideOnSoftKeyboard = HideOnSoftKeyboard(root)
+        mainController.updateTitle = { updateTitle() }
 
         content.addView(mainViewMvc.rootView)
 
+        updateTitle()
+    }
+
+    private fun updateTitle() {
         title = mainController.versionedTitle
     }
 

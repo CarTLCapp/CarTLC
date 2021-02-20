@@ -11,8 +11,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.view.View
-import android.view.inputmethod.InputMethodManager
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.FileProvider
 import androidx.multidex.MultiDex
@@ -46,9 +44,6 @@ class TBApplication : Application() {
 
     companion object {
 
-        private const val FORCE_DEVELOPMENT_SERVER: Boolean = false
-        private const val FORCE_RELEASE_SERVER: Boolean = false
-
         @VisibleForTesting
         var DEBUG_TREE = false
 
@@ -61,10 +56,6 @@ class TBApplication : Application() {
                         R.string.perm_write_external_storage),
                 PermissionRequest(Manifest.permission.ACCESS_FINE_LOCATION,
                         R.string.perm_location))
-
-        fun IsDevelopmentServer(): Boolean {
-            return if (FORCE_DEVELOPMENT_SERVER) true else if (FORCE_RELEASE_SERVER) false else BuildConfig.DEBUG
-        }
 
         fun getUri(ctx: Context, file: File): Uri {
             return FileProvider.getUriForFile(ctx, "com.cartcl.tracker.fileprovider", file)
@@ -146,7 +137,7 @@ class TBApplication : Application() {
         vehicleRepository = VehicleRepository(this, dm)
         vehicleViewModel = VehicleViewModel(vehicleRepository)
 
-        if (IsDevelopmentServer() && DEBUG_TREE) {
+        if (BuildConfig.DEBUG && DEBUG_TREE) {
             Timber.plant(Timber.DebugTree())
         } else {
             Timber.plant(CrashReportingTree(db))

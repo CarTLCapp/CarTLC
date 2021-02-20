@@ -52,9 +52,6 @@ class DCPing(
         private val TAG = DCPing::class.simpleName
         private const val LOG = true
 
-        private const val SERVER_URL_DEVELOPMENT = "https://fleetdev.arqnetworks.com/"
-        private const val SERVER_URL_RELEASE = "https://fleettlc.arqnetworks.com/"
-
         private const val registerSuffix: String = "register"
         private const val enterSuffix: String = "enter"
         private const val pingSuffix: String = "ping"
@@ -84,6 +81,8 @@ class DCPing(
     }
 
     private val serverUrl: String
+        get() = repo.serverName
+
     private var appVersion: String? = null
 
     private val prefHelper: PrefHelper
@@ -112,14 +111,6 @@ class DCPing(
 
     @VisibleForTesting
     var openConnection: (target: String) -> HttpURLConnection = { target -> openTargetConnection(target) }
-
-    init {
-        serverUrl = if (repo.isDevelopment) {
-            SERVER_URL_DEVELOPMENT
-        } else {
-            SERVER_URL_RELEASE
-        }
-    }
 
     private fun url(suffix: String): String {
         return serverUrl + suffix

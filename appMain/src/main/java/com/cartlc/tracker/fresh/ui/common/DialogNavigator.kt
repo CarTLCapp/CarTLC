@@ -87,6 +87,20 @@ class DialogNavigator(
         builder.create().show()
     }
 
+    fun showDebugDialog(onDone: (code: String?) -> Unit) {
+        val builder = android.app.AlertDialog.Builder(context)
+        builder.setTitle(R.string.title_debug)
+        val view: View = layoutInflater.inflate(R.layout.dialog_debug, null)
+        val editView = view.findViewById<EditText>(R.id.value)
+        builder.setView(view)
+        builder.setPositiveButton(R.string.btn_done) { dialog, _ ->
+            val code = editView.text.toString()
+            dialog.dismiss()
+            onDone(code)
+        }
+        builder.create().show()
+    }
+
     // region showFinalConfirmDialog()
 
     private var dialog: AlertDialog? = null

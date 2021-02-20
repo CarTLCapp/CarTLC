@@ -13,6 +13,7 @@ class InstaBugUseCase(
 ) {
 
     companion object {
+        private const val ENABLED = false
         private const val TOKEN = "fc84f2a2145cd800e63ffc1bb1da06b2"
     }
 

@@ -32,6 +32,8 @@
 
     <string name="title_profile">Profile</string>
     <string name="title_feedback">Feedback</string>
+    <string name="title_debug">Debug</string>
+    <string name="title_release">Release</string>
     <string name="title_upload">Upload</string>
     <string name="title_login">Login</string>
     <string name="title_save">Save</string>
@@ -98,6 +100,7 @@
     <string name="dialog_entry_done2">Logged in as %1$s and %2$s</string>
     <string name="dialog_partial_install_title">Partial Install Reason</string>
     <string name="dialog_partial_install_body">What does this installation need to be completed?</string>
+    <string name="dialog_debug_code">Enter debug trigger word</string>
 
     <string name="loading">LOADING&#8230;</string>
 
