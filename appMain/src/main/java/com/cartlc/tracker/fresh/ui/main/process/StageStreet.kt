@@ -1,5 +1,5 @@
 /**
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2020, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.ui.main.process
 
@@ -17,7 +17,7 @@ class StageStreet(
 
         with(shared) {
             var isEditing = flow.stage == Stage.ADD_STREET
-            buttonsUseCase.nextVisible = false
+            buttonsController.nextVisible = false
             titleUseCase.subTitleText = if (isEditing) editProjectHint else curProjectHint
             titleUseCase.mainTitleVisible = true
             titleUseCase.subTitleVisible = true
@@ -53,7 +53,7 @@ class StageStreet(
                 autoNarrowStreets(streets)
                 if (streets.size == 1 && isAutoNarrowOkay) {
                     prefHelper.street = streets[0]
-                    buttonsUseCase.skip()
+                    buttonsController.skip()
                     return
                 } else {
                     hint = prefHelper.address
@@ -70,11 +70,11 @@ class StageStreet(
                 }
             } else {
                 entrySimpleUseCase.helpValue = hint
-                buttonsUseCase.centerVisible = true
+                buttonsController.centerVisible = true
                 mainListUseCase.visible = true
                 setList(StringMessage.title_street, PrefHelper.KEY_STREET, streets)
                 if (mainListUseCase.keyValue != null) {
-                    buttonsUseCase.nextVisible = true
+                    buttonsController.nextVisible = true
                 }
             }
         }
@@ -94,14 +94,15 @@ class StageStreet(
                     streets.clear()
                     streets.addAll(reduced)
                 }
+                streets.sort()
             }
         }
     }
 
-    fun saveAdd(): Boolean {
+    fun saveAdd(isNext: Boolean): Boolean {
         with (shared) {
             prefHelper.street = entrySimpleUseCase.entryTextValue ?: ""
-            return prefHelper.street?.isNotBlank() ?: false
+            return prefHelper.street?.isNotBlank() ?: run { !isNext }
         }
     }
 }

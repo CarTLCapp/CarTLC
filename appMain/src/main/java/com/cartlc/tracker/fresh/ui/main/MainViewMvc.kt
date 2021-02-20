@@ -33,7 +33,6 @@ interface MainViewMvc : ObservableViewMvc<MainViewMvc.Listener> {
 
     var fragmentVisible: FragmentType
     var picturesVisible: Boolean
-    var entryHint: EntryHint
     var addButtonVisible: Boolean
     var customProgress: String?
 
@@ -44,4 +43,5 @@ interface MainViewMvc : ObservableViewMvc<MainViewMvc.Listener> {
     val entrySimpleUseCase: EntrySimpleUseCase
     val confirmUseCase: ConfirmFinalUseCase?
 
+    fun setEntryHint(hint: EntryHint)
 }

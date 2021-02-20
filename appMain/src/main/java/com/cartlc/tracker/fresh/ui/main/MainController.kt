@@ -1,5 +1,5 @@
 /**
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.ui.main
 
@@ -7,26 +7,31 @@ import android.app.Activity
 import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.location.Address
-import android.os.Handler
-import androidx.lifecycle.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.OnLifecycleEvent
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
-import com.cartlc.tracker.fresh.model.event.Action
-import com.cartlc.tracker.fresh.model.event.Button
-import com.cartlc.tracker.fresh.model.event.EventError
-import com.cartlc.tracker.fresh.model.event.EventRefreshProjects
+import com.cartlc.tracker.fresh.model.event.*
 import com.cartlc.tracker.fresh.model.flow.*
 import com.cartlc.tracker.fresh.model.misc.EntryHint
 import com.cartlc.tracker.fresh.model.msg.ErrorMessage
+import com.cartlc.tracker.fresh.model.msg.MessageHandler
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.service.LocationUseCase
+import com.cartlc.tracker.fresh.service.endpoint.post.DCPostUseCase
+import com.cartlc.tracker.fresh.service.instabug.InstaBugUseCase
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
+import com.cartlc.tracker.fresh.ui.app.dependencyinjection.ComponentRoot
 import com.cartlc.tracker.fresh.ui.bits.HideOnSoftKeyboard
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsController
-import com.cartlc.tracker.fresh.ui.common.PermissionHelper
+import com.cartlc.tracker.fresh.ui.common.*
+import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleUseCase
 import com.cartlc.tracker.fresh.ui.main.process.*
 import com.cartlc.tracker.fresh.ui.main.title.TitleController
 import com.cartlc.tracker.fresh.ui.mainlist.MainListUseCase
@@ -38,7 +43,6 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import timber.log.Timber
 import java.io.File
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 class MainController(
@@ -55,6 +59,7 @@ class MainController(
         MainListUseCase.Listener {
 
     companion object {
+        private val TAG = MainController::class.simpleName
         const val REQUEST_IMAGE_CAPTURE = 1
         private const val REQUEST_EDIT_ENTRY = 2
 
@@ -62,35 +67,31 @@ class MainController(
         const val RESULT_EDIT_PROJECT = 3
         const val RESULT_DELETE_PROJECT = 4
 
-        private val CLEAR_UPLOAD_WORKING = TimeUnit.SECONDS.toMillis(45)
         private const val DEBUG_CODE = "roach"
     }
 
     private val repo = boundAct.repo
     private val prefHelper: PrefHelper = repo.prefHelper
     private val db: DatabaseTable = repo.db
-    private val componentRoot = boundAct.componentRoot
-    private val contextWrapper = componentRoot.contextWrapper
-    private val messageHandler = componentRoot.messageHandler
-    private val serviceUseCase = componentRoot.serviceUseCase
-    private val locationUseCase = boundAct.locationUseCase
-    private val screenNavigator = boundAct.screenNavigator
-    private val deviceHelper = componentRoot.deviceHelper
-    private val dialogHelper = boundAct.dialogHelper
-    private val dialogNavigator = boundAct.dialogNavigator
-    private val permissionHelper = componentRoot.permissionHelper
-    private val bitmapHelper = componentRoot.bitmapHelper
-    private val instaBugUseCase = componentRoot.instaBugUseCase
 
-    private val pictureUseCase = viewMvc.pictureUseCase
-    private val mainListUseCase = viewMvc.mainListUseCase
-    private val entrySimpleUseCase = viewMvc.entrySimpleUseCase
-
-    private val eventController = boundAct.componentRoot.eventController
-    private val actionUseCase = repo.actionUseCase
-    private val uploadWorking = AtomicBoolean(false)
+    private val componentRoot: ComponentRoot by lazy { boundAct.componentRoot }
+    private val contextWrapper: ContextWrapper by lazy { componentRoot.contextWrapper }
+    private val messageHandler: MessageHandler by lazy { componentRoot.messageHandler }
+    private val locationUseCase: LocationUseCase by lazy { boundAct.locationUseCase }
+    private val screenNavigator: ScreenNavigator by lazy { boundAct.screenNavigator }
+    private val deviceHelper: DeviceHelper by lazy { componentRoot.deviceHelper }
+    private val dialogHelper: DialogHelper by lazy { boundAct.dialogHelper }
+    private val dialogNavigator: DialogNavigator by lazy { boundAct.dialogNavigator }
+    private val permissionHelper: PermissionHelper by lazy { componentRoot.permissionHelper }
+    private val bitmapHelper: BitmapHelper by lazy { componentRoot.bitmapHelper }
+    private val instaBugUseCase: InstaBugUseCase by lazy { componentRoot.instaBugUseCase }
+    private val pictureUseCase: PictureListUseCase by lazy { viewMvc.pictureUseCase }
+    private val mainListUseCase: MainListUseCase by lazy { viewMvc.mainListUseCase }
+    private val entrySimpleUseCase: EntrySimpleUseCase by lazy { viewMvc.entrySimpleUseCase }
+    private val eventController: EventController by lazy { boundAct.componentRoot.eventController }
+    private val actionUseCase: ActionUseCase by lazy { repo.actionUseCase }
+    private val postUseCase: DCPostUseCase by lazy { boundAct.componentRoot.postUseCase }
     private var showServerError = true
-    private val handler = Handler()
 
     init {
         boundAct.bindObserver(this)
@@ -164,6 +165,17 @@ class MainController(
             return sbuf.toString()
         }
 
+    private val curProjectSubFlowHint: String
+        get() {
+            val sbuf = StringBuilder()
+            sbuf.append(curProjectHint)
+            prefHelper.subFlowSelectedElementName?.let { name ->
+                sbuf.append("\n")
+                sbuf.append(name)
+            }
+            return sbuf.toString()
+        }
+
     private val hasCurrentProject: Boolean
         get() = prefHelper.currentProjectGroup != null
 
@@ -186,27 +198,41 @@ class MainController(
 
         private val main = this@MainController
 
-        val repo = main.repo
-        val db: DatabaseTable = repo.db
-        val prefHelper: PrefHelper = repo.prefHelper
+        val repo
+            get() = main.repo
+        val db: DatabaseTable
+            get() = repo.db
+        val prefHelper: PrefHelper
+            get() = repo.prefHelper
+        val postUseCase: DCPostUseCase
+            get() = main.postUseCase
 
-        val locationUseCase = main.locationUseCase
-        val serviceUseCase = main.serviceUseCase
-        val messageHandler = main.messageHandler
-        val screenNavigator = main.screenNavigator
-        val dialogNavigator = main.dialogNavigator
+        val locationUseCase: LocationUseCase
+            get() = main.locationUseCase
+        val messageHandler: MessageHandler
+            get() = main.messageHandler
+        val screenNavigator: ScreenNavigator
+            get() = main.screenNavigator
+        val dialogNavigator: DialogNavigator
+            get() = main.dialogNavigator
 
-        val titleUseCase = titleController
-        val buttonsUseCase = buttonsController
-        val pictureUseCase = viewMvc.pictureUseCase
-        val mainListUseCase = viewMvc.mainListUseCase
-        val entrySimpleUseCase = viewMvc.entrySimpleUseCase
-
+        val titleUseCase: TitleController
+            get() = titleController
+        val buttonsController: ButtonsController
+            get() = main.buttonsController
+        val pictureUseCase: PictureListUseCase
+            get() = viewMvc.pictureUseCase
+        val mainListUseCase: MainListUseCase
+            get() = viewMvc.mainListUseCase
+        val entrySimpleUseCase: EntrySimpleUseCase
+            get() = viewMvc.entrySimpleUseCase
         val editProjectHint: String
             get() = main.editProjectHint
-
         val curProjectHint: String
             get() = main.curProjectHint
+
+        val curProjectSubFlowElementHint: String
+            get() = main.curProjectSubFlowHint
 
         var progress: String?
             get() = viewMvc.customProgress
@@ -247,6 +273,9 @@ class MainController(
         val hasCurrentProject: Boolean
             get() = main.hasCurrentProject
 
+        val hasSelectedSubFlow: Boolean
+            get() = prefHelper.subFlowSelectedElementId != 0L
+
         var errorValue: ErrorMessage
             get() = repo.errorValue
             set(value) {
@@ -271,6 +300,7 @@ class MainController(
     private val stageCompany = StageCompany(shared)
     private val stageCurrentProject = StageCurrentProject(shared)
     private val stageSelectProject = StageSelectProject(shared)
+    private val stageSelectSubFlow = StageSelectSubFlow(shared)
     private val stageTruckNumber = StageTruckNumber(shared, taskPicture)
     private val stageTruckDamage = StageTruckDamage(shared, taskPicture)
     private val stageEquipment = StageEquipment(shared)
@@ -329,7 +359,6 @@ class MainController(
 
     fun onTrimMemory(level: Int) {
         if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
-            curFlowValue = CurrentProjectFlow()
             bitmapHelper.cacheOkay = false
         }
         if (trimMemoryMessageDone.contains(level)) {
@@ -348,7 +377,7 @@ class MainController(
             else -> level.toString()
         }
         when (level) {
-            ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL -> Timber.e("onTrimMemory($level): $tag")
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL -> error("onTrimMemory($level): $tag")
         }
 
     }
@@ -376,22 +405,12 @@ class MainController(
         buttonsController.reset(flow)
 
         when (flow.stage) {
-            Stage.ROOT_PROJECT,
-            Stage.COMPANY,
-            Stage.ADD_COMPANY,
-            Stage.STATE,
-            Stage.ADD_STATE,
-            Stage.CITY,
-            Stage.ADD_CITY,
-            Stage.STREET,
-            Stage.ADD_STREET,
-            Stage.CONFIRM_ADDRESS -> {
-            }
-            else -> {
+            Stage.SUB_FLOWS -> {
+                stageSelectSubFlow.onAboutTo()
             }
         }
         viewMvc.customProgress = null
-        viewMvc.entryHint = MainViewMvc.EntryHint()
+        viewMvc.setEntryHint(MainViewMvc.EntryHint())
     }
 
     override fun onStageChanged(flow: Flow) {
@@ -424,6 +443,9 @@ class MainController(
             }
             Stage.CURRENT_PROJECT -> {
                 stageCurrentProject.process()
+            }
+            Stage.SUB_FLOWS -> {
+                stageSelectSubFlow.process()
             }
             Stage.TRUCK_NUMBER_PICTURE -> {
                 stageTruckNumber.process()
@@ -480,13 +502,19 @@ class MainController(
                         stageCustomFlow.center()
                     }
                     Button.BTN_PREV -> {
-                        if (!stageCustomFlow.prev()) { // if false no previous flow
-                            curFlowValue.process(action) // will move to the previous stage.
+                        when (stageCustomFlow.prev()) {
+                            StageCustomFlow.MoveResult.FLOW_ENDED -> curFlowValue.process(action) // will move to the previous stage.
+                            StageCustomFlow.MoveResult.SUB_FLOW_ENDED -> onSubFlowEnded()
+                            else -> {
+                            }
                         }
                     }
                     Button.BTN_NEXT -> {
-                        if (!stageCustomFlow.next()) { // if false no next flow
-                            curFlowValue.process(action) // will move to the next stage.
+                        when (stageCustomFlow.next()) {
+                            StageCustomFlow.MoveResult.FLOW_ENDED -> curFlowValue.process(action) // will move to the next stage.
+                            StageCustomFlow.MoveResult.SUB_FLOW_ENDED -> onSubFlowEnded()
+                            else -> {
+                            }
                         }
                     }
                     else -> {
@@ -519,6 +547,17 @@ class MainController(
         }
     }
 
+    private fun onSubFlowEnded() {
+        prefHelper.saveEntry(true)?.let { entry ->
+            repo.setIncomplete(entry)
+            repo.store(entry)
+            prefHelper.setFromEntry(entry)
+        } ?: run {
+            error("Unable to save sub-flow data. Are we in a project?")
+        }
+        curFlowValue = SubFlowsFlow()
+    }
+
     private fun btnChangeCompany() {
         autoNarrowOkay = false
         buttonsController.wasNext = false
@@ -528,13 +567,14 @@ class MainController(
     private fun save(isNext: Boolean): Boolean {
         return when (curFlowValue.stage) {
             Stage.ADD_CITY -> stageCity.saveAdd()
-            Stage.ADD_STREET -> stageStreet.saveAdd()
+            Stage.ADD_STREET -> stageStreet.saveAdd(isNext)
             Stage.ADD_EQUIPMENT -> stageEquipment.saveAdd()
             Stage.EQUIPMENT -> stageEquipment.save(isNext)
             Stage.ADD_COMPANY -> stageCompany.saveAdd(isNext)
             Stage.COMPANY -> stageCompany.save(isNext)
             Stage.TRUCK_NUMBER_PICTURE -> stageTruckNumber.save()
             Stage.TRUCK_DAMAGE_PICTURE -> stageTruckDamage.save()
+            Stage.SUB_FLOWS -> stageSelectSubFlow.save()
             is Stage.CUSTOM_FLOW -> stageCustomFlow.save(isNext)
             Stage.STATUS -> stageStatus.save(isNext)
             Stage.CONFIRM -> stageConfirm.save(viewMvc, isNext)
@@ -591,6 +631,10 @@ class MainController(
             else -> {
             }
         }
+    }
+
+    override fun onNoteChanged(note: DataNote, areNotesComplete: Boolean) {
+        buttonsController.nextVisible = areNotesComplete
     }
 
     private fun checkAddButtonVisible() {
@@ -696,7 +740,7 @@ class MainController(
         if (prefHelper.isCurrentEditEntryComplete) {
             curFlowValue = TruckNumberPictureFlow()
         } else {
-            repo.computeCurStage()
+            repo.computeCurStageDeep()
         }
     }
 
@@ -764,13 +808,7 @@ class MainController(
     }
 
     private fun ping() {
-        if (!uploadWorking.get()) {
-            uploadWorking.set(true)
-            handler.postDelayed({
-                uploadWorking.set(false)
-            }, CLEAR_UPLOAD_WORKING)
-            serviceUseCase.reloadFromServer()
-        } else {
+        if (!postUseCase.reloadFromServer()) {
             screenNavigator.showToast("Upload already working")
         }
     }
@@ -781,7 +819,7 @@ class MainController(
     }
 
     private fun onVehiclesPressed() {
-        if (repo.hasInsectingList) {
+        if (repo.hasVehicleNameList) {
             screenNavigator.showVehiclesActivity()
         } else {
             screenNavigator.showVehiclesPendingDialog()
@@ -790,7 +828,7 @@ class MainController(
 
     private fun onSaveEntryPressed() {
         save(false)
-        prefHelper.saveEntry()?.let { entry ->
+        prefHelper.saveEntry(true)?.let { entry ->
             repo.setIncomplete(entry)
             repo.store(entry)
             prefHelper.clearCurProject()
@@ -807,10 +845,17 @@ class MainController(
     // region MainListUseCase.Listener
 
     override fun onEntryHintChanged(entryHint: EntryHint) {
-        viewMvc.entryHint = MainViewMvc.EntryHint(
+        viewMvc.setEntryHint(MainViewMvc.EntryHint(
                 entryHint.message,
                 if (entryHint.isError) R.color.entry_error_color else android.R.color.white
-        )
+        ))
+        when (curFlowValue.stage) {
+            is Stage.CUSTOM_FLOW -> {
+                stageCustomFlow.updateNextButtonVisible()
+            }
+            else -> {
+            }
+        }
     }
 
     override fun onKeyValueChanged(key: String, keyValue: String?) {
@@ -842,6 +887,10 @@ class MainController(
 
     override fun onConfirmItemChecked(isAllChecked: Boolean) {
         buttonsController.nextVisible = isAllChecked
+    }
+
+    override fun onSubFlowSelected() {
+        stageSelectSubFlow.onSubFlowSelected()
     }
 
     // endregion MainListUseCase.Listener
@@ -886,12 +935,16 @@ class MainController(
     @Suppress("UNUSED_PARAMETER")
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onEvent(event: EventRefreshProjects) {
-        Timber.d("onEvent(EventRefreshProjects)")
+        verbose("onEvent(EventRefreshProjects)")
         repo.flowUseCase.notifyListeners()
         checkAddButtonVisible()
-        if (event.allDone) {
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onEvent(event: EventPingStatus) {
+        if (event.uploadsAllDone && event.didWork) {
             screenNavigator.showToast("Upload Complete")
-            uploadWorking.set(false)
         }
     }
 
@@ -916,6 +969,17 @@ class MainController(
 
     // endregion EventController
 
+    private fun msg(msg: String) {
+        Timber.tag(TAG).i(msg)
+    }
+
+    private fun verbose(msg: String) {
+        Timber.tag(TAG).d(msg)
+    }
+
+    private fun error(msg: String) {
+        Timber.tag(TAG).e(msg)
+    }
     private fun showDebugDialog() {
         dialogNavigator.showDebugDialog { code ->
             if (code == DEBUG_CODE) {

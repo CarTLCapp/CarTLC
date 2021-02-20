@@ -1,0 +1,49 @@
+@(entry: Daar, client : Client)
+
+@main("FleetTLC - Show Daily After Action Report Entry", client, "/daar/list") {
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Root</th>
+                <th>Sub Project</th>
+                <th>Project Desc</th>
+                <th>Start Time Tomorrow</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@entry.id</td>
+                <td>@entry.getTechName()</td>
+                <td>@entry.getDateTime()</td>
+                <td>@entry.getRootProjectName()</td>
+                <td>@entry.getSubProjectName()</td>
+                <td>@entry.getProjectDesc()</td>
+                <td>@entry.getStartTimeTomorrow()</td>
+            </tr>
+        </tbody>
+    </table>
+
+    @if(entry.hasWorkCompleted()) {
+        <h1 id="workCompletedTitle">Work Completed</h1>
+        <p>@entry.getWorkCompleted()</p>
+    }
+    @if(entry.hasMissedUnits()) {
+        <h1 id="missedUnitsTitle">Missed Units</h1>
+        <p>@entry.getMissedUnits()</p>
+    }
+    @if(entry.hasIssues()) {
+        <h1 id="issusTitle">Issues</h1>
+        <p>@entry.getIssues()</p>
+    }
+    @if(entry.hasInjuries()) {
+        <h1 id="injuriesTitle">Injuries</h1>
+        <p>@entry.getInjuries()</p>
+    }
+
+}
+
+            

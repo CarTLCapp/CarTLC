@@ -9,32 +9,29 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-
 import com.cartlc.tracker.BuildConfig
-import com.cartlc.tracker.fresh.model.core.data.*
 import com.cartlc.tracker.fresh.model.CarRepository
-import com.cartlc.tracker.fresh.ui.app.TBApplication
-import com.cartlc.tracker.fresh.model.pref.PrefHelper
-import com.cartlc.tracker.fresh.model.misc.TruckStatus
-import com.cartlc.tracker.fresh.model.event.EventRefreshProjects
-import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.core.data.*
 import com.cartlc.tracker.fresh.model.core.sql.SqlTableCrash
+import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
+import com.cartlc.tracker.fresh.model.event.EventPingStatus
+import com.cartlc.tracker.fresh.model.event.EventRefreshProjects
 import com.cartlc.tracker.fresh.model.flow.Stage
+import com.cartlc.tracker.fresh.model.misc.TruckStatus
+import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.service.help.ServerHelper
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.ui.common.DeviceHelper
-
+import org.greenrobot.eventbus.EventBus
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
-
+import timber.log.Timber
 import java.io.BufferedWriter
+import java.io.IOException
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
-
-import org.greenrobot.eventbus.EventBus
-import org.json.JSONException
-import timber.log.Timber
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -48,7 +45,6 @@ class DCPing(
 ) : DCPost() {
 
     companion object {
-
         private val TAG = DCPing::class.simpleName
         private const val LOG = true
 
@@ -85,17 +81,21 @@ class DCPing(
 
     private var appVersion: String? = null
 
-    private val prefHelper: PrefHelper
-        get() = repo.prefHelper
+    private val prefHelper: PrefHelper by lazy {
+        repo.prefHelper
+    }
 
-    private val db: DatabaseTable
-        get() = repo.db
+    private val db: DatabaseTable by lazy {
+        repo.db
+    }
 
-    private val app: TBApplication
-        get() = context.applicationContext as TBApplication
+    private val app: TBApplication by lazy {
+        context.applicationContext as TBApplication
+    }
 
-    private val deviceHelper: DeviceHelper
-        get() = app.componentRoot.deviceHelper
+    private val deviceHelper: DeviceHelper by lazy {
+        app.componentRoot.deviceHelper
+    }
 
     private val version: String?
         get() {
@@ -109,6 +109,9 @@ class DCPing(
             return appVersion
         }
 
+    private val deviceId: String
+        get() = ServerHelper.deviceId(context)
+
     @VisibleForTesting
     var openConnection: (target: String) -> HttpURLConnection = { target -> openTargetConnection(target) }
 
@@ -118,9 +121,9 @@ class DCPing(
 
     fun sendRegistration(techCode: String, secondaryTechCode: String?): String? {
         var errorMessage: String?
-        Timber.i("sendRegistration($techCode, $secondaryTechCode)")
+        msg("sendRegistration($techCode, $secondaryTechCode)")
         try {
-            val deviceId = ServerHelper.instance.deviceId
+            val deviceId = deviceId
             val jsonObject = JSONObject()
             jsonObject.accumulate("code", techCode)
             if (secondaryTechCode != null) {
@@ -195,12 +198,12 @@ class DCPing(
 
     @Synchronized
     fun ping() {
-        Timber.i("ping()")
+        msg("ping()")
         if (prefHelper.techID == 0) {
-            TBApplication.ShowError("Not logged in")
+            msg("ping() -- abort no tech ID")
             return
         }
-        val deviceId = ServerHelper.instance.deviceId
+        val deviceId = deviceId
         val jsonObject = JSONObject()
         jsonObject.accumulate("device_id", deviceId)
         jsonObject.accumulate("tech_id", prefHelper.techID)
@@ -218,13 +221,13 @@ class DCPing(
         val blob = parseResult(response)
         if (blob.has(UPLOAD_RESET_TRIGGER)) {
             if (blob.getBoolean(UPLOAD_RESET_TRIGGER)) {
-                Timber.i("UPLOAD RESET!")
+                msg("UPLOAD RESET!")
                 repo.clearUploaded()
             }
         }
         if (blob.has(RE_REGISTER_TRIGGER)) {
             if (blob.getBoolean(RE_REGISTER_TRIGGER)) {
-                Timber.i("RE-REGISTER DETECTED!")
+                msg("RE-REGISTER DETECTED!")
                 prefHelper.firstTechCode?.let {
                     sendRegistration(it, prefHelper.secondaryTechCode)
                 }
@@ -264,7 +267,7 @@ class DCPing(
         val version_vehicle_names = blob.getInt(PrefHelper.VERSION_VEHICLE_NAMES)
         var refresh = false
         if (prefHelper.versionProject != version_project) {
-            Timber.i("New project version $version_project")
+            msg("New project version $version_project")
             queryProjects()?.let { error ->
                 TBApplication.ShowError(error)
                 return
@@ -274,7 +277,7 @@ class DCPing(
             EventBus.getDefault().post(EventRefreshProjects())
         }
         if (prefHelper.versionVehicleNames != version_vehicle_names) {
-            Timber.i("New vehicle name version $version_vehicle_names")
+            msg("New vehicle name version $version_vehicle_names")
             queryVehicleNames()?.let { error ->
                 TBApplication.ShowError(error)
                 return
@@ -282,7 +285,7 @@ class DCPing(
             prefHelper.versionVehicleNames = version_vehicle_names
         }
         if (prefHelper.versionCompany != version_company) {
-            Timber.i("New company version $version_company")
+            msg("New company version $version_company")
             queryCompanies()?.let { error ->
                 TBApplication.ShowError(error)
                 return
@@ -291,7 +294,7 @@ class DCPing(
             refresh = true
         }
         if (prefHelper.versionEquipment != version_equipment) {
-            Timber.i("New equipment version $version_equipment")
+            msg("New equipment version $version_equipment")
             queryEquipments()?.let { error ->
                 TBApplication.ShowError(error)
                 return
@@ -300,7 +303,7 @@ class DCPing(
             refresh = true
         }
         if (prefHelper.versionNote != version_note) {
-            Timber.i("New note version $version_note")
+            msg("New note version $version_note")
             queryNotes()?.let { error ->
                 TBApplication.ShowError(error)
                 return
@@ -309,7 +312,7 @@ class DCPing(
             refresh = true
         }
         if (prefHelper.versionFlow != version_flow) {
-            Timber.i("New flow version $version_flow")
+            msg("New flow version $version_flow")
             queryFlows()?.let { error ->
                 TBApplication.ShowError(error)
                 return
@@ -317,7 +320,7 @@ class DCPing(
             prefHelper.versionFlow = version_flow
             refresh = true
         }
-        var entries = db.tableEntry.queryPendingDataToUploadToMaster()
+        var entries = db.tableEntry.queryPendingEntriesToUpload()
         if (entries.isNotEmpty()) {
             sendEntries(entries).let { response ->
                 if (response.error != null) {
@@ -336,23 +339,23 @@ class DCPing(
         val lines = db.tableCrash.queryNeedsUploading()
         sendCrashLines(lines)
         // If any entries do not yet have server-id's, try to get them.
-        entries = db.tableEntry.queryServerIds()
+        entries = db.tableEntry.queryEmptyServerIds()
         if (entries.isNotEmpty()) {
-            Timber.i("FOUND ${entries.size} entries needing to be uploaded")
+            msg("FOUND ${entries.size} entries needing to be uploaded")
             sendEntries(entries)
         } else {
-            Timber.i("All entries have server ids")
+            msg("All entries have server ids")
         }
         val vehicles = db.tableVehicle.queryNotUploaded()
         if (vehicles.isNotEmpty()) {
-            Timber.i("FOUND ${vehicles.size} vehicles needing to be uploaded")
+            msg("FOUND ${vehicles.size} vehicles needing to be uploaded")
             sendVehicles(vehicles)
         } else {
-            Timber.i("All vehicles have uploaded")
+            msg("All vehicles have uploaded")
         }
         val strings = db.tableString.queryNotUploaded()
         if (strings.isNotEmpty()) {
-            Timber.i("Query strings needed.")
+            msg("Query strings needed.")
             queryStrings()
         }
         val daarList = db.tableDaar.queryReadyAndNotUploaded()
@@ -360,9 +363,12 @@ class DCPing(
             Timber.i("FOUND ${daarList.size} DAAR entries needing to be uploaded")
             sendDaars(daarList)
         }
+        val allDone = !db.tableEntry.hasEntriesToUpload && db.tableEntry.queryEmptyServerIds().isEmpty()
+        msg("ping() complete: refresh=$refresh, allDone=$allDone")
         if (refresh) {
-            EventBus.getDefault().post(EventRefreshProjects(true))
+            EventBus.getDefault().post(EventRefreshProjects())
         }
+        EventBus.getDefault().post(EventPingStatus(uploadsAllDone = allDone, didWork = refresh))
     }
 
     private fun queryProjects(): String? {
@@ -408,7 +414,7 @@ class DCPing(
                     // Name change?
                     when {
                         subProject != project.subProject || rootProject != project.rootProject -> {
-                            Timber.i("New name. Root: $rootProject Sub: $subProject") // TEMPORARY DEBUG
+                            msg("New name. Root: $rootProject Sub: $subProject") // TEMPORARY DEBUG
                             unprocessed.delete(project.subProject, project.rootProject)
 
                             project.subProject = subProject
@@ -417,12 +423,12 @@ class DCPing(
                             db.tableProjects.update(project)
                         }
                         project.disabled != disabled -> {
-                            Timber.i("Disable flag change. Root: $rootProject Sub: $subProject Disabled now: $disabled") // TEMPORARY DEBUG
+                            msg("Disable flag change. Root: $rootProject Sub: $subProject Disabled now: $disabled") // TEMPORARY DEBUG
                             project.disabled = disabled
                             db.tableProjects.update(project)
                         }
                         else -> {
-                            Timber.i("No change to project: $rootProject - $subProject") // TEMPORARY DEBUG
+                            msg("No change to project: $rootProject - $subProject") // TEMPORARY DEBUG
                         }
                     }
                     unprocessed.delete(rootProject, subProject)
@@ -463,7 +469,7 @@ class DCPing(
     )
 
     private fun queryCompanies(page: Int, unprocessed: MutableList<DataAddress>): PageResponse {
-        Timber.i("queryCompanies($page)")
+        msg("queryCompanies($page)")
         val numPages: Int
         try {
             val response = post(url(companiesSuffix), page, COMPANY_PAGE_SIZE)
@@ -506,12 +512,12 @@ class DCPing(
                         match.isLocal = false
                         match.isBootStrap = false
                         db.tableAddress.update(match)
-                        Timber.i("Commandeer local: $match")
+                        msg("Commandeer local: $match")
                         unprocessed.remove(match)
                     } else {
                         // Otherwise just add the new tableEntry.
                         db.tableAddress.add(incoming)
-                        Timber.i("New company: $incoming")
+                        msg("New company: $incoming")
                     }
                 } else {
                     // Change of name, street, city or state?
@@ -519,10 +525,10 @@ class DCPing(
                         incoming.id = item.id
                         incoming.serverId = item.serverId
                         incoming.isLocal = false
-                        Timber.i("Change: $incoming")
+                        msg("Change: $incoming")
                         db.tableAddress.update(incoming)
                     } else {
-                        Timber.i("No change: $incoming")
+                        msg("No change: $incoming")
                     }
                     unprocessed.remove(item)
                 }
@@ -540,7 +546,7 @@ class DCPing(
 
     private fun queryEquipments(): String? {
         val showDebug = BuildConfig.DEBUG
-        Timber.i("queryEquipments()")
+        msg("queryEquipments()")
         try {
             val response = post(url(equipmentsSuffix))
             val blob = parseResult(response)
@@ -561,23 +567,23 @@ class DCPing(
                             match.isBootStrap = false
                             match.isLocal = false
                             db.tableEquipment.update(match)
-                            Timber.i("Commandeer local: $name")
+                            msg("Commandeer local: $name")
                             unprocessed.remove(match)
                         } else {
                             // Otherwise just add the new tableEntry.
-                            Timber.i("New equipment: $name")
+                            msg("New equipment: $name")
                             db.tableEquipment.add(incoming)
                         }
                     } else {
                         // Change of name
                         if (incoming != item) {
-                            Timber.i("Change: $name")
+                            msg("Change: $name")
                             incoming.id = item.id
                             incoming.serverId = item.serverId
                             incoming.isLocal = false
                             db.tableEquipment.update(incoming)
                         } else {
-                            Timber.i("No change: $name")
+                            msg("No change: $name")
                         }
                         unprocessed.remove(item)
                     }
@@ -602,7 +608,7 @@ class DCPing(
                     val equipment = db.tableEquipment.queryByServerId(serverEquipmentId)
                     if (project == null || equipment == null) {
                         if (project == null && equipment == null) {
-                            Timber.e("Can't find any project with server ID $serverProjectId nor equipment ID $serverEquipmentId")
+                            error("Can't find any project with server ID $serverProjectId nor equipment ID $serverEquipmentId")
                             prefHelper.reloadProjects()
                             prefHelper.reloadEquipments()
                         } else if (project == null) {
@@ -617,10 +623,10 @@ class DCPing(
                                 sbuf.append(" ")
                             }
                             sbuf.append(".")
-                            Timber.e(sbuf.toString())
+                            error(sbuf.toString())
                             prefHelper.reloadProjects()
                         } else {
-                            Timber.e("Can't find any equipment with server ID $serverEquipmentId for project ${project.subProject}")
+                            error("Can't find any equipment with server ID $serverEquipmentId for project ${project.subProject}")
                             prefHelper.reloadEquipments()
                         }
                         continue
@@ -638,7 +644,7 @@ class DCPing(
                             if (showDebug) {
                                 val projectName = db.tableProjects.queryProjectName(match.collection_id)
                                 val equipmentName = db.tableEquipment.queryEquipmentName(match.value_id)
-                                Timber.i("Commandeer local: PROJECT COLLECTION $projectName <=> $equipmentName")
+                                msg("Commandeer local: PROJECT COLLECTION $projectName <=> $equipmentName")
                             }
                             unprocessed.remove(match)
                         } else {
@@ -646,7 +652,7 @@ class DCPing(
                             if (showDebug) {
                                 val projectName = db.tableProjects.queryProjectName(incoming.collection_id)
                                 val equipmentName = db.tableEquipment.queryEquipmentName(incoming.value_id)
-                                Timber.i("New project collection: $projectName <=> $equipmentName")
+                                msg("New project collection: $projectName <=> $equipmentName")
                             }
                             db.tableCollectionEquipmentProject.add(incoming)
                         }
@@ -656,7 +662,7 @@ class DCPing(
                             if (showDebug) {
                                 val projectName = db.tableProjects.queryProjectName(item.collection_id)
                                 val equipmentName = db.tableEquipment.queryEquipmentName(item.value_id)
-                                Timber.i("Change? $projectName <=> $equipmentName")
+                                msg("Change? $projectName <=> $equipmentName")
                             }
                             incoming.id = item.id
                             incoming.server_id = item.server_id
@@ -665,7 +671,7 @@ class DCPing(
                             if (showDebug) {
                                 val projectName = db.tableProjects.queryProjectName(item.collection_id)
                                 val equipmentName = db.tableEquipment.queryEquipmentName(item.value_id)
-                                Timber.i("No change: $projectName <=> $equipmentName")
+                                msg("No change: $projectName <=> $equipmentName")
                             }
                         }
                         unprocessed.remove(item)
@@ -675,13 +681,13 @@ class DCPing(
                     if (showDebug) {
                         val projectName = db.tableProjects.queryProjectName(item.collection_id)
                         val equipmentName = db.tableEquipment.queryEquipmentName(item.value_id)
-                        Timber.i("Removing: $projectName <=> $equipmentName")
+                        msg("Removing: $projectName <=> $equipmentName")
                     }
                     db.tableCollectionEquipmentProject.remove(item.id)
                 }
                 if (showDebug) {
                     if (unprocessed.size == 0) {
-                        Timber.i("No unprocessed items.")
+                        msg("No unprocessed items.")
                     }
                 }
             }
@@ -695,7 +701,7 @@ class DCPing(
     }
 
     private fun queryNotes(): String? {
-        Timber.i("queryNotes()")
+        msg("queryNotes()")
         try {
             val response = post(url(notesSuffix))
             val obj = parseResult(response)
@@ -718,12 +724,12 @@ class DCPing(
                             match.serverId = serverId
                             match.numDigits = numDigits
                             db.tableNote.update(match)
-                            Timber.i("Commandeer local: $match")
+                            msg("Commandeer local: $match")
                             unprocessed.remove(match)
                         } else {
                             // Otherwise just add the new entry.
                             db.tableNote.add(incoming)
-                            Timber.i("New note: $incoming")
+                            msg("New note: $incoming")
                         }
                     } else {
                         // Change of name, type and/or num_digits
@@ -731,9 +737,9 @@ class DCPing(
                             incoming.id = item.id
                             incoming.serverId = item.serverId
                             db.tableNote.update(incoming)
-                            Timber.i("Change: $incoming")
+                            msg("Change: $incoming")
                         } else {
-                            Timber.i("No change: $item")
+                            msg("No change: $item")
                         }
                         unprocessed.remove(item)
                     }
@@ -758,7 +764,7 @@ class DCPing(
                     incoming.collection_id = project.id
                     val note = db.tableNote.queryByServerId(serverNoteId)
                     if (note == null) {
-                        Timber.e("queryNotes(): Can't find picture_note with ID $serverNoteId")
+                        error("queryNotes(): Can't find picture_note with ID $serverNoteId")
                         continue
                     }
                     incoming.value_id = note.id
@@ -769,17 +775,17 @@ class DCPing(
                             // If this name already exists, convert the existing one by simply giving it the server_id.
                             match.server_id = serverId
                             db.tableCollectionNoteProject.update(match)
-                            Timber.i("Commandeer local: NOTE COLLECTION ${match.collection_id}, ${match.value_id}")
+                            msg("Commandeer local: NOTE COLLECTION ${match.collection_id}, ${match.value_id}")
                             unprocessed.remove(match)
                         } else {
                             // Otherwise just add the new tableEntry.
-                            Timber.i("New picture_note collection. ${incoming.collection_id}, ${incoming.value_id}")
+                            msg("New picture_note collection. ${incoming.collection_id}, ${incoming.value_id}")
                             db.tableCollectionNoteProject.add(incoming)
                         }
                     } else {
                         // Change of IDs. A little weird, but we will allow it.
                         if (incoming != item) {
-                            Timber.i("Change? ${item.collection_id}, ${item.value_id}")
+                            msg("Change? ${item.collection_id}, ${item.value_id}")
                             incoming.id = item.id
                             incoming.server_id = item.server_id
                             db.tableCollectionNoteProject.update(incoming)
@@ -800,7 +806,7 @@ class DCPing(
     }
 
     private fun queryVehicleNames(): String? {
-        Timber.i("queryVehicleNames()")
+        msg("queryVehicleNames()")
         try {
             val response = post(url(vehiclesSuffix))
             val obj = parseResult(response)
@@ -818,21 +824,21 @@ class DCPing(
                         if (match != null) {
                             incoming.id = match.id
                             db.tableVehicleName.save(incoming)
-                            Timber.i("Commandeer local vehicle name: $incoming")
+                            msg("Commandeer local vehicle name: $incoming")
                             unprocessed.removeAll { it.id == match.id }
                         } else {
                             // Otherwise just add the new vehicle name.
-                            Timber.i("New vehicle name: $incoming")
+                            msg("New vehicle name: $incoming")
                             db.tableVehicleName.save(incoming)
                         }
                     } else {
                         // Change of data
                         if (incoming != item) {
-                            Timber.i("Change: [$incoming] from [$item]")
+                            msg("Change: [$incoming] from [$item]")
                             incoming.id = item.id
                             db.tableVehicleName.save(incoming)
                         } else {
-                            Timber.i("No change: $item")
+                            msg("No change: $item")
                         }
                         unprocessed.removeAll { it.id == item.id }
                     }
@@ -852,7 +858,7 @@ class DCPing(
     }
 
     private fun queryStrings(): String? {
-        Timber.i("queryStrings()")
+        msg("queryStrings()")
         try {
             val response = post(url(stringsSuffix))
             val obj = parseResult(response)
@@ -868,11 +874,11 @@ class DCPing(
                 } else {
                     // Change of data
                     if (incoming != item) {
-                        Timber.i("Change: [$incoming] from [$item]")
+                        msg("Change: [$incoming] from [$item]")
                         incoming.id = item.id
                         db.tableString.save(incoming)
                     } else {
-                        Timber.i("No change: $item")
+                        msg("No change: $item")
                     }
                 }
             }
@@ -892,7 +898,7 @@ class DCPing(
 
         fun deleteUnused() {
             // Remove or disable unprocessed elements
-            Timber.i("removing unprocessed: ${unprocessedFlow.size} flows, ${unprocessedFlowElement.size} flow elements, and ${unprocessedFlowElementNote.size} flow notes")
+            msg("removing unprocessed: ${unprocessedFlow.size} flows, ${unprocessedFlowElement.size} flow elements, and ${unprocessedFlowElementNote.size} flow notes")
             for (item in unprocessedFlow) {
                 db.tableFlow.remove(item)
             }
@@ -906,7 +912,7 @@ class DCPing(
     }
 
     private fun queryFlows(): String? {
-        Timber.i("queryFlows()")
+        msg("queryFlows()")
         val unprocessed = UnprocessedFlowData()
         val response = queryFlows(0, unprocessed)
         if (response.error != null) {
@@ -933,20 +939,20 @@ class DCPing(
                 val incomingFlow = DataFlow()
                 incomingFlow.serverId = eleFlow.getInt("flow_id")
                 if (!eleFlow.has("sub_project_id")) {
-                    Timber.e("queryFlows(): invalid flow id ${incomingFlow.serverId}: no sub project id")
+                    error("queryFlows(): invalid flow id ${incomingFlow.serverId}: no sub project id")
                     continue
                 }
                 val serverSubProjectId = eleFlow.getInt("sub_project_id")
                 val project = db.tableProjects.queryByServerId(serverSubProjectId)
                 if (project == null) {
-                    Timber.e("queryFlows(): Can't find project with server ID $serverSubProjectId")
+                    error("queryFlows(): Can't find project with server ID $serverSubProjectId")
                     val sbuf = StringBuffer()
                     sbuf.append(". Projects=")
                     for (project in db.tableProjects.query()) {
                         sbuf.append(project.serverId)
                         sbuf.append(" ")
                     }
-                    Timber.e("Existing projects: $sbuf")
+                    error("Existing projects: $sbuf")
                     continue
                 }
                 incomingFlow.subProjectId = project.id
@@ -957,22 +963,22 @@ class DCPing(
                         // If this already exists, convert the existing one by simply giving it the serverId.
                         match.serverId = incomingFlow.serverId
                         db.tableFlow.update(match)
-                        Timber.i("Commandeer local: $match")
+                        msg("Commandeer local: $match")
                         unprocessed.unprocessedFlow.remove(match)
                         incomingFlow.id = match.id
                     } else {
                         // Otherwise just add the new entry.
                         db.tableFlow.add(incomingFlow)
-                        Timber.i("New flow: $incomingFlow")
+                        msg("New flow: $incomingFlow")
                     }
                 } else {
                     incomingFlow.id = itemFlow.id
                     // Change of data
                     if (incomingFlow != itemFlow) {
-                        Timber.i("Change: $incomingFlow from $itemFlow")
+                        msg("Change: $incomingFlow from $itemFlow")
                         db.tableFlow.update(incomingFlow)
                     } else {
-                        Timber.i("No change: $itemFlow")
+                        msg("No change: $itemFlow")
                     }
                     unprocessed.unprocessedFlow.remove(itemFlow)
                 }
@@ -999,20 +1005,20 @@ class DCPing(
                             match.serverId = incomingEle.serverId
                             db.tableFlowElement.update(match)
                             incomingEle.id = match.id
-                            Timber.i("Commandeer local: $match")
+                            msg("Commandeer local: $match")
                             unprocessed.unprocessedFlowElement.remove(match)
                         } else {
                             // Otherwise just add the new entry.
                             db.tableFlowElement.add(incomingEle)
-                            Timber.i("New flow element: $incomingEle")
+                            msg("New flow element: $incomingEle")
                         }
                     } else {
                         incomingEle.id = itemElement.id
                         if (incomingEle != itemElement) {
                             db.tableFlowElement.update(incomingEle)
-                            Timber.i("Change: $incomingEle from $itemElement")
+                            msg("Change: $incomingEle from $itemElement")
                         } else {
-                            Timber.i("No change: $itemElement of $itemFlow")
+                            msg("No change: $itemElement of $itemFlow")
                         }
                         unprocessed.unprocessedFlowElement.remove(itemElement)
                     }
@@ -1023,7 +1029,7 @@ class DCPing(
                             val serverNoteId = eleNote.getInt("note_id")
                             val itemNote = db.tableNote.queryByServerId(serverNoteId)
                             if (itemNote == null) {
-                                Timber.e("Ignoring no such note with server id: $serverNoteId")
+                                error("Ignoring no such note with server id: $serverNoteId")
                             } else {
                                 val incomingNote = DataFlowElementNote()
                                 incomingNote.flowElementId = incomingEle.id
@@ -1033,15 +1039,15 @@ class DCPing(
                                     val match = get(unprocessed.unprocessedFlowElementNote, incomingNote)
                                     if (match != null) {
                                         // If this already exists we're good to go.
-                                        Timber.i("Found already: $match")
+                                        msg("Found already: $match")
                                         unprocessed.unprocessedFlowElementNote.remove(match)
                                     } else {
                                         // Otherwise just add the new entry.
                                         db.tableFlowElementNote.add(incomingNote)
-                                        Timber.i("New flow element note: $incomingNote")
+                                        msg("New flow element note: $incomingNote")
                                     }
                                 } else {
-                                    Timber.i("No change: $itemElementNote")
+                                    msg("No change: $itemElementNote")
                                     unprocessed.unprocessedFlowElementNote.remove(itemElementNote)
                                 }
                             }
@@ -1055,7 +1061,7 @@ class DCPing(
             TBApplication.ReportError(ex, DCPing::class.java, "queryFlows()", "server")
             return PageResponse(error = ex.message ?: "Exception in queryFlows()")
         }
-        Timber.d("QUERY FLOWS($page): ${db.tableFlow}")
+        verbose("QUERY FLOWS($page): ${db.tableFlow}")
         return PageResponse(numPages = numPages)
     }
 
@@ -1099,7 +1105,7 @@ class DCPing(
                     jsonObject.accumulate("truck_number_string", truck.truckNumberValue)
                 }
                 if (truck.truckNumberPictureId > 0) {
-                    Timber.e("truckNumberPictureId? ${truck.toLongString(db)}") // TODO: This is happening, need to think as to why.
+                    error("truckNumberPictureId? ${truck.toLongString(db)}") // TODO: This is happening, need to think as to why.
                 }
             } else {
                 prefHelper.doErrorCheck = true
@@ -1166,7 +1172,7 @@ class DCPing(
                 }
                 jsonObject.put("notes", jarray)
             }
-            Timber.i("SENDING $jsonObject")
+            msg("SENDING $jsonObject")
             val result = post(url(enterSuffix), jsonObject)
             if (TextUtils.isDigitsOnly(result)) {
                 entry.uploadedMaster = true
@@ -1174,7 +1180,7 @@ class DCPing(
                 entry.hasError = false
                 entry.serverId = Integer.parseInt(result)
                 db.tableEntry.saveUploaded(entry)
-                Timber.i("SUCCESS, ENTRY SERVER ID is ${entry.serverId}")
+                msg("SUCCESS, ENTRY SERVER ID is ${entry.serverId}")
             } else {
                 val sbuf = StringBuilder()
                 sbuf.append("While trying to send entry: ")
@@ -1215,7 +1221,7 @@ class DCPing(
     }
 
     private fun sendVehicle(vehicle: DataVehicle): String? {
-        Timber.i("sendVehicle(${vehicle.id})")
+        msg("sendVehicle(${vehicle.id})")
         try {
             val dateString = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(System.currentTimeMillis()))
             val jsonObject = JSONObject()
@@ -1234,13 +1240,13 @@ class DCPing(
             jsonObject.accumulate("exterior_damage", vehicle.exteriorDamage)
             jsonObject.accumulate("other", vehicle.other)
 
-            Timber.i("SENDING $jsonObject")
+            msg("SENDING $jsonObject")
             val result = post(url(vehicleSuffix), jsonObject)
             if (TextUtils.isDigitsOnly(result)) {
                 vehicle.uploaded = true
                 vehicle.serverId = result.toLong()
                 db.tableVehicle.saveUploaded(vehicle)
-                Timber.i("SUCCESS, VEHICLE SERVER ID is ${vehicle.serverId}")
+                msg("SUCCESS, VEHICLE SERVER ID is ${vehicle.serverId}")
             } else {
                 val sbuf = StringBuilder()
                 sbuf.append("While trying to send vehicle: ")
@@ -1248,7 +1254,7 @@ class DCPing(
                 sbuf.append("\nERROR: ")
                 sbuf.append(result)
                 TBApplication.ShowError(sbuf.toString())
-                Timber.e(sbuf.toString())
+                error(sbuf.toString())
             }
         } catch (ex: IOException) {
             return ex.message ?: "IOException sendVehicle()"
@@ -1328,7 +1334,7 @@ class DCPing(
     @Throws(IOException::class)
     private fun post(target: String, page: Int, pageSize: Int): String {
         val jsonObject = JSONObject()
-        jsonObject.accumulate("device_id", ServerHelper.instance.deviceId)
+        jsonObject.accumulate("device_id", deviceId)
         jsonObject.accumulate("tech_id", prefHelper.techID)
         if (page >= 0 && pageSize > 0) {
             jsonObject.accumulate("page", page)
@@ -1386,9 +1392,9 @@ class DCPing(
         try {
             return JSONObject(result)
         } catch (ex: JSONException) {
-            Timber.e("Got bad result back from server: ${ex.message}")
+            error("Got bad result back from server: ${ex.message}")
             if (result.length > 65000) {
-                Timber.e("It's likely the server tried to return a result that was too large: ${result.length}")
+                error("It's likely the server tried to return a result that was too large: ${result.length}")
             }
         }
         return JSONObject()
@@ -1523,7 +1529,7 @@ class DCPing(
 
         fun disableRemaining() {
             for (project in unprocessed) {
-                Timber.i("Project disable or delete: ${project.dashName}")
+                msg("Project disable or delete: ${project.dashName}")
                 db.tableProjects.removeOrDisable(project)
                 prefHelper.clearCurProjectIfMatching(project.rootProject, project.subProject)
             }
@@ -1550,6 +1556,18 @@ class DCPing(
         }
     }
 
+    private fun msg(msg: String) {
+        Timber.tag(TAG).i(msg)
+    }
+    
+    private fun verbose(msg: String) {
+        Timber.tag(TAG).d(msg)
+    }
+    
+    private fun error(msg: String) {
+        Timber.tag(TAG).e(msg)
+    }
+    
     // endregion support classes
 
 //    private fun queryTrucks(): Boolean {
@@ -1571,7 +1589,7 @@ class DCPing(
 //    }
 
 //    private fun queryTrucks(page: Int, unprocessed: MutableList<DataTruck>): Int {
-//        Timber.i("queryTrucks()")
+//        msg("queryTrucks()")
 //        val numPages: Int
 //        try {
 //            val response = post(trucksUrl, page, TRUCK_PAGE_SIZE, true) ?: return 0
@@ -1595,7 +1613,7 @@ class DCPing(
 //                        val projectServerId = ele.getInt("project_id")
 //                        val project = db.tableProjects.queryByServerId(projectServerId)
 //                        if (project == null) {
-//                            Timber.e("Can't find any project with server ID $projectServerId for truck number ${incoming.truckNumber}")
+//                            error("Can't find any project with server ID $projectServerId for truck number ${incoming.truckNumber}")
 //                        } else {
 //                            incoming.projectNameId = project.id
 //                        }
@@ -1612,21 +1630,21 @@ class DCPing(
 //                        if (match != null) {
 //                            incoming.id = match.id
 //                            db.tableTruck.save(incoming)
-//                            Timber.i("Commandeer local truck: ${incoming.toLongString(db)}")
+//                            msg("Commandeer local truck: ${incoming.toLongString(db)}")
 //                            unprocessed.removeAll { it.id == match.id }
 //                        } else {
 //                            // Otherwise just add the new truck.
-//                            Timber.i("New truck: ${incoming.toLongString(db)}")
+//                            msg("New truck: ${incoming.toLongString(db)}")
 //                            db.tableTruck.save(incoming)
 //                        }
 //                    } else {
 //                        // Change of data
 //                        if (!incoming.equals(item)) {
-//                            Timber.i("Change: [${incoming.toLongString(db)}] from [${item.toLongString(db)}]")
+//                            msg("Change: [${incoming.toLongString(db)}] from [${item.toLongString(db)}]")
 //                            incoming.id = item.id
 //                            db.tableTruck.save(incoming)
 //                        } else {
-//                            Timber.i("No change: ${item.toLongString(db)}")
+//                            msg("No change: ${item.toLongString(db)}")
 //                        }
 //                        unprocessed.removeAll { it.id == item.id }
 //                    }

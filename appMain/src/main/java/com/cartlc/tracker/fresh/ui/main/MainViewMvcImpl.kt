@@ -76,6 +76,8 @@ class MainViewMvcImpl(
         ConfirmFinalFragment()
     }
 
+    // region MainViewMvc.Listener
+
     override val confirmUseCase: ConfirmFinalUseCase?
         get() = confirmFragment.useCase
 
@@ -98,17 +100,15 @@ class MainViewMvcImpl(
             picturesView.visibility = if (value) View.VISIBLE else View.GONE
         }
 
-    override var entryHint: MainViewMvc.EntryHint
-        get() = TODO("not implemented")
-        set(value) {
-            if (value.msg.isNullOrEmpty()) {
-                listEntryHint.visibility = View.GONE
-            } else {
-                listEntryHint.visibility = View.VISIBLE
-                listEntryHint.text = value.msg
-                listEntryHint.setTextColor(ContextCompat.getColor(context, value.textColor))
-            }
+    override fun setEntryHint(hint: MainViewMvc.EntryHint) {
+        if (hint.msg.isNullOrEmpty()) {
+            listEntryHint.visibility = View.GONE
+        } else {
+            listEntryHint.visibility = View.VISIBLE
+            listEntryHint.text = hint.msg
+            listEntryHint.setTextColor(ContextCompat.getColor(context, hint.textColor))
         }
+    }
 
     override var addButtonVisible: Boolean
         get() = fabAdd?.visibility == View.VISIBLE
@@ -122,4 +122,5 @@ class MainViewMvcImpl(
             customProgressView.text = value
         }
 
+    // endregion MainViewMvc.Listener
 }

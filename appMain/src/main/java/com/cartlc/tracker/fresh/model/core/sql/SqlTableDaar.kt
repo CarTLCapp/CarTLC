@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.sql

@@ -19,7 +19,7 @@ class StageCity (
             titleUseCase.subTitleText = if (isEditing) editProjectHint else curProjectHint
             titleUseCase.mainTitleVisible = true
             titleUseCase.subTitleVisible = true
-            buttonsUseCase.nextVisible = false
+            buttonsController.nextVisible = false
             val company = prefHelper.company
             val zipcode = prefHelper.zipCode
             val state = prefHelper.state
@@ -49,7 +49,7 @@ class StageCity (
                 autoNarrowCities(cities)
                 if (cities.size == 1 && isAutoNarrowOkay) {
                     prefHelper.city = cities[0]
-                    buttonsUseCase.skip()
+                    buttonsController.skip()
                     return
                 } else {
                     hint = prefHelper.address
@@ -68,9 +68,9 @@ class StageCity (
                 mainListUseCase.visible = true
                 setList(StringMessage.title_city, PrefHelper.KEY_CITY, cities)
                 if (mainListUseCase.keyValue != null) {
-                    buttonsUseCase.nextVisible = true
+                    buttonsController.nextVisible = true
                 }
-                buttonsUseCase.centerVisible = true
+                buttonsController.centerVisible = true
             }
         }
     }
@@ -89,6 +89,7 @@ class StageCity (
                     cities.clear()
                     cities.add(city)
                 }
+                cities.sort()
             }
         }
     }

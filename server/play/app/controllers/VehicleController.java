@@ -30,6 +30,8 @@ import play.mvc.Result;
 import play.mvc.Results;
 import play.mvc.Security;
 
+import modules.StringHelper;
+
 /**
  * Manage a database of trucks
  */
@@ -120,7 +122,7 @@ public class VehicleController extends Controller {
         String date_value = value.textValue();
         try {
             vehicle.entry_time = mDateFormat.parse(date_value);
-            vehicle.time_zone = EntryController.pickOutTimeZone(date_value, 'Z');
+            vehicle.time_zone = StringHelper.pickOutTimeZone(date_value, 'Z');
         } catch (Exception ex) {
             Logger.error("While parsing " + date_value + ":" + ex.getMessage());
         }
