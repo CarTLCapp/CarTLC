@@ -135,23 +135,37 @@ class DaarController(
     }
 
     override fun onProjectItemSelected(position: Int, item: String) {
-        if (daarDataProjects.selectingRootName) {
-            daarDataProjects.selectedRootProjectName = item
-            daarDataProjects.selectedSubProjectName = null
-            daarDataProjects.selectingRootName = false
-            prepareProjectList(daarDataProjects.subProjectsOf(item))
-        } else {
-            daarDataProjects.selectedSubProjectName = item
-            buttonsViewMvc.btnNextVisible = true
-            daarDataProjects.selectedProjectId?.let { daarUIData.projectStage.storeValue(it) }
+        when {
+            daarDataProjects.selectedProjectTab == DaarViewMvc.ProjectSelect.PROJECT_RECENT -> {
+                daarDataProjects.selectedRecentPosition = position
+                buttonsViewMvc.btnNextVisible = true
+                daarDataProjects.selectedProjectId?.let { daarUIData.projectStage.storeValue(it) }
+            }
+            daarDataProjects.selectingRootName -> {
+                daarDataProjects.selectedRootProjectName = item
+                daarDataProjects.selectedSubProjectName = null
+                daarDataProjects.selectingRootName = false
+                prepareProjectList(daarDataProjects.subProjectsOf(item))
+            }
+            else -> {
+                daarDataProjects.selectedSubProjectName = item
+                buttonsViewMvc.btnNextVisible = true
+                daarDataProjects.selectedProjectId?.let { daarUIData.projectStage.storeValue(it) }
+            }
         }
     }
 
     override fun isProjectSelected(position: Int, item: String): Boolean {
-        return if (daarDataProjects.selectingRootName) {
-            daarDataProjects.selectedRootProjectName == item
-        } else {
-            daarDataProjects.selectedSubProjectName == item
+        return when {
+            daarDataProjects.selectedProjectTab == DaarViewMvc.ProjectSelect.PROJECT_RECENT -> {
+                daarDataProjects.selectedRecentProjectName == item
+            }
+            daarDataProjects.selectingRootName -> {
+                daarDataProjects.selectedRootProjectName == item
+            }
+            else -> {
+                daarDataProjects.selectedSubProjectName == item
+            }
         }
     }
 
