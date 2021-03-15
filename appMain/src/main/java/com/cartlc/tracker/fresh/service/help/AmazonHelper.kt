@@ -1,13 +1,12 @@
 /*
- * *
- *   * Copyright 2019, FleetTLC. All rights reserved
- *
+ * Copyright 2019, 2020, 2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.service.help
 
 import android.content.Context
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferNetworkLossHandler
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.regions.Regions
@@ -39,16 +38,11 @@ class AmazonHelper(
         private const val IDENTITY_POOL_ID_RELEASE = "us-east-2:389282dd-de71-4849-a68b-2b126b3de5f3"
     }
 
-    internal val BUCKET_NAME: String
-    internal val IDENTITY_POOL_ID: String
-    internal var mCred: CognitoCachingCredentialsProvider? = null
-    internal lateinit var mClient: AmazonS3
-    internal var mTrans: TransferUtility? = null
-
-    init {
-        BUCKET_NAME = BUCKET_NAME_RELEASE
-        IDENTITY_POOL_ID = IDENTITY_POOL_ID_RELEASE
-    }
+    private val BUCKET_NAME: String = BUCKET_NAME_RELEASE
+    private val IDENTITY_POOL_ID: String = IDENTITY_POOL_ID_RELEASE
+    private var mCred: CognitoCachingCredentialsProvider? = null
+    private lateinit var mClient: AmazonS3
+    private var mTrans: TransferUtility? = null
 
     private fun init(context: Context) {
         if (mCred == null) {
@@ -57,10 +51,11 @@ class AmazonHelper(
                     IDENTITY_POOL_ID,
                     Regions.US_EAST_2
             )
+//            mClient = AmazonS3ClientBuilder.standard().withCredentials(mCred).build()
             mClient = AmazonS3Client(mCred)
         }
         if (mTrans == null) {
-            mTrans = TransferUtility(mClient, context)
+            mTrans = TransferUtility.builder().s3Client(mClient).context(context).build()
         }
     }
 
@@ -81,7 +76,7 @@ class AmazonHelper(
             }
         }
         if (DataEntry.UPLOAD_DEBUG) {
-            Timber.e("UPLOAD DEBUG: after checking " + list.size + " entries, complete flag was $flag, with $count entries still working")
+            Timber.e("UPLOAD DEBUG: after checking ${list.size} entries, complete flag was $flag, with $count entries still working")
         }
         return flag
     }
@@ -89,6 +84,7 @@ class AmazonHelper(
     private fun sendPictures(ctx: Context, entry: DataEntry): Int {
         var countUploading = 0
         val fileNotFound = mutableListOf<String>()
+        TransferNetworkLossHandler.getInstance(ctx)
         for (item in entry.pictures) {
             if (!item.uploaded) {
                 when (val result = sendPicture(ctx, entry, item)) {

@@ -10,6 +10,8 @@ interface DaarDataProjects {
     var selectedRootProjectName: String?
     var selectedSubProjectName: String?
     val selectedProjectId: Long?
+    val selectedRecentProjectName: String?
+    var selectedRecentPosition: Int?
 
     val rootProjectNames: List<String>
     fun subProjectsOf(rootName: String): List<String>

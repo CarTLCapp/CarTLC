@@ -22,44 +22,59 @@ class DaarDataProjectsImpl(
             }
         }
 
-    private var mostRecentProjectsList: List<String>? = null
+    private var mostRecentProjectsNameList: List<String>? = null
+    private var mostRecentProjectsIdList: List<Long>? = null
 
     // region DaarDataProjects
 
-
     override val isReady: Boolean
         get() {
-            return !selectedRootProjectName.isNullOrEmpty() && !selectedSubProjectName.isNullOrEmpty()
+            return selectedProjectId != null
         }
 
     override var selectedProjectTab: ProjectSelect = ProjectSelect.PROJECT_RECENT
     override var selectingRootName: Boolean = true
     override var selectedRootProjectName: String? = null
     override var selectedSubProjectName: String? = null
+    override var selectedRecentPosition: Int? = null
 
     override val selectedProjectId: Long?
         get() {
-            return selectedRootProjectName?.let { rootName ->
-                selectedSubProjectName?.let { subName ->
-                   db.tableProjects.queryByName(rootName, subName)?.id
+            return if (selectedProjectTab == ProjectSelect.PROJECT_RECENT) {
+                selectedRecentPosition?.let { position -> mostRecentProjectsIdList?.get(position) }
+            } else {
+                selectedRootProjectName?.let { rootName ->
+                    selectedSubProjectName?.let { subName ->
+                        db.tableProjects.queryByName(rootName, subName)?.id
+                    }
                 }
             }
         }
 
+    override val selectedRecentProjectName: String?
+        get() = if (selectedProjectTab == ProjectSelect.PROJECT_RECENT) {
+            selectedRecentPosition?.let { position -> mostRecentProjectsNameList?.get(position) }
+        } else null
+
     override val mostRecentProjects: List<String>
         get() {
-            return mostRecentProjectsList ?: run {
-                val mostRecentList = mutableListOf<String>()
+            return mostRecentProjectsNameList ?: run {
+                val mostRecentNameList = mutableListOf<String>()
+                val mostRecentIdList = mutableListOf<Long>()
                 db.tableEntry.querySince(mostRecentUploadedDaarDate).forEach { entry ->
                     entry.projectAddressCombo?.let { combo ->
-                        mostRecentList.add(combo.projectDashName)
+                        if (!mostRecentNameList.contains(combo.projectDashName)) {
+                            mostRecentNameList.add(combo.projectDashName)
+                            mostRecentIdList.add(combo.projectNameId)
+                        }
                     }
                     if (entry.date > mostRecentDate) {
                         mostRecentDate = entry.date
                     }
                 }
-                mostRecentProjectsList = mostRecentList
-                mostRecentList
+                mostRecentProjectsIdList = mostRecentIdList
+                mostRecentProjectsNameList = mostRecentNameList
+                mostRecentNameList
             }
         }
 

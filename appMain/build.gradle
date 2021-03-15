@@ -25,8 +25,8 @@ android {
         applicationId "com.cartlc.tracker"
         minSdkVersion 21
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 70
-        versionName "3.50"
+        versionCode 71
+        versionName "3.51"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }

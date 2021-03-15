@@ -53,7 +53,7 @@ class DaarUIDataImpl(
         return when (stage) {
             is StageDate -> stage.enteredValue > 0
             is StageString -> !stage.enteredValue.isNullOrBlank()
-            is StageProject -> stage.enteredValue.isReady ?: false
+            is StageProject -> stage.enteredValue.isReady
         }
     }
 
