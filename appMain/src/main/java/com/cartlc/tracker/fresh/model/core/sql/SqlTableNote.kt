@@ -275,7 +275,7 @@ class SqlTableNote constructor(
         if (db.tableCollectionNoteEntry.countNotes(note.id) == 0) {
             remove(note.id)
         } else {
-            Timber.tag(TAG).i("Did not remove unused note because some entries are using it: $note")
+            Timber.i("Did not remove unused note because some entries are using it: $note")
         }
     }
 

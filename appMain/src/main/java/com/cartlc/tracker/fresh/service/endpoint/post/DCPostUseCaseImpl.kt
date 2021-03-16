@@ -82,6 +82,6 @@ class DCPostUseCaseImpl(
     // endregion EventController
 
     private fun msg(msg: String) {
-        Timber.tag(TAG).i(msg)
+        Timber.i(msg)
     }
 }

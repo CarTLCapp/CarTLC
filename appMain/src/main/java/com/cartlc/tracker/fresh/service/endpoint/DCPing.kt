@@ -1557,15 +1557,15 @@ class DCPing(
     }
 
     private fun msg(msg: String) {
-        Timber.tag(TAG).i(msg)
+        Timber.i(msg)
     }
     
     private fun verbose(msg: String) {
-        Timber.tag(TAG).d(msg)
+        Timber.d(msg)
     }
-    
+
     private fun error(msg: String) {
-        Timber.tag(TAG).e(msg)
+        Timber.e(msg)
     }
     
     // endregion support classes

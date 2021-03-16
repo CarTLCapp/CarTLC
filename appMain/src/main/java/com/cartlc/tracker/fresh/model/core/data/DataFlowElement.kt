@@ -44,7 +44,7 @@ class DataFlowElement(
                         return value
                     }
                 }
-                Timber.tag(TAG).e("Unrecognized prompt type: $code")
+                Timber.e("Unrecognized prompt type: $code")
                 return UNSET
             }
         }

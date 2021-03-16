@@ -344,10 +344,10 @@ class SqlTableEquipment(
 
     override fun removeOrDisable(equip: DataEquipment) {
         if (db.tableCollectionEquipmentEntry.countValues(equip.id) == 0) {
-            Timber.tag(TAG).i("remove(${equip.id}, ${equip.name})")
+            Timber.i("remove(${equip.id}, ${equip.name})")
             remove(equip.id)
         } else {
-            Timber.tag(TAG).i("disable(${equip.id}, ${equip.name})")
+            Timber.i("disable(${equip.id}, ${equip.name})")
             equip.disabled = true
             update(equip)
         }
@@ -359,7 +359,7 @@ class SqlTableEquipment(
             val values = ContentValues()
             values.put(KEY_SERVER_ID, 0)
             if (dbSql.update(TABLE_NAME, values, null, null) == 0) {
-                Timber.tag(TAG).e("SqlTableEquipment.clearUploaded(): Unable to update entries")
+                Timber.e("SqlTableEquipment.clearUploaded(): Unable to update entries")
             }
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {

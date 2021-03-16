@@ -38,7 +38,7 @@ open class Flow(
 
         fun checkNull(flow: Flow?): Flow {
             if (flow == null) {
-                Timber.tag(TAG).e("UNKNOWN stage")
+                Timber.e("UNKNOWN stage")
                 return LoginFlow()
             }
             return flow

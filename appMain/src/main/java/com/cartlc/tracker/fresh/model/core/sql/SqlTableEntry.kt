@@ -436,7 +436,7 @@ class SqlTableEntry(
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(entry.id.toString())
             if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
-                Timber.tag(TAG).e("SqlTableEntry.saveProjectAddressCombo(): Unable to update tableEntry")
+                Timber.e("SqlTableEntry.saveProjectAddressCombo(): Unable to update tableEntry")
             }
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {

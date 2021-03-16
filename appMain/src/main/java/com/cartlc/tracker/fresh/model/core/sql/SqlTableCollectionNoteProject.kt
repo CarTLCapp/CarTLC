@@ -37,7 +37,7 @@ class SqlTableCollectionNoteProject(
             if (note == null) {
                 if (!complainedAbout.contains(noteId)) {
                     complainedAbout.add(noteId)
-                    Timber.tag(TAG).e("Could not find note with ID $noteId from project ID $projectNameId")
+                    Timber.e("Could not find note with ID $noteId from project ID $projectNameId")
                 }
             } else {
                 list.add(note)
@@ -49,7 +49,7 @@ class SqlTableCollectionNoteProject(
     override fun removeIfGone(item: DataCollectionItem) {
         if (item.isBootstrap) {
             if (db.tableNote.query(item.value_id) == null) {
-                Timber.tag(TAG).i("remove(${item.id}, $item)")
+                Timber.i("remove(${item.id}, $item)")
                 remove(item.id)
             }
         }

@@ -73,7 +73,7 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
             if (mAddress == null) {
                 mAddress = db.tableAddress.query(addressId)
                 if (mAddress == null) {
-                    Timber.tag(TAG).e("Could not find address ID=$addressId")
+                    Timber.e("Could not find address ID=$addressId")
                 }
             }
             return mAddress

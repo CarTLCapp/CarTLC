@@ -53,12 +53,12 @@ class AlarmController(
                 AlarmReceiver.scheduleIn(context, ACTION_LOGOUT, CHECK_ACTIVITY_TRIGGER_RETRY)
             }
         } else {
-            Timber.tag(TAG).e("Unrecognized action received: $action")
+            Timber.e("Unrecognized action received: $action")
         }
     }
 
     private fun clearLogin() {
-        Timber.tag(TAG).i("LOGIN CLEARED")
+        Timber.i("LOGIN CLEARED")
         prefHelper.firstTechCode = null
         prefHelper.techFirstName = null
         prefHelper.techLastName = null

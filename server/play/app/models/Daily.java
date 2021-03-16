@@ -1,5 +1,5 @@
 /**
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2021, FleetTLC. All rights reserved
  */
 package models;
 
@@ -22,8 +22,8 @@ public class Daily {
     private static final int NUMBER_DAYS = 30;
     private static final String DATE_FORMAT = "MM/dd/yy";
     /**
-     * Need to adjust the time requested to account for the entry_time being off from the
-     * server time because of it coming from a different time zone.
+     * The desire is to have the entries sorted from 6am to the day in question
+     * until 6am the following day.
      */
     private static final long ADJUST_TIME_MS = TimeUnit.HOURS.toMillis(6);
 
@@ -39,7 +39,7 @@ public class Daily {
 
         public ProjectCount(Project project) {
             name = project.name;
-            long useStartTime = mStartTime - ADJUST_TIME_MS;
+            long useStartTime = mStartTime + ADJUST_TIME_MS;
             long useEndTime = mEndTime + ADJUST_TIME_MS;
             List<Entry> entries = Entry.findEntriesForProjectWithinRange(project.id, useStartTime, useEndTime);
             count = 0;

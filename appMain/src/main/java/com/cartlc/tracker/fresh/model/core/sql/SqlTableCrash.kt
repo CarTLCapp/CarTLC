@@ -91,7 +91,7 @@ class SqlTableCrash(
             dbSql.update(TABLE_NAME, values, null, null)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
-            Timber.tag(TAG).e(ex)
+            Timber.e(ex)
         } finally {
             dbSql.endTransaction()
         }
@@ -159,7 +159,7 @@ class SqlTableCrash(
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(java.lang.Long.toString(line.id))
             if (dbSql.update(TABLE_NAME, values, where, whereArgs) == 0) {
-                Timber.tag(TAG).e("Unable to update tableCrash tableEntry")
+                Timber.e("Unable to update tableCrash tableEntry")
             }
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {

@@ -59,6 +59,7 @@ class PrefHelper constructor(
         private const val KEY_DO_ERROR_CHECK = "do_error_check"
         private const val KEY_AUTO_ROTATE_PICTURE = "auto_rotate_picture"
         private const val KEY_LAST_ACTIVITY_TIME = "last_activity_time"
+        private const val KEY_NEW_ENTRY_CREATION_TIME = "new_entry_creation_time"
 
         const val VERSION_PROJECT = "version_project"
         const val VERSION_COMPANY = "version_company"
@@ -283,6 +284,12 @@ class PrefHelper constructor(
 
     // TODO: This look likes something that can be improved:
     var onCurrentProjecGroupChanged: (group: DataProjectAddressCombo?) -> Unit = {}
+
+    private var entryCreationTime: Long
+        get() = getLong(KEY_NEW_ENTRY_CREATION_TIME, 0L)
+        set(value) {
+            setLong(KEY_NEW_ENTRY_CREATION_TIME, value)
+        }
 
     // Note: ID zero has a special meaning, it means that the set is pending.
     private val nextPictureCollectionID: Long
@@ -509,6 +516,15 @@ class PrefHelper constructor(
         return false
     }
 
+    fun setCreationTimeIfUnset() {
+        if (entryCreationTime == 0L) {
+            Timber.d("setCreationTimeIfUnset() --> APPLIED")
+            entryCreationTime = System.currentTimeMillis()
+        } else {
+            Timber.d("setCreationTimeIfUnset() --> ALREADY APPLIED")
+        }
+    }
+
     fun clearCurProject() {
         clearLastEntry()
         state = null
@@ -530,6 +546,8 @@ class PrefHelper constructor(
     }
 
     fun clearLastEntry() {
+        Timber.d("clearLastEntry()")
+        entryCreationTime = 0L
         truckNumberValue = null
         truckDamageValue = null
         truckHasDamage = null
@@ -677,7 +695,12 @@ class PrefHelper constructor(
                 projectGroup.companyName!!)
         entry.status = status
         entry.saveNotes(nextNoteCollectionID, statusIsPartialInstall)
-        entry.date = System.currentTimeMillis()
+        entry.date = entryCreationTime
+        // Sanity check
+        if (entry.date == 0L) {
+            entry.date = System.currentTimeMillis()
+            Timber.e("Error: should not have encountered an unset entry creation time.")
+        }
         if (incOkay) {
             inc()
         }
@@ -736,11 +759,14 @@ class PrefHelper constructor(
         entry.uploadedAws = false
         entry.hasError = false
         entry.serverErrorCount = 0.toShort()
-        // Be careful here: I use the date to match an tableEntry when looking up the server id for older APP versions.
-        if (entry.serverId > 0) {
+        entry.saveNotes(statusIsPartialInstall)
+
+        // Keep original creation time for entry.
+        // The following is a sanity check that should never happen
+        if (entry.date == 0L) {
+            Timber.e("Encountered no creation time for entry. What went wrong?")
             entry.date = System.currentTimeMillis()
         }
-        entry.saveNotes(statusIsPartialInstall)
         return entry
     }
 
@@ -787,14 +813,14 @@ class PrefHelper constructor(
     }
 
     private fun msg(msg: String) {
-        Timber.tag(TAG).i(msg)
+        Timber.i(msg)
     }
 
     private fun verbose(msg: String) {
-        Timber.tag(TAG).d(msg)
+        Timber.d(msg)
     }
 
     private fun error(msg: String) {
-        Timber.tag(TAG).e(msg)
+        Timber.e(msg)
     }
 }

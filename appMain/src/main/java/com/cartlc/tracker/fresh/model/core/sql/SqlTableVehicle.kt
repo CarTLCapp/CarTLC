@@ -229,7 +229,7 @@ open class SqlTableVehicle(
             dbSql.update(TABLE_NAME, values, null, null)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
-            Timber.tag(TAG).e(ex)
+            Timber.e(ex)
         } finally {
             dbSql.endTransaction()
         }

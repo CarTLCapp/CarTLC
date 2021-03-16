@@ -162,7 +162,7 @@ class SqlTableTruck(
                     values.put(KEY_ROWID, truck.id)
                     val confirmId = dbSql.insert(TABLE_NAME, null, values)
                     if (confirmId != truck.id) {
-                        Timber.tag(TAG).e("Did not transfer truck properly for ID ${truck.id}...got back $confirmId")
+                        Timber.e("Did not transfer truck properly for ID ${truck.id}...got back $confirmId")
                     }
                 }
             } else {

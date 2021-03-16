@@ -4,12 +4,12 @@
 package com.cartlc.tracker.fresh.ui.main.process
 
 import com.cartlc.tracker.fresh.model.core.data.DataProject
-import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.fresh.model.flow.Flow
 import com.cartlc.tracker.fresh.model.flow.RootProjectFlow
 import com.cartlc.tracker.fresh.model.flow.Stage
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
+import com.cartlc.tracker.fresh.ui.main.MainController
 
 class StageSelectProject(
         shared: MainController.Shared
@@ -17,7 +17,7 @@ class StageSelectProject(
 
     fun process(flow: Flow) {
         with(shared) {
-            when(flow.stage) {
+            when (flow.stage) {
                 Stage.ROOT_PROJECT -> {
                     mainListUseCase.visible = true
                     titleUseCase.subTitleText = null
@@ -36,11 +36,13 @@ class StageSelectProject(
                         setList(StringMessage.title_sub_project, PrefHelper.KEY_SUB_PROJECT,
                                 getNames(db.tableFlow.filterHasFlow(db.tableProjects.querySubProjects(rootName)))
                         )
+                        prefHelper.setCreationTimeIfUnset()
                     } ?: run {
                         curFlowValue = RootProjectFlow()
                     }
                 }
-                else -> {}
+                else -> {
+                }
             }
         }
     }

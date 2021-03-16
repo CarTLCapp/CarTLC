@@ -63,7 +63,7 @@ class HashLongList(private val db: TableString) : HashSet<Long>() {
                 try {
                     add(ele.toLong())
                 } catch (ex: NumberFormatException) {
-                    Timber.tag(TAG).e(ex)
+                    Timber.e(ex)
                 }
             }
         }

@@ -100,7 +100,7 @@ class DCZip(
             if (data.isValid) {
                 db.tableZipCode.add(data)
             } else {
-                Timber.tag(TAG).e("Invalid zipcode response: $result")
+                Timber.e("Invalid zipcode response: $result")
             }
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCZip::class.java, "findZipCode()", zipcode)

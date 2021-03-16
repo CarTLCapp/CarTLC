@@ -40,6 +40,5 @@ class CrashReportingTree(private val db: DatabaseTable) : Timber.Tree() {
                 db.tableCrash.message(priority, message, null)
             }
         }
-//        Timber.tag("CarTLC")
     }
 }

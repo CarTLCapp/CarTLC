@@ -112,7 +112,7 @@ class SqlTableProjectAddressCombo(
         identicals.remove(projectGroup.id)
         for (other_id in identicals) {
             val entries = db.tableEntry.queryForProjectAddressCombo(other_id)
-            Timber.tag(TAG).i("Found ${entries.size} entries with matching combo id $other_id to ${projectGroup.id}")
+            Timber.i("Found ${entries.size} entries with matching combo id $other_id to ${projectGroup.id}")
             for (entry in entries) {
                 entry.projectAddressCombo = projectGroup
                 entry.uploadedMaster = false

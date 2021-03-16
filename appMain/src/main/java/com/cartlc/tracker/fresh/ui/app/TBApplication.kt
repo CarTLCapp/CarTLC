@@ -40,9 +40,6 @@ class TBApplication : Application() {
 
     companion object {
 
-        @VisibleForTesting
-        var DEBUG_TREE = false
-
         const val REPORT_LOCATION = false
 
         val PERMISSIONS = arrayOf(
@@ -127,13 +124,11 @@ class TBApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         carRepo.db.tablePicture.removeFileDoesNotExist()
-        if (BuildConfig.DEBUG && DEBUG_TREE) {
+        if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         } else {
             Timber.plant(CrashReportingTree(db))
         }
-        Timber.tag("CarTLC")
-
         CheckError.Init()
         LocationHelper.Init(this, db)
         if (prefHelper.detectOneTimeReloadFromServerCheck()) {
