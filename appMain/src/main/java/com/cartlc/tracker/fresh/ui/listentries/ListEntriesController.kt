@@ -1,7 +1,6 @@
 /*
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2019-2021, FleetTLC. All rights reserved
  */
-
 package com.cartlc.tracker.fresh.ui.listentries
 
 import android.app.Activity
@@ -16,7 +15,6 @@ import com.cartlc.tracker.fresh.model.pref.PrefHelper
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.listentries.item.ListEntriesItemViewMvc
 import com.cartlc.tracker.fresh.ui.main.MainController
-import timber.log.Timber
 
 class ListEntriesController(
         private val boundAct: BoundAct,

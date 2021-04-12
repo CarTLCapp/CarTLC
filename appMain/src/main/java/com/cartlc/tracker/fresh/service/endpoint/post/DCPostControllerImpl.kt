@@ -6,7 +6,6 @@ import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.event.EventController
 import com.cartlc.tracker.fresh.model.event.EventPingStatus
 import com.cartlc.tracker.fresh.service.endpoint.DCService
-import com.cartlc.tracker.fresh.ui.main.MainController
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import timber.log.Timber
@@ -16,10 +15,6 @@ class DCPostControllerImpl(
         private val db: DatabaseTable,
         eventController: EventController
 ) : DCPostController {
-
-    companion object {
-        private val TAG = DCPostControllerImpl::class.simpleName
-    }
 
     private var jobParams: JobParameters? = null
     private var jobRef: WeakReference<JobService>? = null

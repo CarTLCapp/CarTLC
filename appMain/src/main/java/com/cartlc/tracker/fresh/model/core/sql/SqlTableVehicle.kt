@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2017-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.sql
 

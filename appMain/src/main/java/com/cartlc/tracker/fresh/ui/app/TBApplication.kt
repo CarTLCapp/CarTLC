@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, FleetTLC. All rights reserved
+ * Copyright 2020-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.ui.app
 
@@ -8,7 +8,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.net.Uri
-import androidx.annotation.VisibleForTesting
 import androidx.core.content.FileProvider
 import androidx.multidex.MultiDex
 import com.cartlc.tracker.BuildConfig

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2017-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.data
 
@@ -12,8 +12,6 @@ import timber.log.Timber
 class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
 
     companion object {
-        private val TAG = DataProjectAddressCombo::class.simpleName
-
         fun sort(list: List<DataProjectAddressCombo>): List<DataProjectAddressCombo> {
             return list.toMutableList().sortedBy { it.projectDashName}
         }

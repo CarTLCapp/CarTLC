@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, FleetTLC. All rights reserved
+ * Copyright 2017-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.service.endpoint
 
@@ -11,7 +11,6 @@ import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.event.EventController
 import com.cartlc.tracker.fresh.model.event.EventPingStatus
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
-import com.cartlc.tracker.fresh.service.endpoint.post.DCPostUseCaseImpl
 import com.cartlc.tracker.fresh.service.network.NetworkUseCase
 import com.cartlc.tracker.fresh.ui.app.TBApplication
 import timber.log.Timber
@@ -89,6 +88,5 @@ class DCService : JobIntentService() {
     private fun error(msg: String) {
         Timber.e(msg)
     }
-
 
 }

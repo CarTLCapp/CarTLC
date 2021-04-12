@@ -33,9 +33,6 @@ open class Flow(
     open val isPictureStage = false
 
     companion object {
-
-        private val TAG = Flow::class.simpleName
-
         fun checkNull(flow: Flow?): Flow {
             if (flow == null) {
                 Timber.e("UNKNOWN stage")

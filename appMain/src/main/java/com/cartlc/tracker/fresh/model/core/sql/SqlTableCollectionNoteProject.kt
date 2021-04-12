@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2018-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.sql
 
@@ -21,8 +21,6 @@ class SqlTableCollectionNoteProject(
 ) : SqlTableCollection(sqlDb, TABLE_NAME), TableCollectionNoteProject {
 
     companion object {
-        private val TAG = SqlTableCollectionNoteProject::class.simpleName
-
         internal const val TABLE_NAME = "note_project_collection"
     }
 

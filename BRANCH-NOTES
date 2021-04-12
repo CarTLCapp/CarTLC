@@ -1,0 +1,15 @@
+  master PRODUCTION
+  daar -> ON TOP OF MASTER (not used)
+* release -> ACTIVE BRANCH (has daar and sub_flow_work, specifically sub_flow_on_daar4_mod)
+
+
+THE REST OF THESE BRANCHES ARE DEVELOPMENT BRANCHES KEPT AROUND FOR NOW:
+  sub_flow_on_daar4
+  sub_flow_on_daar4_mod
+  sub_flow_on_master
+  remotes/origin/sub_flow_on_daar2
+  remotes/origin/sub_flow_on_daar3
+  remotes/origin/sub_flow_on_daar3_mod
+  remotes/origin/sub_flow_on_daar4
+  remotes/origin/sub_flow_on_daar4_mod
+  remotes/origin/sub_flow_on_master

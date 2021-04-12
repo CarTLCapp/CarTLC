@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2020, 2021, FleetTLC. All rights reserved
+ * Copyright 2017-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.service.help
 
@@ -30,12 +30,8 @@ class AmazonHelper(
 ) {
 
     companion object {
-        private val TAG = AmazonHelper::class.simpleName
-
-
         //        private val BUCKET_NAME_DEVELOP = "fleetdev2"
         private const val BUCKET_NAME_RELEASE = "fleettlc"
-
         //        internal val IDENTITY_POOL_ID_DEVELOP = "us-east-2:38d2f2a2-9454-4472-9fec-9468f3700ba5"
         private const val IDENTITY_POOL_ID_RELEASE = "us-east-2:389282dd-de71-4849-a68b-2b126b3de5f3"
     }

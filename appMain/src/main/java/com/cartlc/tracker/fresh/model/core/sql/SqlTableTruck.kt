@@ -1,5 +1,5 @@
 /**
- * Copyright 2021, FleetTLC. All rights reserved
+ * Copyright 2017-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.sql
 
@@ -25,8 +25,6 @@ class SqlTableTruck(
 ) : TableTruck {
 
     companion object {
-        private val TAG = SqlTableTruck::class.simpleName
-
         private const val TABLE_NAME = "table_trucks_v14"
 
         private const val KEY_ROWID = "_id"

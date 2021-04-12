@@ -1,13 +1,9 @@
 /*
- * Copyright 2021, FleetTLC. All rights reserved
+ * Copyright 2017-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.service.help
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
-
 import com.google.android.gms.iid.InstanceID
 
 /**

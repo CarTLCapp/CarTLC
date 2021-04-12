@@ -5,10 +5,6 @@ import timber.log.Timber
 
 class HashLongList(private val db: TableString) : HashSet<Long>() {
 
-    companion object {
-        private val TAG = HashLongList::class.simpleName
-    }
-
     constructor(db: TableString, text: String) : this(db) {
         unmash(text)
     }

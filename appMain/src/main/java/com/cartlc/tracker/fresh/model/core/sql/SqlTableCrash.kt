@@ -22,7 +22,6 @@ class SqlTableCrash(
 ) : TableCrash {
 
     companion object {
-        private val TAG = SqlTableCrash::class.simpleName
         private const val TABLE_NAME = "table_crash"
 
         private const val KEY_ROWID = "_id"

@@ -1,31 +1,23 @@
 /*
- * *
- *   * Copyright 2019, FleetTLC. All rights reserved
- *
+ * Copyright 2017-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.service.endpoint
 
 import android.net.Uri
-
-import com.cartlc.tracker.fresh.ui.app.TBApplication
 import com.cartlc.tracker.fresh.model.core.data.DataZipCode
-import com.cartlc.tracker.fresh.model.core.sql.SqlTableTruck
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
-
+import com.cartlc.tracker.fresh.ui.app.TBApplication
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-
+import timber.log.Timber
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
-import timber.log.Timber
-
 /**
  * Created by dug on 8/24/17.
  */
-
 class DCZip(
         private val db: DatabaseTable
 ) : DCPost() {

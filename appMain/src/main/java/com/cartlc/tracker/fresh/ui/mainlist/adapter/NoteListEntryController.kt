@@ -1,5 +1,5 @@
-/**
- * Copyright 2020, FleetTLC. All rights reserved
+/*
+ * Copyright 2019-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.ui.mainlist.adapter
 

@@ -1,7 +1,6 @@
 /*
- * Copyright 2019, FleetTLC. All rights reserved
+ * Copyright 2019-2021, FleetTLC. All rights reserved
  */
-
 package com.cartlc.tracker.fresh.service.alarm
 
 import android.content.Context
@@ -17,8 +16,6 @@ class AlarmController(
 ) {
 
     companion object {
-        private val TAG = AlarmController::class.simpleName
-
         private const val DEBUG = false
 
         private val CHECK_ACTIVITY_TRIGGER_MINUTES = if (DEBUG) 2 else 60

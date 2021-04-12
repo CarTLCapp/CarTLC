@@ -6,8 +6,9 @@ import com.cartlc.tracker.fresh.model.core.sql.SqlTableEntry
 
 interface TableEntry {
 
-    fun clearAll()
     val hasEntriesToUpload: Boolean
+
+    fun clearAll()
     fun countAddresses(addressId: Long): Int
     fun countTrucks(truckId: Long): Int
     fun countProjects(projectId: Long): Int

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2018-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.sql
 
@@ -8,8 +8,6 @@ import com.cartlc.tracker.fresh.model.core.data.DataCollectionEquipmentProject
 import com.cartlc.tracker.fresh.model.core.data.DataCollectionItem
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableCollectionEquipmentProject
-
-import timber.log.Timber
 
 /**
  * Created by dug on 5/16/17.

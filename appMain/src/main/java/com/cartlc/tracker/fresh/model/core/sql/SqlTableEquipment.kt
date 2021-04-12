@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2018-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.sql
 
@@ -24,8 +24,6 @@ class SqlTableEquipment(
 ) : TableEquipment {
 
     companion object {
-        private val TAG = SqlTableEquipment::class.simpleName
-
         private const val TABLE_NAME = "list_equipment"
 
         private const val KEY_ROWID = "_id"
