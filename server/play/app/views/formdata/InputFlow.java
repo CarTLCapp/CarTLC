@@ -19,11 +19,15 @@ public class InputFlow extends Model {
     private static final long serialVersionUID = 1L;
     public String root_project_name;
     public String sub_project_name;
+    public hasTruckNumberPictureAsk;
+    public hasTruckDamagePictureAsk;
 
     public InputFlow(Flow flow) {
         if (flow != null) {
             root_project_name = flow.getRootProjectName();
             sub_project_name = flow.getSubProjectName();
+            hasTruckNumberPictureAsk = flag.hasFlagTruckNumber();
+            hasTruckDamagePictureAsk = flow.hasFlagTruckDamage();
         }
     }
 
@@ -33,6 +37,8 @@ public class InputFlow extends Model {
     public InputFlow(InputFlow other) {
         root_project_name = other.root_project_name;
         sub_project_name = other.sub_project_name;
+        hasTruckNumberPictureAsk = other.hasTruckNumberPictureAsk;
+        hasTruckDamagePictureAsk = other.hasTruckDamagePictureAsk;
     }
 
     public List<String> optionsSubProject() {

@@ -1,5 +1,5 @@
-/**
- * Copyright 2019, FleetTLC. All rights reserved
+/*
+ * Copyright 2019-2021, FleetTLC. All rights reserved
  */
 package models.flow;
 
@@ -23,12 +23,17 @@ import models.Project;
 public class Flow extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
+    private static final int FLAG_TRUCK_NUMBER = 0x01;
+    private static final int FLAG_TRUCK_DAMAGE = 0x02;
 
     @Id
     public Long id;
 
     @Constraints.Required
     public Long sub_project_id;
+
+    @Constraints.Required
+    public int flags;
 
     public static Finder<Long, Flow> find = new Finder<Long, Flow>(Flow.class);
 
@@ -121,5 +126,42 @@ public class Flow extends com.avaje.ebean.Model {
                 ", sub_project_id=" + sub_project_id +
                 '}';
     }
+
+    public boolean hasFlagTruckNumber() {
+        return hasFlag(FLAG_TRUCK_NUMBER);
+    }
+
+    public boolean hasFlagTruckDamage() {
+        return hasFlag(FLAG_TRUCK_DAMAGE);
+    }
+
+    public void setFlagTruckNumber(boolean value) {
+        if (value) {
+            setFlag(FLAG_TRUCK_NUMBER);
+        } else {
+            clearFlag(FLAG_TRUCK_NUMBER);
+        }
+    }
+
+    public void setFlagTruckDamage(boolean value) {
+        if (value) {
+            setFlag(FLAG_TRUCK_DAMAGE);
+        } else {
+            clearFlag(FLAG_TRUCK_DAMAGE)
+        }
+    }
+
+    private boolean hasFlag(int flag) {
+        return (flags & flag) == flag;
+    }
+
+    private void setFlag(int flag) {
+        return flags |= flag;
+    }
+
+    private void clearFlag(int flag) {
+        return flags &= ~flag;
+    }
+
 }
 

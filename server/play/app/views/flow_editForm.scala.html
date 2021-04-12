@@ -40,10 +40,28 @@
 
         </fieldset>
 
+        <h3>Options</h3>
+
+        <div class="checkbox-container">
+
+            @defining(Client.isAdmin(id)) { flag =>
+                @b3.checkbox(flowForm("hasTruckNumberPictureAsk"), '_label -> "Ask for Truck Number Picture", 'checked -> flag)
+            }
+            <div style="clear:both;"></div>
+
+            @defining(ClientAssociation.hasShowPictures(id)) { flag =>
+                @b3.checkbox(flowForm("hasTruckDamagePictureAsk"), '_label -> "Ask for Truck Damage Picture", 'checked -> flag)
+            }
+            <div style="clear:both;"></div>
+
+        </div>
+
         <input type="submit" value="Save" class="btn primary" style="margin-left:60px">
     }
 
     @if(Flow.hasElements(id)) {
+
+        <h3>Flow Elements</h3>
 
         <table class="companies zebra-striped">
             <thead>

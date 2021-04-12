@@ -130,6 +130,9 @@ public class FlowController extends Controller {
                 message = "Cannot find project named: " + inputFlow.root_project_name + " - " + inputFlow.sub_project_name;
             } else {
                 editFlow.sub_project_id = project.id;
+                editFlow.setFlagTruckNumber(inputFlow.hasTruckNumberPictureAsk);
+                editFlow.setFlagTruckDamage(inputFlow.hasTruckDamagePictureAsk);
+
                 if (flowId > 0) {
                     editFlow.update();
                 } else if (Flow.getByProjectId(project.id) == null) {
@@ -323,6 +326,9 @@ public class FlowController extends Controller {
             ObjectNode node = array.addObject();
             node.put("flow_id", flow.id);
             node.put("sub_project_id", flow.sub_project_id);
+            node.put("has_flag_truck_number", flow.hasFlagTruckNumber());
+            node.put("has_flag_truck_damage", flow.hasFlagTruckDamage());
+
             ArrayNode elementsNode = node.putArray("elements");
             List<FlowElement> elements = flow.getFlowElements();
             Collections.sort(elements);
