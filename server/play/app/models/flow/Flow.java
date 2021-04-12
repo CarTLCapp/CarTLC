@@ -124,6 +124,7 @@ public class Flow extends com.avaje.ebean.Model {
         return "Flow{" +
                 "id=" + id +
                 ", sub_project_id=" + sub_project_id +
+                ", flags=" + flags +
                 '}';
     }
 
@@ -133,6 +134,14 @@ public class Flow extends com.avaje.ebean.Model {
 
     public boolean hasFlagTruckDamage() {
         return hasFlag(FLAG_TRUCK_DAMAGE);
+    }
+
+    public static boolean hasFlagTruckNumber(long flowId) {
+        return get(flowId).hasFlagTruckNumber();
+    }
+
+    public static boolean hasFlagTruckDamage(long id) {
+        return get(flowId).hasFlagTruckDamage();
     }
 
     public void setFlagTruckNumber(boolean value) {
@@ -147,7 +156,7 @@ public class Flow extends com.avaje.ebean.Model {
         if (value) {
             setFlag(FLAG_TRUCK_DAMAGE);
         } else {
-            clearFlag(FLAG_TRUCK_DAMAGE)
+            clearFlag(FLAG_TRUCK_DAMAGE);
         }
     }
 
@@ -156,11 +165,11 @@ public class Flow extends com.avaje.ebean.Model {
     }
 
     private void setFlag(int flag) {
-        return flags |= flag;
+        flags |= flag;
     }
 
     private void clearFlag(int flag) {
-        return flags &= ~flag;
+        flags &= ~flag;
     }
 
 }

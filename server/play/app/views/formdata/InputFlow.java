@@ -19,14 +19,14 @@ public class InputFlow extends Model {
     private static final long serialVersionUID = 1L;
     public String root_project_name;
     public String sub_project_name;
-    public hasTruckNumberPictureAsk;
-    public hasTruckDamagePictureAsk;
+    public boolean hasTruckNumberPictureAsk;
+    public boolean hasTruckDamagePictureAsk;
 
     public InputFlow(Flow flow) {
         if (flow != null) {
             root_project_name = flow.getRootProjectName();
             sub_project_name = flow.getSubProjectName();
-            hasTruckNumberPictureAsk = flag.hasFlagTruckNumber();
+            hasTruckNumberPictureAsk = flow.hasFlagTruckNumber();
             hasTruckDamagePictureAsk = flow.hasFlagTruckDamage();
         }
     }

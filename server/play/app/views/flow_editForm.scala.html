@@ -44,24 +44,28 @@
 
         <div class="checkbox-container">
 
-            @defining(Client.isAdmin(id)) { flag =>
-                @b3.checkbox(flowForm("hasTruckNumberPictureAsk"), '_label -> "Ask for Truck Number Picture", 'checked -> flag)
+            @defining(Flow.hasFlagTruckNumber(id)) { flag =>
+                @b3.checkbox(flowForm("hasTruckNumberPictureAsk"), '_label -> "Ask Truck Number", 'checked -> flag)
             }
             <div style="clear:both;"></div>
 
-            @defining(ClientAssociation.hasShowPictures(id)) { flag =>
-                @b3.checkbox(flowForm("hasTruckDamagePictureAsk"), '_label -> "Ask for Truck Damage Picture", 'checked -> flag)
+            @defining(Flow.hasFlagTruckDamage(id)) { flag =>
+                @b3.checkbox(flowForm("hasTruckDamagePictureAsk"), '_label -> "Ask Truck Damage", 'checked -> flag)
             }
             <div style="clear:both;"></div>
 
         </div>
 
-        <input type="submit" value="Save" class="btn primary" style="margin-left:60px">
+        <div style="clear:both;"></div>
+
+        <input type="submit" value="Save" class="btn primary" style="margin-left:20px; margin-top:20px">
     }
 
     @if(Flow.hasElements(id)) {
 
         <h3>Flow Elements</h3>
+
+        <div class="well">
 
         <table class="companies zebra-striped">
             <thead>
@@ -120,6 +124,7 @@
             </tbody>
         </table>
 
+        </div>
     }
 
     <p><a href="@routes.FlowController.addElement(id)">Add Element</a></p>
