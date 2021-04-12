@@ -19,7 +19,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
         private const val DATABASE_NAME = "cartcl.db"
-        private const val DATABASE_VERSION = 22
+        private const val DATABASE_VERSION = 23
     }
 
     private val dbHelper: DatabaseHelper by lazy {
@@ -150,6 +150,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             }
             if (oldVersion <= 21) {
                 tableDaar.create()
+            }
+            if (oldVersion <= 22) {
+                tableFlow.upgrade22()
             }
         }
 

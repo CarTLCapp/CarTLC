@@ -26,6 +26,8 @@ class SqlTableFlow(
         private const val KEY_ROWID = "_id"
         private const val KEY_SERVER_ID = "server_id"
         private const val KEY_SUB_PROJECT_ID = "sub_project_id"
+        private const val KEY_HAS_TRUCK_NUMBER_ASK = "has_truck_number_ask"
+        private const val KEY_HAS_TRUCK_DAMAGE_ASK = "has_truck_damage_ask"
     }
 
     override fun clearAll() {
@@ -45,8 +47,21 @@ class SqlTableFlow(
         sbuf.append(KEY_SERVER_ID)
         sbuf.append(" integer, ")
         sbuf.append(KEY_SUB_PROJECT_ID)
-        sbuf.append(" int default 0)")
+        sbuf.append(" int default 0, ")
+        sbuf.append(KEY_HAS_TRUCK_NUMBER_ASK)
+        sbuf.append(" bit default 0, ")
+        sbuf.append(KEY_HAS_TRUCK_DAMAGE_ASK)
+        sbuf.append(" bit default 0)")
         dbSql.execSQL(sbuf.toString())
+    }
+
+    fun upgrade22() {
+        try {
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_HAS_TRUCK_NUMBER_ASK bit default 0")
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_HAS_TRUCK_DAMAGE_ASK bit default 0")
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableFlow::class.java, "upgrade22()", "db")
+        }
     }
 
     override fun add(item: DataFlow): Long {
@@ -55,6 +70,8 @@ class SqlTableFlow(
             val values = ContentValues()
             values.put(KEY_SERVER_ID, item.serverId)
             values.put(KEY_SUB_PROJECT_ID, item.subProjectId)
+            values.put(KEY_HAS_TRUCK_NUMBER_ASK, item.hasFlagTruckNumber)
+            values.put(KEY_HAS_TRUCK_DAMAGE_ASK, item.hasFlagTruckDamage)
             item.id = dbSql.insert(TABLE_NAME, null, values)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
@@ -75,16 +92,30 @@ class SqlTableFlow(
         val idxRowId = cursor.getColumnIndex(KEY_ROWID)
         val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
         val idxSubProjectId = cursor.getColumnIndex(KEY_SUB_PROJECT_ID)
+        val idxFlagTruckNumberAskId = cursor.getColumnIndex(KEY_HAS_TRUCK_NUMBER_ASK)
+        val idxFlagTruckDamageAskId = cursor.getColumnIndex(KEY_HAS_TRUCK_DAMAGE_ASK)
         var item: DataFlow
         while (cursor.moveToNext()) {
             item = DataFlow(
                     cursor.getLong(idxRowId),
                     cursor.getInt(idxServerId),
-                    cursor.getLong(idxSubProjectId))
+                    cursor.getLong(idxSubProjectId),
+                    cursor.getShort(idxFlagTruckNumberAskId).toInt() != 0,
+                    cursor.getShort(idxFlagTruckDamageAskId).toInt() != 0
+            )
             list.add(item)
         }
         cursor.close()
         return list
+    }
+
+    override fun queryById(flow_id: Long): DataFlow? {
+        val selection = "$KEY_ROWID=?"
+        val selectionArgs = arrayOf(flow_id.toString())
+        val list = query(selection, selectionArgs)
+        return if (list.isNotEmpty()) {
+            list[0]
+        } else null
     }
 
     override fun queryByServerId(server_id: Int): DataFlow? {
@@ -130,6 +161,8 @@ class SqlTableFlow(
             val values = ContentValues()
             values.put(KEY_SERVER_ID, item.serverId)
             values.put(KEY_SUB_PROJECT_ID, item.subProjectId)
+            values.put(KEY_HAS_TRUCK_NUMBER_ASK, item.hasFlagTruckNumber)
+            values.put(KEY_HAS_TRUCK_DAMAGE_ASK, item.hasFlagTruckDamage)
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(item.id.toString())
             dbSql.update(TABLE_NAME, values, where, whereArgs)
@@ -155,6 +188,12 @@ class SqlTableFlow(
                 sbuf.append("Project \"${project.dashName}\"")
             } ?: run {
                 sbuf.append("Unknown project with ID ${flow.subProjectId}")
+            }
+            if (flow.hasFlagTruckNumber) {
+                sbuf.append(", AskTruckNumber")
+            }
+            if (flow.hasFlagTruckDamage) {
+                sbuf.append(", AskTruckDamage")
             }
             sbuf.append(": ")
             sbuf.append(db.tableFlowElement.toString(flow.id))

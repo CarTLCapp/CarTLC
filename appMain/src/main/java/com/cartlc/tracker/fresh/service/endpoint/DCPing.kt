@@ -941,25 +941,32 @@ class DCPing(
                     continue
                 }
                 val serverSubProjectId = eleFlow.getInt("sub_project_id")
+                val hasTruckNumberAsk = eleFlow.getBoolean("has_flag_truck_number")
+                val hasTruckDamageAsk = eleFlow.getBoolean("has_flag_truck_damage")
+
                 val project = db.tableProjects.queryByServerId(serverSubProjectId)
                 if (project == null) {
                     error("queryFlows(): Can't find project with server ID $serverSubProjectId")
                     val sbuf = StringBuffer()
                     sbuf.append(". Projects=")
-                    for (project in db.tableProjects.query()) {
-                        sbuf.append(project.serverId)
+                    for (proj in db.tableProjects.query()) {
+                        sbuf.append(proj.serverId)
                         sbuf.append(" ")
                     }
                     error("Existing projects: $sbuf")
                     continue
                 }
                 incomingFlow.subProjectId = project.id
+                incomingFlow.hasFlagTruckNumber = hasTruckNumberAsk
+                incomingFlow.hasFlagTruckDamage = hasTruckDamageAsk
                 val itemFlow = db.tableFlow.queryByServerId(incomingFlow.serverId)
                 if (itemFlow == null) {
                     val match = get(unprocessed.unprocessedFlow, incomingFlow)
                     if (match != null) {
-                        // If this already exists, convert the existing one by simply giving it the serverId.
+                        // If this already exists, copy the data over.
                         match.serverId = incomingFlow.serverId
+                        match.hasFlagTruckNumber = incomingFlow.hasFlagTruckNumber
+                        match.hasFlagTruckDamage = incomingFlow.hasFlagTruckDamage
                         db.tableFlow.update(match)
                         msg("Commandeer local: $match")
                         unprocessed.unprocessedFlow.remove(match)

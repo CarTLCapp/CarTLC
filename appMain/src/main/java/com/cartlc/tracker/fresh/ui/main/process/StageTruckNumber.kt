@@ -14,6 +14,7 @@ class StageTruckNumber(
     fun process() {
         with(shared) {
             prefHelper.saveProjectAndAddressCombo(modifyCurrent = false, needsValidServerId = true)
+
             picturesVisible = true
 
             var showToast = false
@@ -52,6 +53,15 @@ class StageTruckNumber(
             titleUseCase.mainTitleVisible = true
         }
     }
+
+    val okToAsk: Boolean
+        get() {
+            with(shared) {
+                return repo.currentFlowElement?.let { element ->
+                    repo.db.tableFlow.queryById(element.flowId)?.hasFlagTruckNumber ?: true
+                } ?: true
+            }
+        }
 
     private val hasTruckNumberValue: Boolean
         get() {

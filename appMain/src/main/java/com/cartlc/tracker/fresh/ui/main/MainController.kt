@@ -448,10 +448,18 @@ class MainController(
                 stageSelectSubFlow.process()
             }
             Stage.TRUCK_NUMBER_PICTURE -> {
-                stageTruckNumber.process()
+                if (stageTruckNumber.okToAsk) {
+                    stageTruckNumber.process()
+                } else {
+                    buttonsController.skip()
+                }
             }
             Stage.TRUCK_DAMAGE_PICTURE -> {
-                stageTruckDamage.process()
+                if (stageTruckDamage.okToAsk) {
+                    stageTruckDamage.process()
+                } else {
+                    buttonsController.skip()
+                }
             }
             Stage.EQUIPMENT, Stage.ADD_EQUIPMENT -> {
                 taskPicture.clearFlags()

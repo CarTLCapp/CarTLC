@@ -67,6 +67,15 @@ class StageTruckDamage(
         }
     }
 
+    val okToAsk: Boolean
+        get() {
+            with(shared) {
+                return repo.currentFlowElement?.let { element ->
+                    repo.db.tableFlow.queryById(element.flowId)?.hasFlagTruckNumber ?: true
+                } ?: true
+            }
+        }
+
     private val hasTruckDamageValue: Boolean
         get() {
             with(shared) {
