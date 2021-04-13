@@ -31,7 +31,7 @@ class DataProjectAddressCombo : Comparable<DataProjectAddressCombo> {
     }
 
     var id: Long = 0
-    var projectNameId: Long
+    var projectNameId: Long // Warning: this is just the root project, still need a sub-project
     var addressId: Long
 
     private var mAddress: DataAddress? = null

@@ -943,7 +943,6 @@ class DCPing(
                 val serverSubProjectId = eleFlow.getInt("sub_project_id")
                 val hasTruckNumberAsk = eleFlow.getBoolean("has_flag_truck_number")
                 val hasTruckDamageAsk = eleFlow.getBoolean("has_flag_truck_damage")
-
                 val project = db.tableProjects.queryByServerId(serverSubProjectId)
                 if (project == null) {
                     error("queryFlows(): Can't find project with server ID $serverSubProjectId")
@@ -1292,7 +1291,7 @@ class DCPing(
             jsonObject.accumulate("tech_id", prefHelper.techID)
             jsonObject.accumulate("date_string", dateString)
             jsonObject.accumulate("server_id", item.serverId)
-            item.projectDesc?.let { jsonObject.accumulate("project_desc", item.projectDesc)}
+            item.projectDesc?.let { jsonObject.accumulate("project_desc", item.projectDesc) }
             item.project?.let { project ->
                 if (project.serverId > 0) {
                     jsonObject.accumulate("project_id", project.serverId)
@@ -1564,7 +1563,7 @@ class DCPing(
     private fun msg(msg: String) {
         Timber.i(msg)
     }
-    
+
     private fun verbose(msg: String) {
         Timber.d(msg)
     }
@@ -1572,7 +1571,7 @@ class DCPing(
     private fun error(msg: String) {
         Timber.e(msg)
     }
-    
+
     // endregion support classes
 
 //    private fun queryTrucks(): Boolean {

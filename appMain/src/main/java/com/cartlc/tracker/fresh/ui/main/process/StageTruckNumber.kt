@@ -3,8 +3,8 @@
  */
 package com.cartlc.tracker.fresh.ui.main.process
 
-import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.fresh.model.msg.StringMessage
+import com.cartlc.tracker.fresh.ui.main.MainController
 
 class StageTruckNumber(
         shared: MainController.Shared,
@@ -13,8 +13,6 @@ class StageTruckNumber(
 
     fun process() {
         with(shared) {
-            prefHelper.saveProjectAndAddressCombo(modifyCurrent = false, needsValidServerId = true)
-
             picturesVisible = true
 
             var showToast = false
@@ -57,8 +55,8 @@ class StageTruckNumber(
     val okToAsk: Boolean
         get() {
             with(shared) {
-                return repo.currentFlowElement?.let { element ->
-                    repo.db.tableFlow.queryById(element.flowId)?.hasFlagTruckNumber ?: true
+                return repo.currentFlowId?.let { flowId ->
+                    repo.db.tableFlow.queryById(flowId)?.hasFlagTruckNumber ?: true
                 } ?: true
             }
         }
@@ -72,7 +70,7 @@ class StageTruckNumber(
 
     private val title: String?
         get() {
-            with (shared) {
+            with(shared) {
                 return db.tableNote.noteTruckNumber?.name
             }
         }

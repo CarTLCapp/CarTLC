@@ -245,8 +245,7 @@ class CarRepository(
 
     val currentFlowElementId: Long?
         get() {
-            val stage = curFlowValue.stage
-            return when (stage) {
+            return when (val stage = curFlowValue.stage) {
                 is Stage.CUSTOM_FLOW -> {
                     when {
                         stage.isFirstElement -> firstFlowElementId
@@ -263,6 +262,18 @@ class CarRepository(
             }
         }
 
+    val currentFlowId: Long?
+        get() {
+            prefHelper.currentProjectGroup?.let { combo ->
+                combo.project?.let { project ->
+                    db.tableFlow.queryBySubProjectId(project.id.toInt())?.let { flow ->
+                        return flow.id
+                    }
+                }
+            }
+            return null
+        }
+
     val isCurrentFlowEntryComplete: Boolean
         get() = currentFlowElement?.flowId?.let { flowId ->
             prefHelper.currentEditEntry?.let { entry -> isComplete(entry, flowId) }
@@ -276,7 +287,7 @@ class CarRepository(
                         return subFlowSelectedElementId?.let { selectedFlowElementId ->
                             db.tableFlowElement.firstOfSubFlow(flow.id, selectedFlowElementId)?.let { it }
                         } ?: run {
-                            db.tableFlowElement.first(flow.id)?.let { it }
+                            db.tableFlowElement.first(flow.id)
                         }
                     }
                 }

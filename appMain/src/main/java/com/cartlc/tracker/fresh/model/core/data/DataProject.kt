@@ -1,12 +1,11 @@
-/**
- * Copyright 2018, FleetTLC. All rights reserved
+/*
+ * Copyright 2017-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.model.core.data
 
 /**
  * Created by dug on 5/16/17.
  */
-
 class DataProject {
     var id: Long = 0
     var serverId: Int = 0

@@ -448,6 +448,7 @@ class MainController(
                 stageSelectSubFlow.process()
             }
             Stage.TRUCK_NUMBER_PICTURE -> {
+                prefHelper.saveProjectAndAddressCombo(modifyCurrent = false, needsValidServerId = true)
                 if (stageTruckNumber.okToAsk) {
                     stageTruckNumber.process()
                 } else {
