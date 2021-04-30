@@ -16,16 +16,15 @@ import java.util.concurrent.TimeUnit;
 import modules.TimeHelper;
 /**
  * For each sub-project list the number of entries installed on the indicated date.
+ *
+ * The count is from 6am on the day requested, until 6am the following day, relative to the local time,
+ * not by the time as adjusted by another time zone.
  */
 public class Daily {
 
     private static final int NUMBER_DAYS = 30;
     private static final String DATE_FORMAT = "MM/dd/yy";
-    /**
-     * The desire is to have the entries sorted from 6am to the day in question
-     * until 6am the following day.
-     */
-    private static final long ADJUST_TIME_MS = TimeUnit.HOURS.toMillis(6);
+    private static final int ADJUST_HOURS = 6;
 
     private long mStartTime;
     private long mEndTime;
@@ -39,16 +38,7 @@ public class Daily {
 
         public ProjectCount(Project project) {
             name = project.name;
-            long useStartTime = mStartTime + ADJUST_TIME_MS;
-            long useEndTime = mEndTime + ADJUST_TIME_MS;
-            List<Entry> entries = Entry.findEntriesForProjectWithinRange(project.id, useStartTime, useEndTime);
-            count = 0;
-            for (Entry entry : entries) {
-                long time = getTimeAdjustedToServerTimeZone(entry);
-                if (time >= mStartTime && time <= mEndTime) {
-                    count++;
-                }
-            }
+            count = Entry.countEntriesForProjectWithinRange(project.id, mStartTime, mEndTime);
         }
 
         @Override
@@ -150,14 +140,12 @@ public class Daily {
     private void init() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(mDate);
-        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.HOUR, ADJUST_HOURS);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.AM_PM, Calendar.AM);
         mStartTime = calendar.getTimeInMillis();
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
+        calendar.add(Calendar.HOUR_OF_DAY, 24);
         mEndTime = calendar.getTimeInMillis();
         mCounts = new Counts();
     }
@@ -197,7 +185,6 @@ public class Daily {
     /**
      * This is very confusing but the entry_time is the value against the time_zone that it was entered
      * in according to the tablet's time. Not the current server's time.
-     * @return
      */
     public long getTimeAdjustedToServerTimeZone(Entry entry) {
         return timeHelper.getTimeAdjustedToServerTimeZone(entry.entry_time, entry.time_zone);

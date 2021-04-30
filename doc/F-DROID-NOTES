@@ -45,10 +45,20 @@ http {
 
 7. Follow the instructions here on how to set it up: https://f-droid.org/en/docs/Setup_an_F-Droid_App_Repo/
 
-       To copy APK over:
-
-       scp -i ~/.ssh/FleetTLC.pem /home/dug/wrap/CarTLC/Dropbox/internal/CarTLC-r4.03.apk  ubuntu@ec2-18-188-35-199.us-east-2.compute.amazonaws.com:
-
 8. Now within the F-Droid APP add a new repository and specify the http address to it ending in .../fdroid/repo
 
        When I did this I finally saw F-DROID working.
+
+
+TO ADD/UPDATE APK'S:
+
+       scp -i ~/.ssh/FleetTLC.pem CarTLC-r4.03.apk  ubuntu@fdroid.arqnetworks.com:apk/
+
+       ssh -i ~/.ssh/FleetTLC.pem ubuntu@fdroid.arqnetworks.com
+
+       cp apk/CarTLC-r4.03.apk public_html/fdroid/repo	
+
+       cd public_html/fdroid
+
+       fdroid update
+

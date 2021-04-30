@@ -54,7 +54,7 @@ class NoteListEntryController(
         })
         when {
             item.type === DataNote.Type.ALPHANUMERIC -> {
-                viewMvc.inputType = android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+                viewMvc.inputType = android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS or android.text.InputType.TYPE_CLASS_TEXT
                 viewMvc.maxLines = 1
             }
             item.type === DataNote.Type.NUMERIC_WITH_SPACES -> {

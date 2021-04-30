@@ -90,7 +90,7 @@
                 <col width="200">
                 <col width="80">
                 <tr>
-                    <th bgcolor="black"><font color="white">Date</font></th>
+                    <th bgcolor="black"><font color="white">Date (6am)</font></th>
                     <th>
                         <select style="width:80px" id="dateSelected" onchange="onDateSelected()">
                             @for(choice <- daily.getDates()) {
@@ -117,6 +117,12 @@
                     }
                 </table>
             }
+
+            <style>
+                p.ex1 { padding-top: 6px; }
+            </style>
+
+            <p class="ex1">The count is from 6am on the day requested,<br>until 6am the following day,<br>relative to the technician's local time.</p>
 
         </div>
 
