@@ -5,7 +5,6 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
-
 repositories {
     maven { url 'https://maven.google.com' }
     mavenCentral()
@@ -25,8 +24,8 @@ android {
         applicationId "com.cartlc.tracker"
         minSdkVersion 21
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 73
-        versionName "4.03"
+        versionCode 74
+        versionName "4.04"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }

@@ -3,10 +3,8 @@
 # 1. To prepare: run 'dist' from sbt.
 # 2. Run this script.
 #
-DATE=`date +%F`
 VERSION=`grep versionName appMain/build.gradle | awk '{gsub(/"/, "", $2); print $2}'`
-WRAP=../wrap/$DATE
-TGT=../wrap/Dropbox
+TGT=../wrap/CarTLC/fdroid/repo
 SRCFILE="./appMain/build/outputs/apk/debug/appMain-debug.apk"
 SRCFILE2="./appMain/debug/appMain-debug.apk"
 BUNDLE="./appMain/build/outputs/bundle/release/appMain-release.aab"
@@ -33,7 +31,7 @@ do
                             ls -l $SRCFILE
                         fi
                         SRCFILE=${SRCFILE2}
-			                  TGTFILE="CarTLC-d${VERSION}.apk"
+			TGTFILE="CarTLC-d${VERSION}.apk"
                         shift # past argument
                         ;;
 		-r)
@@ -43,7 +41,7 @@ do
                             ls -l $RELEASE2
                         fi
                         SRCFILE=${RELEASE}
-			                  TGTFILE="CarTLC-r${VERSION}.apk"
+			TGTFILE="CarTLC-r${VERSION}.apk"
                         shift # past argument
 			;;
                 -r2)
@@ -52,7 +50,7 @@ do
                             ls -l $RELEASE
                         fi
                         SRCFILE=${RELEASE2}
-			                  TGTFILE="CarTLC-r${VERSION}.apk"
+			TGTFILE="CarTLC-r${VERSION}.apk"
                         shift # past argument
                         ;;
                 -b)
@@ -61,7 +59,7 @@ do
                             ls -l $BUNDLE2
                         fi
                         SRCFILE=${BUNDLE}
-			                  TGTFILE="CarTLC-r${VERSION}.aab"
+			TGTFILE="CarTLC-r${VERSION}.aab"
                         shift # past argument
                         ;;
                 -b2)
@@ -70,7 +68,7 @@ do
                             ls -l $BUNDLE
                         fi
                         SRCFILE=${BUNDLE2}
-			                  TGTFILE="CarTLC-r${VERSION}.aab"
+			TGTFILE="CarTLC-r${VERSION}.aab"
                         shift # past argument
                         ;;
 		-clean)
@@ -86,13 +84,10 @@ do
 	esac
 done
 
-mkdir -p $WRAP
-
 echo -n "Using:   "
 ls -l $SRCFILE
 
-cp $SRCFILE $WRAP/$TGTFILE
-cp $WRAP/$TGTFILE $TGT/
-cp $WRAP/$TGTFILE ~/Downloads
+cp $SRCFILE $TGT/$TGTFILE
+cp $SRCFILE ~/Downloads/$TGTFILE
 
-echo "Created $TGTFILE in $WRAP and $TGT"
+echo "Created $TGTFILE and $TGT"

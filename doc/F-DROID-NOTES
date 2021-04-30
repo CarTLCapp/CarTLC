@@ -1,0 +1,19 @@
+
+TO GET F-DROID GOING:
+
+https://f-droid.org/en/docs/Setup_an_F-Droid_App_Repo/
+
+1. Setup a new AWS EC2 instance: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html
+	Called it within AWS F-Droid Repo
+
+2. Within this instance I followed the instructions here:
+	https://guardianproject.info/2013/11/05/setting-up-your-own-app-store-with-f-droid/
+
+   Except before I did the final "fdroid init" I did this:
+	sudo apt update && sudo apt install android-sdk
+	
+   I also set ANDROID_HOME to point to /usr/lib/android-sdk
+
+3. I copied the APK over:
+
+   scp -i ~/.ssh/FleetTLC.pem /home/dug/wrap/CarTLC/Dropbox/internal/CarTLC-r4.03.apk  ubuntu@ec2-18-188-35-199.us-east-2.compute.amazonaws.com:
