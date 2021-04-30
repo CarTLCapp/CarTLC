@@ -4,7 +4,7 @@
 # 2. Run this script.
 #
 VERSION=`grep versionName appMain/build.gradle | awk '{gsub(/"/, "", $2); print $2}'`
-TGT=../wrap/CarTLC/fdroid/repo
+TGT=../wrap/CarTLC
 SRCFILE="./appMain/build/outputs/apk/debug/appMain-debug.apk"
 SRCFILE2="./appMain/debug/appMain-debug.apk"
 BUNDLE="./appMain/build/outputs/bundle/release/appMain-release.aab"
@@ -90,4 +90,4 @@ ls -l $SRCFILE
 cp $SRCFILE $TGT/$TGTFILE
 cp $SRCFILE ~/Downloads/$TGTFILE
 
-echo "Created $TGTFILE and $TGT"
+echo "Created $TGTFILE in $TGT and ~/Downloads"
