@@ -24,6 +24,7 @@ import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleView
 import com.cartlc.tracker.fresh.ui.main.title.TitleController
 import com.cartlc.tracker.fresh.ui.title.TitleView
 import com.cartlc.tracker.fresh.model.event.Button
+import com.cartlc.tracker.fresh.ui.app.factory.FactoryController
 import com.cartlc.tracker.viewmodel.vehicle.VehicleViewModel
 
 class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsController.Listener {
@@ -44,7 +45,7 @@ class VehicleActivity : BaseActivity(), ActionUseCase.Listener, ButtonsControlle
     private lateinit var buttonsController: ButtonsController
     private lateinit var titleController: TitleController
 
-    private val factoryController = componentRoot.factoryController
+    private val factoryController: FactoryController by lazy { componentRoot.factoryController }
 
     lateinit var vm: VehicleViewModel
 
