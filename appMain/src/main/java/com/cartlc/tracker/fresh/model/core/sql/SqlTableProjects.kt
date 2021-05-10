@@ -4,6 +4,7 @@
 package com.cartlc.tracker.fresh.model.core.sql
 
 import android.content.ContentValues
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import com.cartlc.tracker.fresh.model.core.data.DataProject
@@ -11,6 +12,7 @@ import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.core.table.TableProjects
 
 import com.cartlc.tracker.fresh.ui.app.TBApplication
+import timber.log.Timber
 
 /**
  * Created by dug on 4/17/17.
@@ -180,6 +182,23 @@ class SqlTableProjects(
         }
         return count
     }
+
+    override val hasUnsetServerIds: Boolean
+        get() {
+            var foundOne = false
+            var cursor: Cursor? = null
+            try {
+                val columns = arrayOf(KEY_NAME)
+                val selection = "$KEY_SERVER_ID=0"
+                cursor = dbSql.query(TABLE_NAME, columns, selection, null, null, null, null)
+                foundOne = cursor.count > 0
+            } catch (ex: Exception) {
+                Timber.e(ex)
+            } finally {
+                cursor?.close()
+            }
+            return foundOne
+        }
 
     /**
      * Returns list of project names.

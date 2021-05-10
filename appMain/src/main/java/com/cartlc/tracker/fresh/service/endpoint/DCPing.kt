@@ -32,6 +32,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by dug on 8/24/17.
@@ -72,6 +73,8 @@ class DCPing(
 
         private const val COMPANY_PAGE_SIZE = 100
         private const val FLOW_PAGE_SIZE = 10
+
+        private val FREQ_LAST_SERVER_PROJECT_ID_ZERO_CHECK = TimeUnit.DAYS.toMillis(1)
     }
 
     private val serverUrl: String
@@ -264,8 +267,9 @@ class DCPing(
         val version_flow = blob.getInt(PrefHelper.VERSION_FLOW)
         val version_vehicle_names = blob.getInt(PrefHelper.VERSION_VEHICLE_NAMES)
         var refresh = false
-        if (prefHelper.versionProject != version_project) {
-            msg("New project version $version_project")
+        val detectOverride = detectServerProjectIdOfZero
+        if (prefHelper.versionProject != version_project || detectOverride) {
+            msg("New project version $version_project, detectOverride=$detectOverride")
             queryProjects()?.let { error ->
                 TBApplication.ShowError(error)
                 return
@@ -368,6 +372,24 @@ class DCPing(
         }
         EventBus.getDefault().post(EventPingStatus(uploadsAllDone = allDone, didWork = refresh))
     }
+
+    /**
+     * Don't really like this, but the current problem is that somehow I am losing by serverId's for my projects
+     * for some clients. When this happens, it sends over the project id as a name. Which is fine, unless the project
+     * name has been changed, in which case there will be no match. The real solution over what I am doing here is to
+     * find out why I am losing the server ids for projects.
+     */
+    private val detectServerProjectIdOfZero: Boolean
+        get() {
+            val diff = System.currentTimeMillis() - prefHelper.lastServerProjectIdZeroAllowance
+            if (diff < FREQ_LAST_SERVER_PROJECT_ID_ZERO_CHECK) {
+                if (db.tableProjects.hasUnsetServerIds) {
+                    prefHelper.lastServerProjectIdZeroAllowance = System.currentTimeMillis()
+                    return true
+                }
+            }
+            return false
+        }
 
     private fun queryProjects(): String? {
         try {
@@ -1109,7 +1131,7 @@ class DCPing(
                     jsonObject.accumulate("truck_number_string", truck.truckNumberValue)
                 }
                 if (truck.truckNumberPictureId > 0) {
-                    error("truckNumberPictureId? ${truck.toLongString(db)}") // TODO: This is happening, need to think as to why.
+                    Timber.d("truckNumberPictureId? ${truck.toLongString(db)}") // TODO: This is happening, need to think as to why.
                 }
             } else {
                 prefHelper.doErrorCheck = true
@@ -1403,7 +1425,6 @@ class DCPing(
         }
         return JSONObject()
     }
-
 
     private fun sendCrashLines(lines: List<SqlTableCrash.CrashLine>) {
         for (line in lines) {

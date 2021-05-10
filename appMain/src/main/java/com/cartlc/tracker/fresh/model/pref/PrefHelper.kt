@@ -60,6 +60,7 @@ class PrefHelper constructor(
         private const val KEY_AUTO_ROTATE_PICTURE = "auto_rotate_picture"
         private const val KEY_LAST_ACTIVITY_TIME = "last_activity_time"
         private const val KEY_NEW_ENTRY_CREATION_TIME = "new_entry_creation_time"
+        private const val KEY_LAST_SERVER_PROJECT_ID_ZERO_ALLOWANCE = "last_server_project_id_zero_allowance"
 
         const val VERSION_PROJECT = "version_project"
         const val VERSION_COMPANY = "version_company"
@@ -261,7 +262,9 @@ class PrefHelper constructor(
 
     var isDevelopment: Boolean
         get() = getInt(KEY_IS_DEVELOPMENT, 0) != 0
-        set(value) { setInt(KEY_IS_DEVELOPMENT, if (value) 1 else 0) }
+        set(value) {
+            setInt(KEY_IS_DEVELOPMENT, if (value) 1 else 0)
+        }
 
     var currentProjectGroupId: Long
         get() = getLong(KEY_CURRENT_PROJECT_GROUP_ID, -1L)
@@ -284,6 +287,12 @@ class PrefHelper constructor(
 
     // TODO: This look likes something that can be improved:
     var onCurrentProjecGroupChanged: (group: DataProjectAddressCombo?) -> Unit = {}
+
+    var lastServerProjectIdZeroAllowance: Long
+        get() = getLong(KEY_LAST_SERVER_PROJECT_ID_ZERO_ALLOWANCE, 0)
+        set(value) {
+            setLong(KEY_LAST_SERVER_PROJECT_ID_ZERO_ALLOWANCE, value)
+        }
 
     private var entryCreationTime: Long
         get() = getLong(KEY_NEW_ENTRY_CREATION_TIME, 0L)
@@ -443,7 +452,9 @@ class PrefHelper constructor(
 
     var autoRotatePicture: Int
         get() = getInt(KEY_AUTO_ROTATE_PICTURE, 0)
-        set(value) { setInt(KEY_AUTO_ROTATE_PICTURE, value) }
+        set(value) {
+            setInt(KEY_AUTO_ROTATE_PICTURE, value)
+        }
 
     val hasCode: Boolean
         get() = !TextUtils.isEmpty(firstTechCode)

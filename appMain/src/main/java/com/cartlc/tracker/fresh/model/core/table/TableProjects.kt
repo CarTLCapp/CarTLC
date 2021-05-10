@@ -3,6 +3,7 @@ package com.cartlc.tracker.fresh.model.core.table
 import com.cartlc.tracker.fresh.model.core.data.DataProject
 
 interface TableProjects {
+    val hasUnsetServerIds: Boolean
     fun add(rootProject: String, subProject: String, serverId: Int, disabled: Boolean): Long
     fun add(rootProject: String): Long
     fun addTest(item: String): Long

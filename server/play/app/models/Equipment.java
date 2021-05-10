@@ -253,7 +253,7 @@ public class Equipment extends Model implements Comparable<Equipment> {
 
     public static List<Long> findMatches(String name) {
         List<Equipment> equipments = find.where()
-                .eq("name", name)
+                .ilike("name", "%" + name + "%")
                 .findList();
         List<Long> result = new ArrayList<Long>();
         for (Equipment equip : equipments) {

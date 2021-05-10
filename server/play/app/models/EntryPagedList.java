@@ -4,6 +4,7 @@
 package models;
 
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 import com.avaje.ebean.*;
 
@@ -13,12 +14,16 @@ import play.Logger;
 import play.twirl.api.Html;
 import views.formdata.InputSearch;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.concurrent.TimeUnit;
+
 public class EntryPagedList {
 
     public enum ColumnSelector {
         ALL("All", "all", null),
         TECH("Technician", "tech", "te.last_name"),
-        DATE("", "date", "e.entry_time"),
+        DATE("Date", "date", "e.entry_time"),
         TIME("", "time", "e.entry_time"),
         ROOT_PROJECT_ID("Root Project", "root_project", "r.name"),
         SUB_PROJECT_ID("Sub Project", "sub_project", "p.name"),
@@ -114,11 +119,11 @@ public class EntryPagedList {
         }
 
         boolean hasPartialMatch(String element) {
-            return element.contains(mSearchTerm);
+            return StringUtils.containsIgnoreCase(element, mSearchTerm);
         }
 
         boolean hasMatch(String element) {
-            return element.equals(mSearchTerm);
+            return element.equalsIgnoreCase(mSearchTerm);
         }
 
         boolean hasSearchBy(ColumnSelector selector) {
@@ -148,7 +153,7 @@ public class EntryPagedList {
                 return Html.apply(element);
             }
             if (selector == mColumnSelector || mColumnSelector == ColumnSelector.ALL) {
-                if (selector == ColumnSelector.TECH) {
+                if (selector == ColumnSelector.TECH || selector == ColumnSelector.EQUIPMENT || selector == ColumnSelector.STREET) {
                     if (hasPartialMatch(element)) {
                         return highlightPartial(element);
                     }
@@ -182,7 +187,7 @@ public class EntryPagedList {
         TermMatch matchPartial(String element) {
             ArrayList<TermMatch> matches = new ArrayList<>();
             String elementNoCase = element.toLowerCase();
-            String term = mSearchTerm;
+            String term = mSearchTerm.toLowerCase();
             int pos = elementNoCase.indexOf(term, 0);
             if (pos >= 0) {
                 return new TermMatch(term, pos);
@@ -211,6 +216,13 @@ public class EntryPagedList {
     static final String CLASS_NEXT = "next";
     static final String CLASS_NEXT_DISABLED = "next disabled";
 
+    private static final String PARSE_DATE_FORMAT = "MM/dd/yyyy";
+    private SimpleDateFormat mParseDateFormat = new SimpleDateFormat(PARSE_DATE_FORMAT);
+    private static final String PARSE_DATE_FORMAT_ZZZ = "MM/dd/yyyy zzz";
+    private SimpleDateFormat mParseDateFormatZZZ = new SimpleDateFormat(PARSE_DATE_FORMAT_ZZZ);
+    private static final String ENTRY_DATE_FORMAT = "YYYY-MM-dd HH:mm:SS zzz";
+    private SimpleDateFormat mBuildDateFormat = new SimpleDateFormat(ENTRY_DATE_FORMAT);
+
     Parameters mParams = new Parameters();
     Result mResult = new Result();
     SearchInfo mSearch = new SearchInfo();
@@ -219,6 +231,8 @@ public class EntryPagedList {
     long mByTruckId;
     int mRowNumber;
     int mDefaultPageSize = PAGE_SIZES[0];
+    Date mSearchStartDate = null;
+    Date mSearchEndDate = null;
 
     public boolean canViewTrucks = true;
     public boolean canViewPictures = true;
@@ -488,6 +502,23 @@ public class EntryPagedList {
                     appendSearch(query, "e.id", entries_ids);
                 }
             }
+            if (mSearch.hasSearchBy(ColumnSelector.DATE) && getSearchByDate()) {
+                boolean paren;
+                if (query.length() > 0) {
+                    query.append(" OR (");
+                    paren = true;
+                } else {
+                    paren = false;
+                }
+                query.append("e.entry_time BETWEEN '");
+                query.append(mBuildDateFormat.format(mSearchStartDate));
+                query.append("' AND '");
+                query.append(mBuildDateFormat.format(mSearchEndDate));
+                query.append("'");
+                if (paren) {
+                    query.append(")");
+                }
+            }
         }
         return query.toString();
     }
@@ -595,18 +626,43 @@ public class EntryPagedList {
         return list;
     }
 
-//    private boolean hasSearchByEquipment() {
-//        return mSearch.hasSearchBy(ColumnSelector.EQUIPMENT);
-//    }
+    // Return start of scanned time (the beginning of the day)
+    private boolean getSearchByDate() {
+        // Translate entered date value into a concrete time local to the tech's time.
+        try {
+            Date date = parseDate(mSearch.getTerm().trim());
+            if (date == null) {
+                return false;
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            mSearchStartDate = new Date(calendar.getTimeInMillis());
+            calendar.add(Calendar.HOUR_OF_DAY, 24);
+            mSearchEndDate = new Date(calendar.getTimeInMillis());
+            return true;
+        } catch (Exception ex) {
+            Logger.error("Invalid date entered: " + ex.getMessage());
+        }
+        return false;
+    }
 
-//    private boolean hasSearchByRootProject() {
-//        if (mSearch.hasSearchBy(ColumnSelector.ROOT_PROJECT_ID)) {
-//            if (!RootProject.findMatches(mSearch.getTerm()).isEmpty()) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+    private Date parseDate(String term) {
+        if (term.contains(" ")) {
+            try {
+                Date date = mParseDateFormatZZZ.parse(term);
+                return date;
+            } catch (Exception ex) {
+                Logger.info(ex.getMessage());
+            }
+        }
+        try {
+            Date date = mParseDateFormat.parse(term);
+            return date;
+        } catch (Exception ex) {
+            Logger.info(ex.getMessage());
+        }
+        return null;
+    }
 
     private String getLimitFilters() {
         StringBuilder projects = new StringBuilder();
@@ -664,7 +720,11 @@ public class EntryPagedList {
         if (VERBOSE) {
             Logger.debug("Query: " + query);
         }
-        entries = Ebean.createSqlQuery(query).findList();
+        SqlQuery sqlQuery = Ebean.createSqlQuery(query);
+        // Note: it is possible to add parameters to the query call. Referenced within the query as ":start" for example.
+//      sqlQuery.setParameter("start", mSearchStartDate);
+//      sqlQuery.setParameter("end:, mSearchEndDate);
+        entries = sqlQuery.findList();
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
             Logger.error("No entries");

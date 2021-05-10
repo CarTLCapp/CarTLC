@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.OnLifecycleEvent
+import com.cartlc.tracker.BuildConfig
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataNote
 import com.cartlc.tracker.fresh.model.core.data.DataProjectAddressCombo
@@ -334,6 +335,16 @@ class MainController(
 
                     override fun onDenied(permission: String) {}
                 })
+        if (db.tableProjects.hasUnsetServerIds) {
+            Timber.e("Why do some projects have unset server ids?")
+            if (BuildConfig.DEBUG) {
+                db.tableProjects.query().forEach {
+                    if (it.serverId == 0) {
+                        Timber.e("Project=$it")
+                    }
+                }
+            }
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)

@@ -28,6 +28,8 @@ public class Entry extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String DATE_FORMAT = "yyyy-MM-dd kk:mm zzz";
+
     public enum Status {
         // Warning: this string version must match the APP side.
         COMPLETE("Complete"),
@@ -84,7 +86,7 @@ public class Entry extends com.avaje.ebean.Model {
     @Constraints.Required
     public int tech_id;
 
-    @Formats.DateTime(pattern = "yyyy-MM-dd kk:mm zzz")
+    @Formats.DateTime(pattern = DATE_FORMAT)
     public Date entry_time;
 
     @Constraints.Required
