@@ -137,11 +137,19 @@ public class Flow extends com.avaje.ebean.Model {
     }
 
     public static boolean hasFlagTruckNumber(long flowId) {
-        return get(flowId).hasFlagTruckNumber();
+        Flow flow = get(flowId);
+        if (flow == null) {
+            return false;
+        }
+        return flow.hasFlagTruckNumber();
     }
 
     public static boolean hasFlagTruckDamage(long flowId) {
-        return get(flowId).hasFlagTruckDamage();
+        Flow flow = get(flowId);
+        if (flow == null) {
+            return false;
+        }
+        return flow.hasFlagTruckDamage();
     }
 
     public void setFlagTruckNumber(boolean value) {

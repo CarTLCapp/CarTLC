@@ -1,5 +1,5 @@
 /**
- * Copyright 2018, FleetTLC. All rights reserved
+ * Copyright 2018-2021, FleetTLC. All rights reserved
  */
 package controllers;
 
@@ -15,6 +15,9 @@ import play.data.*;
 import play.db.ebean.Transactional;
 import play.libs.Json;
 import play.mvc.*;
+import java.util.concurrent.*;
+import modules.WorkerExecutionContext;
+import play.libs.concurrent.HttpExecution;
 
 import static play.data.Form.*;
 import modules.StringHelper;
@@ -34,11 +37,16 @@ public class DaarController extends Controller {
 
     private FormFactory mFormFactory;
     private SimpleDateFormat mDateFormat;
+    private DaarPagedList mLastEntryList;
+    private WorkerExecutionContext mExecutionContext;
 
     @Inject
-    public DaarController(FormFactory formFactory) {
+    public DaarController(FormFactory formFactory,
+                          WorkerExecutionContext executionContext
+    ) {
         this.mFormFactory = formFactory;
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
+        mExecutionContext = executionContext;
     }
 
     @Security.Authenticated(Secured.class)
@@ -63,6 +71,8 @@ public class DaarController extends Controller {
         list.setOrder(order);
         list.compute();
 
+        mLastEntryList = list;
+
         InputSearch isearch = new InputSearch(decodedSearchTerm, searchField);
         searchForm.fill(isearch);
 
@@ -86,6 +96,8 @@ public class DaarController extends Controller {
         list.setOrder(order);
         list.compute();
 
+        mLastEntryList = list;
+
         searchForm.fill(isearch);
 
         return ok(views.html.daar_list.render(list, searchForm, Secured.getClient(ctx())));
@@ -96,6 +108,8 @@ public class DaarController extends Controller {
         DaarPagedList list = new DaarPagedList();
         list.compute();
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
+
+        mLastEntryList = list;
 
         return ok(views.html.daar_list.render(list, searchForm, Secured.getClient(ctx())));
     }
@@ -111,6 +125,28 @@ public class DaarController extends Controller {
         entry.update();
 
         return ok(views.html.daar_view.render(entry, Secured.getClient(ctx())));
+    }
+
+    public CompletionStage<Result> computeTotalNumRows() {
+        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
+        return CompletableFuture.completedFuture(mLastEntryList.computeTotalNumRows()).thenApplyAsync(result -> {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append(mLastEntryList.getPrevClass());
+            sbuf.append("|");
+            sbuf.append(mLastEntryList.getDisplayingXtoYofZ());
+            sbuf.append("|");
+            sbuf.append(mLastEntryList.getNextClass());
+            sbuf.append("|");
+            if (result == 0) {
+                sbuf.append("No entries");
+            } else if (result == 1) {
+                sbuf.append("One entry");
+            } else {
+                sbuf.append(result);
+                sbuf.append(" entries found");
+            }
+            return ok(sbuf.toString());
+        }, myEc);
     }
 
     @Transactional

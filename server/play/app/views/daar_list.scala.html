@@ -112,6 +112,22 @@
             </ul>
         </div>
 
+        <script type="text/javascript">
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    var line = this.responseText;
+                    var bits = line.split("|");
+                    document.getElementById("previous").setAttribute("class", bits[0])
+                    document.getElementById("currentPage").innerHTML = bits[1];
+                    document.getElementById("next").setAttribute("class", bits[2]);
+                    document.getElementById("homeCount").innerHTML = bits[3];
+                }
+            };
+            xhttp.open("GET", "@routes.DaarController.computeTotalNumRows()", true);
+            xhttp.send();
+        </script>
+
     }
 
     @if(client.is_admin) {

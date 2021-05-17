@@ -211,6 +211,7 @@ GET     /daar/:id/view         controllers.DaarController.view(id:Long)
 GET     /daar/search           controllers.DaarController.search(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc")
 GET     /daar/search/clear     controllers.DaarController.searchClear()
 POST    /daar/enter            controllers.DaarController.enter()
+GET     /daar/compute_totals   controllers.DaarController.computeTotalNumRows()
 
 # Long form
 GET     /daar/list/:page/:pageSize/:sort/:order/:searchField/:searchTerm  controllers.DaarController.list2(page:Int, pageSize:Int, sort: String, order: String, searchTerm: String, searchField: String)

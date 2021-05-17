@@ -594,6 +594,7 @@ public class EntryController extends Controller {
         }
         value = json.findValue("project_id");
         if (value == null) {
+            // This is OLD school:
             value = json.findValue("project_name");
             if (value == null) {
                 missing.add("project_id");
@@ -626,6 +627,7 @@ public class EntryController extends Controller {
         }
         value = json.findValue("address_id");
         if (value == null) {
+            // This is old school:
             value = json.findValue("address");
             if (value == null) {
                 missing.add("address_id");
@@ -679,6 +681,7 @@ public class EntryController extends Controller {
                     collection.collection_id = (long) collection_id;
                     JsonNode subValue = ele.findValue("equipment_id");
                     if (subValue == null) {
+                        // This is old school:
                         subValue = ele.findValue("equipment_name");
                         if (subValue == null) {
                             missing.add("equipment_id");
@@ -793,6 +796,7 @@ public class EntryController extends Controller {
                     collection.collection_id = (long) collection_id;
                     JsonNode subValue = ele.findValue("id");
                     if (subValue == null) {
+                        // This is old school:
                         subValue = ele.findValue("name");
                         if (subValue == null) {
                             missing.add("note:id, note:name");

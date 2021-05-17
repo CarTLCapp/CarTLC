@@ -1131,7 +1131,8 @@ class DCPing(
                     jsonObject.accumulate("truck_number_string", truck.truckNumberValue)
                 }
                 if (truck.truckNumberPictureId > 0) {
-                    Timber.d("truckNumberPictureId? ${truck.toLongString(db)}") // TODO: This is happening, need to think as to why.
+                    // This is no longer being used. Report to log but we probably don't care.
+                    Timber.d("truckNumberPictureId? ${truck.toLongString(db)}")
                 }
             } else {
                 prefHelper.doErrorCheck = true
@@ -1140,14 +1141,18 @@ class DCPing(
             val project = entry.project ?: return "sendEntry(): No project name for entry -- abort"
             if (project.serverId > 0) {
                 jsonObject.accumulate("project_id", project.serverId)
-            } else {
                 jsonObject.accumulate("project_name", project.subProject)
+            } else {
+                prefHelper.reloadProjects()
+                return "sendEntry(): Missing serverId for project : ${project.dashName}"
             }
             val address = entry.address ?: return "sendEntry(): No address for entry -- abort"
             if (address.serverId > 0) {
                 jsonObject.accumulate("address_id", address.serverId)
-            } else {
                 jsonObject.accumulate("address", address.line)
+            } else {
+                prefHelper.reloadCompany()
+                return "sendEntry(): Missing serverId for address : ${address.line}"
             }
             if (entry.status != null && entry.status !== TruckStatus.UNKNOWN) {
                 jsonObject.accumulate("status", entry.status!!.toString())
@@ -1159,8 +1164,10 @@ class DCPing(
                     val jobj = JSONObject()
                     if (equipment.serverId > 0) {
                         jobj.accumulate("equipment_id", equipment.serverId)
-                    } else {
                         jobj.accumulate("equipment_name", equipment.name)
+                    } else {
+                        prefHelper.reloadEquipments()
+                        return "sendEntry(): Missing serverId for equipment ${equipment.name}"
                     }
                     jarray.put(jobj)
                 }
@@ -1190,8 +1197,10 @@ class DCPing(
                     val jobj = JSONObject()
                     if (note.serverId > 0) {
                         jobj.put("id", note.serverId)
-                    } else {
                         jobj.put("name", note.name)
+                    } else {
+                        prefHelper.reloadNotes()
+                        return "sendEntry(): Missing serverId for note ${note.name}"
                     }
                     jobj.put("value", note.value)
                     jarray.put(jobj)

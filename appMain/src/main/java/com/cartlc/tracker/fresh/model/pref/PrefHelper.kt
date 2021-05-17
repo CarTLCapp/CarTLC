@@ -446,8 +446,13 @@ class PrefHelper constructor(
 
     val numEquipPossible: Int
         get() {
-            val collection = db.tableCollectionEquipmentProject.queryForProject(currentProjectGroup!!.projectNameId)
-            return collection.equipment.size
+            return currentProjectGroup?.let { projectAddressCombo ->
+                val collection =
+                    db.tableCollectionEquipmentProject.queryForProject(projectAddressCombo.projectNameId)
+                collection.equipment.size
+            } ?: run {
+                0
+            }
         }
 
     var autoRotatePicture: Int
@@ -654,11 +659,13 @@ class PrefHelper constructor(
     }
 
     private fun setAddress(address: DataAddress?) {
-        company = address!!.company
-        street = address.street
-        city = address.city
-        state = address.state
-        zipCode = address.zipcode
+        address?.let {
+            company = address.company
+            street = address.street
+            city = address.city
+            state = address.state
+            zipCode = address.zipcode
+        }
     }
 
 
@@ -694,7 +701,7 @@ class PrefHelper constructor(
         val entry = DataEntry(db)
         entry.projectAddressCombo = projectGroup
         entry.equipmentCollection = DataCollectionEquipmentEntry(db, nextEquipmentCollectionID)
-        entry.equipmentCollection!!.addChecked()
+        entry.equipmentCollection?.addChecked()
         entry.pictures = db.tablePicture.createCollectionFromPending(nextPictureCollectionID)
         entry.truckId = db.tableTruck.save(
                 truckNumberValue ?: "",
@@ -703,7 +710,7 @@ class PrefHelper constructor(
                 truckDamagePictureId,
                 truckDamageValue ?: "",
                 projectGroup.projectNameId,
-                projectGroup.companyName!!)
+                projectGroup.companyName ?: "?company")
         entry.status = status
         entry.saveNotes(nextNoteCollectionID, statusIsPartialInstall)
         entry.date = entryCreationTime
@@ -815,6 +822,14 @@ class PrefHelper constructor(
 
     fun reloadEquipments() {
         versionEquipment = VERSION_RESET
+    }
+
+    fun reloadCompany() {
+        versionCompany = VERSION_RESET
+    }
+
+    fun reloadNotes() {
+        versionNote = VERSION_RESET
     }
 
     override fun clearAll() {
