@@ -19,7 +19,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
         private const val DATABASE_NAME = "cartcl.db"
-        private const val DATABASE_VERSION = 23
+        private const val DATABASE_VERSION = 24
     }
 
     private val dbHelper: DatabaseHelper by lazy {
@@ -59,6 +59,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
         lateinit var tableVehicle: SqlTableVehicle
         lateinit var tableVehicleName: SqlTableVehicleName
         lateinit var tableDaar: SqlTableDaar
+        lateinit var tableHours: SqlTableHours
 
         override fun onCreate(db: SQLiteDatabase) {
             init(db)
@@ -72,6 +73,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableFlow.create()
             tableFlowElement.create()
             tableFlowElementNote.create()
+            tableHours.create()
             tableNote.create()
             tableCollectionNoteEntry.create()
             tableCollectionNoteProject.create()
@@ -83,7 +85,6 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableVehicle.create()
             tableVehicleName.create()
             tableZipCode.create()
-
         }
 
         fun init(db: SQLiteDatabase) {
@@ -99,6 +100,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableFlow = SqlTableFlow(dm, db)
             tableFlowElement = SqlTableFlowElement(dm, db)
             tableFlowElementNote = SqlTableFlowElementNote(dm, db)
+            tableHours = SqlTableHours(dm, db)
             tableNote = SqlTableNote(dm, db)
             tablePicture = SqlTablePicture(db)
             tableProjectAddressCombo = SqlTableProjectAddressCombo(dm, db)
@@ -154,6 +156,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             if (oldVersion <= 22) {
                 tableFlow.upgrade22()
             }
+            if (oldVersion <= 23) {
+                tableHours.create()
+            }
         }
 
         override fun onOpen(db: SQLiteDatabase) {
@@ -169,6 +174,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableDaar.clearUploaded()
             tableEntry.clearUploaded()
             tableEquipment.clearUploaded()
+            tableHours.clearUploaded()
             tableNote.clearUploaded()
             tablePicture.clearUploaded()
             tableProjects.clearUploaded()
@@ -189,6 +195,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
         tableFlow.clearAll()
         tableFlowElement.clearAll()
         tableFlowElementNote.clearAll()
+        tableHours.clearAll()
         tableNote.clearAll()
         tablePicture.clearAll()
         tableProjectAddressCombo.clearAll()
@@ -257,6 +264,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     override val tableDaar: TableDaar
         get() = dbHelper.tableDaar
+
+    override val tableHours: TableHours
+        get() = dbHelper.tableHours
 
     override val appVersion: String
         get() = (ctx.applicationContext as TBApplication).version

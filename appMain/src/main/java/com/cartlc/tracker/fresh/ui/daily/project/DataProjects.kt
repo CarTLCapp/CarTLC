@@ -1,11 +1,9 @@
-package com.cartlc.tracker.fresh.ui.daar.data
+package com.cartlc.tracker.fresh.ui.daily.project
 
-import com.cartlc.tracker.fresh.ui.daar.DaarViewMvc
-
-interface DaarDataProjects {
+interface DataProjects {
 
     val isReady: Boolean
-    var selectedProjectTab: DaarViewMvc.ProjectSelect
+    var selectedProjectTab: ProjectSelect
     var selectingRootName: Boolean
     var selectedRootProjectName: String?
     var selectedSubProjectName: String?

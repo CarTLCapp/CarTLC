@@ -1,4 +1,4 @@
-package com.cartlc.tracker.fresh.ui.daar
+package com.cartlc.tracker.fresh.ui.daily.project
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,16 +7,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.R
 
-class DaarProjectAdapter(
+class ItemAdapter(
         private val layoutInflater: LayoutInflater,
         private val items: List<String>,
         private val listener: Listener
-) : RecyclerView.Adapter<DaarProjectAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
-    var selectedItem: Int = -1
+    private var selectedItem: Int = -1
 
     interface Listener {
-        fun onProjectItemSelected(position: Int, item: String)
+        fun onItemSelected(position: Int, item: String)
         fun isSelected(position: Int, item: String): Boolean
     }
 
@@ -57,6 +57,6 @@ class DaarProjectAdapter(
         }
         selectedItem = position
         notifyItemChanged(position)
-        listener.onProjectItemSelected(position, text)
+        listener.onItemSelected(position, text)
     }
 }

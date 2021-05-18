@@ -70,7 +70,7 @@
         </activity>
 
         <activity
-            android:name=".fresh.ui.daar.DaarActivity"
+            android:name=".fresh.ui.daily.daar.DaarActivity"
             android:label="@string/daar_title"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"

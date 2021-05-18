@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit
 /**
  * Created by dug on 8/24/17.
  */
-
 class DCPing(
         private val context: Context,
         private val repo: CarRepository
@@ -60,6 +59,7 @@ class DCPing(
         private const val stringsSuffix: String = "strings"
         private const val flowsSuffix: String = "flows"
         private const val daarSuffix: String = "daar/enter"
+        private const val hoursSuffix: String = "hours/enter"
 
         private const val UPLOAD_RESET_TRIGGER = "reset_upload"
         private const val RE_REGISTER_TRIGGER = "re-register"
@@ -70,6 +70,7 @@ class DCPing(
         private const val FAILED_UPLOADED_TRIGGER = 5
 
         private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'z"
+        private const val HOURS_FORMAT = "yyyy-MM-dd'Z'z"
 
         private const val COMPANY_PAGE_SIZE = 100
         private const val FLOW_PAGE_SIZE = 10
@@ -324,11 +325,11 @@ class DCPing(
         }
         var entries = db.tableEntry.queryPendingEntriesToUpload()
         if (entries.isNotEmpty()) {
-            sendEntries(entries).let { response ->
-                if (response.error != null) {
-                    TBApplication.ShowError(response.error)
+            sendEntries(entries).let { r ->
+                if (r.error != null) {
+                    TBApplication.ShowError(r.error)
                 }
-                refresh = response.numPages > 0
+                refresh = r.numPages > 0
             }
         }
         entries = db.tableEntry.queryPendingPicturesToUpload()
@@ -364,6 +365,11 @@ class DCPing(
         if (daarList.isNotEmpty()) {
             Timber.i("FOUND ${daarList.size} DAAR entries needing to be uploaded")
             sendDaars(daarList)
+        }
+        val hoursList = db.tableHours.queryReadyAndNotUploaded()
+        if (hoursList.isNotEmpty()) {
+            Timber.i("FOUND ${hoursList.size} DAAR entries needing to be uploaded")
+            sendHours(hoursList)
         }
         val allDone = !db.tableEntry.hasEntriesToUpload && db.tableEntry.queryEmptyServerIds().isEmpty()
         msg("ping() complete: refresh=$refresh, allDone=$allDone")
@@ -473,7 +479,7 @@ class DCPing(
         }
         for (page in 1 until response.numPages) {
             queryCompanies(page, unprocessed).error?.let { error ->
-                return response.error
+                return error
             }
         }
         // Remaining unprocessed elements are disabled if they have entries.
@@ -638,8 +644,8 @@ class DCPing(
                             sbuf.append(" for tableEquipment ")
                             sbuf.append(equipment!!.name)
                             sbuf.append(". Projects=")
-                            for (project in db.tableProjects.query()) {
-                                sbuf.append(project.serverId)
+                            for (proj in db.tableProjects.query()) {
+                                sbuf.append(proj.serverId)
                                 sbuf.append(" ")
                             }
                             sbuf.append(".")
@@ -1357,6 +1363,69 @@ class DCPing(
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, DCPing::class.java, "sendDaar()", "server")
             return ex.message ?: "Exception sendDaar()"
+        }
+        return null
+    }
+
+    private fun sendHours(list: List<DataHours>): PageResponse {
+        val errors = mutableListOf<String>()
+        var count = 0
+        for (item in list) {
+            sendHours(item)?.let { error ->
+                errors.add(error)
+            } ?: run {
+                count++
+            }
+        }
+        return if (errors.isEmpty()) PageResponse(count) else PageResponse(error = errors.joinToString(","))
+    }
+
+    private fun sendHours(item: DataHours): String? {
+        Timber.i("sendHours($item)")
+        try {
+            val dateString = SimpleDateFormat(HOURS_FORMAT, Locale.getDefault()).format(Date(item.date))
+            val jsonObject = JSONObject()
+            jsonObject.accumulate("tech_id", prefHelper.techID)
+            jsonObject.accumulate("date_string", dateString)
+            jsonObject.accumulate("server_id", item.serverId)
+            item.projectDesc?.let { jsonObject.accumulate("project_desc", item.projectDesc) }
+            item.project?.let { project ->
+                if (project.serverId > 0) {
+                    jsonObject.accumulate("project_id", project.serverId)
+                    jsonObject.accumulate("project_name", project.subProject)
+                } else {
+                    prefHelper.reloadProjects()
+                    return "sendHours(): Missing serverId for project : ${project.dashName}"
+                }
+            }
+            jsonObject.accumulate("start_time", item.startTime)
+            jsonObject.accumulate("end_time", item.endTime)
+            jsonObject.accumulate("lunch_time", item.lunchTime)
+            jsonObject.accumulate("break_time", item.breakTime)
+            jsonObject.accumulate("drive_time", item.driveTime)
+            item.notes?.let { jsonObject.accumulate("notes", item.notes) }
+
+            Timber.i("SENDING $jsonObject")
+            val result = post(url(hoursSuffix), jsonObject)
+            if (TextUtils.isDigitsOnly(result)) {
+                item.uploaded = true
+                item.serverId = result.toLong()
+                db.tableHours.saveUploaded(item)
+                Timber.i("SUCCESS, HOURS SERVER ID is ${item.serverId}")
+            } else {
+                val sbuf = StringBuilder()
+                sbuf.append("While trying to send hours entry: ")
+                sbuf.append(item.toString())
+                sbuf.append("\nERROR: ")
+                sbuf.append(result)
+                TBApplication.ShowError(sbuf.toString())
+                Timber.e(sbuf.toString())
+            }
+        } catch (ex: IOException) {
+            return ex.message ?: "IOException sendHours()"
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, DCPing::class.java, "sendHours()", "server")
+            return ex.message ?: "Exception sendHours()"
         }
         return null
     }

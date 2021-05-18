@@ -4,23 +4,28 @@
 package models;
 
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 import com.avaje.ebean.*;
 
-import play.Logger;
 import play.db.ebean.*;
+import play.Logger;
+
 import play.twirl.api.Html;
 import views.formdata.InputSearch;
 
-public class DaarPagedList {
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.concurrent.TimeUnit;
+
+public class HoursPagedList {
 
     public enum ColumnSelector {
         ALL("All", "all", null),
         TECH("Technician", "tech", "te.last_name"),
-        DATE("Date", "date", "e.entry_time"),
+        DATE("Date", "date", "h.entry_time"),
         ROOT_PROJECT_ID("Root Project", "root_project", "r.name"),
-        SUB_PROJECT_ID("Sub Project", "sub_project", "p.name"),
-        PROJECT_DESC("Project Description", "project_desc", "e.project_desc");
+        SUB_PROJECT_ID("Sub Project", "sub_project", "p.name");
 
         String text;
         String alias;
@@ -45,7 +50,7 @@ public class DaarPagedList {
             Logger.error("Invalid sort by : " + match);
             return null;
         }
-    }
+        }
 
     class TermMatch implements Comparable<TermMatch> {
         String mTerm;
@@ -106,11 +111,11 @@ public class DaarPagedList {
         }
 
         boolean hasPartialMatch(String element) {
-            return element.contains(mSearchTerm);
+            return StringUtils.containsIgnoreCase(element, mSearchTerm);
         }
 
         boolean hasMatch(String element) {
-            return element.equals(mSearchTerm);
+            return element.equalsIgnoreCase(mSearchTerm);
         }
 
         boolean hasSearchBy(ColumnSelector selector) {
@@ -174,7 +179,7 @@ public class DaarPagedList {
         TermMatch matchPartial(String element) {
             ArrayList<TermMatch> matches = new ArrayList<>();
             String elementNoCase = element.toLowerCase();
-            String term = mSearchTerm;
+            String term = mSearchTerm.toLowerCase();
             int pos = elementNoCase.indexOf(term, 0);
             if (pos >= 0) {
                 return new TermMatch(term, pos);
@@ -187,39 +192,46 @@ public class DaarPagedList {
     class Parameters {
         int mPage;
         int mPageSize = mDefaultPageSize;
-        ColumnSelector mSortBy = ColumnSelector.DATE;
+        ColumnSelector mSortBy = ColumnSelector.from("time");
         String mOrder = "desc";
     }
 
     class Result {
-        List<Daar> mList = new ArrayList<Daar>();
+        List<Hours> mList = new ArrayList<Hours>();
         long mNumTotalRows;
     }
 
-    static final boolean VERBOSE = true;
+    static final boolean VERBOSE = false;
     static final int[] PAGE_SIZES = {100, 200, 300, 400, 500};
     static final String CLASS_PREV = "prev";
     static final String CLASS_PREV_DISABLED = "prev disabled";
     static final String CLASS_NEXT = "next";
     static final String CLASS_NEXT_DISABLED = "next disabled";
 
+    private static final String PARSE_DATE_FORMAT = "MM/dd/yyyy";
+    private SimpleDateFormat mParseDateFormat = new SimpleDateFormat(PARSE_DATE_FORMAT);
+    private static final String PARSE_DATE_FORMAT_ZZZ = "MM/dd/yyyy zzz";
+    private SimpleDateFormat mParseDateFormatZZZ = new SimpleDateFormat(PARSE_DATE_FORMAT_ZZZ);
+
     Parameters mParams = new Parameters();
     Result mResult = new Result();
     SearchInfo mSearch = new SearchInfo();
     List<Long> mLimitByProject = new ArrayList<Long>();
-
     int mRowNumber;
     int mDefaultPageSize = PAGE_SIZES[0];
+    Date mSearchStartDate = null;
+    Date mSearchEndDate = null;
 
     public long mForClientId = 0;
 
-    public DaarPagedList() {
+    public HoursPagedList() {
     }
 
-    public DaarPagedList(DaarPagedList other) {
+    public HoursPagedList(HoursPagedList other) {
         mParams.mSortBy = other.mParams.mSortBy;
         mParams.mOrder = other.mParams.mOrder;
         mSearch = new SearchInfo(other.mSearch);
+        mLimitByProject = new ArrayList<>(other.mLimitByProject);
         mResult.mNumTotalRows = other.mResult.mNumTotalRows;
         mRowNumber = 0;
     }
@@ -310,9 +322,15 @@ public class DaarPagedList {
 
     public void computeFilters(Client client) {
         setProjects(client);
+
+        if (client.is_admin) {
+            mForClientId = 0;
+        } else {
+            mForClientId = client.id != null ? client.id : 0;
+        }
     }
 
-    private void setProjects(Client client) {
+    void setProjects(Client client) {
         mLimitByProject.clear();
         List<Project> projects = client.getProjects();
         if (projects != null) {
@@ -325,14 +343,9 @@ public class DaarPagedList {
     private String buildQuery(boolean useLimit) {
         StringBuilder query = new StringBuilder();
 
-        query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.project_desc");
-        query.append(", e.work_completed_desc");
-        query.append(", e.missed_units_desc");
-        query.append(", e.issues_desc");
-        query.append(", e.injuries_desc");
-        query.append(", e.start_time");
-        query.append(", e.time_zone");
-        query.append(", e.viewed");
+        query.append("SELECT DISTINCT h.id, h.tech_id, h.entry_time, h.project_id");
+        query.append(", h.start_time, h.end_time, h.lunch_time, h.break_time, h.drive_time");
+        query.append(", h.notes, h.time_zone, h.viewed");
 
         switch (mParams.mSortBy) {
             case TECH:
@@ -341,7 +354,7 @@ public class DaarPagedList {
                 query.append(" , " + getSortByColumn());
                 break;
         }
-        query.append(" FROM daar AS e");
+        query.append(" FROM hours AS h");
 
         switch (mParams.mSortBy) {
             case TECH:
@@ -396,52 +409,42 @@ public class DaarPagedList {
         StringBuilder query = new StringBuilder();
         if (mSearch.hasSearch()) {
             if (mSearch.hasSearchBy(ColumnSelector.ROOT_PROJECT_ID) || mSearch.hasSearchBy(ColumnSelector.SUB_PROJECT_ID)) {
-                appendSearch(query, "e.project_id", getSearchByProject());
-            } else if (mSearch.hasSearchBy(ColumnSelector.PROJECT_DESC)) {
-                appendSearch(query, "e.project_desc", mSearch.getTerm());
-            } else if (mSearch.hasSearchBy(ColumnSelector.TECH)) {
+                appendSearch(query, "h.project_id", getSearchByProject());
+            }
+            if (mSearch.hasSearchBy(ColumnSelector.TECH)) {
                 List<Long> techs = getSearchByTechnician();
-                appendSearch(query, "e.tech_id", techs);
+                appendSearch(query, "h.tech_id", techs);
+                if (techs.size() > 0) {
+                    List<Long> entries_ids = SecondaryTechnician.findMatches(techs);
+                    appendSearch(query, "h.id", entries_ids);
+                }
+            }
+            if (mSearch.hasSearchBy(ColumnSelector.DATE) && getSearchByDate()) {
+                boolean paren;
+                if (query.length() > 0) {
+                    query.append(" OR (");
+                    paren = true;
+                } else {
+                    paren = false;
+                }
+                query.append("h.entry_time BETWEEN '");
+                query.append(mParseDateFormatZZZ.format(mSearchStartDate));
+                query.append("' AND '");
+                query.append(mParseDateFormatZZZ.format(mSearchEndDate));
+                query.append("'");
+                if (paren) {
+                    query.append(")");
+                }
             }
         }
         return query.toString();
     }
 
-    private List<Long> getSearchByProject() {
-        HashSet<Long> set = new HashSet<Long>();
-        if (mSearch.hasSearchBy(ColumnSelector.SUB_PROJECT_ID)) {
-            set.addAll(Project.findMatches(mSearch.getTerm()));
-        }
-        if (mSearch.hasSearchBy(ColumnSelector.ROOT_PROJECT_ID)) {
-            for (Long rootProjectId : getSearchByRootProject()) {
-                set.addAll(Project.findWithRootProjectId(rootProjectId));
-            }
-        }
-        List<Long> list = new ArrayList<Long>();
-        list.addAll(set);
-        return list;
-    }
-
-    private List<Long> getSearchByRootProject() {
-        List<Long> list = new ArrayList<Long>();
-        list.addAll(RootProject.findMatches(mSearch.getTerm()));
-        return list;
-    }
-
-    private void appendSearch(StringBuilder query, String prefix, String term) {
-        if (query.length() > 0) {
-            query.append(" OR ");
-        }
-        query.append(prefix);
-        query.append(" LIKE ");
-        query.append("'%");
-        query.append(term);
-        query.append("'%'");
-    }
-
     private void appendSearch(StringBuilder query, String prefix, List<Long> items) {
         if (items.size() == 0) {
-            return;
+            if (mSearch.mColumnSelector == ColumnSelector.ALL) {
+                return;
+            }
         }
         if (query.length() > 0) {
             query.append(" OR ");
@@ -465,6 +468,27 @@ public class DaarPagedList {
         query.append(")");
     }
 
+    private List<Long> getSearchByProject() {
+        HashSet<Long> set = new HashSet<Long>();
+        if (mSearch.hasSearchBy(ColumnSelector.SUB_PROJECT_ID)) {
+            set.addAll(Project.findMatches(mSearch.getTerm()));
+        }
+        if (mSearch.hasSearchBy(ColumnSelector.ROOT_PROJECT_ID)) {
+            for (Long rootProjectId : getSearchByRootProject()) {
+                set.addAll(Project.findWithRootProjectId(rootProjectId));
+            }
+        }
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(set);
+        return list;
+    }
+
+    private List<Long> getSearchByRootProject() {
+        List<Long> list = new ArrayList<Long>();
+        list.addAll(RootProject.findMatches(mSearch.getTerm()));
+        return list;
+    }
+
     private List<Long> getSearchByTechnician() {
         List<Long> list = new ArrayList<Long>();
         String term = mSearch.getTerm();
@@ -477,6 +501,44 @@ public class DaarPagedList {
         return list;
     }
 
+    // Return start of scanned time (the beginning of the day)
+    private boolean getSearchByDate() {
+        // Translate entered date value into a concrete time local to the tech's time.
+        try {
+            Date date = parseDate(mSearch.getTerm().trim());
+            if (date == null) {
+                return false;
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            mSearchStartDate = new Date(calendar.getTimeInMillis());
+            calendar.add(Calendar.HOUR_OF_DAY, 24);
+            mSearchEndDate = new Date(calendar.getTimeInMillis());
+            return true;
+        } catch (Exception ex) {
+            Logger.error("Invalid date entered: " + ex.getMessage());
+        }
+        return false;
+    }
+
+    private Date parseDate(String term) {
+        if (term.contains(" ")) {
+            try {
+                Date date = mParseDateFormatZZZ.parse(term);
+                return date;
+            } catch (Exception ex) {
+                Logger.info(ex.getMessage());
+            }
+        }
+        try {
+            Date date = mParseDateFormat.parse(term);
+            return date;
+        } catch (Exception ex) {
+            Logger.info(ex.getMessage());
+        }
+        return null;
+    }
+
     private String getLimitFilters() {
         StringBuilder projects = new StringBuilder();
         boolean first = true;
@@ -486,7 +548,7 @@ public class DaarPagedList {
             } else {
                 projects.append(" OR ");
             }
-            projects.append("e.project_id = ");
+            projects.append("h.project_id = ");
             projects.append(project_id);
         }
         StringBuilder query = new StringBuilder();
@@ -511,7 +573,8 @@ public class DaarPagedList {
         if (VERBOSE) {
             Logger.debug("Query: " + query);
         }
-        entries = Ebean.createSqlQuery(query).findList();
+        SqlQuery sqlQuery = Ebean.createSqlQuery(query);
+        entries = sqlQuery.findList();
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
             Logger.error("No entries");
@@ -535,30 +598,30 @@ public class DaarPagedList {
         return mResult.mNumTotalRows;
     }
 
-    private Daar parseEntry(SqlRow row) {
-        Daar entry = new Daar();
+    private Hours parseEntry(SqlRow row) {
+        Hours entry = new Hours();
         entry.id = row.getLong("id");
         entry.tech_id = row.getInteger("tech_id");
         entry.entry_time = row.getDate("entry_time");
-        entry.start_time = row.getDate("start_time");
         entry.time_zone = row.getString("time_zone");
         entry.project_id = row.getLong("project_id");
-        entry.project_desc = row.getString("project_desc");
-        entry.work_completed_desc = row.getString("work_completed_desc");
-        entry.missed_units_desc = row.getString("missed_units_desc");
-        entry.issues_desc = row.getString("issues_desc");
-        entry.injuries_desc = row.getString("injuries_desc");
+        entry.start_time = row.getInteger("start_time");
+        entry.end_time = row.getInteger("end_time");
+        entry.lunch_time = row.getInteger("lunch_time");
+        entry.break_time = row.getInteger("break_time");
+        entry.drive_time = row.getInteger("drive_time");
+        entry.notes = row.getString("notes");
         entry.viewed = row.getBoolean("viewed");
         return entry;
     }
 
-    public synchronized List<Daar> getList() {
+    public synchronized List<Hours> getList() {
         return mResult.mList;
     }
 
-    public List<Daar> getOrderedList() {
+    public List<Hours> getOrderedList() {
         if (isOrderDesc()) {
-            List<Daar> reversed = new ArrayList<Daar>(mResult.mList);
+            List<Hours> reversed = new ArrayList<>(mResult.mList);
             Collections.reverse(reversed);
             return reversed;
         }
@@ -636,17 +699,6 @@ public class DaarPagedList {
 
     public Html highlightSearch(String element, ColumnSelector selector) {
         return mSearch.highlight(element, selector);
-    }
-
-    public Html highlightViewed(boolean viewed, String text) {
-        if (viewed) {
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append("<b>");
-            sbuf.append(text);
-            sbuf.append("</b>");
-            return Html.apply(sbuf.toString());
-        }
-        return Html.apply(text);
     }
 
     public void clearSearch() {

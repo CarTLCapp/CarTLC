@@ -216,6 +216,17 @@ GET     /daar/compute_totals   controllers.DaarController.computeTotalNumRows()
 # Long form
 GET     /daar/list/:page/:pageSize/:sort/:order/:searchField/:searchTerm  controllers.DaarController.list2(page:Int, pageSize:Int, sort: String, order: String, searchTerm: String, searchField: String)
 
+### HOURS ###
+
+GET     /hours/list             controllers.HoursController.list(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc", searchTerm ?= "null", searchField ?= "null")
+GET     /hours/search           controllers.HoursController.search(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc")
+GET     /hours/search/clear     controllers.HoursController.searchClear()
+POST    /hours/enter            controllers.HoursController.enter()
+GET     /hours/compute_totals   controllers.HoursController.computeTotalNumRows()
+
+# Long form
+GET     /hours/list/:page/:pageSize/:sort/:order/:searchField/:searchTerm  controllers.HoursController.list2(page:Int, pageSize:Int, sort: String, order: String, searchTerm: String, searchField: String)
+
 ### APP SIDE MISC REQUESTS ###
 
 POST    /register              controllers.PostController.register()

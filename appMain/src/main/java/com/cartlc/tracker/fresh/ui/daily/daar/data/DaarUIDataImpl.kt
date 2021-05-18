@@ -1,4 +1,4 @@
-package com.cartlc.tracker.fresh.ui.daar.data
+package com.cartlc.tracker.fresh.ui.daily.daar.data
 
 import com.cartlc.tracker.R
 import com.cartlc.tracker.R.string.daar_instruction_missed_units
@@ -7,24 +7,40 @@ import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
 import com.cartlc.tracker.fresh.model.msg.MessageHandler
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.ui.common.DateUtil
-import com.cartlc.tracker.fresh.ui.daar.data.DaarUIData.Stage
-import com.cartlc.tracker.fresh.ui.daar.data.DaarUIData.Stage.*
-import com.cartlc.tracker.fresh.ui.daar.data.DaarUIData.TimeOrDate
+import com.cartlc.tracker.fresh.ui.daily.daar.data.DaarUIData.Stage
+import com.cartlc.tracker.fresh.ui.daily.daar.data.DaarUIData.Stage.*
+import com.cartlc.tracker.fresh.ui.daily.daar.data.DaarUIData.TimeOrDate
 import timber.log.Timber
 
 class DaarUIDataImpl(
-        private val dm: DatabaseTable,
-        private val messageHandler: MessageHandler
+    private val dm: DatabaseTable,
+    private val messageHandler: MessageHandler
 ) : DaarUIData {
 
     private val stages = listOf(
-            StageDate(R.string.daar_instruction_date, TimeOrDate.DATE, { it.date.toInt() }) { item, value -> item.date = value },
-            StageProject(R.string.daar_instruction_project, { StageProjectValue.get(it) }) { item, value -> set(item, value) },
-            StageString(R.string.daar_instruction_work_completed, { it.workCompleted }) { item, value -> item.workCompleted = value },
-            StageString(daar_instruction_missed_units, { it.missedUnits }) { item, value -> item.missedUnits = value },
-            StageString(R.string.daar_instruction_issues, { it.issues }) { item, value -> item.issues = value },
-            StageString(R.string.daar_instruction_injuries, { it.injuries }) { item, value -> item.injuries = value },
-            StageDate(R.string.daar_instruction_starting_time_tomorrow, TimeOrDate.TIME, { it.startTimeTomorrow.toInt() }) { item, value -> item.startTimeTomorrow = value }
+        StageDate(
+            R.string.daar_instruction_date,
+            TimeOrDate.DATE,
+            { it.date.toInt() }) { item, value -> item.date = value },
+        StageProject(
+            R.string.daar_instruction_project,
+            { StageProjectValue.get(it) }) { item, value -> set(item, value) },
+        StageString(
+            R.string.daar_instruction_work_completed,
+            { it.workCompleted }) { item, value -> item.workCompleted = value },
+        StageString(
+            daar_instruction_missed_units,
+            { it.missedUnits }) { item, value -> item.missedUnits = value },
+        StageString(R.string.daar_instruction_issues, { it.issues }) { item, value ->
+            item.issues = value
+        },
+        StageString(
+            R.string.daar_instruction_injuries,
+            { it.injuries }) { item, value -> item.injuries = value },
+        StageDate(
+            R.string.daar_instruction_starting_time_tomorrow,
+            TimeOrDate.TIME,
+            { it.startTimeTomorrow.toInt() }) { item, value -> item.startTimeTomorrow = value }
     )
 
     private fun set(item: DataDaar, value: StageProjectValue) {
@@ -83,7 +99,7 @@ class DaarUIDataImpl(
         get() = curIndex == 0
 
     override val isLast: Boolean
-        get() = curIndex >= stages.size-1
+        get() = curIndex >= stages.size - 1
 
     override fun prev() {
         if (curIndex > 0) {
@@ -172,9 +188,15 @@ class DaarUIDataImpl(
             val item = DataDaar(dm)
             stages.forEach { stage ->
                 when (stage) {
-                    is StageDate -> { stage.setItemValueFromStored(item) }
-                    is StageString -> { stage.setItemValueFromStored(item) }
-                    is StageProject -> { stage.setItemValueFromStored(item) }
+                    is StageDate -> {
+                        stage.setItemValueFromStored(item)
+                    }
+                    is StageString -> {
+                        stage.setItemValueFromStored(item)
+                    }
+                    is StageProject -> {
+                        stage.setItemValueFromStored(item)
+                    }
                 }
             }
             item.id = curDataId
@@ -184,9 +206,15 @@ class DaarUIDataImpl(
             curDataId = item.id
             stages.forEach { stage ->
                 when (stage) {
-                    is StageDate -> { stage.storeValueFromItem(item) }
-                    is StageString -> { stage.storeValueFromItem(item) }
-                    is StageProject -> { stage.storeValueFromItem(item) }
+                    is StageDate -> {
+                        stage.storeValueFromItem(item)
+                    }
+                    is StageString -> {
+                        stage.storeValueFromItem(item)
+                    }
+                    is StageProject -> {
+                        stage.storeValueFromItem(item)
+                    }
                 }
             }
         }

@@ -1,4 +1,4 @@
-package com.cartlc.tracker.fresh.ui.daar.data
+package com.cartlc.tracker.fresh.ui.daily.daar.data
 
 import androidx.annotation.StringRes
 import com.cartlc.tracker.fresh.model.core.data.DataDaar
@@ -30,10 +30,10 @@ interface DaarUIData {
         }
 
         data class StageDate(
-                @StringRes private val i: Int,
-                private val timeOrDate: TimeOrDate,
-                private val getValueFromItem: (item: DataDaar) -> Int,
-                private val setValueOfItem: (item: DataDaar, value: Long) -> Unit
+            @StringRes private val i: Int,
+            private val timeOrDate: TimeOrDate,
+            private val getValueFromItem: (item: DataDaar) -> Int,
+            private val setValueOfItem: (item: DataDaar, value: Long) -> Unit
         ) : Stage(i) {
             var enteredValue: Long = 0
 
@@ -64,9 +64,9 @@ interface DaarUIData {
         }
 
         data class StageProject(
-                @StringRes private val i: Int,
-                private val getValueFromItem: (item: DataDaar) -> StageProjectValue,
-                private val setValueOfItem: (item: DataDaar, value: StageProjectValue) -> Unit
+            @StringRes private val i: Int,
+            private val getValueFromItem: (item: DataDaar) -> StageProjectValue,
+            private val setValueOfItem: (item: DataDaar, value: StageProjectValue) -> Unit
         ) : Stage(i) {
 
             var enteredValue: StageProjectValue = StageProjectValue()

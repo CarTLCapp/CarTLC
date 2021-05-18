@@ -191,6 +191,23 @@
     <string name="daar_select_all">All</string>
     <string name="daar_select_other">Describe</string>
 
+    <!-- HOURS -->
+    <string name="hours_title">Daily Hours Worked</string>
+    <string name="hours_sub_title">Please provide details of your day for time sheet reporting.</string>
+    <string name="hours_instruction_date">What date is this for?</string>
+    <string name="hours_instruction_project">What project are you on?</string>
+    <string name="hours_instruction_worked">What hours did you work?</string>
+    <string name="hours_instruction_lunch">How long was your lunch break?</string>
+    <string name="hours_instruction_break">Were there any other extended breaks?</string>
+    <string name="hours_instruction_drive">List how many hours were spent driving. This includes all drive time hours further than 1 hour from home and drive time between plants.</string>
+    <string name="hours_instruction_notes">Additional payroll notes</string>
+    <string name="hours_date_hint">Date</string>
+    <string name="hours_time_start_hint">Start Time</string>
+    <string name="hours_time_end_hint">End Time</string>
+    <string name="hours_time_start_hint_value">Start Time: %s</string>
+    <string name="hours_time_end_hint_value">End Time: %s</string>
+    <string name="hours_time_none">None</string>
+
     <!-- Arrays -->
     <string-array name="type_of_inspection">
         <item>Pre-Trip</item>

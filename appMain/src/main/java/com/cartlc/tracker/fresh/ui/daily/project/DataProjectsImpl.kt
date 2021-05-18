@@ -1,31 +1,17 @@
-package com.cartlc.tracker.fresh.ui.daar.data
+package com.cartlc.tracker.fresh.ui.daily.project
 
 import com.cartlc.tracker.fresh.model.core.table.DatabaseTable
-import com.cartlc.tracker.fresh.ui.daar.DaarViewMvc.ProjectSelect
-import java.util.concurrent.TimeUnit
 
-class DaarDataProjectsImpl(
-        private val db: DatabaseTable
-) : DaarDataProjects {
+abstract class DataProjectsImpl(
+        protected val db: DatabaseTable
+) : DataProjects {
 
-    companion object {
-        private const val WINDOW_SINCE_DAYS = 2L
-        private const val FALLBACK_SINCE_DAYS = 3L
-    }
-
-    private val mostRecentUploadedDaarDate: Long
-        get() {
-            return db.tableDaar.queryMostRecentUploaded()?.let { data ->
-                data.date - TimeUnit.DAYS.toMillis(WINDOW_SINCE_DAYS)
-            } ?: run {
-                System.currentTimeMillis() - TimeUnit.DAYS.toMillis(FALLBACK_SINCE_DAYS)
-            }
-        }
+    open val mostRecentUploadedDate: Long = 0
 
     private var mostRecentProjectsNameList: List<String>? = null
     private var mostRecentProjectsIdList: List<Long>? = null
 
-    // region DaarDataProjects
+    // region DataDataProjects
 
     override val isReady: Boolean
         get() {
@@ -61,7 +47,7 @@ class DaarDataProjectsImpl(
             return mostRecentProjectsNameList ?: run {
                 val mostRecentNameList = mutableListOf<String>()
                 val mostRecentIdList = mutableListOf<Long>()
-                db.tableEntry.querySince(mostRecentUploadedDaarDate).forEach { entry ->
+                db.tableEntry.querySince(mostRecentUploadedDate).forEach { entry ->
                     entry.projectAddressCombo?.let { combo ->
                         if (!mostRecentNameList.contains(combo.projectDashName)) {
                             mostRecentNameList.add(combo.projectDashName)
@@ -79,7 +65,6 @@ class DaarDataProjectsImpl(
         }
 
     override var mostRecentDate: Long = 0
-        private set
 
     override val rootProjectNames: List<String>
         get() = db.tableProjects.queryRootProjectNames()
@@ -92,7 +77,6 @@ class DaarDataProjectsImpl(
         return names
     }
 
-    // endregion DaarDataProjects
-
+    // endregion DataDataProjects
 
 }

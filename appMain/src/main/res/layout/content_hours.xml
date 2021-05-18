@@ -22,7 +22,7 @@
         android:layout_marginEnd="10dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:text="@string/daar_instruction_work_completed"
+        android:text="@string/hours_instruction_date"
         android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,10 +34,33 @@
         android:layout_height="wrap_content"
         android:drawableEnd="@drawable/ic_baseline_date_range_24"
         android:drawablePadding="10dp"
-        android:text="@string/daar_date_hint"
+        android:text="@string/hours_date_hint"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/instruction" />
+
+    <Button
+        android:id="@+id/timeStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableEnd="@drawable/ic_baseline_date_range_24"
+        android:drawablePadding="10dp"
+        android:text="@string/hours_time_start_hint"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/instruction" />
+
+    <Button
+        android:id="@+id/timeEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableEnd="@drawable/ic_baseline_date_range_24"
+        android:drawablePadding="10dp"
+        android:text="@string/hours_time_end_hint"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/timeStart" />
+
 
     <RadioGroup
         android:id="@+id/projectSelect"

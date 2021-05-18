@@ -1,4 +1,4 @@
-package com.cartlc.tracker.fresh.ui.daar
+package com.cartlc.tracker.fresh.ui.daily.daar
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -13,8 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsView
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
+import com.cartlc.tracker.fresh.ui.daily.project.ItemAdapter
+import com.cartlc.tracker.fresh.ui.daily.project.ProjectSelect
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvcImpl
-import com.cartlc.tracker.fresh.ui.daar.DaarViewMvc.ProjectSelect
 import com.cartlc.tracker.fresh.ui.title.TitleView
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
 import java.util.*
@@ -23,19 +24,19 @@ class DaarViewMvcImpl(
         private val inflater: LayoutInflater,
         container: ViewGroup?
 ) : ObservableViewMvcImpl<DaarViewMvc.Listener>(),
-        DaarViewMvc,
+    DaarViewMvc,
         DatePickerDialog.OnDateSetListener,
         TimePickerDialog.OnTimeSetListener,
-        DaarProjectAdapter.Listener {
+        ItemAdapter.Listener {
 
     override val rootView: View = inflater.inflate(R.layout.content_daar, container, false) as ViewGroup
 
     private val instructionView = findViewById<TextView>(R.id.instruction)
     private val entryEditText = findViewById<EditText>(R.id.entry)
-    private val timeDateDisplay = findViewById<Button>(R.id.timeDateDisplay)
+    private val timeDateDisplay = findViewById<Button>(R.id.dateDisplay)
     private val titleView = findViewById<TitleView>(R.id.frame_title)
     private val buttonsView = findViewById<ButtonsView>(R.id.frame_buttons)
-    private val projectList = findViewById<RecyclerView>(R.id.projectList)
+    private val projectList = findViewById<RecyclerView>(R.id.itemList)
     private val projectSelect = findViewById<RadioGroup>(R.id.projectSelect)
     private val projectRecent = findViewById<RadioButton>(R.id.projectRecent)
     private val projectAll = findViewById<RadioButton>(R.id.projectAll)
@@ -183,7 +184,7 @@ class DaarViewMvcImpl(
         }
 
     override fun prepareProjectList(items: List<String>) {
-        projectList.adapter = DaarProjectAdapter(inflater, items, this)
+        projectList.adapter = ItemAdapter(inflater, items, this)
     }
 
     override fun refreshProjectList() {
@@ -192,9 +193,9 @@ class DaarViewMvcImpl(
 
     // endregion DaarViewMvc
 
-    // region DaarProjectAdapter.Listener
+    // region ProjectAdapter.Listener
 
-    override fun onProjectItemSelected(position: Int, item: String) {
+    override fun onItemSelected(position: Int, item: String) {
         listeners.forEach { it.onProjectItemSelected(position, item) }
     }
 
@@ -202,7 +203,7 @@ class DaarViewMvcImpl(
         return listeners.firstOrNull()?.isProjectSelected(position, item) ?: false
     }
 
-    // endregion DaarProjectAdapter.Listener
+    // endregion ProjectAdapter.Listener
 
     // region DatePickerDialog.OnDateSetListener
 

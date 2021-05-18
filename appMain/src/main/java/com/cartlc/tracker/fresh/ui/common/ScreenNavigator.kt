@@ -16,7 +16,8 @@ import com.cartlc.tracker.R
 import com.cartlc.tracker.fresh.model.core.data.DataEntry
 import com.cartlc.tracker.ui.act.VehicleActivity
 import com.cartlc.tracker.fresh.ui.app.TBApplication
-import com.cartlc.tracker.fresh.ui.daar.DaarActivity
+import com.cartlc.tracker.fresh.ui.daily.daar.DaarActivity
+import com.cartlc.tracker.fresh.ui.daily.hours.HoursActivity
 import com.cartlc.tracker.fresh.ui.listentries.ListEntriesActivity
 import com.cartlc.tracker.ui.util.CheckError
 import java.io.File
@@ -96,6 +97,11 @@ class ScreenNavigator(
 
     fun showDaarActivity() {
         val intent = Intent(act, DaarActivity::class.java)
+        act.startActivity(intent)
+    }
+
+    fun showHoursActivity() {
+        val intent = Intent(act, HoursActivity::class.java)
         act.startActivity(intent)
     }
 

@@ -1,7 +1,7 @@
 /**
  * Copyright 2021, FleetTLC. All rights reserved
  */
-package com.cartlc.tracker.fresh.ui.daar
+package com.cartlc.tracker.fresh.ui.daily.hours
 
 import android.os.Bundle
 import android.view.Menu
@@ -14,14 +14,14 @@ import com.cartlc.tracker.fresh.ui.base.BaseActivity
 import com.cartlc.tracker.fresh.ui.bits.HideOnSoftKeyboard
 import kotlinx.android.synthetic.main.activity_main.*
 
-class DaarActivity : BaseActivity() {
+class HoursActivity : BaseActivity() {
 
     private val factoryViewMvc: FactoryViewMvc
         get() = componentRoot.factoryViewMvc
     private val factoryController: FactoryController
         get() = componentRoot.factoryController
 
-    private lateinit var daarController: DaarController
+    private lateinit var controller: HoursController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,16 +32,16 @@ class DaarActivity : BaseActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val content = findViewById<ViewGroup>(R.id.content)
-        val daarViewMvc = factoryViewMvc.allocDaarViewMvc(content)
-        val titleViewMvc = daarViewMvc.titleViewMvc
-        val buttonsViewMvc = daarViewMvc.buttonsViewMvc
+        val hoursViewMvc = factoryViewMvc.allocHoursViewMvc(content)
+        val titleViewMvc = hoursViewMvc.titleViewMvc
+        val buttonsViewMvc = hoursViewMvc.buttonsViewMvc
 
-        daarController = factoryController.allocDaarController(boundAct, daarViewMvc, titleViewMvc, buttonsViewMvc)
-        daarController.hideOnSoftKeyboard = HideOnSoftKeyboard(root)
+        controller = factoryController.allocHoursController(boundAct, hoursViewMvc, titleViewMvc, buttonsViewMvc)
+        controller.hideOnSoftKeyboard = HideOnSoftKeyboard(root)
 
-        content.addView(daarViewMvc.rootView)
+        content.addView(hoursViewMvc.rootView)
 
-        title = getString(R.string.daar_title)
+        title = getString(R.string.hours_title)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -1,4 +1,4 @@
-package com.cartlc.tracker.fresh.ui.daar
+package com.cartlc.tracker.fresh.ui.daily.daar
 
 import android.view.View
 import androidx.lifecycle.Lifecycle
@@ -10,21 +10,22 @@ import com.cartlc.tracker.fresh.service.endpoint.post.DCPostUseCase
 import com.cartlc.tracker.fresh.ui.app.dependencyinjection.BoundAct
 import com.cartlc.tracker.fresh.ui.bits.HideOnSoftKeyboard
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
-import com.cartlc.tracker.fresh.ui.daar.data.DaarDataProjectsImpl
-import com.cartlc.tracker.fresh.ui.daar.data.DaarUIData
-import com.cartlc.tracker.fresh.ui.daar.data.DaarUIDataImpl
+import com.cartlc.tracker.fresh.ui.daily.project.ProjectSelect
+import com.cartlc.tracker.fresh.ui.daily.daar.data.DaarDataProjectsImpl
+import com.cartlc.tracker.fresh.ui.daily.daar.data.DaarUIData
+import com.cartlc.tracker.fresh.ui.daily.daar.data.DaarUIDataImpl
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
 
 class DaarController(
-        private val boundAct: BoundAct,
-        private val daarViewMvc: DaarViewMvc,
-        private val titleViewMvc: TitleViewMvc,
-        private val buttonsViewMvc: ButtonsViewMvc,
-        dm: DatabaseTable
+    private val boundAct: BoundAct,
+    private val viewMvc: DaarViewMvc,
+    private val titleViewMvc: TitleViewMvc,
+    private val buttonsViewMvc: ButtonsViewMvc,
+    dm: DatabaseTable
 ) : LifecycleObserver,
-        DaarViewMvc.Listener,
-        ButtonsViewMvc.Listener,
-        HideOnSoftKeyboard.Listener {
+    DaarViewMvc.Listener,
+    ButtonsViewMvc.Listener,
+    HideOnSoftKeyboard.Listener {
 
     private val messageHandler = boundAct.componentRoot.messageHandler
     private var daarUIData: DaarUIData = DaarUIDataImpl(dm, messageHandler)
@@ -45,12 +46,12 @@ class DaarController(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
-        daarViewMvc.registerListener(this)
+        viewMvc.registerListener(this)
         buttonsViewMvc.registerListener(this)
         buttonsViewMvc.btnCenterVisible = false
         titleViewMvc.mainTitleText = messageHandler.getString(StringMessage.daar_title)
         titleViewMvc.subTitleText = messageHandler.getString(StringMessage.daar_sub_title)
-        daarViewMvc.invokeDatePicker()
+        viewMvc.invokeDatePicker()
         daarUIData.first()
         initializeProjects()
         loadCurrentEdit()
@@ -62,7 +63,7 @@ class DaarController(
         if (!isSaved) {
             preserve()
         }
-        daarViewMvc.unregisterListener(this)
+        viewMvc.unregisterListener(this)
         buttonsViewMvc.unregisterListener(this)
         hideOnSoftKeyboard?.unregisterListener(this)
     }
@@ -75,7 +76,7 @@ class DaarController(
         daarUIData.storeValueToStage(value)
         buttonsViewMvc.btnNextVisible = value.isNotBlank()
         daarUIData.curStage?.let { data ->
-            if (data is DaarUIData.Stage.StageProject && daarDataProjects.selectedProjectTab != DaarViewMvc.ProjectSelect.PROJECT_OTHER) {
+            if (data is DaarUIData.Stage.StageProject && daarDataProjects.selectedProjectTab != ProjectSelect.PROJECT_OTHER) {
                 buttonsViewMvc.btnNextVisible = daarDataProjects.isReady
             }
         }
@@ -86,85 +87,89 @@ class DaarController(
 
     override fun onDateButtonClicked() {
         if (daarUIData.isStageInTime) {
-            daarViewMvc.invokeTimePicker()
+            viewMvc.invokeTimePicker()
         } else {
-            daarViewMvc.invokeDatePicker()
+            viewMvc.invokeDatePicker()
         }
     }
 
     override fun onDateEntered(value: Long) {
-        daarViewMvc.timeDateTextValue = daarUIData.storeValueToStage(value)
+        viewMvc.timeDateTextValue = daarUIData.storeValueToStage(value)
         applyCurStage()
     }
 
     override fun onTimeEntered(value: Long) {
-        daarViewMvc.timeDateTextValue = daarUIData.storeValueToStage(value)
+        viewMvc.timeDateTextValue = daarUIData.storeValueToStage(value)
         applyCurStage()
     }
 
-    override fun onProjectTypeSelected(which: DaarViewMvc.ProjectSelect) {
+    override fun onProjectTypeSelected(which: ProjectSelect) {
         var showEntry = false
         when (which) {
-            DaarViewMvc.ProjectSelect.PROJECT_RECENT -> {
-                daarViewMvc.projectListVisible = true
+            ProjectSelect.PROJECT_RECENT -> {
+                viewMvc.projectListVisible = true
                 daarDataProjects.selectingRootName = false
                 prepareProjectList(daarDataProjects.mostRecentProjects)
             }
-            DaarViewMvc.ProjectSelect.PROJECT_ALL -> {
-                daarViewMvc.projectListVisible = true
+            ProjectSelect.PROJECT_ALL -> {
+                viewMvc.projectListVisible = true
                 daarDataProjects.selectingRootName = true
                 prepareProjectList(daarDataProjects.rootProjectNames)
             }
-            DaarViewMvc.ProjectSelect.PROJECT_OTHER -> {
+            ProjectSelect.PROJECT_OTHER -> {
                 showEntry = true
-                daarViewMvc.projectListVisible = false
+                viewMvc.projectListVisible = false
                 daarDataProjects.selectingRootName = true
                 daarUIData.storeValueToStage(daarUIData.data.projectDesc)
             }
         }
         daarDataProjects.selectedProjectTab = which
-        daarViewMvc.entryVisible = showEntry
+        viewMvc.entryVisible = showEntry
     }
 
     private fun prepareProjectList(items: List<String>): Boolean {
         if (items.isEmpty()) {
             return false
         }
-        daarViewMvc.prepareProjectList(items)
+        viewMvc.prepareProjectList(items)
         return true
     }
 
     override fun onProjectItemSelected(position: Int, item: String) {
-        when {
-            daarDataProjects.selectedProjectTab == DaarViewMvc.ProjectSelect.PROJECT_RECENT -> {
-                daarDataProjects.selectedRecentPosition = position
-                buttonsViewMvc.btnNextVisible = true
-                daarDataProjects.selectedProjectId?.let { daarUIData.projectStage.storeValue(it) }
-            }
-            daarDataProjects.selectingRootName -> {
-                daarDataProjects.selectedRootProjectName = item
-                daarDataProjects.selectedSubProjectName = null
-                daarDataProjects.selectingRootName = false
-                prepareProjectList(daarDataProjects.subProjectsOf(item))
-            }
-            else -> {
-                daarDataProjects.selectedSubProjectName = item
-                buttonsViewMvc.btnNextVisible = true
-                daarDataProjects.selectedProjectId?.let { daarUIData.projectStage.storeValue(it) }
+        with(daarDataProjects) {
+            when {
+                selectedProjectTab == ProjectSelect.PROJECT_RECENT -> {
+                    selectedRecentPosition = position
+                    buttonsViewMvc.btnNextVisible = true
+                    selectedProjectId?.let { daarUIData.projectStage.storeValue(it) }
+                }
+                selectingRootName -> {
+                    selectedRootProjectName = item
+                    selectedSubProjectName = null
+                    selectingRootName = false
+                    prepareProjectList(subProjectsOf(item))
+                }
+                else -> {
+                    selectedSubProjectName = item
+                    buttonsViewMvc.btnNextVisible = true
+                    selectedProjectId?.let { daarUIData.projectStage.storeValue(it) }
+                }
             }
         }
     }
 
     override fun isProjectSelected(position: Int, item: String): Boolean {
-        return when {
-            daarDataProjects.selectedProjectTab == DaarViewMvc.ProjectSelect.PROJECT_RECENT -> {
-                daarDataProjects.selectedRecentProjectName == item
-            }
-            daarDataProjects.selectingRootName -> {
-                daarDataProjects.selectedRootProjectName == item
-            }
-            else -> {
-                daarDataProjects.selectedSubProjectName == item
+        with(daarDataProjects) {
+            return when {
+                selectedProjectTab == ProjectSelect.PROJECT_RECENT -> {
+                    selectedRecentProjectName == item
+                }
+                selectingRootName -> {
+                    selectedRootProjectName == item
+                }
+                else -> {
+                    selectedSubProjectName == item
+                }
             }
         }
     }
@@ -218,11 +223,11 @@ class DaarController(
     // region SoftKeyboardDetect.Listener
 
     override fun onSoftKeyboardVisible() {
-        daarViewMvc.buttonsViewVisible = false
+        viewMvc.buttonsViewVisible = false
     }
 
     override fun onSoftKeyboardHidden() {
-        daarViewMvc.buttonsViewVisible = true
+        viewMvc.buttonsViewVisible = true
     }
 
     // endregion SoftKeyboard
@@ -245,28 +250,29 @@ class DaarController(
                 daarDataProjects.selectedRootProjectName = null
                 daarDataProjects.selectedSubProjectName = null
             }
-            daarViewMvc.setInstruction(data.instruction)
+            viewMvc.setInstruction(data.instruction)
             when (data) {
                 is DaarUIData.Stage.StageString -> {
-                    daarViewMvc.entryVisible = true
-                    daarViewMvc.timeDateVisible = false
-                    daarViewMvc.projectSelectVisible = false
-                    daarViewMvc.projectListVisible = false
-                    daarViewMvc.entryEditTextValue = daarUIData.getStringValueOf(data)
+                    viewMvc.entryVisible = true
+                    viewMvc.timeDateVisible = false
+                    viewMvc.projectSelectVisible = false
+                    viewMvc.projectListVisible = false
+                    viewMvc.entryEditTextValue = daarUIData.getStringValueOf(data)
                 }
                 is DaarUIData.Stage.StageDate -> {
-                    daarViewMvc.timeDateVisible = true
-                    daarViewMvc.entryVisible = false
-                    daarViewMvc.projectSelectVisible = false
-                    daarViewMvc.projectListVisible = false
-                    daarViewMvc.timeDateTextValue = daarUIData.getStringValueOf(data)
+                    viewMvc.timeDateVisible = true
+                    viewMvc.entryVisible = false
+                    viewMvc.projectSelectVisible = false
+                    viewMvc.projectListVisible = false
+                    viewMvc.timeDateTextValue = daarUIData.getStringValueOf(data)
                 }
                 is DaarUIData.Stage.StageProject -> {
-                    daarViewMvc.timeDateVisible = false
-                    daarViewMvc.projectSelectVisible = true
-                    daarViewMvc.entryVisible = false
-                    daarViewMvc.projectListVisible = daarViewMvc.projectSelectWhich != DaarViewMvc.ProjectSelect.PROJECT_OTHER
-                    onProjectTypeSelected(daarViewMvc.projectSelectWhich)
+                    viewMvc.timeDateVisible = false
+                    viewMvc.projectSelectVisible = true
+                    viewMvc.entryVisible = false
+                    viewMvc.projectListVisible =
+                        viewMvc.projectSelectWhich != ProjectSelect.PROJECT_OTHER
+                    onProjectTypeSelected(viewMvc.projectSelectWhich)
                 }
             }
             if (!daarUIData.isComplete(data)) {
@@ -274,7 +280,8 @@ class DaarController(
             } else if (daarUIData.isLast && daarUIData.isComplete) {
                 hasNext = true
             }
-            buttonsViewMvc.btnNextText = messageHandler.getString(if (daarUIData.hasSave) StringMessage.btn_save else StringMessage.btn_next)
+            buttonsViewMvc.btnNextText =
+                messageHandler.getString(if (daarUIData.hasSave) StringMessage.btn_save else StringMessage.btn_next)
             buttonsViewMvc.btnNextVisible = hasNext
             buttonsViewMvc.btnPrevVisible = hasPrev
         }
@@ -295,11 +302,11 @@ class DaarController(
 
     private fun initializeProjects() {
         val hasRecentProjects = daarDataProjects.mostRecentProjects.isNotEmpty()
-        daarViewMvc.projectsSelectRecentEnabled = hasRecentProjects
+        viewMvc.projectsSelectRecentEnabled = hasRecentProjects
         if (hasRecentProjects) {
-            daarViewMvc.projectSelectWhich = DaarViewMvc.ProjectSelect.PROJECT_RECENT
+            viewMvc.projectSelectWhich = ProjectSelect.PROJECT_RECENT
         } else {
-            daarViewMvc.projectSelectWhich = DaarViewMvc.ProjectSelect.PROJECT_ALL
+            viewMvc.projectSelectWhich = ProjectSelect.PROJECT_ALL
         }
         daarUIData.first()
         daarUIData.storeValueToStage(daarDataProjects.mostRecentDate)

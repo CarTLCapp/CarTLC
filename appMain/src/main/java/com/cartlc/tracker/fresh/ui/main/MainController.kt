@@ -802,6 +802,9 @@ class MainController(
             R.id.fleet_daar -> {
                 onDaarPressed()
             }
+            R.id.fleet_hours -> {
+                onHoursPressed()
+            }
             R.id.upload -> {
                 ping()
             }
@@ -858,6 +861,10 @@ class MainController(
 
     private fun onDaarPressed() {
         screenNavigator.showDaarActivity()
+    }
+
+    private fun onHoursPressed() {
+        screenNavigator.showHoursActivity()
     }
 
     // endregion MenuItem

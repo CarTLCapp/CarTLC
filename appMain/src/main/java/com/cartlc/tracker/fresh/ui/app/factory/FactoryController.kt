@@ -14,8 +14,10 @@ import com.cartlc.tracker.fresh.ui.buttons.ButtonsController
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalController
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvc
-import com.cartlc.tracker.fresh.ui.daar.DaarController
-import com.cartlc.tracker.fresh.ui.daar.DaarViewMvc
+import com.cartlc.tracker.fresh.ui.daily.daar.DaarController
+import com.cartlc.tracker.fresh.ui.daily.daar.DaarViewMvc
+import com.cartlc.tracker.fresh.ui.daily.hours.HoursController
+import com.cartlc.tracker.fresh.ui.daily.hours.HoursViewMvc
 import com.cartlc.tracker.fresh.ui.listentries.ListEntriesController
 import com.cartlc.tracker.fresh.ui.listentries.ListEntriesViewMvc
 import com.cartlc.tracker.fresh.ui.login.LoginController
@@ -31,67 +33,105 @@ import com.cartlc.tracker.fresh.ui.main.title.TitleControllerImpl
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
 
 class FactoryController(
-        private val dcRx: DCServerRx,
-        private val schedulerPlan: SchedulerPlan
+    private val dcRx: DCServerRx,
+    private val schedulerPlan: SchedulerPlan
 ) {
 
-    fun allocEntrySimpleController(boundAct: BoundAct, view: EntrySimpleViewMvc): EntrySimpleController {
+    fun allocEntrySimpleController(
+        boundAct: BoundAct,
+        view: EntrySimpleViewMvc
+    ): EntrySimpleController {
         return EntrySimpleController(boundAct, view)
     }
 
     fun allocLoginController(
-            boundFrag: BoundFrag,
-            view: LoginViewMvc,
-            butttonsController: ButtonsController
+        boundFrag: BoundFrag,
+        view: LoginViewMvc,
+        butttonsController: ButtonsController
     ): LoginController {
         return LoginController(
-                boundFrag, view,
-                butttonsController, dcRx, schedulerPlan)
+            boundFrag, view,
+            butttonsController, dcRx, schedulerPlan
+        )
     }
 
-    fun allocButtonsController(boundAct: BoundAct,
-                               viewMvc: ButtonsViewMvc
+    fun allocButtonsController(
+        boundAct: BoundAct,
+        viewMvc: ButtonsViewMvc
     ): ButtonsController {
         return ButtonsControllerImpl(boundAct, viewMvc)
     }
 
-    fun allocTitleController(boundAct: BoundAct,
-                             viewMvc: TitleViewMvc): TitleController {
+    fun allocTitleController(
+        boundAct: BoundAct,
+        viewMvc: TitleViewMvc
+    ): TitleController {
         return TitleControllerImpl(boundAct, viewMvc)
     }
 
-    fun allocConfirmController(boundFrag: BoundFrag,
-                               viewMvc: ConfirmFinalViewMvc): ConfirmFinalController {
+    fun allocConfirmController(
+        boundFrag: BoundFrag,
+        viewMvc: ConfirmFinalViewMvc
+    ): ConfirmFinalController {
         return ConfirmFinalController(boundFrag, viewMvc)
     }
 
-    fun allocMainListController(boundAct: BoundAct,
-                                viewMvc: MainListViewMvc): MainListController {
+    fun allocMainListController(
+        boundAct: BoundAct,
+        viewMvc: MainListViewMvc
+    ): MainListController {
         return MainListController(boundAct, viewMvc)
     }
 
-    fun allocPictureListController(boundAct: BoundAct,
-                               viewMvc: PictureListViewMvc): PictureListController {
+    fun allocPictureListController(
+        boundAct: BoundAct,
+        viewMvc: PictureListViewMvc
+    ): PictureListController {
         return PictureListController(boundAct, viewMvc)
     }
 
-    fun allocMainController(boundAct: BoundAct, viewMvc: MainViewMvc,
-                            titleController: TitleController,
-                            buttonsController: ButtonsController
+    fun allocMainController(
+        boundAct: BoundAct, viewMvc: MainViewMvc,
+        titleController: TitleController,
+        buttonsController: ButtonsController
     ): MainController {
         return MainController(boundAct, viewMvc, titleController, buttonsController)
     }
 
-    fun allocListEntriesController(boundAct: BoundAct, viewMvc: ListEntriesViewMvc): ListEntriesController {
+    fun allocListEntriesController(
+        boundAct: BoundAct,
+        viewMvc: ListEntriesViewMvc
+    ): ListEntriesController {
         return ListEntriesController(boundAct, viewMvc)
     }
 
-    fun allocDaarController(boundAct: BoundAct, daarViewMvc: DaarViewMvc, titleViewMvc: TitleViewMvc, buttonsViewMvc: ButtonsViewMvc): DaarController {
+    fun allocDaarController(
+        boundAct: BoundAct,
+        daarViewMvc: DaarViewMvc,
+        titleViewMvc: TitleViewMvc,
+        buttonsViewMvc: ButtonsViewMvc
+    ): DaarController {
         return DaarController(
-                boundAct,
-                daarViewMvc,
-                titleViewMvc,
-                buttonsViewMvc,
-                boundAct.repo.db)
+            boundAct,
+            daarViewMvc,
+            titleViewMvc,
+            buttonsViewMvc,
+            boundAct.repo.db
+        )
+    }
+
+    fun allocHoursController(
+        boundAct: BoundAct,
+        hoursViewMvc: HoursViewMvc,
+        titleViewMvc: TitleViewMvc,
+        buttonsViewMvc: ButtonsViewMvc
+    ): HoursController {
+        return HoursController(
+            boundAct,
+            hoursViewMvc,
+            titleViewMvc,
+            buttonsViewMvc,
+            boundAct.repo.db
+        )
     }
 }

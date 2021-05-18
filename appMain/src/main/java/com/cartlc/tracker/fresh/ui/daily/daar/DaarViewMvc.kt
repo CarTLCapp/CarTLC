@@ -1,17 +1,12 @@
-package com.cartlc.tracker.fresh.ui.daar
+package com.cartlc.tracker.fresh.ui.daily.daar
 
 import androidx.annotation.StringRes
 import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvc
+import com.cartlc.tracker.fresh.ui.daily.project.ProjectSelect
 import com.cartlc.tracker.fresh.ui.common.viewmvc.ObservableViewMvc
 import com.cartlc.tracker.fresh.ui.title.TitleViewMvc
 
 interface DaarViewMvc : ObservableViewMvc<DaarViewMvc.Listener> {
-
-    enum class ProjectSelect {
-        PROJECT_RECENT,
-        PROJECT_ALL,
-        PROJECT_OTHER
-    }
 
     interface Listener {
         fun editTextAfterTextChanged(value: String)

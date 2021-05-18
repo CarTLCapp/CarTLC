@@ -1,7 +1,5 @@
 /*
- * *
- *   * Copyright 2019, FleetTLC. All rights reserved
- *
+ * Copyright 2017-2021, FleetTLC. All rights reserved
  */
 package com.cartlc.tracker.fresh.service.endpoint
 
@@ -16,12 +14,8 @@ import java.net.HttpURLConnection
  */
 open class DCPost {
 
-
     companion object {
-
-        private const val TAG = "DCPost"
         private const val MAX_SIZE = 65536
-
     }
 
     @Throws(IOException::class)

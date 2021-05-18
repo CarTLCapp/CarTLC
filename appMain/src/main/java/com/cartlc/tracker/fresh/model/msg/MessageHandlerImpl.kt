@@ -42,6 +42,9 @@ class MessageHandlerImpl(
                         }
                     }
                 }
+                is StringMessage.hours_time_start_hint_value -> getString(msg.text, msg.value)
+                is StringMessage.hours_time_end_hint_value -> getString(msg.text, msg.value)
+
                 else -> {
                     getString(msg.text)
                 }

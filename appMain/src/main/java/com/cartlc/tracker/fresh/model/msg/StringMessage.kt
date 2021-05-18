@@ -71,6 +71,11 @@ sealed class StringMessage(
     object daar_entry_date: StringMessage(R.string.daar_date_hint)
     object daar_entry_time: StringMessage(R.string.daar_time_hint)
 
+    object hours_time_none: StringMessage(R.string.hours_time_none)
+
+    data class hours_time_start_hint_value(val value: String): StringMessage(R.string.hours_time_start_hint_value)
+    data class hours_time_end_hint_value(val value: String): StringMessage(R.string.hours_time_end_hint_value)
+
     data class dialog_dialog_entry_done(val name: String): StringMessage(R.string.dialog_entry_done)
     data class dialog_dialog_entry_done2(val name: String, val name2: String): StringMessage(R.string.dialog_entry_done2)
     data class prompt_custom_photo_1(val prompt: String): StringMessage(R.string.prompt_custom_photo_1)

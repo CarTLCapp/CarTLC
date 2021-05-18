@@ -1,4 +1,4 @@
-@(currentPage: DaarPagedList, searchForm : Form[views.formdata.InputSearch], client : Client)
+@(currentPage: HoursPagedList, searchForm : Form[views.formdata.InputSearch], client : Client)
 
 @import helper._
 
@@ -18,7 +18,7 @@
         }
     }
     // Generate the link
-    routes.DaarController.list(newPage, currentPage.getPageSize(), currentPage.getSortBy(), currentPage.getOrder(), currentPage.getSearchTerm())
+    routes.HoursController.list(newPage, currentPage.getPageSize(), currentPage.getSortBy(), currentPage.getOrder(), currentPage.getSearchTerm())
 }
 
 @header(key:String, title:String) = {
@@ -27,13 +27,13 @@
     </th>
 }
 
-@main("FleetTLC - List Daily After Action Reports", client) {
+@main("FleetTLC - Daily Hours Worked Reports", client) {
 
-    @helper.form(action = routes.DaarController.search(currentPage.getPageIndex(), currentPage.getPageSize(), currentPage.getSortBy(), currentPage.getOrder())) {
+    @helper.form(action = routes.HoursController.search(currentPage.getPageIndex(), currentPage.getPageSize(), currentPage.getSortBy(), currentPage.getOrder())) {
         <h1 id="homeTitle">
             <span id="homeCount">...</span>
             <span style="float:right;font-size:16px">
-                   <a href="@routes.DaarController.searchClear()" class="btn">Clear</a>
+                   <a href="@routes.HoursController.searchClear()" class="btn">Clear</a>
             </span>
             <span style="float:right;font-size:16px">
                     @helper.select(searchForm("searchField"), currentPage.getSearchFieldOptions().map(option => option.value.toString -> option.text.toString), '_label -> "")
@@ -75,8 +75,12 @@
                     @header("date", "Date")
                     @header("root_project", "Root")
                     @header("sub_project", "Sub Project")
-                    @header("project_desc", "Desc")
-                    <th>View</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Lunch</th>
+                    <th>Break</th>
+                    <th>Drive</th>
+                    <th>Notes</th>
                 </tr>
             </thead>
             <tbody>
@@ -86,12 +90,16 @@
                     @currentPage.incRowNumber()
                     <tr>
                         <td><input class="entryCheckbox" style="margin-right:5px" type="checkbox" value="@entry.id">@currentPage.getRowNumber()</td>
-                        <td>@currentPage.highlightSearch(entry.getTechName(), DaarPagedList.ColumnSelector.TECH)</td>
-                        <td>@entry.getDateTime()</td>
-                        <td>@currentPage.highlightSearch(entry.getRootProjectName(), DaarPagedList.ColumnSelector.ROOT_PROJECT_ID)</td>
-                        <td>@currentPage.highlightSearch(entry.getSubProjectName(), DaarPagedList.ColumnSelector.SUB_PROJECT_ID)</td>
-                        <td>@currentPage.highlightSearch(entry.getProjectDesc(), DaarPagedList.ColumnSelector.PROJECT_DESC)</td>
-                        <td><a href="@routes.DaarController.view(entry.id)">@currentPage.highlightViewed(entry.viewed, "View")</a></td>
+                        <td>@currentPage.highlightSearch(entry.getTechName(), HoursPagedList.ColumnSelector.TECH)</td>
+                        <td>@entry.getEntryTime()</td>
+                        <td>@currentPage.highlightSearch(entry.getRootProjectName(), HoursPagedList.ColumnSelector.ROOT_PROJECT_ID)</td>
+                        <td>@currentPage.highlightSearch(entry.getSubProjectName(), HoursPagedList.ColumnSelector.SUB_PROJECT_ID)</td>
+                        <td>@entry.getStartTime()</td>
+                        <td>@entry.getEndTime()</td>
+                        <td>@entry.getLunchTime()</td>
+                        <td>@entry.getBreakTime()</td>
+                        <td>@entry.getDriveTime()</td>
+                        <th>@entry.getNotes()</th>
                     </tr>
                 }
 
@@ -124,7 +132,7 @@
                     document.getElementById("homeCount").innerHTML = bits[3];
                 }
             };
-            xhttp.open("GET", "@routes.DaarController.computeTotalNumRows()", true);
+            xhttp.open("GET", "@routes.HoursController.computeTotalNumRows()", true);
             xhttp.send();
         </script>
 
@@ -162,7 +170,7 @@
                     dataSearchField = "null";
                 }
                 var pageSize = selected;
-                var call = "/daar/list/0/" + pageSize + "/" + dataSortBy + "/" + dataOrder + "/" + dataSearchField + "/" + encodeURIComponent(dataSearchTerm);
+                var call = "/hours/list/0/" + pageSize + "/" + dataSortBy + "/" + dataOrder + "/" + dataSearchField + "/" + encodeURIComponent(dataSearchTerm);
                 var location = window.location.href;
                 var pathArray = location.split('/');
                 var protocol = pathArray[0];

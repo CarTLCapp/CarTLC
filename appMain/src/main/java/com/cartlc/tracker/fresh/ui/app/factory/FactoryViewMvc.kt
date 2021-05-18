@@ -13,8 +13,10 @@ import com.cartlc.tracker.fresh.ui.buttons.ButtonsViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvc
 import com.cartlc.tracker.fresh.ui.confirm.ConfirmFinalViewMvcImpl
 import com.cartlc.tracker.fresh.ui.confirm.item.*
-import com.cartlc.tracker.fresh.ui.daar.DaarViewMvc
-import com.cartlc.tracker.fresh.ui.daar.DaarViewMvcImpl
+import com.cartlc.tracker.fresh.ui.daily.daar.DaarViewMvc
+import com.cartlc.tracker.fresh.ui.daily.daar.DaarViewMvcImpl
+import com.cartlc.tracker.fresh.ui.daily.hours.HoursViewMvc
+import com.cartlc.tracker.fresh.ui.daily.hours.HoursViewMvcImpl
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvc
 import com.cartlc.tracker.fresh.ui.entrysimple.EntrySimpleViewMvcImpl
 import com.cartlc.tracker.fresh.ui.listentries.ListEntriesViewMvc
@@ -151,6 +153,10 @@ class FactoryViewMvc(
 
     fun allocDaarViewMvc(container: ViewGroup?): DaarViewMvc {
         return DaarViewMvcImpl(getInflater(container), container)
+    }
+
+    fun allocHoursViewMvc(container: ViewGroup?): HoursViewMvc {
+        return HoursViewMvcImpl(getInflater(container), container)
     }
 
 }

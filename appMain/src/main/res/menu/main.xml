@@ -8,6 +8,11 @@
         android:title="@string/daar_title"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/fleet_hours"
+        android:icon="@drawable/ic_baseline_hourglass_full_24"
+        android:title="@string/hours_title"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/upload"
         android:icon="@drawable/icon_upload"
         android:title="@string/title_upload"
