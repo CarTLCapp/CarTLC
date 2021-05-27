@@ -828,7 +828,7 @@ public class EntryController extends Controller {
                         collection.note_id = subValue.longValue();
                     }
                     subValue = ele.findValue("value");
-                    if (value == null) {
+                    if (subValue == null) {
                         missing.add("note:value");
                     } else {
                         collection.note_value = subValue.textValue();
