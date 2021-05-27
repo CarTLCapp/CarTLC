@@ -509,6 +509,7 @@ public class EntryController extends Controller {
         JsonNode json = request().body().asJson();
         Logger.debug("GOT: " + json.toString());
         boolean retServerId = false;
+        boolean entryFailAction = false;
         JsonNode value;
         value = json.findValue("tech_id");
         if (value == null) {
@@ -594,7 +595,6 @@ public class EntryController extends Controller {
         }
         value = json.findValue("project_id");
         if (value == null) {
-            // This is OLD school:
             value = json.findValue("project_name");
             if (value == null) {
                 missing.add("project_id");
@@ -606,6 +606,7 @@ public class EntryController extends Controller {
                     entry.project_id = project.id;
                 } else {
                     missing.add("project named '" + projectName + "'");
+                    entryFailAction = true;
                 }
             }
         } else {
@@ -839,6 +840,9 @@ public class EntryController extends Controller {
             }
         }
         if (missing.size() > 0) {
+            if (entryFailAction) {
+
+            }
             return missingRequest(missing);
         }
         if (entry.id != null && entry.id > 0) {
