@@ -509,10 +509,12 @@ public class EntryController extends Controller {
         JsonNode json = request().body().asJson();
         Logger.debug("GOT: " + json.toString());
         boolean retServerId = false;
+        boolean fatal = false;
         JsonNode value;
         value = json.findValue("tech_id");
         if (value == null) {
             missing.add("tech_id");
+            fatal = true;
         } else {
             entry.tech_id = value.intValue();
         }
@@ -536,6 +538,7 @@ public class EntryController extends Controller {
             value = json.findValue("date");
             if (value == null) {
                 missing.add("date");
+                fatal = true;
             } else {
                 entry.entry_time = new Date(value.longValue());
             }
@@ -599,12 +602,14 @@ public class EntryController extends Controller {
             if (value == null) {
                 missing.add("project_id");
                 missing.add("project_name");
+                fatal = true;
             } else {
                 String projectName = value.textValue();
                 Project project = Project.findByName(projectName);
                 if (project != null) {
                     entry.project_id = project.id;
                 } else {
+                    fatal = true;
                     missing.add("project named '" + projectName + "'");
                 }
             }
@@ -631,6 +636,7 @@ public class EntryController extends Controller {
             value = json.findValue("address");
             if (value == null) {
                 missing.add("address_id");
+                fatal = true;
             } else {
                 String address = value.textValue().trim();
                 if (address.length() > 0) {
@@ -827,7 +833,7 @@ public class EntryController extends Controller {
                     } else {
                         collection.note_id = subValue.longValue();
                     }
-                    subValue = ele.findValue("value");
+                     subValue = ele.findValue("value");
                     if (subValue == null) {
                         missing.add("note:value");
                     } else {
@@ -839,7 +845,12 @@ public class EntryController extends Controller {
             }
         }
         if (missing.size() > 0) {
-            return missingRequest(missing);
+            if (fatal) {
+                Logger.error("Found missing values -- entry aborted");
+                return missingRequest(missing);
+            } else {
+                Logger.error(missingString(missing));
+            }
         }
         if (entry.id != null && entry.id > 0) {
             entry.update();
@@ -862,6 +873,10 @@ public class EntryController extends Controller {
     }
 
     Result missingRequest(ArrayList<String> missing) {
+        return badRequest2(missingString(missing));
+    }
+
+    String missingString(ArrayList<String> missing) {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("Missing fields:");
         boolean comma = false;
@@ -873,7 +888,7 @@ public class EntryController extends Controller {
             comma = true;
         }
         sbuf.append("\n");
-        return badRequest2(sbuf.toString());
+        return sbuf.toString();
     }
 
     Result badRequest2(String field) {

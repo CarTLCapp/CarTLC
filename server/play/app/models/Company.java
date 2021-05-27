@@ -208,7 +208,16 @@ public class Company extends Model {
                     if (fields.length > 3) {
                         State state = State.find(fields[3].trim());
                         if (state == null) {
-                            throw new DataErrorException("Invalid state:" + fields[3] + " from '" + line + "'");
+                            String [] splitted = fields[3].split(" ");
+                            for (String split : splitted) {
+                                state = State.find(split.trim());
+                                if (state != null) {
+                                    break;
+                                }
+                            }
+                            if (state == null) {
+                                throw new DataErrorException("Invalid state:" + fields[3] + " from '" + line + "'");
+                            }
                         }
                         company.state = state.abbr;
                         if (fields.length > 4) {
