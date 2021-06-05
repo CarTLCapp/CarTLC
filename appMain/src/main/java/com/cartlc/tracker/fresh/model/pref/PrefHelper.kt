@@ -625,8 +625,13 @@ class PrefHelper constructor(
         }
         if (needsValidServerId) {
             if (!db.tableProjects.hasServerId(rootName, subName)) {
-                error("saveProjectAndAddressCombo(): current project is not associated with anything on the server: $rootName - $subName")
+                if (subName.isEmpty()) {
+                    error("saveProjectAndAddressCombo(): current project is not associated with anything on the server: $rootName|")
+                } else {
+                    error("saveProjectAndAddressCombo(): current project is not associated with anything on the server: $rootName|$subName|")
+                }
                 clearCurProject()
+                reloadProjects()
                 return false
             }
         }
@@ -726,7 +731,7 @@ class PrefHelper constructor(
         // Sanity check
         if (entry.date == 0L) {
             entry.date = System.currentTimeMillis()
-            Timber.e("Error: should not have encountered an unset entry creation time.")
+            Timber.w("Warning: should not have encountered an unset entry creation time.")
         }
         if (incOkay) {
             inc()

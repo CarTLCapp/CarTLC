@@ -55,6 +55,8 @@ class MessageHandlerImpl(
                 ErrorMessage.NEED_COMPANY -> R.string.error_need_company
                 ErrorMessage.NEED_STATUS -> R.string.error_need_status
                 ErrorMessage.CANNOT_TAKE_PICTURE -> R.string.error_cannot_take_picture
+                ErrorMessage.CANNOT_HAVE_COMMAS -> R.string.error_cannot_have_commas
+                ErrorMessage.INVALID -> R.string.error_invalid
             })
 
     private fun getString(@StringRes text: Int): String {

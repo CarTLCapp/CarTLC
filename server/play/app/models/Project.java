@@ -15,6 +15,8 @@ import play.Logger;
 
 import com.avaje.ebean.*;
 
+import play.db.ebean.Transactional;
+
 /**
  * Project entity managed by Ebean
  */
@@ -22,6 +24,7 @@ import com.avaje.ebean.*;
 public class Project extends Model implements Comparable<Project> {
 
     private static final long serialVersionUID = 1L;
+    private static final String RECOVERY_NAME = "Recovery";
 
     @Id
     public Long id;
@@ -189,6 +192,20 @@ public class Project extends Model implements Comparable<Project> {
             result.add(project.id);
         }
         return result;
+    }
+
+    @Transactional
+    public static void initRecovery() {
+        Project project = getRecoveryProject();
+        if (project == null) {
+            project = new Project();
+            project.name = RECOVERY_NAME;
+            project.save();
+        }
+    }
+
+    public static Project getRecoveryProject() {
+        return findByName(RECOVERY_NAME);
     }
 
     public String getEquipmentsLine() {

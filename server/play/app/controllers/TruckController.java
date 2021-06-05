@@ -61,12 +61,6 @@ public class TruckController extends Controller {
         return Results.redirect(routes.TruckController.list(0));
     }
 
-    @Security.Authenticated(Secured.class)
-    public Result cleanup() {
-        Truck.cleanup();
-        return LIST();
-    }
-
     public Result toggleFilter() {
         mFilter = !mFilter;
         return LIST();

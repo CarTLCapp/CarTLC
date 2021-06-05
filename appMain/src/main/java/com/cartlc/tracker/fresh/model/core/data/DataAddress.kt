@@ -8,6 +8,23 @@ package com.cartlc.tracker.fresh.model.core.data
  */
 class DataAddress {
 
+    companion object {
+
+        internal fun equals(field1: String?, field2: String?): Boolean {
+            if (field1 == null && field2 == null) {
+                return true
+            }
+            if (field1 != null && field2 == null) {
+                return false
+            }
+            return if (field1 == null && field2 != null) {
+                false
+            } else {
+                field1 == field2
+            }
+        }
+    }
+
     constructor(company: String) {
         this.company = company
         this.isBootStrap = true
@@ -90,7 +107,7 @@ class DataAddress {
             return sbuf.toString()
         }
 
-    fun hasValidAddress(): Boolean {
+    private fun hasValidAddress(): Boolean {
         return !street.isNullOrBlank() && !city.isNullOrBlank() && !state.isNullOrBlank()
     }
 
@@ -98,7 +115,7 @@ class DataAddress {
         return !state.isNullOrEmpty() && DataStates.isValid(state)
     }
 
-    fun hasZipCode(): Boolean {
+    private fun hasZipCode(): Boolean {
         return !zipcode.isNullOrBlank()
     }
 
@@ -157,20 +174,4 @@ class DataAddress {
         return sbuf.toString()
     }
 
-    companion object {
-
-        internal fun equals(field1: String?, field2: String?): Boolean {
-            if (field1 == null && field2 == null) {
-                return true
-            }
-            if (field1 != null && field2 == null) {
-                return false
-            }
-            return if (field1 == null && field2 != null) {
-                false
-            } else {
-                field1 == field2
-            }
-        }
-    }
 }

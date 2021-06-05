@@ -72,7 +72,7 @@ class CarRepository(
     }
 
     var errorValue: ErrorMessage
-        get() = error.value!!
+        get() = error.value ?: ErrorMessage.INVALID
         set(value) {
             error.value = value
         }

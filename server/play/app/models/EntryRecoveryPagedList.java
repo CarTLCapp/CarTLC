@@ -4,22 +4,22 @@
 package models;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.text.SimpleDateFormat;
 
 import com.avaje.ebean.*;
 
 import play.db.ebean.*;
 import play.Logger;
-import play.twirl.api.Html;
 
+import play.twirl.api.Html;
 import views.formdata.InputSearch;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.concurrent.TimeUnit;
 import modules.Status;
 
-public class EntryPagedList {
+public class EntryRecoveryPagedList {
 
     public enum ColumnSelector {
         ALL("All", "all", null),
@@ -206,7 +206,7 @@ public class EntryPagedList {
     }
 
     class Result {
-        List<Entry> mList = new ArrayList<Entry>();
+        List<EntryRecovery> mList = new ArrayList<EntryRecovery>();
         long mNumTotalRows;
     }
 
@@ -230,7 +230,6 @@ public class EntryPagedList {
     List<Long> mLimitByProject = new ArrayList<Long>();
     List<String> mLimitByCompanyName = new ArrayList<String>();
     long mByTruckId;
-    boolean mByRepaired;
     int mRowNumber;
     int mDefaultPageSize = PAGE_SIZES[0];
     Date mSearchStartDate = null;
@@ -240,10 +239,10 @@ public class EntryPagedList {
     public boolean canViewPictures = true;
     public long mForClientId = 0;
 
-    public EntryPagedList() {
+    public EntryRecoveryPagedList() {
     }
 
-    public EntryPagedList(EntryPagedList other) {
+    public EntryRecoveryPagedList(EntryRecoveryPagedList other) {
         mParams.mSortBy = other.mParams.mSortBy;
         mParams.mOrder = other.mParams.mOrder;
         mSearch = new SearchInfo(other.mSearch);
@@ -353,7 +352,7 @@ public class EntryPagedList {
         }
     }
 
-    public String getEquipmentLine(Entry entry) {
+    public String getEquipmentLine(EntryRecovery entry) {
         return entry.getEquipmentLine(mForClientId);
     }
 
@@ -380,14 +379,6 @@ public class EntryPagedList {
         return mByTruckId != 0;
     }
 
-    public void setByRepaired() {
-        mByRepaired = true;
-    }
-
-    public boolean isByRepaired() {
-        return mByRepaired;
-    }
-
     public String getByTruckLine() {
         Truck truck = Truck.find.byId(mByTruckId);
         if (truck != null) {
@@ -403,7 +394,7 @@ public class EntryPagedList {
         query.append(", e.equipment_collection_id");
         query.append(", e.picture_collection_id");
         query.append(", e.note_collection_id");
-        query.append(", e.truck_id, e.status, e.time_zone");
+        query.append(", e.truck_id, e.status, e.time_zone, e.error");
 
         switch (mParams.mSortBy) {
             case TECH:
@@ -418,7 +409,7 @@ public class EntryPagedList {
                 query.append(" , " + getSortByColumn());
                 break;
         }
-        query.append(" FROM entry AS e");
+        query.append(" FROM entry_recovery AS e");
 
         if (mSearch.hasSearch() && mSearch.hasSearchBy(ColumnSelector.EQUIPMENT)) {
             query.append(" INNER JOIN entry_equipment_collection AS eqc ON e.equipment_collection_id = eqc.collection_id");
@@ -451,9 +442,6 @@ public class EntryPagedList {
             query.append("e.truck_id=");
             query.append(mByTruckId);
         } else {
-            if (mByRepaired) {
-                query.append(" INNER JOIN repaired AS rep ON e.id = rep.entry_id");
-            }
             StringBuilder whereQuery = new StringBuilder();
             String search = getWhereSearch();
             if (search.length() > 0) {
@@ -665,14 +653,14 @@ public class EntryPagedList {
                 Date date = mParseDateFormatZZZ.parse(term);
                 return date;
             } catch (Exception ex) {
-                // Not a date -- this is okay
+                Logger.info(ex.getMessage());
             }
         }
         try {
             Date date = mParseDateFormat.parse(term);
             return date;
         } catch (Exception ex) {
-            // Not a date -- this is okay
+            Logger.info(ex.getMessage());
         }
         return null;
     }
@@ -761,12 +749,27 @@ public class EntryPagedList {
         return mResult.mNumTotalRows;
     }
 
-    private Entry parseEntry(SqlRow row) {
-        return Entry.parseEntry(row);
+    private EntryRecovery parseEntry(SqlRow row) {
+        EntryRecovery entry = new EntryRecovery();
+        entry.id = row.getLong("id");
+        entry.tech_id = row.getInteger("tech_id");
+        entry.entry_time = row.getDate("entry_time");
+        entry.time_zone = row.getString("time_zone");
+        entry.project_id = row.getLong("project_id");
+        entry.company_id = row.getLong("company_id");
+        entry.equipment_collection_id = row.getLong("equipment_collection_id");
+        entry.picture_collection_id = row.getLong("picture_collection_id");
+        entry.note_collection_id = row.getLong("note_collection_id");
+        entry.truck_id = row.getLong("truck_id");
+        entry.error = row.getString("error");
+        if (row.get("status") != null) { // WHY DO I NEED THIS?
+            entry.status = Status.from(getInteger(row, "status"));
+        }
+        return entry;
     }
 
-    private boolean hasEquipmentMatch(List<Entry> entries) {
-        for (Entry entry : entries) {
+    private boolean hasEquipmentMatch(List<EntryRecovery> entries) {
+        for (EntryRecovery entry : entries) {
             String line = entry.getEquipmentLine(mForClientId);
             if (mSearch.hasMatch(line)) {
                 return true;
@@ -775,20 +778,20 @@ public class EntryPagedList {
         return false;
     }
 
-    private static Integer getInteger(SqlRow row, String column) {
+    private Integer getInteger(SqlRow row, String column) {
         if (row.get(column) == null) {
             return null;
         }
         return row.getInteger(column);
     }
 
-    public synchronized List<Entry> getList() {
+    public synchronized List<EntryRecovery> getList() {
         return mResult.mList;
     }
 
-    public List<Entry> getOrderedList() {
+    public List<EntryRecovery> getOrderedList() {
         if (isOrderDesc()) {
-            List<Entry> reversed = new ArrayList<>(mResult.mList);
+            List<EntryRecovery> reversed = new ArrayList<>(mResult.mList);
             Collections.reverse(reversed);
             return reversed;
         }
@@ -815,7 +818,7 @@ public class EntryPagedList {
         return Integer.toString(mRowNumber);
     }
 
-    public String getRowNumber(Entry entry) {
+    public String getRowNumber(EntryRecovery entry) {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(mRowNumber);
         sbuf.append(" (");
@@ -904,37 +907,4 @@ public class EntryPagedList {
         return mSearch.getField();
     }
 
-//    public List<Long> parseIds(String rows) {
-//        ArrayList<Long> ids = new ArrayList<>();
-//        String[] rowIds = rows.split(",");
-//        try {
-//            int lastRow = -1;
-//            boolean range = false;
-//            for (String rowId : rowIds) {
-//                if (rowId.equals("R")) {
-//                    range = true;
-//                } else {
-//                    int row = Integer.parseInt(rowId);
-//                    if (range) {
-//                        for (int r = lastRow + 1; r <= row; r++) {
-//                            ids.add(mEntryList.getList().get(r).id);
-//                        }
-//                    } else {
-//                        ids.add(mEntryList.getList().get(row).id);
-//                    }
-//                    lastRow = row;
-//                    range = false;
-//                }
-//            }
-//            if (range) {
-//                for (int r = lastRow + 1; r < mEntryList.getList().size(); r++) {
-//                    ids.add(mEntryList.getList().get(r).id);
-//                }
-//            }
-//        } catch (NumberFormatException ex) {
-//            Logger.error(ex.getMessage());
-//        }
-//        Logger.warn("Total entries to delete now is: " + ids.size());
-//        return ids;
-//    }
 }

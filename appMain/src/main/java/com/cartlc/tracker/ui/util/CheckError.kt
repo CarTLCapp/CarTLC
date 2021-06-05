@@ -29,7 +29,7 @@ class CheckError {
     }
 
     internal var mDialog: AlertDialog? = null
-    internal var mErrorEntry: CheckErrorEntry
+    private var mErrorEntry: CheckErrorEntry
 
     interface CheckErrorResult {
         fun doEdit()
@@ -116,10 +116,8 @@ class CheckError {
         }
 
         fun hasValidAddress(entry: DataEntry): Boolean {
-            return entry.address!!.hasValidState()
+            return entry.address?.hasValidState() ?: false
         }
     }
-
-
 
 }

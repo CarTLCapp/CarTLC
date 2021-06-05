@@ -1,0 +1,11 @@
+
+1. Make backup of sql database
+
+2. Remove play_evolutions table creation from backup file.
+
+3. Execute drop.sql to clear out entire database
+
+4. Run product
+
+5. Execute restore with backup file.
+

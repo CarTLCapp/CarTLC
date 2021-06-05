@@ -12,6 +12,8 @@ import com.avaje.ebean.*;
 import play.db.ebean.*;
 import play.Logger;
 
+import modules.Status;
+
 public class ProgressGrid extends WorkOrderList {
 
     final static int MAX_COLS = 25;
@@ -83,7 +85,7 @@ public class ProgressGrid extends WorkOrderList {
     }
 
     public static String getKeyColor(String name) {
-        Entry.Status status = Entry.Status.from(name);
+        Status status = Status.from(name);
         if (status != null) {
             return status.getCellColor();
         }
@@ -91,7 +93,7 @@ public class ProgressGrid extends WorkOrderList {
     }
 
     public static String getKeyName(String name) {
-        Entry.Status status = Entry.Status.from(name);
+        Status status = Status.from(name);
         if (status != null) {
             return status.getName();
         }

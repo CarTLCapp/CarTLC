@@ -34,6 +34,14 @@ class AmazonHelper(
         private const val BUCKET_NAME_RELEASE = "fleettlc"
         //        internal val IDENTITY_POOL_ID_DEVELOP = "us-east-2:38d2f2a2-9454-4472-9fec-9468f3700ba5"
         private const val IDENTITY_POOL_ID_RELEASE = "us-east-2:389282dd-de71-4849-a68b-2b126b3de5f3"
+
+        private val IGNORE_ERRORS = listOf(
+            "Unable to execute HTTP request: timeout",
+            "Unable to execute HTTP request: Read timed out",
+            "Unable to execute HTTP request: SSL handshake timed out",
+            "Unable to execute HTTP request: failed to connect to",
+            "Unable to execute HTTP request: Unable to resolve host"
+        )
     }
 
     private val BUCKET_NAME: String = BUCKET_NAME_RELEASE
@@ -142,7 +150,11 @@ class AmazonHelper(
             override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
 
             override fun onError(id: Int, ex: Exception) {
-                TBApplication.ReportError(ex, AmazonHelper::class.java, "sendPicture()", "amazon")
+                if (IGNORE_ERRORS.contains(ex.message)) {
+                    Timber.i(ex)
+                } else {
+                    TBApplication.ReportError(ex, AmazonHelper::class.java, "sendPicture()", "amazon")
+                }
             }
         })
         return BitmapResult.OK

@@ -117,7 +117,7 @@ public class Note extends Model implements Comparable<Note> {
                 note.name = NOTE_TRUCK_NUMBER_NAME;
                 note.type = Type.ALPHANUMERIC;
                 note.save();
-                Logger.info("ADDED " + note.name);
+                Logger.info("Note.initGeneralPurpose() ADDED " + note.name);
             }
             if (!hasDamage) {
                 Note note = new Note();
@@ -127,7 +127,7 @@ public class Note extends Model implements Comparable<Note> {
                 note.name = NOTE_TRUCK_DAMAGE_NAME;
                 note.type = Type.TEXT;
                 note.save();
-                Logger.info("ADDED " + note.name);
+                Logger.info("Note.initGeneralPurpose() ADDED " + note.name);
             }
             if (!hasPartialInstall) {
                 Note note = new Note();
@@ -137,7 +137,7 @@ public class Note extends Model implements Comparable<Note> {
                 note.name = NOTE_PARTIAL_INSTALL_REASON;
                 note.type = Type.TEXT;
                 note.save();
-                Logger.info("ADDED " + note.name);
+                Logger.info("Note.initGeneralPurpose() ADDED " + note.name);
             }
             Version.inc(Version.VERSION_NOTE);
         }
@@ -180,7 +180,7 @@ public class Note extends Model implements Comparable<Note> {
     }
 
     public static List<Note> appList() {
-        return find.where().eq("disabled", false).findList();
+        return find.where().findList();
     }
 
     public static List<Note> getCreatedByClient(int client_id) {

@@ -70,19 +70,19 @@
         <h3><a href="@routes.MessageController.list()">Errors</a></h3>
 
         <p>Display list of coding errors received from the app (developer use only)</p>
+
+        <h3><a href="@routes.EntryRecoveryController.list()">Recovery Entries</a></h3>
+
+        <p>Load entries as extracted from log for recovery purposes.</p>
+
+        <h3><a href="@routes.CleanupController.index()">Cleanup Database</a></h3>
+
+        <p>Cleanup orphan database entries. Remove old entries no longer needed.</p>
     }
 
     <h6>Server version @version</h6>
 
     @if(client.is_admin) {
-
-		<a id="picture_cleanup" href="@routes.HomeController.index()" class="light">Picture Cleanup</a>
-
-		<p id="picture_cleanup_result"></p>
-
-        	<a id="truck_cleanup" href="@routes.HomeController.index()" class="light">Truck Cleanup</a>
-	
-       	 <p id="truck_cleanup_result"></p>
 
         <div class="dailyBox">
 
@@ -130,28 +130,6 @@
 
     <script type="text/javascript">
 
-        function myPictureCleanup() {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.responseText.length > 0 && this.status == 200) {
-                    document.getElementById("picture_cleanup_result").innerHTML = this.responseText;
-                    document.getElementById("picture_cleanup").innerHTML = "Picture Cleanup";
-                }
-            };
-            xhttp.open("GET", "@routes.HomeController.pictureCleanup()", true);
-            xhttp.send();
-            document.getElementById("picture_cleanup").innerHTML = "";
-        }
-
-        function myConfirmPictureCleanup() {
-            if (confirm('This will scan and delete all unused picture files and cannot be undone. Are you sure?')) {
-                myPictureCleanup();
-            }
-        }
-
-        document.getElementById("picture_cleanup").onclick = myConfirmPictureCleanup;
-
-
         function onDateSelected() {
             var e = document.getElementById("dateSelected");
             var selected = e.options[e.selectedIndex].value;
@@ -165,27 +143,6 @@
             xhttp.open("GET", call, true);
             xhttp.send();
         }
-        
-        function myTruckCleanup() {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.responseText.length > 0 && this.status == 200) {
-                    document.getElementById("truck_cleanup_result").innerHTML = this.responseText;
-                    document.getElementById("truck_cleanup").innerHTML = "Truck Cleanup";
-                }
-            };
-            xhttp.open("GET", "@routes.HomeController.truckCleanup()", true);
-            xhttp.send();
-            document.getElementById("truck_cleanup").innerHTML = "";
-        }
-
-        function myConfirmTruckCleanup() {
-            if (confirm('This will confirm all entries have no duplicate truck records between them and cannot be undone. Are you sure?')) {
-                myTruckCleanup();
-            }
-        }
-
-        document.getElementById("truck_cleanup").onclick = myConfirmTruckCleanup;
 
     </script>
 

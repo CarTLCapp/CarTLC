@@ -27,6 +27,7 @@ public class Globals {
         Company.saveNames();
         Technician.fixCodeZeros();
         Note.initGeneralPurpose();
+        Project.initRecovery();
         Calendar c1 = Calendar.getInstance();
         if (c1.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
             superInit();

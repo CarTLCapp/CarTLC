@@ -4,24 +4,21 @@
 package models;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.io.File;
-import java.lang.Math;
 
 import javax.persistence.*;
 
 import play.data.validation.*;
 import play.data.format.*;
 import play.data.Form;
-import play.db.ebean.Transactional;
 
 import com.avaje.ebean.*;
-import play.db.ebean.*;
 
 import modules.AmazonHelper;
 import modules.AmazonHelper.OnDownloadComplete;
 import modules.TimeHelper;
 import modules.Status;
+
 import models.flow.*;
 import play.Logger;
 
@@ -29,39 +26,46 @@ import play.Logger;
  * Entry entity managed by Ebean
  */
 @Entity
-public class Entry extends com.avaje.ebean.Model {
+public class EntryRecovery extends com.avaje.ebean.Model {
 
     private static final long serialVersionUID = 1L;
+
     private static final String DATE_FORMAT = "yyyy-MM-dd kk:mm zzz";
-    private static final Boolean VERBOSE = EntryRecovery.VERBOSE;
-    private static final long IS_THE_SAME_WINDOW_MS = TimeUnit.DAYS.toMillis(30 * 6);
+    public static final Boolean VERBOSE = false;
+
 
     @Id
     public Long id;
 
     @Constraints.Required
-    public int tech_id;
+    public Long entry_id;
+
+    @Constraints.Required
+    public int tech_id;    // Match: required
 
     @Formats.DateTime(pattern = DATE_FORMAT)
     public Date entry_time;
 
     @Constraints.Required
-    public long project_id;
-
+    public long project_id;  // Sometimes missing or malformed causes this to not be here.
+    // If it is present, then flow match can occur.
     @Constraints.Required
-    public long company_id;
+    public long company_id;   // Match: required
 
     @Constraints.Required
     public long equipment_collection_id;
 
     @Constraints.Required
-    public long picture_collection_id;
+    public long picture_collection_id; // This will have a flow link
 
     @Constraints.Required
     public long note_collection_id;
 
     @Constraints.Required
-    public long truck_id; // If unused, then it is expected to have a picture with an associated note id'ing the truck
+    public long truck_id; // Match required if not in flow. If in flow, then see
+
+    @Constraints.Required
+    public long comparison_flags;
 
     @Constraints.Required
     public Status status;
@@ -69,16 +73,33 @@ public class Entry extends com.avaje.ebean.Model {
     @Constraints.Required
     public String time_zone;
 
-    public static Finder<Long, Entry> find = new Finder<Long, Entry>(Entry.class);
+    @Constraints.Required
+    public String error;
 
-    public static Entry get(long id) {
-        return find.byId(id);
-    }
+    public static Finder<Long, EntryRecovery> find = new Finder<Long, EntryRecovery>(EntryRecovery.class);
 
-    public static PagedList<Entry> list(int page, int pageSize, String sortBy, String order) {
+    public static PagedList<EntryRecovery> list(int page, int pageSize, String sortBy, String order) {
         return find.where()
                 .orderBy(sortBy + " " + order)
                 .findPagedList(page, pageSize);
+    }
+
+    public void copy(Entry entry) {
+        tech_id = entry.tech_id;
+        entry_time = entry.entry_time;
+        project_id = entry.project_id;
+        company_id = entry.company_id;
+        equipment_collection_id = entry.equipment_collection_id;
+        picture_collection_id = entry.picture_collection_id;
+        note_collection_id = entry.note_collection_id;
+        truck_id = entry.truck_id;
+        status = entry.status;
+        time_zone = entry.time_zone;
+        if (entry.id != null && entry.id > 0) {
+            entry_id = entry.id;
+        } else {
+            entry_id = null;
+        }
     }
 
     public boolean match(List<String> terms, long client_id) {
@@ -138,18 +159,18 @@ public class Entry extends com.avaje.ebean.Model {
         if (tech == null) {
             return Technician.RIP;
         }
-        Technician tech2 = SecondaryTechnician.findSecondaryTechByEntryId(id);
-        if (tech2 == null) {
-            return tech.fullName();
-        }
+//        Technician tech2 = SecondaryTechnician.findSecondaryTechByEntryId(id);
+//        if (tech2 == null) {
+//            return tech.fullName();
+//        }
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(tech.fullName());
-        sbuf.append(" & ");
-        try {
-            sbuf.append(tech2.fullName());
-        } catch (Exception ex) {
-            sbuf.append(Technician.RIP);
-        }
+//        sbuf.append(" & ");
+//        try {
+//            sbuf.append(tech2.fullName());
+//        } catch (Exception ex) {
+//            sbuf.append(Technician.RIP);
+//        }
         return sbuf.toString();
     }
 
@@ -339,6 +360,9 @@ public class Entry extends com.avaje.ebean.Model {
         if (status == null) {
             return "";
         }
+        if (error != null) {
+            return "ERROR";
+        }
         return status.getName();
     }
 
@@ -346,49 +370,21 @@ public class Entry extends com.avaje.ebean.Model {
         if (status == null) {
             return "";
         }
+        if (error != null) {
+            return "#ff0000";
+        }
         return status.getCellColor();
     }
 
-    public String getStatus2() {
-        if (wasRepaired()) {
-            return "Repaired";
-        }
-        return getStatus();
+    public boolean hasError() {
+        return error != null;
     }
 
-    public String getCellColor2() {
-        if (wasRepaired()) {
-            return "#ff0167";
+    public String getErrorLine() {
+        if (error != null) {
+            return error;
         }
-        return getCellColor();
-    }
-
-    public boolean wasRepaired() {
-        return Repaired.wasRepaired(id);
-    }
-
-    public List<Entry> getRelatedEntries() {
-        List<Repaired> meList = Repaired.findByEntryId(id);
-        ArrayList<Integer> instanceIds = new ArrayList<Integer>();
-        for (Repaired repaired : meList) {
-            int instanceId = repaired.instance_id;
-            if (!instanceIds.contains(instanceId)) {
-                instanceIds.add(instanceId);
-            }
-        }
-        ArrayList<Entry> relatedEntries = new ArrayList<Entry>();
-        for (int instanceId : instanceIds) {
-            List<Repaired> items = Repaired.findByInstanceId(instanceId);
-            for (Repaired item : items) {
-                if (!item.entry_id.equals(id)) {
-                    Entry related = Entry.get(item.entry_id);
-                    if (related != null) {
-                        relatedEntries.add(related);
-                    }
-                }
-            }
-        }
-        return relatedEntries;
+        return "";
     }
 
     public String getDate() {
@@ -415,7 +411,7 @@ public class Entry extends com.avaje.ebean.Model {
         return truck.getID();
     }
 
-    public int truckCompareTo(Entry other) {
+    public int truckCompareTo(EntryRecovery other) {
         Truck truck = Truck.find.byId(truck_id);
         Truck otruck = Truck.find.byId(other.truck_id);
         if (truck == null || otruck == null) {
@@ -508,15 +504,7 @@ public class Entry extends com.avaje.ebean.Model {
         }
     }
 
-    public HashMap<String, Object> getNoteValues(long client_id) {
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        for (EntryNoteCollection note : getNotes(client_id)) {
-            map.put(note.idValueString(), note.getValue());
-        }
-        return map;
-    }
-
-    public HashMap<String, String> getNoteValues2(long client_id) {
+    public HashMap<String, String> getNoteValues(long client_id) {
         HashMap<String, String> map = new HashMap<String, String>();
         for (EntryNoteCollection note : getNotes(client_id)) {
             map.put(note.idValueString(), note.getValue());
@@ -525,7 +513,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     static public List<EntryNoteCollection> getNotesForId(long client_id, long id) {
-        Entry entry = find.byId(id);
+        EntryRecovery entry = find.byId(id);
         if (entry == null) {
             return new ArrayList<EntryNoteCollection>();
         }
@@ -571,16 +559,12 @@ public class Entry extends com.avaje.ebean.Model {
         return items;
     }
 
-    static List<Entry> findByProjectId(long project_id) {
+    static List<EntryRecovery> findByProjectId(long project_id) {
         return find.where().eq("project_id", project_id).findList();
     }
 
-    public static List<Entry> findByTruckId(long truck_id) {
-        return find.where().eq("truck_id", truck_id).findList();
-    }
-
-    public static Entry findByDate(int tech_id, Date date) {
-        List<Entry> list = find.where()
+    public static EntryRecovery findByDate(int tech_id, Date date) {
+        List<EntryRecovery> list = find.where()
                 .eq("tech_id", tech_id)
                 .eq("entry_time", date)
                 .findList();
@@ -591,7 +575,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasEquipmentByProject(long project_id, long equipment_id) {
-        for (Entry entry : findByProjectId(project_id)) {
+        for (EntryRecovery entry : findByProjectId(project_id)) {
             if (entry.hasEquipment(equipment_id)) {
                 return true;
             }
@@ -600,7 +584,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasEquipment(long entry_id, long equipment_id) {
-        Entry entry = find.byId(entry_id);
+        EntryRecovery entry = find.byId(entry_id);
         if (entry != null) {
             if (entry.hasEquipment(equipment_id)) {
                 return true;
@@ -620,7 +604,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public static boolean hasNote(long entry_id, long note_id) {
-        Entry entry = find.byId(entry_id);
+        EntryRecovery entry = find.byId(entry_id);
         if (entry != null) {
             if (entry.hasNote(note_id)) {
                 return true;
@@ -639,21 +623,23 @@ public class Entry extends com.avaje.ebean.Model {
         return false;
     }
 
-    public void remove(AmazonHelper.DeleteAction amazonAction) {
+
+    public void remove() {
         /**
-         * Also check to ensure collection not used in recovery entries. Shouldn't be, but if it is, leave it.
+         * Being extra cautious here to also check regular entries before deleting this entry.
+         * There should be no chance that it is referenced but just in case it is, it would be very bad to delete it.
          */
-        if (!EntryRecovery.hasEntryForEquipment(equipment_collection_id)) {
+        if (!Entry.hasEntryForEquipment(equipment_collection_id)) {
             if (countEntryForEquipment(equipment_collection_id) <= 1) {
                 EntryEquipmentCollection.deleteByCollectionId(equipment_collection_id);
             }
         }
-        if (!EntryRecovery.hasEntryForPictureCollectionId(picture_collection_id)) {
+        if (!Entry.hasEntryForPictureCollectionId(picture_collection_id)) {
             if (countEntryForPictureCollectionId(picture_collection_id) <= 1) {
-                PictureCollection.deleteByCollectionId(picture_collection_id, amazonAction);
+                PictureCollection.deleteByCollectionId(picture_collection_id, null);
             }
         }
-        if (!EntryRecovery.hasEntryForNote(note_collection_id)) {
+        if (!Entry.hasEntryForNote(note_collection_id)) {
             if (countEntryForNote(note_collection_id) <= 1) {
                 EntryNoteCollection.deleteByCollectionId(note_collection_id);
             }
@@ -683,7 +669,7 @@ public class Entry extends com.avaje.ebean.Model {
                 .findRowCount();
     }
 
-    public static List<Entry> findEntiesForProjectWithinRange(long project_id, long start_time, long end_time) {
+    public static List<EntryRecovery> findEntriesForProjectWithinRange(long project_id, long start_time, long end_time) {
         return find.where()
                 .eq("project_id", project_id)
                 .ge("entry_time", new Date(start_time))
@@ -709,6 +695,10 @@ public class Entry extends com.avaje.ebean.Model {
 
     public static int countEntriesForTruck(long truck_id) {
         return find.where().eq("truck_id", truck_id).findRowCount();
+    }
+
+    public List<EntryRecovery> getEntriesForTruck() {
+        return find.where().eq("truck_id", truck_id).findList();
     }
 
     public static int countEntriesForNote(long note_id) {
@@ -789,6 +779,72 @@ public class Entry extends com.avaje.ebean.Model {
         return false;
     }
 
+    /**
+     * @param entry
+     * @param client_id
+     * @return list of EntryRecovery items that match the given truck value for the passed in entry.
+     */
+    public static List<EntryRecovery> findEntryForEntry(EntryRecovery entry, long client_id) {
+
+        List<Truck> trucks = Truck.findMatching(entry.getTruck());
+
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT e.id, e.tech_id, e.entry_id, e.entry_time, e.project_id, e.company_id");
+        query.append(", e.equipment_collection_id");
+        query.append(", e.picture_collection_id");
+        query.append(", e.note_collection_id");
+        query.append(", e.truck_id, e.status, e.time_zone");
+        query.append(", e.comparison_flags, e.error");
+        query.append(" FROM entry_recovery AS e");
+        query.append(" WHERE ");
+        query.append("e.truck_id IN (");
+        boolean first = true;
+        for (Truck truck : trucks) {
+            if (first) {
+                first = false;
+            } else {
+                query.append(", ");
+            }
+            query.append(truck.id);
+        }
+        query.append(")");
+
+        List<SqlRow> rows = Ebean.createSqlQuery(query.toString()).findList();
+        ArrayList<EntryRecovery> entries = new ArrayList<EntryRecovery>();
+        for (SqlRow row : rows) {
+            entries.add(parseEntry(row));
+        }
+        return entries;
+    }
+
+    public static EntryRecovery parseEntry(SqlRow row) {
+        EntryRecovery entry = new EntryRecovery();
+        entry.id = row.getLong("id");
+        entry.tech_id = row.getInteger("tech_id");
+        entry.entry_time = row.getDate("entry_time");
+        entry.entry_id = row.getLong("entry_id");
+        entry.time_zone = row.getString("time_zone");
+        entry.project_id = row.getLong("project_id");
+        entry.company_id = row.getLong("company_id");
+        entry.equipment_collection_id = row.getLong("equipment_collection_id");
+        entry.picture_collection_id = row.getLong("picture_collection_id");
+        entry.note_collection_id = row.getLong("note_collection_id");
+        entry.truck_id = row.getLong("truck_id");
+        entry.comparison_flags = row.getInteger("comparison_flags");
+        entry.error = row.getString("error");
+        if (row.get("status") != null) { // WHY DO I NEED THIS?
+            entry.status = Status.from(getInteger(row, "status"));
+        }
+        return entry;
+    }
+
+    private static Integer getInteger(SqlRow row, String column) {
+        if (row.get(column) == null) {
+            return null;
+        }
+        return row.getInteger(column);
+    }
+
     public static boolean hasEntryForNote(final long note_id) {
         return countEntryForNote(note_id) > 0;
     }
@@ -813,138 +869,13 @@ public class Entry extends com.avaje.ebean.Model {
                 .findRowCount() > 0;
     }
 
-    /**
-     *
-     * @param entry The entry to check for.
-     * @param client_id
-     * @return true if there is already an entry near enough in time to the passed in entry with the same truck
-     *  value.
-     */
-    public static boolean hasEntryForEntry(Entry entry, long client_id) {
-
-        List<Truck> trucks = Truck.findMatching(entry.getTruck());
-
-        StringBuilder query = new StringBuilder();
-        query.append("SELECT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
-        query.append(", e.equipment_collection_id");
-        query.append(", e.picture_collection_id");
-        query.append(", e.note_collection_id");
-        query.append(", e.truck_id, e.status, e.time_zone");
-        query.append(" FROM entry AS e");
-        query.append(" WHERE ");
-        query.append("e.truck_id IN (");
-        boolean first = true;
-        for (Truck truck : trucks) {
-            if (first) {
-                first = false;
-            } else {
-                query.append(", ");
-            }
-            query.append(truck.id);
-        }
-        query.append(")");
-
-        List<SqlRow> rows = Ebean.createSqlQuery(query.toString()).findList();
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        for (SqlRow row : rows) {
-            entries.add(parseEntry(row));
-        }
-
-        for (Entry item : entries) {
-            if (entry.nearInTime(item)) {
-                if (VERBOSE) {
-                    Logger.warn("hasEntryForEntry(): TRUE because " + entry.toString(client_id) + " near recent " + item.toString(client_id));
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static Entry parseEntry(SqlRow row) {
-        Entry entry = new Entry();
-        entry.id = row.getLong("id");
-        entry.tech_id = row.getInteger("tech_id");
-        entry.entry_time = row.getDate("entry_time");
-        entry.time_zone = row.getString("time_zone");
-        entry.project_id = row.getLong("project_id");
-        entry.company_id = row.getLong("company_id");
-        entry.equipment_collection_id = row.getLong("equipment_collection_id");
-        entry.picture_collection_id = row.getLong("picture_collection_id");
-        entry.note_collection_id = row.getLong("note_collection_id");
-        entry.truck_id = row.getLong("truck_id");
-        if (row.get("status") != null) { // WHY DO I NEED THIS?
-            entry.status = Status.from(getInteger(row, "status"));
-        }
-        return entry;
-    }
-
-    private static Integer getInteger(SqlRow row, String column) {
-        if (row.get(column) == null) {
-            return null;
-        }
-        return row.getInteger(column);
-    }
-
-    private boolean nearInTime(Entry other) {
-        long diffTime = Math.abs(other.entry_time.getTime() - entry_time.getTime());
-        return diffTime <= IS_THE_SAME_WINDOW_MS;
-    }
-
-    public boolean isMatching(Entry entry, long client_id) {
-        if (company_id == entry.company_id && truck_id == entry.truck_id) {
-            if (VERBOSE) {
-                Logger.warn("isMatching(): TRUE: " + toString() + " matched " + entry.toString());
-            }
-            return true;
-        }
-        Truck entryTruck = getTruck();
-        if (entryTruck == null) {
-            return false;
-        }
-        Truck itemTruck = entry.getTruck();
-        if (itemTruck == null) {
-            return false;
-        }
-        if (itemTruck.isTheSame(entryTruck)) {
-            if (nearInTime(entry)) {
-                if (VERBOSE) {
-                    Logger.warn("isMatching() TRUE by truck: " + toString(client_id) + " matched " + entry.toString(client_id));
-                }
-                return true;
-            } else {
-                if (VERBOSE) {
-                    Logger.warn("isMatching() TRUE, but returning false because too distant: " + toString(client_id) + " matched " + entry.toString(client_id));
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean fixTruckCompanyName() {
-        Truck entryTruck = getTruck();
-        if (entryTruck == null) {
-            return false;
-        }
-        if (entryTruck.company_name_id != 0) {
-            return false;
-        }
-        Company company = Company.get(company_id);
-        if (company.name == null || company.name.length() == 0) {
-            return false;
-        }
-        entryTruck.setCompanyName(CompanyName.save(company.name));
-        return true;
-    }
-
     public static boolean hasEntryForPicture(String filename) {
         List<PictureCollection> pictures = PictureCollection.findByPictureName(filename);
         if (pictures.isEmpty()) {
             return false;
         }
         for (PictureCollection collection : pictures) {
-            List<Entry> list = find.where()
+            List<EntryRecovery> list = find.where()
                     .eq("picture_collection_id", collection.collection_id)
                     .findList();
             if (!list.isEmpty()) {
@@ -966,8 +897,8 @@ public class Entry extends com.avaje.ebean.Model {
                 .findRowCount();
     }
 
-    public static Entry getFulfilledBy(WorkOrder order) {
-        List<Entry> list = find.where()
+    public static EntryRecovery getFulfilledBy(WorkOrder order) {
+        List<EntryRecovery> list = find.where()
                 .eq("company_id", order.company_id)
                 .eq("project_id", order.project_id)
                 .eq("truck_id", order.truck_id)
@@ -978,7 +909,7 @@ public class Entry extends com.avaje.ebean.Model {
         if (list.size() > 1) {
             StringBuilder sbuf = new StringBuilder();
             sbuf.append("More than one entry found to fulfill workorder");
-            for (Entry entry : list) {
+            for (EntryRecovery entry : list) {
                 sbuf.append("\n");
                 sbuf.append(entry.toString());
             }
@@ -1005,25 +936,30 @@ public class Entry extends com.avaje.ebean.Model {
 
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("Entry(");
+        sbuf.append("EntryRecovery(");
         if (id != null) {
             sbuf.append(id);
             sbuf.append(", ");
         }
+        sbuf.append(", date=");
         sbuf.append(getDate());
-        sbuf.append(", tech=");
+        sbuf.append(", tech_id=");
         sbuf.append(tech_id);
-        sbuf.append(", project-id=");
+        sbuf.append(", project_id=");
         sbuf.append(project_id);
         sbuf.append(", company_id=");
         sbuf.append(company_id);
         sbuf.append(", truck_id=");
         sbuf.append(truck_id);
-        sbuf.append(", note=");
+        if (error != null) {
+            sbuf.append(", error='");
+            sbuf.append(error);
+        }
+        sbuf.append(", note_id=");
         sbuf.append(note_collection_id);
-        sbuf.append(", equip=");
+        sbuf.append(", equip_id=");
         sbuf.append(equipment_collection_id);
-        sbuf.append(", picture-");
+        sbuf.append(", picture_id=");
         sbuf.append(picture_collection_id);
         sbuf.append(")");
         return sbuf.toString();
@@ -1031,11 +967,10 @@ public class Entry extends com.avaje.ebean.Model {
 
     public String toString(long client_id) {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("Entry(");
+        sbuf.append("EntryRecovery(");
         if (id != null) {
             sbuf.append(id);
             sbuf.append(", ");
-
         }
         sbuf.append("date=");
         sbuf.append(getDate());
@@ -1043,22 +978,22 @@ public class Entry extends com.avaje.ebean.Model {
         sbuf.append(project_id);
         sbuf.append(", tech=");
         sbuf.append(getTechName());
-        sbuf.append(", address=");
-        sbuf.append(",\"");
+        sbuf.append(", address=\"");
         sbuf.append(getAddressLine());
         sbuf.append("\", truck=");
         sbuf.append(getTruckLine());
-        sbuf.append(", eq='");
-        sbuf.append(getEquipmentLine(client_id));
-        sbuf.append("', ");
-        sbuf.append(" notes=");
-        sbuf.append(note_collection_id);
-        if (hasNotes(client_id)) {
-            sbuf.append(" TRUE");
-        }
-        sbuf.append(", eqline=");
+        sbuf.append(", equip_id=");
         sbuf.append(equipment_collection_id);
-        sbuf.append(", pictures=");
+        sbuf.append(", equip='");
+        sbuf.append(getEquipmentLine(client_id));
+        sbuf.append("'");
+        if (error != null) {
+            sbuf.append(", error='");
+            sbuf.append(error);
+        }
+        sbuf.append("', note_id=");
+        sbuf.append(note_collection_id);
+        sbuf.append(", picture_id=");
         sbuf.append(picture_collection_id);
         sbuf.append(")");
         return sbuf.toString();
@@ -1113,5 +1048,16 @@ public class Entry extends com.avaje.ebean.Model {
         return findStatus(match) != null;
     }
 
+    private void setFlag(int flag, boolean value) {
+        if (value) {
+            comparison_flags |= flag;
+        } else {
+            comparison_flags &= ~flag;
+        }
+    }
+
+    private boolean hasFlag(int flag) {
+        return (comparison_flags & flag) == flag;
+    }
 }
 

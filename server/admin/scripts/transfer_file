@@ -1,0 +1,3 @@
+#!/bin/bash
+scp -i ~/.ssh/FleetTLC.pem ubuntu@fleettlc.arqnetworks.com:backup/$1 ~/Downloads/$1
+scp -i ~/.ssh/FleetTLC.pem ~/Downloads/$1 ubuntu@fleetdev.arqnetworks.com:

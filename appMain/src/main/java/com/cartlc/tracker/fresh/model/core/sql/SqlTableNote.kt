@@ -27,10 +27,7 @@ class SqlTableNote constructor(
 ): TableNote {
 
     companion object {
-        private val TAG = SqlTableNote::class.simpleName
-
         private const val TABLE_NAME = "list_notes"
-
         private const val KEY_ROWID = "_id"
         private const val KEY_NAME = "name"
         private const val KEY_VALUE = "value"
@@ -38,6 +35,7 @@ class SqlTableNote constructor(
         private const val KEY_NUM_DIGITS = "num_digits"
         private const val KEY_SERVER_ID = "server_id"
         private const val KEY_IS_BOOT = "is_boot_strap"
+        private const val KEY_DISABLED = "disabled"
     }
 
     override val noteTruckNumber: DataNote?
@@ -67,8 +65,19 @@ class SqlTableNote constructor(
         sbuf.append(KEY_SERVER_ID)
         sbuf.append(" int, ")
         sbuf.append(KEY_IS_BOOT)
-        sbuf.append(" bit default 0)")
+        sbuf.append(" bit default 0, ")
+        sbuf.append(KEY_DISABLED)
+        sbuf.append(" bit default 0")
+        sbuf.append(")")
         dbSql.execSQL(sbuf.toString())
+    }
+
+    fun upgrade23() {
+        try {
+            dbSql.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $KEY_DISABLED bit default 0")
+        } catch (ex: Exception) {
+            TBApplication.ReportError(ex, SqlTableNote::class.java, "upgrade23()", "db")
+        }
     }
 
     override fun clearAll() {
@@ -79,17 +88,17 @@ class SqlTableNote constructor(
         }
     }
 
-    fun count(): Int {
-        var count = 0
-        try {
-            val cursor = dbSql.query(TABLE_NAME, null, null, null, null, null, null)
-            count = cursor.count
-            cursor.close()
-        } catch (ex: Exception) {
-            TBApplication.ReportError(ex, SqlTableNote::class.java, "count()", "db")
-        }
-        return count
-    }
+//    fun count(): Int {
+//        var count = 0
+//        try {
+//            val cursor = dbSql.query(TABLE_NAME, null, null, null, null, null, null)
+//            count = cursor.count
+//            cursor.close()
+//        } catch (ex: Exception) {
+//            TBApplication.ReportError(ex, SqlTableNote::class.java, "count()", "db")
+//        }
+//        return count
+//    }
 
     fun add(list: List<DataNote>) {
         dbSql.beginTransaction()
@@ -103,6 +112,7 @@ class SqlTableNote constructor(
                 values.put(KEY_NUM_DIGITS, value.numDigits)
                 values.put(KEY_SERVER_ID, value.serverId)
                 values.put(KEY_IS_BOOT, if (value.isBootStrap) 1 else 0)
+                values.put(KEY_DISABLED, if (value.disabled) 1 else 0)
                 dbSql.insert(TABLE_NAME, null, values)
             }
             dbSql.setTransactionSuccessful()
@@ -124,6 +134,7 @@ class SqlTableNote constructor(
             values.put(KEY_NUM_DIGITS, item.numDigits)
             values.put(KEY_SERVER_ID, item.serverId)
             values.put(KEY_IS_BOOT, if (item.isBootStrap) 1 else 0)
+            values.put(KEY_DISABLED, if (item.disabled) 1 else 0)
             item.id = dbSql.insert(TABLE_NAME, null, values)
             dbSql.setTransactionSuccessful()
         } catch (ex: Exception) {
@@ -204,6 +215,7 @@ class SqlTableNote constructor(
             val idxNumDigits = cursor.getColumnIndex(KEY_NUM_DIGITS)
             val idxServerId = cursor.getColumnIndex(KEY_SERVER_ID)
             val idxTest = cursor.getColumnIndex(KEY_IS_BOOT)
+            val idxDisabled = cursor.getColumnIndex(KEY_DISABLED)
             while (cursor.moveToNext()) {
                 val item = DataNote()
                 item.id = cursor.getLong(idxRowId)
@@ -213,6 +225,7 @@ class SqlTableNote constructor(
                 item.numDigits = cursor.getShort(idxNumDigits)
                 item.serverId = cursor.getInt(idxServerId)
                 item.isBootStrap = cursor.getShort(idxTest).toInt() != 0
+                item.disabled = cursor.getShort(idxDisabled).toInt() != 0
                 list.add(item)
             }
             cursor.close()
@@ -232,6 +245,7 @@ class SqlTableNote constructor(
             values.put(KEY_VALUE, item.value)
             values.put(KEY_SERVER_ID, item.serverId)
             values.put(KEY_NUM_DIGITS, item.numDigits)
+            values.put(KEY_DISABLED, if (item.disabled) 1 else 0)
             val where = "$KEY_ROWID=?"
             val whereArgs = arrayOf(item.id.toString())
             dbSql.update(TABLE_NAME, values, where, whereArgs)
@@ -292,6 +306,5 @@ class SqlTableNote constructor(
             dbSql.endTransaction()
         }
     }
-
 
 }

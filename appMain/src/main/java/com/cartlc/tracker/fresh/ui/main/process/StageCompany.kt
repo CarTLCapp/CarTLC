@@ -55,6 +55,7 @@ class StageCompany(
                         entrySimpleUseCase.simpleTextClear()
                     }
                 }
+                else -> {}
             }
         }
     }
@@ -94,10 +95,33 @@ class StageCompany(
         return list
     }
 
+    fun save(isNext: Boolean): Boolean {
+        with (shared) {
+            if (isNext) {
+                val value = prefHelper.company
+                if (value.isNullOrBlank()) {
+                    errorValue = ErrorMessage.NEED_COMPANY
+                    return false
+                } else if (detectedCommaError(value)) {
+                    errorValue = ErrorMessage.CANNOT_HAVE_COMMAS
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
     fun saveAdd(isNext: Boolean): Boolean {
         with (shared) {
             val entryText = entrySimpleUseCase.entryTextValue ?: ""
             val newCompanyName = entryText.trim { it <= ' ' }
+            if (newCompanyName.isBlank()) {
+                return !isNext
+            }
+            if (detectedCommaError(newCompanyName)) {
+                errorValue = ErrorMessage.CANNOT_HAVE_COMMAS
+                return !isNext
+            }
             if (isNext) {
                 if (newCompanyName.isEmpty()) {
                     errorValue = ErrorMessage.NEED_NEW_COMPANY
@@ -110,18 +134,6 @@ class StageCompany(
                         address.company = newCompanyName
                         db.tableAddress.update(address)
                     }
-                }
-            }
-        }
-        return true
-    }
-
-    fun save(isNext: Boolean): Boolean {
-        with (shared) {
-            if (isNext) {
-                if (prefHelper.company.isNullOrBlank()) {
-                    errorValue = ErrorMessage.NEED_COMPANY
-                    return false
                 }
             }
         }

@@ -19,6 +19,7 @@ class DataNote {
     var numDigits: Short = 0
     var serverId: Int = 0
     var isBootStrap: Boolean = false
+    var disabled: Boolean = false
 
     enum class Type {
         TEXT,
@@ -62,11 +63,12 @@ class DataNote {
         this.isBootStrap = true
     }
 
-    constructor(name: String, type: Type, num_digits: Short, server_id: Int) {
+    constructor(name: String, type: Type, num_digits: Short, server_id: Int, disabled: Boolean) {
         this.name = name
         this.type = type
         this.numDigits = num_digits
         this.serverId = server_id
+        this.disabled = disabled
     }
 
     @VisibleForTesting

@@ -41,6 +41,9 @@ public class AmazonHelper {
     static private final String BUCKET_NAME_RELEASE = "fleettlc";
     static private final String REGION = "us-east-2";
 
+    static private final String CONFIG_PICTURE_DOWNLOAD_DIR = "pictureDownloadDir";
+    static private final String CONFIG_RECOVERY_FILE = "recoveryEntryFile";
+
     public interface OnDownloadComplete {
         void onDownloadComplete();
     }
@@ -66,12 +69,16 @@ public class AmazonHelper {
     }
 
     public File getLocalFile(String filename) {
-        String downloadDir = configuration.getString("pictureDownloadDir");
+        String downloadDir = configuration.getString(CONFIG_PICTURE_DOWNLOAD_DIR);
         return new File(downloadDir, filename);
     }
 
     public File getLocalDirectory() {
-        return new File(configuration.getString("pictureDownloadDir"));
+        return new File(configuration.getString(CONFIG_PICTURE_DOWNLOAD_DIR));
+    }
+
+    public File getRecoveryFile() {
+        return new File(configuration.getString(CONFIG_RECOVERY_FILE));
     }
 
     // --------------

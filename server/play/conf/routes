@@ -12,9 +12,16 @@ GET     /login                    controllers.HomeController.login()
 POST    /login                    controllers.HomeController.postLogin()
 GET     /logout                   controllers.HomeController.logout()
 GET     /problem                  controllers.HomeController.problem(msg : String)
-GET     /picture_cleanup          controllers.HomeController.pictureCleanup()
-GET     /truck_cleanup            controllers.HomeController.truckCleanup()
 GET     /daily/:date              controllers.HomeController.daily(date:Long)
+
+### CLEANUP ###
+
+GET     /cleanup                  controllers.CleanupController.index()
+GET     /cleanup/picture          controllers.CleanupController.pictureCleanup()
+GET     /cleanup/truck            controllers.CleanupController.truckCleanup()
+GET     /cleanup/truck_next       controllers.CleanupController.truckCleanupNext()
+GET     /cleanup/entry            controllers.CleanupController.entryFixup()
+GET     /cleanup/delete_dated     controllers.CleanupController.deleteDated()
 
 ### TECHNICIANS ###
 
@@ -27,7 +34,6 @@ POST    /tech/:id                controllers.TechnicianController.update(id:Long
 GET     /tech/:id/delete         controllers.TechnicianController.delete(id:Long)
 GET     /tech/:id/enable         controllers.TechnicianController.enable(id:Long)
 GET     /tech/:id/reset_upload   controllers.TechnicianController.resetUpload(id:Long)
-# POST    /techs                   controllers.TechnicianController.query()
 
 ### PROJECTS ###
 
@@ -161,10 +167,13 @@ GET     /entry/:id/delete             controllers.EntryController.delete(id:Long
 GET     /entry/search                 controllers.EntryController.search(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc")
 GET     /entry/search/clear           controllers.EntryController.searchClear()
 GET     /entry/:id/bytruck            controllers.EntryController.showByTruck(id:Long)
+GET     /entry/byrepaired             controllers.EntryController.showByRepaired()
 GET     /entry/compute_totals         controllers.EntryController.computeTotalNumRows()
 GET     /entry/export_next            controllers.EntryController.exportNext()
 GET     /entry/export_download        controllers.EntryController.exportDownload()
 GET     /entry/delete_entries/:rows   controllers.EntryController.deleteEntries(rows:String)
+GET     /entry/delete_next            controllers.EntryController.deleteNext()
+GET     /entry/delete_abort           controllers.EntryController.deleteAbort()
 GET     /entry/check_loading_pictures controllers.EntryController.checkLoadingPictures()
 GET     /entry/reload_images          controllers.EntryController.reloadImages()
 POST    /enter                        controllers.EntryController.enter()
@@ -172,6 +181,27 @@ POST    /enter                        controllers.EntryController.enter()
 # Long form
 GET     /entry/export/:searchField/:searchTerm                             controllers.EntryController.export(searchTerm:String, searchField:String)
 GET     /entry/list/:page/:pageSize/:sort/:order/:searchField/:searchTerm  controllers.EntryController.list2(page:Int, pageSize:Int, sort: String, order: String, searchTerm: String, searchField: String)
+
+###  ENTRY RECOVERY ###
+
+# Entries list (look at the default values for pagination parameters)
+GET     /entry_recovery                         controllers.EntryRecoveryController.list(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc", searchTerm ?= "null", searchField ?= "null")
+GET     /entry_recovery/:id/view                controllers.EntryRecoveryController.view(id:Long)
+GET     /entry_recovery/:id/delete              controllers.EntryRecoveryController.delete(id:Long)
+GET     /entry_recovery/search                  controllers.EntryRecoveryController.search(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc")
+GET     /entry_recovery/search/clear            controllers.EntryRecoveryController.searchClear()
+GET     /entry_recovery/:id/bytruck             controllers.EntryRecoveryController.showByTruck(id:Long)
+GET     /entry_recovery/compute_totals          controllers.EntryRecoveryController.computeTotalNumRows()
+GET     /entry_recovery/import                  controllers.EntryRecoveryController.importStart()
+GET     /entry_recovery/import_next             controllers.EntryRecoveryController.importNext()
+GET     /entry_recovery/delete_entries/:rows    controllers.EntryRecoveryController.deleteEntries(rows:String)
+GET     /entry_recovery/delete_next             controllers.EntryRecoveryController.deleteNext()
+GET     /entry_recovery/delete_abort            controllers.EntryRecoveryController.deleteAbort()
+GET     /entry_recovery/check_loading_pictures  controllers.EntryRecoveryController.checkLoadingPictures()
+GET     /entry_recovery/reload_images           controllers.EntryRecoveryController.reloadImages()
+
+# Long form
+GET     /entry_recovery/list/:page/:pageSize/:sort/:order/:searchField/:searchTerm  controllers.EntryRecoveryController.list2(page:Int, pageSize:Int, sort: String, order: String, searchTerm: String, searchField: String)
 
 ### MESSAGES ###
 
@@ -186,7 +216,6 @@ GET     /message/page_size/:size controllers.MessageController.pageSize(size:Str
 ### TRUCKS ###
 
 GET     /truck                 controllers.TruckController.list(p:Int ?= 0)
-GET     /truck/cleanup         controllers.TruckController.cleanup()
 GET     /truck/toggle_filter   controllers.TruckController.toggleFilter()
 POST    /truck/:id/delete      controllers.TruckController.delete(id:Long)
 GET     /truck/:id             controllers.TruckController.edit(id:Long)

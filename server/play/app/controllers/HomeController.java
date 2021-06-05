@@ -33,7 +33,6 @@ import play.db.ebean.Transactional;
 
 public class HomeController extends Controller {
 
-    private AmazonHelper mAmazonHelper;
     private FormFactory mFormFactory;
     private Globals mGlobals;
     private String mVersion;
@@ -41,11 +40,9 @@ public class HomeController extends Controller {
 
     @Inject
     public HomeController(
-            AmazonHelper amazonHelper,
             FormFactory formFactory,
             Globals globals,
             Config config) {
-        mAmazonHelper = amazonHelper;
         mFormFactory = formFactory;
         mGlobals = globals;
         mVersion = config.getString("app.version");
@@ -129,168 +126,4 @@ public class HomeController extends Controller {
         return login();
     }
 
-    @Security.Authenticated(Secured.class)
-    public CompletionStage<Result> pictureCleanup() {
-        String host = request().host();
-        CompletableFuture<Result> completableFuture = new CompletableFuture<>();
-        Executors.newCachedThreadPool().submit(() -> {
-            mAmazonHelper.list(host, (keys) -> pictureCleanup1(host, completableFuture, keys));
-            return null;
-        });
-        return completableFuture;
-    }
-
-    private void pictureCleanup1(String host, CompletableFuture<Result> completableFuture, List<String> keys) {
-        Logger.warn("Checking for orphaned pictures from " + keys.size() + " keys");
-        ArrayList<String> missing = new ArrayList<>();
-        for (String key : keys) {
-            if (!Entry.hasEntryForPicture(key)) {
-                missing.add(key);
-            }
-        }
-        Logger.warn("ORPHANED REMOTE PICTURES=" + missing.size());
-        mAmazonHelper.deleteAction().host(host).deleteLocalFile(true).listener((deleted, errors) -> {
-            pictureCleanup2(host, completableFuture, deleted);
-        }).delete(missing);
-        Logger.warn("DONE");
-    }
-
-    private void pictureCleanup2(String host, CompletableFuture<Result> completableFuture, int deletedRemote) {
-        List<String> orphanedDb = pictureCollectionIdCleanup(host);
-        mAmazonHelper.deleteAction()
-                .host(host)
-                .deleteLocalFile(true)
-                .listener((deleted, errors) -> {
-                    pictureCleanup3(host, completableFuture, deletedRemote, deleted);
-                })
-                .delete(orphanedDb);
-    }
-
-    private void pictureCleanup3(String host, CompletableFuture<Result> completableFuture, int deletedRemote, int deletedDb) {
-        int orphanedLocal = pictureLocalFileCleanup();
-        StringBuilder sbuf = new StringBuilder();
-        sbuf.append("REMOTE FILES DELETED=");
-        sbuf.append(deletedRemote);
-        sbuf.append(", ORPHANED NODES=");
-        sbuf.append(deletedDb);
-        sbuf.append(", LOCAL DELETE=");
-        sbuf.append(orphanedLocal);
-        completableFuture.complete(ok(sbuf.toString()));
-        Logger.warn(sbuf.toString());
-    }
-
-    private List<String> pictureCollectionIdCleanup(String host) {
-        Logger.warn("pictureCollectionIdCleanup()");
-        ArrayList<String> orphaned = new ArrayList<>();
-        List<PictureCollection> list = PictureCollection.findNoEntries();
-        for (PictureCollection collection : list) {
-            Logger.warn("Orphaned collection: " + collection.toString());
-            orphaned.add(collection.picture);
-            collection.delete();
-        }
-        return orphaned;
-    }
-
-    private int pictureLocalFileCleanup() {
-        File dir = mAmazonHelper.getLocalDirectory();
-        ArrayList<File> orphaned = new ArrayList<>();
-        for (File file : dir.listFiles()) {
-            if (!Entry.hasEntryForPicture(file.getName())) {
-                orphaned.add(file);
-            }
-        }
-        for (File file : orphaned) {
-            Logger.warn("ORPHANED LOCAL FILE DELETED: " + file.getName());
-            file.delete();
-        }
-        return orphaned.size();
-    }
-
-    /**
-     * Clean up the list of entries with the same truck id. This is an error.
-     * Note: in the new flow style this problem will no longer be an issue as this field is obsolete.
-     *
-     * @return
-     */
-    @Security.Authenticated(Secured.class)
-    public CompletionStage<Result> truckCleanup() {
-        String host = request().host();
-        final CompletableFuture<Result> completableFuture = new CompletableFuture<>();
-        Executors.newCachedThreadPool().submit(() -> {
-            truckCleanup1(host, completableFuture);
-            return null;
-        });
-        return completableFuture;
-    }
-
-    private void truckCleanup1(String host, CompletableFuture<Result> completableFuture) {
-        EntryPagedList entryList = new EntryPagedList();
-        entryList.setPage(0);
-        entryList.compute();
-        entryList.computeTotalNumRows();
-        int curRow = 0;
-        int curPage = 0;
-        int pageRow = -1;
-        int reassignCount = 0;
-        List<Entry> page = entryList.getList();
-        List<Entry> instancesWithTruckId;
-        List<Entry> needsReassignment = new ArrayList<Entry>();
-        Entry entry;
-        Logger.warn("Found " + entryList.getTotalRowCount() + " total rows");
-        for (curRow = 0; curRow <= entryList.getTotalRowCount(); curRow++) {
-            if (++pageRow >= page.size()) {
-                pageRow = 0;
-                entryList.setPage(++curPage);
-                entryList.compute();
-                page = entryList.getList();
-                if (needsReassignment.size() > 0) {
-                    Logger.warn("Processed " + curRow + " of " + entryList.getTotalRowCount() + " rows. Reassigned " + needsReassignment.size());
-                    reassignCount += needsReassignment.size();
-                    reassignTruckValues(needsReassignment);
-                    needsReassignment.clear();
-                } else {
-                    Logger.warn("Processed " + curRow + " of " + entryList.getTotalRowCount() + " rows.");
-                }
-            }
-            entry = page.get(pageRow);
-            instancesWithTruckId = entry.getEntriesForTruck();
-            if (instancesWithTruckId.size() > 1) {
-                for (int i = 1; i < instancesWithTruckId.size(); i++) {
-                    needsReassignment.add(instancesWithTruckId.get(i));
-                }
-            }
-        }
-        reassignCount += needsReassignment.size();
-        reassignTruckValues(needsReassignment);
-        needsReassignment.clear();
-
-        StringBuilder sbuf = new StringBuilder();
-        sbuf.append("REASSIGNED ");
-        sbuf.append(reassignCount);
-        sbuf.append(" TRUCKS");
-        completableFuture.complete(ok(sbuf.toString()));
-        Logger.warn(sbuf.toString());
-    }
-
-    private void reassignTruckValues(List<Entry> list) {
-        for (Entry entry : list) {
-            reassignTruckValue(entry);
-        }
-    }
-
-    @Transactional
-    private void reassignTruckValue(Entry entry) {
-        Truck existing = entry.getTruck();
-        Truck truck = new Truck();
-        truck.truck_number = existing.truck_number;
-        truck.project_id = existing.project_id;
-        truck.company_name_id = existing.company_name_id;
-        truck.license_plate = existing.license_plate;
-        truck.created_by = existing.created_by;
-        truck.created_by_client = existing.created_by_client;
-        truck.upload_id = existing.upload_id;
-        truck.save();
-        entry.truck_id = truck.id;
-        entry.update();
-    }
 }

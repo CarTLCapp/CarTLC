@@ -23,7 +23,6 @@
                 }
                 <th>Equipment</th>
                 <th>Status</th>
-
             </tr>
         </thead>
         <tbody>
@@ -43,6 +42,60 @@
             </tr>
         </tbody>
     </table>
+
+    @if(entry.wasRepaired()) {
+        <h1>Repaired</h1>
+        <h4>Database Error: The internal truck value for this entry was duplicated with these elements as well:</h4>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tech</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Root</th>
+                    <th>Sub</th>
+                    <th>Company</th>
+                    <th>Street</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>ZIP</th>
+                    <th>Truck</th>
+                    <th>Equip</th>
+                    <th>Pictures</th>
+                    <th>Notes</th>
+                    <th>View</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @for(ref <- entry.getRelatedEntries()) {
+                    <tr>
+                        <td>@ref.id</td>
+                        <td>@ref.getTechName()</td>
+                        <td>@ref.getDate()</td>
+                        <td>@ref.getTime()</td>
+                        <td>@ref.getRootProjectName()</td>
+                        <td>@ref.getSubProjectName()</td>
+                        <td>@ref.getCompany()</td>
+                        <td>@ref.getStreet()</td>
+                        <td>@ref.getCity()</td>
+                        <td>@ref.getState()</td>
+                        <td>@ref.getZipCode()</td>
+                        <td>@ref.getTruckLine()</td>
+                        <td>@ref.getEquipmentLine(client)</td>
+                        <td><a href="@routes.EntryController.pictures(ref.id)">@ref.getPictureAddendum()</a></td>
+                        <td><a href="@routes.EntryController.notes(ref.id)">@ref.getNoteAddendum(client)</a></td>
+                        <td><a href="@routes.EntryController.view(ref.id)">View</a></td>
+                        <td bgcolor="@ref.getCellColor()">@ref.getStatus()</td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    }
 
     @if(entry.hasNotes(client)) {
 

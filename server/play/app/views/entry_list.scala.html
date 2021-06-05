@@ -27,7 +27,10 @@
     </th>
 }
 
-@main("FleetTLC - List Entries", client) {
+@topTitle() = @{ if (currentPage.isByRepaired()) "FleetTLC - List Repaired Entries" else "FleetTLC - List Entries" }
+@topReturn() = @{ if (currentPage.isByRepaired()) "/cleanup" else "/" }
+
+@main(topTitle(), client, topReturn()) {
 
     @if(currentPage.isByTruck()) {
         <h1>TRUCK @currentPage.getByTruckLine()</h1>
@@ -35,10 +38,15 @@
         @helper.form(action = routes.EntryController.search(currentPage.getPageIndex(), currentPage.getPageSize(), currentPage.getSortBy(), currentPage.getOrder())) {
             <h1 id="homeTitle">
                 <span id="homeCount">...</span>
-                <span style="float:right;font-size:16px;padding-left:20px">
+                <span style="float:right;font-size:16px;padding-left:20px;cursor:pointer">
                     <a id="export_download" href="@routes.EntryController.exportDownload()"></a>
                 </span>
-                <span style="float:right;font-size:16px;padding-left:10px"><a id="export">Export</a></span>
+                <span style="float:right;font-size:16px;padding-left:10px;cursor:pointer">
+                    <a id="export">Export</a>
+                </span>
+                <span style="float:right;font-size:16px;padding-left:10px;cursor:pointer">
+                       <a href="@routes.EntryController.showByRepaired()">Repaired</a>
+                </span>
                 <span style="float:right;font-size:16px">
                        <a href="@routes.EntryController.searchClear()" class="btn">Clear</a>
                 </span>
@@ -60,6 +68,9 @@
                 </span>
                 <span style="float:right;font-size:16px"><div class="search">Page Size:</div></span>
             </h1>
+        }
+        @if(currentPage.isByRepaired()) {
+            <h3>REPAIRED</h3>
         }
     }
 
@@ -127,7 +138,7 @@
                         }
                         <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum(client)</a></td>
                         <td><a href="@routes.EntryController.view(entry.id)">View</a></td>
-                        <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
+                        <td bgcolor="@entry.getCellColor2()">@entry.getStatus2()</td>
                     </tr>
                 }
 
@@ -173,7 +184,9 @@
                         <a id="delete_checked" class="btn danger">Delete checked entries</a>
                     </div>
                 </span>
-                <span id="delete_progress"></span>
+                <div id="div_progress">
+                    <a href="@routes.EntryController.deleteAbort()" id="delete_progress"></a>
+                </div>
             </h4>
         }
 
@@ -210,8 +223,8 @@
             document.getElementById("export_download").innerHTML = "";
 
             <!-- DELETE -->
+
             function myDelete() {
-                document.getElementById("div_delete_checked").style.display = "none";
                 var checkedValues = [];
                 var inputElements = document.getElementsByClassName('entryCheckbox');
                 for (var i=0; inputElements[i]; ++i) {
@@ -223,18 +236,22 @@
                 xhttp.onreadystatechange = function() {
                     if (this.status == 200) {
                         var line = this.responseText;
-                        if (line.length == 0) {
-                            location.reload(true);
-                            document.getElementById("delete_progress").innerHTML = "";
-                            document.getElementById("div_delete_checked").style.display = "block";
-                        } else {
-                            document.getElementById("delete_progress").innerHTML = line;
-                            var call = "/entry/delete_entries/" + line;
-                            xhttp.open("GET", call, true);
+                        var key = line.substring(0, 1);
+                        var value = line.substring(1);
+                        if (key == "#") {
+                            document.getElementById("delete_checked").innerHTML = "Working";
+                            document.getElementById("delete_progress").innerHTML = value;
+                            xhttp.open("GET", "@routes.EntryController.deleteNext()", true);
                             xhttp.send();
+                        } else if (key == "D" || key == "R") {
+                            document.getElementById("delete_checked").innerHTML = "Delete checked entries";
+                            document.getElementById("delete_progress").innerHTML = value;
+                            location.reload(true);
                         }
                     }
                 };
+
+                document.getElementById("delete_progress").innerHTML = "...";
                 var call = "/entry/delete_entries/" + checkedValues.join();
                 xhttp.open("GET", call, true);
                 xhttp.send();

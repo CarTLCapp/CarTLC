@@ -5,8 +5,8 @@
 @main("FleetTLC - List Trucks", client) {
 
     <h1 id="homeTitle">@Messages("trucks.list.title", currentPage.getTotalRowCount())
-        <span style="float:right;font-size:16px">
-            <a href="@routes.TruckController.cleanup()" class="btn">Cleanup</a>
+        <span style="float:right;font-size:16px;padding-left:10px;cursor:pointer">
+             <a href="@routes.CleanupController.index()">Cleanup</a>
         </span>
         <span style="float:right;font-size:16px">
             <a href="@routes.TruckController.toggleFilter()">@filter  &nbsp;</a>

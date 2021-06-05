@@ -15,7 +15,7 @@ import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
 
-import com.avaje.ebean.PagedList;
+import com.avaje.ebean.*;
 
 import play.Logger;
 
@@ -59,10 +59,7 @@ public class Truck extends com.avaje.ebean.Model {
     public static Finder<Long, Truck> find = new Finder<Long, Truck>(Truck.class);
 
     public static Truck get(long id) {
-        if (id > 0) {
-            return find.byId(id);
-        }
-        return null;
+        return find.byId(id);
     }
 
     public static List<Truck> list() {
@@ -90,71 +87,103 @@ public class Truck extends com.avaje.ebean.Model {
         return find.where().eq("upload_id", upload_id).findList();
     }
 
-    static List<Truck> findBy(long project_id, long company_name_id, String truck_number) {
-        List<Truck> list;
-        list = find.where()
-                .eq("project_id", project_id)
+    static List<Truck> findByTruckNumber(long company_name_id, String truck_number) {
+        return find.where()
                 .eq("company_name_id", company_name_id)
                 .eq("truck_number", truck_number)
                 .findList();
-        if (list.size() == 0) {
-            list = null;
-        } else if (list.size() > 1) {
-            Logger.error("Found too many trucks with truck number="
-                    + truck_number + ", project_id=" + project_id + ", company_name_id=" + company_name_id);
-        }
-        return list;
     }
 
-    public static int cleanup() {
-        StringBuilder sbuf = new StringBuilder();
-        List<Truck> list = find.all();
-        int count = 0;
-        for (Truck truck : list) {
-            if (truck.getSubProjectName().length() > 0) {
-                continue;
-            }
-            if (truck.getCompanyName().length() > 0) {
-                continue;
-            }
-            if (truck.countEntries() > 0) {
-                Logger.info("Cannot delete truck, has entries: " + truck.toString());
-                continue;
-            }
-            if (WorkOrder.countWorkOrdersForTruck(truck.id) > 0) {
-                Logger.info("Cannot delete truck, used in work orders: " + truck.toString());
-                continue;
-            }
-            Logger.info("Deleting truck: " + truck.toString());
-            truck.delete();
-            count++;
-        }
-        Logger.info("Deleted " + count + " trucks");
-        return count;
+    static List<Truck> findByLicensePlate(long company_name_id, String license_plate) {
+        return find.where()
+                .eq("company_name_id", company_name_id)
+                .eq("license_plate", license_plate)
+                .findList();
     }
 
-    public static int cleanup2() {
-        int count = 0;
-        List<Truck> list = find.all();
-        Logger.info("Found " + list.size() + " trucks");
-        for (Truck truck : list) {
-            if (truck.countEntries() == 0 && WorkOrder.countWorkOrdersForTruck(truck.id) == 0) {
-                truck.delete();
-                count++;
-            }
+    public static List<Truck> findMatching(Truck matching) {
+        if (matching.truck_number != null && matching.truck_number.length() > 0) {
+            return findByTruckNumber(matching.company_name_id, matching.truck_number);
         }
-        Logger.info("Deleted " + count + " trucks");
-        return count;
+        if (matching.license_plate != null && matching.license_plate.length() > 0) {
+            findByLicensePlate(matching.company_name_id, matching.license_plate);
+        }
+        return new ArrayList<Truck>();
+    }
+
+    public static int countTrucks() {
+        return find.where().findRowCount();
+    }
+
+    public static List<Truck> findBadTrucks() {
+        return find.where()
+                .eq("company_name_id", 0)
+                .findList();
+    }
+
+    /**
+     * Trucks not referenced in any entries nor work orders are removed.
+     *
+     * @return count of trucks deleted.
+     * @oaram pageSize to process at a time.
+     */
+    public static List<Truck> getTrucks(int page, int pageSize) {
+        int start = page * pageSize;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT * FROM truck LIMIT ");
+        query.append(start);
+        query.append(", ");
+        query.append(pageSize);
+        List<SqlRow> rows = Ebean.createSqlQuery(query.toString()).findList();
+        ArrayList<Truck> trucks = new ArrayList<Truck>();
+        for (SqlRow row : rows) {
+            trucks.add(parseRow(row));
+        }
+        return trucks;
+    }
+
+    private static Truck parseRow(SqlRow row) {
+        Truck truck = new Truck();
+        truck.id = row.getLong("id");
+        truck.truck_number = row.getString("truck_number");
+        truck.license_plate = row.getString("license_plate");
+        truck.upload_id = row.getInteger("upload_id");
+        truck.project_id = row.getLong("project_id");
+        truck.company_name_id = row.getLong("company_name_id");
+        truck.created_by = row.getInteger("created_by");
+        truck.created_by_client = row.getBoolean("created_by_client");
+        return truck;
     }
 
     public static Truck findFirst(long project_id, long company_name_id, String truck_number) {
-        List<Truck> list = findBy(project_id, company_name_id, truck_number);
+        List<Truck> list = findByTruckNumber(company_name_id, truck_number);
         if (list == null) {
             return null;
         }
         return list.get(0);
     }
 
+    public boolean truckNumberEquals(Truck other) {
+        if (truck_number != null && other.truck_number != null) {
+            return truck_number.equals(other.truck_number);
+        }
+        return false;
+    }
+
+    public boolean isTheSame(Truck other) {
+        if (!getTruckNumber().equals(other.getTruckNumber())) {
+            return false;
+        }
+        if (!getLicensePlate().equals(other.getLicensePlate())) {
+            return false;
+        }
+        if (!getCompanyName().equals(other.getCompanyName())) {
+            return false;
+        }
+        return true;
+    }
+
+    @Transactional
     public static Truck add(long project_id, long company_id, long truck_id, String truck_number, String license_plate, int tech_id) {
         long company_name_id = 0;
         if (company_id > 0) {
@@ -181,65 +210,20 @@ public class Truck extends com.avaje.ebean.Model {
                 truck = null;
             }
         }
-//        if (truck == null) {
-//            if (!StringUtils.isEmpty(truck_number)) {
-//                if (project_id > 0 && company_name_id > 0) {
-//                    list = find.where()
-//                            .eq("project_id", project_id)
-//                            .eq("company_name_id", company_name_id)
-//                            .eq("truck_number", truck_number)
-//                            .findList();
-//                } else if (project_id > 0) {
-//                    list = find.where()
-//                            .eq("project_id", project_id)
-//                            .eq("truck_number", truck_number)
-//                            .findList();
-//                } else if (company_name_id > 0) {
-//                    list = find.where()
-//                            .eq("company_name_id", company_name_id)
-//                            .eq("truck_number", truck_number)
-//                            .findList();
-//                } else {
-//                    list = find.where()
-//                            .eq("truck_number", truck_number)
-//                            .findList();
-//                }
-//            } else {
-//                if (project_id > 0 && company_name_id > 0) {
-//                    list = find.where()
-//                            .eq("project_id", project_id)
-//                            .eq("company_name_id", company_name_id)
-//                            .eq("license_plate", license_plate)
-//                            .findList();
-//                } else if (project_id > 0) {
-//                    list = find.where()
-//                            .eq("project_id", project_id)
-//                            .eq("license_plate", license_plate)
-//                            .findList();
-//                } else if (company_name_id > 0) {
-//                    list = find.where()
-//                            .eq("company_name_id", company_name_id)
-//                            .eq("license_plate", license_plate)
-//                            .findList();
-//                } else {
-//                    list = find.where()
-//                            .eq("license_plate", license_plate)
-//                            .findList();
-//                }
-//            }
-//            if (list != null) {
-//                if (list.size() > 1) {
-//                    Logger.error("Found too many trucks with "
-//                            + truck_number + ", " + license_plate + ", project_id=" + project_id + ", company_name_id=" + company_name_id);
-//                    for (Truck t : list) {
-//                        Logger.error(t.toString());
-//                    }
-//                    truck = list.get(0);
-//                } else if (list.size() == 1) {
-//                    truck = list.get(0);
-//                }
-//            }
-//        }
+        if (project_id == 0) {
+            Logger.warn("Truck.add(" + project_id + ", " + company_id + ", " + truck_id + ", " + truck_number + ", " + license_plate + ", " + tech_id + ") CID=" + company_name_id + "[2]");
+            Logger.warn("No project id entered");
+        }
+        if (company_name_id == 0) {
+            Logger.error("Truck.add(" + project_id + ", " + company_id + ", " + truck_id + ", " + truck_number + ", " + license_plate + ", " + tech_id + ") CID=" + company_name_id + "[2]");
+            Logger.error("No company name entered");
+            return null;
+        }
+        if (StringUtils.isEmpty(truck_number) && StringUtils.isEmpty(license_plate)) {
+            Logger.error("Truck.add(" + project_id + ", " + company_id + ", " + truck_id + ", " + truck_number + ", " + license_plate + ", " + tech_id + ") CID=" + company_name_id + "[2]");
+            Logger.error("No truck number nor license_plate entered");
+            return null;
+        }
         if (truck == null) {
             truck = new Truck();
             truck.truck_number = truck_number;
@@ -268,6 +252,16 @@ public class Truck extends com.avaje.ebean.Model {
             truck.update();
         }
         return truck;
+    }
+
+    private static List<Truck> narrowByProject(List<Truck> items, long project_id) {
+        ArrayList<Truck> result = new ArrayList<Truck>();
+        for (Truck item : items) {
+            if (item.project_id == project_id) {
+                result.add(item);
+            }
+        }
+        return result;
     }
 
     public String getTruckNumber() {
@@ -323,6 +317,13 @@ public class Truck extends com.avaje.ebean.Model {
             return null;
         }
         return CompanyName.get(company_name_id);
+    }
+
+    @Transactional
+    public void setCompanyName(long company_name_id) {
+        this.company_name_id = company_name_id;
+        update();
+        Truck recheck = get(id);
     }
 
     public String getCreatedBy() {
@@ -410,28 +411,33 @@ public class Truck extends com.avaje.ebean.Model {
 
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("ID ");
+        sbuf.append("Truck(id=");
         sbuf.append(id);
-        sbuf.append(" NUMBER ");
+
         if (truck_number != null && !truck_number.isEmpty()) {
+            sbuf.append(", number=");
             sbuf.append(truck_number);
         }
         if (license_plate != null && !license_plate.isEmpty()) {
-            sbuf.append(" : ");
+            sbuf.append(", plate=");
             sbuf.append(license_plate);
         }
         if (project_id > 0) {
+            sbuf.append(", project='");
             if (getRootProjectName() != null) {
-                sbuf.append(", PROJECT ");
                 sbuf.append(getRootProjectName());
                 sbuf.append(" - ");
+                sbuf.append(getSubProjectName());
+            } else {
+                sbuf.append(getSubProjectName());
             }
-            sbuf.append(getSubProjectName());
+            sbuf.append("'");
         }
         if (company_name_id > 0) {
-            sbuf.append(", COMPANY ");
+            sbuf.append(", company=");
             sbuf.append(getCompanyName());
         }
+        sbuf.append(")");
         return sbuf.toString();
     }
 

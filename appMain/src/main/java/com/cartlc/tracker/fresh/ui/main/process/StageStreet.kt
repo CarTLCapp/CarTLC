@@ -5,6 +5,7 @@ package com.cartlc.tracker.fresh.ui.main.process
 
 import android.text.InputType
 import com.cartlc.tracker.fresh.model.flow.*
+import com.cartlc.tracker.fresh.model.msg.ErrorMessage
 import com.cartlc.tracker.fresh.ui.main.MainController
 import com.cartlc.tracker.fresh.model.msg.StringMessage
 import com.cartlc.tracker.fresh.model.pref.PrefHelper
@@ -22,34 +23,37 @@ class StageStreet(
             titleUseCase.mainTitleVisible = true
             titleUseCase.subTitleVisible = true
             val company = prefHelper.company
-            val city = prefHelper.city
-            val state = prefHelper.state
             if (company == null) {
-                curFlowValue = CompanyFlow()
+                curFlowValue = CompanyFlow() // Expected to have a company by this point -- abort and get it
                 return
             }
+            val state = prefHelper.state
             if (state == null) {
-                curFlowValue = StateFlow()
+                curFlowValue = StateFlow() // Expected to have a state at this point -- abort and get it
                 return
             }
+            val city = prefHelper.city
             if (city == null) {
-                curFlowValue = CityFlow()
+                curFlowValue = CityFlow() // Expected to have a city at this poinjt -- abort and get it.
                 return
             }
-            var streets = db.tableAddress.queryStreets(
-                    company,
-                    city,
-                    state,
-                    prefHelper.zipCode)
+            val streets = mutableListOf<String>()
+            val street = prefHelper.street
+            if (!street.isNullOrEmpty()) {
+                streets.add(street)
+            }
+            db.tableAddress.queryStreets(company, city, state, prefHelper.zipCode).forEach { addstreet ->
+                if (!streets.contains(addstreet)) {
+                    streets.add(addstreet)
+                }
+            }
             if (streets.isEmpty()) {
                 isEditing = true
             }
             val hint: String?
             if (isEditing) {
-                streets = mutableListOf()
                 hint = null
             } else {
-                streets = streets.toMutableList()
                 autoNarrowStreets(streets)
                 if (streets.size == 1 && isAutoNarrowOkay) {
                     prefHelper.street = streets[0]
@@ -101,8 +105,16 @@ class StageStreet(
 
     fun saveAdd(isNext: Boolean): Boolean {
         with (shared) {
-            prefHelper.street = entrySimpleUseCase.entryTextValue ?: ""
-            return prefHelper.street?.isNotBlank() ?: run { !isNext }
+            val value = entrySimpleUseCase.entryTextValue ?: ""
+            if (value.isBlank()) {
+                return !isNext
+            }
+            if (detectedCommaError(value)) {
+                errorValue = ErrorMessage.CANNOT_HAVE_COMMAS
+                return !isNext
+            }
+            prefHelper.street = value
+            return value.isNotBlank()
         }
     }
 }

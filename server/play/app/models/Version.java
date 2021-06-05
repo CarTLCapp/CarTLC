@@ -24,6 +24,7 @@ public class Version extends com.avaje.ebean.Model {
     public static final String NEXT_PICTURE_COLLECTION_ID       = "next_picture_collection_id";
     public static final String NEXT_NOTE_COLLECTION_ID          = "next_note_collection_id";
     public static final String NEXT_UPLOAD_ID                   = "next_upload_id";
+    public static final String NEXT_REPAIRED_INSTANCE_ID        = "next_repaired_instance_id";
 
     private static final long serialVersionUID = 1L;
 

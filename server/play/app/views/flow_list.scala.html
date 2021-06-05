@@ -21,6 +21,7 @@
                     <th>Project</th>
                     <th>Chain Size</th>
                     <th>Sub Flows</th>
+                    <th>Truck?</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -31,6 +32,7 @@
                         <td>@flow.getSubProjectName()</td>
                         <td>@flow.getChainSize()</td>
                         <td>@flow.getSubFlowCount()</td>
+                        <td>@flow.hasTruck()</td>
                         <td><a href="@routes.FlowController.edit(flow.id)">Edit</a></td>
                     </tr>
                 }

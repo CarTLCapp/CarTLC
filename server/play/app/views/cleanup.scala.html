@@ -1,0 +1,85 @@
+@(cleanupForm: Form[views.formdata.CleanupFormData], client : Client, numRepaired : Int, lastResult: String))
+
+@import helper._
+@import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
+
+<head>
+    <style>
+        h1.top1 {
+            padding-top: 40px;
+        }
+        p.result {
+            font-size: 18px;
+            font-weight: bold;
+            padding-top: 10px;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+
+@repairedWord() = @{ "Repaired (" + numRepaired + ")" }
+
+@main("FleetTLC - Cleanup Operations", client) {
+
+    <h1>Fix
+        <span style="float:right;font-size:16px;padding-left:10px;cursor:pointer">
+                 <a href="@routes.EntryController.showByRepaired()">@repairedWord</a>
+        </span>
+    </h1>
+
+    <p><span style="font-size:24px;cursor:pointer"><a id="truck_cleanup">Truck Cleanup</a></span></p>
+    <p id="truck_cleanup_result" class="result">@lastResult</p>
+
+    <h1 class="top1">Delete</h1>
+
+    @b3.form(routes.CleanupController.deleteDated()) {
+
+        @CSRF.formField
+
+        <fieldset>
+
+            @b3.text(cleanupForm("date"), '_label -> "Date", '_help -> "")
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value="Delete all elements before the entered date" class="btn danger" onclick="return confirm('This cannot be undone. Are you sure?'">
+        </div>
+
+    }
+
+    <script type="text/javascript">
+
+        <!-- IMPORT -->
+
+        function myTruckCleanup() {
+            document.getElementById("truck_cleanup").innerHTML = "...Abort...";
+            document.getElementById("truck_cleanup_result").innerHTML = "...";
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    var line = this.responseText;
+                    var key = line.substring(0, 1);
+                    var value = line.substring(1);
+                    if (key == "#") {
+                        document.getElementById("truck_cleanup_result").innerHTML = value;
+                        xhttp.open("GET", "@routes.CleanupController.truckCleanupNext()", true);
+                        xhttp.send();
+                    } else if (key == "D" || key == "R") {
+                        document.getElementById("truck_cleanup_result").innerHTML = "DONE: " + value;
+                        document.getElementById("truck_cleanup").innerHTML = "Truck Cleanup";
+                        location.reload(true);
+                    }
+                }
+            };
+            xhttp.open("GET", "@routes.CleanupController.truckCleanup()", true);
+            xhttp.send();
+        }
+        document.getElementById("truck_cleanup").onclick = myTruckCleanup;
+        document.getElementById("truck_cleanup").innerHTML = "Truck Cleanup";
+
+   </script>
+}
+
+            

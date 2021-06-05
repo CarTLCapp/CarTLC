@@ -291,6 +291,14 @@ class MainController(
         fun getLocation() = locationUseCase.getLocation { address -> fabAddress = address }
 
         fun onEditEntry() = main.onEditEntry()
+
+        fun detectedCommaError(value: String): Boolean {
+            if (value.indexOf(',') >= 0) {
+                errorValue = ErrorMessage.CANNOT_HAVE_COMMAS
+                return true
+            }
+            return false
+        }
     }
 
     private val shared = Shared()
@@ -337,6 +345,8 @@ class MainController(
                 })
         if (db.tableProjects.hasUnsetServerIds) {
             Timber.e("Why do some projects have unset server ids?")
+            prefHelper.reloadProjects()
+
             if (BuildConfig.DEBUG) {
                 db.tableProjects.query().forEach {
                     if (it.serverId == 0) {
@@ -388,7 +398,7 @@ class MainController(
             else -> level.toString()
         }
         when (level) {
-            ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL -> error("onTrimMemory($level): $tag")
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL -> msg("onTrimMemory($level): $tag")
         }
 
     }
@@ -496,6 +506,11 @@ class MainController(
 
     // region ButtonsUseCase.Listener
 
+    /**
+     * When the button is pressed, we have a chance here to make sure everything is okay.
+     * @param action Button
+     * @return Boolean
+     */
     override fun onButtonConfirm(action: Button): Boolean {
         when (curFlowValue.stage) {
             Stage.CONFIRM_ADDRESS -> {
@@ -567,6 +582,8 @@ class MainController(
         }
     }
 
+    // endregion ButtonsUseCase.Listener
+
     private fun onSubFlowEnded() {
         prefHelper.saveEntry(true)?.let { entry ->
             repo.setIncomplete(entry)
@@ -586,7 +603,7 @@ class MainController(
 
     private fun save(isNext: Boolean): Boolean {
         return when (curFlowValue.stage) {
-            Stage.ADD_CITY -> stageCity.saveAdd()
+            Stage.ADD_CITY -> stageCity.saveAdd(isNext)
             Stage.ADD_STREET -> stageStreet.saveAdd(isNext)
             Stage.ADD_EQUIPMENT -> stageEquipment.saveAdd()
             Stage.EQUIPMENT -> stageEquipment.save(isNext)
@@ -601,8 +618,6 @@ class MainController(
             else -> true
         }
     }
-
-    // endregion ButtonsUseCase.Listener
 
     // region MainListViewMvc.Listener
 
@@ -670,11 +685,11 @@ class MainController(
     val error: MutableLiveData<ErrorMessage>
         get() = repo.error
 
-    private var errorValue: ErrorMessage
-        get() = repo.errorValue
-        set(value) {
-            repo.errorValue = value
-        }
+//    private var errorValue: ErrorMessage
+//        get() = repo.errorValue
+//        set(value) {
+//            repo.errorValue = value
+//        }
 
     private fun showError(error: ErrorMessage) {
         return showError(messageHandler.getErrorMessage(error))

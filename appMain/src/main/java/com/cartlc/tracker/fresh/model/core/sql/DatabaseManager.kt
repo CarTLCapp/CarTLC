@@ -19,7 +19,7 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
 
     companion object {
         private const val DATABASE_NAME = "cartcl.db"
-        private const val DATABASE_VERSION = 23
+        private const val DATABASE_VERSION = 24
     }
 
     private val dbHelper: DatabaseHelper by lazy {
@@ -83,7 +83,6 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             tableVehicle.create()
             tableVehicleName.create()
             tableZipCode.create()
-
         }
 
         fun init(db: SQLiteDatabase) {
@@ -153,6 +152,9 @@ open class DatabaseManager(private val ctx: Context) : DatabaseTable {
             }
             if (oldVersion <= 22) {
                 tableFlow.upgrade22()
+            }
+            if (oldVersion <= 23) {
+                tableNote.upgrade23()
             }
         }
 

@@ -110,6 +110,13 @@ public class Flow extends com.avaje.ebean.Model {
         return FlowElementCollection.getSubFlowCount(id);
     }
 
+    public String hasTruck() {
+        if (hasFlagTruckNumber() || hasFlagTruckDamage()) {
+            return "YES";
+        }
+        return "NO";
+    }
+
     public static boolean hasElements(long id) {
         return FlowElementCollection.getNumElements(id) > 0;
     }

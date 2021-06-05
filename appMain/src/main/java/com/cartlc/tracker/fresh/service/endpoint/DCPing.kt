@@ -75,6 +75,16 @@ class DCPing(
         private const val FLOW_PAGE_SIZE = 10
 
         private val FREQ_LAST_SERVER_PROJECT_ID_ZERO_CHECK = TimeUnit.DAYS.toMillis(1)
+
+        private val IGNORE_ERRORS = listOf(
+            "Server COMPLAINT: <!DOCTYPE html> <html lang=\"en\"> <head> <title>Error</title> <link rel=\"shortcut icon\"",
+            "Unable to resolve host",
+            "Failed to connect to",
+            "connection.errorStream must not be null",
+            "SSL handshake aborted: ssl",
+            "Software caused connection abort",
+            "Handshake failed"
+        )
     }
 
     private val serverUrl: String
@@ -324,11 +334,11 @@ class DCPing(
         }
         var entries = db.tableEntry.queryPendingEntriesToUpload()
         if (entries.isNotEmpty()) {
-            sendEntries(entries).let { response ->
-                if (response.error != null) {
-                    TBApplication.ShowError(response.error)
+            sendEntries(entries).let { response2 ->
+                if (response2.error != null) {
+                    TBApplication.ShowError(response2.error)
                 }
-                refresh = response.numPages > 0
+                refresh = response2.numPages > 0
             }
         }
         entries = db.tableEntry.queryPendingPicturesToUpload()
@@ -456,6 +466,11 @@ class DCPing(
             }
             // Remaining unprocessed elements are disabled if they have entries.
             unprocessed.disableRemaining()
+
+            // This should never happen
+            if (db.tableProjects.hasUnsetServerIds) {
+                Timber.e("Why are there unset server id's after a project refresh?")
+            }
         } catch (ex: IOException) {
             return ex.message ?: "IO Exception during queryProjects()"
         } catch (ex: Exception) {
@@ -733,9 +748,10 @@ class DCPing(
                     val serverId = ele.getInt("id")
                     val name = ele.getString("name")
                     val typeStr = ele.getString("type")
+                    val disabled = ele.getBoolean("disabled")
                     val numDigits = ele.getInt("num_digits").toShort()
                     val type = DataNote.Type.from(typeStr)
-                    val incoming = DataNote(name, type, numDigits, serverId)
+                    val incoming = DataNote(name, type, numDigits, serverId, disabled)
                     val item = db.tableNote.queryByServerId(serverId)
                     if (item == null) {
                         val match = get(unprocessed, incoming)
@@ -1055,7 +1071,8 @@ class DCPing(
                             val serverNoteId = eleNote.getInt("note_id")
                             val itemNote = db.tableNote.queryByServerId(serverNoteId)
                             if (itemNote == null) {
-                                error("Ignoring no such note with server id: $serverNoteId")
+                                error("Reload notes, because no such note with server id: $serverNoteId")
+                                prefHelper.reloadNotes()
                             } else {
                                 val incomingNote = DataFlowElementNote()
                                 incomingNote.flowElementId = incomingEle.id
@@ -1432,22 +1449,46 @@ class DCPing(
         } catch (ex: IOException) {
             val msg: String
             if (sendError) {
-                msg = TBApplication.ReportServerError(ex, DCPing::class.java, "post()", "server")
+                if (ignoreError(ex.message)) {
+                    Timber.i(ex)
+                    msg = ex.message ?: "Unknown error"
+                } else {
+                    msg = TBApplication.ReportServerError(ex, DCPing::class.java, "post()", "server")
+                    throw(IOException(msg))
+                }
             } else {
                 msg = ex.message ?: "unknown error"
                 Log.e(TAG, "While sending to $target\n$msg")
             }
-//            TBApplication.ShowError(msg)
             throw(IOException(msg))
+
         } catch (ex: Exception) {
             val msg: String
             if (sendError) {
-                msg = TBApplication.ReportServerError(ex, DCPing::class.java, "post()", "server")
+                if (ignoreError(ex.message)) {
+                    Timber.i(ex)
+                    msg = ex.message ?: "Unknown error"
+                } else {
+                    msg = TBApplication.ReportServerError(ex, DCPing::class.java, "post()", "server")
+                    throw(IOException(msg))
+                }
             } else {
                 msg = ex.message ?: "unknown error"
             }
             throw(IOException(msg))
         }
+    }
+
+    private fun ignoreError(msg: String?): Boolean {
+        if (msg == null) {
+            return true
+        }
+        IGNORE_ERRORS.forEach {
+            if (msg.startsWith(it)) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun parseResult(result: String): JSONObject {

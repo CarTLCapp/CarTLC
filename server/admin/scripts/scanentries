@@ -1,0 +1,31 @@
+#!/usr/bin/python3
+import sys
+
+if (len(sys.argv) == 0):
+    print("No file specified")
+    exit(1)
+
+print("[")
+for file in sys.argv[1:]:
+    filepath=file
+    gotline=""
+    with open(filepath) as fp:
+        line = fp.readline()
+        while line:
+            pos = line.find("GOT:")
+            if (pos > 0):
+                gotline=line[pos+5:].strip()
+            elif (len(gotline) > 0):
+                pos = line.find("ERROR: ")
+                if (pos > 0):
+                    errorLine = line[pos+7:].strip()
+                    revised = gotline[:1] + "\"error\":\"" + errorLine + "\"," + gotline[1:] + ","
+                else:
+                    revised = gotline + ","
+                print(revised)
+                gotline=""
+            line = fp.readline()
+    if (len(gotline) > 0):
+        print(gotline)
+
+print("{}]")

@@ -1,0 +1,308 @@
+@(currentPage: EntryRecoveryPagedList, searchForm : Form[views.formdata.InputSearch], client : Client)
+
+@import helper._
+
+@link(newPage:Int, newSortBy:String) = @{
+    var sortBy = currentPage.getSortBy()
+    var order = currentPage.getOrder()
+    if(newSortBy != null) {
+        sortBy = newSortBy
+        if(currentPage.getSortBy() == newSortBy) {
+            if(currentPage.getOrder() == "asc") {
+                order = "desc"
+            } else {
+                order = "asc"
+            }
+        } else {
+            order = "asc"
+        }
+    }
+    // Generate the link
+    routes.EntryRecoveryController.list(newPage, currentPage.getPageSize(), currentPage.getSortBy(), currentPage.getOrder(), currentPage.getSearchTerm())
+}
+
+@header(key:String, title:String) = {
+    <th class="@key header @if(currentPage.getSortBy() == key) @{if(currentPage.getOrder() == "asc") "headerSortDown" else "headerSortUp"}">
+        <a href="@link(0, key)">@title</a>
+    </th>
+}
+
+@main("FleetTLC - List Recovery Entries", client) {
+
+    @if(currentPage.isByTruck()) {
+        <h1>TRUCK @currentPage.getByTruckLine()</h1>
+    } else {
+
+        <h4>These entries cannot be found in the regular entries table:</h4>
+
+        @helper.form(action = routes.EntryRecoveryController.search(currentPage.getPageIndex(), currentPage.getPageSize(), currentPage.getSortBy(), currentPage.getOrder())) {
+            <h1 id="homeTitle">
+                <span id="homeCount">...</span>
+                <span style="float:right;font-size:16px;padding-left:10px;cursor:pointer"><a id="import">Import</a></span>
+                <span style="float:right;font-size:16px">
+                       <a href="@routes.EntryRecoveryController.searchClear()" class="btn">Clear</a>
+                </span>
+                <span style="float:right;font-size:16px">
+                        @helper.select(searchForm("searchField"), currentPage.getSearchFieldOptions().map(option => option.value.toString -> option.text.toString), '_label -> "")
+                </span>
+                <span style="float:right;font-size:16px">
+                        @helper.inputText(searchForm("searchTerm"), '_label -> "")
+                </span>
+                <span style="float:right;font-size:16px;padding-left:20px"><div class="search">Search:</div></span>
+                <span style="float:right;font-size:16px">
+                    <div>
+                        <select style="width:80px" id="pageSizeSelect" data-sortby="@currentPage.getSortBy()" data-order="@currentPage.getOrder()" data-search-term="@currentPage.getSearchTerm()" data-search-field="@currentPage.getSearchField()" onchange="onPageSizeSelect()">
+                            @for(option <- currentPage.getPageSizes()) {
+                                <option value="@option.value" @option.selected>@option.text</option>
+                            }
+                        </select>
+                    </div>
+                </span>
+                <span style="float:right;font-size:16px"><div class="search">Page Size:</div></span>
+            </h1>
+        }
+    }
+
+    @if(!currentPage.hasRows()) {
+
+        <div class="well">
+            <em>Nothing to display</em>
+        </div>
+
+        <script type="text/javascript">
+            document.getElementById("homeCount").innerHTML = "No elements";
+        </script>
+
+    } else {
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:55px"><input style="margin-right:5px" id="all" type="checkbox" value="ALL">Row</th>
+                    @header("tech", "Name")
+                    @header("date", "Date")
+                    @header("time", "Time")
+                    @header("root_project", "Root")
+                    @header("sub_project", "Sub Project")
+                    @header("company", "Company")
+                    @header("street", "Street / Plant Name")
+                    @header("city", "City")
+                    @header("state", "State")
+                    @header("zipcode", "ZIP")
+
+                    @if(currentPage.canViewTrucks) {
+                        <th>Truck</th>
+                    }
+                    <th>Equipment</th>
+                    @if(currentPage.canViewPictures) {
+                        <th>Pictures</th>
+                    }
+                    <th>Notes</th>
+                    <th>View</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @currentPage.resetRowNumber()
+                @for(entry <- currentPage.getList()) {
+                    @currentPage.incRowNumber()
+                    <tr>
+                        <td><input class="entryCheckbox" style="margin-right:5px" type="checkbox" value="@entry.id">@currentPage.getRowNumber()</td>
+                        <td>@currentPage.highlightSearch(entry.getTechName(), EntryRecoveryPagedList.ColumnSelector.TECH)</td>
+                        <td>@entry.getDate()</td>
+                        <td>@entry.getTime()</td>
+                        <td>@currentPage.highlightSearch(entry.getRootProjectName(), EntryRecoveryPagedList.ColumnSelector.ROOT_PROJECT_ID)</td>
+                        <td>@currentPage.highlightSearch(entry.getSubProjectName(), EntryRecoveryPagedList.ColumnSelector.SUB_PROJECT_ID)</td>
+                        <td>@currentPage.highlightSearch(entry.getCompany(), EntryRecoveryPagedList.ColumnSelector.COMPANY_NAME)</td>
+                        <td>@currentPage.highlightSearch(entry.getStreet(), EntryRecoveryPagedList.ColumnSelector.STREET)</td>
+                        <td>@currentPage.highlightSearch(entry.getCity(), EntryRecoveryPagedList.ColumnSelector.CITY)</td>
+                        <td>@currentPage.highlightSearch(entry.getState(), EntryRecoveryPagedList.ColumnSelector.STATE)</td>
+                        <td>@currentPage.highlightSearch(entry.getZipCode(), EntryRecoveryPagedList.ColumnSelector.ZIP)</td>
+                        @if(currentPage.canViewTrucks) {
+                            <td>@currentPage.highlightSearch(entry.getTruckLine(), EntryRecoveryPagedList.ColumnSelector.TRUCK_NUMBER)</td>
+                        }
+                        <td>@currentPage.highlightSearch(currentPage.getEquipmentLine(entry), EntryRecoveryPagedList.ColumnSelector.EQUIPMENT)</td>
+                        @if(currentPage.canViewPictures) {
+                            <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
+                        }
+                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum(client)</a></td>
+                        <td><a href="@routes.EntryRecoveryController.view(entry.id)">View</a></td>
+                        <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+        @if(!currentPage.isByTruck()) {
+            <div id="pagination" class="pagination">
+                <ul>
+                    <li id="previous" class="@currentPage.getPrevClass()">
+                        <a href="@link(currentPage.getPageIndex() - 1, null)">&larr; Previous</a>
+                    </li>
+                    <li class="current">
+                        <a id="currentPage">@currentPage.getDisplayingXtoYofZ()</a>
+                    </li>
+                    <li id="next" class="@currentPage.getNextClass()">
+                        <a href="@link(currentPage.getPageIndex() + 1, null)">Next &rarr;</a>
+                    </li>
+                </ul>
+            </div>
+
+            <script type="text/javascript">
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.responseText.length > 0 && this.status == 200) {
+                        var line = this.responseText;
+                        var bits = line.split("|");
+                        document.getElementById("previous").setAttribute("class", bits[0])
+                        document.getElementById("currentPage").innerHTML = bits[1];
+                        document.getElementById("next").setAttribute("class", bits[2]);
+                        document.getElementById("homeCount").innerHTML = bits[3];
+                    }
+                };
+                xhttp.open("GET", "@routes.EntryRecoveryController.computeTotalNumRows()", true);
+                xhttp.send();
+            </script>
+        }
+
+        <h4>
+            <span style="font-size:16px;padding-left:30px;cursor:pointer">
+                <div id="div_delete_checked" class="actions">
+                    <a id="delete_checked" class="btn danger">Delete checked entries</a>
+                </div>
+                <div id="div_progress">
+                    <a href="@routes.EntryRecoveryController.deleteAbort()" id="delete_progress"></a>
+                </div>
+            </span>
+        </h4>
+
+    }
+
+    <script type="text/javascript">
+
+        <!-- IMPORT -->
+
+        function myImport() {
+            document.getElementById("import").innerHTML = "...";
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    var line = this.responseText;
+                    var key = line.substring(0, 1);
+                    var value = line.substring(1);
+                    if (key == "#") {
+                        document.getElementById("import").innerHTML = value;
+                        xhttp.open("GET", "@routes.EntryRecoveryController.importNext()", true);
+                        xhttp.send();
+                    } else if (key == "D" || key == "R") {
+                        document.getElementById("import").innerHTML = "Import";
+                        location.reload(true);
+                    }
+                }
+            };
+            xhttp.open("GET", "@routes.EntryRecoveryController.importStart()", true);
+            xhttp.send();
+        }
+        document.getElementById("import").onclick = myImport;
+        document.getElementById("import").innerHTML = "Import";
+
+        <!-- DELETE -->
+
+        function myDelete() {
+            var checkedValues = [];
+            var inputElements = document.getElementsByClassName('entryCheckbox');
+            for (var i=0; inputElements[i]; ++i) {
+                if (inputElements[i].checked) {
+                    checkedValues.push(inputElements[i].value);
+                }
+            }
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.status == 200) {
+                    var line = this.responseText;
+                    var key = line.substring(0, 1);
+                    var value = line.substring(1);
+                    if (key == "#") {
+                        document.getElementById("delete_checked").innerHTML = "Working";
+                        document.getElementById("delete_progress").innerHTML = value;
+                        xhttp.open("GET", "@routes.EntryRecoveryController.deleteNext()", true);
+                        xhttp.send();
+                    } else if (key == "D" || key == "R") {
+                        document.getElementById("delete_checked").innerHTML = "Delete checked entries";
+                        document.getElementById("delete_progress").innerHTML = value;
+                        location.reload(true);
+                    }
+                }
+            };
+            document.getElementById("delete_progress").innerHTML = "...";
+            var call = "/entry_recovery/delete_entries/" + checkedValues.join();
+            xhttp.open("GET", call, true);
+            xhttp.send();
+        }
+
+        function myConfirmDelete() {
+            var inputElements = document.getElementsByClassName('entryCheckbox');
+            var count = 0;
+            for (var i=0; inputElements[i]; ++i) {
+                if (inputElements[i].checked) {
+                    count++;
+                }
+            }
+            if (count > 0) {
+                var message;
+                if (count == 1) {
+                    message = "Deleting this element cannot be undone. Are you sure?";
+                } else {
+                    message = "Deleting these " + count + " elements cannot be undone. Are you sure?";
+                }
+                if (confirm(message)) {
+                    myDelete();
+                }
+            }
+        }
+
+        document.getElementById("delete_checked").onclick = myConfirmDelete;
+
+        <!-- ALL CHECKBOX -->
+
+        function myCheckboxALL() {
+            var allCheckbox = document.getElementById('all');
+            var inputElements = document.getElementsByClassName('entryCheckbox');
+            for (var i=0; inputElements[i]; ++i) {
+                inputElements[i].checked = allCheckbox.checked;
+            }
+        }
+
+        document.getElementById("all").onclick = myCheckboxALL;
+
+        <!-- PAGE SIZE SELECT -->
+
+        function onPageSizeSelect() {
+            var e = document.getElementById("pageSizeSelect");
+            var selected = e.options[e.selectedIndex].value;
+            var dataSortBy = e.getAttribute('data-sortby');
+            var dataOrder = e.getAttribute('data-order');
+            var dataSearchTerm = e.getAttribute('data-search-term');
+            if (dataSearchTerm.length == 0) {
+                dataSearchTerm = "null";
+            }
+            var dataSearchField = e.getAttribute('data-search-field');
+            if (dataSearchField.length == 0) {
+                dataSearchField = "null";
+            }
+            var pageSize = selected;
+            var call = "/entry_recovery/list/0/" + pageSize + "/" + dataSortBy + "/" + dataOrder + "/" + dataSearchField + "/" + encodeURIComponent(dataSearchTerm);
+            var location = window.location.href;
+            var pathArray = location.split('/');
+            var protocol = pathArray[0];
+            var host = pathArray[2];
+            var longCall = protocol + "//" + host + call;
+            window.location.href = longCall;
+        }
+
+   </script>
+}
+
+            

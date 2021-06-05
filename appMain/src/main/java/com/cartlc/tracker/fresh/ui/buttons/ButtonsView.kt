@@ -21,10 +21,9 @@ class ButtonsView(
     private val componentRoot: ComponentRoot = app.componentRoot
     private val factoryViewMvc = componentRoot.factoryViewMvc
 
-    val viewMvc: ButtonsViewMvc
+    val viewMvc: ButtonsViewMvc = factoryViewMvc.allocButtonsViewMvc(null)
 
     init {
-        viewMvc = factoryViewMvc.allocButtonsViewMvc(null)
         addView(viewMvc.rootView)
     }
 

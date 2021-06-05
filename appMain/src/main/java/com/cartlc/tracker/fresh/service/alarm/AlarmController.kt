@@ -49,7 +49,7 @@ class AlarmController(
             } else {
                 AlarmReceiver.scheduleIn(context, ACTION_LOGOUT, CHECK_ACTIVITY_TRIGGER_RETRY)
             }
-        } else {
+        } else if (action != null) {
             Timber.e("Unrecognized action received: $action")
         }
     }

@@ -7,7 +7,7 @@ DATE=`date +%F`
 FILE=`ls server/play/target/universal/*.zip`
 TGT="$HOME/server/$DATE"
 mkdir -p $TGT
-rm -f $TGT/*.zip
+rm -rf $TGT/*
 cp $FILE $TGT
 cd $TGT
 unzip *.zip

@@ -234,6 +234,28 @@ alter table work_order add constraint c2_w_client_id foreign key(client_id) refe
 
 # --- !Downs
 
+alter table work_order drop foreign key c2_w_truck_id;
+alter table work_order drop foreign key c2_w_project_id;
+alter table work_order drop foreign key c2_w_company_id;
+alter table work_order drop foreign key c2_w_client_id;
+alter table vehicle drop foreign key c2_tech_id;
+alter table truck drop foreign key c2_project_id;
+alter table truck drop foreign key c2_company_name_id;
+alter table secondary_technician drop foreign key c2_entry_id;
+alter table entry drop foreign key c2_e_entry_project_id;
+alter table entry drop foreign key c2_e_entry_company_id;
+alter table entry drop foreign key c2_e_tech_id;
+alter table project_equipment_collection drop foreign key c_pec_project_id;
+alter table project_equipment_collection drop foreign key c_pec_equipment_id;
+alter table entry_note_collection drop foreign key c_enc_note_id;
+alter table project_note_collection drop foreign key c_pnc_project_id;
+alter table project_note_collection drop foreign key c_pnc_note_id;
+alter table entry_equipment_collection drop foreign key c_eec_equipment_id;
+alter table client_company_name_association drop foreign key c_ccna_client_id;
+alter table client_company_name_association drop foreign key c_ccna_company_name_id;
+alter table client_project_association drop foreign key c_cpa_client_id;
+alter table client_project_association drop foreign key c_cpa_project_id;
+
 drop table if exists vehicle;
 drop table if exists vehicle_name;
 drop table if exists work_order;

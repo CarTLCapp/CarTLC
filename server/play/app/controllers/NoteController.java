@@ -294,6 +294,7 @@ public class NoteController extends Controller {
             node.put("name", item.name);
             node.put("type", item.type.toString());
             node.put("num_digits", item.num_digits);
+            node.put("disabled", item.disabled);
             noteIds.add(item.id);
         }
         array = top.putArray("project_note");

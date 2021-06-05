@@ -1,5 +1,5 @@
 /**
- * Copyright 2020, FleetTLC. All rights reserved
+ * Copyright 2021, FleetTLC. All rights reserved
  */
 package controllers;
 
@@ -9,6 +9,9 @@ import play.data.validation.ValidationError;
 
 import models.*;
 import modules.WorkerExecutionContext;
+import modules.ParseResult;
+import modules.Status;
+
 import views.formdata.EntryFormData;
 import views.formdata.InputSearch;
 
@@ -44,6 +47,8 @@ import play.db.ebean.Transactional;
 import play.Logger;
 import play.libs.concurrent.HttpExecution;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Manage a database of equipment.
  */
@@ -51,6 +56,7 @@ public class EntryController extends Controller {
 
     public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
     private static final String EXPORT_FILENAME = "/tmp/export.csv";
+    private static final int NOTE_LENGTH = 256;
 
     private AmazonHelper mAmazonHelper;
     private EntryPagedList mLastEntryList;
@@ -60,7 +66,9 @@ public class EntryController extends Controller {
     private WorkerExecutionContext mExecutionContext;
     private EntryListWriter mExportWriter;
     private boolean mExporting;
+    private boolean mDeleting;
     private boolean mAborted;
+    private DeleteAction mDeleteAction;
     private long mDownloadPicturesForEntryId;
     private long mDownloadPicturesLastAttemptEntryId;
     private ArrayList<Long> mDownloaded = new ArrayList<>();
@@ -156,6 +164,20 @@ public class EntryController extends Controller {
         mGlobals.setClearSearch(false);
         EntryPagedList list = new EntryPagedList();
         list.setByTruckId(truck_id);
+        list.computeFilters(Secured.getClient(ctx()));
+        list.compute();
+
+        mLastEntryList = list;
+
+        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
+        return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result showByRepaired() {
+        mGlobals.setClearSearch(false);
+        EntryPagedList list = new EntryPagedList();
+        list.setByRepaired();
         list.computeFilters(Secured.getClient(ctx()));
         list.compute();
 
@@ -435,7 +457,7 @@ public class EntryController extends Controller {
                     }
                 }
             }
-            Entry.Status status = Entry.findStatus(data.status);
+            Status status = Entry.findStatus(data.status);
             if (status != null) {
                 entry.status = status;
             }
@@ -455,61 +477,112 @@ public class EntryController extends Controller {
         return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
     }
 
+    // region DELETE
+
     @Security.Authenticated(Secured.class)
-    synchronized
-    public CompletionStage<Result> deleteEntries(String idsLine) {
-        String[] idsArray = idsLine.split(",");
-        List<String> idsList = new ArrayList<String>(Arrays.asList(idsArray));
-        String commaSeparated;
-        Logger.info("Delete request " + idsLine);
-        if (idsList.size() > 0) {
+    public Result deleteEntries(String idsLine) {
+        if (mDeleting) {
+            mAborted = true;
+            mDeleting = false;
+            Logger.info("deleteEntries() ABORT INITIATED");
+            return ok("R");
+        }
+        mDeleting = true;
+        mAborted = false;
+
+        mDeleteAction = new DeleteAction(idsLine);
+
+        return ok("#0...");
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result deleteNext() {
+        if (mAborted) {
+            mAborted = false;
+            mDeleting = false;
+            Logger.info("deleteNext(): ABORT");
+            return ok("R");
+        }
+        int count = mDeleteAction.count;
+        if (mDeleteAction.deleteNext()) {
+            Logger.info("deleteNext() " + count);
+            return ok("#" + Integer.toString(count) + "...");
+        } else {
+            Logger.info("deleteNext() DONE!");
+            mDeleting = false;
+            return ok("D" + Integer.toString(count));
+        }
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result deleteAbort() {
+        if (mDeleting) {
+            mAborted = true;
+            mDeleting = false;
+            Logger.info("deleteAbort()");
+        }
+        return list();
+    }
+
+    private class DeleteAction {
+
+        List<String> idsList;
+        int totalRequested = 0;
+        int count = 0;
+
+        public DeleteAction(String idsLine) {
+            String[] idsArray = idsLine.split(",");
+            idsList = new ArrayList<String>(Arrays.asList(idsArray));
+            totalRequested = idsArray.length;
+        }
+
+        public boolean deleteNext() {
+            if (idsList.size() == 0) {
+                return false;
+            }
             String idsText = idsList.get(0);
             try {
                 long id = Long.parseLong(idsText);
                 deleteNext(id);
                 idsList.remove(0);
-                commaSeparated = String.join(",", idsList);
             } catch (NumberFormatException ex) {
                 Logger.error(ex.getMessage());
-                commaSeparated = "";
             }
-        } else {
-            commaSeparated = "";
+            return true;
         }
-        CompletableFuture<Result> completableFuture = new CompletableFuture<>();
-        completableFuture.complete(ok(commaSeparated));
-        return completableFuture;
-    }
 
-    private boolean deleteNext(Long id) {
-        try {
-            String host = request().host();
-            Logger.debug("Deleting ENTRY ID " + id);
-            Entry entry = Entry.find.byId(id);
-            if (entry != null) {
-                entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
-                    Logger.warn("Remote entry has been deleted: " + id);
-                }));
-            } else {
-                Logger.error("Called deleteNext() with bad ID " + id);
+        private boolean deleteNext(long id) {
+            try {
+                String host = request().host();
+                Logger.debug("Deleting ENTRY ID " + id);
+                Entry entry = Entry.find.byId(id);
+                if (entry != null) {
+                    entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
+                        Logger.warn("Remote picture files have been deleted: " + id);
+                    }));
+                    count++;
+                    Logger.warn("Entry has been deleted: " + id);
+                } else {
+                    Logger.error("Called deleteNext() with bad ID " + id);
+                    return false;
+                }
+            } catch (NumberFormatException ex) {
+                Logger.error(ex.getMessage());
                 return false;
             }
-        } catch (NumberFormatException ex) {
-            Logger.error(ex.getMessage());
-            return false;
+            return true;
         }
-        return true;
     }
 
-    @Transactional
-    @BodyParser.Of(BodyParser.Json.class)
-    public Result enter() {
+    // endregion DELETE
+
+    public static ParseResult parse(JsonNode json, boolean modOkay) {
+        SimpleDateFormat mDateFormat = new SimpleDateFormat(DATE_FORMAT);
         Entry entry = new Entry();
         ArrayList<String> missing = new ArrayList<String>();
-        JsonNode json = request().body().asJson();
-        Logger.debug("GOT: " + json.toString());
         boolean retServerId = false;
         boolean fatal = false;
+        String hadProjectName = null;
         JsonNode value;
         value = json.findValue("tech_id");
         if (value == null) {
@@ -568,7 +641,6 @@ public class EntryController extends Controller {
                 entry = existing;
             }
         }
-        // This is OLD SCHOOL:
         int truck_id;
         String truck_number;
         String license_plate;
@@ -597,42 +669,22 @@ public class EntryController extends Controller {
         }
         value = json.findValue("project_id");
         if (value == null) {
-            // This is OLD school:
+            missing.add("project_id");
             value = json.findValue("project_name");
-            if (value == null) {
-                missing.add("project_id");
-                missing.add("project_name");
-                fatal = true;
-            } else {
+            if (value != null) {
                 String projectName = value.textValue();
                 Project project = Project.findByName(projectName);
                 if (project != null) {
                     entry.project_id = project.id;
                 } else {
-                    fatal = true;
-                    missing.add("project named '" + projectName + "'");
+                    Logger.error("Could not locate any project named: '" + projectName + "'");
                 }
             }
         } else {
             entry.project_id = value.longValue();
         }
-        if (truck_number == null && license_plate == null && truck_id == 0) {
-            // In flow style this is okay. So just ignore this.
-        } else {
-            // Old pre-flow school:
-
-            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
-            // The reason is that other techs don't need to know about a local techs truck updates.
-            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_id, truck_number, license_plate, entry.tech_id);
-            entry.truck_id = truck.id;
-        }
-        value = json.findValue("status");
-        if (value != null) {
-            entry.status = Entry.Status.from(value.textValue());
-        }
         value = json.findValue("address_id");
         if (value == null) {
-            // This is old school:
             value = json.findValue("address");
             if (value == null) {
                 missing.add("address_id");
@@ -643,7 +695,7 @@ public class EntryController extends Controller {
                     try {
                         Company company = Company.parse(address);
                         Company existing = Company.has(company);
-                        if (existing != null) {
+                        if (existing != null && modOkay) {
                             company = existing;
                         } else {
                             company.created_by = entry.tech_id;
@@ -653,10 +705,10 @@ public class EntryController extends Controller {
                         entry.company_id = company.id;
                         CompanyName.save(company.name);
                     } catch (Exception ex) {
-                        return badRequest2("address: " + ex.getMessage());
+                        return new ParseResult("address: " + ex.getMessage());
                     }
                 } else {
-                    return badRequest2("address");
+                    return new ParseResult("address");
                 }
             }
         } else {
@@ -664,16 +716,41 @@ public class EntryController extends Controller {
             Company company = Company.get(entry.company_id);
             if (company == null) {
                 Technician.AddReloadCode(entry.tech_id, 'c');
-                return badRequest2("address: no such company with ID " + entry.company_id);
+                return new ParseResult("address: nno such company with ID " + entry.company_id);
             }
+        }
+        if (truck_number == null && license_plate == null && truck_id == 0) {
+            // In flow style could be entered as a flow element.
+        } else {
+            // Note: I don't call Version.inc(Version.VERSION_TRUCK) intentionally.
+            // The reason is that other techs don't need to know about a local techs truck updates.
+            Truck truck = Truck.add(entry.project_id, entry.company_id, truck_id, truck_number, license_plate, entry.tech_id);
+            if (truck != null) {
+                entry.truck_id = truck.id;
+            } else if (StringUtils.isEmpty(truck_number) && StringUtils.isEmpty(license_plate)) {
+                missing.add("truck_number");
+                missing.add("license_plate");
+                fatal = true;
+            } else if (entry.company_id == 0) {
+                missing.add("company_id");
+                fatal = true;
+            } else {
+                missing.add("assumed company_name_id");
+                fatal = true;
+            }
+        }
+        value = json.findValue("status");
+        if (value != null) {
+            entry.status = Status.from(value.textValue());
         }
         value = json.findValue("equipment");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
                 Logger.error("Expected array for element 'equipment'");
+                missing.add("equipment array");
             } else {
                 int collection_id;
-                if (entry.equipment_collection_id > 0) {
+                if (entry.equipment_collection_id > 0 && modOkay) {
                     collection_id = (int) entry.equipment_collection_id;
                     EntryEquipmentCollection.deleteByCollectionId(entry.equipment_collection_id);
                 } else {
@@ -705,8 +782,12 @@ public class EntryController extends Controller {
                                 Logger.info("Created new equipment: " + equipment.toString());
                                 newEquipmentCreated = true;
 
-                                ProjectEquipmentCollection.addNew(entry.project_id, equipment);
-                                Logger.info("Registered for project:" + entry.project_id);
+                                if (entry.project_id > 0) {
+                                    ProjectEquipmentCollection.addNew(entry.project_id, equipment);
+                                    Logger.info("Registered for project:" + entry.project_id);
+                                } else {
+                                    Logger.error("Could not add equipment to project collection as there is no project");
+                                }
                             } else {
                                 if (equipments.size() > 1) {
                                     Logger.error("Too many equipments found with name: " + name);
@@ -731,9 +812,10 @@ public class EntryController extends Controller {
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
                 Logger.error("Expected array for element 'picture'");
+                missing.add("picture array");
             } else {
                 int collection_id;
-                if (entry.picture_collection_id > 0) {
+                if (entry.picture_collection_id > 0 && modOkay) {
                     collection_id = (int) entry.picture_collection_id;
                     PictureCollection.deleteByCollectionId(entry.picture_collection_id, null);
                 } else {
@@ -787,9 +869,10 @@ public class EntryController extends Controller {
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
                 Logger.error("Expected array for element 'notes'");
+                missing.add("notes array");
             } else {
                 int collection_id;
-                if (entry.note_collection_id > 0) {
+                if (entry.note_collection_id > 0 && modOkay) {
                     collection_id = (int) entry.note_collection_id;
                     EntryNoteCollection.deleteByCollectionId(entry.note_collection_id);
                 } else {
@@ -833,23 +916,51 @@ public class EntryController extends Controller {
                     } else {
                         collection.note_id = subValue.longValue();
                     }
-                     subValue = ele.findValue("value");
+                    subValue = ele.findValue("value");
                     if (subValue == null) {
-                        missing.add("note:value");
+                        Logger.error("Missing field note:value -- ignored entry.");
                     } else {
-                        collection.note_value = subValue.textValue();
+                        collection.note_value = limitSize(subValue.textValue(), NOTE_LENGTH);
                     }
                     collection.save();
                 }
                 entry.note_collection_id = collection_id;
             }
         }
-        if (missing.size() > 0) {
-            if (fatal) {
+        ParseResult result = new ParseResult();
+        result.entry = entry;
+        result.missing = missing;
+        result.fatal = fatal;
+        result.retServerId = retServerId;
+        result.secondary_tech_id = secondary_tech_id;
+        return result;
+    }
+
+    private static String limitSize(String value, int length) {
+        if (value.length() >= length) {
+            return value.substring(0, length - 1);
+        }
+        return value;
+    }
+
+    @Transactional
+    @BodyParser.Of(BodyParser.Json.class)
+    public Result enter() {
+        JsonNode json = request().body().asJson();
+        Logger.debug("GOT: " + json.toString());
+        ParseResult result = parse(json, true);
+        if (result.errorMsg != null) {
+            return badRequest2(result.errorMsg);
+        }
+        Entry entry = result.entry;
+        boolean fatal = result.fatal;
+        boolean retServerId = result.retServerId;
+        if (result.missing.size() > 0) {
+            if (fatal || entry.project_id == 0) {
                 Logger.error("Found missing values -- entry aborted");
-                return missingRequest(missing);
+                return missingRequest(result.missing);
             } else {
-                Logger.error(missingString(missing));
+                Logger.error(missingString(result.missing));
             }
         }
         if (entry.id != null && entry.id > 0) {
@@ -859,13 +970,14 @@ public class EntryController extends Controller {
             entry.save();
             Logger.debug("Created new entry " + entry.id);
         }
-        if (secondary_tech_id > 0) {
-            SecondaryTechnician.save(entry.id, secondary_tech_id);
-            Logger.debug("Assigned secondary technician " + secondary_tech_id + " to " + entry.id);
+        if (result.secondary_tech_id > 0) {
+            SecondaryTechnician.save(entry.id, result.secondary_tech_id);
+            Logger.debug("Assigned secondary technician " + result.secondary_tech_id + " to " + entry.id);
         }
         long ret_id;
         if (retServerId) {
             ret_id = entry.id;
+            Logger.debug("Entry " + retServerId + "saved.");
         } else {
             ret_id = 0;
         }
@@ -896,63 +1008,5 @@ public class EntryController extends Controller {
         return badRequest(field);
     }
 
-
-//    public CompletionStage<Result> exportBackground() {
-//        if (mExporting) {
-//            return ok("...");
-//        }
-//        mExporting = true;
-//        Client client = Secured.getClient(ctx());
-//        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
-//        return CompletableFuture.completedFuture(export(client)).thenApplyAsync(result -> {
-//            mExporting = false;
-//            if (result.startsWith("ERROR:")) {
-//                return badRequest2(result);
-//            }
-//            return ok(result);
-//        }, myEc);
-//    }
-
-//    @Security.Authenticated(Secured.class)
-//    public CompletionStage<Result> exportBackground() {
-//        Logger.info("export() BACKGROUND BEGIN");
-//        Client client = Secured.getClient(ctx());
-//        Executor myEc = HttpExecution.fromThread((Executor) mExecutionContext);
-//        return CompletableFuture.supplyAsync(() -> export(client), myEc);
-//        return CompletionStage<Result>.completedFuture(export(client)).thenApplyAsync(result -> {
-//            return result;
-//        }, myEc);
-//    }
-
-
-//    @Security.Authenticated(Secured.class)
-//    public Result pageSize(String size) {
-//        return pageSize2(size, "");
-//    }
-//
-//    @Security.Authenticated(Secured.class)
-//    public Result pageSize2(String size, String searchTerm, String searchField) {
-//        EntryPagedList list = new EntryPagedList();
-//        list.computeFilters(Secured.getClient(ctx()));
-//        list.setSearch(searchTerm, searchField);
-//        try {
-//            int pageSize = Integer.parseInt(size);
-//            list.setPageSize(pageSize);
-//        } catch (NumberFormatException ex) {
-//            Logger.error(ex.getMessage());
-//        }
-//        list.setSortBy(mLastEntryList.getSortBy());
-//        list.setOrder(mLastEntryList.getOrder());
-//        list.computeFilters(Secured.getClient(ctx()));
-//        list.compute();
-//
-//        mLastEntryList = list;
-//
-//        Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
-//        InputSearch isearch = new InputSearch(search);
-//        searchForm.fill(isearch);
-//
-//        return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
-//    }
 }
 

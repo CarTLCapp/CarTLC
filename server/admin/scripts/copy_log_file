@@ -1,0 +1,2 @@
+#!/bin/bash
+scp -i ~/.ssh/FleetTLC.pem ubuntu@fleettlc.arqnetworks.com:logs/$1 .

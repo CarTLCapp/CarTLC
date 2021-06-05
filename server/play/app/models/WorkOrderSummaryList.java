@@ -11,8 +11,9 @@ import play.db.ebean.*;
 import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
-
 import play.Logger;
+
+import modules.Status;
 
 import com.avaje.ebean.*;
 
@@ -55,7 +56,7 @@ public class WorkOrderSummaryList extends BaseList<WorkOrderSummary> implements 
                 if ((summary.first_date == null) || (date.getTime() < summary.first_date.getTime())) {
                     summary.first_date = date;
                 }
-                if (entry.status == Entry.Status.COMPLETE) {
+                if (entry.status == Status.COMPLETE) {
                     summary.num_complete++;
                 }
                 HashSet<Integer> techSet;

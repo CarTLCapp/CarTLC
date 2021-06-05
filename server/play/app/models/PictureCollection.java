@@ -35,7 +35,7 @@ public class PictureCollection extends Model {
     public String picture;
 
     @Constraints.Required
-    public String note; // Old school. Not used in the new flow style.
+    public String note; // Duplicate information for safety: also stored in notes
 
     @Constraints.Required
     public Long flow_element_id;
