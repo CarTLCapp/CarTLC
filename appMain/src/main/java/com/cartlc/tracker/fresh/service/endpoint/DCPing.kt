@@ -1180,11 +1180,22 @@ class DCPing(
                     val jobj = JSONObject()
                     jobj.put("filename", picture.tailname)
                     jobj.put("id", picture.id)
-                    val flowElementServerId = getFlowElementServerId(picture)
+                    val flowElement = getFlowElement(picture)
                     when {
-                        flowElementServerId != null -> jobj.put("flow_element_id", flowElementServerId)
+                        flowElement != null -> jobj.put("flow_element_id", flowElement.serverId)
                         picture.stage == Stage.TRUCK_NUMBER_PICTURE -> jobj.put("flow_stage", "truck_number")
                         picture.stage == Stage.TRUCK_DAMAGE_PICTURE -> jobj.put("flow_stage", "truck_damage")
+                    }
+                    /**
+                     * Add some additional redundancy of note information since I had a bad bug once time where the notes
+                     * were disassociated with the pictures. This way we have some backup.
+                     */
+                    if (flowElement != null) {
+                        val pictureNotes = db.noteHelper.getNotesOverlaidFrom(flowElement.id, entry)
+                        val noteString = buildNoteString(pictureNotes)
+                        if (noteString != null) {
+                            jobj.put("note", noteString)
+                        }
                     }
                     jarray.put(jobj)
                 }
@@ -1233,13 +1244,29 @@ class DCPing(
         return null
     }
 
-    private fun getFlowElementServerId(picture: DataPicture): Int? {
+    private fun getFlowElement(picture: DataPicture): DataFlowElement? {
         if (picture.stage is Stage.CUSTOM_FLOW) {
             db.tableFlowElement.query(picture.stage.flowElementId)?.let { element ->
-                return element.serverId
+                return element
             }
         }
         return null
+    }
+
+    private fun buildNoteString(list: List<DataNote>): String? {
+        if (list.isEmpty()) {
+            return null
+        }
+        val sbuf = StringBuffer()
+        for (note in list) {
+            if (sbuf.isNotEmpty()) {
+                sbuf.append(",")
+            }
+            sbuf.append(note.name)
+            sbuf.append("=")
+            sbuf.append(note.value)
+        }
+        return sbuf.toString()
     }
 
     private fun sendVehicles(list: List<DataVehicle>): PageResponse {

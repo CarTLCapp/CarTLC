@@ -109,7 +109,7 @@ class DataEntry(private val db: DatabaseTable) {
     // This will also include any current edits in place as well.
     private fun pendingNotes(withPartialInstallReason: Boolean): List<DataNote> {
         return projectAddressCombo?.projectNameId?.let { db.noteHelper.getPendingNotes(it, withPartialInstallReason) }
-                ?: emptyList()
+            ?: emptyList()
     }
 
     // Return the notes for the collection along with their values.
@@ -196,12 +196,12 @@ class DataEntry(private val db: DatabaseTable) {
     fun getEquipmentLine(ctx: Context): String {
         val sbuf = StringBuilder()
         for (name in equipmentNames!!) {
-            if (sbuf.length > 0) {
+            if (sbuf.isNotEmpty()) {
                 sbuf.append(", ")
             }
             sbuf.append(name)
         }
-        if (sbuf.length == 0) {
+        if (sbuf.isEmpty()) {
             sbuf.append(ctx.getString(R.string.status_no_equipment))
         }
         return sbuf.toString()
@@ -211,14 +211,14 @@ class DataEntry(private val db: DatabaseTable) {
         val sbuf = StringBuilder()
         sbuf.append("ID=")
         sbuf.append(id)
-        if (projectAddressCombo != null) {
+        projectAddressCombo?.let {
             sbuf.append("\nCOMBO=[")
-            sbuf.append(projectAddressCombo!!.toString())
+            sbuf.append(it.toString())
             sbuf.append("]")
         }
-        if (equipmentCollection != null) {
+        equipmentCollection?.let {
             sbuf.append("\nEQUIP=")
-            sbuf.append(equipmentCollection!!.toString())
+            sbuf.append(it.toString())
         }
         sbuf.append("\nNOTES=[")
         for (note in notesWithValues) {
@@ -238,6 +238,14 @@ class DataEntry(private val db: DatabaseTable) {
             sbuf.append(SimpleDateFormat("yy-MM-dd_HH:mm:ss", Locale.getDefault()).format(date))
             sbuf.append(" ")
         }
+        if (pictures.isNotEmpty()) {
+            sbuf.append("\nPICTURES=")
+            for (picture in pictures) {
+                sbuf.append(picture.toString())
+                sbuf.append(" ")
+            }
+        }
+        sbuf.append("pictureCollectionId=$pictureCollectionId")
         sbuf.append("SERVERID=")
         sbuf.append(serverId)
         if (status != null) {

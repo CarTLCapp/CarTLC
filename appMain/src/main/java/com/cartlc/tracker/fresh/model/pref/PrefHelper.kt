@@ -310,6 +310,8 @@ class PrefHelper constructor(
     private val nextNoteCollectionID: Long
         get() = getLong(KEY_NEXT_NOTE_COLLECTION_ID, 1L)
 
+    private var incNeeded = false
+
     val address: String
         get() {
             val sbuf = StringBuilder()
@@ -574,6 +576,7 @@ class PrefHelper constructor(
         db.tablePicture.clearPendingPictures()
         db.tableNote.clearValues()
         db.tableEquipment.clearChecked()
+        incNeeded = false
         clearConfirmValues()
     }
 
@@ -668,7 +671,12 @@ class PrefHelper constructor(
         }
     }
 
-
+    fun incIfNeeded() {
+        if (incNeeded) {
+            inc()
+            incNeeded = false
+        }
+    }
     private fun inc() {
         incNextEquipmentCollectionID()
         incNextPictureCollectionID()
@@ -714,6 +722,7 @@ class PrefHelper constructor(
         entry.status = status
         entry.saveNotes(nextNoteCollectionID, statusIsPartialInstall)
         entry.date = entryCreationTime
+        incNeeded = true
         // Sanity check
         if (entry.date == 0L) {
             entry.date = System.currentTimeMillis()
@@ -760,6 +769,7 @@ class PrefHelper constructor(
      * Save the data entered for either a currently edited entry, or save a new entry.
      */
     fun saveEntry(incOkay: Boolean): DataEntry? {
+        Timber.d("saveEntry($incOkay)")
         val entry = currentEditEntry ?: return createEntry(incOkay)
         entry.equipmentCollection?.addChecked()
         var truck = entry.truck

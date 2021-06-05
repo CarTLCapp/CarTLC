@@ -89,8 +89,6 @@
 
                 @if(element.isConfirm()) {
                     <h3 id="sectionTitle"><span>&#10003;</span>@element.getPromptIndent()</h3>
-                } else if (element.isDialog()) {
-                    <h2 id="sectionTitle">@element.prompt</h2>
                 } else {
                     <h2 id="sectionTitle">@element.prompt</h2>
                 }

@@ -744,12 +744,12 @@ public class EntryController extends Controller {
                     JsonNode ele = iterator.next();
                     PictureCollection collection = new PictureCollection();
                     collection.collection_id = (long) collection_id;
-                    // This reference is old school. Will not be seen in flow style:
+                    // This reference is a convenient duplicate. It is also stored in the flow by element.id for the picture the flow belongs too.
                     JsonNode subValue = ele.findValue("note");
                     if (subValue != null) {
                         collection.note = subValue.textValue();
                     }
-                    // The new way:
+                    // The new way, using flow element id. The notes associated with this flow element id will implicitly be associated with this picture:
                     JsonNode flowElementIdValue = ele.findValue("flow_element_id");
                     if (flowElementIdValue != null) {
                         long flowElementId = flowElementIdValue.longValue();

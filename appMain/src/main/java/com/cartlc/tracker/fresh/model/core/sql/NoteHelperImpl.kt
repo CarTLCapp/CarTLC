@@ -52,10 +52,10 @@ class NoteHelperImpl(
         return notes
     }
 
-    override fun getNotesOverlaidFrom(elementId: Long, entry: DataEntry?): List<DataNote> {
+    override fun getNotesOverlaidFrom(elementFlowId: Long, entry: DataEntry?): List<DataNote> {
         val notes = mutableListOf<DataNote>()
-        val elements = db.tableFlowElementNote.query(elementId)
-        for (element in elements) {
+        val noteElements = db.tableFlowElementNote.query(elementFlowId)
+        for (element in noteElements) {
             db.tableNote.query(element.noteId)?.let { note ->
                 entry?.let { entry ->
                     entry.overlayNoteValue(note.id)?.let {

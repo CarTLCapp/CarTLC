@@ -120,6 +120,7 @@ class ConfirmFinalController(
             entry.isComplete = true
             repo.store(entry)
             curEntry = null
+            prefHelper.incIfNeeded()
             prefHelper.clearCurProject()
             repo.curFlowValue = CurrentProjectFlow()
         }

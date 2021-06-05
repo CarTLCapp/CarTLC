@@ -19,7 +19,7 @@ import timber.log.Timber
  * Created by dug on 5/10/17.
  */
 class SqlTablePicture(
-        private val dbSql: SQLiteDatabase
+    private val dbSql: SQLiteDatabase
 ) : TablePicture {
 
     companion object {
@@ -32,6 +32,8 @@ class SqlTablePicture(
         private const val KEY_PICTURE_FILENAME = "picture_filename"
         private const val KEY_UPLOADING_FILENAME = "uploading_filename"
         private const val KEY_UPLOADED = "uploaded"
+
+        private const val PENDING_PICTURE_COLLECTION_ID = 0L
     }
 
     override fun clearAll() {
@@ -74,9 +76,10 @@ class SqlTablePicture(
 
     override fun add(picture: File, collection_id: Long, stage: Stage): DataPicture {
         val item = DataPicture(
-                unscaledFilename = picture.absolutePath,
-                collectionId = collection_id,
-                stage = stage)
+            unscaledFilename = picture.absolutePath,
+            collectionId = collection_id,
+            stage = stage
+        )
         update(item)
         return item
     }
@@ -113,9 +116,9 @@ class SqlTablePicture(
             val stageOrd = stage.ord
             val flowElementId = if (stage is Stage.CUSTOM_FLOW) stage.flowElementId else 0
             selectionArgs = arrayOf(
-                    collection_id.toString(),
-                    stageOrd.toString(),
-                    flowElementId.toString()
+                collection_id.toString(),
+                stageOrd.toString(),
+                flowElementId.toString()
             )
         } else {
             selection = "$KEY_COLLECTION_ID=?"
@@ -189,9 +192,9 @@ class SqlTablePicture(
             val stageOrd = stage.ord
             val flowElementId = if (stage is Stage.CUSTOM_FLOW) stage.flowElementId else 0
             selectionArgs = arrayOf(
-                    collection_id.toString(),
-                    stageOrd.toString(),
-                    flowElementId.toString()
+                collection_id.toString(),
+                stageOrd.toString(),
+                flowElementId.toString()
             )
         } else {
             selection = "$KEY_COLLECTION_ID=?"
@@ -234,7 +237,7 @@ class SqlTablePicture(
     }
 
     override fun createCollectionFromPending(nextPictureCollectionID: Long): List<DataPicture> {
-        val pending = removeFileDoesNotExist(query(0, null))
+        val pending = removeFileDoesNotExist(query(PENDING_PICTURE_COLLECTION_ID, null))
         val pictures = mutableListOf<DataPicture>()
         for (picture in pending) {
             pictures.add(DataPicture(picture, nextPictureCollectionID))
@@ -244,8 +247,9 @@ class SqlTablePicture(
 
     override fun clearPendingPictures() {
         try {
-            val where = "$KEY_COLLECTION_ID=0"
-            dbSql.delete(TABLE_NAME, where, null)
+            val where = "$KEY_COLLECTION_ID=$PENDING_PICTURE_COLLECTION_ID"
+            val count = dbSql.delete(TABLE_NAME, where, null)
+            Timber.d("Deleted $count pending pictures")
         } catch (ex: Exception) {
             TBApplication.ReportError(ex, SqlTablePicture::class.java, "clearPendingPictures()", "db")
         }
