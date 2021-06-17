@@ -317,15 +317,14 @@ public class EquipmentController extends Controller {
         List<Equipment> equipments = Equipment.all();
         List<Long> equipmentIds = new ArrayList<Long>();
         for (Equipment item : equipments) {
-            if (!item.disabled) {
-                ObjectNode node = array.addObject();
-                node.put("id", item.id);
-                node.put("name", item.name);
-                if (item.created_by != 0) {
-                    node.put("is_local", true);
-                }
-                equipmentIds.add(item.id);
+            ObjectNode node = array.addObject();
+            node.put("id", item.id);
+            node.put("name", item.name);
+            node.put("disabled", item.disabled);
+            if (item.created_by != 0) {
+                node.put("is_local", true);
             }
+            equipmentIds.add(item.id);
         }
         array = top.putArray("project_equipment");
         for (ProjectEquipmentCollection item : ProjectEquipmentCollection.find.all()) {

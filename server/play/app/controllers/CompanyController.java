@@ -210,6 +210,7 @@ public class CompanyController extends Controller {
             ObjectNode node = array.addObject();
             node.put("id", item.id);
             node.put("name", item.getName());
+            node.put("disabled", item.disabled);
             if (item.street != null && !item.street.isEmpty()) {
                 node.put("street", item.street);
             }

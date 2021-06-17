@@ -29,6 +29,14 @@ public class Technician extends com.avaje.ebean.Model {
     public static String RIP = "Inactive";
     public static int BASE_CODE = 0;
 
+    public static final char RELOAD_CODE_PROJECT        = 'p';
+    public static final char RELOAD_CODE_EQUIPMENT      = 'e';
+    public static final char RELOAD_CODE_NOTES          = 'n';
+    public static final char RELOAD_CODE_COMPANY        = 'c';
+    public static final char RELOAD_CODE_TRUCK          = 't';
+    public static final char RELOAD_CODE_VEHICLE        = 'v';
+    public static final char RELOAD_CODE_FLOW           = 'f';
+
     @Id
     public Long id;
 

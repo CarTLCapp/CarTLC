@@ -10,7 +10,7 @@ import play.db.ebean.*;
 import play.data.validation.*;
 import play.db.ebean.Transactional;
 
-@Entity 
+@Entity
 public class Version extends com.avaje.ebean.Model {
 
     public static final String VERSION_PROJECT                  = "version_project";

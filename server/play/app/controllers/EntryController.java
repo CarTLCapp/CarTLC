@@ -688,8 +688,13 @@ public class EntryController extends Controller {
             value = json.findValue("address");
             if (value == null) {
                 missing.add("address_id");
+                missing.add("address");
                 fatal = true;
             } else {
+                /**
+                 * The user added a new company address -- store it and ensure this technician updates their addresses so they
+                 * can get the right serverId.
+                 */
                 String address = value.textValue().trim();
                 if (address.length() > 0) {
                     try {
@@ -697,10 +702,12 @@ public class EntryController extends Controller {
                         Company existing = Company.has(company);
                         if (existing != null && modOkay) {
                             company = existing;
+                            Logger.info("Modified address: " + company.toString());
                         } else {
                             company.created_by = entry.tech_id;
                             company.save();
-                            Version.inc(Version.VERSION_COMPANY);
+                            Technician.AddReloadCode(entry.tech_id, Technician.RELOAD_CODE_COMPANY);
+                            Logger.info("Created new address: " + company.toString());
                         }
                         entry.company_id = company.id;
                         CompanyName.save(company.name);
@@ -715,7 +722,7 @@ public class EntryController extends Controller {
             entry.company_id = value.longValue();
             Company company = Company.get(entry.company_id);
             if (company == null) {
-                Technician.AddReloadCode(entry.tech_id, 'c');
+                Technician.AddReloadCode(entry.tech_id, Technician.RELOAD_CODE_COMPANY);
                 return new ParseResult("address: nno such company with ID " + entry.company_id);
             }
         }
@@ -764,7 +771,6 @@ public class EntryController extends Controller {
                     collection.collection_id = (long) collection_id;
                     JsonNode subValue = ele.findValue("equipment_id");
                     if (subValue == null) {
-                        // This is old school:
                         subValue = ele.findValue("equipment_name");
                         if (subValue == null) {
                             missing.add("equipment_id");
@@ -774,6 +780,9 @@ public class EntryController extends Controller {
                             List<Equipment> equipments = Equipment.findByName(name);
                             Equipment equipment;
                             if (equipments.size() == 0) {
+                                // The user is assumed to have done the 'add' operation and added there own
+                                // equipment. We need to add this equipment to the server and then cause the technician
+                                // to resync the equipment list so they can update the server id for that equipment.
                                 equipment = new Equipment();
                                 equipment.name = name;
                                 equipment.created_by = entry.tech_id;
@@ -790,7 +799,7 @@ public class EntryController extends Controller {
                                 }
                             } else {
                                 if (equipments.size() > 1) {
-                                    Logger.error("Too many equipments found with name: " + name);
+                                    Logger.error("Found several many equipments found with name \"" + name + "\", using just the first.");
                                 }
                                 equipment = equipments.get(0);
                             }
@@ -803,7 +812,7 @@ public class EntryController extends Controller {
                 }
                 entry.equipment_collection_id = collection_id;
                 if (newEquipmentCreated) {
-                    Version.inc(Version.VERSION_EQUIPMENT);
+                    Technician.AddReloadCode(entry.tech_id, Technician.RELOAD_CODE_EQUIPMENT);
                 }
             }
         }
@@ -977,7 +986,7 @@ public class EntryController extends Controller {
         long ret_id;
         if (retServerId) {
             ret_id = entry.id;
-            Logger.debug("Entry " + retServerId + "saved.");
+            Logger.debug("Entry " + ret_id + " saved.");
         } else {
             ret_id = 0;
         }

@@ -38,13 +38,14 @@ class DataAddress {
         this.zipcode = zipcode
     }
 
-    constructor(server_id: Int, company: String, street: String, city: String?, state: String?, zipcode: String?) {
+    constructor(server_id: Int, company: String, street: String, city: String?, state: String?, zipcode: String?, disabled: Boolean) {
         this.serverId = server_id
         this.company = company
         this.street = street
         this.city = city
         this.state = state
         this.zipcode = zipcode
+        this.disabled = disabled
     }
 
     constructor(id: Long, server_id: Int, company: String, street: String?, city: String?, state: String?, zipcode: String?) {
@@ -146,7 +147,8 @@ class DataAddress {
                 equals(street, item.street) &&
                 equals(city, item.city) &&
                 equals(state, item.state) &&
-                equals(zipcode, item.zipcode)
+                equals(zipcode, item.zipcode) &&
+                disabled == item.disabled
     }
 
     override fun toString(): String {

@@ -283,6 +283,22 @@ public class Company extends Model {
         return sbuf.toString();
     }
 
+    @java.lang.Override
+    public java.lang.String toString() {
+        return "Company{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", street='" + street + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zipcode='" + zipcode + '\'' +
+                ", created_by=" + created_by +
+                ", upload_id=" + upload_id +
+                ", disabled=" + disabled +
+                ", created_by_client=" + created_by_client +
+                '}';
+    }
+
     public String getCreatedBy() {
         if (created_by != 0) {
             if (created_by_client) {

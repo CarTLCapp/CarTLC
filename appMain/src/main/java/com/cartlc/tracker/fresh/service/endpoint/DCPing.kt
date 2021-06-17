@@ -519,6 +519,7 @@ class DCPing(
             for (i in 0 until array.length()) {
                 val ele = array.getJSONObject(i)
                 val serverId = ele.getInt("id")
+                val disabled = ele.getBoolean("disabled")
                 name = ele.getString("name")
                 if (name.isBlank()) {
                     TBApplication.ReportError("Got empty company name", DCPing::class.java, "queryCompanies()", "server")
@@ -532,12 +533,12 @@ class DCPing(
                     TBApplication.ReportError("Missing street, city, or state for company $name, server id $serverId", DCPing::class.java, "queryCompanies()", "server")
                     continue
                 }
-                if (ele.has("zipcode")) {
-                    zipcode = ele.getString("zipcode")
+                zipcode = if (ele.has("zipcode")) {
+                    ele.getString("zipcode")
                 } else {
-                    zipcode = null
+                    null
                 }
-                val incoming = DataAddress(serverId, name, street, city, state, zipcode)
+                val incoming = DataAddress(serverId, name, street, city, state, zipcode, disabled)
                 val item = db.tableAddress.queryByServerId(serverId)
                 if (item == null) {
                     val match = get(unprocessed, incoming)
@@ -546,6 +547,7 @@ class DCPing(
                         match.serverId = serverId
                         match.isLocal = false
                         match.isBootStrap = false
+                        match.disabled = disabled
                         db.tableAddress.update(match)
                         msg("Commandeer local: $match")
                         unprocessed.remove(match)
@@ -555,7 +557,6 @@ class DCPing(
                         msg("New company: $incoming")
                     }
                 } else {
-                    // Change of name, street, city or state?
                     if (!incoming.equals(item) || incoming.isLocal != item.isLocal) {
                         incoming.id = item.id
                         incoming.serverId = item.serverId
@@ -592,33 +593,34 @@ class DCPing(
                     val ele = array.getJSONObject(i)
                     val serverId = ele.getInt("id")
                     val name = ele.getString("name")
-                    val incoming = DataEquipment(name, serverId)
+                    val disabled = ele.getBoolean("disabled")
+                    val incoming = DataEquipment(name, serverId, disabled)
                     val item = db.tableEquipment.queryByServerId(serverId)
                     if (item == null) {
                         val match = get(unprocessed, incoming)
                         if (match != null) {
-                            // If this name already exists, convert the existing one by simply giving it the server_id.
+                            // If this name already exists, reuse existing one, updating needed values.
                             match.serverId = serverId.toLong()
                             match.isBootStrap = false
                             match.isLocal = false
+                            match.disabled = disabled
                             db.tableEquipment.update(match)
-                            msg("Commandeer local: $name")
+                            msg("Commandeer local: $incoming")
                             unprocessed.remove(match)
                         } else {
-                            // Otherwise just add the new tableEntry.
-                            msg("New equipment: $name")
+                            msg("New equipment: $incoming")
                             db.tableEquipment.add(incoming)
                         }
                     } else {
-                        // Change of name
                         if (incoming != item) {
-                            msg("Change: $name")
                             incoming.id = item.id
                             incoming.serverId = item.serverId
                             incoming.isLocal = false
+                            incoming.disabled = disabled
+                            msg("Changed to: $incoming")
                             db.tableEquipment.update(incoming)
                         } else {
-                            msg("No change: $name")
+                            msg("No change: $incoming")
                         }
                         unprocessed.remove(item)
                     }
@@ -651,7 +653,7 @@ class DCPing(
                             sbuf.append("Can't find any project with server ID ")
                             sbuf.append(serverProjectId)
                             sbuf.append(" for tableEquipment ")
-                            sbuf.append(equipment!!.name)
+                            sbuf.append(equipment?.name)
                             sbuf.append(". Projects=")
                             for (project in db.tableProjects.query()) {
                                 sbuf.append(project.serverId)
@@ -1161,18 +1163,25 @@ class DCPing(
                 jsonObject.accumulate("project_name", project.subProject)
             } else {
                 prefHelper.reloadProjects()
-                return "sendEntry(): Missing serverId for project : ${project.dashName}"
+                return "sendEntry(): Missing serverId for project: '${project.dashName}'"
             }
             val address = entry.address ?: return "sendEntry(): No address for entry -- abort"
             if (address.serverId > 0) {
                 jsonObject.accumulate("address_id", address.serverId)
                 jsonObject.accumulate("address", address.line)
             } else {
-                prefHelper.reloadCompany()
-                return "sendEntry(): Missing serverId for address : ${address.line}"
+                /**
+                 * The user used the "Add" button when setting up the project to create a new address. This is what needs to happen:
+                 *  - We send up just the address line, without a server id.
+                 *  - The server will add it to the company address list.
+                 *  - The server will then reschedule this user to resync the company addresses.
+                 *  - When we get a version update in the app, the new company should then have the proper serverId to use for the company.
+                */
+                Timber.d("sendEntry(): Missing serverId for address : '${address.line}' -- assumed fresh new added address by user")
+                jsonObject.accumulate("address", address.line)
             }
             if (entry.status != null && entry.status !== TruckStatus.UNKNOWN) {
-                jsonObject.accumulate("status", entry.status!!.toString())
+                entry.status?.let { jsonObject.accumulate("status", it.toString()) }
             }
             val equipments = entry.equipment ?: emptyList()
             if (equipments.isNotEmpty()) {
@@ -1183,8 +1192,15 @@ class DCPing(
                         jobj.accumulate("equipment_id", equipment.serverId)
                         jobj.accumulate("equipment_name", equipment.name)
                     } else {
-                        prefHelper.reloadEquipments()
-                        return "sendEntry(): Missing serverId for equipment ${equipment.name}"
+                        /**
+                         * This is assumed to be an added equipment the user has done. This what needs to happen:
+                         *  - We send up just the name, without a server id.
+                         *  - The server will add it to the equipment list.
+                         *  - The server will then reschedule this user to resync the equipments.
+                         *  - When we get a version update in the app, the new equipment should then have the proper serverId to use for the equipment.
+                         */
+                        Timber.d("sendEntry(): Missing serverId for equipment: '${equipment.name}' -- assumed fresh new added equipment by user")
+                        jobj.accumulate("equipment_name", equipment.name)
                     }
                     jarray.put(jobj)
                 }
@@ -1228,7 +1244,7 @@ class DCPing(
                         jobj.put("name", note.name)
                     } else {
                         prefHelper.reloadNotes()
-                        return "sendEntry(): Missing serverId for note ${note.name}"
+                        return "sendEntry(): Missing serverId for note: '${note.name}'"
                     }
                     jobj.put("value", note.value)
                     jarray.put(jobj)

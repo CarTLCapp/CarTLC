@@ -23,31 +23,41 @@ class DataEquipment : Comparable<DataEquipment> {
         this.isLocal = isLocal
     }
 
-    constructor(name: String, server_id: Int) {
+    constructor(name: String, server_id: Int, isDisabled: Boolean) {
         this.name = name
         this.serverId = server_id.toLong()
+        this.disabled = isDisabled
     }
+
+    // region Object
 
     override fun toString(): String {
         val sbuf = StringBuilder()
-        sbuf.append("NAME=")
+        sbuf.append("DataEquipment(")
         sbuf.append(name)
+        sbuf.append(", serverId=")
+        sbuf.append(serverId)
         sbuf.append(", checked=")
         sbuf.append(isChecked)
         sbuf.append(", local=")
         sbuf.append(isLocal)
         sbuf.append(", test=")
         sbuf.append(isBootStrap)
+        sbuf.append(", disabled=")
+        sbuf.append(disabled)
+        sbuf.append(")")
         return sbuf.toString()
     }
 
     override fun equals(other: Any?): Boolean {
         return if (other is DataEquipment) {
-            return name == other.name
+            return name == other.name && disabled == other.disabled && serverId == other.serverId
         } else super.equals(other)
     }
 
     override fun compareTo(other: DataEquipment): Int {
         return name.compareTo(other.name)
     }
+
+    // endregion Object
 }
