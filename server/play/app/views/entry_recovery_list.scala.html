@@ -124,9 +124,9 @@
                         }
                         <td>@currentPage.highlightSearch(currentPage.getEquipmentLine(entry), EntryRecoveryPagedList.ColumnSelector.EQUIPMENT)</td>
                         @if(currentPage.canViewPictures) {
-                            <td><a href="@routes.EntryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
+                            <td><a href="@routes.EntryRecoveryController.pictures(entry.id)">@entry.getPictureAddendum()</a></td>
                         }
-                        <td><a href="@routes.EntryController.notes(entry.id)">@entry.getNoteAddendum(client)</a></td>
+                        <td><a href="@routes.EntryRecoveryController.notes(entry.id)">@entry.getNoteAddendum(client)</a></td>
                         <td><a href="@routes.EntryRecoveryController.view(entry.id)">View</a></td>
                         <td bgcolor="@entry.getCellColor()">@entry.getStatus()</td>
                     </tr>

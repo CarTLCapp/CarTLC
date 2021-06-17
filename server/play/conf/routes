@@ -188,6 +188,8 @@ GET     /entry/list/:page/:pageSize/:sort/:order/:searchField/:searchTerm  contr
 GET     /entry_recovery                         controllers.EntryRecoveryController.list(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc", searchTerm ?= "null", searchField ?= "null")
 GET     /entry_recovery/:id/view                controllers.EntryRecoveryController.view(id:Long)
 GET     /entry_recovery/:id/delete              controllers.EntryRecoveryController.delete(id:Long)
+GET     /entry_recovery/:id/pictures            controllers.EntryRecoveryController.pictures(id:Long)
+GET     /entry_recovery/:id/notes               controllers.EntryRecoveryController.notes(id:Long)
 GET     /entry_recovery/search                  controllers.EntryRecoveryController.search(page:Int ?= 0, pageSize:Int ?= 100, sort ?= "date", order ?= "desc")
 GET     /entry_recovery/search/clear            controllers.EntryRecoveryController.searchClear()
 GET     /entry_recovery/:id/bytruck             controllers.EntryRecoveryController.showByTruck(id:Long)

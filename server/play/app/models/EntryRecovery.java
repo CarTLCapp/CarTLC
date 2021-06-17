@@ -701,6 +701,10 @@ public class EntryRecovery extends com.avaje.ebean.Model {
         return find.where().eq("truck_id", truck_id).findList();
     }
 
+    public boolean hasMatchingEntry() {
+        return (entry_id != null && entry_id > 0);
+    }
+
     public static int countEntriesForNote(long note_id) {
         return EntryNoteCollection.countNotes(note_id);
     }
