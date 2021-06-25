@@ -160,7 +160,7 @@ public class Technician extends com.avaje.ebean.Model {
     }
 
     public String lastPing() {
-        return new TimeHelper().getDate(last_ping, null);
+        return new TimeHelper().getDate(last_ping);
     }
 
     public static void AddReloadCode(long tech_id, char ch) {

@@ -7,63 +7,55 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 import java.util.Date;
 import java.util.Calendar;
+import java.lang.StringBuilder;
 
 import play.Logger;
 
 public class TimeHelper {
 
-    public static final String DATE_FORMAT = "MM/dd/yyyy";
-    public static final String TIME_FORMAT = "kk:mm z";
-    public static final String DATE_TIME_FORMAT = "MM/dd/yyyy kk:mm z";
+    public static final String DATE_FORMAT = "MM/dd/yyyy";              // relative to user's local time
+    public static final String TIME_FORMAT = "kk:mm";                   // relative to user's local time
+    public static final String DATE_TIME_FORMAT = "MM/dd/yyyy kk:mm"; // relative to user's local time
 
     public TimeHelper() {
     }
 
+    /**
+     * @param entry_time
+     * @return date relative to the user's local time, with the time zone they are in appended on.
+     */
     public String getDateTime(Date entry_time, String time_zone) {
         if (entry_time == null) {
             return "";
         }
-        return getFormat(DATE_TIME_FORMAT, time_zone).format(entry_time);
+        return getFormatAppendTimeZone(DATE_TIME_FORMAT, entry_time, time_zone);
     }
 
-    public String getDate(Date entry_time, String time_zone) {
+    /**
+     * @param entry_time
+     * @return date relative to the user's local time. (i.e. ignore time zone)
+     */
+    public String getDate(Date entry_time) {
         if (entry_time == null) {
             return "";
         }
-        return getFormat(DATE_FORMAT, time_zone).format(entry_time);
+        return new SimpleDateFormat(DATE_FORMAT).format(entry_time);
     }
 
     public String getTime(Date entry_time, String time_zone) {
         if (entry_time == null) {
             return "";
         }
-        return getFormat(TIME_FORMAT, time_zone).format(entry_time);
+        return getFormatAppendTimeZone(TIME_FORMAT, entry_time, time_zone);
     }
 
-    /**
-     * @param entry_time value of the device.
-     * @param time_zone  value of the time zone on the device.
-     * @return the Date value adjusted within the server's time zone for the passed entry_time and time_zone.
-     */
-    public long getTimeAdjustedToServerTimeZone(Date entry_time, String time_zone) {
-        if (entry_time == null) {
-            return 0;
-        }
-        TimeZone tz = getTimeZone(time_zone);
-        if (tz != null) {
-            long offset = tz.getOffset(Calendar.ZONE_OFFSET);
-            return entry_time.getTime() + offset;
-        }
-        return entry_time.getTime();
-    }
-
-    private SimpleDateFormat getFormat(String the_format, String time_zone) {
+    private String getFormatAppendTimeZone(String the_format, Date entry_time, String time_zone) {
         SimpleDateFormat format = new SimpleDateFormat(the_format);
-        TimeZone tz = getTimeZone(time_zone);
-        if (tz != null) {
-            format.setTimeZone(tz);
-        }
-        return format;
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(format.format(entry_time));
+        sbuf.append(" ");
+        sbuf.append(time_zone);
+        return sbuf.toString();
     }
 
     private TimeZone getTimeZone(String time_zone) {

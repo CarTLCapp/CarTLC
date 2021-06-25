@@ -95,7 +95,7 @@ public class Vehicle extends com.avaje.ebean.Model {
         }
     }
 
-    public String getDate() { return new TimeHelper().getDate(entry_time, time_zone); }
+    public String getDate() { return new TimeHelper().getDate(entry_time); }
 
     public String getTime() { return new TimeHelper().getTime(entry_time, time_zone); }
 

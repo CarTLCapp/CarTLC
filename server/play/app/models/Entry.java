@@ -392,7 +392,7 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     public String getDate() {
-        return new TimeHelper().getDate(entry_time, time_zone);
+        return new TimeHelper().getDate(entry_time);
     }
 
     public String getTime() {
