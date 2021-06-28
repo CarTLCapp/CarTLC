@@ -254,12 +254,13 @@ public class EntryController extends Controller {
                 Logger.info("exportNext(): ABORT");
                 return ok("R");
             }
+            Logger.info("exportNext(): calling computeNext()");
             if (mExportWriter.computeNext()) {
                 int count = mExportWriter.writeNext();
                 Logger.info("exportNext() " + count);
                 return ok("#" + Integer.toString(count) + "...");
             } else {
-                Logger.info("exportNext() DONE!");
+                Logger.info("exportNext(): DONE!");
                 mExportWriter.finish(EXPORT_FILENAME);
                 mExporting = false;
                 return ok("E" + mExportWriter.getFile().getName());
@@ -267,6 +268,7 @@ public class EntryController extends Controller {
         } catch (IOException ex) {
             mExporting = false;
             mAborted = false;
+            Logger.error("exportNext(): ERROR " + ex.getMessage());
             return badRequest2(ex.getMessage());
         }
     }
