@@ -29,4 +29,12 @@ public class StringHelper {
         return null;
     }
 
+    public static String pickOutTimeWithoutTimeZone(String value, char sp) {
+        int pos = value.indexOf(sp);
+        if (pos >= 0) {
+            return value.substring(0, pos);
+        }
+        return value;
+    }
+
 }

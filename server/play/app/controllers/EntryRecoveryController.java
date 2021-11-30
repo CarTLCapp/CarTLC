@@ -66,6 +66,7 @@ public class EntryRecoveryController extends Controller {
     private ImportRecovery mImportRecovery;
     private boolean mAborted;
     private boolean mImporting;
+    private boolean mInstalling;
     private boolean mDeleting;
     private DeleteAction mDeleteAction;
     private long mDownloadPicturesForEntryId;
@@ -92,7 +93,7 @@ public class EntryRecoveryController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result list(int page, int pageSize, String sortBy, String order, String searchTerm, String searchField) {
-        EntryRecoveryPagedList list = new EntryRecoveryPagedList();
+        EntryRecoveryPagedList list = new EntryRecoveryPagedList(mAmazonHelper);
 
         String decodedSearchTerm = StringHelper.decode(searchTerm);
 
@@ -129,7 +130,7 @@ public class EntryRecoveryController extends Controller {
 
         Logger.info("search(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
 
-        EntryRecoveryPagedList list = new EntryRecoveryPagedList();
+        EntryRecoveryPagedList list = new EntryRecoveryPagedList(mAmazonHelper);
         list.setSearch(searchTerm, searchField);
         list.setPage(page);
         list.setPageSize(pageSize);
@@ -148,9 +149,10 @@ public class EntryRecoveryController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result searchClear() {
-        EntryRecoveryPagedList list = new EntryRecoveryPagedList();
+        EntryRecoveryPagedList list = new EntryRecoveryPagedList(mAmazonHelper);
         list.computeFilters(Secured.getClient(ctx()));
         list.compute();
+
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
 
         mLastEntryList = list;
@@ -161,7 +163,7 @@ public class EntryRecoveryController extends Controller {
     @Security.Authenticated(Secured.class)
     public Result showByTruck(long truck_id) {
         mGlobals.setClearSearch(false);
-        EntryRecoveryPagedList list = new EntryRecoveryPagedList();
+        EntryRecoveryPagedList list = new EntryRecoveryPagedList(mAmazonHelper);
         list.setByTruckId(truck_id);
         list.computeFilters(Secured.getClient(ctx()));
         list.compute();
@@ -351,6 +353,113 @@ public class EntryRecoveryController extends Controller {
         return list();
     }
 
+    @Security.Authenticated(Secured.class)
+    public Result importStart() {
+        if (mImporting) {
+            mAborted = true;
+            mImporting = false;
+            mInstalling = false;
+            Logger.info("import() ABORT INITIATED");
+            return ok("R");
+        }
+        mImporting = true;
+        mAborted = false;
+        Client client = Secured.getClient(ctx());
+
+        Logger.info("importStart() START");
+
+        mImportRecovery = new ImportRecovery(mInstalling);
+        if (!mImportRecovery.initialize()) {
+            mImporting = false;
+            mInstalling = false;
+            return badRequest2("Could not parse file.");
+        }
+        if (mImportRecovery.mJsonTop.getNodeType() != JsonNodeType.ARRAY) {
+            mImporting = false;
+            mInstalling = false;
+            return badRequest2("Not an array.");
+        }
+        return ok("#0...");
+    }
+
+    // endregion DELETE
+
+    // region IMPORT
+
+    public Result importNext() {
+        if (mAborted) {
+            mAborted = false;
+            mImporting = false;
+            mInstalling = false;
+            Logger.info("importNext(): ABORT");
+            return ok("R");
+        }
+        if (!mImportRecovery.hasNext()) {
+            Logger.info("importNext() DONE!");
+            mImporting = false;
+            mInstalling = false;
+            return ok("D");
+        }
+        if (mImportRecovery.loadNext()) {
+            Logger.info("importNext() " + mImportRecovery.mCount);
+        }
+        return ok("#" + mImportRecovery.report());
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result installStart() {
+        mInstalling = true;
+        return importStart();
+    }
+
+    public Result installNext() {
+        mInstalling = true;
+        return importNext();
+    }
+
+    private String readFile(File file) {
+        StringBuilder sbuf = new StringBuilder();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().length() > 0) {
+                    sbuf.append(line);
+                    sbuf.append("\n");
+                }
+            }
+        } catch (Exception ex) {
+            Logger.error(ex.getMessage());
+        }
+        return sbuf.toString();
+    }
+
+    Result missingRequest(ArrayList<String> missing) {
+        return badRequest2(missingString(missing));
+    }
+
+    String missingString(ArrayList<String> missing) {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("Missing fields:");
+        boolean comma = false;
+        for (String field : missing) {
+            if (comma) {
+                sbuf.append(", ");
+            }
+            sbuf.append(field);
+            comma = true;
+        }
+        sbuf.append("\n");
+        return sbuf.toString();
+    }
+
+    // endregion IMPORT
+
+    Result badRequest2(String field) {
+        Logger.error("ERROR: " + field);
+        return badRequest(field);
+    }
+
     private class DeleteAction {
 
         List<String> idsList;
@@ -399,79 +508,16 @@ public class EntryRecoveryController extends Controller {
         }
     }
 
-    // endregion DELETE
-
-    // region IMPORT
-
-    @Security.Authenticated(Secured.class)
-    public Result importStart() {
-        if (mImporting) {
-            mAborted = true;
-            mImporting = false;
-            Logger.info("import() ABORT INITIATED");
-            return ok("R");
-        }
-        mImporting = true;
-        mAborted = false;
-        Client client = Secured.getClient(ctx());
-
-        Logger.info("importStart() START");
-
-        mImportRecovery = new ImportRecovery();
-        if (!mImportRecovery.initialize()) {
-            mImporting = false;
-            return badRequest2("Could not parse file.");
-        }
-        if (mImportRecovery.mJsonTop.getNodeType() != JsonNodeType.ARRAY) {
-            mImporting = false;
-            return badRequest2("Not an array.");
-        }
-        return ok("#0...");
-    }
-
-    public Result importNext() {
-        if (mAborted) {
-            mAborted = false;
-            mImporting = false;
-            Logger.info("importNext(): ABORT");
-            return ok("R");
-        }
-        if (!mImportRecovery.hasNext()) {
-            Logger.info("importNext() DONE!");
-            mImporting = false;
-            return ok("D");
-        }
-        if (mImportRecovery.loadNext()) {
-            Logger.info("importNext() " + mImportRecovery.mCount);
-        }
-        return ok("#" + mImportRecovery.report());
-    }
-
-    private String readFile(File file) {
-        StringBuilder sbuf = new StringBuilder();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().length() > 0) {
-                    sbuf.append(line);
-                    sbuf.append("\n");
-                }
-            }
-        } catch (Exception ex) {
-            Logger.error(ex.getMessage());
-        }
-        return sbuf.toString();
-    }
-
     private class ImportRecovery {
         JsonNode mJsonTop;
         Iterator<JsonNode> mIterator;
         int mCount = 0;
         int mProcessed = 0;
         int mTotal = 0;
+        boolean mInstalling = false;
 
-        ImportRecovery() {
+        ImportRecovery(boolean installing) {
+            mInstalling = installing;
         }
 
         boolean initialize() {
@@ -548,13 +594,30 @@ public class EntryRecoveryController extends Controller {
                 Entry existing = Entry.find.byId(entry.id);
                 if (existing != null) {
                     if (entry.isMatching(existing, client_id)) {
-                        Logger.info("Already have this entry: " + entry.toString(client_id));
+                        Logger.info("Recovered entry: " + entry.toString(client_id));
+                        Logger.info("Existing entry : " + existing.toString(client_id));
+                        if (mInstalling) {
+                            Logger.info("Replacing existing entry with recovered entry");
+                            entry.update();
+                        } else {
+                            Logger.info("Nothing done.");
+                        }
                         return false;
                     }
                 }
             }
-            if (Entry.hasEntryForEntry(entry, client_id)) {
-                Logger.info("An entry similar to this is already in the database: " + entry.toString(client_id));
+            List<Entry> similar = Entry.getEntriesFromEntry(entry, client_id);
+            if (similar.size() > 0) {
+                Logger.warn("Matched some existing entries with recovery entry of " + entry.toString(client_id));
+                for (Entry item : similar) {
+                    Logger.warn("  Found " + item.toString(client_id));
+                }
+                if (mInstalling) {
+                    Logger.info("Overwriting first one found with recovery entry.");
+                    Entry item = similar.get(0);
+                    entry.id = item.id;
+                    entry.update();
+                }
                 return false;
             }
             EntryRecovery entryRecovery = new EntryRecovery();
@@ -582,32 +645,6 @@ public class EntryRecoveryController extends Controller {
             return true;
         }
 
-    }
-
-    // endregion IMPORT
-
-    Result missingRequest(ArrayList<String> missing) {
-        return badRequest2(missingString(missing));
-    }
-
-    String missingString(ArrayList<String> missing) {
-        StringBuilder sbuf = new StringBuilder();
-        sbuf.append("Missing fields:");
-        boolean comma = false;
-        for (String field : missing) {
-            if (comma) {
-                sbuf.append(", ");
-            }
-            sbuf.append(field);
-            comma = true;
-        }
-        sbuf.append("\n");
-        return sbuf.toString();
-    }
-
-    Result badRequest2(String field) {
-        Logger.error("ERROR: " + field);
-        return badRequest(field);
     }
 
 }

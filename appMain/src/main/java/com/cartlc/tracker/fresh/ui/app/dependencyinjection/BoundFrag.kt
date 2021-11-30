@@ -9,7 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 
 class BoundFrag(
         private val frag: Fragment
-) : BoundAct(frag.activity!!) {
+) : BoundAct(frag.requireActivity()) {
 
     override val lifecycleOwner: LifecycleOwner
         get() = frag

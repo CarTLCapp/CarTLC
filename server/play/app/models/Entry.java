@@ -814,13 +814,9 @@ public class Entry extends com.avaje.ebean.Model {
     }
 
     /**
-     *
-     * @param entry The entry to check for.
-     * @param client_id
-     * @return true if there is already an entry near enough in time to the passed in entry with the same truck
-     *  value.
+     * @return The entries that have the same truck value as the passed in entry and has a near enough time value.
      */
-    public static boolean hasEntryForEntry(Entry entry, long client_id) {
+    public static List<Entry> getEntriesFromEntry(Entry entry, long client_id) {
 
         List<Truck> trucks = Truck.findMatching(entry.getTruck());
 
@@ -850,16 +846,13 @@ public class Entry extends com.avaje.ebean.Model {
         for (SqlRow row : rows) {
             entries.add(parseEntry(row));
         }
-
+        ArrayList<Entry> result = new ArrayList<Entry>();
         for (Entry item : entries) {
             if (entry.nearInTime(item)) {
-                if (VERBOSE) {
-                    Logger.warn("hasEntryForEntry(): TRUE because " + entry.toString(client_id) + " near recent " + item.toString(client_id));
-                }
-                return true;
+                result.add(item);
             }
         }
-        return false;
+        return result;
     }
 
     public static Entry parseEntry(SqlRow row) {
@@ -892,6 +885,9 @@ public class Entry extends com.avaje.ebean.Model {
         return diffTime <= IS_THE_SAME_WINDOW_MS;
     }
 
+    /**
+     * @return true if there is the passed in entry matches the same same company_id/truck_id as the current entry.
+     */
     public boolean isMatching(Entry entry, long client_id) {
         if (company_id == entry.company_id && truck_id == entry.truck_id) {
             if (VERBOSE) {
@@ -1038,7 +1034,7 @@ public class Entry extends com.avaje.ebean.Model {
 
         }
         sbuf.append("date=");
-        sbuf.append(getDate());
+        sbuf.append(getDateTime());
         sbuf.append(", project_id=");
         sbuf.append(project_id);
         sbuf.append(", tech=");

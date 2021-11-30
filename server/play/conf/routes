@@ -196,6 +196,8 @@ GET     /entry_recovery/:id/bytruck             controllers.EntryRecoveryControl
 GET     /entry_recovery/compute_totals          controllers.EntryRecoveryController.computeTotalNumRows()
 GET     /entry_recovery/import                  controllers.EntryRecoveryController.importStart()
 GET     /entry_recovery/import_next             controllers.EntryRecoveryController.importNext()
+GET     /entry_recovery/install                 controllers.EntryRecoveryController.installStart()
+GET     /entry_recovery/install_next            controllers.EntryRecoveryController.installNext()
 GET     /entry_recovery/delete_entries/:rows    controllers.EntryRecoveryController.deleteEntries(rows:String)
 GET     /entry_recovery/delete_next             controllers.EntryRecoveryController.deleteNext()
 GET     /entry_recovery/delete_abort            controllers.EntryRecoveryController.deleteAbort()

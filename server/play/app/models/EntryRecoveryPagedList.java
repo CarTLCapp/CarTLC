@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 import modules.Status;
+import modules.AmazonHelper;
 
 public class EntryRecoveryPagedList {
 
@@ -234,12 +235,14 @@ public class EntryRecoveryPagedList {
     int mDefaultPageSize = PAGE_SIZES[0];
     Date mSearchStartDate = null;
     Date mSearchEndDate = null;
+    String mEntryRecoveryFile = "";
 
     public boolean canViewTrucks = true;
     public boolean canViewPictures = true;
     public long mForClientId = 0;
 
-    public EntryRecoveryPagedList() {
+    public EntryRecoveryPagedList(AmazonHelper amazonHelper) {
+        mEntryRecoveryFile = amazonHelper.getRecoveryFile().toString();
     }
 
     public EntryRecoveryPagedList(EntryRecoveryPagedList other) {
@@ -251,6 +254,10 @@ public class EntryRecoveryPagedList {
         mByTruckId = other.mByTruckId;
         mResult.mNumTotalRows = other.mResult.mNumTotalRows;
         mRowNumber = 0;
+    }
+
+    public String getRecoveryFile() {
+        return mEntryRecoveryFile;
     }
 
     public void setPage(int page) {

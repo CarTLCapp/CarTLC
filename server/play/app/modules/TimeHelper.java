@@ -15,7 +15,7 @@ public class TimeHelper {
 
     public static final String DATE_FORMAT = "MM/dd/yyyy";              // relative to user's local time
     public static final String TIME_FORMAT = "kk:mm";                   // relative to user's local time
-    public static final String DATE_TIME_FORMAT = "MM/dd/yyyy kk:mm"; // relative to user's local time
+    public static final String DATE_TIME_FORMAT = "MM/dd/yyyy kk:mm";   // relative to user's local time
 
     public TimeHelper() {
     }

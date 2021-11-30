@@ -31,3 +31,26 @@ git tag -a vX.XX -m "Version X.XX"
 git push origin vX.XX
 OR
 git push origin --tags
+
+
+
+=== DEVELOPMENT ===
+
+ssh_dev - To get on dev server
+ssh_rel - To get on release server
+
+kill-server - To kill running server
+run-server - To start up new server 
+
+To compile:
+% cd server/play
+% sbt -mem 2048 0
+sbt> compile
+sbt> run
+
+On the machine to deliver the new server code to:
+./r-dist-server - This will built the image from the sources preparing to go 
+./r-wrap-local
+
+App Side:
+./r-wrap-app - Use this to push to the app to the production repository (self-managed, not google play)

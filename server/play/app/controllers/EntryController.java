@@ -54,7 +54,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class EntryController extends Controller {
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'zzz";
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String EXPORT_FILENAME = "/tmp/export.csv";
     private static final int NOTE_LENGTH = 256;
 
@@ -604,8 +604,10 @@ public class EntryController extends Controller {
         if (value != null) {
             String date_value = value.textValue();
             try {
-                entry.entry_time = mDateFormat.parse(date_value);
-                entry.time_zone = StringHelper.pickOutTimeZone(date_value, 'Z');
+                String justTime = StringHelper.pickOutTimeWithoutTimeZone(date_value, 'Z');
+                String justTimeZone = StringHelper.pickOutTimeZone(date_value, 'Z');
+                entry.entry_time = mDateFormat.parse(justTime);
+                entry.time_zone = justTimeZone;
             } catch (Exception ex) {
                 Logger.error("While parsing " + date_value + ":" + ex.getMessage());
             }
