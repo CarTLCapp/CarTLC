@@ -84,7 +84,7 @@ public class EntryController extends Controller {
         mDateFormat = new SimpleDateFormat(DATE_FORMAT);
         mGlobals = globals;
         mExecutionContext = executionContext;
-    }
+     }
 
     @Security.Authenticated(Secured.class)
     public Result list2(int page, int pageSize, String sortBy, String order, String searchTerm, String searchField) {

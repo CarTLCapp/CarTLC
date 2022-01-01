@@ -4,7 +4,7 @@
 package controllers;
 
 import play.mvc.*;
-import play.data.*;
+import play.data.*;import play.mvc.Http;
 import play.data.validation.ValidationError;
 
 import models.*;
@@ -48,6 +48,7 @@ import java.io.FileReader;
 import play.db.ebean.Transactional;
 import play.Logger;
 import play.libs.concurrent.HttpExecution;
+import play.libs.Files.TemporaryFile;
 
 /**
  * Manage a database of equipment.
@@ -454,6 +455,24 @@ public class EntryRecoveryController extends Controller {
     }
 
     // endregion IMPORT
+
+    // region UPLOAD
+
+    @BodyParser.Of(BodyParser.Text.class)
+    public Result upload() {
+        Http.MultipartFormData<TemporaryFile> body = request().body().asMultipartFormData();
+        Http.MultipartFormData.FilePart<TemporaryFile> incoming = body.getFile("incoming");
+        if (incoming != null) {
+            TemporaryFile tmpFile = incoming.getFile();
+            File recoveryFile = mAmazonHelper.getRecoveryFile();
+            tmpFile.moveTo(recoveryFile, true);
+            return ok("File uploaded");
+        } else {
+            return badRequest2("Missing file");
+        }
+    }
+
+    // endregion
 
     Result badRequest2(String field) {
         Logger.error("ERROR: " + field);

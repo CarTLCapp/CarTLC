@@ -204,6 +204,10 @@ GET     /entry_recovery/delete_abort            controllers.EntryRecoveryControl
 GET     /entry_recovery/check_loading_pictures  controllers.EntryRecoveryController.checkLoadingPictures()
 GET     /entry_recovery/reload_images           controllers.EntryRecoveryController.reloadImages()
 
+# upload:
+++nocsrf
+POST    /entry_recovery/upload                  controllers.EntryRecoveryController.upload()
+
 # Long form
 GET     /entry_recovery/list/:page/:pageSize/:sort/:order/:searchField/:searchTerm  controllers.EntryRecoveryController.list2(page:Int, pageSize:Int, sort: String, order: String, searchTerm: String, searchField: String)
 

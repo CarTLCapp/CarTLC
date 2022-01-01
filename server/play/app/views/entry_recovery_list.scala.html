@@ -33,11 +33,18 @@
         <h1>TRUCK @currentPage.getByTruckLine()</h1>
     } else {
 
-        <p>To analyze and import entries into the table below use @currentPage.getRecoveryFile() and then click the <b><i>Import</i></b> button.</p>
+        <p>To analyze and import entries into the table below there is a script called scanentries which takes as an argument a log file in the logs directory on the server.</p>
+        <p>After running this, place the captured result at @currentPage.getRecoveryFile() on the server and then click the <b><i>Import</i></b> button.</p>
         <p>To import directly into the regular entries tables from this file use the <b><i>Install</i></b> button.</p>
 
         <h4>These entries, identified by company and truck, cannot be found in the regular entries table, therefore they exist only here:</h4>
 
+        @helper.form(action = routes.EntryRecoveryController.upload, Symbol("enctype") -> "multipart/form-data") {
+            <input type="file" name="incoming">
+            <p>
+                <input type="submit">
+            </p>
+        }
         @helper.form(action = routes.EntryRecoveryController.search(currentPage.getPageIndex(), currentPage.getPageSize(), currentPage.getSortBy(), currentPage.getOrder())) {
             <h1 id="homeTitle">
                 <span id="homeCount">...</span>
@@ -65,15 +72,15 @@
                 <span style="float:right;font-size:16px"><div class="search">Page Size:</div></span>
             </h1>
         }
-    }
+}
 
-    @if(!currentPage.hasRows()) {
+@if(!currentPage.hasRows()) {
 
-        <div class="well">
-            <em>Nothing to display</em>
-        </div>
+<div class="well">
+    <em>Nothing to display</em>
+</div>
 
-        <script type="text/javascript">
+<script type="text/javascript">
             document.getElementById("homeCount").innerHTML = "No elements";
         </script>
 
