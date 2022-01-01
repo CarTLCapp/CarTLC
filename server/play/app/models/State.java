@@ -3,8 +3,6 @@
  */
 package models;
 
-import play.Logger;
-
 /**
  * States
  */

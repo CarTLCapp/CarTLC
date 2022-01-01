@@ -16,8 +16,6 @@ import play.data.Form;
 
 import com.avaje.ebean.*;
 
-import play.Logger;
-
 /**
  * Equipment entity managed by Ebean
  */

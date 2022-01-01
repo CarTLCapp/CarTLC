@@ -3,7 +3,6 @@
  */
 package modules;
 
-import play.Logger;
 import java.util.ArrayList;
 import models.Entry;
 import org.apache.commons.text.StringEscapeUtils;

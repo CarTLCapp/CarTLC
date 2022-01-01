@@ -5,7 +5,6 @@ package controllers;
 
 import modules.AmazonHelper;
 import modules.WorkerExecutionContext;
-import play.Logger;
 import play.libs.concurrent.HttpExecution;
 import play.mvc.*;
 import play.data.*;

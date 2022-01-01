@@ -13,8 +13,6 @@ import play.data.format.*;
 import play.data.validation.*;
 import play.data.Form;
 
-import play.Logger;
-
 import com.avaje.ebean.*;
 import play.db.ebean.Transactional;
 

@@ -8,7 +8,6 @@ import java.util.*;
 import com.avaje.ebean.*;
 
 import play.db.ebean.*;
-import play.Logger;
 
 import play.twirl.api.Html;
 

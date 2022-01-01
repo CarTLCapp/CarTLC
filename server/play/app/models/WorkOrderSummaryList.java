@@ -11,7 +11,6 @@ import play.db.ebean.*;
 import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
-import play.Logger;
 
 import modules.Status;
 

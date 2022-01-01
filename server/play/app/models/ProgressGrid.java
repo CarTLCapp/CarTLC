@@ -10,7 +10,6 @@ import java.lang.Integer;
 import com.avaje.ebean.*;
 
 import play.db.ebean.*;
-import play.Logger;
 
 import modules.Status;
 

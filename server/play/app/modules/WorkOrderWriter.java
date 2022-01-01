@@ -12,7 +12,6 @@ import java.lang.StringBuilder;
 
 import models.*;
 import play.db.ebean.Transactional;
-import play.Logger;
 import modules.WorkOrderField;
 
 public class WorkOrderWriter {

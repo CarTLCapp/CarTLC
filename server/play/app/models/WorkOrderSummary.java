@@ -14,8 +14,6 @@ import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
 
-import play.Logger;
-
 import com.avaje.ebean.*;
 
 public class WorkOrderSummary {

@@ -9,8 +9,6 @@ import java.util.Date;
 import java.util.Calendar;
 import java.lang.StringBuilder;
 
-import play.Logger;
-
 public class TimeHelper {
 
     public static final String DATE_FORMAT = "MM/dd/yyyy";              // relative to user's local time

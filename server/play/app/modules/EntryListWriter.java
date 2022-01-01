@@ -17,7 +17,6 @@ import java.io.File;
 
 import models.*;
 import play.db.ebean.Transactional;
-import play.Logger;
 
 public class EntryListWriter {
 

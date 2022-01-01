@@ -5,7 +5,6 @@ package controllers;
 
 import modules.AmazonHelper;
 import modules.WorkerExecutionContext;
-import play.Logger;
 import play.libs.concurrent.HttpExecution;
 import play.mvc.*;
 import play.data.*;
@@ -32,10 +31,12 @@ import models.*;
 import modules.TimeHelper;
 
 import play.db.ebean.Transactional;
+import play.Logger;
 
 public class CleanupController extends Controller {
 
     private static final int PAGE_SIZE = 100;
+    // private static final Logger.ALogger logger = Logger.of(CleanupController.class);
 
     private AmazonHelper mAmazonHelper;
     private FormFactory mFormFactory;
@@ -400,15 +401,15 @@ public class CleanupController extends Controller {
 
     // region Logger
 
-    private void warn(String msg) {
+    private static void warn(String msg) {
         Logger.warn(msg);
     }
 
-    private void info(String msg) {
+    private static void info(String msg) {
         Logger.info(msg);
     }
 
-    private void debug(String msg) {
+    private static void debug(String msg) {
         Logger.debug(msg);
     }
 

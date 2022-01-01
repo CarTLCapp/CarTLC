@@ -8,7 +8,6 @@ import java.util.*;
 import com.avaje.ebean.*;
 
 import play.db.ebean.*;
-import play.Logger;
 
 /**
  * Created because Ebean doesn't work in one annoying aspect:

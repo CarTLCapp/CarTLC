@@ -18,7 +18,6 @@ import modules.AmazonHelper;
 import modules.AmazonHelper.OnDownloadComplete;
 import modules.TimeHelper;
 import models.flow.*;
-import play.Logger;
 
 /**
  * Daily After Action Report entity managed by Ebean

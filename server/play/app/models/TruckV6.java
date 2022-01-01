@@ -13,8 +13,6 @@ import play.data.validation.*;
 import play.db.ebean.Transactional;
 import play.data.format.*;
 
-import play.Logger;
-
 /**
  * User entity managed by Ebean
  */

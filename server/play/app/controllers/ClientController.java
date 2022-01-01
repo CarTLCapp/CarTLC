@@ -21,7 +21,6 @@ import javax.persistence.PersistenceException;
 
 import java.util.List;
 import java.util.ArrayList;
-import play.Logger;
 
 /**
  * Manage a database of users
