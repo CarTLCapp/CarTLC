@@ -246,7 +246,7 @@ public class EntryRecovery extends com.avaje.ebean.Model {
     public String getTruckNumberPictureValue() {
         List<PictureCollection> list = PictureCollection.locate(picture_collection_id, PictureCollection.FLOW_TRUCK_NUMBER_ID);
         if (list.size() > 1) {
-            Logger.error("More than one truck number picture found. Need a fixup for entry: " + toString());
+            error("More than one truck number picture found. Need a fixup for entry: " + toString());
         }
         if (list.size() > 0) {
             return list.get(list.size() - 1).picture;
@@ -261,7 +261,7 @@ public class EntryRecovery extends com.avaje.ebean.Model {
     public String getTruckDamagePictureValue() {
         List<PictureCollection> list = PictureCollection.locate(picture_collection_id, PictureCollection.FLOW_TRUCK_DAMAGE_ID);
         if (list.size() > 1) {
-            Logger.error("More than one truck damage picture found. Need a fixup for entry: " + toString());
+            error("More than one truck damage picture found. Need a fixup for entry: " + toString());
         }
         if (list.size() > 0) {
             return list.get(list.size() - 1).picture;
@@ -551,7 +551,7 @@ public class EntryRecovery extends com.avaje.ebean.Model {
         FlowElement flowElement = FlowElement.get(element_id);
         int expected = flowElement.getNumImages();
         if (expected != items.size()) {
-            Logger.error("Unexpected number of pictures found for flow element " + flowElement.id + ", EXPECTED=" + expected + " != ACTUAL " + items.size());
+            error("Unexpected number of pictures found for flow element " + flowElement.id + ", EXPECTED=" + expected + " != ACTUAL " + items.size());
         }
         if (items.size() > expected) {
             return items.subList(items.size() - expected, items.size());
@@ -886,7 +886,7 @@ public class EntryRecovery extends com.avaje.ebean.Model {
                 return true;
             }
             // This is very interesting. A collection ID without any entries? Sounds like something to delete.
-            Logger.warn("ALERT! No entries for picture collection ID: " + collection.collection_id + ", triggered from: " + filename);
+            warn("ALERT! No entries for picture collection ID: " + collection.collection_id + ", triggered from: " + filename);
         }
         return false;
     }
@@ -917,7 +917,7 @@ public class EntryRecovery extends com.avaje.ebean.Model {
                 sbuf.append("\n");
                 sbuf.append(entry.toString());
             }
-            Logger.error(sbuf.toString());
+            error(sbuf.toString());
         }
         return list.get(0);
     }
@@ -1063,5 +1063,25 @@ public class EntryRecovery extends com.avaje.ebean.Model {
     private boolean hasFlag(int flag) {
         return (comparison_flags & flag) == flag;
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

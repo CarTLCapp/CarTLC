@@ -42,7 +42,7 @@ public class ProjectEquipmentCollection extends Model {
         for (ProjectEquipmentCollection item : items) {
             Equipment equipment = Equipment.find.byId(item.equipment_id);
             if (equipment == null) {
-                Logger.error("Could not locate equipment ID " + item.equipment_id);
+                error("Could not locate equipment ID " + item.equipment_id);
             } else {
                 list.add(equipment);
             }
@@ -66,7 +66,7 @@ public class ProjectEquipmentCollection extends Model {
         for (ProjectEquipmentCollection item : items) {
             Project project = Project.find.byId(item.project_id);
             if (project == null) {
-                Logger.error("Could not locate project ID " + item.project_id);
+                error("Could not locate project ID " + item.project_id);
             } else {
                 list.add(project);
             }
@@ -128,5 +128,24 @@ public class ProjectEquipmentCollection extends Model {
         item.save();
     }
 
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

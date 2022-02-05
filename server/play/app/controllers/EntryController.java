@@ -97,7 +97,7 @@ public class EntryController extends Controller {
 
         String decodedSearchTerm = StringHelper.decode(searchTerm);
 
-        Logger.info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + decodedSearchTerm + ", " + searchField + ")");
+        info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + decodedSearchTerm + ", " + searchField + ")");
 
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
 
@@ -128,7 +128,7 @@ public class EntryController extends Controller {
         String searchTerm = isearch.searchTerm;
         String searchField = isearch.searchField;
 
-        Logger.info("search(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
+        info("search(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
 
         EntryPagedList list = new EntryPagedList();
         list.setSearch(searchTerm, searchField);
@@ -214,7 +214,7 @@ public class EntryController extends Controller {
         if (mExporting) {
             mAborted = true;
             mExporting = false;
-            Logger.info("export() ABORT INITIATED");
+            info("export() ABORT INITIATED");
             return ok("R");
         }
         mExporting = true;
@@ -223,7 +223,7 @@ public class EntryController extends Controller {
 
         String decodedSearchTerm = StringHelper.decode(searchTerm);
 
-        Logger.info("export(" + decodedSearchTerm + ", " + searchField + ") START");
+        info("export(" + decodedSearchTerm + ", " + searchField + ") START");
 
         EntryPagedList entryList = new EntryPagedList();
         entryList.computeFilters(client);
@@ -241,7 +241,7 @@ public class EntryController extends Controller {
             mExporting = false;
             return badRequest2(ex.getMessage());
         }
-        Logger.info("export(): " + entryList.getTotalRowCount() + ", " + entryList.getDisplayingXtoYofZ());
+        info("export(): " + entryList.getTotalRowCount() + ", " + entryList.getDisplayingXtoYofZ());
         return ok("#" + Integer.toString(count) + "...");
     }
 
@@ -251,16 +251,16 @@ public class EntryController extends Controller {
                 mExportWriter.abort();
                 mAborted = false;
                 mExporting = false;
-                Logger.info("exportNext(): ABORT");
+                info("exportNext(): ABORT");
                 return ok("R");
             }
-            Logger.info("exportNext(): calling computeNext()");
+            info("exportNext(): calling computeNext()");
             if (mExportWriter.computeNext()) {
                 int count = mExportWriter.writeNext();
-                Logger.info("exportNext() " + count);
+                info("exportNext() " + count);
                 return ok("#" + Integer.toString(count) + "...");
             } else {
-                Logger.info("exportNext(): DONE!");
+                info("exportNext(): DONE!");
                 mExportWriter.finish(EXPORT_FILENAME);
                 mExporting = false;
                 return ok("E" + mExportWriter.getFile().getName());
@@ -268,7 +268,7 @@ public class EntryController extends Controller {
         } catch (IOException ex) {
             mExporting = false;
             mAborted = false;
-            Logger.error("exportNext(): ERROR " + ex.getMessage());
+            error("exportNext(): ERROR " + ex.getMessage());
             return badRequest2(ex.getMessage());
         }
     }
@@ -300,7 +300,7 @@ public class EntryController extends Controller {
     private void downloadPicturesFor(long entry_id) {
         Entry entry = Entry.find.byId(entry_id);
         if (entry == null) {
-            Logger.error("Could not find entry ID " + entry_id);
+            error("Could not find entry ID " + entry_id);
         } else {
             loadPictures(entry);
         }
@@ -316,11 +316,11 @@ public class EntryController extends Controller {
         }
         mDownloadPicturesLastAttemptEntryId = entry_id;
         if (!mDownloaded.contains(entry_id)) {
-            Logger.info("pictures(" + entry_id + "): permitted size=" + mDownloaded.size());
+            info("pictures(" + entry_id + "): permitted size=" + mDownloaded.size());
             mDownloaded.add(entry_id);
             mDownloadPicturesForEntryId = entry_id;
         } else {
-            Logger.info("pictures(" + entry_id + "): already done");
+            info("pictures(" + entry_id + "): already done");
         }
         return ok(views.html.entry_list_picture.render(entry.getPictures()));
     }
@@ -382,7 +382,7 @@ public class EntryController extends Controller {
         Entry entry = Entry.find.byId(entry_id);
         if (entry != null) {
             entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
-                Logger.info("Entry has been deleted: " + entry_id);
+                info("Entry has been deleted: " + entry_id);
             }));
         }
         return list();
@@ -433,7 +433,7 @@ public class EntryController extends Controller {
             if (company != null) {
                 entry.company_id = company.id;
             } else {
-                Logger.error("Could not find company with name='" + data.companyName + "', address='" + data.address + "'");
+                error("Could not find company with name='" + data.companyName + "', address='" + data.address + "'");
             }
             Truck truck = Truck.getTruckByID(data.truck);
             if (truck != null) {
@@ -454,7 +454,7 @@ public class EntryController extends Controller {
                             truck.license_plate = items[1];
                         }
                         truck.save();
-                        Logger.info("New truck: " + truck.toString());
+                        info("New truck: " + truck.toString());
                         entry.truck_id = truck.id;
                     }
                 }
@@ -473,7 +473,7 @@ public class EntryController extends Controller {
             entry.applyToNotes(client.id, entryForm);
             entry.update();
         } catch (ParseException ex) {
-            Logger.error(ex.getMessage());
+            error(ex.getMessage());
             return badRequest(ex.getMessage());
         }
         return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
@@ -486,7 +486,7 @@ public class EntryController extends Controller {
         if (mDeleting) {
             mAborted = true;
             mDeleting = false;
-            Logger.info("deleteEntries() ABORT INITIATED");
+            info("deleteEntries() ABORT INITIATED");
             return ok("R");
         }
         mDeleting = true;
@@ -502,15 +502,15 @@ public class EntryController extends Controller {
         if (mAborted) {
             mAborted = false;
             mDeleting = false;
-            Logger.info("deleteNext(): ABORT");
+            info("deleteNext(): ABORT");
             return ok("R");
         }
         int count = mDeleteAction.count;
         if (mDeleteAction.deleteNext()) {
-            Logger.info("deleteNext() " + count);
+            info("deleteNext() " + count);
             return ok("#" + Integer.toString(count) + "...");
         } else {
-            Logger.info("deleteNext() DONE!");
+            info("deleteNext() DONE!");
             mDeleting = false;
             return ok("D" + Integer.toString(count));
         }
@@ -521,7 +521,7 @@ public class EntryController extends Controller {
         if (mDeleting) {
             mAborted = true;
             mDeleting = false;
-            Logger.info("deleteAbort()");
+            info("deleteAbort()");
         }
         return list();
     }
@@ -548,7 +548,7 @@ public class EntryController extends Controller {
                 deleteNext(id);
                 idsList.remove(0);
             } catch (NumberFormatException ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
             }
             return true;
         }
@@ -556,20 +556,20 @@ public class EntryController extends Controller {
         private boolean deleteNext(long id) {
             try {
                 String host = request().host();
-                Logger.debug("Deleting ENTRY ID " + id);
+                debug("Deleting ENTRY ID " + id);
                 Entry entry = Entry.find.byId(id);
                 if (entry != null) {
                     entry.remove(mAmazonHelper.deleteAction().host(host).listener((deleted, errors) -> {
-                        Logger.warn("Remote picture files have been deleted: " + id);
+                        warn("Remote picture files have been deleted: " + id);
                     }));
                     count++;
-                    Logger.warn("Entry has been deleted: " + id);
+                    warn("Entry has been deleted: " + id);
                 } else {
-                    Logger.error("Called deleteNext() with bad ID " + id);
+                    error("Called deleteNext() with bad ID " + id);
                     return false;
                 }
             } catch (NumberFormatException ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
                 return false;
             }
             return true;
@@ -609,7 +609,7 @@ public class EntryController extends Controller {
                 entry.entry_time = mDateFormat.parse(justTime);
                 entry.time_zone = justTimeZone;
             } catch (Exception ex) {
-                Logger.error("While parsing " + date_value + ":" + ex.getMessage());
+                error("While parsing " + date_value + ":" + ex.getMessage());
             }
         } else {
             value = json.findValue("date");
@@ -630,7 +630,7 @@ public class EntryController extends Controller {
                 if (existing == null) {
                     existing = Entry.findByDate(entry.tech_id, entry.entry_time);
                     if (existing != null) {
-                        Logger.info("Could not find entry with ID " + entry.id + ", so located based on time=" + entry.entry_time);
+                        info("Could not find entry with ID " + entry.id + ", so located based on time=" + entry.entry_time);
                     }
                 } else {
                     existing.entry_time = entry.entry_time;
@@ -681,7 +681,7 @@ public class EntryController extends Controller {
                 if (project != null) {
                     entry.project_id = project.id;
                 } else {
-                    Logger.error("Could not locate any project named: '" + projectName + "'");
+                    error("Could not locate any project named: '" + projectName + "'");
                 }
             }
         } else {
@@ -706,12 +706,12 @@ public class EntryController extends Controller {
                         Company existing = Company.has(company);
                         if (existing != null && modOkay) {
                             company = existing;
-                            Logger.info("Modified address: " + company.toString());
+                            info("Modified address: " + company.toString());
                         } else {
                             company.created_by = entry.tech_id;
                             company.save();
                             Technician.AddReloadCode(entry.tech_id, Technician.RELOAD_CODE_COMPANY);
-                            Logger.info("Created new address: " + company.toString());
+                            info("Created new address: " + company.toString());
                         }
                         entry.company_id = company.id;
                         CompanyName.save(company.name);
@@ -757,7 +757,7 @@ public class EntryController extends Controller {
         value = json.findValue("equipment");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                Logger.error("Expected array for element 'equipment'");
+                error("Expected array for element 'equipment'");
                 missing.add("equipment array");
             } else {
                 int collection_id;
@@ -792,18 +792,18 @@ public class EntryController extends Controller {
                                 equipment.created_by = entry.tech_id;
                                 equipment.created_by_client = false;
                                 equipment.save();
-                                Logger.info("Created new equipment: " + equipment.toString());
+                                info("Created new equipment: " + equipment.toString());
                                 newEquipmentCreated = true;
 
                                 if (entry.project_id > 0) {
                                     ProjectEquipmentCollection.addNew(entry.project_id, equipment);
-                                    Logger.info("Registered for project:" + entry.project_id);
+                                    info("Registered for project:" + entry.project_id);
                                 } else {
-                                    Logger.error("Could not add equipment to project collection as there is no project");
+                                    error("Could not add equipment to project collection as there is no project");
                                 }
                             } else {
                                 if (equipments.size() > 1) {
-                                    Logger.error("Found several many equipments found with name \"" + name + "\", using just the first.");
+                                    error("Found several many equipments found with name \"" + name + "\", using just the first.");
                                 }
                                 equipment = equipments.get(0);
                             }
@@ -824,7 +824,7 @@ public class EntryController extends Controller {
         value = json.findValue("picture");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                Logger.error("Expected array for element 'picture'");
+                error("Expected array for element 'picture'");
                 missing.add("picture array");
             } else {
                 int collection_id;
@@ -881,7 +881,7 @@ public class EntryController extends Controller {
         value = json.findValue("notes");
         if (value != null) {
             if (value.getNodeType() != JsonNodeType.ARRAY) {
-                Logger.error("Expected array for element 'notes'");
+                error("Expected array for element 'notes'");
                 missing.add("notes array");
             } else {
                 int collection_id;
@@ -918,9 +918,9 @@ public class EntryController extends Controller {
                                 note.save();
                                 collection.note_id = note.id;
                                 // Note: don't inc version number because other techs don't really need to know.
-                                Logger.info("Created new note: " + note.toString());
+                                info("Created new note: " + note.toString());
                             } else if (notes.size() > 1) {
-                                Logger.error("Too many notes with name: " + name);
+                                error("Too many notes with name: " + name);
                                 missing.add("note: '" + name + "'");
                             } else {
                                 collection.note_id = notes.get(0).id;
@@ -931,7 +931,7 @@ public class EntryController extends Controller {
                     }
                     subValue = ele.findValue("value");
                     if (subValue == null) {
-                        Logger.error("Missing field note:value -- ignored entry.");
+                        error("Missing field note:value -- ignored entry.");
                     } else {
                         collection.note_value = limitSize(subValue.textValue(), NOTE_LENGTH);
                     }
@@ -960,7 +960,7 @@ public class EntryController extends Controller {
     @BodyParser.Of(BodyParser.Json.class)
     public Result enter() {
         JsonNode json = request().body().asJson();
-        Logger.debug("GOT: " + json.toString());
+        debug("GOT: " + json.toString());
         ParseResult result = parse(json, true);
         if (result.errorMsg != null) {
             return badRequest2(result.errorMsg);
@@ -970,27 +970,27 @@ public class EntryController extends Controller {
         boolean retServerId = result.retServerId;
         if (result.missing.size() > 0) {
             if (fatal || entry.project_id == 0) {
-                Logger.error("Found missing values -- entry aborted");
+                error("Found missing values -- entry aborted");
                 return missingRequest(result.missing);
             } else {
-                Logger.error(missingString(result.missing));
+                error(missingString(result.missing));
             }
         }
         if (entry.id != null && entry.id > 0) {
             entry.update();
-            Logger.debug("Updated entry " + entry.id);
+            debug("Updated entry " + entry.id);
         } else {
             entry.save();
-            Logger.debug("Created new entry " + entry.id);
+            debug("Created new entry " + entry.id);
         }
         if (result.secondary_tech_id > 0) {
             SecondaryTechnician.save(entry.id, result.secondary_tech_id);
-            Logger.debug("Assigned secondary technician " + result.secondary_tech_id + " to " + entry.id);
+            debug("Assigned secondary technician " + result.secondary_tech_id + " to " + entry.id);
         }
         long ret_id;
         if (retServerId) {
             ret_id = entry.id;
-            Logger.debug("Entry " + ret_id + " saved.");
+            debug("Entry " + ret_id + " saved.");
         } else {
             ret_id = 0;
         }
@@ -1017,9 +1017,28 @@ public class EntryController extends Controller {
     }
 
     Result badRequest2(String field) {
-        Logger.error("ERROR: " + field);
+        error("ERROR: " + field);
         return badRequest(field);
     }
 
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

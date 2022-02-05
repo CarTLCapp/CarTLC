@@ -91,10 +91,10 @@ public class VehicleController extends Controller {
         Form<InputLines> linesForm = formFactory.form(InputLines.class).bindFromRequest();
         if (linesForm.hasErrors() || !Secured.isAdmin(ctx())) {
             if (linesForm.hasErrors()) {
-                Logger.error("Had errors");
+                error("Had errors");
             }
             if (!Secured.isAdmin(ctx())) {
-                Logger.error("Not admin");
+                error("Not admin");
             }
             return badRequest(views.html.vehicle_names_edit.render(linesForm, Secured.getClient(ctx())));
         }
@@ -110,7 +110,7 @@ public class VehicleController extends Controller {
         Vehicle vehicle = new Vehicle();
         ArrayList<String> missing = new ArrayList<String>();
         JsonNode json = request().body().asJson();
-        Logger.debug("VGOT: " + json.toString());
+        debug("VGOT: " + json.toString());
         JsonNode value;
         value = json.findValue("tech_id");
         if (value == null) {
@@ -124,7 +124,7 @@ public class VehicleController extends Controller {
             vehicle.entry_time = mDateFormat.parse(date_value);
             vehicle.time_zone = StringHelper.pickOutTimeZone(date_value, 'Z');
         } catch (Exception ex) {
-            Logger.error("While parsing " + date_value + ":" + ex.getMessage());
+            error("While parsing " + date_value + ":" + ex.getMessage());
         }
         value = json.findValue("server_id");
         if (value != null) {
@@ -218,10 +218,10 @@ public class VehicleController extends Controller {
         }
         if (vehicle.id != null && vehicle.id > 0) {
             vehicle.update();
-            Logger.debug("Updated vehicle " + vehicle.id);
+            debug("Updated vehicle " + vehicle.id);
         } else {
             vehicle.save();
-            Logger.debug("Created new vehicle " + vehicle.id);
+            debug("Created new vehicle " + vehicle.id);
         }
         long ret_id;
         ret_id = vehicle.id;
@@ -298,7 +298,7 @@ public class VehicleController extends Controller {
     }
 
     private Result badRequest2(String field) {
-        Logger.error("ERROR: " + field);
+        error("ERROR: " + field);
         return badRequest(field);
     }
 
@@ -310,5 +310,25 @@ public class VehicleController extends Controller {
         vehicle.delete();
         return LIST();
     }
+
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
             

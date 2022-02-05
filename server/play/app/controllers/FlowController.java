@@ -313,7 +313,7 @@ public class FlowController extends Controller {
                 }
                 subList = list.subList(fromIndex, toIndex);
             } catch (IndexOutOfBoundsException ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
                 subList = new ArrayList<Flow>();
             }
         } else {
@@ -338,7 +338,7 @@ public class FlowController extends Controller {
                 elementNode.put("order", element.line_num);
                 if (element.hasPrompt()) {
                     if (element.prompt.contains("\"")) {
-                        Logger.error("Ignoring prompt value with quote: " + element.prompt);
+                        error("Ignoring prompt value with quote: " + element.prompt);
                     } else {
                         elementNode.put("prompt", element.prompt);
                     }
@@ -359,5 +359,24 @@ public class FlowController extends Controller {
         return ok(top);
     }
 
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
             

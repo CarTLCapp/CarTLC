@@ -42,10 +42,10 @@ public class DaarPagedList {
                     return item;
                 }
             }
-            Logger.error("Invalid sort by : " + match);
+            error("Invalid sort by : " + match);
             return null;
         }
-        }
+    }
 
     class TermMatch implements Comparable<TermMatch> {
         String mTerm;
@@ -511,12 +511,12 @@ public class DaarPagedList {
         String query;
         query = buildQuery(true);
         if (VERBOSE) {
-            Logger.debug("Query: " + query);
+            debug("Query: " + query);
         }
         entries = Ebean.createSqlQuery(query).findList();
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
-            Logger.error("No entries");
+            error("No entries");
             return;
         }
         for (SqlRow row : entries) {
@@ -663,7 +663,7 @@ public class DaarPagedList {
     }
 
     public void setSearch(String searchTerm, String columnSelector) {
-        Logger.debug("setSearch(" + searchTerm + ", " + columnSelector.toString() + ")");
+        debug("setSearch(" + searchTerm + ", " + columnSelector.toString() + ")");
         if (searchTerm != null && searchTerm.length() > 0 && !searchTerm.equals("null")) {
             mSearch.setSearchTerm(searchTerm);
         } else {
@@ -683,5 +683,25 @@ public class DaarPagedList {
     public String getSearchField() {
         return mSearch.getField();
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 
 }

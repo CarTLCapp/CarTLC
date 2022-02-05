@@ -97,7 +97,7 @@ public class EntryRecoveryController extends Controller {
 
         String decodedSearchTerm = StringHelper.decode(searchTerm);
 
-        Logger.info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + decodedSearchTerm + ", " + searchField + ")");
+        info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + decodedSearchTerm + ", " + searchField + ")");
 
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
 
@@ -128,7 +128,7 @@ public class EntryRecoveryController extends Controller {
         String searchTerm = isearch.searchTerm;
         String searchField = isearch.searchField;
 
-        Logger.info("search(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
+        info("search(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
 
         EntryRecoveryPagedList list = new EntryRecoveryPagedList(mAmazonHelper);
         list.setSearch(searchTerm, searchField);
@@ -219,7 +219,7 @@ public class EntryRecoveryController extends Controller {
     private void downloadPicturesFor(long entry_id) {
         EntryRecovery entry = EntryRecovery.find.byId(entry_id);
         if (entry == null) {
-            Logger.error("Could not find entry ID " + entry_id);
+            error("Could not find entry ID " + entry_id);
         } else {
             loadPictures(entry);
         }
@@ -235,11 +235,11 @@ public class EntryRecoveryController extends Controller {
         }
         mDownloadPicturesLastAttemptEntryId = entry_id;
         if (!mDownloaded.contains(entry_id)) {
-            Logger.info("pictures(" + entry_id + "): permitted size=" + mDownloaded.size());
+            info("pictures(" + entry_id + "): permitted size=" + mDownloaded.size());
             mDownloaded.add(entry_id);
             mDownloadPicturesForEntryId = entry_id;
         } else {
-            Logger.info("pictures(" + entry_id + "): already done");
+            info("pictures(" + entry_id + "): already done");
         }
         return ok(views.html.entry_list_picture.render(entry.getPictures()));
     }
@@ -303,7 +303,7 @@ public class EntryRecoveryController extends Controller {
         EntryRecovery entry = EntryRecovery.find.byId(entry_id);
         if (entry != null) {
             entry.remove();
-            Logger.info("Recovery Entry has been deleted: " + entry_id);
+            info("Recovery Entry has been deleted: " + entry_id);
         }
         return list();
     }
@@ -313,7 +313,7 @@ public class EntryRecoveryController extends Controller {
         if (mDeleting) {
             mAborted = true;
             mDeleting = false;
-            Logger.info("deleteEntries() ABORT INITIATED");
+            info("deleteEntries() ABORT INITIATED");
             return ok("R");
         }
         mDeleting = true;
@@ -329,15 +329,15 @@ public class EntryRecoveryController extends Controller {
         if (mAborted) {
             mAborted = false;
             mDeleting = false;
-            Logger.info("deleteNext(): ABORT");
+            info("deleteNext(): ABORT");
             return ok("R");
         }
         int count = mDeleteAction.count;
         if (mDeleteAction.deleteNext()) {
-            Logger.info("deleteNext() " + count);
+            info("deleteNext() " + count);
             return ok("#" + Integer.toString(count) + "...");
         } else {
-            Logger.info("deleteNext() DONE!");
+            info("deleteNext() DONE!");
             mDeleting = false;
             return ok("D" + Integer.toString(count));
         }
@@ -348,7 +348,7 @@ public class EntryRecoveryController extends Controller {
         if (mDeleting) {
             mAborted = true;
             mDeleting = false;
-            Logger.info("deleteAbort()");
+            info("deleteAbort()");
         }
         return list();
     }
@@ -359,14 +359,14 @@ public class EntryRecoveryController extends Controller {
             mAborted = true;
             mImporting = false;
             mInstalling = false;
-            Logger.info("import() ABORT INITIATED");
+            info("import() ABORT INITIATED");
             return ok("R");
         }
         mImporting = true;
         mAborted = false;
         Client client = Secured.getClient(ctx());
 
-        Logger.info("importStart() START");
+        info("importStart() START");
 
         mImportRecovery = new ImportRecovery(mInstalling);
         if (!mImportRecovery.initialize()) {
@@ -391,17 +391,17 @@ public class EntryRecoveryController extends Controller {
             mAborted = false;
             mImporting = false;
             mInstalling = false;
-            Logger.info("importNext(): ABORT");
+            info("importNext(): ABORT");
             return ok("R");
         }
         if (!mImportRecovery.hasNext()) {
-            Logger.info("importNext() DONE!");
+            info("importNext() DONE!");
             mImporting = false;
             mInstalling = false;
             return ok("D");
         }
         if (mImportRecovery.loadNext()) {
-            Logger.info("importNext() " + mImportRecovery.mCount);
+            info("importNext() " + mImportRecovery.mCount);
         }
         return ok("#" + mImportRecovery.report());
     }
@@ -429,7 +429,7 @@ public class EntryRecoveryController extends Controller {
                 }
             }
         } catch (Exception ex) {
-            Logger.error(ex.getMessage());
+            error(ex.getMessage());
         }
         return sbuf.toString();
     }
@@ -456,7 +456,7 @@ public class EntryRecoveryController extends Controller {
     // endregion IMPORT
 
     Result badRequest2(String field) {
-        Logger.error("ERROR: " + field);
+        error("ERROR: " + field);
         return badRequest(field);
     }
 
@@ -482,7 +482,7 @@ public class EntryRecoveryController extends Controller {
                 deleteNext(id);
                 idsList.remove(0);
             } catch (NumberFormatException ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
             }
             return true;
         }
@@ -490,18 +490,18 @@ public class EntryRecoveryController extends Controller {
         private boolean deleteNext(long id) {
             try {
                 String host = request().host();
-                Logger.debug("Deleting ENTRY ID " + id);
+                debug("Deleting ENTRY ID " + id);
                 EntryRecovery entry = EntryRecovery.find.byId(id);
                 if (entry != null) {
                     entry.remove();
                     count++;
-                    Logger.warn("Recovery entry has been deleted: " + id);
+                    warn("Recovery entry has been deleted: " + id);
                 } else {
-                    Logger.error("Called deleteNext() with bad ID " + id);
+                    error("Called deleteNext() with bad ID " + id);
                     return false;
                 }
             } catch (NumberFormatException ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
                 return false;
             }
             return true;
@@ -528,7 +528,7 @@ public class EntryRecoveryController extends Controller {
                 mTotal = mJsonTop.size();
                 mIterator = mJsonTop.elements();
             } catch (Exception ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
                 return false;
             }
             return true;
@@ -562,19 +562,19 @@ public class EntryRecoveryController extends Controller {
 
         @Transactional
         private boolean load(JsonNode json) {
-            Logger.debug("RECOVERY: " + json.toString());
+            debug("RECOVERY: " + json.toString());
             ParseResult result = EntryController.parse(json, false);
             if (result.errorMsg != null) {
-                Logger.error(result.errorMsg);
-                Logger.error("Will not create recovery entry");
+                error(result.errorMsg);
+                error("Will not create recovery entry");
                 return false;
             }
             boolean fatal = result.fatal;
             boolean retServerId = result.retServerId;
             if (result.missing.size() > 0) {
-                Logger.error(missingString(result.missing));
+                error(missingString(result.missing));
                 if (fatal) {
-                    Logger.error("Will not create recovery entry");
+                    error("Will not create recovery entry");
                     return false;
                 }
             }
@@ -583,10 +583,10 @@ public class EntryRecoveryController extends Controller {
             if (entry.project_id == 0) {
                 Project recoveryProject = Project.getRecoveryProject();
                 if (recoveryProject != null) {
-                    Logger.error("USING RECOVERY PROJECT.");
+                    error("USING RECOVERY PROJECT.");
                     entry.project_id = recoveryProject.id;
                 } else {
-                    Logger.error("NO RECOVERY PROJECT found.");
+                    error("NO RECOVERY PROJECT found.");
                     return false;
                 }
             }
@@ -594,13 +594,13 @@ public class EntryRecoveryController extends Controller {
                 Entry existing = Entry.find.byId(entry.id);
                 if (existing != null) {
                     if (entry.isMatching(existing, client_id)) {
-                        Logger.info("Recovered entry: " + entry.toString(client_id));
-                        Logger.info("Existing entry : " + existing.toString(client_id));
+                        info("Recovered entry: " + entry.toString(client_id));
+                        info("Existing entry : " + existing.toString(client_id));
                         if (mInstalling) {
-                            Logger.info("Replacing existing entry with recovered entry");
+                            info("Replacing existing entry with recovered entry");
                             entry.update();
                         } else {
-                            Logger.info("Nothing done.");
+                            info("Nothing done.");
                         }
                         return false;
                     }
@@ -608,12 +608,12 @@ public class EntryRecoveryController extends Controller {
             }
             List<Entry> similar = Entry.getEntriesFromEntry(entry, client_id);
             if (similar.size() > 0) {
-                Logger.warn("Matched some existing entries with recovery entry of " + entry.toString(client_id));
+                warn("Matched some existing entries with recovery entry of " + entry.toString(client_id));
                 for (Entry item : similar) {
-                    Logger.warn("  Found " + item.toString(client_id));
+                    warn("  Found " + item.toString(client_id));
                 }
                 if (mInstalling) {
-                    Logger.info("Overwriting first one found with recovery entry.");
+                    info("Overwriting first one found with recovery entry.");
                     Entry item = similar.get(0);
                     entry.id = item.id;
                     entry.update();
@@ -629,7 +629,7 @@ public class EntryRecoveryController extends Controller {
             List<EntryRecovery> existingRecords = EntryRecovery.findEntryForEntry(entryRecovery, client_id);
             if (existingRecords.size() > 0) {
                 for (EntryRecovery existingRecord : existingRecords) {
-                    Logger.info("Found existing record, will replace: " + entryRecovery.toString(client_id) + " [" + mCount + "]");
+                    info("Found existing record, will replace: " + entryRecovery.toString(client_id) + " [" + mCount + "]");
                     existingRecord.remove();
                     mCount--;
                 }
@@ -637,15 +637,35 @@ public class EntryRecoveryController extends Controller {
             try {
                 entryRecovery.save();
                 mCount++;
-                Logger.debug("Created new recovery entry: " + entryRecovery.toString(client_id) + " [" + mCount + "]");
+                debug("Created new recovery entry: " + entryRecovery.toString(client_id) + " [" + mCount + "]");
             } catch (Exception ex) {
-                Logger.error(ex.getMessage());
-                Logger.debug("Failed to create new recovery entry: " + entryRecovery.toString(client_id));
+                error(ex.getMessage());
+                debug("Failed to create new recovery entry: " + entryRecovery.toString(client_id));
             }
             return true;
         }
 
     }
+
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 
 }
 

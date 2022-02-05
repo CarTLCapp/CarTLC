@@ -48,7 +48,7 @@ public abstract class BaseList<T> {
                     return item;
                 }
             }
-            Logger.error("Invalid sort by : " + code);
+            error("Invalid sort by : " + code);
             return null;
         }
     }
@@ -71,7 +71,7 @@ public abstract class BaseList<T> {
                     return item;
                 }
             }
-            Logger.error("Invalid order by : " + code);
+            error("Invalid order by : " + code);
             return null;
         }
     }
@@ -267,11 +267,11 @@ public abstract class BaseList<T> {
                     needsSort = true;
                     break;
                 default:
-                    Logger.error("Invalid sort by code: " + mNextParameters.sortBy.toString());
+                    error("Invalid sort by code: " + mNextParameters.sortBy.toString());
                     return;
             }
         } else {
-            Logger.error("Invalid NULL sort by");
+            error("Invalid NULL sort by");
             return;
         }
         if (mNextParameters.projectIds != null && mNextParameters.projectIds.size() > 0) {
@@ -352,4 +352,23 @@ public abstract class BaseList<T> {
         return sbuf.toString();
     }
 
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }

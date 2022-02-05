@@ -16,7 +16,7 @@ public class StringHelper {
         try {
             return StringEscapeUtils.unescapeHtml4(ele);
         } catch (Exception ex) {
-            Logger.error(ex.getMessage());
+            error(ex.getMessage());
             return ele;
         }
     }
@@ -36,5 +36,26 @@ public class StringHelper {
         }
         return value;
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
+
 
 }

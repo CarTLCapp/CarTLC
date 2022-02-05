@@ -69,7 +69,7 @@ public class Client extends com.avaje.ebean.Model {
             return null;
         }
         if (items.size() > 1) {
-            Logger.error("Found more than one user with name: " + username);
+            error("Found more than one user with name: " + username);
         }
         return items.get(0);
     }
@@ -95,7 +95,7 @@ public class Client extends com.avaje.ebean.Model {
                 return clientInfo.password.equals(password);
             }
         } catch (Exception ex) {
-            Logger.error(ex.getMessage());
+            error(ex.getMessage());
         }
         return false;
     }
@@ -271,5 +271,24 @@ public class Client extends com.avaje.ebean.Model {
         }
     }
 
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

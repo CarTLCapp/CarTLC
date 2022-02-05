@@ -83,7 +83,7 @@ public class MessageController extends Controller {
             int pageSize = Integer.parseInt(size);
             mMessages.setPageSize(pageSize);
         } catch (NumberFormatException ex) {
-            Logger.error(ex.getMessage());
+            error(ex.getMessage());
         }
         return ok("Done");
     }
@@ -94,7 +94,7 @@ public class MessageController extends Controller {
         Message message = new Message();
         ArrayList<String> missing = new ArrayList<String>();
         JsonNode json = request().body().asJson();
-        Logger.debug("GOT MSG: " + json.toString());
+        debug("GOT MSG: " + json.toString());
         JsonNode value = json.findValue("tech_id");
         if (value == null) {
             missing.add("tech_id");
@@ -144,8 +144,28 @@ public class MessageController extends Controller {
     }
 
     Result badRequest2(String field) {
-        Logger.error("ERROR: " + field);
+        error("ERROR: " + field);
         return badRequest(field);
     }
+
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 
 }

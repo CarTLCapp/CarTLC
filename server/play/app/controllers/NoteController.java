@@ -91,7 +91,7 @@ public class NoteController extends Controller {
         }
         newNoteData.id = id;
         newNoteData.update();
-        Logger.info("Note " + newNoteData.name + " has been updated");
+        info("Note " + newNoteData.name + " has been updated");
         Version.inc(Version.VERSION_NOTE);
         return LIST();
     }
@@ -193,7 +193,7 @@ public class NoteController extends Controller {
                     note.save();
                 } else {
                     if (notes.size() > 1) {
-                        Logger.error("Found too many notes with name: " + name);
+                        error("Found too many notes with name: " + name);
                     }
                     note = notes.get(0);
                     if (type != null) {
@@ -224,11 +224,11 @@ public class NoteController extends Controller {
         if (Entry.hasEntryForNote(id)) {
             note.disabled = true;
             note.update();
-            Logger.info("Note has been disabled: it had entries: " + note.name);
+            info("Note has been disabled: it had entries: " + note.name);
         } else {
             ProjectNoteCollection.deleteByNoteId(note.id);
             note.delete();
-            Logger.info("Note has been deleted: " + note.name);
+            info("Note has been deleted: " + note.name);
         }
         Version.inc(Version.VERSION_NOTE);
         return LIST();
@@ -309,5 +309,24 @@ public class NoteController extends Controller {
         return ok(top);
     }
 
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

@@ -226,7 +226,7 @@ public class EquipmentController extends Controller {
                     equipment.save();
                 } else {
                     if (equipments.size() > 1) {
-                        Logger.error("Too many equipments with name: " + name);
+                        error("Too many equipments with name: " + name);
                     }
                     equipment = equipments.get(0);
                 }
@@ -341,6 +341,26 @@ public class EquipmentController extends Controller {
         }
         return ok(top);
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 
 }
 

@@ -131,7 +131,7 @@ public class Technician extends com.avaje.ebean.Model {
             return null;
         }
         if (items.size() > 1) {
-            Logger.error("Found more than one technician with the name: " + first_name + ", " + last_name + " -> just using the first encountered");
+            error("Found more than one technician with the name: " + first_name + ", " + last_name + " -> just using the first encountered");
         }
         return items.get(0);
     }
@@ -264,5 +264,24 @@ public class Technician extends com.avaje.ebean.Model {
         return tech.disabled;
     }
 
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static  void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

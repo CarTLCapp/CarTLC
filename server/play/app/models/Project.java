@@ -124,14 +124,14 @@ public class Project extends Model implements Comparable<Project> {
             String projectName;
             if (root != null && root.length() > 0) {
                 if (subproject != null && subproject.length() > 0) {
-                    Logger.error("Project.findByName(): Could not find project: " + root + " - " + subproject);
+                    error("Project.findByName(): Could not find project: " + root + " - " + subproject);
                     return null;
                 }
                 projectName = root;
             } else if (subproject != null && subproject.length() > 0) {
                 projectName = subproject;
             } else {
-                Logger.error("Project.findByName(): Could not find NULL project");
+                error("Project.findByName(): Could not find NULL project");
                 return null;
             }
             List<Project> projects = find.where()
@@ -140,7 +140,7 @@ public class Project extends Model implements Comparable<Project> {
             if (projects.size() == 1) {
                 return projects.get(0);
             } else if (projects.size() > 1) {
-                Logger.error("Project.findByName(): Too many projects named: " + projectName);
+                error("Project.findByName(): Too many projects named: " + projectName);
             }
             return null;
         }
@@ -151,7 +151,7 @@ public class Project extends Model implements Comparable<Project> {
         if (projects.size() == 1) {
             return projects.get(0);
         } else if (projects.size() > 1) {
-            Logger.error("Project.findByName(): Too many projects named: " + root + " - " + subproject);
+            error("Project.findByName(): Too many projects named: " + root + " - " + subproject);
         }
         return null;
     }
@@ -327,6 +327,26 @@ public class Project extends Model implements Comparable<Project> {
     }
 
     // endregion NAME & COMPARE
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 
 }
 

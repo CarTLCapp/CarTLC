@@ -197,31 +197,31 @@ public class Truck extends com.avaje.ebean.Model {
         if (truck_id > 0) {
             truck = get(truck_id);
             if (!StringUtils.isEmpty(truck.truck_number) && !StringUtils.isEmpty(truck_number) && !truck.truck_number.equals(truck_number)) {
-                Logger.error("TRUCK ID " + truck_id + " mismatch number: " + truck_number + " != " + truck.truck_number);
+                error("TRUCK ID " + truck_id + " mismatch number: " + truck_number + " != " + truck.truck_number);
                 truck = null;
             } else if (!StringUtils.isEmpty(truck.license_plate) && !StringUtils.isEmpty(license_plate) && !truck.license_plate.equals(license_plate)) {
-                Logger.error("TRUCK ID " + truck_id + " mismatch license: " + license_plate + " != " + truck.license_plate);
+                error("TRUCK ID " + truck_id + " mismatch license: " + license_plate + " != " + truck.license_plate);
                 truck = null;
             } else if (truck.project_id > 0 && project_id > 0 && truck.project_id != project_id) {
-                Logger.error("TRUCK ID " + truck_id + " mismatch project: " + project_id + " != " + truck.project_id);
+                error("TRUCK ID " + truck_id + " mismatch project: " + project_id + " != " + truck.project_id);
                 truck = null;
             } else if (truck.company_name_id > 0 && company_name_id > 0 && truck.company_name_id != company_name_id) {
-                Logger.error("TRUCK ID " + truck_id + " mismatch company: " + company_name_id + " != " + truck.company_name_id);
+                error("TRUCK ID " + truck_id + " mismatch company: " + company_name_id + " != " + truck.company_name_id);
                 truck = null;
             }
         }
         if (project_id == 0) {
-            Logger.warn("Truck.add(" + project_id + ", " + company_id + ", " + truck_id + ", " + truck_number + ", " + license_plate + ", " + tech_id + ") CID=" + company_name_id + "[2]");
-            Logger.warn("No project id entered");
+            warn("Truck.add(" + project_id + ", " + company_id + ", " + truck_id + ", " + truck_number + ", " + license_plate + ", " + tech_id + ") CID=" + company_name_id + "[2]");
+            warn("No project id entered");
         }
         if (company_name_id == 0) {
-            Logger.error("Truck.add(" + project_id + ", " + company_id + ", " + truck_id + ", " + truck_number + ", " + license_plate + ", " + tech_id + ") CID=" + company_name_id + "[2]");
-            Logger.error("No company name entered");
+            error("Truck.add(" + project_id + ", " + company_id + ", " + truck_id + ", " + truck_number + ", " + license_plate + ", " + tech_id + ") CID=" + company_name_id + "[2]");
+            error("No company name entered");
             return null;
         }
         if (StringUtils.isEmpty(truck_number) && StringUtils.isEmpty(license_plate)) {
-            Logger.error("Truck.add(" + project_id + ", " + company_id + ", " + truck_id + ", " + truck_number + ", " + license_plate + ", " + tech_id + ") CID=" + company_name_id + "[2]");
-            Logger.error("No truck number nor license_plate entered");
+            error("Truck.add(" + project_id + ", " + company_id + ", " + truck_id + ", " + truck_number + ", " + license_plate + ", " + tech_id + ") CID=" + company_name_id + "[2]");
+            error("No truck number nor license_plate entered");
             return null;
         }
         if (truck == null) {
@@ -468,5 +468,24 @@ public class Truck extends com.avaje.ebean.Model {
         return getTruckByID(id) != null;
     }
 
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

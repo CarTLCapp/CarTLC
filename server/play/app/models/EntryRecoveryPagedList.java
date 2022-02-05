@@ -57,7 +57,7 @@ public class EntryRecoveryPagedList {
                     return item;
                 }
             }
-            Logger.error("Invalid sort by : " + match);
+            error("Invalid sort by : " + match);
             return null;
         }
     }
@@ -649,7 +649,7 @@ public class EntryRecoveryPagedList {
             mSearchEndDate = new Date(calendar.getTimeInMillis());
             return true;
         } catch (Exception ex) {
-            Logger.error("Invalid date entered: " + ex.getMessage());
+            error("Invalid date entered: " + ex.getMessage());
         }
         return false;
     }
@@ -660,14 +660,14 @@ public class EntryRecoveryPagedList {
                 Date date = mParseDateFormatZZZ.parse(term);
                 return date;
             } catch (Exception ex) {
-                Logger.info(ex.getMessage());
+                info(ex.getMessage());
             }
         }
         try {
             Date date = mParseDateFormat.parse(term);
             return date;
         } catch (Exception ex) {
-            Logger.info(ex.getMessage());
+            info(ex.getMessage());
         }
         return null;
     }
@@ -726,7 +726,7 @@ public class EntryRecoveryPagedList {
         String query;
         query = buildQuery(true);
         if (VERBOSE) {
-            Logger.debug("Query: " + query);
+            debug("Query: " + query);
         }
         SqlQuery sqlQuery = Ebean.createSqlQuery(query);
         // Note: it is possible to add parameters to the query call. Referenced within the query as ":start" for example.
@@ -735,7 +735,7 @@ public class EntryRecoveryPagedList {
         entries = sqlQuery.findList();
         mResult.mList.clear();
         if (entries == null || entries.size() == 0) {
-            Logger.error("No entries");
+            error("No entries");
             return;
         }
         for (SqlRow row : entries) {
@@ -892,7 +892,7 @@ public class EntryRecoveryPagedList {
     }
 
     public void setSearch(String searchTerm, String columnSelector) {
-        Logger.debug("setSearch(" + searchTerm + ", " + columnSelector.toString() + ")");
+        debug("setSearch(" + searchTerm + ", " + columnSelector.toString() + ")");
         if (searchTerm != null && searchTerm.length() > 0 && !searchTerm.equals("null")) {
             mSearch.setSearchTerm(searchTerm);
         } else {
@@ -913,5 +913,25 @@ public class EntryRecoveryPagedList {
     public String getSearchField() {
         return mSearch.getField();
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 
 }

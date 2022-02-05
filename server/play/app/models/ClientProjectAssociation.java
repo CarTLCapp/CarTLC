@@ -47,7 +47,7 @@ public class ClientProjectAssociation extends Model {
         for (ClientProjectAssociation item : items) {
             Project project = Project.find.byId(item.project_id);
             if (project == null) {
-                Logger.error("Could not locate project ID " + item.project_id);
+                error("Could not locate project ID " + item.project_id);
             } else {
                 list.add(project);
             }
@@ -118,5 +118,24 @@ public class ClientProjectAssociation extends Model {
         }
     }
 
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

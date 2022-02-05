@@ -107,18 +107,18 @@ public class CleanupController extends Controller {
     }
 
     private void pictureCleanup1(String host, CompletableFuture<Result> completableFuture, List<String> keys) {
-        Logger.warn("Checking for orphaned pictures from " + keys.size() + " keys");
+        warn("Checking for orphaned pictures from " + keys.size() + " keys");
         ArrayList<String> missing = new ArrayList<>();
         for (String key : keys) {
             if (!Entry.hasEntryForPicture(key)) {
                 missing.add(key);
             }
         }
-        Logger.warn("ORPHANED REMOTE PICTURES=" + missing.size());
+        warn("ORPHANED REMOTE PICTURES=" + missing.size());
         mAmazonHelper.deleteAction().host(host).deleteLocalFile(true).listener((deleted, errors) -> {
             pictureCleanup2(host, completableFuture, deleted);
         }).delete(missing);
-        Logger.warn("DONE");
+        warn("DONE");
     }
 
     private void pictureCleanup2(String host, CompletableFuture<Result> completableFuture, int deletedRemote) {
@@ -142,15 +142,15 @@ public class CleanupController extends Controller {
         sbuf.append(", LOCAL DELETE=");
         sbuf.append(orphanedLocal);
         completableFuture.complete(ok(sbuf.toString()));
-        Logger.warn(sbuf.toString());
+        warn(sbuf.toString());
     }
 
     private List<String> pictureCollectionIdCleanup(String host) {
-        Logger.warn("pictureCollectionIdCleanup()");
+        warn("pictureCollectionIdCleanup()");
         ArrayList<String> orphaned = new ArrayList<>();
         List<PictureCollection> list = PictureCollection.findNoEntries();
         for (PictureCollection collection : list) {
-            Logger.warn("Orphaned collection: " + collection.toString());
+            warn("Orphaned collection: " + collection.toString());
             orphaned.add(collection.picture);
             collection.delete();
         }
@@ -166,7 +166,7 @@ public class CleanupController extends Controller {
             }
         }
         for (File file : orphaned) {
-            Logger.warn("ORPHANED LOCAL FILE DELETED: " + file.getName());
+            warn("ORPHANED LOCAL FILE DELETED: " + file.getName());
             file.delete();
         }
         return orphaned.size();
@@ -186,12 +186,12 @@ public class CleanupController extends Controller {
     public Result truckCleanup() {
         Client client = Secured.getClient(ctx());
         if (mCleaningTrucks) {
-            Logger.info("truckCleanup(): ABORTED");
+            info("truckCleanup(): ABORTED");
             mCleaningTrucks = false;
             mAborted = true;
             return ok("R");
         }
-        Logger.info("truckCleanup()");
+        info("truckCleanup()");
         mCleaningTrucks = true;
         mAborted = false;
         mCleanupTrucks = new CleanupTrucks();
@@ -202,11 +202,11 @@ public class CleanupController extends Controller {
         if (mAborted) {
             mAborted = false;
             mCleaningTrucks = false;
-            Logger.info("truckCleanupNext(): ABORT");
+            info("truckCleanupNext(): ABORT");
             return ok("R");
         }
         if (mCleanupTrucks.processNextPage()) {
-            Logger.debug("truckCleanupNext(): PAGE " + mCleanupTrucks.mPage + " OF " + mCleanupTrucks.mNumPages);
+            debug("truckCleanupNext(): PAGE " + mCleanupTrucks.mPage + " OF " + mCleanupTrucks.mNumPages);
             return ok("#" + mCleanupTrucks.getReport() + "...");
         }
         if (mCleanupTrucks.reassignNextTruck()) {
@@ -218,7 +218,7 @@ public class CleanupController extends Controller {
         if (mCleanupTrucks.deleteNextTruck()) {
             return ok("#" + mCleanupTrucks.getReport() + "...");
         }
-        Logger.debug("truckCleanupNext(): DONE");
+        debug("truckCleanupNext(): DONE");
         mCleaningTrucks = false;
         lastResult = mCleanupTrucks.getReport();
         return ok("D" + lastResult);
@@ -254,9 +254,9 @@ public class CleanupController extends Controller {
                 if (num_entries > 0) {
                     if (num_entries > 1) {
                         mReassignTrucks.add(truck);
-                        Logger.info("Found truck with more than one entry: " + truck.toString());
+                        info("Found truck with more than one entry: " + truck.toString());
                     } else if (truck.company_name_id == 0) {
-                        Logger.info("Found truck with no company name: " + truck.toString());
+                        info("Found truck with no company name: " + truck.toString());
                         mFixTruckCompanyName.addAll(Entry.findByTruckId(truck.id));
                     }
                     continue;
@@ -264,7 +264,7 @@ public class CleanupController extends Controller {
                 if (WorkOrder.countWorkOrdersForTruck(truck.id) > 0) {
                     continue;
                 }
-                Logger.info("Found orphaned truck: " + truck.toString());
+                info("Found orphaned truck: " + truck.toString());
                 mDeleteTrucks.add(truck);
             }
             return true;
@@ -296,7 +296,7 @@ public class CleanupController extends Controller {
             boolean isReassigned = false;
             int instance_id = Version.inc(Version.NEXT_REPAIRED_INSTANCE_ID);
             for (Entry entry : instances) {
-                Logger.info("ENTRY HAD DUP TRUCK : " + entry.toString() + (isReassigned ? " [REASSIGNED]" : ""));
+                info("ENTRY HAD DUP TRUCK : " + entry.toString() + (isReassigned ? " [REASSIGNED]" : ""));
                 isReassigned = true;
                 Repaired.addDupTruckId(entry.id, instance_id);
             }
@@ -322,7 +322,7 @@ public class CleanupController extends Controller {
             }
             for (Entry entry : fix) {
                 if (entry.fixTruckCompanyName()) {
-                    Logger.info("ENTRY FIXED TRUCK COMPANY NAME : " + entry.toString());
+                    info("ENTRY FIXED TRUCK COMPANY NAME : " + entry.toString());
                     mFixedCompanyNames++;
                 }
             }
@@ -344,7 +344,7 @@ public class CleanupController extends Controller {
             for (Truck truck : deleteList) {
                 truck.delete();
                 mDeletedCount++;
-                Logger.info("TRUCK DELETED: " + truck.toString());
+                info("TRUCK DELETED: " + truck.toString());
             }
             return true;
         }
@@ -397,5 +397,21 @@ public class CleanupController extends Controller {
     }
 
     // endregion TRUCK CLEANUP
+
+    // region Logger
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 
 }

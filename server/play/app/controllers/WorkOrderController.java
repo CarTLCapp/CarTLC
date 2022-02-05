@@ -190,7 +190,7 @@ public class WorkOrderController extends Controller {
             return badRequest("No fulfilled entry for this work order");
         }
         entry.loadPictures(request().host(), amazonHelper, () -> {
-            Logger.info("Picture loading done");
+            info("Picture loading done");
         });
         return ok(views.html.entry_view.render(entry, Secured.getClient(ctx())));
     }
@@ -268,16 +268,16 @@ public class WorkOrderController extends Controller {
                 truck.created_by_client = true;
                 truck.upload_id = workOrderItem.upload_id;
                 truck.save();
-                Logger.info("New truck line: " + truck.toString());
+                info("New truck line: " + truck.toString());
                 workOrderItem.truck_id = truck.id;
                 workOrderItem.update();
             } else {
                 truck.update();
-                Logger.info("Truck updated: " + truck.toString());
+                info("Truck updated: " + truck.toString());
             }
             Version.inc(Version.VERSION_TRUCK);
         } catch (Exception ex) {
-            Logger.error(ex.getMessage());
+            error(ex.getMessage());
         }
         return index();
     }
@@ -294,4 +294,23 @@ public class WorkOrderController extends Controller {
         return true;
     }
 
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }

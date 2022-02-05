@@ -75,7 +75,7 @@ public class RootProject extends Model implements Comparable<RootProject> {
         if (projects.size() == 1) {
             return projects.get(0);
         } else if (projects.size() > 1) {
-            Logger.error("Too many projects named: " + name);
+            error("Too many projects named: " + name);
         }
         return null;
     }
@@ -123,5 +123,25 @@ public class RootProject extends Model implements Comparable<RootProject> {
         }
         return result;
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 
 }

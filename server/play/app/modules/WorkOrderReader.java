@@ -67,7 +67,7 @@ public class WorkOrderReader {
                         WorkOrderField field = WorkOrderField.find(name);
                         if (field != null) {
                             if (fieldPos.containsKey(field.ordinal())) {
-                                error("This field exists more than once: " + field.toString());
+                                errorMsg("This field exists more than once: " + field.toString());
                             } else {
                                 fieldPos.put(field.ordinal(), pos);
                             }
@@ -164,7 +164,7 @@ public class WorkOrderReader {
         return errors.size() == 0;
     }
 
-    void error(String msg) {
+    void errorMsg(String msg) {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("Line ");
         sbuf.append(lineCount);
@@ -232,8 +232,28 @@ public class WorkOrderReader {
         try {
             return Integer.parseInt(value);
         } catch (Exception ex) {
-            Logger.error(ex.getMessage());
+            error(ex.getMessage());
         }
         return 0;
     }
+
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }

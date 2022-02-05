@@ -92,12 +92,12 @@ public class RootProjectController extends Controller {
                 savedProject.name = newProjectData.name;
                 savedProject.update();
 
-                Logger.info("Root Project " + savedProject.name + " has been updated");
+                info("Root Project " + savedProject.name + " has been updated");
 
                 Version.inc(Version.VERSION_PROJECT);
             }
         } catch (Exception ex) {
-            Logger.error(ex.getMessage());
+            error(ex.getMessage());
         }
         return LIST();
     }
@@ -149,17 +149,17 @@ public class RootProjectController extends Controller {
             RootProject project = RootProject.find.byId(id);
             project.disabled = true;
             project.update();
-            Logger.info("Root Project has been disabled: it had entries: " + project.name);
+            info("Root Project has been disabled: it had entries: " + project.name);
         } else {
             try {
                 RootProject.find.ref(id).delete();
-                Logger.info("Project has been deleted");
+                info("Project has been deleted");
             } catch (Exception ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
                 RootProject project = RootProject.find.byId(id);
                 project.disabled = true;
                 project.update();
-                Logger.info("Project has been disabled: it could not be deleted: " + project.name);
+                info("Project has been disabled: it could not be deleted: " + project.name);
             }
         }
         Version.inc(Version.VERSION_PROJECT);
@@ -211,5 +211,24 @@ public class RootProjectController extends Controller {
         return ok(sbuf.toString());
     }
 
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

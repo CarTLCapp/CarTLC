@@ -103,12 +103,12 @@ public class ProjectController extends Controller {
                 ProjectEquipmentCollection.replace(id, Equipment.getChecked(projectForm));
                 ProjectNoteCollection.replace(id, Note.getChecked(projectForm));
 
-                Logger.info("Project " + savedProject.name + " has been updated");
+                info("Project " + savedProject.name + " has been updated");
 
                 Version.inc(Version.VERSION_PROJECT);
             }
         } catch (Exception ex) {
-            Logger.error(ex.getMessage());
+            error(ex.getMessage());
         }
         return LIST();
     }
@@ -194,7 +194,7 @@ public class ProjectController extends Controller {
                     newProject.name = names[1];
                     newProject.save();
                 } else {
-                    Logger.info("Already created: " + name);
+                    info("Already created: " + name);
                 }
             }
         }
@@ -215,17 +215,17 @@ public class ProjectController extends Controller {
             Project project = Project.find.byId(id);
             project.disabled = true;
             project.update();
-            Logger.info("Project has been disabled: it had entries: " + project.name);
+            info("Project has been disabled: it had entries: " + project.name);
         } else {
             try {
                 Project.find.ref(id).delete();
-                Logger.info("Project has been deleted");
+                info("Project has been deleted");
             } catch (Exception ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
                 Project project = Project.find.byId(id);
                 project.disabled = true;
                 project.update();
-                Logger.info("Project has been disabled: it could not be deleted: " + project.name);
+                info("Project has been disabled: it could not be deleted: " + project.name);
             }
         }
         Version.inc(Version.VERSION_PROJECT);
@@ -261,5 +261,24 @@ public class ProjectController extends Controller {
         return list();
     }
 
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

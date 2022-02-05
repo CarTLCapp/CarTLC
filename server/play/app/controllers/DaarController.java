@@ -60,7 +60,7 @@ public class DaarController extends Controller {
 
         String decodedSearchTerm = StringHelper.decode(searchTerm);
 
-        Logger.info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + decodedSearchTerm + ", " + searchField + ")");
+        info("list(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + decodedSearchTerm + ", " + searchField + ")");
 
         Form<InputSearch> searchForm = mFormFactory.form(InputSearch.class);
 
@@ -86,7 +86,7 @@ public class DaarController extends Controller {
         String searchTerm = isearch.searchTerm;
         String searchField = isearch.searchField;
 
-        Logger.info("search(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
+        info("search(" + page + ", " + pageSize + ", " + sortBy + ", " + order + ", " + searchTerm + ", " + searchField + ")");
 
         DaarPagedList list = new DaarPagedList();
         list.setSearch(searchTerm, searchField);
@@ -155,7 +155,7 @@ public class DaarController extends Controller {
         Daar entry = new Daar();
         ArrayList<String> missing = new ArrayList<String>();
         JsonNode json = request().body().asJson();
-        Logger.debug("GOT: " + json.toString());
+        debug("GOT: " + json.toString());
         boolean retServerId = false;
         JsonNode value;
         // TECH
@@ -173,7 +173,7 @@ public class DaarController extends Controller {
                 entry.entry_time = mDateFormat.parse(date_value);
                 entry.time_zone = StringHelper.pickOutTimeZone(date_value, 'Z');
             } catch (Exception ex) {
-                Logger.error("While parsing " + date_value + ":" + ex.getMessage());
+                error("While parsing " + date_value + ":" + ex.getMessage());
             }
         } else {
             missing.add("date_string");
@@ -185,7 +185,7 @@ public class DaarController extends Controller {
             try {
                 entry.start_time = mDateFormat.parse(date_value);
             } catch (Exception ex) {
-                Logger.error("While parsing " + date_value + ":" + ex.getMessage());
+                error("While parsing " + date_value + ":" + ex.getMessage());
             }
         } else {
             missing.add("start_time_tomorrow_string");
@@ -201,7 +201,7 @@ public class DaarController extends Controller {
                 if (existing == null) {
                     existing = Daar.findByDate(entry.tech_id, entry.entry_time);
                     if (existing != null) {
-                        Logger.info("Could not find DAAR entry with ID " + entry.id + ", so located based on time=" + entry.entry_time);
+                        info("Could not find DAAR entry with ID " + entry.id + ", so located based on time=" + entry.entry_time);
                     }
                 } else {
                     existing.entry_time = entry.entry_time;
@@ -246,10 +246,10 @@ public class DaarController extends Controller {
         }
         if (entry.id != null && entry.id > 0) {
             entry.update();
-            Logger.debug("Updated DAAR entry " + entry.id);
+            debug("Updated DAAR entry " + entry.id);
         } else {
             entry.save();
-            Logger.debug("Created new DAAR entry " + entry.id);
+            debug("Created new DAAR entry " + entry.id);
         }
         long ret_id;
         if (retServerId) {
@@ -276,9 +276,28 @@ public class DaarController extends Controller {
     }
 
     Result badRequest2(String field) {
-        Logger.error("ERROR: " + field);
+        error("ERROR: " + field);
         return badRequest(field);
     }
 
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
             

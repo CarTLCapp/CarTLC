@@ -75,7 +75,7 @@ public class EntryNoteCollection extends Model {
         for (EntryNoteCollection item : items) {
             Note note = Note.find.byId(item.note_id);
             if (note == null) {
-                Logger.error("Could not locate note ID " + item.note_id);
+                error("Could not locate note ID " + item.note_id);
             } else {
                 list.add(note);
             }
@@ -123,7 +123,7 @@ public class EntryNoteCollection extends Model {
                 sbuf.append("INSERT INTO `entry_note_collection` VALUES(" + item.id + "," + item.collection_id + "," + item.note_id + ",'" + item.note_value + "');\n");
                 item.delete();
             }
-            Logger.info(sbuf.toString());
+            info(sbuf.toString());
         }
     }
 
@@ -144,5 +144,25 @@ public class EntryNoteCollection extends Model {
             item.save();
         }
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

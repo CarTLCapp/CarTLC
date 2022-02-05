@@ -103,7 +103,7 @@ public class VehicleName extends com.avaje.ebean.Model {
                         line = before.trim();
                     }
                 } catch (NumberFormatException ex) {
-                    Logger.error("While parsing: " + ex.getMessage());
+                    error("While parsing: " + ex.getMessage());
                 }
             }
             VehicleName name = new VehicleName();
@@ -158,4 +158,24 @@ public class VehicleName extends com.avaje.ebean.Model {
         }
         return null;
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }

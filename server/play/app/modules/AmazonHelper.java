@@ -110,18 +110,18 @@ public class AmazonHelper {
         }
 
         private void next(File targetFile) {
-            Logger.warn("DOWNLOAD: BUCKET=" + bucketName + ", KEY=" + targetFile.getName() + " TARGET=" + targetFile.getAbsolutePath());
+            warn("DOWNLOAD: BUCKET=" + bucketName + ", KEY=" + targetFile.getName() + " TARGET=" + targetFile.getAbsolutePath());
             try {
                 TransferManager xferManager = TransferManagerBuilder.standard().build();
                 Download download = xferManager.download(bucketName, targetFile.getName(), targetFile);
                 download.waitForCompletion();
-                Logger.info("COMPLETED: " + targetFile.getAbsolutePath());
+                info("COMPLETED: " + targetFile.getAbsolutePath());
             } catch (AmazonServiceException e) {
-                Logger.error("Amazon service error: " + e.getMessage());
+                error("Amazon service error: " + e.getMessage());
             } catch (AmazonClientException e) {
-                Logger.error("Amazon client error: " + e.getMessage());
+                error("Amazon client error: " + e.getMessage());
             } catch (InterruptedException e) {
-                Logger.error("Transfer interrupted: " + e.getMessage());
+                error("Transfer interrupted: " + e.getMessage());
             }
             scheduleNext();
         }
@@ -155,7 +155,7 @@ public class AmazonHelper {
         }
 
         public void run() {
-            Logger.warn("LIST: BUCKET=" + bucketName);
+            warn("LIST: BUCKET=" + bucketName);
             try {
                 AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                         .withCredentials(new ProfileCredentialsProvider())
@@ -177,16 +177,16 @@ public class AmazonHelper {
                     String token = result.getNextContinuationToken();
                     req.setContinuationToken(token);
                 } while (result.isTruncated());
-                Logger.warn("LIST: TOTAL FOUND=" + files.size());
+                warn("LIST: TOTAL FOUND=" + files.size());
                 listener.onListComplete(files);
             } catch (AmazonServiceException e) {
                 // The call was transmitted successfully, but Amazon S3 couldn't process
                 // it, so it returned an error response.
-                Logger.error("SERVICE EXCEPTION: " + e.getMessage());
+                error("SERVICE EXCEPTION: " + e.getMessage());
             } catch (SdkClientException e) {
                 // Amazon S3 couldn't be contacted for a response, or the client
                 // couldn't parse the response from Amazon S3.
-                Logger.error("CLIENT EXCEPTION: " + e.getMessage());
+                error("CLIENT EXCEPTION: " + e.getMessage());
             }
         }
     }
@@ -222,7 +222,7 @@ public class AmazonHelper {
 
             for (String key : keys) {
                 try {
-                    Logger.warn("DELETING FROM BUCKET=" + bucketName + ", KEY=" + key);
+                    warn("DELETING FROM BUCKET=" + bucketName + ", KEY=" + key);
                     AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                             .withCredentials(new ProfileCredentialsProvider())
                             .withRegion(REGION)
@@ -236,12 +236,12 @@ public class AmazonHelper {
                 } catch (AmazonServiceException e) {
                     // The call was transmitted successfully, but Amazon S3 couldn't process
                     // it, so it returned an error response.
-                    Logger.error("SERVICE EXCEPTION: " + e.getMessage());
+                    error("SERVICE EXCEPTION: " + e.getMessage());
                     errors++;
                 } catch (SdkClientException e) {
                     // Amazon S3 couldn't be contacted for a response, or the client
                     // couldn't parse the response from Amazon S3.
-                    Logger.error("CLIENT EXCEPTION: " + e.getMessage());
+                    error("CLIENT EXCEPTION: " + e.getMessage());
                     errors++;
                 }
             }
@@ -280,5 +280,25 @@ public class AmazonHelper {
             executor.execute(new DeleteActivity(mHost, keys, mDeleteLocalFile, mListener));
         }
     }
+
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

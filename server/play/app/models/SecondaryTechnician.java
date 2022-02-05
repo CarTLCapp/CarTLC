@@ -41,7 +41,7 @@ public class SecondaryTechnician extends com.avaje.ebean.Model {
             return 0L;
         }
         if (list.size() > 1) {
-            Logger.error("Found too many secondary tech id rows with the same entry_id="
+            error("Found too many secondary tech id rows with the same entry_id="
                     + entry_id);
         }
         SecondaryTechnician row = list.get(0);
@@ -60,7 +60,7 @@ public class SecondaryTechnician extends com.avaje.ebean.Model {
         List<SecondaryTechnician> list = find.where().eq("entry_id", entry_id).findList();
         if (list.size() > 0) {
             for (SecondaryTechnician ele : list) {
-                Logger.info("Delete secondary_technician for entry " + entry_id);
+                info("Delete secondary_technician for entry " + entry_id);
                 ele.delete();
             }
         }
@@ -69,7 +69,7 @@ public class SecondaryTechnician extends com.avaje.ebean.Model {
         item.secondary_tech_id = secondary_tech_id;
         item.save();
 
-        Logger.info("Added secondary_technician for " + entry_id + " of " + secondary_tech_id);
+        info("Added secondary_technician for " + entry_id + " of " + secondary_tech_id);
     }
 
     /**
@@ -103,5 +103,24 @@ public class SecondaryTechnician extends com.avaje.ebean.Model {
         return result;
     }
 
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

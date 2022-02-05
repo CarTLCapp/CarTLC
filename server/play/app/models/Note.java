@@ -117,7 +117,7 @@ public class Note extends Model implements Comparable<Note> {
                 note.name = NOTE_TRUCK_NUMBER_NAME;
                 note.type = Type.ALPHANUMERIC;
                 note.save();
-                Logger.info("Note.initGeneralPurpose() ADDED " + note.name);
+                info("Note.initGeneralPurpose() ADDED " + note.name);
             }
             if (!hasDamage) {
                 Note note = new Note();
@@ -127,7 +127,7 @@ public class Note extends Model implements Comparable<Note> {
                 note.name = NOTE_TRUCK_DAMAGE_NAME;
                 note.type = Type.TEXT;
                 note.save();
-                Logger.info("Note.initGeneralPurpose() ADDED " + note.name);
+                info("Note.initGeneralPurpose() ADDED " + note.name);
             }
             if (!hasPartialInstall) {
                 Note note = new Note();
@@ -137,7 +137,7 @@ public class Note extends Model implements Comparable<Note> {
                 note.name = NOTE_PARTIAL_INSTALL_REASON;
                 note.type = Type.TEXT;
                 note.save();
-                Logger.info("Note.initGeneralPurpose() ADDED " + note.name);
+                info("Note.initGeneralPurpose() ADDED " + note.name);
             }
             Version.inc(Version.VERSION_NOTE);
         }
@@ -347,5 +347,24 @@ public class Note extends Model implements Comparable<Note> {
         return notes;
     }
 
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

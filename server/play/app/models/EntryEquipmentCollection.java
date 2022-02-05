@@ -46,7 +46,7 @@ public class EntryEquipmentCollection extends Model {
         for (EntryEquipmentCollection item : items) {
             Equipment equipment = Equipment.find.byId(item.equipment_id);
             if (equipment == null) {
-                Logger.error("Could not locate equipment ID " + item.equipment_id);
+                error("Could not locate equipment ID " + item.equipment_id);
             } else {
                 list.add(equipment);
             }
@@ -97,7 +97,7 @@ public class EntryEquipmentCollection extends Model {
                 sbuf.append("INSERT INTO `entry_equipment_collection` VALUES(" + item.id + "," + item.collection_id + "," + item.equipment_id + ");\n");
                 item.delete();
             }
-            Logger.info(sbuf.toString());
+            info(sbuf.toString());
         }
     }
 
@@ -110,5 +110,25 @@ public class EntryEquipmentCollection extends Model {
             item.save();
         }
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

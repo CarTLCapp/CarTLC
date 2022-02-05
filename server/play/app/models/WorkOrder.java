@@ -79,7 +79,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
                 sbuf.append("=");
                 sbuf.append(truck.toString());
             }
-            Logger.error(sbuf.toString());
+            error(sbuf.toString());
         }
         return list.get(0);
     }
@@ -244,7 +244,7 @@ public class WorkOrder extends com.avaje.ebean.Model {
 
     public static int deleteByUploadId(Integer upload_id, Client client) {
         if (upload_id == null || upload_id == 0) {
-            Logger.error("Cannot call deleteByUploadId() without an upload_id");
+            error("Cannot call deleteByUploadId() without an upload_id");
             return 0;
         }
         List<WorkOrder> list = findByUploadId(upload_id, client);
@@ -290,9 +290,29 @@ public class WorkOrder extends com.avaje.ebean.Model {
             }
         }
         if (count > 0) {
-            Logger.warn("WorkOrder.fixed project and company name for " + count + " trucks");
+            warn("WorkOrder.fixed project and company name for " + count + " trucks");
             Version.inc(Version.VERSION_TRUCK);
         }
     }
+
+    // region Logger
+
+    private static void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private static void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private static void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private static void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 }
 

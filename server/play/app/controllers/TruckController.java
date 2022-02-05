@@ -127,7 +127,7 @@ public class TruckController extends Controller {
                 }
                 subList = list.subList(fromIndex, toIndex);
             } catch (IndexOutOfBoundsException ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
                 subList = new ArrayList<Truck>();
             }
         } else {
@@ -214,11 +214,31 @@ public class TruckController extends Controller {
         }
         truck.update();
 
-        Logger.info("Truck updated: " + truck.toString());
+        info("Truck updated: " + truck.toString());
         Version.inc(Version.VERSION_TRUCK);
 
         return LIST();
     }
+
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    private void warn(String msg) {
+        Logger.warn(msg);
+    }
+
+    private void info(String msg) {
+        Logger.info(msg);
+    }
+
+    private void debug(String msg) {
+        Logger.debug(msg);
+    }
+
+    // endregion Logger
 
 }
             

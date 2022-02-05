@@ -198,7 +198,7 @@ public class CompanyController extends Controller {
                 }
                 subList = list.subList(fromIndex, toIndex);
             } catch (IndexOutOfBoundsException ex) {
-                Logger.error(ex.getMessage());
+                error(ex.getMessage());
                 subList = new ArrayList<Company>();
             }
         } else {
@@ -277,6 +277,14 @@ public class CompanyController extends Controller {
         }
         return ok(sbuf.toString());
     }
+
+    // region Logger
+
+    private void error(String msg) {
+        Logger.error(msg);
+    }
+
+    // endregion Logger
 
 }
 
