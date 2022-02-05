@@ -179,7 +179,7 @@ GET     /entry/reload_images          controllers.EntryController.reloadImages()
 POST    /enter                        controllers.EntryController.enter()
 
 # Long form
-GET     /entry/export/:searchField/:searchTerm                             controllers.EntryController.export(searchTerm:String, searchField:String)
+GET     /entry/export/:pageSize/:sort/:order/:searchField/:searchTerm      controllers.EntryController.export(pageSize:Int, sort: String, order: String, searchTerm: String, searchField: String)
 GET     /entry/list/:page/:pageSize/:sort/:order/:searchField/:searchTerm  controllers.EntryController.list2(page:Int, pageSize:Int, sort: String, order: String, searchTerm: String, searchField: String)
 
 ###  ENTRY RECOVERY ###

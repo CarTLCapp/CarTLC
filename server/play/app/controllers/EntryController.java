@@ -114,6 +114,8 @@ public class EntryController extends Controller {
         InputSearch isearch = new InputSearch(decodedSearchTerm, searchField);
         searchForm.fill(isearch);
 
+        info("list(): gathered " + list.getList().size() + " elements");
+
         return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
     }
 
@@ -144,11 +146,16 @@ public class EntryController extends Controller {
 
         searchForm.fill(isearch);
 
+        info("search(): gathered " + list.getList().size() + " elements");
+
         return ok(views.html.entry_list.render(list, searchForm, Secured.getClient(ctx())));
     }
 
     @Security.Authenticated(Secured.class)
     public Result searchClear() {
+
+        info("searchClear()");
+
         EntryPagedList list = new EntryPagedList();
         list.computeFilters(Secured.getClient(ctx()));
         list.compute();
@@ -210,7 +217,7 @@ public class EntryController extends Controller {
     }
 
     @Security.Authenticated(Secured.class)
-    public Result export(String searchTerm, String searchField) {
+    public Result export(int pageSize, String sortBy, String order, String searchTerm, String searchField) {
         if (mExporting) {
             mAborted = true;
             mExporting = false;
@@ -223,12 +230,16 @@ public class EntryController extends Controller {
 
         String decodedSearchTerm = StringHelper.decode(searchTerm);
 
-        info("export(" + decodedSearchTerm + ", " + searchField + ") START");
+        info("export(" + pageSize + ", " + sortBy + ", " + order + ", " + decodedSearchTerm + ", " + searchField + ") START");
 
         EntryPagedList entryList = new EntryPagedList();
         entryList.computeFilters(client);
         entryList.setSearch(decodedSearchTerm, searchField);
-        entryList.computeFilters(Secured.getClient(ctx()));
+        entryList.computeFilters(client);
+        entryList.setPageSize(pageSize);
+        entryList.setSortBy(sortBy);
+        entryList.setOrder(order);
+        entryList.clearCache();
         entryList.compute();
         entryList.computeTotalNumRows();
         mExportWriter = new EntryListWriter(entryList);
@@ -241,7 +252,7 @@ public class EntryController extends Controller {
             mExporting = false;
             return badRequest2(ex.getMessage());
         }
-        info("export(): " + entryList.getTotalRowCount() + ", " + entryList.getDisplayingXtoYofZ());
+        info("export(): start wrote " + count + " items. Total will be " + entryList.getTotalRowCount() + ", " + entryList.getDisplayingXtoYofZ());
         return ok("#" + Integer.toString(count) + "...");
     }
 
@@ -257,7 +268,7 @@ public class EntryController extends Controller {
             info("exportNext(): calling computeNext()");
             if (mExportWriter.computeNext()) {
                 int count = mExportWriter.writeNext();
-                info("exportNext() " + count);
+                info("exportNext() " + count + " written");
                 return ok("#" + Integer.toString(count) + "...");
             } else {
                 info("exportNext(): DONE!");

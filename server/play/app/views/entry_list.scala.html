@@ -215,7 +215,7 @@
                         }
                     }
                 };
-                xhttp.open("GET", "@routes.EntryController.export(currentPage.getSearchTerm(), currentPage.getSearchField())", true);
+                xhttp.open("GET", "@routes.EntryController.export(currentPage.getPageSize(), currentPage.getSortBy(), currentPage.getOrder(), currentPage.getSearchTerm(), currentPage.getSearchField())", true);
                 xhttp.send();
             }
             document.getElementById("export").onclick = myExport;

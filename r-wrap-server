@@ -1,7 +1,8 @@
 #!/bin/bash 
 #
-# 1. To prepare: run 'dist' from sbt.
-# 2. Run this script.
+# 1. To prepare: ./r-dist-server
+# 2. Run this script 
+#    OR: if already on the server do this: ./r-wrap-local
 #
 DATE=`date +%F`
 WRAP=../wrap/$DATE

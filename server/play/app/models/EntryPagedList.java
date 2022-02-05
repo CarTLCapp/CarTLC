@@ -142,6 +142,13 @@ public class EntryPagedList {
             return "";
         }
 
+        String getTermWithNullWord() {
+            if (mSearchTerm != null && mSearchTerm.length() > 0) {
+                return mSearchTerm;
+            }
+            return NULL_WORD;
+        }
+
         String getField() {
             if (mColumnSelector == null) {
                 return ColumnSelector.ALL.alias;
@@ -216,6 +223,7 @@ public class EntryPagedList {
     static final String CLASS_PREV_DISABLED = "prev disabled";
     static final String CLASS_NEXT = "next";
     static final String CLASS_NEXT_DISABLED = "next disabled";
+    static final String NULL_WORD = "null";
 
     private static final String PARSE_DATE_FORMAT = "MM/dd/yyyy";
     private SimpleDateFormat mParseDateFormat = new SimpleDateFormat(PARSE_DATE_FORMAT);
@@ -396,7 +404,7 @@ public class EntryPagedList {
         return "";
     }
 
-    private String buildQuery(boolean useLimit) {
+    private String buildQuery() {
         StringBuilder query = new StringBuilder();
 
         query.append("SELECT DISTINCT e.id, e.tech_id, e.entry_time, e.project_id, e.company_id");
@@ -479,18 +487,75 @@ public class EntryPagedList {
         query.append(getSortByColumn());
         query.append(" ");
         query.append(getOrder());
-        if (useLimit) {
-            if (mParams.mPageSize == 0) {
-                mParams.mPageSize = mDefaultPageSize;
+        if (mParams.mPageSize == 0) {
+            mParams.mPageSize = mDefaultPageSize;
+        }
+        int start = mParams.mPage * mParams.mPageSize;
+        query.append(" LIMIT ");
+        query.append(start);
+        query.append(", ");
+        query.append(mParams.mPageSize);
+        return query.toString();
+    }
+
+    private String buildCount() {
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT COUNT(*)");
+        query.append(" FROM entry AS e");
+        switch (mParams.mSortBy) {
+            case TECH:
+                query.append(" INNER JOIN technician AS te ON e.tech_id = te.id");
+                break;
+            case ROOT_PROJECT_ID:
+                query.append(" INNER JOIN project AS p ON e.project_id = p.id");
+                query.append(" INNER JOIN root_project AS r ON p.root_project_id = r.id");
+                break;
+            case SUB_PROJECT_ID:
+                query.append(" INNER JOIN project AS p ON e.project_id = p.id");
+                break;
+            case TRUCK_NUMBER:
+                query.append(" INNER JOIN truck AS tr ON e.truck_id = tr.id");
+                break;
+            case COMPANY_NAME:
+            case STREET:
+            case CITY:
+            case STATE:
+            case ZIP:
+                query.append(" INNER JOIN company AS c ON e.company_id = c.id");
+                break;
+        }
+        if (mByTruckId > 0) {
+            query.append(" WHERE ");
+            query.append("e.truck_id=");
+            query.append(mByTruckId);
+        } else {
+            if (mByRepaired) {
+                query.append(" INNER JOIN repaired AS rep ON e.id = rep.entry_id");
             }
-            int start = mParams.mPage * mParams.mPageSize;
-            query.append(" LIMIT ");
-            query.append(start);
-            query.append(", ");
-            query.append(mParams.mPageSize);
+            StringBuilder whereQuery = new StringBuilder();
+            String search = getWhereSearch();
+            if (search.length() > 0) {
+                whereQuery.append("(");
+                whereQuery.append(search);
+                whereQuery.append(")");
+            }
+            String limit = getLimitFilters();
+            if (limit.length() > 0) {
+                if (whereQuery.length() > 0) {
+                    whereQuery.append(" AND ");
+                }
+                whereQuery.append("(");
+                whereQuery.append(limit);
+                whereQuery.append(")");
+            }
+            if (whereQuery.length() > 0) {
+                query.append(" WHERE ");
+                query.append(whereQuery.toString());
+            }
         }
         return query.toString();
     }
+
 
     private String getWhereSearch() {
         StringBuilder query = new StringBuilder();
@@ -729,7 +794,7 @@ public class EntryPagedList {
     public void compute() {
         List<SqlRow> entries;
         String query;
-        query = buildQuery(true);
+        query = buildQuery();
         if (VERBOSE) {
             debug("Query: " + query);
         }
@@ -754,9 +819,19 @@ public class EntryPagedList {
 
     public long computeTotalNumRows() {
         if (mResult.mNumTotalRows == 0) {
-            String query = buildQuery(false);
-            List<SqlRow> entries = Ebean.createSqlQuery(query).findList();
-            mResult.mNumTotalRows = entries.size();
+            String query = buildCount();
+            SqlQuery sqlQuery = Ebean.createSqlQuery(query);
+            List<SqlRow> list = sqlQuery.findList();
+            int cnt = 0;
+            for (SqlRow row : list) {
+                for (String key : row.keySet()) {
+                    cnt = row.getInteger(key);
+                }
+            }
+            if (VERBOSE) {
+                debug("Count: " + query + " = " + cnt);
+            }
+            mResult.mNumTotalRows = cnt;
         }
         return mResult.mNumTotalRows;
     }
@@ -882,13 +957,12 @@ public class EntryPagedList {
     }
 
     public void setSearch(String searchTerm, String columnSelector) {
-        debug("setSearch(" + searchTerm + ", " + columnSelector.toString() + ")");
-        if (searchTerm != null && searchTerm.length() > 0 && !searchTerm.equals("null")) {
+        if (searchTerm != null && searchTerm.length() > 0 && !searchTerm.equals(NULL_WORD)) {
             mSearch.setSearchTerm(searchTerm);
         } else {
             mSearch.setSearchTerm(null);
         }
-        if (columnSelector != null && columnSelector.length() > 0 && !columnSelector.equals("null")) {
+        if (columnSelector != null && columnSelector.length() > 0 && !columnSelector.equals(NULL_WORD)) {
             mSearch.setSearchField(ColumnSelector.from(columnSelector));
         } else {
             mSearch.setSearchField(ColumnSelector.ALL);
@@ -897,7 +971,7 @@ public class EntryPagedList {
     }
 
     public String getSearchTerm() {
-        return mSearch.getTermChkNull();
+        return mSearch.getTermWithNullWord();
     }
 
     public String getSearchField() {
