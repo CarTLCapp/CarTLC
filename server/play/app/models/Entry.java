@@ -571,6 +571,14 @@ public class Entry extends com.avaje.ebean.Model {
         return items;
     }
 
+    public static List<Entry> findAllBefore(Date date) {
+        return find.where().lt("entry_time", date).findList();
+    }
+
+    public static int countAllBefore(Date date) {
+        return find.where().lt("entry_time", date).findRowCount();
+    }
+
     static List<Entry> findByProjectId(long project_id) {
         return find.where().eq("project_id", project_id).findList();
     }
@@ -1031,7 +1039,6 @@ public class Entry extends com.avaje.ebean.Model {
         if (id != null) {
             sbuf.append(id);
             sbuf.append(", ");
-
         }
         sbuf.append("date=");
         sbuf.append(getDateTime());
@@ -1057,6 +1064,31 @@ public class Entry extends com.avaje.ebean.Model {
         sbuf.append(", pictures=");
         sbuf.append(picture_collection_id);
         sbuf.append(")");
+        return sbuf.toString();
+    }
+
+    public String getLine(long client_id) {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append(id);
+        sbuf.append(" : ");
+        sbuf.append(getDate());
+        sbuf.append(" : ");
+        sbuf.append(getTechName());
+        sbuf.append(" : ");
+        String rootProject = getRootProjectName();
+        if (rootProject != null) {
+            sbuf.append(getRootProjectName());
+            sbuf.append("/");
+        }
+        sbuf.append(getSubProjectName());
+        sbuf.append(" : ");
+        sbuf.append(getAddressLine());
+        sbuf.append(" : TRUCK=");
+        sbuf.append(getTruckLine());
+        sbuf.append(" : #Pictures=");
+        sbuf.append(getPictures().size());
+        sbuf.append(" : EQUIP=");
+        sbuf.append(getEquipmentLine(client_id));
         return sbuf.toString();
     }
 

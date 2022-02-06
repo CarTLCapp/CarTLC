@@ -21,7 +21,12 @@ GET     /cleanup/picture          controllers.CleanupController.pictureCleanup()
 GET     /cleanup/truck            controllers.CleanupController.truckCleanup()
 GET     /cleanup/truck_next       controllers.CleanupController.truckCleanupNext()
 GET     /cleanup/entry            controllers.CleanupController.entryFixup()
-GET     /cleanup/delete_dated     controllers.CleanupController.deleteDated()
+GET     /cleanup/count_records        controllers.CleanupController.countRecords()
+GET     /cleanup/show_records         controllers.CleanupController.showRecords()
+GET     /cleanup/show_records_next    controllers.CleanupController.showRecordsNext()
+GET     /cleanup/delete_records       controllers.CleanupController.deleteRecords()
+GET     /cleanup/delete_records_next  controllers.CleanupController.deleteRecordsNext()
+
 
 ### TECHNICIANS ###
 

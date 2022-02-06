@@ -38,6 +38,7 @@ import com.typesafe.config.Config;
 @Singleton
 public class AmazonHelper {
 
+    static private final String DEV_SERVER_NAME_PREFIX = "fleetdev";
     static private final String BUCKET_NAME_RELEASE = "fleettlc";
     static private final String REGION = "us-east-2";
 
@@ -52,9 +53,11 @@ public class AmazonHelper {
 
         final String bucketName;
         final String host;
+        final boolean isDev;
 
         CommonActivity(String host) {
             this.host = host;
+            isDev = host.startsWith(DEV_SERVER_NAME_PREFIX);
             bucketName = BUCKET_NAME_RELEASE;
         }
     }
@@ -219,20 +222,30 @@ public class AmazonHelper {
         public void run() {
             int deleted = 0;
             int errors = 0;
+            boolean didDelete;
 
             for (String key : keys) {
                 try {
-                    warn("DELETING FROM BUCKET=" + bucketName + ", KEY=" + key);
-                    AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                            .withCredentials(new ProfileCredentialsProvider())
-                            .withRegion(REGION)
-                            .build();
+                    didDelete = false;
+                    if (isDev) {
+                        warn("DEVELOPMENT SERVER: not actually deleting FROM BUCKET=" + bucketName + ", KEY=" + key);
+                    } else {
+                        warn("DELETING FROM BUCKET=" + bucketName + ", KEY=" + key);
+                        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                                .withCredentials(new ProfileCredentialsProvider())
+                                .withRegion(REGION)
+                                .build();
 
-                    s3Client.deleteObject(new DeleteObjectRequest(bucketName, key));
+                        s3Client.deleteObject(new DeleteObjectRequest(bucketName, key));
+                        didDelete = true;
+                    }
                     if (deleteLocalFile) {
                         getLocalFile(key).delete();
+                        didDelete = true;
                     }
-                    deleted++;
+                    if (didDelete) {
+                        deleted++;
+                    }
                 } catch (AmazonServiceException e) {
                     // The call was transmitted successfully, but Amazon S3 couldn't process
                     // it, so it returned an error response.

@@ -15,12 +15,14 @@ import com.typesafe.config.Config;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import javax.persistence.PersistenceException;
 import javax.inject.Inject;
@@ -40,9 +42,13 @@ public class CleanupController extends Controller {
     private AmazonHelper mAmazonHelper;
     private FormFactory mFormFactory;
     private boolean mCleaningTrucks = false;
+    private boolean mDeletingRecords = false;
+    private boolean mShowingRecords = false;
     private boolean mAborted = false;
     private CleanupTrucks mCleanupTrucks;
-    private String lastResult = "";
+    private CleanupData mCleanupData = new CleanupData();
+    private DeleteRecords mDeleteRecords;
+    private ShowRecords mShowRecords;
 
     @Inject
     public CleanupController(
@@ -54,25 +60,190 @@ public class CleanupController extends Controller {
 
     @Security.Authenticated(Secured.class)
     public Result index() {
+        mCleanupData.numRepaired = Repaired.count();
         Form<CleanupFormData> cleanupForm = mFormFactory.form(CleanupFormData.class).fill(new CleanupFormData());
-        return ok(views.html.cleanup.render(cleanupForm, Secured.getClient(ctx()), Repaired.count(), lastResult));
+        return ok(views.html.cleanup.render(mCleanupData, cleanupForm, Secured.getClient(ctx())));
+    }
+
+    @Security.Authenticated(Secured.class)
+    public Result index(String withResult) {
+        mCleanupData.setMessages(withResult);
+        return index();
     }
 
     // region DELETE OLD ENTRIES
 
-    @Transactional
     @Security.Authenticated(Secured.class)
-    public Result deleteDated() throws PersistenceException {
+    public Result countRecords() throws PersistenceException {
         Client client = Secured.getClient(ctx());
         Form<CleanupFormData> cleanupForm = mFormFactory.form(CleanupFormData.class).bindFromRequest();
         CleanupFormData data = cleanupForm.get();
-        SimpleDateFormat format = new SimpleDateFormat(TimeHelper.DATE_TIME_FORMAT);
+        SimpleDateFormat format = new SimpleDateFormat(TimeHelper.DATE_FORMAT);
+        Date parsedDate;
+        try {
+            parsedDate = format.parse(data.date);
+        } catch (ParseException ex) {
+            return index(String.format("Expected format: %s\n%s", TimeHelper.DATE_FORMAT, ex.getMessage()));
+        }
+        int count = Entry.countAllBefore(parsedDate);
+        mCleanupData.currentDate = parsedDate;
+        mCleanupData.currentDateString = data.date;
+        mCleanupData.numRecordsFound = count;
         return index();
+    }
+
+    // ------------
+    // SHOW RECORDS
+    // ------------
+
+    @Security.Authenticated(Secured.class)
+    public Result showRecords() {
+        Client client = Secured.getClient(ctx());
+        if (mShowingRecords) {
+            info("showRecords(): ABORTED");
+            mShowingRecords = false;
+            mAborted = true;
+            return ok("R");
+        }
+        info("showRecords()");
+        List<Entry> list = Entry.findAllBefore(mCleanupData.currentDate);
+        if (list.size() == 0) {
+            return index("No records found");
+        }
+        info(String.format("Found %d records", list.size()));
+        mShowingRecords = true;
+        mAborted = false;
+        mShowRecords = new ShowRecords(client.id, list);
+        return ok("#0...");
+    }
+
+    public Result showRecordsNext() {
+        if (mAborted) {
+            mAborted = false;
+            mShowingRecords = false;
+            info("showRecordsNext(): ABORT");
+            return ok("R");
+        }
+        if (mShowRecords.processNext()) {
+            return ok("#" + mShowRecords.getReport() + "...");
+        }
+        info("showRecordsNext(): DONE");
+        String finalReport = mShowRecords.getReport();
+        mShowingRecords = false;
+        return ok("D" + finalReport);
+    }
+
+    private class ShowRecords {
+
+        List<Entry> mEntries;
+        int mCurrent = 0;
+        long mClientId = 0;
+
+        public ShowRecords(long client_id, List<Entry> list) {
+            mEntries = list;
+            mClientId = client_id;
+        }
+
+        public boolean processNext() {
+            if (mCurrent >= mEntries.size()) {
+                return false;
+            }
+            Entry entry = mEntries.get(mCurrent++);
+            mCleanupData.addMessage(entry.getLine(mClientId));
+            return true;
+        }
+
+        public String getReport() {
+            return String.format("%s/%s", mCurrent, mEntries.size());
+        }
+
+    }
+
+    // --------------
+    // DELETE RECORDS
+    // --------------
+
+    @Security.Authenticated(Secured.class)
+    public Result deleteRecords() {
+        Client client = Secured.getClient(ctx());
+        if (mDeletingRecords) {
+            info("deleteRecords(): ABORTED");
+            mDeletingRecords = false;
+            mAborted = true;
+            return ok("R");
+        }
+        info("deleteRecords()");
+        String host = request().host();
+        List<Entry> list = Entry.findAllBefore(mCleanupData.currentDate);
+        if (list.size() == 0) {
+            return index("No records found to delete");
+        }
+        info(String.format("Found %d records to delete", list.size()));
+        mDeletingRecords = true;
+        mAborted = false;
+        mDeleteRecords = new DeleteRecords(host, list);
+        return ok("#" + mDeleteRecords.getReport() + "...");
+    }
+
+    public Result deleteRecordsNext() {
+        if (mAborted) {
+            mAborted = false;
+            mDeletingRecords = false;
+            info("deleteRecordsNext(): ABORT");
+            return ok("R");
+        }
+        if (mDeleteRecords.processNextDelete()) {
+            info("Sent request for " + mDeleteRecords.currentId);
+            return ok("#" + mDeleteRecords.getReport() + "...");
+        }
+        info("mDeletingRecords(): DONE");
+        String finalReport = mDeleteRecords.getReport();
+        mDeletingRecords = false;
+        mCleanupData.clear();
+        mCleanupData.commonResult = finalReport;
+        return ok("D" + finalReport);
+    }
+
+    private class DeleteRecords {
+
+        private List<Entry> mList;
+        private int mDeleted = 0;
+        private String mHost;
+        public long currentId = 0;
+
+        DeleteRecords(String host, List<Entry> list) {
+            mList = list;
+            mHost = host;
+        }
+
+        boolean processNextDelete() {
+            if (mList.size() == 0) {
+                return false;
+            }
+            Entry entry = mList.get(0);
+            currentId = entry.id;
+            entry.remove(mAmazonHelper.deleteAction().host(mHost).listener((deleted, errors) -> {
+                info("Entry has been deleted: " + entry.id);
+                mDeleted++;
+            }));
+            mList.remove(0);
+            return true;
+        }
+
+        String getReport() {
+            StringBuilder sbuf = new StringBuilder();
+            sbuf.append("DELETED ");
+            sbuf.append(mDeleted);
+            sbuf.append(" RECORDS");
+            return sbuf.toString();
+        }
+
     }
 
     // endregion DELETE OLD ENTRIES
 
     // region ENTRY FIXUP
+    // TODO: This doesn't seem to do anything now, but in theory could be used to cleanup messed up entries.
 
     @Security.Authenticated(Secured.class)
     public CompletionStage<Result> entryFixup() {
@@ -220,8 +391,8 @@ public class CleanupController extends Controller {
         }
         debug("truckCleanupNext(): DONE");
         mCleaningTrucks = false;
-        lastResult = mCleanupTrucks.getReport();
-        return ok("D" + lastResult);
+        mCleanupData.commonResult = mCleanupTrucks.getReport();
+        return ok("D" + mCleanupData.commonResult);
     }
 
     private class CleanupTrucks {

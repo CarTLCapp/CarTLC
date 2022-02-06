@@ -1,4 +1,4 @@
-@(cleanupForm: Form[views.formdata.CleanupFormData], client : Client, numRepaired : Int, lastResult: String))
+@(currentPage: CleanupData, cleanupForm: Form[views.formdata.CleanupFormData], client : Client)
 
 @import helper._
 @import b3.vertical.fieldConstructor  // Declares a vertical field constructor as default
@@ -17,7 +17,7 @@
     </style>
 </head>
 
-@repairedWord() = @{ "Repaired (" + numRepaired + ")" }
+@repairedWord() = @{ "Repaired (" + currentPage.numRepaired + ")" }
 
 @main("FleetTLC - Cleanup Operations", client) {
 
@@ -27,34 +27,59 @@
         </span>
     </h1>
 
+    <!-- TRUCK CLEANUP -->
     <p><span style="font-size:24px;cursor:pointer"><a id="truck_cleanup">Truck Cleanup</a></span></p>
-    <p id="truck_cleanup_result" class="result">@lastResult</p>
 
+    <!-- PICTURE CLEANUP: should we still have this? -->
+    <p><span style="font-size:24px;cursor:pointer"><a id="picture_cleanup">Picture Cleanup</a></span></p>
+
+    <!-- ENTRY DELETE FROM DATE -->
     <h1 class="top1">Delete</h1>
 
-    @b3.form(routes.CleanupController.deleteDated()) {
+    <p>Warning:<br>
+        The database should be backed up before doing this operation.<br>
+        On the entries page you can export all entries to a csv file.<br>
+        But note that after deleting, removed pictures cannot be recovered.</br>
+        As a safety precaution, while performing the delete operation, no other activity on the server should be happening.
+    </p>
+
+    @b3.form(routes.CleanupController.countRecords()) {
 
         @CSRF.formField
 
         <fieldset>
 
-            @b3.text(cleanupForm("date"), '_label -> "Date", '_help -> "")
+            @b3.text(cleanupForm("date"), '_label -> "Before Date", '_help -> "")
 
         </fieldset>
 
-        <div class="actions">
-            <input type="submit" value="Delete all elements before the entered date" class="btn danger" onclick="return confirm('This cannot be undone. Are you sure?'">
-        </div>
+    }
+
+    @if(currentPage.numRecordsFound >= 0) {
+        <p><span style="font-size:20px;cursor:pointer">Before @{currentPage.currentDateString} found @{currentPage.numRecordsFound} records</span></p>
+        <p><span style="font-size:24px;cursor:pointer"><a id="show_records">Show Records</a></span></p>
+        <p><span style="font-size:24px;cursor:pointer"><a id="delete_records">Delete Records</a></span></p>
+    }
+
+    <p id="common_result" class="result">@{currentPage.commonResult}</p>
+
+    @if(currentPage.getMessages().size() > 0) {
+
+        <p>Records: @{currentPage.getMessages().size()}</p>
+
+        @for(message <- currentPage.getMessages()) {
+            <p class="result">@{message}</p>
+        }
 
     }
 
     <script type="text/javascript">
 
-        <!-- IMPORT -->
+        <!-- TRUCK CLEANUP -->
 
         function myTruckCleanup() {
             document.getElementById("truck_cleanup").innerHTML = "...Abort...";
-            document.getElementById("truck_cleanup_result").innerHTML = "...";
+            document.getElementById("common_result").innerHTML = "...";
 
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
@@ -63,11 +88,11 @@
                     var key = line.substring(0, 1);
                     var value = line.substring(1);
                     if (key == "#") {
-                        document.getElementById("truck_cleanup_result").innerHTML = value;
+                        document.getElementById("common_result").innerHTML = value;
                         xhttp.open("GET", "@routes.CleanupController.truckCleanupNext()", true);
                         xhttp.send();
                     } else if (key == "D" || key == "R") {
-                        document.getElementById("truck_cleanup_result").innerHTML = "DONE: " + value;
+                        document.getElementById("common_result").innerHTML = "DONE: " + value;
                         document.getElementById("truck_cleanup").innerHTML = "Truck Cleanup";
                         location.reload(true);
                     }
@@ -78,6 +103,92 @@
         }
         document.getElementById("truck_cleanup").onclick = myTruckCleanup;
         document.getElementById("truck_cleanup").innerHTML = "Truck Cleanup";
+
+        <!-- PICTURE CLEANUP -->
+        function myPictureCleanup() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    document.getElementById("common_result").innerHTML = this.responseText;
+                    document.getElementById("picture_cleanup").innerHTML = "Picture Cleanup";
+                }
+            };
+            xhttp.open("GET", "@routes.CleanupController.pictureCleanup()", true);
+            xhttp.send();
+            document.getElementById("picture_cleanup").innerHTML = "";
+        }
+
+        function myConfirmPictureCleanup() {
+            if (confirm('This will scan and delete all unused picture files and cannot be undone. Are you sure?')) {
+                myPictureCleanup();
+            }
+        }
+
+        document.getElementById("picture_cleanup").onclick = myConfirmPictureCleanup;
+
+        <!-- SHOW ENTRIES -->
+
+        function myShowRecords() {
+            document.getElementById("show_records").innerHTML = "...Abort...";
+            document.getElementById("common_result").innerHTML = "...";
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    var line = this.responseText;
+                    var key = line.substring(0, 1);
+                    var value = line.substring(1);
+                    if (key == "#") {
+                        document.getElementById("common_result").innerHTML = value;
+                        xhttp.open("GET", "@routes.CleanupController.showRecordsNext()", true);
+                        xhttp.send();
+                    } else if (key == "D" || key == "R") {
+                        document.getElementById("common_result").innerHTML = "DONE: " + value;
+                        document.getElementById("show_records").innerHTML = "Show Records";
+                        location.reload(true);
+                    }
+                }
+            };
+            xhttp.open("GET", "@routes.CleanupController.showRecords()", true);
+            xhttp.send();
+        }
+
+        document.getElementById("show_records").onclick = myShowRecords;
+
+        <!-- DELETE ENTRIES -->
+
+        function myDeleteRecords() {
+            document.getElementById("delete_records").innerHTML = "...Abort...";
+            document.getElementById("common_result").innerHTML = "...";
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.responseText.length > 0 && this.status == 200) {
+                    var line = this.responseText;
+                    var key = line.substring(0, 1);
+                    var value = line.substring(1);
+                    if (key == "#") {
+                        document.getElementById("common_result").innerHTML = value;
+                        xhttp.open("GET", "@routes.CleanupController.deleteRecordsNext()", true);
+                        xhttp.send();
+                    } else if (key == "D" || key == "R") {
+                        document.getElementById("common_result").innerHTML = "DONE: " + value;
+                        document.getElementById("delete_records").innerHTML = "Delete Records";
+                        location.reload(true);
+                    }
+                }
+            };
+            xhttp.open("GET", "@routes.CleanupController.deleteRecords()", true);
+            xhttp.send();
+        }
+
+        function myConfirmDeleteRecords() {
+            if (confirm('This will delete all records before the entered date and cannot be undone. Are you sure?')) {
+                myDeleteRecords();
+            }
+        }
+
+        document.getElementById("delete_records").onclick = myConfirmDeleteRecords;
 
    </script>
 }
