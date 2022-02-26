@@ -71,6 +71,12 @@ public class Repaired extends Model {
         add(entry_id, instance_id, FLAG_DUP_TRUCK_ID);
     }
 
+    public static void deleteMatchingEntryId(long entry_id) {
+        for (Repaired repaired : findByEntryId(entry_id)) {
+            repaired.delete();
+        }
+    }
+
     @Transactional
     private static void add(long entry_id, int instance_id, int flag) {
         Repaired repaired = new Repaired();

@@ -666,6 +666,7 @@ public class Entry extends com.avaje.ebean.Model {
                 EntryNoteCollection.deleteByCollectionId(note_collection_id);
             }
         }
+        Repaired.deleteMatchingEntryId(id);
         delete();
     }
 

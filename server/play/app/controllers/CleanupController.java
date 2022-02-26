@@ -89,6 +89,7 @@ public class CleanupController extends Controller {
         mCleanupData.currentDate = parsedDate;
         mCleanupData.currentDateString = data.date;
         mCleanupData.numRecordsFound = count;
+        mCleanupData.commonResult = "";
         return index();
     }
 
@@ -113,6 +114,7 @@ public class CleanupController extends Controller {
         info(String.format("Found %d records", list.size()));
         mShowingRecords = true;
         mAborted = false;
+        mCleanupData.clearMessages();
         mShowRecords = new ShowRecords(client.id, list);
         return ok("#0...");
     }
@@ -130,6 +132,7 @@ public class CleanupController extends Controller {
         info("showRecordsNext(): DONE");
         String finalReport = mShowRecords.getReport();
         mShowingRecords = false;
+        mCleanupData.commonResult = "";
         return ok("D" + finalReport);
     }
 
@@ -182,6 +185,7 @@ public class CleanupController extends Controller {
         mDeletingRecords = true;
         mAborted = false;
         mDeleteRecords = new DeleteRecords(host, list);
+        mCleanupData.clearMessages();
         return ok("#" + mDeleteRecords.getReport() + "...");
     }
 
@@ -200,7 +204,6 @@ public class CleanupController extends Controller {
         String finalReport = mDeleteRecords.getReport();
         mDeletingRecords = false;
         mCleanupData.clear();
-        mCleanupData.commonResult = finalReport;
         return ok("D" + finalReport);
     }
 
@@ -222,8 +225,10 @@ public class CleanupController extends Controller {
             }
             Entry entry = mList.get(0);
             currentId = entry.id;
+            final long deletedId = entry.id;
             entry.remove(mAmazonHelper.deleteAction().host(mHost).listener((deleted, errors) -> {
-                info("Entry has been deleted: " + entry.id);
+                info("Entry has been deleted: " + deletedId);
+                mCleanupData.addMessage("DELETED: " + deletedId);
                 mDeleted++;
             }));
             mList.remove(0);
