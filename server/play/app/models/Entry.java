@@ -667,6 +667,7 @@ public class Entry extends com.avaje.ebean.Model {
             }
         }
         Repaired.deleteMatchingEntryId(id);
+        EntryRecovery.deleteMatchingEntryId(id);
         delete();
     }
 

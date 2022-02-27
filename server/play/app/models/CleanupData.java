@@ -25,13 +25,11 @@ public class CleanupData {
     public Date currentDate;
     public String currentDateString = "";
 
-    public void clear() {
-        numRepaired = 0;
+    public void done() {
         commonResult = "";
         numRecordsFound = -1;
         currentDateString = "";
         currentDate = null;
-        mMessages.clear();
     }
 
     public List<String> getMessages() {

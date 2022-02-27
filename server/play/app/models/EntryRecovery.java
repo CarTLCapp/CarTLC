@@ -159,18 +159,8 @@ public class EntryRecovery extends com.avaje.ebean.Model {
         if (tech == null) {
             return Technician.RIP;
         }
-//        Technician tech2 = SecondaryTechnician.findSecondaryTechByEntryId(id);
-//        if (tech2 == null) {
-//            return tech.fullName();
-//        }
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(tech.fullName());
-//        sbuf.append(" & ");
-//        try {
-//            sbuf.append(tech2.fullName());
-//        } catch (Exception ex) {
-//            sbuf.append(Technician.RIP);
-//        }
         return sbuf.toString();
     }
 
@@ -559,6 +549,10 @@ public class EntryRecovery extends com.avaje.ebean.Model {
         return items;
     }
 
+    static List<EntryRecovery> findByEntryId(long entry_id) {
+        return find.where().eq("entry_id", entry_id).findList();
+    }
+
     static List<EntryRecovery> findByProjectId(long project_id) {
         return find.where().eq("project_id", project_id).findList();
     }
@@ -623,6 +617,11 @@ public class EntryRecovery extends com.avaje.ebean.Model {
         return false;
     }
 
+    public static void deleteMatchingEntryId(long entry_id) {
+        for (EntryRecovery entry : findByEntryId(entry_id)) {
+            entry.delete();
+        }
+    }
 
     public void remove() {
         /**

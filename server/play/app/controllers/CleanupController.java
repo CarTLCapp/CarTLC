@@ -203,7 +203,7 @@ public class CleanupController extends Controller {
         info("mDeletingRecords(): DONE");
         String finalReport = mDeleteRecords.getReport();
         mDeletingRecords = false;
-        mCleanupData.clear();
+        mCleanupData.done();
         return ok("D" + finalReport);
     }
 
